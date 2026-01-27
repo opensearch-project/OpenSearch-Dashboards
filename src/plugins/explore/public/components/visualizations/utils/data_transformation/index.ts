@@ -17,4 +17,4 @@ export { aggregateValues } from './utils/aggregation';
 export { roundToTimeUnit } from './utils/time';
 export { normalizeEmptyValue } from './utils/normalization';
 
-export { map, pick } from './common';
+export { map, pick, calculateYAxisMax } from './common';

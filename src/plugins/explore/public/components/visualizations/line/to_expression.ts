@@ -4,7 +4,14 @@
  */
 
 import { LineChartStyle } from './line_vis_config';
-import { VisColumn, Positions, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import {
+  VisColumn,
+  Positions,
+  VEGASCHEMA,
+  AxisColumnMappings,
+  AxisRole,
+  ThresholdMode,
+} from '../types';
 import {
   buildMarkConfig,
   createTimeMarkerLayer,
@@ -32,6 +39,7 @@ import {
   sortByTime,
   facetTransform,
   flatten,
+  calculateYAxisMax,
 } from '../utils/data_transformation';
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -58,9 +66,22 @@ export const createSimpleLineChart = (
     if (!valueField || !timeField) throw Error('Missing axis config for line chart');
 
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
 
     const result = pipe(
-      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      transform(
+        sortByTime(axisColumnMappings?.x?.column),
+        calculateYAxisMax({
+          categoryField: timeField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
+        convertTo2DArray(allColumns)
+      ),
       createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
       buildAxisConfigs,
       createLineSeries({
@@ -227,9 +248,22 @@ export const createLineBarChart = (
     }
 
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
 
     const result = pipe(
-      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      transform(
+        sortByTime(axisColumnMappings?.x?.column),
+        calculateYAxisMax({
+          categoryField: timeField,
+          seriesField: valueField.column, // thresholds are drawn based on axis for line in line-bar chart
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
+        convertTo2DArray(allColumns)
+      ),
       createBaseConfig({
         title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
       }),
@@ -437,9 +471,21 @@ export const createMultiLineChart = (
     if (!timeField || !valueField || !colorField) {
       throw Error('Missing axis config or color field for multi lines chart');
     }
+
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
       transform(
         sortByTime(timeField),
+        calculateYAxisMax({
+          categoryField: timeField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
         pivot({
           groupBy: timeField,
           pivot: colorField,
@@ -622,11 +668,21 @@ export const createFacetedMultiLineChart = (
     if (!timeField || !valueField || !colorField || !facetColumn) {
       throw Error('Missing axis config for facet time line chart');
     }
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
 
     const result = pipe(
       facetTransform(
         facetColumn,
         sortByTime(timeField),
+        calculateYAxisMax({
+          categoryField: timeField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
         pivot({
           groupBy: timeField,
           pivot: colorField,
@@ -840,8 +896,22 @@ export const createCategoryLineChart = (
     // This is the critical minimal fix:
     // for category-based line charts, simply set addTimeMarker to false
     // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
+
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
-      transform(convertTo2DArray(allColumns)),
+      transform(
+        calculateYAxisMax({
+          categoryField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
+        convertTo2DArray(allColumns)
+      ),
       createBaseConfig({ title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}` }),
       buildAxisConfigs,
       createLineSeries({
@@ -963,8 +1033,20 @@ export const createCategoryMultiLineChart = (
     if (!cateField || !valueField || !colorField) {
       throw Error('Missing axis config or color field for multi lines chart');
     }
+
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
       transform(
+        calculateYAxisMax({
+          categoryField: cateField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
         pivot({
           groupBy: cateField,
           pivot: colorField,

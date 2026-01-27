@@ -10,6 +10,7 @@ import { HeatmapChartStyle } from './heatmap_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { rgbToHex, hexToRgb } from '../theme/color_utils';
+import { getSeriesDisplayName } from '../utils/series';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -185,7 +186,7 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
   categoryFields: string[];
   seriesField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], visualMap } = state;
+  const { transformedData = [], visualMap, axisColumnMappings } = state;
 
   const seriesIndex = transformedData[0].indexOf(seriesField);
 
@@ -265,6 +266,37 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
         formatter: (params: any) => {
           const v = Array.isArray(params.value) ? params.value[seriesIndex] : params.value;
           return typeof v === 'number' ? v.toFixed(2) : v; // trim to 2 decimals
+        },
+      },
+      tooltip: {
+        formatter: (params) => {
+          if (!params.value || !Array.isArray(params.value)) {
+            return '';
+          }
+
+          const seriesDisplayName = getSeriesDisplayName(
+            seriesField,
+            Object.values(axisColumnMappings)
+          );
+
+          const categoryDisplayName = getSeriesDisplayName(
+            categoryFields[0],
+            Object.values(axisColumnMappings)
+          );
+
+          const categoryDisplayName2 = getSeriesDisplayName(
+            categoryFields[1],
+            Object.values(axisColumnMappings)
+          );
+
+          const categoryIndex = transformedData[0].indexOf(categoryFields[0]);
+          const category2Index = transformedData[0].indexOf(categoryFields[1]);
+
+          return `<strong>${categoryDisplayName}</strong>: ${
+            params.value[categoryIndex] ?? ''
+          }<br/><strong>${categoryDisplayName2}</strong>: ${
+            params.value[category2Index] ?? ''
+          }<br/><strong>${seriesDisplayName}</strong>: ${params.value[seriesIndex] ?? ''}`;
         },
       },
       itemStyle: {

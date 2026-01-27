@@ -11,6 +11,7 @@ import {
   VisFieldType,
   TimeUnit,
   AggregationType,
+  ThresholdMode,
 } from '../types';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
@@ -45,6 +46,7 @@ import {
   transform,
   pivot,
   facetTransform,
+  calculateYAxisMax,
 } from '../utils/data_transformation';
 
 // Only set size and binSpacing in manual mode
@@ -86,6 +88,10 @@ export const createBarSpec = (
     }
 
     const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
       transform(
         aggregate({
@@ -93,9 +99,16 @@ export const createBarSpec = (
           field: valueField,
           aggregationType,
         }),
+        calculateYAxisMax({
+          categoryField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
         convertTo2DArray()
       ),
-      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}` }),
+      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
@@ -230,6 +243,10 @@ export const createTimeBarChart = (
 
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
     const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
       transform(
         aggregate({
@@ -238,9 +255,19 @@ export const createTimeBarChart = (
           timeUnit,
           aggregationType,
         }),
+        calculateYAxisMax({
+          categoryField: timeField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: false,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
         convertTo2DArray()
       ),
-      createBaseConfig({ title: `${axisColumnMappings?.y?.name} Over Time` }),
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} Over Time`,
+        legend: { show: false },
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -394,8 +421,21 @@ export const createGroupedTimeBarChart = (
       throw new Error('Color column is required for grouped time bar chart');
     }
 
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
       transform(
+        // TODO not accurate since there is time unit
+        calculateYAxisMax({
+          categoryField: timeField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: true,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
+
         pivot({
           groupBy: timeField,
           pivot: colorField,
@@ -757,8 +797,19 @@ export const createStackedBarSpec = (
       throw new Error('Color column is required for stacked bar chart');
     }
 
+    const highestThresholdValue = styles?.thresholdOptions?.thresholds?.length
+      ? styles.thresholdOptions.thresholds[styles.thresholdOptions.thresholds.length - 1].value
+      : 0;
+
     const result = pipe(
       transform(
+        calculateYAxisMax({
+          categoryField,
+          seriesField: valueField,
+          highestThreshold: highestThresholdValue,
+          isStacked: true,
+          shouldCalculate: styles?.thresholdOptions.thresholdStyle !== ThresholdMode.Off,
+        }),
         pivot({
           groupBy: categoryField,
           pivot: colorField,
