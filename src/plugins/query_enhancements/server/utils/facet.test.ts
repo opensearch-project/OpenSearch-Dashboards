@@ -9,6 +9,7 @@ import { Facet, FacetProps } from './facet';
 describe('Facet', () => {
   let facet: Facet;
   let facetWithShimEnabled: Facet;
+  let facetWithCompression: Facet;
   let mockClient: jest.Mock;
   let mockLogger: jest.Mocked<Logger>;
   let mockContext: any;
@@ -28,6 +29,7 @@ describe('Facet', () => {
 
     facet = new Facet(props);
     facetWithShimEnabled = new Facet({ ...props, shimResponse: true });
+    facetWithCompression = new Facet({ ...props, requestCompression: true });
 
     mockContext = {
       dataSource: {
@@ -128,6 +130,65 @@ describe('Facet', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Facet fetch: test-endpoint: Error: Test error'
       );
+    });
+  });
+
+  describe('requestCompression', () => {
+    it('should add accept-encoding header when requestCompression is true', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      const result = await facetWithCompression.describeQuery(mockContext, mockRequest);
+
+      expect(result).toEqual({ success: true, data: { result: 'success' } });
+      expect(mockClient).toHaveBeenCalledWith('test-endpoint', {
+        body: {
+          query: 'test query',
+          datasource: 'test-name',
+          sessionId: 'test-session',
+          lang: 'sql',
+        },
+        headers: { 'accept-encoding': 'gzip, deflate' },
+      });
+    });
+
+    it('should NOT add accept-encoding header when requestCompression is false', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      const result = await facet.describeQuery(mockContext, mockRequest);
+
+      expect(result).toEqual({ success: true, data: { result: 'success' } });
+      expect(mockClient).toHaveBeenCalledWith('test-endpoint', {
+        body: {
+          query: 'test query',
+          datasource: 'test-name',
+          sessionId: 'test-session',
+          lang: 'sql',
+        },
+      });
+      // Verify headers are not present
+      const callArgs = mockClient.mock.calls[0][1];
+      expect(callArgs.headers).toBeUndefined();
+    });
+
+    it('should add accept-encoding header for fetchJobs when requestCompression is true', async () => {
+      const facetWithCompressionAndJobs = new Facet({
+        client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },
+        logger: mockLogger,
+        endpoint: 'test-endpoint',
+        useJobs: true,
+        requestCompression: true,
+      });
+
+      mockRequest.params = { queryId: 'test-query-id' };
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      const result = await facetWithCompressionAndJobs.describeQuery(mockContext, mockRequest);
+
+      expect(result).toEqual({ success: true, data: { result: 'success' } });
+      expect(mockClient).toHaveBeenCalledWith('test-endpoint', {
+        queryId: 'test-query-id',
+        headers: { 'accept-encoding': 'gzip, deflate' },
+      });
     });
   });
 });

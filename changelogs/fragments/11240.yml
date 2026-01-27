@@ -1,0 +1,2 @@
+feat:
+- Add gzip compression support for PPL queries ([#11240](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11240))
