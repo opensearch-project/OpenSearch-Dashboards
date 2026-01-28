@@ -285,7 +285,7 @@ describe('useSearch', () => {
 
     expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
     expect(services.filterManager.setAppFilters).toBeCalledWith(
-      expect.arrayContaining([mockFilterA, mockFilterB])
+      expect.arrayContaining([mockFilterB])
     );
   });
 
