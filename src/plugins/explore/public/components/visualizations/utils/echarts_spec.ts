@@ -66,6 +66,8 @@ export interface EChartsAxisConfig {
   yAxis?: Axis;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2Axis?: Axis;
+  y2AxisStyle?: StandardAxes;
 }
 
 /**
@@ -181,6 +183,7 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
+  const hasY2 = axisColumnMappings.y2 !== undefined && axisConfig?.y2Axis;
 
   const getConfig = (
     axis: Axis | undefined,
@@ -214,6 +217,11 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
 
     yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+
+    if (hasY2) {
+      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle);
+      yAxisConfig = [yAxisConfig, y2AxisConfig];
+    }
   }
 
   return { ...state, xAxisConfig, yAxisConfig };
