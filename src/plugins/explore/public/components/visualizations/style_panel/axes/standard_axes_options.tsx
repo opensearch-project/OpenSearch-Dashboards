@@ -133,7 +133,8 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     >
       {standardAxes.map((axis, index) => {
         return (
-          <EuiSplitPanel.Inner paddingSize="s" key={axis.axisRole} color="subdued">
+          <EuiSplitPanel.Inner paddingSize="s" key={axis.axisRole}>
+            {index !== 0 && <EuiSpacer size="m" />}
             <EuiText size="s" style={{ fontWeight: 600 }}>
               {getAxisLabel(axis.axisRole)}
             </EuiText>

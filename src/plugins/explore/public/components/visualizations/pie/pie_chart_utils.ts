@@ -18,7 +18,7 @@ export const createPieSeries = <T extends BaseChartStyle>({
 }): PipelineFn<T> => (state: EChartsSpecState<T>) => {
   const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
 
-  let formatter = '';
+  let formatter = '{b}';
   if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
     formatter = `{b}: {@${valueField}}`;
   } else if (styles?.exclusive?.showLabels) {
