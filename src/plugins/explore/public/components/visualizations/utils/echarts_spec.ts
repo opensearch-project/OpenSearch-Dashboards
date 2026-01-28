@@ -156,6 +156,9 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
     },
     tooltip: {
+      extraCssText: `overflow-y: auto; max-height: 50%;`,
+      enterable: true, // for y direction overflow
+      confine: true, // for x direction
       show: styles.tooltipOptions?.mode !== 'hidden',
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
