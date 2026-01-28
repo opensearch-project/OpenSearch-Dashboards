@@ -16,6 +16,8 @@ export const CORRELATION_TYPE_PREFIXES = {
 
 // @experimental This schema is experimental and might change in future releases.
 export interface CorrelationSavedObjectAttributes extends SavedObjectAttributes {
+  title?: string;
+
   correlationType: string;
 
   version: string;

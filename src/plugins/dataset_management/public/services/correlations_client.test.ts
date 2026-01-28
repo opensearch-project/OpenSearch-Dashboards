@@ -189,6 +189,7 @@ describe('CorrelationsClient', () => {
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'correlations',
         {
+          title: 'trace-to-logs_my-trace-dataset',
           correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [

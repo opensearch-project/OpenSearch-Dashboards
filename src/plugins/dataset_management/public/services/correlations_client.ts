@@ -62,7 +62,14 @@ export class CorrelationsClient {
    * Create a new correlation
    */
   async create(data: CreateCorrelationData): Promise<CorrelationSavedObject> {
-    const { traceDatasetId, traceDatasetTitle, logDatasetIds, correlationType, version } = data;
+    const {
+      traceDatasetId,
+      traceDatasetTitle,
+      logDatasetIds,
+      correlationType,
+      version,
+      title,
+    } = data;
 
     // Build references array
     const references: SavedObjectReference[] = [
@@ -82,8 +89,12 @@ export class CorrelationsClient {
     const finalCorrelationType =
       correlationType || `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}${traceDatasetTitle}`;
 
+    // Generate title for search: use provided title or generate from trace dataset
+    const finalTitle = title || `trace-to-logs_${traceDatasetTitle}`;
+
     // Build attributes
     const attributes: CorrelationAttributes = {
+      title: finalTitle,
       correlationType: finalCorrelationType,
       version: version || CORRELATION_VERSION,
       entities: [

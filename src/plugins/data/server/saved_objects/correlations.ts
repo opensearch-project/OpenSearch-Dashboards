@@ -13,9 +13,14 @@ export const correlationsSavedObjectType: SavedObjectsType = {
   namespaceType: 'single',
   management: {
     icon: 'link',
-    defaultSearchField: 'correlationType',
+    defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
+      // Use title if available
+      if (obj.attributes?.title) {
+        return obj.attributes.title;
+      }
+      // Fallback for correlations without title (e.g., imported old objects)
       const correlationType = obj.attributes?.correlationType || '';
       if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.APM_CONFIG)) {
         return 'APM-config';
@@ -50,6 +55,9 @@ export const correlationsSavedObjectType: SavedObjectsType = {
   },
   mappings: {
     properties: {
+      title: {
+        type: 'text',
+      },
       correlationType: {
         type: 'keyword',
       },

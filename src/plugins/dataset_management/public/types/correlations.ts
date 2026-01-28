@@ -11,6 +11,7 @@ export { CORRELATION_TYPE_PREFIXES } from '../../../data/common';
  * Correlation attributes matching the saved object schema
  */
 export interface CorrelationAttributes {
+  title?: string;
   correlationType: string; // 'Traces-Logs-Correlation'
   version: string;
   entities: Array<{
@@ -73,6 +74,7 @@ export interface CreateCorrelationData {
   logDatasetIds: string[];
   correlationType?: string;
   version?: string;
+  title?: string;
 }
 
 /**
