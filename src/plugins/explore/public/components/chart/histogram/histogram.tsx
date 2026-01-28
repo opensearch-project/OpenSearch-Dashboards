@@ -78,19 +78,28 @@ export interface DiscoverHistogramProps {
  * The format is chosen to match what Elastic Charts will display as axis ticks,
  * which are determined by the overall time range, not the histogram interval.
  *
- * For ranges < 1 day: show time (hours/minutes)
+ * For ranges < 1 minute: show time with milliseconds
+ * For ranges 1 minute - 1 hour: show time with seconds (hours/minutes/seconds)
+ * For ranges 1 hour - 1 day: show time (hours/minutes)
  * For ranges 1-7 days: show day + time
  * For ranges 1 week - 2 months: show month + day
  * For ranges > 2 months: show month (+ year if > 1 year)
  */
 function getSmartDateFormat(rangeInMs: number): string {
-  const ONE_HOUR = 60 * 60 * 1000;
+  const ONE_MINUTE = 60 * 1000;
+  const ONE_HOUR = 60 * ONE_MINUTE;
   const ONE_DAY = 24 * ONE_HOUR;
   const ONE_WEEK = 7 * ONE_DAY;
   const TWO_MONTHS = 60 * ONE_DAY;
   const ONE_YEAR = 365 * ONE_DAY;
 
-  if (rangeInMs < ONE_DAY) {
+  if (rangeInMs < ONE_MINUTE) {
+    // Sub-minute range: show hours, minutes, seconds, and milliseconds
+    return 'HH:mm:ss.SSS';
+  } else if (rangeInMs < ONE_HOUR) {
+    // Sub-hour range: show hours, minutes, and seconds
+    return 'HH:mm:ss';
+  } else if (rangeInMs < ONE_DAY) {
     // Sub-day range: show hours and minutes
     return 'HH:mm';
   } else if (rangeInMs < ONE_WEEK) {
