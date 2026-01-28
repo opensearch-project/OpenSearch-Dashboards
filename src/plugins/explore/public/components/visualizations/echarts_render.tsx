@@ -81,13 +81,15 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
   }, [instance, onSelectTimeRange]);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
+    function adjustGrid() {
       // if grid is not specified, use a default grid config
       // and adjust the grid dynamically based on legend and visualMap
       if (spec.grid) {
         return;
       }
       if (instance) {
+        // Echarts lacks the capability to handle legend and grid responsively
+        // instance._componentsViews is a non-public API so @ts-ignore is added
         // @ts-ignore
         const legend = instance._componentsViews.find(
           (entry: any) => entry.type === 'legend.plain' || entry.type === 'legend.scroll'
@@ -128,10 +130,11 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
         instance.setOption({ grid, legend: legendConfig });
         gridConfigRef.current = grid;
       }
-    }, 300);
+    }
+    instance?.on('finished', adjustGrid);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      instance?.off('finished', adjustGrid);
     };
   }, [instance, spec.legend, spec.visualMap, spec.grid, spec.title]);
 
