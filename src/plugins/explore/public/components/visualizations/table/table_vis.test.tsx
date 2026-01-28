@@ -245,7 +245,7 @@ describe('TableVis', () => {
     const parsedVisibleColumns = JSON.parse(visibleColumnsJson || '[]');
     expect(parsedVisibleColumns).toEqual(['column1', 'column2']);
     expect(screen.getByTestId('mockRowCount').textContent).toBe('2');
-    expect(screen.getByTestId('mockPageSize').textContent).toBe('10');
+    expect(screen.getByTestId('mockPageSize').textContent).toBe('50');
     expect(screen.getByTestId('mockPageIndex').textContent).toBe('0');
     expect(screen.getByTestId('cellValue-0-column1')).toBeInTheDocument();
   });
