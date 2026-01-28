@@ -66,6 +66,46 @@ export interface DiscoverHistogramProps {
   services: ExploreServices;
   showYAxisLabel?: boolean;
   customChartsTheme?: Record<string, any>;
+  /**
+   * When true, uses a smarter date format that hides the year for intervals
+   * smaller than month, making the x-axis labels more compact and readable.
+   */
+  useSmartDateFormat?: boolean;
+}
+
+/**
+ * Determines the optimal date format based on the time range duration.
+ * The format is chosen to match what Elastic Charts will display as axis ticks,
+ * which are determined by the overall time range, not the histogram interval.
+ *
+ * For ranges < 1 day: show time (hours/minutes)
+ * For ranges 1-7 days: show day + time
+ * For ranges 1 week - 2 months: show month + day
+ * For ranges > 2 months: show month (+ year if > 1 year)
+ */
+function getSmartDateFormat(rangeInMs: number): string {
+  const ONE_HOUR = 60 * 60 * 1000;
+  const ONE_DAY = 24 * ONE_HOUR;
+  const ONE_WEEK = 7 * ONE_DAY;
+  const TWO_MONTHS = 60 * ONE_DAY;
+  const ONE_YEAR = 365 * ONE_DAY;
+
+  if (rangeInMs < ONE_DAY) {
+    // Sub-day range: show hours and minutes
+    return 'HH:mm';
+  } else if (rangeInMs < ONE_WEEK) {
+    // 1-7 days: show day and time
+    return 'MMM D, HH:mm';
+  } else if (rangeInMs < TWO_MONTHS) {
+    // 1 week to 2 months: show month and day
+    return 'MMM D';
+  } else if (rangeInMs < ONE_YEAR) {
+    // 2 months to 1 year: ticks will be at month boundaries, show just month
+    return 'MMM';
+  } else {
+    // Over 1 year: show month and year
+    return 'MMM YYYY';
+  }
 }
 
 function findIntervalFromDuration(
@@ -137,6 +177,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
   services,
   showYAxisLabel = false,
   customChartsTheme,
+  useSmartDateFormat = false,
 }) => {
   useEffect(() => {
     const subscription = combineLatest([
@@ -178,10 +219,16 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
 
   const formatXValue = useCallback(
     (val: string) => {
-      const xAxisFormat = chartData.xAxisFormat.params!.pattern;
-      return moment(val).format(xAxisFormat);
+      let format: string;
+      if (useSmartDateFormat) {
+        const rangeInMs = chartData.ordered.max.valueOf() - chartData.ordered.min.valueOf();
+        format = getSmartDateFormat(rangeInMs);
+      } else {
+        format = chartData.xAxisFormat.params!.pattern;
+      }
+      return moment(val).format(format);
     },
-    [chartData]
+    [chartData, useSmartDateFormat]
   );
 
   const renderBarTooltip = useCallback(
