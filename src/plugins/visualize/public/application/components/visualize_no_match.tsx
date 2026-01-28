@@ -46,6 +46,13 @@ export const VisualizeNoMatch = () => {
   const { services } = useOpenSearchDashboards<VisualizeServices>();
 
   useEffect(() => {
+    // React 18 fix: Check if we're still on visualize app before modifying URL.
+    // In concurrent mode, this effect can run after navigation to another app
+    // has already changed the URL, which would corrupt the destination URL.
+    if (!window.location.pathname.includes('/app/visualize')) {
+      return;
+    }
+
     services.restorePreviousUrl();
 
     const { navigated } = services.urlForwarding.navigateToLegacyOpenSearchDashboardsUrl(
