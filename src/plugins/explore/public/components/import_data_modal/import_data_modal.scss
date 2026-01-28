@@ -1,0 +1,15 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.importDataModal {
+  width: min(1200px, 90vw);
+  max-height: 80vh;
+}
+
+.importDataModal__body {
+  max-height: calc(80vh - 100px);
+  min-height: 400px;
+  padding: 16px;
+}

@@ -13,6 +13,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enabledFileTypes: true,
     maxFileSizeBytes: true,
     maxTextCount: true,
+    filePreviewDocumentsCount: true,
   },
 };
 

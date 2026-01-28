@@ -266,7 +266,7 @@ cy.explore.add(
   'saveQuery',
   (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
-      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
     });
     cy.getElementByTestId('saved-query-management-save-button').click();
 
@@ -293,7 +293,7 @@ cy.explore.add(
   'updateSavedQuery',
   (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
-      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
     });
     cy.getElementByTestId('saved-query-management-save-button').click();
 

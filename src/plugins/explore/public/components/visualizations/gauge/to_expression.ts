@@ -5,7 +5,7 @@
 
 import { GaugeChartStyle } from './gauge_vis_config';
 import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
-import { generateArcExpression, createGaugeSeries } from './gauge_chart_utils';
+import { generateArcExpression, createGaugeSeries, assembleGaugeSpec } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
 import {
   locateThreshold,
@@ -16,7 +16,7 @@ import {
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 import { getChartRender } from '../utils/utils';
-import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
+import { pipe, createBaseConfig } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 
 export const createGauge = (
@@ -37,7 +37,7 @@ export const createGauge = (
       transform(convertTo2DArray()),
       createBaseConfig({ title: '' }),
       createGaugeSeries({ styles: styleOptions, seriesFields: [valueColumn.column] }),
-      assembleSpec
+      assembleGaugeSpec
     )({
       data: transformedData,
       styles: styleOptions,

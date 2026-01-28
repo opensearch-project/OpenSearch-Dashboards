@@ -36,6 +36,12 @@ jest.mock('../../../../application/legacy/discover/application/utils/state_manag
   useDispatch: jest.fn(),
 }));
 
+// Mock the useDisplayedColumnNames hook to avoid Redux context requirement
+import { useDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
+jest.mock('../../../../helpers/use_displayed_columns', () => ({
+  useDisplayedColumnNames: jest.fn(),
+}));
+
 const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
   fields: {
     event_time: ['2022-12-31T08:14:42.801Z'],
@@ -164,6 +170,9 @@ describe('useDiscoverDownloadCsv', () => {
     beforeEach(() => {
       (useDispatch as jest.MockedFunction<any>).mockReturnValue(mockDispatch);
       (useSelector as jest.MockedFunction<any>).mockImplementation(() => mockDisplayedColumnNames);
+      (useDisplayedColumnNames as jest.MockedFunction<any>).mockReturnValue(
+        mockDisplayedColumnNames
+      );
       (unparse as jest.MockedFunction<any>).mockImplementation(mockUnparse);
       mockDispatch.mockResolvedValue({ payload: mockRows });
     });
@@ -172,6 +181,7 @@ describe('useDiscoverDownloadCsv', () => {
       (useDispatch as jest.MockedFunction<any>).mockClear();
       (saveAs as jest.MockedFunction<any>).mockClear();
       (useSelector as jest.MockedFunction<any>).mockClear();
+      (useDisplayedColumnNames as jest.MockedFunction<any>).mockClear();
       (unparse as jest.MockedFunction<any>).mockClear();
       mockDispatch.mockClear();
       mockOnLoading.mockClear();
