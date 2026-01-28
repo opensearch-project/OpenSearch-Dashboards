@@ -72,14 +72,16 @@ export const runCreateVisTests = () => {
     it('should change line interpolation of line chart and reflect immediatly to the line visualization', () => {
       const query = `source=${datasetName} | stats count() by event_time`;
       cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
+      cy.wait(1000);
       let beforeCanvasDataUrl;
       cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
-      // turn off show X axis
+      // Change line style
       cy.getElementByTestId('lineMode-stepped').click();
+      cy.wait(1000);
       // compare with new canvas
       cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
