@@ -60,14 +60,6 @@ jest.mock('../../services/services', () => ({
   })),
 }));
 
-jest.mock('./utils/utils', () => {
-  const actual = jest.requireActual('./utils/utils');
-  return {
-    ...actual,
-    getChartRender: jest.fn().mockReturnValue('vega'),
-  };
-});
-
 describe('VisualizationRender', () => {
   // Sample data for testing
   const mockVisData: VisData = {
@@ -184,7 +176,27 @@ describe('VisualizationRender', () => {
       />
     );
 
-    expect(screen.getByTestId('vegaRender')).toBeInTheDocument();
+    expect(screen.getByTestId('echartsRender')).toBeInTheDocument();
+  });
+
+  it('renders echarts when there is a selection mapping but spec has no $schema', () => {
+    // Mock createVisSpec to return a spec without $schema (Echarts spec)
+    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender
+        data$={data$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
+        searchContext={mockSearchContext}
+      />
+    );
+
+    expect(screen.getByTestId('echartsRender')).toBeInTheDocument();
   });
 
   it('renders empty state when there is no selection mapping', () => {

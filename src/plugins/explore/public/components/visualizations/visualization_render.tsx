@@ -17,6 +17,7 @@ import { RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
 import { VegaRender } from './vega_render';
 import { EchartsRender } from './echarts_render';
+import { createVisSpec } from './utils/create_vis_spec';
 import { getChartRender } from './utils/utils';
 
 interface Props {
@@ -110,27 +111,50 @@ export const VisualizationRender = ({
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (getChartRender() === 'echarts') {
-      return (
-        <EchartsRender
-          onSelectTimeRange={onSelectTimeRange}
-          data={visualizationData}
-          timeRange={timeRange}
-          config={visConfig}
-        />
-      );
-    }
     return (
-      <VegaRender
-        searchContext={searchContext}
-        ExpressionRenderer={ExpressionRenderer}
-        onSelectTimeRange={onSelectTimeRange}
+      <ChartRender
         data={visualizationData}
-        timeRange={timeRange}
         config={visConfig}
+        timeRange={timeRange}
+        ExpressionRenderer={ExpressionRenderer}
+        searchContext={searchContext}
+        onSelectTimeRange={onSelectTimeRange}
       />
     );
   }
 
   return <VisualizationEmptyState />;
+};
+
+const ChartRender = ({
+  data,
+  config,
+  timeRange,
+  onSelectTimeRange,
+  searchContext,
+  ExpressionRenderer,
+}: {
+  data?: VisData;
+  config?: RenderChartConfig;
+  timeRange: TimeRange;
+  onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  searchContext?: ExecutionContextSearch;
+  ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+}) => {
+  const spec = useMemo(() => {
+    return createVisSpec({ data, config, timeRange });
+  }, [config, data, timeRange]);
+
+  if (getChartRender() === 'echarts') {
+    return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+  }
+
+  return (
+    <VegaRender
+      searchContext={searchContext}
+      ExpressionRenderer={ExpressionRenderer}
+      onSelectTimeRange={onSelectTimeRange}
+      spec={spec}
+    />
+  );
 };

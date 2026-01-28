@@ -7,15 +7,10 @@ import * as echarts from 'echarts';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { TimeRange } from '../../../../data/public';
 import { DEFAULT_THEME } from './theme/default';
-import { VisData } from './visualization_builder.types';
-import { RenderChartConfig } from './types';
-import { createVisSpec } from './utils/create_vis_spec';
 
 interface Props {
+  spec: echarts.EChartsOption;
   onSelectTimeRange?: (range: TimeRange) => void;
-  timeRange: TimeRange;
-  data?: VisData;
-  config?: RenderChartConfig;
 }
 
 const DEFAULT_GRID = {
@@ -25,7 +20,7 @@ const DEFAULT_GRID = {
   left: 40,
 };
 
-export const EchartsRender = React.memo(({ onSelectTimeRange, data, config, timeRange }: Props) => {
+export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => {
   const [instance, setInstance] = useState<echarts.ECharts | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const instanceRef = useRef<echarts.ECharts | null>(null);
@@ -41,10 +36,6 @@ export const EchartsRender = React.memo(({ onSelectTimeRange, data, config, time
       }),
     []
   );
-
-  const spec = useMemo(() => {
-    return createVisSpec({ data, config, timeRange });
-  }, [config, data, timeRange]);
 
   const gridArray = Array.isArray(spec?.grid) ? spec.grid : [];
   const shouldScroll = gridArray.length > 10;
