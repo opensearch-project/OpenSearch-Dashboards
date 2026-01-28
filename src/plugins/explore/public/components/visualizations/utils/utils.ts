@@ -534,7 +534,7 @@ export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarke
       xAxis: new Date(),
       itemStyle: { color: 'red' },
       lineStyle: { type: 'dashed' },
-      label: { formatter: new Date().toISOString() },
+      label: { formatter: new Date().toISOString(), align: 'right' },
     });
   }
 

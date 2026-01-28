@@ -17,9 +17,10 @@ import {
   generateThresholds,
   generateValueThresholds,
   createBarGaugeSeries,
+  assembleBarGaugeSpec,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
+import { pipe, createBaseConfig } from '../utils/echarts_spec';
 import { aggregate, transform } from '../utils/data_transformation';
 
 export const createBarGaugeSpec = (
@@ -57,7 +58,7 @@ export const createBarGaugeSpec = (
       ), // Bar gauge uses individual series with custom itemStyle per bar, can't use 2d array format
       createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
       createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
-      assembleSpec
+      assembleBarGaugeSpec
     )({
       data: transformedData,
       styles: styleOptions,

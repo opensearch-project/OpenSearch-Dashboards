@@ -325,7 +325,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
           show: true,
           position: 'top',
           color: fontColors[i],
-          fontSize: Math.max(10, Math.min(30, 100 / Math.sqrt(fontFactor))), // font size between 10px  and 30px
+          fontSize: Math.max(10, Math.min(25, 100 / Math.sqrt(fontFactor))), // font size between 10px  and 25px
           formatter: displayValues[i],
         },
       })),
@@ -589,7 +589,11 @@ const getAxesStyleConfig = (
   const isHorizontal = styles?.exclusive.orientation === 'horizontal';
   const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
 
-  const axisStyle = { axisLine: { show: false }, axisTick: { show: false } };
+  const axisStyle = {
+    axisLine: { show: false },
+    axisTick: { show: false },
+    splitLine: { show: false },
+  };
   const nullStyle = { show: false };
 
   if (isHorizontal) {
@@ -607,4 +611,21 @@ const getAxesStyleConfig = (
     yAxis,
     yAxisStyle: isXNumerical ? axisStyle : nullStyle,
   };
+};
+
+export const assembleBarGaugeSpec = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series } = state;
+
+  const spec = {
+    ...baseConfig,
+    dataset: { source: transformedData },
+    xAxis: xAxisConfig,
+    yAxis: yAxisConfig,
+    series,
+    grid: { top: 50, right: 30, bottom: 40, left: 30 },
+  };
+
+  return { ...state, spec };
 };
