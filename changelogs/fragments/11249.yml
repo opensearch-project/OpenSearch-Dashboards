@@ -1,0 +1,2 @@
+fix:
+- Consolidated nav footer. Removed home. Rearranged keyboard shortcuts to help menu. ([#11249](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11249))
