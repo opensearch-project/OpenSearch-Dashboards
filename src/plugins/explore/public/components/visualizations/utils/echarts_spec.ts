@@ -27,6 +27,7 @@ import {
   AxisRole,
 } from '../types';
 import { convertThresholds } from './utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Base style interface that all chart styles should extend
@@ -188,11 +189,12 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const getConfig = (
     axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
-    gridNumber?: number
+    gridNumber?: number,
+    addSplitLineStyle: boolean = false
   ) => {
     return {
       type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle }),
+      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
       ...(hasFacet && { gridIndex: gridNumber }),
     };
   };
@@ -219,7 +221,7 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
 
     if (hasY2) {
-      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle);
+      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle, undefined, true);
       yAxisConfig = [yAxisConfig, y2AxisConfig];
     }
   }
@@ -305,8 +307,10 @@ const POSITION_MAP = {
 
 export const applyAxisStyling = ({
   axisStyle,
+  addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
+  addSplitLineStyle?: boolean;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
@@ -325,6 +329,12 @@ export const applyAxisStyling = ({
   if (axisStyle?.grid) {
     echartsAxisConfig.splitLine = {
       show: axisStyle.grid.showLines ?? true,
+      ...(addSplitLineStyle && {
+        lineStyle: {
+          type: 'dotted',
+          opacity: DEFAULT_OPACITY / 2,
+        },
+      }),
     };
   }
 
