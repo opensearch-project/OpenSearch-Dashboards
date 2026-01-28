@@ -34,11 +34,9 @@ const defaultStyleOptions: TableChartStyle = {
   ...defaultTableChartStyles,
   showColumnFilter: false,
   showFooter: false,
-  pageSize: 10,
+  pageSize: 50,
   globalAlignment: 'left',
 };
-
-const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 export const VisualizationRender = ({
   data$,
@@ -102,7 +100,6 @@ export const VisualizationRender = ({
         rows={rows}
         columns={columns}
         styleOptions={defaultStyleOptions}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
         showStyleSelector={false}
         disableActions={false}
       />

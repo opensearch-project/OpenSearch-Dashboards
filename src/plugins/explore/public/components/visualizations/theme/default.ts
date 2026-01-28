@@ -80,6 +80,7 @@ export function createEchartsTheme(colors: ReturnType<typeof getColors>) {
     visualMap: {
       color: [colors.statusGreen, colors.statusYellow, colors.statusOrange, colors.statusRed],
     },
+    animationDuration: 500,
   };
 }
 
