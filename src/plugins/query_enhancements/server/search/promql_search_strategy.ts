@@ -148,9 +148,31 @@ async function executeMultipleQueries(
           response: queryRes,
         };
       } catch (error) {
+        let errorMessage = `Query ${parsedQuery.label} failed`;
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
+        // Try to extract detailed error from response body from SQL plugin
+        const responseBody = (error as any)?.body ?? (error as any)?.response;
+        if (responseBody) {
+          try {
+            const parsed =
+              typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
+            errorMessage =
+              parsed?.error?.details ??
+              parsed?.error?.reason ??
+              parsed?.error?.message ??
+              errorMessage;
+          } catch {
+            // error might come from other places, use original message if failed
+          }
+        }
+
         return {
           label: parsedQuery.label,
-          error: error instanceof Error ? error.message : `Query ${parsedQuery.label} failed`,
+          error: errorMessage,
         };
       }
     }
@@ -169,7 +191,7 @@ function formatMetricLabels(metric: Record<string, string>): string {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}="${value}"`);
 
-  return labelParts.length > 0 ? `{${labelParts.join(', ')}}` : '';
+  return `{${labelParts.join(', ')}}`;
 }
 
 /**
@@ -230,6 +252,13 @@ function createDataFrame(
       const labelsWithoutName = { ...metricResult.metric };
       delete labelsWithoutName.__name__;
 
+      const formattedLabels = formatMetricLabels(metricResult.metric);
+      const seriesName = isSingleQuery ? formattedLabels : `${result.label}: ${formattedLabels}`;
+      // TODO: remove escaping if not using vega
+      // Escape brackets in series name to prevent Vega's splitAccessPath from
+      // interpreting them as array index notation when used as field names
+      const escapedSeriesName = seriesName.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+
       metricResult.values.forEach(([timestamp, value]) => {
         const metricSignature = JSON.stringify({
           name: metricName,
@@ -254,14 +283,9 @@ function createDataFrame(
         }
 
         if (seriesIndex < MAX_SERIES_VIZ) {
-          const formattedLabels = formatMetricLabels(metricResult.metric);
-          const seriesName = isSingleQuery
-            ? formattedLabels
-            : `${result.label}: ${formattedLabels}`;
-
           allVizRows.push({
             Time: timeMs,
-            Series: seriesName,
+            Series: escapedSeriesName,
             Value: Number(value),
           });
         }

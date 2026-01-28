@@ -63,7 +63,9 @@ export class DataImporterPlugin
       },
     ]);
 
-    return {};
+    return {
+      config,
+    };
   }
 
   public start(_: CoreStart): DataImporterPluginStart {

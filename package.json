@@ -41,7 +41,7 @@
   "author": "opensearch-project",
   "scripts": {
     "preinstall": "scripts/use_node ./preinstall_check",
-    "postinstall": "scripts/use_node scripts/postinstall && patch-package",
+    "postinstall": "scripts/use_node scripts/postinstall",
     "osd": "scripts/use_node scripts/osd",
     "opensearch": "scripts/use_node scripts/opensearch",
     "test": "grunt test",
@@ -533,7 +533,6 @@
     "node-stream-zip": "^1.15.0",
     "normalize-path": "^3.0.0",
     "nyc": "^15.1.0",
-    "patch-package": "^8.0.1",
     "pixelmatch": "^5.1.0",
     "pngjs": "^3.4.0",
     "postcss": "^8.4.31",

@@ -248,6 +248,55 @@ describe('promqlSearchStrategy', () => {
       expect(schemaNames).toEqual(['Time', 'Metric', 'cpu', 'host', 'mode', 'Value']);
     });
 
+    it('should escape brackets in series names for Vega compatibility', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: {
+                  __name__: 'jvm_cpu_count',
+                  resource_process_command_args: '[/usr/lib/jvm/java]',
+                },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'jvm_cpu_count',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // Brackets should be escaped in Series field values
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField).toBeDefined();
+      expect(seriesField?.values[0]).toContain('\\[');
+      expect(seriesField?.values[0]).toContain('\\]');
+      // Should not contain unescaped brackets
+      expect(seriesField?.values[0]).not.toMatch(/[^\\]\[/);
+    });
+
     it('should handle metrics with missing labels', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',
@@ -709,6 +758,115 @@ describe('promqlSearchStrategy', () => {
           {}
         )
       ).rejects.toThrow('Single query failed');
+    });
+
+    it('should extract error details from response body in multi-query', async () => {
+      const mockResponseA = {
+        queryId: 'query-a',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'server1' },
+                values: [[1638316800, 100]],
+              },
+            ],
+          },
+        },
+      };
+
+      const errorWithBody = new Error('Internal Server Error');
+      (errorWithBody as any).body = JSON.stringify({
+        status: 500,
+        error: {
+          type: 'InvalidTypeIdException',
+          reason: 'There was internal problem at backend',
+          details: 'Could not resolve subtype: missing type id property',
+        },
+      });
+
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(mockResponseA)
+        .mockRejectedValueOnce(errorWithBody);
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'metric_a; bad_metric',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // Should extract details from the response body
+      expect(result.body.meta?.multiQuery.errors[0].error).toBe(
+        'Could not resolve subtype: missing type id property'
+      );
+    });
+
+    it('should fall back to reason when details is not available', async () => {
+      const mockResponseA = {
+        queryId: 'query-a',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'server1' },
+                values: [[1638316800, 100]],
+              },
+            ],
+          },
+        },
+      };
+
+      const errorWithBody = new Error('Internal Server Error');
+      (errorWithBody as any).body = JSON.stringify({
+        status: 500,
+        error: {
+          type: 'SomeException',
+          reason: 'A specific reason message',
+        },
+      });
+
+      (prometheusManager.query as jest.Mock)
+        .mockResolvedValueOnce(mockResponseA)
+        .mockRejectedValueOnce(errorWithBody);
+
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'metric_a; bad_metric',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // Should fall back to reason
+      expect(result.body.meta?.multiQuery.errors[0].error).toBe('A specific reason message');
     });
   });
 });

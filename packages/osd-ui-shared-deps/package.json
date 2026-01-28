@@ -15,7 +15,7 @@
     "@opensearch/datemath": "5.0.3",
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
-    "axios": "^1.8.2",
+    "axios": "^1.13.3",
     "compression-webpack-plugin": "^11.1.0",
     "core-js": "^3.6.5",
     "jquery": "^3.5.0",

@@ -37,7 +37,7 @@ export const getSuggestions = async ({
   query,
   services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
-  if (!services || !services.appName || !indexPattern) return [];
+  if (!services || !services.appName) return [];
 
   try {
     const { lineNumber, column } = position || {};
@@ -45,68 +45,10 @@ export const getSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
-    const prometheusResourceClient = services.data.resourceClientFactory.get<{
-      getMetrics: (dataConnectionId: string, timeRange?: TimeRange) => Promise<string[]>;
-      getLabels: (
-        dataConnectionId: string,
-        metric?: string,
-        timeRange?: TimeRange
-      ) => Promise<string[]>;
-      getLabelValues: (
-        dataConnectionId: string,
-        label: string,
-        timeRange?: TimeRange
-      ) => Promise<string[]>;
-    }>('prometheus');
-    if (!prometheusResourceClient) throw new Error('Prometheus resource client not found.');
 
-    const timeRange = services.data.query.timefilter.timefilter.getTime();
     const finalSuggestions: MonacoCompatibleQuerySuggestion[] = [];
 
-    if (suggestions.suggestMetrics) {
-      const metrics = await prometheusResourceClient.getMetrics(indexPattern.id!, timeRange);
-      finalSuggestions.push(
-        ...metrics.map((metric: string) => ({
-          text: metric,
-          type: monaco.languages.CompletionItemKind.Field,
-          detail: PromQLSuggestionItemDescriptions.METRIC,
-        }))
-      );
-    }
-
-    if (suggestions.suggestLabels || suggestions.suggestLabels === '') {
-      // TODO: figure out why partial label being typed will always appear regardless of metric before it
-      const labels = await prometheusResourceClient.getLabels(
-        indexPattern.id!,
-        suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined,
-        timeRange
-      );
-      finalSuggestions.push(
-        ...labels.map((af: string) => ({
-          text: `${af}`,
-          type: monaco.languages.CompletionItemKind.Class,
-          detail: PromQLSuggestionItemDescriptions.LABEL,
-        }))
-      );
-    }
-
-    if (suggestions.suggestLabelValues && suggestions.suggestLabelValues.label) {
-      // TODO: match what's already typed to the suggestion name so that it appears when being typed
-      // TODO: update when we can get metric name passed in
-      const labelValues = await prometheusResourceClient.getLabelValues(
-        indexPattern.id!,
-        suggestions.suggestLabelValues.label,
-        timeRange
-      );
-      finalSuggestions.push(
-        ...labelValues.map((af: string) => ({
-          text: `${af}`,
-          type: monaco.languages.CompletionItemKind.Interface,
-          detail: PromQLSuggestionItemDescriptions.VALUE,
-        }))
-      );
-    }
-
+    // Add static suggestions (functions, aggregations, keywords, duration units) first
     if (suggestions.suggestTimeRangeUnits && lineNumber && column) {
       finalSuggestions.push(
         ...prometheusDurationUnits.map((af) => ({
@@ -151,6 +93,82 @@ export const getSuggestions = async ({
           detail: PromQLSuggestionItemDescriptions.KEYWORD,
         }))
       );
+    }
+
+    // Add dynamic suggestions (metrics, labels, label values)
+    const datasetId = indexPattern?.id ?? services.data.query.queryString.getQuery().dataset?.id;
+
+    if (datasetId) {
+      const prometheusResourceClient = services.data.resourceClientFactory.get<{
+        getMetrics: (dataConnectionId: string, timeRange?: TimeRange) => Promise<string[]>;
+        getLabels: (
+          dataConnectionId: string,
+          metric?: string,
+          timeRange?: TimeRange
+        ) => Promise<string[]>;
+        getLabelValues: (
+          dataConnectionId: string,
+          label: string,
+          timeRange?: TimeRange
+        ) => Promise<string[]>;
+      }>('prometheus');
+
+      if (prometheusResourceClient) {
+        const timeRange = services.data.query.timefilter.timefilter.getTime();
+
+        if (suggestions.suggestMetrics) {
+          try {
+            const metrics = await prometheusResourceClient.getMetrics(datasetId, timeRange);
+            finalSuggestions.push(
+              ...metrics.map((metric: string) => ({
+                text: metric,
+                type: monaco.languages.CompletionItemKind.Field,
+                detail: PromQLSuggestionItemDescriptions.METRIC,
+              }))
+            );
+          } catch {
+            // Metrics fetch failed, but we still have static suggestions
+          }
+        }
+
+        if (suggestions.suggestLabels || suggestions.suggestLabels === '') {
+          try {
+            const labels = await prometheusResourceClient.getLabels(
+              datasetId,
+              suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined,
+              timeRange
+            );
+            finalSuggestions.push(
+              ...labels.map((af: string) => ({
+                text: `${af}`,
+                type: monaco.languages.CompletionItemKind.Class,
+                detail: PromQLSuggestionItemDescriptions.LABEL,
+              }))
+            );
+          } catch {
+            // Labels fetch failed, but we still have static suggestions
+          }
+        }
+
+        if (suggestions.suggestLabelValues && suggestions.suggestLabelValues.label) {
+          try {
+            const labelValues = await prometheusResourceClient.getLabelValues(
+              datasetId,
+              suggestions.suggestLabelValues.label,
+              timeRange
+            );
+            finalSuggestions.push(
+              ...labelValues.map((af: string) => ({
+                text: `${af}`,
+                type: monaco.languages.CompletionItemKind.Interface,
+                detail: PromQLSuggestionItemDescriptions.VALUE,
+              }))
+            );
+          } catch {
+            // Label values fetch failed, but we still have static suggestions
+          }
+        }
+      }
     }
 
     // add a link to prometheus documentation on every description

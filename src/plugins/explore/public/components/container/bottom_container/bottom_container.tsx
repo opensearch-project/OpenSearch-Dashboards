@@ -23,8 +23,8 @@ export const BottomContainer = () => {
           <>
             <EuiResizablePanel
               id="left"
-              initialSize={20}
-              minSize="260px"
+              initialSize={15}
+              minSize="10%"
               mode={['custom', { position: 'top' }]}
               paddingSize="none"
             >
@@ -33,7 +33,13 @@ export const BottomContainer = () => {
               </CanvasPanel>
             </EuiResizablePanel>
             <EuiResizableButton />
-            <EuiResizablePanel id="main" initialSize={80} minSize="65%" paddingSize="none">
+            <EuiResizablePanel
+              id="main"
+              className="resizable-panel-right"
+              initialSize={90}
+              minSize="65%"
+              paddingSize="none"
+            >
               <EuiPageBody className="explore-layout__canvas">
                 <BottomRightContainer />
               </EuiPageBody>
