@@ -12,6 +12,7 @@ import { createSearchBar } from './search_bar/create_search_bar';
 import { SuggestionsComponent } from './typeahead';
 import { IUiSetup, IUiStart } from './types';
 import { DataStorage } from '../../common';
+import { ContextProviderStart } from '../../../context_provider/public';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -21,6 +22,7 @@ export interface UiServiceSetupDependencies {}
 export interface UiServiceStartDependencies {
   dataServices: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
+  contextProvider?: ContextProviderStart;
 }
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
@@ -36,11 +38,15 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     return {};
   }
 
-  public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
+  public start(
+    core: CoreStart,
+    { dataServices, storage, contextProvider }: UiServiceStartDependencies
+  ): IUiStart {
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage,
+      contextProvider,
     });
 
     return {

@@ -227,7 +227,10 @@ export class DataPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
+  public start(
+    core: CoreStart,
+    { uiActions, contextProvider }: DataStartDependencies
+  ): DataPublicPluginStart {
     const {
       uiSettings,
       http,
@@ -350,7 +353,11 @@ export class DataPublicPlugin
 
     registerDefaultDataSource(dataServices);
 
-    const uiService = this.uiService.start(core, { dataServices, storage: this.storage });
+    const uiService = this.uiService.start(core, {
+      dataServices,
+      storage: this.storage,
+      contextProvider,
+    });
     setUiService(uiService);
 
     return {

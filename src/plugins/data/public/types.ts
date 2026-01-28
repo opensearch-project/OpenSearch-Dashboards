@@ -43,6 +43,7 @@ import { DataSourceStart } from './data_sources/datasource_services/types';
 import { IUiStart } from './ui';
 import { DataStorage } from '../common';
 import { ResourceClientFactory } from './resources';
+import { ContextProviderStart } from '../../context_provider/public';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
@@ -56,6 +57,7 @@ export interface DataSetupDependencies {
 }
 
 export interface DataStartDependencies {
+  contextProvider?: ContextProviderStart;
   uiActions: UiActionsStart;
 }
 
