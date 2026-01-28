@@ -53,7 +53,7 @@ import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
-import { KeyboardShortcutService } from '../../../keyboard_shortcut';
+import { KeyboardShortcutStart } from '../../../keyboard_shortcut';
 import { KeyboardShortcutHelpModal } from '../../../keyboard_shortcut/keyboard_shortcut_help_modal';
 
 /** @public */
@@ -128,7 +128,7 @@ interface Props {
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
-  keyboardShortcutService?: KeyboardShortcutService;
+  keyboardShortcutService?: KeyboardShortcutStart;
 }
 
 interface State {
@@ -151,10 +151,10 @@ class HeaderHelpMenuUI extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    this.subscription = combineLatest(
+    this.subscription = combineLatest([
       this.props.helpExtension$,
-      this.props.helpSupportUrl$
-    ).subscribe(([helpExtension, helpSupportUrl]) => {
+      this.props.helpSupportUrl$,
+    ]).subscribe(([helpExtension, helpSupportUrl]) => {
       this.setState({
         helpExtension,
         helpSupportUrl,
