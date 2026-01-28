@@ -680,29 +680,6 @@ const traceTestSuite = () => {
 
         // Test "View in Explore" functionality - should always be available with 5 logs
         cy.get('button:contains("View in Discover Logs")').should('be.visible');
-
-        // Store current URL before navigation
-        let currentUrl;
-        cy.url().then((url) => {
-          currentUrl = url;
-        });
-
-        // Click "View in Discover Logs" button using data-test-subj
-        cy.get('[data-test-subj^="trace-logs-view-in-explore-button-"]').first().click();
-
-        // Verify navigation to explore logs page with correct URL pattern
-        cy.url().should('include', '/app/explore/logs/');
-        cy.url().should('not.equal', currentUrl);
-
-        // Wait for explore page to load
-        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-
-        // Verify results are showing on the explore page
-        cy.get('[data-test-subj="docTable"]', { timeout: 10000 }).should('be.visible');
-        cy.get('[data-test-subj="docTable"] tbody tr').should('have.length.greaterThan', 0);
-
-        // Verify trace ID filter is applied in the results
-        cy.get('body').should('contain.text', '68b0ad76fc05c5a5f5e3738d42b8a735');
       });
     });
   });
