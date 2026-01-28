@@ -26,12 +26,12 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
   return (
     <>
       <EuiFormRow
-        label={`${i18n.translate(
-          'data.explorer.datasetSelector.advancedSelector.configurator.datasetNameLabel',
+        label={i18n.translate(
+          'data.explorer.datasetSelector.advancedSelector.configurator.datasetNameLabelOptional',
           {
-            defaultMessage: 'Dataset name',
+            defaultMessage: 'Dataset name – optional',
           }
-        )} – optional`}
+        )}
         display="columnCompressed"
         fullWidth
       >
@@ -43,12 +43,12 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={`${i18n.translate(
-          'data.explorer.datasetSelector.advancedSelector.configurator.datasetDescriptionLabel',
+        label={i18n.translate(
+          'data.explorer.datasetSelector.advancedSelector.configurator.datasetDescriptionLabelOptional',
           {
-            defaultMessage: 'Dataset description',
+            defaultMessage: 'Dataset description – optional',
           }
-        )} – optional`}
+        )}
         display="columnCompressed"
         fullWidth
       >
