@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import DOMPurify from 'dompurify';
 import { HeatmapSeriesOption } from 'echarts';
 import type { Encoding } from 'vega-lite/build/src/encoding';
 import { AggregationType, VisColumn, Positions, ColorSchemas, ScaleType } from '../types';
@@ -292,11 +293,13 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
           const categoryIndex = transformedData[0].indexOf(categoryFields[0]);
           const category2Index = transformedData[0].indexOf(categoryFields[1]);
 
-          return `<strong>${categoryDisplayName}</strong>: ${
+          const message = `<strong>${categoryDisplayName}</strong>: ${
             params.value[categoryIndex] ?? ''
           }<br/><strong>${categoryDisplayName2}</strong>: ${
             params.value[category2Index] ?? ''
           }<br/><strong>${seriesDisplayName}</strong>: ${params.value[seriesIndex] ?? ''}`;
+
+          return DOMPurify.sanitize(message);
         },
       },
       itemStyle: {
