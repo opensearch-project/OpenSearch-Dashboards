@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { createRef } from 'react';
 import { useCommandMenuKeyboard } from './use_command_menu_keyboard';
 import { slashCommandRegistry, SlashCommand } from '../services/slash_commands';
