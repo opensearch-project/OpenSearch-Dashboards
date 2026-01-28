@@ -1,0 +1,2 @@
+fix:
+- Update the OTel sample data index names ([#11208](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11208))
