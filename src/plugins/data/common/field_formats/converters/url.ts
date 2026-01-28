@@ -30,6 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { escape, memoize } from 'lodash';
+import dompurify from 'dompurify';
 import { getHighlightHtml } from '../utils';
 import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
@@ -142,12 +143,20 @@ export class UrlFormat extends FieldFormat {
   }
 
   private generateImgHtml(url: string, imageLabel: string): string {
-    const isValidWidth = !isNaN(parseInt(this.param('width'), 10));
-    const isValidHeight = !isNaN(parseInt(this.param('height'), 10));
-    const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
-    const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
+    const parsedWidth = parseInt(this.param('width'), 10);
+    const parsedHeight = parseInt(this.param('height'), 10);
+    const isValidWidth = !isNaN(parsedWidth);
+    const isValidHeight = !isNaN(parsedHeight);
+    const maxWidth = isValidWidth ? `${parsedWidth}px` : 'none';
+    const maxHeight = isValidHeight ? `${parsedHeight}px` : 'none';
 
-    return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
+    const escapedUrl = dompurify.sanitize(url, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    const escapedImageLabel = dompurify.sanitize(imageLabel, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+    });
+
+    return `<img src="${escapedUrl}" alt="${escapedImageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
   textConvert: TextContextTypeConvert = (value) => this.formatLabel(value);
