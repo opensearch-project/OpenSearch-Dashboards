@@ -31,8 +31,8 @@ describe('DatasetMetadataFields', () => {
       />
     );
 
-    expect(screen.getByText('Dataset name')).toBeInTheDocument();
-    expect(screen.getByText('Dataset description')).toBeInTheDocument();
+    expect(screen.getByText('Dataset name – optional')).toBeInTheDocument();
+    expect(screen.getByText('Dataset description – optional')).toBeInTheDocument();
     expect(screen.getByTestId('datasetNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('datasetDescriptionInput')).toBeInTheDocument();
   });
