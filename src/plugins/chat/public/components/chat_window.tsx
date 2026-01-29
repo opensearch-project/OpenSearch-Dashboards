@@ -59,6 +59,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
+  const currentSubscriptionRef = useRef<any>(null);
+  const loadingMessageIdRef = useRef<string | null>(null);
 
   const timelineRef = React.useRef<Message[]>(timeline);
 
@@ -197,6 +199,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Add loading assistant message
       const loadingMessageId = `loading-${Date.now()}`;
+      loadingMessageIdRef.current = loadingMessageId;
       const loadingMessage: Message = {
         id: loadingMessageId,
         role: 'assistant',
@@ -219,6 +222,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           if (!firstResponseReceived) {
             firstResponseReceived = true;
             setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+            loadingMessageIdRef.current = null;
           }
 
           // Handle all events through the event handler service
@@ -228,19 +232,27 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           console.error('Subscription error:', error);
           // Remove loading message on error
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          loadingMessageIdRef.current = null;
           setIsStreaming(false);
+          currentSubscriptionRef.current = null;
         },
         complete: () => {
           // Remove loading message if still present
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          loadingMessageIdRef.current = null;
           setIsStreaming(false);
+          currentSubscriptionRef.current = null;
         },
       });
+
+      // Store subscription for potential cancellation
+      currentSubscriptionRef.current = subscription;
 
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to send message:', error);
       setIsStreaming(false);
+      currentSubscriptionRef.current = null;
     }
   }, [chatService, currentRunId, eventHandler]);
 
@@ -328,6 +340,26 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setPendingConfirmation(null);
   }, [chatService]);
 
+  const handleStop = useCallback(() => {
+    // Abort the current streaming request
+    chatService.abort();
+    
+    // Remove loading message if it exists
+    if (loadingMessageIdRef.current) {
+      setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageIdRef.current));
+      loadingMessageIdRef.current = null;
+    }
+    
+    // Unsubscribe from current observable if exists
+    if (currentSubscriptionRef.current) {
+      currentSubscriptionRef.current.unsubscribe();
+      currentSubscriptionRef.current = null;
+    }
+    
+    // Update streaming state
+    setIsStreaming(false);
+  }, [chatService]);
+
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {
       confirmationService.approve(pendingConfirmation.id);
@@ -387,6 +419,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         isStreaming={isStreaming}
         onInputChange={setInput}
         onSend={handleSend}
+        onStop={handleStop}
         onKeyDown={handleKeyDown}
       />
     </ChatContainer>
