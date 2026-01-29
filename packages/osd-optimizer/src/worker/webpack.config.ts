@@ -301,6 +301,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           ],
         },
         {
+          resourceQuery: '?raw',
+          type: 'asset/source',
+        },
+        {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
           type: 'asset',
         },
