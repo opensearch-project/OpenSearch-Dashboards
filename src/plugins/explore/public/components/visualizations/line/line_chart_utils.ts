@@ -303,7 +303,7 @@ const getLineInterpolation = (lineMode: LineMode) => {
 const generateLineStyles = (styles: LineChartStyle) => {
   const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
   return {
-    ...(styles.lineStyle === 'line' ? { symbol: 'none' } : {}),
+    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
     lineStyle: {
       width: lineWidth,
     },

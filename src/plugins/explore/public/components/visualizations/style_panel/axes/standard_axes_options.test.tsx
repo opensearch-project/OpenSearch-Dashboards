@@ -147,8 +147,8 @@ describe('AllAxesOptions', () => {
         <AllAxesOptions {...defaultProps} />
       </Provider>
     );
-    expect(screen.getByText('X-Axis')).toBeInTheDocument();
-    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Show X-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Show Y-Axis')).toBeInTheDocument();
   });
 
   it('should switch label is switchAxes is true', () => {

@@ -21,6 +21,14 @@ import {
 } from '../types';
 import { AreaChartStyle } from './area_vis_config';
 
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
+
 describe('Area Chart to_expression', () => {
   // Mock data for testing
   const mockTransformedData = [

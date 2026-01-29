@@ -55,7 +55,7 @@ export const ThresholdPanel = ({
 
       {showThresholdStyle && (
         <>
-          <EuiSpacer />
+          <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.threshold.thresholdMode', {
               defaultMessage: 'Threshold lines mode',

@@ -28,6 +28,7 @@ export type LineMode = 'straight' | 'smooth' | 'stepped';
 export interface LineChartStyleOptions {
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
   addTimeMarker?: boolean;
 
@@ -69,7 +70,7 @@ export const defaultLineChartStyles: LineChartStyle = {
   legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
 
-  lineStyle: 'both',
+  lineStyle: 'line',
   lineMode: 'straight',
   lineWidth: 2,
   tooltipOptions: {

@@ -19,6 +19,14 @@ import {
 } from '../types';
 import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
 
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
+
 describe('Scatter Chart to_expression', () => {
   // Mock data for testing
   const mockTransformedData = [

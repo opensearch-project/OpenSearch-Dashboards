@@ -42,7 +42,7 @@ export const createPieSpec = (
         }),
         convertTo2DArray(allColumns)
       ),
-      createBaseConfig({ title: defaultTitle }),
+      createBaseConfig({ title: defaultTitle, legend: { show: styleOptions.addLegend } }),
       createPieSeries({ styles: styleOptions, cateField: colorColumn, valueField: thetaColumn }),
       assembleSpec
     )({

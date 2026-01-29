@@ -176,7 +176,7 @@ describe('VisualizationRender', () => {
       />
     );
 
-    expect(screen.getByTestId('vegaRender')).toBeInTheDocument();
+    expect(screen.getByTestId('echartsRender')).toBeInTheDocument();
   });
 
   it('renders echarts when there is a selection mapping but spec has no $schema', () => {
