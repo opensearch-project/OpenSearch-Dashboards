@@ -295,6 +295,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                 </>
               )}
             </div>
+            {index < standardAxes.length - 1 && <EuiSpacer size="m" />}
           </EuiSplitPanel.Inner>
         );
       })}
