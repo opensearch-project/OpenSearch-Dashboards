@@ -22902,7 +22902,7 @@ tar@^7.5.7:
   integrity sha512-fov56fJiRuThVFXD6o6/Q354S7pnWMJIVlDBYijsTNx6jKSE4pvrDTs6lUnmGvNyfJwFQQwWy3owKz1ucIhveQ==
   dependencies:
     "@isaacs/fs-minipass" "^4.0.0"
-    chow`nr "^3.0.0"
+    chownr "^3.0.0"
     minipass "^7.1.2"
     minizlib "^3.1.0"
     yallist "^5.0.0"
