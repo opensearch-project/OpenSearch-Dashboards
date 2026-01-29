@@ -1,0 +1,2 @@
+infra:
+- Supply data source version to Datasets ([#10798](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10798))
