@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
-import { EuiFieldText, EuiButtonIcon, EuiTextColor } from '@elastic/eui';
+import React, { useRef, useEffect } from 'react';
+import { EuiTextArea, EuiButtonIcon, EuiTextColor } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
@@ -17,6 +17,7 @@ interface ChatInputProps {
   isStreaming: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
+  onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
 }
 
@@ -26,9 +27,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isStreaming,
   onInputChange,
   onSend,
+  onStop,
   onKeyDown,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Use custom hook for command menu keyboard handling
   const {
@@ -45,6 +47,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     inputRef,
   });
 
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set height based on scrollHeight, with max of 4 lines (~96px)
+      const maxHeight = 96; // approximately 4 lines
+      textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+    }
+  }, [input]);
+
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
       <ContextPills category="chat" />
@@ -57,15 +71,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           />
         )}
         <div className="chatInput__fieldWrapper">
-          <EuiFieldText
+          <EuiTextArea
             inputRef={inputRef}
-            placeholder="Ask anything. Type / for actions"
+            placeholder="How can I help you today?"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isStreaming}
             autoFocus={true}
             fullWidth
+            resize="none"
+            rows={1}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -77,12 +93,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           )}
         </div>
         <EuiButtonIcon
-          iconType={isStreaming ? 'generate' : 'sortUp'}
-          onClick={onSend}
-          isDisabled={input.trim().length === 0 || isStreaming}
-          aria-label="Send message"
+          iconType={isStreaming ? 'stop' : 'sortUp'}
+          onClick={isStreaming ? onStop : onSend}
+          isDisabled={!isStreaming && input.trim().length === 0}
+          aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
-          color="primary"
+          color={isStreaming ? 'danger' : 'primary'}
           display="fill"
         />
       </div>
