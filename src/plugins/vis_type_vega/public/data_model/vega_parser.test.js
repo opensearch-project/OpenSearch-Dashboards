@@ -37,10 +37,7 @@ import { VisLayerTypes } from '../../../vis_augmenter/public';
 
 jest.mock('../services');
 
-jest.mock('../lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
+jest.mock('../lib/vega');
 
 describe(`VegaParser.parseAsync`, () => {
   test(`should throw an error in case of $spec is not defined`, async () => {
