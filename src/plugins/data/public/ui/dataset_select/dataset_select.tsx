@@ -152,7 +152,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
     {
       field: 'displayName',
       name: i18n.translate('data.datasetSelect.viewModal.nameColumn', {
-        defaultMessage: 'Name',
+        defaultMessage: 'Dataset',
       }),
       render: (displayName: string, dataset: DetailedDataset) => {
         const typeConfig = datasetService.getType(dataset.type);
@@ -189,7 +189,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
     {
       field: 'title',
       name: i18n.translate('data.datasetSelect.viewModal.dataColumn', {
-        defaultMessage: 'Data',
+        defaultMessage: 'Datasource',
       }),
       render: (title: string, dataset: DetailedDataset) => {
         const dataSourceName = dataset.dataSource?.title || 'Local cluster';
@@ -588,7 +588,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   const datasetTitle = useMemo(() => {
     if (!selectedDataset) {
       return i18n.translate('data.datasetSelect.selectDataLabel', {
-        defaultMessage: 'Select data',
+        defaultMessage: 'Select dataset',
       });
     }
 
