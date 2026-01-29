@@ -15,24 +15,60 @@
 
 // Chainable mock view
 class MockView {
-  initialize() { return this; }
-  width() { return this; }
-  height() { return this; }
-  padding() { return this; }
-  renderer() { return this; }
-  hover() { return this; }
-  logLevel() { return this; }
-  tooltip() { return this; }
-  run() { return this; }
-  runAsync() { return Promise.resolve(this); }
-  finalize() { return this; }
-  signal() { return this; }
-  addSignalListener() { return this; }
-  removeSignalListener() { return this; }
-  container() { return null; }
-  origin() { return [0, 0]; }
-  data() { return this; }
-  change() { return this; }
+  initialize() {
+    return this;
+  }
+  width() {
+    return this;
+  }
+  height() {
+    return this;
+  }
+  padding() {
+    return this;
+  }
+  renderer() {
+    return this;
+  }
+  hover() {
+    return this;
+  }
+  logLevel() {
+    return this;
+  }
+  tooltip() {
+    return this;
+  }
+  run() {
+    return this;
+  }
+  runAsync() {
+    return Promise.resolve(this);
+  }
+  finalize() {
+    return this;
+  }
+  signal() {
+    return this;
+  }
+  addSignalListener() {
+    return this;
+  }
+  removeSignalListener() {
+    return this;
+  }
+  container() {
+    return null;
+  }
+  origin() {
+    return [0, 0];
+  }
+  data() {
+    return this;
+  }
+  change() {
+    return this;
+  }
 }
 
 export const vega = {

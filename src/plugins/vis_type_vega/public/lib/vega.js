@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* eslint-disable import/namespace */
+
 // vega-lite 6.x no longer exports from /src subpath
 import { compile, version } from 'vega-lite';
 import * as vega from 'vega';
