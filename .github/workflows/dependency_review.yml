@@ -29,39 +29,3 @@ jobs:
         with:
           # Use Amazon OSPO default configuration
           config-file: amazon-ospo/dependency-review-config/default/dependency-review-config.yml@main
-          # Replicate all the licenses in the OSPO default configuration plus BlueOak
-          # TODO: remove below when BlueOak is supported by OSPO default configuration
-          allow-licenses:
-            - 0BSD
-            - Apache-2.0
-            - BSD-1-Clause
-            - BSD-2-Clause-FreeBSD
-            - BSD-2-Clause
-            - BSD-3-Clause-Attribution
-            - BSD-3-Clause
-            - BSD-Source-Code
-            - bzip2-1.0.6
-            - curl
-            - ISC
-            - JSON
-            - MIT
-            - NTP
-            - OLDAP-2.8
-            - OpenSSL
-            - PDDL-1.0
-            - PostgreSQL
-            - Python-2.0
-            - Ruby
-            - Spencer-94
-            - Unicode-DFS-2015
-            - Unicode-DFS-2016
-            - Unlicense
-            - WTFPL
-            - X11
-            - zlib-acknowledgement
-            - Zlib
-            - MPL-2.0
-            - EPL-2.0
-            - CDDL-1.1
-            - CDLA-Permissive-2.0
-            - BlueOak-1.0.0
