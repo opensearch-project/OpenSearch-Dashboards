@@ -30,7 +30,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('!!raw-loader!./disable_animations.css', () => 'MOCK DISABLE ANIMATIONS CSS');
+jest.mock('./disable_animations.css?raw', () => 'MOCK DISABLE ANIMATIONS CSS');
 jest.mock('../../utils', () => ({
   getNonce: jest.fn(),
 }));

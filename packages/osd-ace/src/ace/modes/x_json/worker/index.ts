@@ -29,7 +29,7 @@
  */
 
 // @ts-ignore
-import src from '!!raw-loader!./x_json.ace.worker.js';
+import src from './x_json.ace.worker.js?raw';
 
 export const workerModule = {
   id: 'ace/mode/json_worker',
