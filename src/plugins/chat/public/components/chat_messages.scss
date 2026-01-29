@@ -26,7 +26,46 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    gap: 16px;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  &__emptyStateHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+
+    h3 {
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  &__suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  &__suggestionCard {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
   }
 
   &__loadingIndicator {
