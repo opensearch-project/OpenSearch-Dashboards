@@ -1,0 +1,318 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Backward Compatibility Test
+
+# trigger on every commit push and PR for all branches except pushes for backport branches
+on:
+  push:
+    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+  pull_request:
+    branches: ['**']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+
+env:
+  TEST_BROWSER_HEADLESS: 1
+  CI: 1
+  GCS_UPLOAD_PREFIX: fake
+  TEST_OPENSEARCH_DASHBOARDS_HOST: localhost
+  TEST_OPENSEARCH_DASHBOARDS_PORT: 6610
+  TEST_OPENSEARCH_TRANSPORT_PORT: 9403
+  TEST_OPENSEARCH_PORT: 9400
+  OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
+  OSD_OPTIMIZER_MAX_WORKERS: 8
+  NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
+
+jobs:
+  functional-tests:
+    name: Run functional tests on ${{ matrix.name }} against OpenSearch ${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        version:
+          [
+            3.3.0,
+            3.1.0,
+            2.19.0,
+            2.17.0,
+            2.15.0,
+            2.13.0,
+            2.11.0,
+            2.9.0,
+            2.7.0,
+            2.5.0,
+            2.3.0,
+            1.3.0,
+            1.2.0,
+            1.1.0,
+            1.0.0,
+          ]
+        include:
+          - os: ubuntu-latest
+            name: Linux
+    runs-on: ${{ matrix.os }}
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001 --privileged
+    steps:
+      - run: echo Running functional tests for ${{ matrix.version }} for ciGroup${{ matrix.group }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Clean up what we can without sudo in the container
+          # Clear any existing build artifacts and caches
+          rm -rf ~/.cache/* 2>/dev/null || true
+          rm -rf ~/.npm/_cacache/* 2>/dev/null || true
+          rm -rf /tmp/* 2>/dev/null || true
+
+          # Clean up any yarn/npm global caches if they exist
+          yarn cache clean 2>/dev/null || true
+          npm cache clean --force 2>/dev/null || true
+
+          echo "Disk usage after cleanup:"
+          df -h
+
+          # List largest directories to understand disk usage
+          echo "Largest directories:"
+          du -h --max-depth=2 / 2>/dev/null | sort -hr | head -10 || true
+
+      - name: Set Java version
+        run: |
+          if [[ "${{ matrix.version }}" == 1.* ]] || [[ "${{ matrix.version }}" == 2.* ]]; then
+            echo "JAVA_VERSION=17" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          fi
+          echo "Using Java $JAVA_VERSION for OpenSearch ${{ matrix.version }}"
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Verify Chrome installation
+        run: |
+          which google-chrome || which chromium-browser || which chromium || echo "Chrome not found in PATH, but container may have it configured differently"
+          google-chrome --version || chromium-browser --version || chromium --version || echo "Chrome version check failed, but tests may still work"
+
+      - name: Setup chromedriver
+        run: node scripts/upgrade_chromedriver.js
+
+      - name: Set OpenSearch URL
+        run: |
+          echo "OPENSEARCH_URL=https://artifacts.opensearch.org/releases/core/opensearch/${{ matrix.version }}/opensearch-min-${{ matrix.version }}-linux-x64.tar.gz" >> $GITHUB_ENV
+
+      - name: Download and extract OpenSearch ${{ matrix.version }}
+        run: |
+          mkdir -p opensearch-${{ matrix.version }}
+          cd opensearch-${{ matrix.version }}
+          curl -L "${{ env.OPENSEARCH_URL }}" | tar -xz --strip-components=1
+          echo "OPENSEARCH_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Run CI test ${{ matrix.version }} for group ${{ matrix.group }}
+        id: ftr-tests
+        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }} --opensearchFrom ${{ env.OPENSEARCH_DIR }}
+        env:
+          CI_GROUP: ciGroup${{ matrix.group }}
+          JOB: compatibility-test
+          CACHE_DIR: compatibility-${{ matrix.version }}-${{ matrix.group }}
+          TEST_OPENSEARCH_PORT: 9200
+          OPENSEARCH_VERSION: ${{ matrix.version }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failure-artifacts-opensearch-${{ matrix.version }}-ci${{ matrix.group }}
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
+            ${{ env.OPENSEARCH_DIR }}/opensearch.log
+          overwrite: true
+
+  plugin-functional-tests:
+    name: Run plugin functional tests on ${{ matrix.name }} against OpenSearch ${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        version:
+          [
+            3.3.0,
+            3.1.0,
+            2.19.0,
+            2.17.0,
+            2.15.0,
+            2.13.0,
+            2.11.0,
+            2.9.0,
+            2.7.0,
+            2.5.0,
+            2.3.0,
+            1.3.0,
+            1.2.0,
+            1.1.0,
+            1.0.0,
+          ]
+        include:
+          - os: ubuntu-latest
+            name: Linux
+    runs-on: ${{ matrix.os }}
+    container:
+      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
+      options: --user 1001 --privileged
+    steps:
+      - run: echo Running plugin functional tests
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Clean up what we can without sudo in the container
+          # Clear any existing build artifacts and caches
+          rm -rf ~/.cache/* 2>/dev/null || true
+          rm -rf ~/.npm/_cacache/* 2>/dev/null || true
+          rm -rf /tmp/* 2>/dev/null || true
+
+          # Clean up any yarn/npm global caches if they exist
+          yarn cache clean 2>/dev/null || true
+          npm cache clean --force 2>/dev/null || true
+
+          echo "Disk usage after cleanup:"
+          df -h
+
+          # List largest directories to understand disk usage
+          echo "Largest directories:"
+          du -h --max-depth=2 / 2>/dev/null | sort -hr | head -10 || true
+
+      - name: Set Java version
+        run: |
+          if [[ "${{ matrix.version }}" == 1.* ]] || [[ "${{ matrix.version }}" == 2.* ]]; then
+            echo "JAVA_VERSION=17" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          fi
+          echo "Using Java $JAVA_VERSION for OpenSearch ${{ matrix.version }}"
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Verify Chrome installation
+        run: |
+          which google-chrome || which chromium-browser || which chromium || echo "Chrome not found in PATH, but container may have it configured differently"
+          google-chrome --version || chromium-browser --version || chromium --version || echo "Chrome version check failed, but tests may still work"
+
+      - name: Setup chromedriver
+        run: node scripts/upgrade_chromedriver.js
+
+      - name: Set OpenSearch URL
+        run: |
+          echo "OPENSEARCH_URL=https://artifacts.opensearch.org/releases/core/opensearch/${{ matrix.version }}/opensearch-min-${{ matrix.version }}-linux-x64.tar.gz" >> $GITHUB_ENV
+
+      - name: Download and extract OpenSearch ${{ matrix.version }}
+        run: |
+          mkdir -p opensearch-${{ matrix.version }}
+          cd opensearch-${{ matrix.version }}
+          curl -L "${{ env.OPENSEARCH_URL }}" | tar -xz --strip-components=1
+          echo "OPENSEARCH_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
+
+      - name: Run functional plugin tests
+        id: plugin-ftr-tests
+        run: node scripts/functional_tests.js --config test/plugin_functional/config.ts --opensearchFrom ${{ env.OPENSEARCH_DIR }}
+        env:
+          TEST_OPENSEARCH_PORT: 9200
+          OPENSEARCH_VERSION: ${{ matrix.version }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failure-artifacts-plugin-functional-${{ matrix.version }}
+          path: |
+            test/*/failure_debug/
+            test/*/screenshots/
+            ${{ env.OPENSEARCH_DIR }}/opensearch.log
+          overwrite: true
