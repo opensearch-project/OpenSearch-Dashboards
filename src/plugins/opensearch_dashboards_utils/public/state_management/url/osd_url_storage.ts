@@ -199,7 +199,10 @@ export const createOsdUrlControls = (
   function flush(replace = shouldReplace) {
     // React 18 fix: If the app has changed (pathname changed), cancel pending updates.
     // This prevents URL corruption when effects run after navigation.
-    if (window.location.pathname !== initialPathname) {
+    // Use startsWith to handle trailing slash differences.
+    const currentPath = window.location.pathname.replace(/\/+$/, '');
+    const initialPath = initialPathname.replace(/\/+$/, '');
+    if (currentPath !== initialPath) {
       cleanUp();
       return undefined;
     }

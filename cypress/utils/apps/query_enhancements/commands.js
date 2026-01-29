@@ -173,12 +173,7 @@ Cypress.Commands.add(
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
 
-    // Click on "Indexes" dataset type if it's visible
-    cy.get('body').then(($body) => {
-      if ($body.find(`[title="Indexes"]`).length > 0) {
-        cy.get(`[title="Indexes"]`).click();
-      }
-    });
+    cy.get(`[title="Indexes"]`).click();
 
     cy.get(`[title="${dataSourceName}"]`).click();
 
