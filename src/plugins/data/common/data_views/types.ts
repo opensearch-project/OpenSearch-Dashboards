@@ -143,6 +143,8 @@ export type DataViewSavedObjectReference = SavedObjectReference;
  */
 export type DataViewSpec = IndexPatternSpec & {
   dataSourceRef?: DataViewSavedObjectReference;
+  // non OpenSearch data-source may have additional meta properties
+  dataSourceMeta?: Record<string, unknown>;
 };
 
 /**

@@ -25,6 +25,7 @@ interface GeneratePromQLOptions {
   question: string;
   dataSourceName: string;
   dataSourceId?: string;
+  dataSourceMeta?: Record<string, unknown>;
 }
 
 interface GeneratePromQLResult {
@@ -63,9 +64,10 @@ export async function generatePromQLWithAgUi({
   question,
   dataSourceName,
   dataSourceId,
+  dataSourceMeta,
 }: GeneratePromQLOptions): Promise<GeneratePromQLResult> {
   const agent = new AgUiAgent();
-  const toolHandlers = new PromQLToolHandlers(data, dataSourceName);
+  const toolHandlers = new PromQLToolHandlers(data, dataSourceName, dataSourceMeta);
 
   let streamingText = '';
   let query: string | undefined;

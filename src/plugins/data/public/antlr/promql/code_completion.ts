@@ -16,7 +16,7 @@ import {
   PromQLSuggestionItemDescriptions,
 } from './constants';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
-import { TimeRange } from '../../../common';
+import { DataView } from '../..';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -96,29 +96,23 @@ export const getSuggestions = async ({
     }
 
     // Add dynamic suggestions (metrics, labels, label values)
-    const datasetId = indexPattern?.id ?? services.data.query.queryString.getQuery().dataset?.id;
+    const dataView = indexPattern as DataView;
+    const dataConnectionId = dataView?.id ?? services.data.query.queryString.getQuery().dataset?.id;
+    const meta = dataView?.dataSourceMeta;
 
-    if (datasetId) {
-      const prometheusResourceClient = services.data.resourceClientFactory.get<{
-        getMetrics: (dataConnectionId: string, timeRange?: TimeRange) => Promise<string[]>;
-        getLabels: (
-          dataConnectionId: string,
-          metric?: string,
-          timeRange?: TimeRange
-        ) => Promise<string[]>;
-        getLabelValues: (
-          dataConnectionId: string,
-          label: string,
-          timeRange?: TimeRange
-        ) => Promise<string[]>;
-      }>('prometheus');
+    if (dataConnectionId) {
+      const prometheusResourceClient = services.data.resourceClientFactory.get<any>('prometheus');
 
       if (prometheusResourceClient) {
         const timeRange = services.data.query.timefilter.timefilter.getTime();
 
         if (suggestions.suggestMetrics) {
           try {
-            const metrics = await prometheusResourceClient.getMetrics(datasetId, timeRange);
+            const metrics = await prometheusResourceClient.getMetrics(
+              dataConnectionId,
+              meta,
+              timeRange
+            );
             finalSuggestions.push(
               ...metrics.map((metric: string) => ({
                 text: metric,
@@ -134,7 +128,8 @@ export const getSuggestions = async ({
         if (suggestions.suggestLabels || suggestions.suggestLabels === '') {
           try {
             const labels = await prometheusResourceClient.getLabels(
-              datasetId,
+              dataConnectionId,
+              meta,
               suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined,
               timeRange
             );
@@ -153,7 +148,8 @@ export const getSuggestions = async ({
         if (suggestions.suggestLabelValues && suggestions.suggestLabelValues.label) {
           try {
             const labelValues = await prometheusResourceClient.getLabelValues(
-              datasetId,
+              dataConnectionId,
+              meta,
               suggestions.suggestLabelValues.label,
               timeRange
             );
