@@ -10,7 +10,7 @@ interface UseCommandMenuKeyboardParams {
   input: string;
   onInputChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  inputRef: RefObject<HTMLInputElement>;
+  inputRef: RefObject<HTMLTextAreaElement>;
 }
 
 interface UseCommandMenuKeyboardReturn {
@@ -83,6 +83,17 @@ export const useCommandMenuKeyboard = ({
       setGhostText('');
     }
   }, [input]);
+
+  useEffect(() => {
+    const textArea = inputRef.current;
+    if (textArea) {
+      textArea.style.height = 'auto';
+      const maxHeight = 80;
+      const minHeight = 45;
+      const newHeight = Math.min(Math.max(textArea.scrollHeight, minHeight), maxHeight);
+      textArea.style.height = `${newHeight}px`;
+    }
+  }, [input, inputRef]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Handle Tab or Space for command autocomplete (only before space is typed)
