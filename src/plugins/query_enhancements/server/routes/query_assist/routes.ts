@@ -11,6 +11,10 @@ import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { createResponseBody } from './createResponse';
 import { parseTimeRangeXML, getUnselectedTimeFields } from './ppl/time_parser_utils';
+import {
+  DataSourceAttributes,
+  DataSourceEngineType,
+} from '../../../../data_source/common/data_sources';
 
 export function registerQueryAssistRoutes(router: IRouter) {
   router.get(
@@ -25,6 +29,18 @@ export function registerQueryAssistRoutes(router: IRouter) {
     async (context, request, response) => {
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       const config = await context.query_assist.configPromise;
+
+      let isServerlessDatasource = false;
+      if (request.query.dataSourceId) {
+        const savedObject = await context.core.savedObjects.client.get<DataSourceAttributes>(
+          'data-source',
+          request.query.dataSourceId
+        );
+        isServerlessDatasource =
+          savedObject?.attributes?.dataSourceEngineType ===
+          DataSourceEngineType.OpenSearchServerless;
+      }
+
       const client =
         // @ts-expect-error TS2339 TODO(ts-error): fixme
         context.query_assist.dataSourceEnabled && request.query.dataSourceId
@@ -48,9 +64,10 @@ export function registerQueryAssistRoutes(router: IRouter) {
           // @ts-expect-error TS7006 TODO(ts-error): fixme
           config.queryAssist.supportedLanguages.map((languageConfig) =>
             // if the call does not throw any error, then the agent is properly configured
-            getAgentIdByConfig(client, languageConfig.agentConfig).then(() =>
-              configuredLanguages.push(languageConfig.language)
-            )
+            (isServerlessDatasource
+              ? Promise.resolve(languageConfig.agentConfig)
+              : getAgentIdByConfig(client, languageConfig.agentConfig)
+            ).then(() => configuredLanguages.push(languageConfig.language))
           )
         );
         return response.ok({ body: { configuredLanguages } });

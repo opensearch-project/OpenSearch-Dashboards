@@ -7,6 +7,10 @@ import { ApiResponse } from '@opensearch-project/opensearch';
 import { RequestBody, TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { RequestHandlerContext } from 'src/core/server';
 import { URI } from '../../../common';
+import {
+  DataSourceEngineType,
+  DataSourceAttributes,
+} from '../../../../data_source/common/data_sources';
 
 const AGENT_REQUEST_OPTIONS = {
   /**
@@ -51,6 +55,21 @@ export const getAgentIdByConfig = async (
     throw new Error(`Get agent '${configName}' failed, reason: ` + errorMessage);
   }
 };
+const detectServerlessDatasource = async (
+  context: RequestHandlerContext,
+  dsId: string | undefined
+) => {
+  if (dsId) {
+    const savedObject = await context.core.savedObjects.client.get<DataSourceAttributes>(
+      'data-source',
+      dsId
+    );
+
+    return (
+      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.OpenSearchServerless
+    );
+  }
+};
 
 export const requestAgentByConfig = async (options: {
   context: RequestHandlerContext;
@@ -59,12 +78,16 @@ export const requestAgentByConfig = async (options: {
   dataSourceId?: string;
 }): Promise<AgentResponse> => {
   const { context, configName, body, dataSourceId } = options;
+  const isServerlessDatasource = await detectServerlessDatasource(context, dataSourceId);
   const client =
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     context.query_assist.dataSourceEnabled && dataSourceId
       ? await context.dataSource.opensearch.getClient(dataSourceId)
       : context.core.opensearch.client.asCurrentUser;
-  const agentId = await getAgentIdByConfig(client, configName);
+
+  const agentId = isServerlessDatasource
+    ? configName
+    : await getAgentIdByConfig(client, configName);
   return client.transport.request(
     {
       method: 'POST',
