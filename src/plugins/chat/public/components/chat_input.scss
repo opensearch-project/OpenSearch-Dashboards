@@ -1,3 +1,5 @@
+@import "@elastic/eui/src/global_styling/variables";
+
 .chatInput {
   grid-area: input;
   display: flex;
@@ -7,17 +9,42 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px;
-    align-items: center;
+    align-items: flex-end;
   }
 
   &__fieldWrapper {
     position: relative;
     width: 100%;
 
-    input {
+    textarea {
       position: relative;
       z-index: 1;
       background: transparent !important;
+      min-height: 40px;
+      max-height: 96px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      resize: none;
+      line-height: 1.5;
+      padding: 8px 14px;
+
+      // Custom scrollbar styling
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: $euiColorLightShade;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: $euiColorMediumShade;
+      }
     }
   }
 
@@ -27,13 +54,14 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 0 14px;
+    padding: 8px 14px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     pointer-events: none;
     color: transparent;
-    white-space: nowrap;
+    white-space: pre-wrap;
     overflow: hidden;
+    line-height: 1.5;
 
     &--subdued {
       opacity: 0.6;

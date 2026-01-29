@@ -10,7 +10,7 @@ interface UseCommandMenuKeyboardParams {
   input: string;
   onInputChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  inputRef: RefObject<HTMLInputElement>;
+  inputRef: RefObject<HTMLTextAreaElement>;
 }
 
 interface UseCommandMenuKeyboardReturn {
