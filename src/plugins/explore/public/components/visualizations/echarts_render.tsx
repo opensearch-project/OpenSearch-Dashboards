@@ -170,9 +170,9 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
 
       if (!option.grid) {
         option.grid = { ...DEFAULT_GRID };
-      }
-      if (gridConfigRef.current) {
-        option.grid = { ...option.grid, ...gridConfigRef.current };
+        if (gridConfigRef.current) {
+          option.grid = { ...option.grid, ...gridConfigRef.current };
+        }
       }
 
       instance.setOption(

@@ -47,11 +47,11 @@ export const runCreateVisTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
     it('should create a scatter plot visualization using a query with two metrics and one category', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
+      const query = `source=${datasetName} | fields bytes_transferred, status_code | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
     });
     it('should change axes style of scatter chart and reflect immediatly to the scatter visualization', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
+      const query = `source=${datasetName} | fields bytes_transferred, status_code | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
       let beforeCanvasDataUrl;
       cy.get('.exploreVisContainer canvas')
@@ -70,7 +70,7 @@ export const runCreateVisTests = () => {
       });
     });
     it('should change point style of scatter chart and reflect immediatly to the scatter visualization', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
+      const query = `source=${datasetName} | fields bytes_transferred, status_code | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
       let beforeCanvasDataUrl;
       cy.get('.exploreVisContainer canvas')
