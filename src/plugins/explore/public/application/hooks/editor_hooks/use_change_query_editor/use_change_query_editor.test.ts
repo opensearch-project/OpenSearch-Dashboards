@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useEditorFocus } from '../use_editor_focus';
 import { useSetEditorText } from '../use_set_editor_text';
 import { DataViewField as DatasetField, opensearchFilters } from '../../../../../../data/public';

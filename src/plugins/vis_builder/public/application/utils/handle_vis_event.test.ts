@@ -37,6 +37,10 @@ describe('handleVisEvent', () => {
     jest.useFakeTimers();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('should trigger the correct event', async () => {
     const event: ExpressionRendererEvent = {
       name: 'filter',

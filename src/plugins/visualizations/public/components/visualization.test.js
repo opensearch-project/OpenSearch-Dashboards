@@ -28,9 +28,7 @@
  * under the License.
  */
 
-jest.useFakeTimers();
-
-import React from 'react';
+import React, { act } from 'react';
 import { render, mount } from 'enzyme';
 import { Visualization } from './visualization';
 
@@ -65,6 +63,7 @@ describe('<Visualization/>', () => {
   let vis;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     vis = {
       setUiState: function (uiState) {
         this.uiState = uiState;
@@ -80,6 +79,11 @@ describe('<Visualization/>', () => {
         visualization: VisualizationStub,
       },
     };
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   it('should display no result message when length of data is 0', () => {
@@ -100,15 +104,18 @@ describe('<Visualization/>', () => {
   it('should call onInit when rendering no data', () => {
     const spy = jest.fn();
     const noData = { hits: 0 };
-    mount(
-      <Visualization
-        vis={vis}
-        visData={noData}
-        uiState={uiState}
-        listenOnChange={false}
-        onInit={spy}
-      />
-    );
+    // In React 18, wrap mount in act() to ensure componentDidMount completes
+    act(() => {
+      mount(
+        <Visualization
+          vis={vis}
+          visData={noData}
+          uiState={uiState}
+          listenOnChange={false}
+          onInit={spy}
+        />
+      );
+    });
     expect(spy).toHaveBeenCalled();
   });
 });

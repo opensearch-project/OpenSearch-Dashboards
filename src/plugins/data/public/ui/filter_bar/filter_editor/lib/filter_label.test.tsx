@@ -44,7 +44,6 @@ test('alias', () => {
   const { container } = render(<FilterLabel filter={filter} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
       geo.coordinates in US
     </div>
   `);
@@ -138,7 +137,6 @@ test('warning', () => {
   const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Warning'} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
       machine.os
       : 
       <span
@@ -155,7 +153,6 @@ test('error', () => {
   const { container } = render(<FilterLabel filter={phraseFilter} valueLabel={'Error'} />);
   expect(container).toMatchInlineSnapshot(`
     <div>
-      
       machine.os
       : 
       <span

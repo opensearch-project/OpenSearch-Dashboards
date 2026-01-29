@@ -4,24 +4,19 @@
  */
 
 import { act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { usePromptIsTyping, PROMPT_IS_TYPING_TIMEOUT } from './use_prompt_is_typing';
-
-// Mock timers
-jest.useFakeTimers();
 
 describe('usePromptIsTyping', () => {
   beforeEach(() => {
-    jest.clearAllTimers();
-  });
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
     jest.useFakeTimers();
   });
 
-  afterAll(() => {
+  afterEach(() => {
+    // Wrap in act() to handle any pending state updates from timers
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
     jest.useRealTimers();
   });
 

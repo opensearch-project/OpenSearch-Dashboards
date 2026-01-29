@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { AppPluginDependencies } from './types';
 
@@ -47,12 +47,12 @@ export const renderApp = (
       testId: 'demoNewButton',
     },
   ];
-  render(
+  const root = createRoot(element);
+  root.render(
     <TopNavMenu appName="demo-app" config={config}>
       Hey
-    </TopNavMenu>,
-    element
+    </TopNavMenu>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

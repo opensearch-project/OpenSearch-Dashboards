@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { I18nStart } from '../../../../core/public';
 
@@ -56,8 +56,9 @@ export function showSaveModal(
   I18nContext: I18nStart['Context']
 ) {
   const container = document.createElement('div');
+  const root = createRoot(container);
   const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
   };
 
@@ -77,5 +78,5 @@ export function showSaveModal(
     onClose: closeModal,
   });
 
-  ReactDOM.render(<I18nContext>{element}</I18nContext>, container);
+  root.render(<I18nContext>{element}</I18nContext>);
 }

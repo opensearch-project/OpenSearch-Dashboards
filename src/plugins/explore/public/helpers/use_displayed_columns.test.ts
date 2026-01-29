@@ -23,7 +23,7 @@ jest.mock('../../../data/public', () => ({
   },
 }));
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux';
 import { useDisplayedColumns, useDisplayedColumnNames } from './use_displayed_columns';
 import { filterColumns } from './view_component_utils/filter_columns';

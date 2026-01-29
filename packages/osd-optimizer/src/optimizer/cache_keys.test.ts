@@ -135,17 +135,17 @@ describe('diffCacheKey()', () => {
 
   it('returns a diff if the values are different', () => {
     expect(diffCacheKey(['1', '2', { a: 'b' }], ['1', '2', { b: 'a' }])).toMatchInlineSnapshot(`
-      "[32m- Expected[39m
-      [31m+ Received[39m
+      "- Expected
+      + Received
 
-      [2m  [[22m
-      [2m    \\"1\\",[22m
-      [2m    \\"2\\",[22m
-      [2m    {[22m
-      [32m-     \\"a\\": \\"b\\"[39m
-      [31m+     \\"b\\": \\"a\\"[39m
-      [2m    }[22m
-      [2m  ][22m"
+        [
+          \\"1\\",
+          \\"2\\",
+          {
+      -     \\"a\\": \\"b\\"
+      +     \\"b\\": \\"a\\"
+          }
+        ]"
     `);
     expect(
       diffCacheKey(
@@ -159,15 +159,15 @@ describe('diffCacheKey()', () => {
         }
       )
     ).toMatchInlineSnapshot(`
-      "[32m- Expected[39m
-      [31m+ Received[39m
+      "- Expected
+      + Received
 
-      [2m  {[22m
-      [32m-   \\"a\\": \\"1\\",[39m
-      [32m-   \\"b\\": \\"1\\"[39m
-      [31m+   \\"a\\": \\"2\\",[39m
-      [31m+   \\"b\\": \\"2\\"[39m
-      [2m  }[22m"
+        {
+      -   \\"a\\": \\"1\\",
+      -   \\"b\\": \\"1\\"
+      +   \\"a\\": \\"2\\",
+      +   \\"b\\": \\"2\\"
+        }"
     `);
   });
 });
@@ -184,27 +184,27 @@ describe('reformatJestDiff()', () => {
     );
 
     expect(reformatJestDiff(jestDiff)).toMatchInlineSnapshot(`
-      "[32m- Expected[39m
-      [31m+ Received[39m
+      "- Expected
+      + Received
 
-      [2m  Object {[22m
-      [32m-   \\"a\\": Array [[39m
-      [31m+   \\"b\\": Array [[39m
-      [2m      \\"1\\",[22m
-      [2m      \\"1\\",[22m
-      [2m      ...[22m
-      [2m      \\"1\\",[22m
-      [2m      \\"1\\",[22m
-      [32m-     \\"2\\",[39m
-      [2m      \\"1\\",[22m
-      [2m      \\"1\\",[22m
-      [2m      ...[22m
-      [2m      \\"1\\",[22m
-      [2m      \\"1\\",[22m
-      [31m+     \\"2\\",[39m
-      [2m      \\"1\\",[22m
-      [2m      \\"1\\",[22m
-      [2m      ...[22m"
+        Object {
+      -   \\"a\\": Array [
+      +   \\"b\\": Array [
+            \\"1\\",
+            \\"1\\",
+            ...
+            \\"1\\",
+            \\"1\\",
+      -     \\"2\\",
+            \\"1\\",
+            \\"1\\",
+            ...
+            \\"1\\",
+            \\"1\\",
+      +     \\"2\\",
+            \\"1\\",
+            \\"1\\",
+            ..."
     `);
   });
 });

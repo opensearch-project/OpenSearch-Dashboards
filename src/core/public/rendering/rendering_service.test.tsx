@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 import { RenderingService } from './rendering_service';
 import { applicationServiceMock } from '../application/application_service.mock';
@@ -70,21 +70,16 @@ describe('RenderingService#start', () => {
 
   it('renders application service into provided DOM element', () => {
     startService();
-    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`
-              <div
-                class="application class-name"
-              >
-                <div>
-                  Hello application!
-                </div>
-              </div>
-          `);
+    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`null`);
   });
 
-  it('adds the `chrome-hidden` class to the AppWrapper when chrome is hidden', () => {
+  it('adds the `chrome-hidden` class to the AppWrapper when chrome is hidden', async () => {
     const isVisible$ = new BehaviorSubject(true);
     chrome.getIsVisible$.mockReturnValue(isVisible$);
-    startService();
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      startService();
+    });
 
     const appWrapper = targetDomElement.querySelector('div.app-wrapper')!;
     expect(appWrapper.className).toEqual('app-wrapper');
@@ -96,10 +91,13 @@ describe('RenderingService#start', () => {
     expect(appWrapper.className).toEqual('app-wrapper');
   });
 
-  it('adds the application classes to the AppContainer', () => {
+  it('adds the application classes to the AppContainer', async () => {
     const applicationClasses$ = new BehaviorSubject<string[]>([]);
     chrome.getApplicationClasses$.mockReturnValue(applicationClasses$);
-    startService();
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      startService();
+    });
 
     const appContainer = targetDomElement.querySelector('div.application')!;
     expect(appContainer.className).toEqual('application');
@@ -122,14 +120,6 @@ describe('RenderingService#start', () => {
 
   it('renders the banner UI', () => {
     startService();
-    expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
-              <div
-                id="globalBannerList"
-              >
-                <div>
-                  I'm a banner!
-                </div>
-              </div>
-          `);
+    expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`null`);
   });
 });

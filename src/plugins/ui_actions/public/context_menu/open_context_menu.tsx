@@ -32,9 +32,10 @@ import React from 'react';
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 let activeSession: ContextMenuSession | null = null;
+let activeRoot: Root | null = null;
 
 const CONTAINER_ID = 'contextMenu-container';
 
@@ -153,8 +154,9 @@ class ContextMenuSession extends EventEmitter {
   public close(): void {
     if (activeSession === this) {
       const container = document.getElementById(CONTAINER_ID);
-      if (container) {
-        ReactDOM.unmountComponentAtNode(container);
+      if (container && activeRoot) {
+        activeRoot.unmount();
+        activeRoot = null;
         this.emit('closed');
       }
     }
@@ -189,7 +191,10 @@ export function openContextMenu(
     session.close();
   };
 
-  ReactDOM.render(
+  if (!activeRoot) {
+    activeRoot = createRoot(container);
+  }
+  activeRoot.render(
     <EuiPopover
       className="embPanel__optionsMenuPopover"
       button={container}
@@ -204,8 +209,7 @@ export function openContextMenu(
         panels={panels}
         data-test-subj={props['data-test-subj']}
       />
-    </EuiPopover>,
-    container
+    </EuiPopover>
   );
 
   return session;

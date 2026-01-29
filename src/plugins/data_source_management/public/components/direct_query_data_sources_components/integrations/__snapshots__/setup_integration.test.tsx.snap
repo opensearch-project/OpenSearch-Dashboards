@@ -81,87 +81,6 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 1`] = `
 </Fragment>
 `;
 
-exports[`SetupIntegrationForm tests renders SetupIntegrationForm 2`] = `
-<Fragment>
-  <EuiPageContent>
-    <EuiPageContentBody>
-      <SetupIntegrationFormInputs
-        config={
-          Object {
-            "checkpointLocation": "",
-            "connectionDataSource": "",
-            "connectionLocation": "",
-            "connectionTableName": "test_integration",
-            "connectionType": "index",
-            "displayName": "test_integration Integration",
-            "enabledWorkflows": Array [],
-            "refreshRangeDays": 7,
-          }
-        }
-        http={
-          Object {
-            "get": [MockFunction],
-            "post": [MockFunction],
-          }
-        }
-        integration={
-          Object {
-            "assets": Array [],
-            "components": Array [],
-            "license": "",
-            "name": "test_integration",
-            "type": "",
-            "version": "",
-          }
-        }
-        lockConnectionType={false}
-        setupCallout={
-          Object {
-            "show": false,
-          }
-        }
-        updateConfig={[Function]}
-      />
-    </EuiPageContentBody>
-  </EuiPageContent>
-  <EuiBottomBar>
-    <SetupBottomBar
-      config={
-        Object {
-          "checkpointLocation": "",
-          "connectionDataSource": "",
-          "connectionLocation": "",
-          "connectionTableName": "test_integration",
-          "connectionType": "index",
-          "displayName": "test_integration Integration",
-          "enabledWorkflows": Array [],
-          "refreshRangeDays": 7,
-        }
-      }
-      http={
-        Object {
-          "get": [MockFunction],
-          "post": [MockFunction],
-        }
-      }
-      integration={
-        Object {
-          "assets": Array [],
-          "components": Array [],
-          "license": "",
-          "name": "test_integration",
-          "type": "",
-          "version": "",
-        }
-      }
-      loading={false}
-      setLoading={[Function]}
-      setSetupCallout={[Function]}
-    />
-  </EuiBottomBar>
-</Fragment>
-`;
-
 exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches snapshot 1`] = `
 <SetupIntegrationForm
   http={
@@ -171,15 +90,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
           Array [
             "/api/integrations/repository/test_integration",
           ],
-          Array [
-            "/api/integrations/repository/test_integration",
-          ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
           Object {
             "type": "return",
             "value": Promise {},
@@ -198,22 +110,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
               },
             },
           ],
-          Array [
-            "/api/console/proxy",
-            Object {
-              "body": "{}",
-              "query": Object {
-                "method": "GET",
-                "path": "_data_stream/ss4o_*",
-              },
-            },
-          ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
           Object {
             "type": "return",
             "value": Promise {},
@@ -259,15 +157,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                       Array [
                         "/api/integrations/repository/test_integration",
                       ],
-                      Array [
-                        "/api/integrations/repository/test_integration",
-                      ],
                     ],
                     "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": Promise {},
-                      },
                       Object {
                         "type": "return",
                         "value": Promise {},
@@ -286,22 +177,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                           },
                         },
                       ],
-                      Array [
-                        "/api/console/proxy",
-                        Object {
-                          "body": "{}",
-                          "query": Object {
-                            "method": "GET",
-                            "path": "_data_stream/ss4o_*",
-                          },
-                        },
-                      ],
                     ],
                     "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": Promise {},
-                      },
                       Object {
                         "type": "return",
                         "value": Promise {},
@@ -312,12 +189,32 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
               }
               integration={
                 Object {
-                  "assets": Array [],
-                  "components": Array [],
-                  "license": "",
-                  "name": "test_integration",
-                  "type": "",
-                  "version": "",
+                  "assets": Array [
+                    Object {
+                      "extension": "ndjson",
+                      "name": "sample",
+                      "type": "savedObjectBundle",
+                      "version": "1.0.1",
+                    },
+                  ],
+                  "components": Array [
+                    Object {
+                      "name": "logs",
+                      "version": "1.0.0",
+                    },
+                  ],
+                  "license": "Apache-2.0",
+                  "name": "sample",
+                  "type": "logs",
+                  "version": "2.0.0",
+                  "workflows": Array [
+                    Object {
+                      "description": "This is a test workflow.",
+                      "enabled_by_default": true,
+                      "label": "Workflow 1",
+                      "name": "workflow1",
+                    },
+                  ],
                 }
               }
               lockConnectionType={false}
@@ -378,12 +275,32 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                     }
                     integration={
                       Object {
-                        "assets": Array [],
-                        "components": Array [],
-                        "license": "",
-                        "name": "test_integration",
-                        "type": "",
-                        "version": "",
+                        "assets": Array [
+                          Object {
+                            "extension": "ndjson",
+                            "name": "sample",
+                            "type": "savedObjectBundle",
+                            "version": "1.0.1",
+                          },
+                        ],
+                        "components": Array [
+                          Object {
+                            "name": "logs",
+                            "version": "1.0.0",
+                          },
+                        ],
+                        "license": "Apache-2.0",
+                        "name": "sample",
+                        "type": "logs",
+                        "version": "2.0.0",
+                        "workflows": Array [
+                          Object {
+                            "description": "This is a test workflow.",
+                            "enabled_by_default": true,
+                            "label": "Workflow 1",
+                            "name": "workflow1",
+                          },
+                        ],
                       }
                     }
                     updateConfig={[Function]}
@@ -437,7 +354,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                             onBlur={[Function]}
                             onChange={[Function]}
                             onFocus={[Function]}
-                            placeholder="test_integration Integration"
+                            placeholder="sample Integration"
                             value="test_integration Integration"
                           >
                             <EuiFormControlLayout
@@ -460,7 +377,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                       onBlur={[Function]}
                                       onChange={[Function]}
                                       onFocus={[Function]}
-                                      placeholder="test_integration Integration"
+                                      placeholder="sample Integration"
                                       type="text"
                                       value="test_integration Integration"
                                     />
@@ -513,15 +430,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                             Array [
                               "/api/integrations/repository/test_integration",
                             ],
-                            Array [
-                              "/api/integrations/repository/test_integration",
-                            ],
                           ],
                           "results": Array [
-                            Object {
-                              "type": "return",
-                              "value": Promise {},
-                            },
                             Object {
                               "type": "return",
                               "value": Promise {},
@@ -540,22 +450,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                 },
                               },
                             ],
-                            Array [
-                              "/api/console/proxy",
-                              Object {
-                                "body": "{}",
-                                "query": Object {
-                                  "method": "GET",
-                                  "path": "_data_stream/ss4o_*",
-                                },
-                              },
-                            ],
                           ],
                           "results": Array [
-                            Object {
-                              "type": "return",
-                              "value": Promise {},
-                            },
                             Object {
                               "type": "return",
                               "value": Promise {},
@@ -566,12 +462,32 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                     }
                     integration={
                       Object {
-                        "assets": Array [],
-                        "components": Array [],
-                        "license": "",
-                        "name": "test_integration",
-                        "type": "",
-                        "version": "",
+                        "assets": Array [
+                          Object {
+                            "extension": "ndjson",
+                            "name": "sample",
+                            "type": "savedObjectBundle",
+                            "version": "1.0.1",
+                          },
+                        ],
+                        "components": Array [
+                          Object {
+                            "name": "logs",
+                            "version": "1.0.0",
+                          },
+                        ],
+                        "license": "Apache-2.0",
+                        "name": "sample",
+                        "type": "logs",
+                        "version": "2.0.0",
+                        "workflows": Array [
+                          Object {
+                            "description": "This is a test workflow.",
+                            "enabled_by_default": true,
+                            "label": "Workflow 1",
+                            "name": "workflow1",
+                          },
+                        ],
                       }
                     }
                     lockConnectionType={false}
@@ -618,7 +534,14 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                             onBlur={[Function]}
                             onChange={[Function]}
                             onFocus={[Function]}
-                            options={Array []}
+                            options={
+                              Array [
+                                Object {
+                                  "text": "OpenSearch Index",
+                                  "value": "index",
+                                },
+                              ]
+                            }
                             value="index"
                           >
                             <EuiFormControlLayout
@@ -650,7 +573,14 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                       onFocus={[Function]}
                                       onMouseUp={[Function]}
                                       value="index"
-                                    />
+                                    >
+                                      <option
+                                        key="0"
+                                        value="index"
+                                      >
+                                        OpenSearch Index
+                                      </option>
+                                    </select>
                                   </EuiValidatableControl>
                                   <EuiFormControlLayoutIcons
                                     compressed={false}
@@ -752,7 +682,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                             id="generated-id"
                             isClearable={true}
                             isDisabled={false}
-                            isLoading={true}
+                            isLoading={false}
                             onBlur={[Function]}
                             onChange={[Function]}
                             onCreateOption={[Function]}
@@ -790,7 +720,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                 inputRef={[Function]}
                                 isDisabled={false}
                                 isListOpen={false}
-                                isLoading={true}
+                                isLoading={false}
                                 noIcon={false}
                                 onChange={[Function]}
                                 onClear={[Function]}
@@ -837,7 +767,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                       "type": "arrowDown",
                                     }
                                   }
-                                  isLoading={true}
+                                  isLoading={false}
                                 >
                                   <div
                                     className="euiFormControlLayout"
@@ -846,7 +776,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                       className="euiFormControlLayout__childrenWrapper"
                                     >
                                       <div
-                                        className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isLoading euiComboBox__inputWrap-isClearable"
+                                        className="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
                                         data-test-subj="comboBoxInput"
                                         onClick={[Function]}
                                         tabIndex={-1}
@@ -906,7 +836,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                               style={
                                                 Object {
                                                   "boxSizing": "content-box",
-                                                  "width": "1px",
+                                                  "width": "2px",
                                                 }
                                               }
                                               value=""
@@ -946,7 +876,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                             "type": "arrowDown",
                                           }
                                         }
-                                        isLoading={true}
+                                        isLoading={false}
                                       >
                                         <div
                                           className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -979,13 +909,6 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                               </button>
                                             </EuiI18n>
                                           </EuiFormControlLayoutClearButton>
-                                          <EuiLoadingSpinner
-                                            size="m"
-                                          >
-                                            <span
-                                              className="euiLoadingSpinner euiLoadingSpinner--medium"
-                                            />
-                                          </EuiLoadingSpinner>
                                           <EuiFormControlLayoutCustomIcon
                                             aria-label="Open list of options"
                                             data-test-subj="comboBoxToggleListButton"
@@ -1169,15 +1092,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                       Array [
                         "/api/integrations/repository/test_integration",
                       ],
-                      Array [
-                        "/api/integrations/repository/test_integration",
-                      ],
                     ],
                     "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": Promise {},
-                      },
                       Object {
                         "type": "return",
                         "value": Promise {},
@@ -1196,22 +1112,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                           },
                         },
                       ],
-                      Array [
-                        "/api/console/proxy",
-                        Object {
-                          "body": "{}",
-                          "query": Object {
-                            "method": "GET",
-                            "path": "_data_stream/ss4o_*",
-                          },
-                        },
-                      ],
                     ],
                     "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": Promise {},
-                      },
                       Object {
                         "type": "return",
                         "value": Promise {},
@@ -1222,12 +1124,32 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
               }
               integration={
                 Object {
-                  "assets": Array [],
-                  "components": Array [],
-                  "license": "",
-                  "name": "test_integration",
-                  "type": "",
-                  "version": "",
+                  "assets": Array [
+                    Object {
+                      "extension": "ndjson",
+                      "name": "sample",
+                      "type": "savedObjectBundle",
+                      "version": "1.0.1",
+                    },
+                  ],
+                  "components": Array [
+                    Object {
+                      "name": "logs",
+                      "version": "1.0.0",
+                    },
+                  ],
+                  "license": "Apache-2.0",
+                  "name": "sample",
+                  "type": "logs",
+                  "version": "2.0.0",
+                  "workflows": Array [
+                    Object {
+                      "description": "This is a test workflow.",
+                      "enabled_by_default": true,
+                      "label": "Workflow 1",
+                      "name": "workflow1",
+                    },
+                  ],
                 }
               }
               loading={false}

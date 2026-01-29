@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { ReactExpressionRenderer } from './react_expression_renderer';

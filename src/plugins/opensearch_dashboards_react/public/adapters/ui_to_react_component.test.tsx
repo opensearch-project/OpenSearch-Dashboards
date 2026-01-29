@@ -29,10 +29,11 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { UiComponent } from '../../../opensearch_dashboards_utils/public';
 import { uiToReactComponent } from './ui_to_react_component';
 import { reactToUiComponent } from './react_to_ui_component';
+import { act } from 'react';
 
 const UiComp: UiComponent<{ cnt?: number }> = () => ({
   render: (el, { cnt = 0 }) => {
@@ -45,32 +46,58 @@ describe('uiToReactComponent', () => {
   test('can render React component', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
+    let root: Root;
 
-    ReactDOM.render(<ReactComp />, div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp />);
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 0</div>');
+
+    act(() => {
+      root!.unmount();
+    });
   });
 
   test('can pass in props', async () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
+    let root: Root;
 
-    ReactDOM.render(<ReactComp cnt={5} />, div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp cnt={5} />);
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 5</div>');
+
+    act(() => {
+      root!.unmount();
+    });
   });
 
   test('re-renders when React component is re-rendered', async () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
+    let root: Root;
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp cnt={1} />);
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 1</div>');
 
-    ReactDOM.render(<ReactComp cnt={2} />, div);
+    act(() => {
+      root.render(<ReactComp cnt={2} />);
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 2</div>');
+
+    act(() => {
+      root!.unmount();
+    });
   });
 
   test('does not crash if .unmount() not provided', () => {
@@ -82,9 +109,16 @@ describe('uiToReactComponent', () => {
     });
     const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
+    let root: Root;
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
-    ReactDOM.unmountComponentAtNode(div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp cnt={1} />);
+    });
+
+    act(() => {
+      root!.unmount();
+    });
 
     expect(div.innerHTML).toBe('');
   });
@@ -100,14 +134,20 @@ describe('uiToReactComponent', () => {
     });
     const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
+    let root: Root;
 
     expect(unmount).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp cnt={1} />);
+    });
 
     expect(unmount).toHaveBeenCalledTimes(0);
 
-    ReactDOM.unmountComponentAtNode(div);
+    act(() => {
+      root!.unmount();
+    });
 
     expect(unmount).toHaveBeenCalledTimes(1);
   });
@@ -122,29 +162,49 @@ describe('uiToReactComponent', () => {
     });
     const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
+    let root: Root;
 
     expect(render).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp cnt={1} />);
+    });
 
     expect(render).toHaveBeenCalledTimes(1);
 
-    ReactDOM.render(<ReactComp cnt={2} />, div);
+    act(() => {
+      root.render(<ReactComp cnt={2} />);
+    });
 
     expect(render).toHaveBeenCalledTimes(2);
 
-    ReactDOM.render(<ReactComp cnt={3} />, div);
+    act(() => {
+      root.render(<ReactComp cnt={3} />);
+    });
 
     expect(render).toHaveBeenCalledTimes(3);
+
+    act(() => {
+      root!.unmount();
+    });
   });
 
   test('can specify wrapper element', async () => {
     const ReactComp = uiToReactComponent(UiComp, 'span');
     const div = document.createElement('div');
+    let root: Root;
 
-    ReactDOM.render(<ReactComp cnt={5} />, div);
+    act(() => {
+      root = createRoot(div);
+      root.render(<ReactComp cnt={5} />);
+    });
 
     expect(div.innerHTML).toBe('<span>cnt: 5</span>');
+
+    act(() => {
+      root!.unmount();
+    });
   });
 });
 
@@ -153,12 +213,22 @@ test('can adapt component many times', () => {
     reactToUiComponent(uiToReactComponent(reactToUiComponent(uiToReactComponent(UiComp))))
   );
   const div = document.createElement('div');
+  let root: Root;
 
-  ReactDOM.render(<ReactComp />, div);
+  act(() => {
+    root = createRoot(div);
+    root.render(<ReactComp />);
+  });
 
   expect(div.textContent).toBe('cnt: 0');
 
-  ReactDOM.render(<ReactComp cnt={123} />, div);
+  act(() => {
+    root.render(<ReactComp cnt={123} />);
+  });
 
   expect(div.textContent).toBe('cnt: 123');
+
+  act(() => {
+    root!.unmount();
+  });
 });

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import { Embeddable, EmbeddableInput, IContainer } from '../../../embeddable/public';
 
@@ -14,23 +14,25 @@ export type CustomContentEmbeddableInput = EmbeddableInput & { render: () => Rea
 export class CustomContentEmbeddable extends Embeddable<CustomContentEmbeddableInput> {
   public readonly type = CUSTOM_CONTENT_EMBEDDABLE;
   private node: HTMLElement | null = null;
+  private root: Root | null = null;
 
   constructor(initialInput: CustomContentEmbeddableInput, parent?: IContainer) {
     super(initialInput, {}, parent);
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
-    ReactDOM.render(this.input.render(), node);
+    this.root = createRoot(node);
+    this.root.render(this.input.render());
   }
 
   public destroy() {
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 

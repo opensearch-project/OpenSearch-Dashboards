@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useIndexFetcher } from './use_index_fetcher';
 import { DataStructure } from '../../../../../../common';
 import { IDataPluginServices } from '../../../../../types';

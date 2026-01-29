@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { TableVis } from './table_vis';
 import { VisColumn, VisFieldType } from '../types';
 import { TableColumnHeader } from './table_vis_filter';
@@ -309,7 +309,7 @@ describe('TableVis', () => {
     expect(headerColumn1).toHaveAttribute('data-popover-open', 'false');
   });
 
-  test('applies filters and clears when showColumnFilter is false', () => {
+  test('applies filters and clears when showColumnFilter is false', async () => {
     const { rerender } = render(
       <TableVis
         rows={mockRows}
@@ -319,8 +319,12 @@ describe('TableVis', () => {
     );
     expect(TableColumnHeader).toHaveBeenCalled();
     const setFilters = (TableColumnHeader as jest.Mock).mock.calls[0][0].setFilters;
-    setFilters({ column1: { values: [10], operator: '=' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    act(() => {
+      setFilters({ column1: { values: [10], operator: '=' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
     rerender(
       <TableVis
         rows={mockRows}
@@ -335,7 +339,7 @@ describe('TableVis', () => {
     expect(filtersColumn1).toEqual({});
   });
 
-  test('filters rows with different operators', () => {
+  test('filters rows with different operators', async () => {
     render(
       <TableVis
         rows={mockRows}
@@ -345,18 +349,48 @@ describe('TableVis', () => {
     );
     expect(TableColumnHeader).toHaveBeenCalled();
     const setFilters = (TableColumnHeader as jest.Mock).mock.calls[0][0].setFilters;
-    setFilters({ column2: { search: 'value1', operator: 'contains' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-    setFilters({ column1: { values: [10], operator: '=' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-    setFilters({ column1: { values: [10], operator: '!=' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-    setFilters({ column1: { search: '15', operator: '>' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-    setFilters({ column1: { search: '15', operator: '<' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
-    setFilters({ column1: { search: 'invalid', operator: '>' } });
-    expect(screen.getByTestId('mockRowCount').textContent).toBe('0');
+
+    act(() => {
+      setFilters({ column2: { search: 'value1', operator: 'contains' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
+
+    act(() => {
+      setFilters({ column1: { values: [10], operator: '=' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
+
+    act(() => {
+      setFilters({ column1: { values: [10], operator: '!=' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
+
+    act(() => {
+      setFilters({ column1: { search: '15', operator: '>' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
+
+    act(() => {
+      setFilters({ column1: { search: '15', operator: '<' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('1');
+    });
+
+    act(() => {
+      setFilters({ column1: { search: 'invalid', operator: '>' } });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockRowCount').textContent).toBe('0');
+    });
   });
 
   test('renders footer with calculations', () => {
