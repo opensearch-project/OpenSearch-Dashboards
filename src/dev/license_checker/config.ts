@@ -102,4 +102,10 @@ export const LICENSE_OVERRIDES = {
   'jackspeak@3.4.0': ['BlueOak-1.0.0'],
   'path-scurry@1.11.1': ['BlueOak-1.0.0'],
   'walk@2.3.9': ['MIT'],
+  // https://github.com/isaacs/chownr/blob/v3.0.0/package.json#L32
+  'chownr@3.0.0': ['BlueOak-1.0.0'],
+  // https://github.com/isaacs/node-tar/blob/v7.5.7/package.json#L43
+  'tar@7.5.7': ['BlueOak-1.0.0'],
+  // https://github.com/isaacs/yallist/blob/v5.0.0/package.json#L31
+  'yallist@5.0.0': ['BlueOak-1.0.0'],
 };
