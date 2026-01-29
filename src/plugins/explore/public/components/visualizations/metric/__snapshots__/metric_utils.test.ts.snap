@@ -3,9 +3,9 @@
 exports[`metric_utils assembleForMetric should configure spec correctly for metric visualization 1`] = `
 Object {
   "grid": Object {
-    "bottom": "10px",
-    "left": "10px",
-    "right": "10px",
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
     "top": "50%",
   },
   "legend": Object {
@@ -28,9 +28,9 @@ Object {
 exports[`metric_utils assembleForMetric should preserve existing spec properties while hiding axes 1`] = `
 Object {
   "grid": Object {
-    "bottom": "10px",
-    "left": "10px",
-    "right": "10px",
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
     "top": "50%",
   },
   "legend": Object {
@@ -237,7 +237,9 @@ Array [
 exports[`metric_utils createMetricChartSeries snapshot tests should create metric with sparkline when date field is provided 1`] = `
 Array [
   Object {
-    "areaStyle": Object {},
+    "areaStyle": Object {
+      "opacity": 0.5,
+    },
     "encode": Object {
       "x": "date_field",
       "y": "value_field",

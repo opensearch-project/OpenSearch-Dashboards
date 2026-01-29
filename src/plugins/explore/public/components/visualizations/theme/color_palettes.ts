@@ -52,7 +52,7 @@ export const DEFAULT_LIGHT = {
 };
 
 export const ECHARTS_LIGHT = {
-  statusBlue: '#004A9E',
+  statusBlue: '#006CE0',
   statusGreen: '#00BD6B',
   statusYellow: '#F90',
   statusOrange: '#FF6A3D',

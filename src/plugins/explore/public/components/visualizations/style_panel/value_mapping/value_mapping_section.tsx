@@ -45,32 +45,38 @@ export const ValueMappingSection = ({ valueMappings, onChange }: ValueMappingPro
       onChange(updated);
     };
     return (
-      <EuiPanel paddingSize="s" color="transparent" key={`${mapping.type}-item-${index}`}>
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
-          <EuiFlexItem>
-            {mapping.type === 'value' ? (
-              <EuiText textAlign="center">{mapping.value}</EuiText>
-            ) : (
-              <EuiText textAlign="center">
-                {`[${mapping.range?.min}, ${mapping.range?.max ?? '∞'})`}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'arrowRight'} />
-          </EuiFlexItem>
-          <EuiFlexItem>
+      <>
+        <EuiPanel
+          paddingSize="s"
+          hasBorder={false}
+          color="transparent"
+          key={`${mapping.type}-item-${index}`}
+        >
+          <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="xs">
             <EuiFlexItem>
-              <EuiText textAlign="center">{mapping.displayText}</EuiText>
+              {mapping.type === 'value' ? (
+                <EuiText textAlign="left">{mapping.value}</EuiText>
+              ) : (
+                <EuiText textAlign="left">
+                  {`[${mapping.range?.min}, ${mapping.range?.max ?? '∞'})`}
+                </EuiText>
+              )}
             </EuiFlexItem>
-          </EuiFlexItem>
-          {mapping.color && (
             <EuiFlexItem grow={false}>
-              <ColorGroupButton buttonColor={mapping.color} onChange={handleChangeColor} />
+              <EuiIcon type={'arrowRight'} />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
+            <EuiFlexItem>
+              <EuiText textAlign="left">{mapping.displayText}</EuiText>
+            </EuiFlexItem>
+            {mapping.color && (
+              <EuiFlexItem grow={false}>
+                <ColorGroupButton buttonColor={mapping.color} onChange={handleChangeColor} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </>
     );
   };
 

@@ -126,7 +126,9 @@ export const createMetricChartSeries = ({
           y: item,
         },
         symbol: 'none',
-        areaStyle: {},
+        areaStyle: {
+          opacity: 0.5,
+        },
       });
     }
 
@@ -209,10 +211,10 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
   const spec = {
     ...state.spec,
     grid: {
-      left: '10px',
-      right: '10px',
+      left: 0,
+      right: 0,
       top: '50%',
-      bottom: '10px',
+      bottom: 0,
     },
     xAxis,
     yAxis,
