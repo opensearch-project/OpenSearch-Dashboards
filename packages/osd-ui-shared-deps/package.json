@@ -19,7 +19,7 @@
     "compression-webpack-plugin": "^11.1.0",
     "core-js": "^3.6.5",
     "jquery": "^3.5.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "mini-css-extract-plugin": "^2.9.2",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",

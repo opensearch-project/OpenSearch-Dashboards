@@ -9,7 +9,7 @@
   "sideEffects": false,
   "dependencies": {
     "json11": "^2.0.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
     "@osd/utility-types": "1.0.0",
