@@ -48,6 +48,11 @@
     // To fight intruding styles that conflict with OUI's
     & > tbody > tr > td {
       line-height: inherit;
+      border-top: 0;
+    }
+
+    & > thead > tr > th {
+      border-bottom: 0;
     }
 
     /**
