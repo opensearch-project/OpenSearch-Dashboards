@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { addons } from '@storybook/addons';
+import { addons } from '@storybook/manager-api';
 import { create } from '@storybook/theming';
 
 // This configures the "Manager", or main outer view of Storybook. It is an

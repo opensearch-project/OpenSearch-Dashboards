@@ -39,8 +39,12 @@ export default function ({ config: storybookConfig }: { config: Configuration })
   }
 
   const config = {
+    target: 'web', // Fix for chunk format error
     devServer: {
       stats,
+    },
+    output: {
+      chunkFormat: 'array-push', // Explicit chunk format for browser
     },
     module: {
       rules: [
