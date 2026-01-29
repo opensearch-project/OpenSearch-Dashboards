@@ -53,7 +53,7 @@ jest.mock('./default_spec', () => ({
 
 jest.mock('./lib/vega', () => ({
   vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite/src'),
+  vegaLite: jest.requireActual('vega-lite'),
 }));
 
 // This is to remove the time-zone dependent `aria-label` key of "Dec 10/11, 2017" from the snapshot
