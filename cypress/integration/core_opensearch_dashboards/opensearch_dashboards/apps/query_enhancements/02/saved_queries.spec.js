@@ -128,21 +128,39 @@ const runSavedQueriesUITests = () => {
 
     testConfigurations.forEach((config) => {
       describe(`saved query lifecycle: ${config.testName}`, () => {
-        beforeEach(() => {
+        let savedQueryName;
+        let saveAsNewQueryName;
+
+        before(() => {
+          savedQueryName = `${workspaceName}-${config.saveName}`;
+          saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
+
+          // Clean up any existing queries
           cy.then(() => {
             const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
-            cy.osd.apiDeleteSavedQueryIfExists(`${workspaceName}-${config.saveName}`, workspaceId);
+            cy.osd.apiDeleteSavedQueryIfExists(savedQueryName, workspaceId);
             cy.osd.apiDeleteSavedQueryIfExists(`${workspaceName}-${config.testName}`, workspaceId);
+            cy.osd.apiDeleteSavedQueryIfExists(
+              `${workspaceName}-${saveAsNewQueryName}`,
+              workspaceId
+            );
           });
         });
 
-        it('creates, loads, updates, modifies and deletes the saved query', () => {
+        it('should create and verify saved query', () => {
           createSavedQuery(config);
           loadSavedQuery(config);
-          updateAndVerifySavedQuery(config);
+        });
 
-          const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
+        it('should update saved query', () => {
+          updateAndVerifySavedQuery(config);
+        });
+
+        it('should modify and save as new query', () => {
           modifyAndVerifySavedQuery(config, saveAsNewQueryName);
+        });
+
+        it('should delete saved query', () => {
           deleteSavedQuery(saveAsNewQueryName);
         });
       });
