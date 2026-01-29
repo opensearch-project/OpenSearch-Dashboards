@@ -73,12 +73,12 @@ export const runCreateVisTests = () => {
     });
 
     it('should create a metric sparkline visualization using a metric query with time bucket', () => {
-      const query = `source=${datasetName} | stats count() by span(timestamp, 1d)`;
+      const query = `source=${datasetName} | stats count() by span(event_time, 1d) | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'metric', datasetName, {
         shouldManualSelectChartType: true,
       });
       cy.getElementByTestId('field-value').contains('count()');
-      cy.getElementByTestId('field-time').contains('timestamp');
+      cy.getElementByTestId('field-time').contains('event_time');
 
       let beforeCanvasDataUrl;
       cy.get('.exploreVisContainer canvas')
