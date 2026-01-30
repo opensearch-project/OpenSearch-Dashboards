@@ -1,0 +1,2 @@
+infra:
+- [Core] Upgrade React from 16 to 18 ([#11187](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11187))
