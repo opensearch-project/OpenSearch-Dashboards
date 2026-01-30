@@ -65,25 +65,33 @@ interface SearchPrometheusMetadataResult {
 }
 
 interface PrometheusResourceClient {
-  getMetrics: (dataConnectionId: string, timeRange?: TimeRange) => Promise<string[]>;
+  getMetrics: (
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    timeRange?: TimeRange
+  ) => Promise<string[]>;
   getMetricMetadata: (
     dataConnectionId: string,
+    meta?: Record<string, unknown>,
     metric?: string,
     timeRange?: TimeRange
   ) => Promise<Record<string, Array<{ type: string; help: string }>>>;
   getLabels: (
     dataConnectionId: string,
+    meta?: Record<string, unknown>,
     metric?: string,
     timeRange?: TimeRange
   ) => Promise<string[]>;
   getLabelValues: (
     dataConnectionId: string,
-    label: string,
+    meta?: Record<string, unknown>,
+    label?: string,
     timeRange?: TimeRange
   ) => Promise<string[]>;
   getSeries: (
     dataConnectionId: string,
     match: string,
+    meta?: Record<string, unknown>,
     timeRange?: TimeRange
   ) => Promise<Array<Record<string, string>>>;
 }
@@ -99,15 +107,21 @@ interface MetricMetadata {
 export class PromQLToolHandlers {
   private prometheusClient: PrometheusResourceClient;
   private dataSourceName: string;
+  private dataSourceMeta?: Record<string, unknown>;
   private data: DataPublicPluginStart;
 
-  constructor(data: DataPublicPluginStart, dataSourceName: string) {
+  constructor(
+    data: DataPublicPluginStart,
+    dataSourceName: string,
+    dataSourceMeta?: Record<string, unknown>
+  ) {
     const client = data.resourceClientFactory.get<PrometheusResourceClient>('prometheus');
     if (!client) {
       throw new Error('Prometheus resource client not found');
     }
     this.prometheusClient = client;
     this.dataSourceName = dataSourceName;
+    this.dataSourceMeta = dataSourceMeta;
     this.data = data;
   }
 
@@ -132,7 +146,11 @@ export class PromQLToolHandlers {
       const valuesLimit = args.valuesLimit ?? DEFAULT_VALUES_LIMIT;
       const timeRange = this.data.query.timefilter.timefilter.getTime();
 
-      let metricNames = await this.prometheusClient.getMetrics(this.dataSourceName, timeRange);
+      let metricNames = await this.prometheusClient.getMetrics(
+        this.dataSourceName,
+        this.dataSourceMeta,
+        timeRange
+      );
 
       if (args.query) {
         try {
@@ -163,12 +181,17 @@ export class PromQLToolHandlers {
         const escapedMetrics = batch.map(escapeRegexForPrometheus);
         const matchSelector = `{__name__=~"${escapedMetrics.join('|')}"}`;
         return this.prometheusClient
-          .getSeries(this.dataSourceName, matchSelector, timeRange)
+          .getSeries(this.dataSourceName, matchSelector, this.dataSourceMeta, timeRange)
           .catch(() => []);
       });
 
       const [metadata, seriesResults] = await Promise.all([
-        this.prometheusClient.getMetricMetadata(this.dataSourceName, undefined, timeRange),
+        this.prometheusClient.getMetricMetadata(
+          this.dataSourceName,
+          this.dataSourceMeta,
+          undefined,
+          timeRange
+        ),
         executeWithConcurrencyLimit(seriesTasks, MAX_CONCURRENT_REQUESTS),
       ]);
 

@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* eslint-disable import/namespace */
+
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';

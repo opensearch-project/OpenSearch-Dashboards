@@ -18,6 +18,7 @@ describe('PromQLToolHandlers', () => {
   let mockData: DataPublicPluginStart;
   let handlers: PromQLToolHandlers;
   const testDataSourceName = 'test-datasource';
+  const testDataSourceMeta = { prometheusUrl: 'http://localhost:9090' };
   const mockTimeRange = { from: 'now-15m', to: 'now' };
 
   beforeEach(() => {
@@ -42,7 +43,7 @@ describe('PromQLToolHandlers', () => {
       },
     } as unknown) as DataPublicPluginStart;
 
-    handlers = new PromQLToolHandlers(mockData, testDataSourceName);
+    handlers = new PromQLToolHandlers(mockData, testDataSourceName, testDataSourceMeta);
   });
 
   describe('constructor', () => {
@@ -58,9 +59,14 @@ describe('PromQLToolHandlers', () => {
         },
       } as unknown) as DataPublicPluginStart;
 
-      expect(() => new PromQLToolHandlers(mockDataWithoutClient, testDataSourceName)).toThrow(
-        'Prometheus resource client not found'
-      );
+      expect(
+        () => new PromQLToolHandlers(mockDataWithoutClient, testDataSourceName, testDataSourceMeta)
+      ).toThrow('Prometheus resource client not found');
+    });
+
+    it('should accept optional dataSourceMeta parameter', () => {
+      const handlersWithoutMeta = new PromQLToolHandlers(mockData, testDataSourceName);
+      expect(handlersWithoutMeta).toBeDefined();
     });
   });
 
@@ -415,6 +421,7 @@ describe('PromQLToolHandlers', () => {
       expect(mockPrometheusClient.getSeries).toHaveBeenCalledWith(
         testDataSourceName,
         '{__name__=~"metric1|metric2"}',
+        testDataSourceMeta,
         mockTimeRange
       );
     });
@@ -430,6 +437,7 @@ describe('PromQLToolHandlers', () => {
       expect(mockPrometheusClient.getSeries).toHaveBeenCalledWith(
         testDataSourceName,
         '{__name__=~"metric\\.name|metric\\+plus"}',
+        testDataSourceMeta,
         mockTimeRange
       );
     });
@@ -449,12 +457,14 @@ describe('PromQLToolHandlers', () => {
       expect(mockPrometheusClient.getSeries).toHaveBeenCalledWith(
         testDataSourceName,
         '{__name__=~"metric_0|metric_1|metric_2|metric_3|metric_4|metric_5|metric_6|metric_7|metric_8|metric_9"}',
+        testDataSourceMeta,
         mockTimeRange
       );
       // Second batch: metrics 10-14
       expect(mockPrometheusClient.getSeries).toHaveBeenCalledWith(
         testDataSourceName,
         '{__name__=~"metric_10|metric_11|metric_12|metric_13|metric_14"}',
+        testDataSourceMeta,
         mockTimeRange
       );
     });
