@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimelineBarColor, useTimelineBarRange } from './timeline_waterfall_bar_hooks';
 import { calculateSpanTimeRange } from '../../../utils/span_timerange_utils';
 import { resolveServiceNameFromSpan } from '../../ppl_resolve_helpers';

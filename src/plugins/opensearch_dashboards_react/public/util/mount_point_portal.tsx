@@ -37,6 +37,7 @@ import { useIfMounted } from './utils';
 
 interface MountPointPortalProps {
   setMountPoint: (mountPoint: MountPoint<HTMLElement>) => void;
+  children?: React.ReactNode;
 }
 
 /**
@@ -83,7 +84,10 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
   }
 };
 
-class MountPointPortalErrorBoundary extends Component<{}, { error?: any }> {
+class MountPointPortalErrorBoundary extends Component<
+  { children?: React.ReactNode },
+  { error?: any }
+> {
   state = {
     error: undefined,
   };

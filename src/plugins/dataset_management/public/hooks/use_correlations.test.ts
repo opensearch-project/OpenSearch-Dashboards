@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-dom/test-utils';
+import { renderHook, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import { savedObjectsServiceMock } from '../../../../core/public/mocks';
 import { useCorrelations, useCorrelationCount, useSingleCorrelation } from './use_correlations';
 import { CorrelationSavedObject } from '../types/correlations';
@@ -61,18 +61,18 @@ describe('useCorrelations', () => {
 
     mockFind.mockResolvedValue(mockCorrelations);
 
-    const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
+    const { result } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
     // Initially loading
     expect(result.current.loading).toBe(true);
     expect(result.current.correlations).toEqual([]);
 
     // Wait for data to load
-    await waitForNextUpdate();
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.correlations).toEqual(mockCorrelations);
-    expect(result.current.error).toBeNull();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.correlations).toEqual(mockCorrelations);
+      expect(result.current.error).toBeNull();
+    });
   });
 
   it('should filter correlations by dataset ID', async () => {
@@ -91,41 +91,41 @@ describe('useCorrelations', () => {
 
     mockFind.mockResolvedValue(mockCorrelations);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useCorrelations(mockSavedObjectsClient, { datasetId: 'dataset-123' })
     );
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledWith(
-      expect.objectContaining({
-        datasetId: 'dataset-123',
-      })
-    );
-    expect(result.current.correlations).toEqual(mockCorrelations);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasetId: 'dataset-123',
+        })
+      );
+      expect(result.current.correlations).toEqual(mockCorrelations);
+    });
   });
 
   it('should handle fetch errors', async () => {
     const error = new Error('Failed to fetch');
     mockFind.mockRejectedValue(error);
 
-    const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
+    const { result } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual(error);
-    expect(result.current.correlations).toEqual([]);
+    await waitFor(() => {
+      expect(result.current.error).toEqual(error);
+      expect(result.current.correlations).toEqual([]);
+    });
   });
 
   it('should handle non-Error exceptions', async () => {
     mockFind.mockRejectedValue('String error');
 
-    const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
+    const { result } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect(result.current.error?.message).toBe('Failed to fetch correlations');
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Failed to fetch correlations');
+    });
   });
 
   it('should support refetch functionality', async () => {
@@ -144,47 +144,47 @@ describe('useCorrelations', () => {
 
     mockFind.mockResolvedValue(mockCorrelations);
 
-    const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
+    const { result } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(1);
+    });
 
     // Refetch
     act(() => {
       result.current.refetch();
     });
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('should refetch when options change', async () => {
     mockFind.mockResolvedValue([]);
 
-    const { rerender, waitForNextUpdate } = renderHook(
+    const { rerender } = renderHook(
       ({ datasetId }) => useCorrelations(mockSavedObjectsClient, { datasetId }),
       {
         initialProps: { datasetId: 'dataset-1' },
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(1);
+    });
 
     // Change options
     rerender({ datasetId: 'dataset-2' });
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(2);
-    expect(mockFind).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        datasetId: 'dataset-2',
-      })
-    );
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(2);
+      expect(mockFind).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          datasetId: 'dataset-2',
+        })
+      );
+    });
   });
 });
 
@@ -231,22 +231,18 @@ describe('useCorrelationCount', () => {
 
     mockFind.mockResolvedValue(mockCorrelations);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
-    );
+    const { result } = renderHook(() => useCorrelationCount(mockSavedObjectsClient, 'dataset-123'));
 
-    await waitForNextUpdate();
-
-    expect(result.current.count).toBe(3);
-    expect(result.current.error).toBeNull();
+    await waitFor(() => {
+      expect(result.current.count).toBe(3);
+      expect(result.current.error).toBeNull();
+    });
   });
 
   it('should return 0 when no dataset ID provided', async () => {
-    const { result, waitFor } = renderHook(() =>
-      useCorrelationCount(mockSavedObjectsClient, undefined)
-    );
+    const { result } = renderHook(() => useCorrelationCount(mockSavedObjectsClient, undefined));
 
-    await waitFor(() => result.current.loading === false);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.count).toBe(0);
     expect(mockFind).not.toHaveBeenCalled();
@@ -255,27 +251,23 @@ describe('useCorrelationCount', () => {
   it('should return 0 when no correlations found', async () => {
     mockFind.mockResolvedValue([]);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
-    );
+    const { result } = renderHook(() => useCorrelationCount(mockSavedObjectsClient, 'dataset-123'));
 
-    await waitForNextUpdate();
-
-    expect(result.current.count).toBe(0);
+    await waitFor(() => {
+      expect(result.current.count).toBe(0);
+    });
   });
 
   it('should handle fetch errors', async () => {
     const error = new Error('Failed to fetch');
     mockFind.mockRejectedValue(error);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
-    );
+    const { result } = renderHook(() => useCorrelationCount(mockSavedObjectsClient, 'dataset-123'));
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual(error);
-    expect(result.current.count).toBe(0);
+    await waitFor(() => {
+      expect(result.current.error).toEqual(error);
+      expect(result.current.count).toBe(0);
+    });
   });
 
   it('should support refetch functionality', async () => {
@@ -291,22 +283,20 @@ describe('useCorrelationCount', () => {
       },
     ] as any);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
-    );
+    const { result } = renderHook(() => useCorrelationCount(mockSavedObjectsClient, 'dataset-123'));
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(1);
+    });
 
     // Refetch
     act(() => {
       result.current.refetch();
     });
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('should use perPage: 1000 for count query', async () => {
@@ -324,23 +314,23 @@ describe('useCorrelationCount', () => {
   it('should refetch when datasetId changes', async () => {
     mockFind.mockResolvedValue([]);
 
-    const { rerender, waitForNextUpdate } = renderHook(
+    const { rerender } = renderHook(
       ({ datasetId }) => useCorrelationCount(mockSavedObjectsClient, datasetId),
       {
         initialProps: { datasetId: 'dataset-1' },
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(1);
+    });
 
     // Change datasetId
     rerender({ datasetId: 'dataset-2' });
 
-    await waitForNextUpdate();
-
-    expect(mockFind).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(mockFind).toHaveBeenCalledTimes(2);
+    });
   });
 });
 
@@ -368,23 +358,21 @@ describe('useSingleCorrelation', () => {
 
     mockGet.mockResolvedValue(mockCorrelation);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSingleCorrelation(mockSavedObjectsClient, 'correlation-1')
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.correlation).toEqual(mockCorrelation);
-    expect(result.current.error).toBeNull();
-    expect(mockGet).toHaveBeenCalledWith('correlation-1');
+    await waitFor(() => {
+      expect(result.current.correlation).toEqual(mockCorrelation);
+      expect(result.current.error).toBeNull();
+      expect(mockGet).toHaveBeenCalledWith('correlation-1');
+    });
   });
 
   it('should return null when no correlation ID provided', async () => {
-    const { result, waitFor } = renderHook(() =>
-      useSingleCorrelation(mockSavedObjectsClient, undefined)
-    );
+    const { result } = renderHook(() => useSingleCorrelation(mockSavedObjectsClient, undefined));
 
-    await waitFor(() => result.current.loading === false);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.correlation).toBeNull();
     expect(mockGet).not.toHaveBeenCalled();
@@ -394,27 +382,27 @@ describe('useSingleCorrelation', () => {
     const error = new Error('Not found');
     mockGet.mockRejectedValue(error);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSingleCorrelation(mockSavedObjectsClient, 'correlation-1')
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual(error);
-    expect(result.current.correlation).toBeNull();
+    await waitFor(() => {
+      expect(result.current.error).toEqual(error);
+      expect(result.current.correlation).toBeNull();
+    });
   });
 
   it('should handle non-Error exceptions', async () => {
     mockGet.mockRejectedValue('String error');
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useSingleCorrelation(mockSavedObjectsClient, 'correlation-1')
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect(result.current.error?.message).toBe('Failed to fetch correlation');
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('Failed to fetch correlation');
+    });
   });
 
   it('should refetch when correlation ID changes', async () => {
@@ -431,24 +419,24 @@ describe('useSingleCorrelation', () => {
 
     mockGet.mockResolvedValue(mockCorrelation);
 
-    const { rerender, waitForNextUpdate } = renderHook(
+    const { rerender } = renderHook(
       ({ correlationId }) => useSingleCorrelation(mockSavedObjectsClient, correlationId),
       {
         initialProps: { correlationId: 'correlation-1' },
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(mockGet).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
 
     // Change ID
     rerender({ correlationId: 'correlation-2' });
 
-    await waitForNextUpdate();
-
-    expect(mockGet).toHaveBeenCalledTimes(2);
-    expect(mockGet).toHaveBeenLastCalledWith('correlation-2');
+    await waitFor(() => {
+      expect(mockGet).toHaveBeenCalledTimes(2);
+      expect(mockGet).toHaveBeenLastCalledWith('correlation-2');
+    });
   });
 
   it('should clear correlation when ID changes to undefined', async () => {
@@ -465,22 +453,23 @@ describe('useSingleCorrelation', () => {
 
     mockGet.mockResolvedValue(mockCorrelation);
 
-    const { result, rerender, waitForNextUpdate, waitFor } = renderHook(
+    const { result, rerender } = renderHook(
       ({ correlationId }) => useSingleCorrelation(mockSavedObjectsClient, correlationId),
       {
         initialProps: { correlationId: 'correlation-1' as string | undefined },
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.correlation).toEqual(mockCorrelation);
+    await waitFor(() => {
+      expect(result.current.correlation).toEqual(mockCorrelation);
+    });
 
     // Change ID to undefined
     rerender({ correlationId: undefined });
 
-    await waitFor(() => result.current.loading === false);
-
-    expect(result.current.correlation).toBeNull();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+      expect(result.current.correlation).toBeNull();
+    });
   });
 });

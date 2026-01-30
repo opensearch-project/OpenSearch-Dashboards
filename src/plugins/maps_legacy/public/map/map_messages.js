@@ -30,10 +30,12 @@
 
 /* eslint-disable react/no-multi-comp */
 import React, { Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
+
+const regionDeniedRoots = new Map();
 
 export const createRegionDeniedWarning = (function () {
   /* eslint-disable react/prefer-stateless-function */
@@ -70,10 +72,10 @@ export const createRegionDeniedWarning = (function () {
       Array.prototype.forEach.call(
         document.getElementsByClassName('leaflet-container'),
         (leafletDom) => {
-          ReactDOM.render(
-            new RegionDeniedWarningOverlay().render(),
-            leafletDom.appendChild(messageBlock)
-          );
+          const container = leafletDom.appendChild(messageBlock);
+          const root = createRoot(container);
+          root.render(new RegionDeniedWarningOverlay().render());
+          regionDeniedRoots.set(container, root);
         }
       );
     }
@@ -84,6 +86,11 @@ export const removeRegionDeniedWarning = (function () {
   return () => {
     const childEle = document.getElementById('blocker-div');
     if (childEle) {
+      const root = regionDeniedRoots.get(childEle);
+      if (root) {
+        root.unmount();
+        regionDeniedRoots.delete(childEle);
+      }
       childEle.parentNode.removeChild(childEle);
     }
   };

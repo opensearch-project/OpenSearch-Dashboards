@@ -111,10 +111,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
       indexState: 'active',
     });
 
-    // Mock intervalAsMinutes for interval and last sync time
-    (intervalAsMinutes as jest.Mock)
-      .mockReturnValueOnce('5 minutes') // For interval: 1000 * 300 / 60000
-      .mockReturnValueOnce('152331 minutes'); // For last sync time: (1716496560000 - 1625097600000) / 60000
+    // Mock intervalAsMinutes - use mockImplementation to handle React 18's multiple renders
+    // Component calls intervalAsMinutes(1000 * refreshInterval) where refreshInterval=300 seconds
+    // So it calls intervalAsMinutes(300000)
+    (intervalAsMinutes as jest.Mock).mockImplementation((ms: number) => {
+      // For interval: 1000 * 300 = 300000 ms
+      if (ms === 300000) return '5 minutes';
+      // For last sync time calculation (large value)
+      return '152331 minutes';
+    });
 
     render(
       <DashboardDirectQuerySyncBanner
@@ -145,8 +150,8 @@ describe('DashboardDirectQuerySyncBanner', () => {
       mdsId: 'mds-1',
     });
 
-    // Mock intervalAsMinutes for interval
-    (intervalAsMinutes as jest.Mock).mockReturnValueOnce('5 minutes'); // For interval: 1000 * 300 / 60000
+    // Mock intervalAsMinutes - use mockReturnValue to handle React 18's multiple renders
+    (intervalAsMinutes as jest.Mock).mockReturnValue('5 minutes');
 
     render(
       <DashboardDirectQuerySyncBanner

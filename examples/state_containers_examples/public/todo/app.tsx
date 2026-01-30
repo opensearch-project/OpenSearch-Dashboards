@@ -29,7 +29,7 @@
  */
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { createHashHistory } from 'history';
 import { TodoAppPage } from './todo';
@@ -50,7 +50,8 @@ export const renderApp = (
   { appInstanceId, appTitle, historyType }: AppOptions
 ) => {
   const history = historyType === History.Browser ? platformHistory : createHashHistory();
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <TodoAppPage
       history={history}
       appInstanceId={appInstanceId}
@@ -68,9 +69,8 @@ export const renderApp = (
           return currentAppUrl === '#' && !history.location.search;
         }
       }}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
