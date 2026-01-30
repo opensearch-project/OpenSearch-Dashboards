@@ -7,6 +7,7 @@ import * as echarts from 'echarts';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { TimeRange } from '../../../../data/public';
 import { DEFAULT_THEME } from './theme/default';
+import { isEqual } from 'lodash';
 
 interface Props {
   spec: echarts.EChartsOption;
@@ -127,8 +128,10 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
             }
           }
         }
-        instance.setOption({ grid, legend: legendConfig });
-        gridConfigRef.current = grid;
+        if (!isEqual(gridConfigRef.current, grid)) {
+          gridConfigRef.current = grid;
+          instance.setOption({ grid, legend: legendConfig });
+        }
       }
     }
     instance?.on('finished', adjustGrid);
