@@ -5,9 +5,10 @@
 
 import * as echarts from 'echarts';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
+import { isEqual } from 'lodash';
+
 import { TimeRange } from '../../../../data/public';
 import { DEFAULT_THEME } from './theme/default';
-import { isEqual } from 'lodash';
 
 interface Props {
   spec: echarts.EChartsOption;
