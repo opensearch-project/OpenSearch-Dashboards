@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/constants';
+import {
+  DATASOURCE_NAME,
+  INDEX_PATTERN_WITH_TIME,
+  QueryLanguages,
+} from '../../../../../../utils/constants';
 
 import {
   verifyDiscoverPageState,
@@ -97,8 +101,22 @@ const deleteSavedQuery = (saveAsNewQueryName) => {
   verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
 
+/**
+ * Generate test configurations for SQL and PPL languages
+ * Filter from all configurations to get only SQL and PPL tests
+ */
+const generateSQLPPLTestConfigurations = () => {
+  const allTestConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
+
+  // Filter to only include SQL and PPL languages
+  return allTestConfigurations.filter(
+    (config) =>
+      config.language === QueryLanguages.SQL.name || config.language === QueryLanguages.PPL.name
+  );
+};
+
 const runSavedQueriesUITests = () => {
-  describe('saved queries UI', () => {
+  describe('saved queries UI - SQL and PPL', () => {
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
 
@@ -124,7 +142,7 @@ const runSavedQueriesUITests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
-    const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
+    const testConfigurations = generateSQLPPLTestConfigurations();
 
     testConfigurations.forEach((config) => {
       describe(`saved query lifecycle: ${config.testName}`, () => {
@@ -168,4 +186,4 @@ const runSavedQueriesUITests = () => {
   });
 };
 
-prepareTestSuite('Saved Queries', runSavedQueriesUITests);
+prepareTestSuite('Saved Queries - SQL and PPL', runSavedQueriesUITests);
