@@ -199,6 +199,7 @@ export async function createAutoDetectedDatasets(
       const correlationResponse = await savedObjectsClient.create(
         'correlations',
         {
+          title: `trace-to-logs_${detection.tracePattern}`,
           correlationType: `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}${detection.tracePattern}`,
           version: '1.0.0',
           entities: [

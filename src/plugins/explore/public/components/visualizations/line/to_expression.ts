@@ -448,6 +448,7 @@ export const createMultiLineChart = (
     if (!timeField || !valueField || !colorField) {
       throw Error('Missing axis config or color field for multi lines chart');
     }
+
     const result = pipe(
       transform(
         sortByTime(timeField),
