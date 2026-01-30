@@ -4,13 +4,15 @@
  */
 
 import styled from 'styled-components';
-import { borderRadius, colors, spacing, typography } from '../theme/custom_theme';
+import { borderRadius, componentTokens, spacing, typography } from '../theme/custom_theme';
+
+const { header: colors } = componentTokens;
 
 export const Header = styled.header`
-  background-color: ${colors.header.background};
-  color: ${colors.header.text};
+  background-color: ${colors.background};
+  color: ${colors.text};
   font-family: ${typography.fontFamily};
-  font-size: ${typography.headerSize};
+  font-size: ${typography.fontSize.l};
   padding: ${spacing.m};
   border-radius: ${borderRadius.s};
 `;
