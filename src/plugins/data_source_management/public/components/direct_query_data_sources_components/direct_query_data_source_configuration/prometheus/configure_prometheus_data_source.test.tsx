@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './configure_prometheus_data_source';

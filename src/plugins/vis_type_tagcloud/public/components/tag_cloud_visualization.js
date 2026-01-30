@@ -31,7 +31,7 @@
 import React from 'react';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { getFormatService } from '../services';
@@ -82,17 +82,18 @@ export class TagCloudVisualization {
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
-    render(
+    this._feedbackRoot = createRoot(this._feedbackNode);
+    this._feedbackRoot.render(
       <I18nProvider>
         <FeedbackMessage ref={this._feedbackMessage} />
-      </I18nProvider>,
-      this._feedbackNode
+      </I18nProvider>
     );
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);
     this._label = React.createRef();
-    render(<Label ref={this._label} />, this._labelNode);
+    this._labelRoot = createRoot(this._labelNode);
+    this._labelRoot.render(<Label ref={this._label} />);
   }
 
   async render(data, visParams) {
@@ -127,8 +128,12 @@ export class TagCloudVisualization {
 
   destroy() {
     this._tagCloud.destroy();
-    unmountComponentAtNode(this._feedbackNode);
-    unmountComponentAtNode(this._labelNode);
+    if (this._feedbackRoot) {
+      this._feedbackRoot.unmount();
+    }
+    if (this._labelRoot) {
+      this._labelRoot.unmount();
+    }
   }
 
   _updateData(data) {

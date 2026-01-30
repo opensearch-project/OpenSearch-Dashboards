@@ -28,6 +28,10 @@
  * under the License.
  */
 
+// Disable chalk colors in tests for consistent snapshot results across environments
+// (TTY detection varies between Docker containers, CI, and local terminals)
+process.env.FORCE_COLOR = '0';
+
 // bluebird < v3.3.5 does not work with MutationObserver polyfill
 // when MutationObserver exists, bluebird avoids using node's builtin async schedulers
 const bluebird = require('bluebird');
@@ -36,3 +40,8 @@ bluebird.Promise.setScheduler(function (fn) {
 });
 
 require('whatwg-fetch');
+
+// TextEncoder/TextDecoder polyfill required for React 18 enzyme adapter
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;

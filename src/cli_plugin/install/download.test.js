@@ -81,7 +81,7 @@ describe('opensearchDashboards cli', function () {
     afterEach(async () => {
       logger.log.restore();
       logger.error.restore();
-      del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
+      await del(testWorkingPath, { cwd: PROCESS_WORKING_DIR });
     });
 
     describe('_downloadSingle', function () {

@@ -6,13 +6,9 @@ exports[`SidecarService SidecarRef#Show() recover sidecar when calling show afte
 
 exports[`SidecarService SidecarRef#close() can be called multiple times on the same SidecarRef 1`] = `
 Array [
-  Array [
-    <div />,
-  ],
+  Array [],
 ]
 `;
-
-exports[`SidecarService open sidecar does not unmount if targetDom is null 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
 
 exports[`SidecarService open sidecar renders a sidecar to the DOM 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
 

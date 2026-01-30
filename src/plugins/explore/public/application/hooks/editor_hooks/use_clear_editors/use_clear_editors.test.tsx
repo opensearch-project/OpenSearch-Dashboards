@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDispatch } from 'react-redux';
 import { resetEditorMode } from '../../../utils/state_management/slices';
 import { useSetEditorText } from '../use_set_editor_text';

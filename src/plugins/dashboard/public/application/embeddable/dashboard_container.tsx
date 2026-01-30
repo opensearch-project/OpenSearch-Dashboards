@@ -31,7 +31,7 @@
 import './_dashboard_container.scss';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { CoreStart, Logos } from 'src/core/public';
@@ -121,6 +121,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
   private readonly logos: Logos;
+  private root?: Root;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -235,7 +236,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
-    ReactDOM.render(
+    if (!this.root) {
+      this.root = createRoot(dom);
+    }
+    this.root.render(
       <I18nProvider>
         <OpenSearchDashboardsContextProvider services={this.options}>
           <DashboardViewport
@@ -246,8 +250,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
             PanelComponent={this.embeddablePanel}
           />
         </OpenSearchDashboardsContextProvider>
-      </I18nProvider>,
-      dom
+      </I18nProvider>
     );
   }
 

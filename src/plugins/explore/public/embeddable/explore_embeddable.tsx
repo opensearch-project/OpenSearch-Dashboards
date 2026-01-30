@@ -6,7 +6,7 @@
 import { isEqual } from 'lodash';
 import { merge, Subscription } from 'rxjs';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
@@ -121,6 +121,7 @@ export class ExploreEmbeddable
     timeRange: undefined as TimeRange | undefined,
   };
   private node?: HTMLElement;
+  private root?: Root;
 
   constructor(
     {
@@ -437,9 +438,9 @@ export class ExploreEmbeddable
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) return;
+    if (!this.searchProps || !this.root) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {
@@ -458,8 +459,8 @@ export class ExploreEmbeddable
     if (this.searchProps) {
       delete this.searchProps;
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 
@@ -475,11 +476,12 @@ export class ExploreEmbeddable
     if (!this.searchProps) {
       throw new Error('Search scope not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
     this.node.style.height = '100%';
+    this.root = createRoot(node);
   }
 
   public getInspectorAdapters() {

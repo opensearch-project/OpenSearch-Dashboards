@@ -30,7 +30,7 @@
 
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';

@@ -29,7 +29,8 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 
 import { I18nStart } from '../../i18n';
 import { IUiSettingsClient } from '../../ui_settings';
@@ -62,6 +63,7 @@ export type ToastsStart = IToasts;
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
+  private toastsRoot?: Root;
 
   public setup({ uiSettings }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
@@ -72,22 +74,25 @@ export class ToastsService {
     this.api!.start({ overlays, i18n });
     this.targetDomElement = targetDomElement;
 
-    render(
+    this.toastsRoot = createRoot(targetDomElement);
+    this.toastsRoot.render(
       <i18n.Context>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
         />
-      </i18n.Context>,
-      targetDomElement
+      </i18n.Context>
     );
 
     return this.api!;
   }
 
   public stop() {
+    if (this.toastsRoot) {
+      this.toastsRoot.unmount();
+      this.toastsRoot = undefined;
+    }
     if (this.targetDomElement) {
-      unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.textContent = '';
     }
   }

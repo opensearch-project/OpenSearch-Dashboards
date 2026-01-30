@@ -10,7 +10,7 @@ import { CreateAccelerationButton } from './create_acceleration_button';
 import { DirectQueryLoadingStatus, CreateAccelerationForm } from '../../../../../framework/types';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { useDirectQuery } from '../../../../../framework/hooks/direct_query_hook';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 jest.mock('../../../../../framework/hooks/direct_query_hook');
 jest.mock('./utils', () => ({

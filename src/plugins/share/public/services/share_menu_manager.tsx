@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
@@ -42,6 +42,7 @@ export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
+  private root?: Root;
 
   start(core: CoreStart, shareRegistry: ShareMenuRegistryStart) {
     return {
@@ -63,7 +64,10 @@ export class ShareMenuManager {
   }
 
   private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
+    if (this.root) {
+      this.root.unmount();
+      this.root = undefined;
+    }
     this.isOpen = false;
   };
 
@@ -118,7 +122,10 @@ export class ShareMenuManager {
         </EuiWrappingPopover>
       </I18nProvider>
     );
-    ReactDOM.render(element, this.container);
+    if (!this.root) {
+      this.root = createRoot(this.container);
+    }
+    this.root.render(element);
   }
 }
 export type ShareMenuManagerStart = ReturnType<ShareMenuManager['start']>;

@@ -29,7 +29,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { EuiPage } from '@elastic/eui';
 
@@ -175,7 +175,8 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ActionsExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<ActionsExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

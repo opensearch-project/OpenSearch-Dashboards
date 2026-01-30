@@ -4,12 +4,10 @@
  */
 
 import { configure, mount, shallow } from 'enzyme';
-// @ts-expect-error TS7016 TODO(ts-error): fixme
-import Adapter from 'enzyme-adapter-react-16';
-import React from 'react';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
+import React, { act } from 'react';
 import { SetupIntegrationForm, SetupBottomBar, LoadingPage } from './setup_integration';
 import { HttpStart } from 'opensearch-dashboards/public';
-import { act } from 'react-dom/test-utils';
 import { TEST_INTEGRATION_CONFIG } from '../../../mocks';
 
 const mockHttp: Partial<HttpStart> = {
@@ -27,6 +25,14 @@ const mockHttp: Partial<HttpStart> = {
 
 configure({ adapter: new Adapter() });
 
+// Helper to wait for promises and state updates in React 18
+const waitForComponentUpdate = async (wrapper: any) => {
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+  wrapper.update();
+};
+
 describe('SetupIntegrationForm tests', () => {
   const setupProps = {
     integration: 'test_integration',
@@ -36,12 +42,9 @@ describe('SetupIntegrationForm tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -50,8 +53,8 @@ describe('SetupIntegrationForm tests', () => {
     await act(async () => {
       // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
       wrapper = shallow(<SetupIntegrationForm {...setupProps} />);
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
+    await waitForComponentUpdate(wrapper);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -60,14 +63,10 @@ describe('SetupIntegrationForm tests', () => {
     await act(async () => {
       // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
       wrapper = mount(<SetupIntegrationForm {...setupProps} />);
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
     // Wait for initial rendering and effects to complete
-    await act(async () => {
-      wrapper.update();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+    await waitForComponentUpdate(wrapper);
 
     const setupBottomBar = wrapper.find(SetupBottomBar).first();
 
@@ -76,9 +75,7 @@ describe('SetupIntegrationForm tests', () => {
       setupBottomBar.prop('setLoading')(true);
     });
 
-    await act(async () => {
-      wrapper.update();
-    });
+    await waitForComponentUpdate(wrapper);
 
     expect(wrapper.find(LoadingPage)).toHaveLength(1);
   });
@@ -88,12 +85,9 @@ describe('SetupIntegrationForm tests', () => {
     await act(async () => {
       // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
       wrapper = mount(<SetupIntegrationForm {...setupProps} />);
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    await act(async () => {
-      wrapper.update();
-    });
+    await waitForComponentUpdate(wrapper);
 
     const setupBottomBar = wrapper.find(SetupBottomBar).first();
 
@@ -122,8 +116,8 @@ describe('SetupIntegrationForm tests', () => {
     await act(async () => {
       // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
       wrapper = mount(<SetupIntegrationForm {...setupProps} />);
-      await new Promise((resolve) => setTimeout(resolve, 0));
     });
+    await waitForComponentUpdate(wrapper);
     expect(wrapper).toMatchSnapshot();
   });
 });

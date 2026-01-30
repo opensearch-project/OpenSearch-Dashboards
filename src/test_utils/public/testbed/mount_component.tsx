@@ -31,24 +31,29 @@
 import React, { ComponentType } from 'react';
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute, WithStore } from '../helpers';
 import { MemoryRouterConfig } from './types';
 
 interface Config {
-  Component: ComponentType;
+  Component: ComponentType<any>;
   memoryRouter: MemoryRouterConfig;
   store: Store | null;
   props: any;
   onRouter: (router: any) => void;
 }
 
-const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config): ComponentType => {
+const getCompFromConfig = ({
+  Component,
+  memoryRouter,
+  store,
+  onRouter,
+}: Config): ComponentType<any> => {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
-  let Comp: ComponentType = store !== null ? WithStore(store)(Component) : Component;
+  let Comp: ComponentType<any> = store !== null ? WithStore(store)(Component) : Component;
 
   if (wrapWithRouter) {
     const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
@@ -81,6 +86,6 @@ export const mountComponentAsync = async (config: Config): Promise<ReactWrapper>
   return component.update();
 };
 
-export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (
+export const getJSXComponentWithProps = (Component: ComponentType<any>, props: any) => (
   <Component {...props} />
 );

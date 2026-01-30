@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { waitFor } from '@testing-library/react';
 import * as utils from '../utils';
 import { DataSourceTable } from './data_source_table';

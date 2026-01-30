@@ -14,6 +14,6 @@
   "devDependencies": {
     "@elastic/eui": "npm:@opensearch-project/oui@1.22.1",
     "@osd/plugin-helpers": "1.0.0",
-    "react": "^16.14.0"
+    "react": "^18.2.0"
   }
 }

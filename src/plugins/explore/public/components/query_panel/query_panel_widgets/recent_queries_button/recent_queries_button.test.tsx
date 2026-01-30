@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
@@ -265,7 +265,7 @@ describe('RecentQueriesButton', () => {
       });
     });
 
-    it('keyboard shortcut toggles popover when executed', () => {
+    it('keyboard shortcut toggles popover when executed', async () => {
       renderWithStore();
 
       const shortcutCall = mockUseKeyboardShortcut.mock.calls.find(
@@ -277,16 +277,22 @@ describe('RecentQueriesButton', () => {
 
       expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
 
-      executeFunction();
-      let table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'block' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
 
-      executeFunction();
-      table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'none' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'none' });
+      });
     });
 
-    it('keyboard shortcut execute function is the same as button click handler', () => {
+    it('keyboard shortcut execute function is the same as button click handler', async () => {
       renderWithStore();
 
       const button = screen.getByTestId('exploreRecentQueriesButton');
@@ -296,19 +302,26 @@ describe('RecentQueriesButton', () => {
       expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
 
       fireEvent.click(button);
-      let table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'block' });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
 
-      executeFunction();
-      table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'none' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'none' });
+      });
 
-      executeFunction();
-      table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'block' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
     });
 
-    it('keyboard shortcut works independently of button clicks', () => {
+    it('keyboard shortcut works independently of button clicks', async () => {
       renderWithStore();
 
       const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
@@ -316,17 +329,26 @@ describe('RecentQueriesButton', () => {
 
       expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
 
-      executeFunction();
-      let table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'block' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
 
-      executeFunction();
-      table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'none' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'none' });
+      });
 
-      executeFunction();
-      table = screen.getByTestId('recent-queries-table');
-      expect(table).toHaveStyle({ display: 'block' });
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
     });
   });
 });

@@ -32,7 +32,8 @@
 
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
@@ -120,6 +121,7 @@ interface StartDeps {
 export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
   private targetDomElement: Element | null = null;
+  private flyoutRoot?: Root;
 
   public start({ i18n, targetDomElement }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
@@ -143,13 +145,13 @@ export class FlyoutService {
 
         this.activeFlyout = flyout;
 
-        render(
+        this.flyoutRoot = createRoot(this.targetDomElement!);
+        this.flyoutRoot.render(
           <i18n.Context>
             <EuiFlyout {...options} onClose={() => flyout.close()}>
               <MountWrapper mount={mount} className="osdOverlayMountWrapper" />
             </EuiFlyout>
-          </i18n.Context>,
-          this.targetDomElement
+          </i18n.Context>
         );
 
         return flyout;
@@ -171,8 +173,11 @@ export class FlyoutService {
    * depend on unmounting for cleanup behaviour.
    */
   private cleanupDom(): void {
+    if (this.flyoutRoot) {
+      this.flyoutRoot.unmount();
+      this.flyoutRoot = undefined;
+    }
     if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.innerHTML = '';
     }
     this.activeFlyout = null;
