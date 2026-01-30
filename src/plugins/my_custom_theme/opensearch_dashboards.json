@@ -1,0 +1,9 @@
+{
+  "id": "myCustomTheme",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

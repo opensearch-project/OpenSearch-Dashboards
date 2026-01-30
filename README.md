@@ -1,56 +1,75 @@
-<img src="https://raw.githubusercontent.com/opensearch-project/project-website/refs/heads/main/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg" height="64px"/>
+# OpenSearch Dashboards – Design System Enhancement
 
-- [Welcome!](#welcome)
-- [Project Resources](#project-resources)
-- [Code of Conduct](#code-of-conduct)
-- [License](#license)
-- [Copyright](#copyright)
+## Overview
+This project updates the OpenSearch Dashboards UI by introducing a cohesive design system and improving core components.  
+The goal is to demonstrate design consistency, modern front-end practices, and attention to usability and accessibility.
 
-## Welcome
+![Design System Preview](./preview.jpg)
 
-OpenSearch Dashboards is an open-source data visualization tool designed to work with OpenSearch. OpenSearch Dashboards gives you data visualization tools to improve and automate business intelligence and support data-driven decision-making and strategic planning.
+## Design Rationale
+The new design system focuses on:
+- Clear visual hierarchy
+- Consistent spacing and typography
+- Improved contrast and accessibility
+- Scalable tokens for future extension
 
-We aim to be an exceptional community-driven platform and to foster open participation and collective contribution with all contributors. Stay up to date on what's happening with the OpenSearch Project by tracking GitHub [issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues) and [pull requests](https://github.com/opensearch-project/OpenSearch-Dashboards/pulls). 
+Design tokens were introduced to centralize colors, typography, and spacing, making the UI easier to maintain and evolve.
 
-You can [contribute to this project](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/CONTRIBUTING.md) by [opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) to give feedback, share ideas, identify bugs, and contribute code.
+## Design System
+### Colors
+- Primary, secondary, neutral, and semantic colors defined as tokens
+- Applied globally via CSS variables
 
-Set up your [OpenSearch Dashboards development environment](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/DEVELOPER_GUIDE.md#getting-started-guide) today! The project team looks forward to your contributions.
+### Typography
+- Defined font families, sizes, weights, and line-heights
+- Consistent usage across headers, body text, and UI components
 
-## Code Summary
+### Spacing
+- Spacing scale defined with reusable tokens
+- Applied consistently to layout and components
 
-[![Build and Test][build-and-test-badge]][build-and-test-link]
-[![Unit Test Code Coverage][codecov-badge]][codecov-link]
-[![Link Checker][link-checker-badge]][link-checker-link]
+## Modified Components
+The following components were updated to reflect the new design system:
+- Button
+- Header
+- Sidebar
+- Card
+- Form Input
 
-## Project Resources
+Each component was refined for better usability, visual clarity, and accessibility while keeping alignment with OpenSearch patterns.
 
-* [Project Website](https://opensearch.org/)
-* [Downloads](https://opensearch.org/downloads.html)
-* [Documentation](https://opensearch.org/docs/)
-* Need help? See the [communication guide](COMMUNICATIONS.md) for various options
-* [Project Principles](https://opensearch.org/#principles)
-* [Developer Guide](DEVELOPER_GUIDE.md)
-* [Contributing to OpenSearch](CONTRIBUTING.md)
-* [Maintainer Responsibilities](MAINTAINERS.md)
-* [Release Management](RELEASING.md)
-* [Testing](TESTING.md)
-* [Security](SECURITY.md)
+## Setup & Build Instructions
 
-## Code of Conduct
+### Prerequisites
+- Node.js (recommended version from OpenSearch Dashboards docs)
+- Yarn
+- Java (required by Gradle)
+- Gradle
 
-This project has adopted the [Amazon Open Source Code of Conduct](CODE_OF_CONDUCT.md). For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq), or contact [opensource-codeofconduct@amazon.com](mailto:opensource-codeofconduct@amazon.com) with any additional questions or comments.
+### Important Note (Docker Limitation)
+At the time of this challenge, Docker images for **OpenSearch 3.5** were not yet available.  
+Because of this, the project was set up and executed **locally using Gradle** instead of Docker.
 
-## License
+### Running OpenSearch locally
+1. Download OpenSearch 3.5 source or distribution.
+2. Start OpenSearch using Gradle:
+   ```bash
+   ./gradlew run
+    ```
 
-This project is licensed under the [Apache v2.0 License](LICENSE.txt).
-
-## Copyright
-
-Copyright OpenSearch Contributors. See [NOTICE](NOTICE.txt) for details.
-
-[build-and-test-badge]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/build_and_test_workflow.yml/badge.svg
-[build-and-test-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/build_and_test_workflow.yml
-[codecov-badge]: https://codecov.io/gh/opensearch-project/OpenSearch-Dashboards/branch/main/graphs/badge.svg
-[codecov-link]: https://app.codecov.io/gh/opensearch-project/OpenSearch-Dashboards
-[link-checker-badge]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml/badge.svg
-[link-checker-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml
+### Running OpenSearch Dashboards locally
+1. Clone this repository.
+2. Navigate to the OpenSearch Dashboards directory.
+3. Install dependencies:
+   ```bash
+   yarn install
+   ```
+4. Bootstrap OpenSearch Dashboards:
+   ```bash
+    yarn osd bootstrap
+    ```
+5. Start OpenSearch Dashboards:
+    ```bash
+    yarn start --no-base-path --opensearch=http://localhost:9200
+    ```
+6. Open your browser and navigate to `http://localhost:5601/app/myCustomThemeDemo` to view the test page showcasing the new design system and components.
