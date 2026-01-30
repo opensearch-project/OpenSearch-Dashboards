@@ -125,6 +125,7 @@ export class DatasetService {
                 version: dataset.dataSource.version,
               }
             : undefined,
+          dataSourceMeta: dataset.dataSource ? dataset.dataSource.meta : undefined,
         } as IndexPatternSpec;
 
         if (defaultCache) {

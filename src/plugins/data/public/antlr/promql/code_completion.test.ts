@@ -45,9 +45,11 @@ const mockParseQuery = sharedUtils.parseQuery as jest.Mock;
 
 describe('promql code_completion', () => {
   describe('getSuggestions', () => {
+    const mockDataSourceMeta = { prometheusUrl: 'http://localhost:9090' };
     const mockIndexPattern = {
       id: 'test-datasource-id',
       title: 'test-index',
+      dataSourceMeta: mockDataSourceMeta,
       fields: [
         { name: 'field1', type: 'string' },
         { name: 'field2', type: 'number' },
@@ -193,11 +195,12 @@ describe('promql code_completion', () => {
       );
     });
 
-    it('should call prometheus client with indexPattern.id and timeRange', async () => {
+    it('should call prometheus client with indexPattern.id, dataSourceMeta and timeRange', async () => {
       await getSimpleSuggestions('');
 
       expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith(
         mockIndexPattern.id,
+        mockDataSourceMeta,
         mockTimeRange
       );
     });

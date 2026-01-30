@@ -75,6 +75,7 @@ describe('generatePromQLWithAgUi', () => {
     question: 'Show CPU usage',
     dataSourceName: 'prometheus-ds',
     dataSourceId: 'ds-123',
+    dataSourceMeta: { prometheusUrl: 'http://localhost:9090' },
   };
 
   describe('successful query generation', () => {
