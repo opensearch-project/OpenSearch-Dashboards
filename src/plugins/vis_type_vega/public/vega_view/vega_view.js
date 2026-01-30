@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* eslint-disable import/namespace */
+
 import { get } from 'lodash';
 import {
   VisLayerTypes,
