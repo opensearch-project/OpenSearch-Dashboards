@@ -74,12 +74,6 @@ jest.mock('./explore_traces_chart', () => ({
   ),
 }));
 
-jest.mock('../panel/canvas_panel', () => ({
-  CanvasPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="canvas-panel">{children}</div>
-  ),
-}));
-
 jest.mock('../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
 }));
@@ -266,14 +260,12 @@ describe('DiscoverChartContainer', () => {
 
   it('renders logs chart when flavor is logs and data is available', () => {
     renderComponent(true, ExploreFlavor.Logs);
-    expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
     expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     expect(screen.queryByTestId('explore-traces-chart')).not.toBeInTheDocument();
   });
 
   it('renders traces chart when flavor is traces and data is available', () => {
     renderComponent(true, ExploreFlavor.Traces);
-    expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
     expect(screen.getByTestId('explore-traces-chart')).toBeInTheDocument();
     expect(screen.queryByTestId('explore-logs-chart')).not.toBeInTheDocument();
   });
@@ -503,7 +495,6 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
       expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     });
 
@@ -614,7 +605,7 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
 
       prepareHistogramCacheKey.mockClear();
       prepareHistogramCacheKey.mockImplementation((_query: any, isBreakdown: boolean) => {
@@ -722,7 +713,7 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     });
 
     it('does not detect breakdown error when breakdown succeeds', () => {
@@ -822,7 +813,6 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
       expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     });
   });

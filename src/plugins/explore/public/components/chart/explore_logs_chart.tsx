@@ -224,6 +224,15 @@ export const ExploreLogsChart = ({
                 chartType={'HistogramBar'}
                 timefilterUpdateHandler={timefilterUpdateHandler}
                 services={services}
+                customChartsTheme={{
+                  axes: {
+                    gridLine: {
+                      horizontal: { visible: false },
+                      vertical: { visible: false },
+                    },
+                  },
+                }}
+                useSmartDateFormat
               />
             </div>
           </section>
