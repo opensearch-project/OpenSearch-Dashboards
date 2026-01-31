@@ -47,6 +47,7 @@ jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   applyTimeRangeToEncoding: jest.fn().mockReturnValue(undefined),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
+  getChartRender: jest.fn().mockReturnValue('vega'),
 }));
 
 describe('to_expression', () => {
