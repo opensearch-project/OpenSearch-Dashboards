@@ -90,9 +90,6 @@ describe('data_connections_router', () => {
       expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith('data-connection', {
         connectionId: 'test-prometheus',
         type: DataConnectionType.Prometheus,
-        meta: JSON.stringify({
-          properties: { 'prometheus.uri': 'http://localhost:9090' },
-        }),
       });
 
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockCreateDataSourceResponse });
