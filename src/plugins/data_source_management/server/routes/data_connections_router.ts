@@ -209,7 +209,6 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           await context.core.savedObjects.client.create('data-connection', {
             connectionId: request.body.name,
             type: DataConnectionType.Prometheus,
-            meta: JSON.stringify({ properties: request.body.properties }),
           });
         }
 
