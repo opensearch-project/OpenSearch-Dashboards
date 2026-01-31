@@ -34,6 +34,7 @@ export interface StateTimeLineChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
@@ -213,12 +213,13 @@ export class VisualizationBuilder {
 
     const currentRule = visualizationRegistry.findRuleByAxesMapping(axesMapping, allColumns);
     if (!isEmpty(axesMapping) && currentRule) {
+      const columns = Object.values(axesMapping);
       const columnMapping = visualizationRegistry.getDefaultAxesMapping(
         currentRule,
         chartType,
-        data?.numericalColumns ?? [],
-        data?.categoricalColumns ?? [],
-        data?.dateColumns ?? []
+        (data?.numericalColumns ?? []).filter((c) => columns.includes(c.name)),
+        (data?.categoricalColumns ?? []).filter((c) => columns.includes(c.name)),
+        (data?.dateColumns ?? []).filter((c) => columns.includes(c.name))
       );
       const updatedAxesMapping: Record<string, string> = {};
       Object.entries(columnMapping).forEach(([role, value]) => {
@@ -326,7 +327,7 @@ export class VisualizationBuilder {
 
   setAxesMapping(mapping: Record<string, string>) {
     const config = this.visConfig$.value;
-    if (config) {
+    if (config && !isEqual(config.axesMapping, mapping)) {
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
   }

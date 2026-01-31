@@ -96,7 +96,7 @@ export const createBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}` }),
+      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
@@ -241,7 +241,10 @@ export const createTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig({ title: `${axisColumnMappings?.y?.name} Over Time` }),
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} Over Time`,
+        legend: { show: false },
+      }),
       buildAxisConfigs,
       applyTimeRange,
       buildVisMap({
@@ -410,6 +413,7 @@ export const createGroupedTimeBarChart = (
       ),
       createBaseConfig({
         title: `${axisColumnMappings?.y?.name} Over Time by ${colorColumn.name}`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -776,6 +780,7 @@ export const createStackedBarSpec = (
       ),
       createBaseConfig({
         title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       buildVisMap({
@@ -920,7 +925,7 @@ export const createDoubleNumericalBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig({ title: `${xAxis?.name} with ${yAxis?.name}` }),
+      createBaseConfig({ title: `${xAxis?.name} with ${yAxis?.name}`, legend: { show: false } }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),

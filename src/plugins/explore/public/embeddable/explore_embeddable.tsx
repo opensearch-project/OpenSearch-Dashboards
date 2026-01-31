@@ -4,6 +4,7 @@
  */
 
 import { isEqual } from 'lodash';
+import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
@@ -52,6 +53,7 @@ import {
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
+import { mergeStyles } from '../components/visualizations/utils/utils';
 
 export interface SearchProps {
   description?: string;
@@ -84,6 +86,7 @@ export interface SearchProps {
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   onExpressionEvent?: (e: ExpressionRendererEvent) => void;
+  onSelectTimeRange?: (range: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -279,6 +282,24 @@ export class ExploreEmbeddable
       }
     };
 
+    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+        embeddable: this,
+        filters: [
+          {
+            range: {
+              '*': {
+                mode: 'absolute',
+                gte: moment(range.from),
+                lte: moment(range.to),
+              },
+            },
+          },
+        ],
+        timeFieldName: '*',
+      });
+    };
+
     this.updateHandler(searchProps);
   }
 
@@ -369,6 +390,7 @@ export class ExploreEmbeddable
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
+    const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
@@ -406,11 +428,15 @@ export class ExploreEmbeddable
           this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
 
-          const styles = adaptLegacyData({
+          let styles = adaptLegacyData({
             type: selectedChartType,
             styles: styleOptions,
             axesMapping: visualization.axesMapping,
           })?.styles;
+
+          if (vis) {
+            styles = mergeStyles(vis.ui.style.defaults, styles);
+          }
           this.searchProps.styleOptions = styles;
 
           const spec = matchedRule.toSpec(

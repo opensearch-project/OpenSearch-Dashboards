@@ -30,7 +30,9 @@ export interface ScatterChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
+  // @deprecated - removed this once migrated to echarts
   legendTitleForSize?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];

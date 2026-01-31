@@ -257,74 +257,6 @@ export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (stat
 };
 
 /**
- * Custom spec assembly for size scatter charts
- */
-export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
-  const { styles, axisConfig, series, visualMap } = state;
-  const legendPosition = styles.legendPosition || 'bottom';
-
-  const getGridConfig = () => {
-    switch (legendPosition) {
-      case 'left':
-        return { top: 60, bottom: 60, left: 200, right: 80 };
-      case 'right':
-        return { top: 60, bottom: 60, left: 60, right: 200 };
-      case 'top':
-        return { top: 80, bottom: 60, left: 60, right: 80 };
-      case 'bottom':
-        return { top: 60, bottom: 120, left: 60, right: 80 };
-    }
-  };
-
-  const spec = {
-    title: {
-      text: styles.titleOptions?.show ? styles.titleOptions?.titleName : undefined,
-    },
-    tooltip: {
-      trigger: 'item',
-      show: styles.tooltipOptions?.mode !== 'hidden',
-    },
-    legend: {
-      show: styles.addLegend,
-      orient:
-        styles.legendPosition === 'left' || styles.legendPosition === 'right'
-          ? 'vertical'
-          : 'horizontal',
-      left:
-        styles.legendPosition === 'left'
-          ? 'left'
-          : styles.legendPosition === 'right'
-          ? 'right'
-          : 'center',
-      top:
-        styles.legendPosition === 'top'
-          ? 'top'
-          : styles.legendPosition === 'bottom'
-          ? 'bottom'
-          : undefined,
-    },
-    xAxis: {
-      type: 'value',
-      name: axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name,
-      nameLocation: 'middle',
-      nameGap: 35,
-    },
-    yAxis: {
-      type: 'value',
-      name: axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name,
-      nameLocation: 'middle',
-      nameGap: 50,
-    },
-    visualMap,
-    series,
-    // Dynamic grid based on legend positions
-    grid: getGridConfig(),
-  };
-
-  return { ...state, spec };
-};
-
-/**
  * Create scatter series with both color and size encoding
  */
 export const createSizeScatterSeries = <T extends BaseChartStyle>({
@@ -359,6 +291,9 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     };
     return newState;
   }
+
+  const headers = transformedData[0] ?? [];
+  const sizeDimension = headers.indexOf(sizeField);
 
   // Transform data using multi-series approach
   const { categories, seriesData, sizeRange } = transformToMultiSeriesWithSize(
@@ -409,28 +344,18 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   const getVisualMapConfig = () => {
     switch (legendPosition) {
       case 'left':
-        return {
-          orient: 'vertical',
-          left: 'left',
-          top: 'top',
-        };
-      case 'right':
+      case 'top':
+      case 'bottom':
         return {
           orient: 'vertical',
           right: 'right',
-          top: 'top',
+          top: 'middle',
         };
-      case 'top':
+      case 'right':
         return {
           orient: 'horizontal',
-          left: 'center',
-          top: '5%',
-        };
-      case 'bottom':
-        return {
-          orient: 'horizontal',
-          left: 'center',
-          bottom: '5%',
+          bottom: 'bottom',
+          left: 'middle',
         };
     }
   };
@@ -438,10 +363,10 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   newState.visualMap = {
     show: styles.addLegend === true,
     type: 'continuous',
-    dimension: 2,
+    dimension: sizeDimension,
     min: sizeRange.min,
     max: sizeRange.max,
-    text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
+    // text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
     inRange: {
       symbolSize: [5, 25],
     },

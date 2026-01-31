@@ -55,7 +55,7 @@ export const runCreateVisTests = () => {
         shouldManualSelectChartType: true,
       });
       cy.getElementByTestId('field-x').contains('response_time');
-      cy.get('canvas.marks').should('be.visible');
+      cy.get('.exploreVisContainer canvas').should('be.visible');
     });
 
     it('should change style options and the changes reflect immediately to the histogram visualization', () => {
@@ -65,7 +65,7 @@ export const runCreateVisTests = () => {
       });
 
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -74,7 +74,7 @@ export const runCreateVisTests = () => {
       // Use threshold color to update the histogram
       cy.getElementByTestId('useThresholdColorButton').click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
         beforeCanvasDataUrl = afterCanvasDataUrl;
@@ -83,7 +83,7 @@ export const runCreateVisTests = () => {
       // Change bucket count should update the histogram
       cy.contains('label', 'Bucket Count').click().type('10');
       cy.wait(1000);
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
         beforeCanvasDataUrl = afterCanvasDataUrl;
@@ -92,7 +92,7 @@ export const runCreateVisTests = () => {
       // Change bucket size should update the histogram
       cy.contains('label', 'Bucket Size').click().type('0.2');
       cy.wait(1000);
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
         beforeCanvasDataUrl = afterCanvasDataUrl;
