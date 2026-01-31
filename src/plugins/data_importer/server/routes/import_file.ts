@@ -4,6 +4,7 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
+import { v4 as uuidv4 } from 'uuid';
 import { FileProcessorService } from '../processors/file_processor_service';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { IRouter } from '../../../../core/server';
@@ -38,6 +39,15 @@ export function importFileRoute(
               validate(value: string) {
                 if (!CSV_SUPPORTED_DELIMITERS.includes(value)) {
                   return `must be a supported delimiter`;
+                }
+              },
+            })
+          ),
+          importIdentifier: schema.maybe(
+            schema.string({
+              validate(value: string) {
+                if (!/^[a-z][a-z0-9_-]*$/i.test(value)) {
+                  return `must be alphanumeric with hyphens/underscores`;
                 }
               },
             })
@@ -90,13 +100,26 @@ export function importFileRoute(
         });
       }
 
+      // Generate lookup ID if import identifier is provided
+      const lookupId = request.query.importIdentifier ? uuidv4() : undefined;
+      const lookupField = '__lookup';
+
       if (request.query.createMode) {
         const mapping = request.body.mapping;
+        const mappingObj = mapping ? JSON.parse(mapping) : {};
+
+        // Add __lookup field to mapping if using import identifier
+        if (request.query.importIdentifier) {
+          mappingObj.properties = mappingObj.properties || {};
+          mappingObj.properties[lookupField] = {
+            type: 'keyword',
+          };
+        }
 
         try {
           await client.indices.create({
             index: request.query.indexName,
-            ...(mapping && { body: { mappings: JSON.parse(mapping) } }),
+            ...(Object.keys(mappingObj).length > 0 && { body: { mappings: mappingObj } }),
           });
         } catch (e) {
           return response.internalError({
@@ -113,7 +136,37 @@ export function importFileRoute(
           client,
           delimiter: request.query.delimiter,
           dataSourceId: request.query.dataSource,
+          lookupId,
+          lookupField,
         });
+
+        // Create filtered alias if import identifier is provided
+        if (request.query.importIdentifier && lookupId && message.failedRows.length < 1) {
+          try {
+            await client.indices.updateAliases({
+              body: {
+                actions: [
+                  {
+                    add: {
+                      index: request.query.indexName,
+                      alias: request.query.importIdentifier,
+                      filter: {
+                        term: {
+                          [lookupField]: lookupId,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            });
+          } catch (aliasError) {
+            // Log error but don't fail the import
+            context.dataImporter!.logger.error(
+              `Failed to create alias ${request.query.importIdentifier}: ${aliasError}`
+            );
+          }
+        }
 
         return response.ok({
           body: {

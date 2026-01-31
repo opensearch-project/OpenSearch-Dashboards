@@ -21,13 +21,17 @@ export class JSONProcessor implements IFileProcessor {
   }
 
   public async ingestText(text: string, options: IngestOptions) {
-    const { client, indexName } = options;
+    const { client, indexName, lookupId, lookupField } = options;
     const document = JSON.parse(text);
+
+    // Inject lookup field if provided
+    const doc = lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+
     const isSuccessful = await new Promise<boolean>(async (resolve) => {
       try {
         await client.index({
           index: indexName,
-          body: document,
+          body: doc,
         });
         resolve(true);
       } catch (e) {
@@ -45,7 +49,7 @@ export class JSONProcessor implements IFileProcessor {
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
-    const { client, indexName } = options;
+    const { client, indexName, lookupId, lookupField } = options;
 
     const numSucessfulDocs = await new Promise<number>((resolve) => {
       let rawData = '';
@@ -58,9 +62,14 @@ export class JSONProcessor implements IFileProcessor {
             if (!isValidObject(document)) {
               resolve(0);
             }
+
+            // Inject lookup field if provided
+            const doc =
+              lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+
             await client.index({
               index: indexName,
-              body: document,
+              body: doc,
             });
             resolve(1);
           } catch (_) {
