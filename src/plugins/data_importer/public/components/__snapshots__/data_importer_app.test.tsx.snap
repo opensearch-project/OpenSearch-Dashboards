@@ -1,5 +1,347 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`App should render in embedded mode without Router and page wrappers 1`] = `
+<div>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive dataImporterEmbedded__flexGroup"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrow1 dataImporterEmbedded__leftPanel"
+    >
+      <fieldset>
+        <legend
+          class="euiFormLegend"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall"
+          >
+            Import type
+          </span>
+        </legend>
+        <fieldset
+          class="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text euiButtonGroup--fullWidth"
+        >
+          <legend
+            class="euiScreenReaderOnly"
+          >
+            Import type
+          </legend>
+          <div
+            class="euiButtonGroup__buttons"
+          >
+            <label
+              class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+              for="generated-id"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text euiButtonGroupButton__textShift"
+                  data-text="Upload"
+                  title="Upload"
+                >
+                  <input
+                    checked=""
+                    class="euiScreenReaderOnly"
+                    data-test-subj="file"
+                    id="generated-id"
+                    name="generated-id"
+                    type="radio"
+                    value=""
+                  />
+                  Upload
+                </span>
+              </span>
+            </label>
+            <label
+              class="euiButtonGroupButton euiButtonGroupButton--text"
+              for="generated-id"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text euiButtonGroupButton__textShift"
+                  data-text="Text"
+                  title="Text"
+                >
+                  <input
+                    class="euiScreenReaderOnly"
+                    data-test-subj="text"
+                    id="generated-id"
+                    name="generated-id"
+                    type="radio"
+                    value=""
+                  />
+                  Text
+                </span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      </fieldset>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <span
+        class="euiTitle euiTitle--xsmall"
+      >
+        Select an existing index or create new
+      </span>
+      <div
+        class="euiFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            class="euiComboBox"
+            role="combobox"
+          >
+            <div
+              class="euiFormControlLayout"
+            >
+              <div
+                class="euiFormControlLayout__childrenWrapper"
+              >
+                <div
+                  class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <p
+                    class="euiComboBoxPlaceholder"
+                  >
+                    Enter index name
+                  </p>
+                  <div
+                    class="euiComboBox__input"
+                    style="font-size: 14px; display: inline-block;"
+                  >
+                    <input
+                      aria-controls=""
+                      data-test-subj="comboBoxSearchInput"
+                      id="generated-id"
+                      role="textbox"
+                      style="box-sizing: content-box; width: 2px;"
+                      value=""
+                    />
+                    <div
+                      style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <button
+                    aria-label="Open list of options"
+                    class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                    data-test-subj="comboBoxToggleListButton"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <div
+        class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+      >
+        <div
+          class="euiFilePicker__wrap"
+        >
+          <input
+            accept=".csv, .json, .ndjson"
+            aria-describedby="data-importer-file-picker-filePicker__prompt"
+            class="euiFilePicker__input"
+            id="data-importer-file-picker"
+            type="file"
+          />
+          <div
+            class="euiFilePicker__prompt"
+            id="data-importer-file-picker-filePicker__prompt"
+          >
+            <span
+              aria-hidden="true"
+              class="euiFilePicker__icon"
+              data-euiicon-type="importAction"
+            />
+            <div
+              class="euiFilePicker__promptText"
+            >
+              Select or drag and drop a .csv, .json, .ndjson file
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <button
+        class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+        disabled=""
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Preview
+          </span>
+        </span>
+      </button>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <button
+        class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+        disabled=""
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Import
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrow2 dataImporterEmbedded__rightPanel"
+    >
+      <div
+        class="dataImporterEmbedded__previewContainer"
+      >
+        <div
+          style="display: flex; justify-content: space-between; align-items: center;"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <h3>
+              Preview data
+              (
+              0
+              /
+              0
+              )
+            </h3>
+          </div>
+          <div
+            class="euiFormControlLayout"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                class="euiFieldSearch customSearchBar"
+                placeholder="Search..."
+                type="search"
+                value=""
+              />
+              <div
+                class="euiFormControlLayoutIcons"
+              >
+                <span
+                  class="euiFormControlLayoutCustomIcon"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFormControlLayoutCustomIcon__icon"
+                    data-euiicon-type="search"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="previewTableContainer"
+        >
+          <table
+            class="euiTable previewTable euiTable--responsive"
+            tabindex="-1"
+          >
+            <thead>
+              <tr>
+                <th
+                  class="euiTableHeaderCell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="#"
+                    >
+                      #
+                    </span>
+                  </span>
+                </th>
+                <th
+                  class="euiTableHeaderCell"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Column"
+                    >
+                      Column
+                    </span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody />
+          </table>
+          <div
+            class="euiText euiText--medium"
+            style="margin-top: 20px;"
+          >
+            <div
+              class="euiTextAlign euiTextAlign--center"
+            >
+              <p>
+                No data to display. Please upload a file to see the preview.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`App should render with MDS 1`] = `
 <div>
   <div
@@ -172,6 +514,368 @@ exports[`App should render with MDS 1`] = `
                 </div>
               </div>
             </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <span
+              class="euiTitle euiTitle--xsmall"
+            >
+              Select an existing index or create new
+            </span>
+            <div
+              class="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <div
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  class="euiComboBox"
+                  role="combobox"
+                >
+                  <div
+                    class="euiFormControlLayout"
+                  >
+                    <div
+                      class="euiFormControlLayout__childrenWrapper"
+                    >
+                      <div
+                        class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable"
+                        data-test-subj="comboBoxInput"
+                        tabindex="-1"
+                      >
+                        <p
+                          class="euiComboBoxPlaceholder"
+                        >
+                          Enter index name
+                        </p>
+                        <div
+                          class="euiComboBox__input"
+                          style="font-size: 14px; display: inline-block;"
+                        >
+                          <input
+                            aria-controls=""
+                            data-test-subj="comboBoxSearchInput"
+                            id="generated-id"
+                            role="textbox"
+                            style="box-sizing: content-box; width: 2px;"
+                            value=""
+                          />
+                          <div
+                            style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                          />
+                        </div>
+                      </div>
+                      <div
+                        class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <button
+                          aria-label="Open list of options"
+                          class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                          data-test-subj="comboBoxToggleListButton"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <div
+              class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+            >
+              <div
+                class="euiFilePicker__wrap"
+              >
+                <input
+                  accept=".csv, .json, .ndjson"
+                  aria-describedby="data-importer-file-picker-filePicker__prompt"
+                  class="euiFilePicker__input"
+                  id="data-importer-file-picker"
+                  type="file"
+                />
+                <div
+                  class="euiFilePicker__prompt"
+                  id="data-importer-file-picker-filePicker__prompt"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon"
+                    data-euiicon-type="importAction"
+                  />
+                  <div
+                    class="euiFilePicker__promptText"
+                  >
+                    Select or drag and drop a .csv, .json, .ndjson file
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <button
+              class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Preview
+                </span>
+              </span>
+            </button>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <button
+              class="euiButton euiButton--primary euiButton--fullWidth euiButton-isDisabled"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Import
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow2"
+          >
+            <div>
+              <div
+                style="display: flex; justify-content: space-between; align-items: center;"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  <h3>
+                    Preview data
+                    (
+                    0
+                    /
+                    0
+                    )
+                  </h3>
+                </div>
+                <div
+                  class="euiFormControlLayout"
+                >
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      class="euiFieldSearch customSearchBar"
+                      placeholder="Search..."
+                      type="search"
+                      value=""
+                    />
+                    <div
+                      class="euiFormControlLayoutIcons"
+                    >
+                      <span
+                        class="euiFormControlLayoutCustomIcon"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiFormControlLayoutCustomIcon__icon"
+                          data-euiicon-type="search"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="previewTableContainer"
+              >
+                <table
+                  class="euiTable previewTable euiTable--responsive"
+                  tabindex="-1"
+                >
+                  <thead>
+                    <tr>
+                      <th
+                        class="euiTableHeaderCell"
+                        role="columnheader"
+                        scope="col"
+                      >
+                        <span
+                          class="euiTableCellContent"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                            title="#"
+                          >
+                            #
+                          </span>
+                        </span>
+                      </th>
+                      <th
+                        class="euiTableHeaderCell"
+                        role="columnheader"
+                        scope="col"
+                      >
+                        <span
+                          class="euiTableCellContent"
+                        >
+                          <span
+                            class="euiTableCellContent__text"
+                            title="Column"
+                          >
+                            Column
+                          </span>
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody />
+                </table>
+                <div
+                  class="euiText euiText--medium"
+                  style="margin-top: 20px;"
+                >
+                  <div
+                    class="euiTextAlign euiTextAlign--center"
+                  >
+                    <p>
+                      No data to display. Please upload a file to see the preview.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`App should render with Router when embedded is false 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+  >
+    <main
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <header
+        class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+      >
+        <h1
+          class="euiTitle euiTitle--large"
+        >
+          Data Importer
+        </h1>
+      </header>
+      <div
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent data_importer_content"
+        role="main"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow1"
+          >
+            <fieldset>
+              <legend
+                class="euiFormLegend"
+              >
+                <span
+                  class="euiTitle euiTitle--xsmall"
+                >
+                  Import type
+                </span>
+              </legend>
+              <fieldset
+                class="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text euiButtonGroup--fullWidth"
+              >
+                <legend
+                  class="euiScreenReaderOnly"
+                >
+                  Import type
+                </legend>
+                <div
+                  class="euiButtonGroup__buttons"
+                >
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Upload"
+                        title="Upload"
+                      >
+                        <input
+                          checked=""
+                          class="euiScreenReaderOnly"
+                          data-test-subj="file"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Upload
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Text"
+                        title="Text"
+                      >
+                        <input
+                          class="euiScreenReaderOnly"
+                          data-test-subj="text"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Text
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </fieldset>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
             <div
               class="euiSpacer euiSpacer--s"
             />
