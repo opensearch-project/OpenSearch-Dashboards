@@ -9,15 +9,11 @@ import moment from 'moment';
 import { saveAs } from 'file-saver';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import {
-  useSelector,
-  useDispatch,
-} from '../../../../application/legacy/discover/application/utils/state_management';
+import { useDispatch } from '../../../../application/legacy/discover/application/utils/state_management';
 import { exportMaxSizeCsv } from '../../../../application/utils/state_management/actions/export_actions';
-import { getLegacyDisplayedColumns } from '../../../../application/legacy/discover/application/components/default_discover_table/helper';
-import { IndexPattern, UI_SETTINGS } from '../../../../../../data/common';
+import { IndexPattern } from '../../../../../../data/common';
 import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common/legacy/discover';
+import { useDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
 
 export interface UseDiscoverDownloadCsvProps {
   hits?: number;
@@ -72,17 +68,11 @@ export const useDiscoverDownloadCsv = ({
   onError,
 }: UseDiscoverDownloadCsvProps) => {
   const dispatch = useDispatch();
-  const { uiSettings } = getServices();
+  const services = getServices();
+  const { uiSettings } = services;
   const [isLoading, setIsLoading] = useState(false);
-  const displayedColumnNames = useSelector((state) => {
-    const displayedColumns = getLegacyDisplayedColumns(
-      state.legacy.columns,
-      indexPattern,
-      uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
-      uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE)
-    );
-    return displayedColumns.map((column) => column.name);
-  });
+  // Use shared hook to ensure CSV export columns match DataTable display columns
+  const displayedColumnNames = useDisplayedColumnNames({ includeFieldCounts: true });
 
   const downloadCsvForOption = async (option: DownloadCsvFormId) => {
     try {
@@ -93,7 +83,6 @@ export const useDiscoverDownloadCsv = ({
         if (!hits) throw new Error('No hits');
         const size = Math.min(hits || 0, MAX_DOWNLOAD_CSV_COUNT);
         // Replace fetchForMaxCsvOption with Redux action
-        const services = getServices();
         await dispatch(
           exportMaxSizeCsv({
             maxSize: size,

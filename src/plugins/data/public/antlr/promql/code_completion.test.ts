@@ -45,9 +45,11 @@ const mockParseQuery = sharedUtils.parseQuery as jest.Mock;
 
 describe('promql code_completion', () => {
   describe('getSuggestions', () => {
+    const mockDataSourceMeta = { prometheusUrl: 'http://localhost:9090' };
     const mockIndexPattern = {
       id: 'test-datasource-id',
       title: 'test-index',
+      dataSourceMeta: mockDataSourceMeta,
       fields: [
         { name: 'field1', type: 'string' },
         { name: 'field2', type: 'number' },
@@ -61,11 +63,20 @@ describe('promql code_completion', () => {
       getLabelValues: jest.fn().mockResolvedValue([]),
     };
 
+    const mockTimeRange = { from: 'now-15m', to: 'now' };
+
     const mockServices = ({
       appName: 'test-app',
       data: {
         resourceClientFactory: {
           get: jest.fn().mockReturnValue(mockPrometheusClient),
+        },
+        query: {
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn().mockReturnValue(mockTimeRange),
+            },
+          },
         },
       },
     } as unknown) as IDataPluginServices;
@@ -184,10 +195,14 @@ describe('promql code_completion', () => {
       );
     });
 
-    it('should call prometheus client with indexPattern.id', async () => {
+    it('should call prometheus client with indexPattern.id, dataSourceMeta and timeRange', async () => {
       await getSimpleSuggestions('');
 
-      expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith(mockIndexPattern.id);
+      expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith(
+        mockIndexPattern.id,
+        mockDataSourceMeta,
+        mockTimeRange
+      );
     });
   });
 });

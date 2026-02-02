@@ -28,9 +28,21 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     }
   };
 
+  // Check if the message is a slash command
+  // A message is a slash command if rawMessage exists and starts with "/"
+  const isSlashCommand = () => {
+    if (message.role === 'user' && 'rawMessage' in message && message.rawMessage) {
+      return typeof message.rawMessage === 'string' && message.rawMessage.trim().startsWith('/');
+    }
+    return false;
+  };
+
   // Handle multimodal content (text + images) or simple string content
   const renderContent = () => {
-    const content = message.content || '';
+    const content =
+      message.role === 'user' && 'rawMessage' in message && message.rawMessage
+        ? message.rawMessage
+        : message.content || '';
 
     // If content is a string, render as markdown
     if (typeof content === 'string') {
@@ -92,8 +104,8 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           </div>
         </EuiPanel>
 
-        {/* Actions for user messages */}
-        {message.role === 'user' && onResend && (
+        {/* Actions for user messages - hide resend for slash commands */}
+        {message.role === 'user' && onResend && !isSlashCommand() && (
           <div className={`messageRow__actions ${isHovered ? 'messageRow__actions--visible' : ''}`}>
             <EuiButtonIcon
               iconType="refresh"

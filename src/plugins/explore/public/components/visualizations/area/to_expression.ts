@@ -29,6 +29,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  applyTimeRange,
 } from '../utils/echarts_spec';
 import {
   createAreaSeries,
@@ -74,8 +75,9 @@ export const createSimpleAreaChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
       buildAxisConfigs,
+      applyTimeRange,
       createAreaSeries({
         styles,
         categoryField: timeField,
@@ -87,6 +89,7 @@ export const createSimpleAreaChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -252,8 +255,10 @@ export const createMultiAreaChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
@@ -264,6 +269,7 @@ export const createMultiAreaChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -449,8 +455,10 @@ export const createFacetedMultiAreaChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createFacetAreaSeries({
         styles,
         categoryField: timeField,
@@ -462,6 +470,7 @@ export const createFacetedMultiAreaChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -660,7 +669,10 @@ export const createCategoryAreaChart = (
         }),
         convertTo2DArray(allColumns)
       ),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}` }),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
+        legend: { show: false },
+      }),
       buildAxisConfigs,
       createCategoryAreaSeries({
         styles,
@@ -810,6 +822,7 @@ export const createStackedAreaChart = (
       ),
       createBaseConfig({
         title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       buildVisMap({

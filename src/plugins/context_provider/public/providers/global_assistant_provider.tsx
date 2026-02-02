@@ -62,6 +62,7 @@ export function GlobalAssistantProvider({
     getToolDefinitions: service.getToolDefinitions,
     updateToolCallState: service.updateToolCallState,
     getActionRenderer: service.getActionRenderer,
+    shouldUseCustomRenderer: service.shouldUseCustomRenderer,
   };
 
   return (

@@ -23,6 +23,7 @@ export interface PieChartStyleOptions {
   addTooltip?: boolean;
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
   tooltipOptions?: TooltipOptions;
 

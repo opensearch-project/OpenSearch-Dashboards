@@ -41,7 +41,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ExportUrlAsType, UrlPanelContent } from './url_panel_content';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { shortenUrl } from '../lib/url_shortener';
 
 const defaultProps = {

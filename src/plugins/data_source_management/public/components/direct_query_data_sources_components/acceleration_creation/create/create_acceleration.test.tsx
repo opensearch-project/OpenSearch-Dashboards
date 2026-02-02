@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { CreateAcceleration } from './create_acceleration';
 import { EuiButtonEmpty, EuiFlyout, EuiForm } from '@elastic/eui';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';

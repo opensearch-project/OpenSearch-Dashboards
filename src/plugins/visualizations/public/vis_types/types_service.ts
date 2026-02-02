@@ -94,6 +94,8 @@ export class TypesService {
           } else {
             this.unregisteredHiddenTypes.push(name);
           }
+          // Hide the alias type at the same time
+          visTypeAliasRegistry.hideTypes(typeNames);
         });
       },
     };

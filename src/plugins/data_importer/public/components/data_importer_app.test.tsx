@@ -75,4 +75,63 @@ describe('App', () => {
     );
     expect(container).toMatchSnapshot();
   });
+
+  it('should render in embedded mode without Router and page wrappers', () => {
+    const dataSourceManagementMock = {
+      registerAuthenticationMethod: jest.fn(),
+      ui: {
+        DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
+        getDataSourceMenu: jest.fn(),
+      },
+      dataSourceSelection: {} as any,
+      getDefaultDataSourceId: jest.fn(),
+      getDefaultDataSourceId$: jest.fn(),
+    };
+    const container = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
+      <DataImporterPluginApp
+        basename={PLUGIN_ID}
+        notifications={notificationsMock}
+        http={httpMock}
+        savedObjects={savedObjectsMock}
+        navigation={navigationMock}
+        config={mockConfig}
+        dataSourceEnabled={false}
+        dataSourceManagement={dataSourceManagementMock}
+        embedded={true}
+      />
+    );
+    // In embedded mode, Router wrapper should not be present
+    expect(container.find('Router')).toHaveLength(0);
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should render with Router when embedded is false', () => {
+    const dataSourceManagementMock = {
+      registerAuthenticationMethod: jest.fn(),
+      ui: {
+        DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
+        getDataSourceMenu: jest.fn(),
+      },
+      dataSourceSelection: {} as any,
+      getDefaultDataSourceId: jest.fn(),
+      getDefaultDataSourceId$: jest.fn(),
+    };
+    const container = shallow(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
+      <DataImporterPluginApp
+        basename={PLUGIN_ID}
+        notifications={notificationsMock}
+        http={httpMock}
+        savedObjects={savedObjectsMock}
+        navigation={navigationMock}
+        config={mockConfig}
+        dataSourceEnabled={false}
+        dataSourceManagement={dataSourceManagementMock}
+        embedded={false}
+      />
+    );
+    // Check that the root component is Router (BrowserRouter) when not embedded
+    expect(container.type().name).toBe('BrowserRouter');
+  });
 });

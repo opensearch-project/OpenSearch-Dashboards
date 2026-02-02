@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -31,7 +31,7 @@ describe('useInitializeMetricsDataset', () => {
   const mockGetType = jest.fn();
   const mockGetDatasetService = jest.fn();
 
-  const createMockStore = (dataset?: any) => {
+  const createMockStore = (dataset?: any, language: string = 'PROMQL') => {
     return configureStore({
       reducer: {
         query: queryReducer,
@@ -39,7 +39,7 @@ describe('useInitializeMetricsDataset', () => {
       preloadedState: {
         query: {
           query: '',
-          language: 'PROMQL',
+          language,
           dataset,
         },
       },
@@ -90,8 +90,13 @@ describe('useInitializeMetricsDataset', () => {
     });
   });
 
-  const renderHookWithProvider = (services: ExploreServices, dataset?: any, savedExplore?: any) => {
-    const store = createMockStore(dataset);
+  const renderHookWithProvider = (
+    services: ExploreServices,
+    dataset?: any,
+    savedExplore?: any,
+    language: string = 'PROMQL'
+  ) => {
+    const store = createMockStore(dataset, language);
     jest.spyOn(store, 'dispatch').mockImplementation(mockDispatch);
 
     return renderHook(() => useInitializeMetricsDataset({ services, savedExplore }), {
@@ -221,7 +226,7 @@ describe('useInitializeMetricsDataset', () => {
   });
 
   describe('when dataset exists with non-PROMETHEUS type', () => {
-    it('should fetch and initialize prometheus connection', async () => {
+    it('should clear dataset and set language to PROMQL, then fetch and initialize prometheus connection', async () => {
       const mockServices = createMockServices();
       const existingDataset = { id: 'some-index', type: 'INDEX_PATTERN' };
       const mockConnection = {
@@ -247,7 +252,51 @@ describe('useInitializeMetricsDataset', () => {
       });
 
       expect(mockFetch).toHaveBeenCalled();
-      expect(mockSetQueryWithHistory).toHaveBeenCalled();
+      // First call clears dataset and sets language to PROMQL
+      expect(mockSetQueryWithHistory).toHaveBeenNthCalledWith(1, {
+        query: '',
+        language: 'PROMQL',
+        dataset: undefined,
+      });
+      // Second call sets the fetched prometheus dataset
+      expect(mockSetQueryWithHistory).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('when no dataset exists but language is not PROMQL', () => {
+    it('should set language to PROMQL and then fetch prometheus connection', async () => {
+      const mockServices = createMockServices();
+      const mockConnection = {
+        id: 'prometheus-connection-1',
+        title: 'Prometheus Connection 1',
+        type: 'PROMETHEUS',
+      };
+      const mockDataset = {
+        id: 'prometheus-connection-1',
+        type: 'PROMETHEUS',
+        title: 'Prometheus Connection 1',
+        language: 'PROMQL',
+      };
+
+      mockFetch.mockResolvedValue({
+        children: [mockConnection],
+      });
+      mockToDataset.mockReturnValue(mockDataset);
+
+      await act(async () => {
+        renderHookWithProvider(mockServices, undefined, undefined, 'SQL');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+
+      expect(mockFetch).toHaveBeenCalled();
+      // First call sets language to PROMQL when no dataset and language is not PROMQL
+      expect(mockSetQueryWithHistory).toHaveBeenNthCalledWith(1, {
+        query: '',
+        language: 'PROMQL',
+        dataset: undefined,
+      });
+      // Second call sets the fetched prometheus dataset
+      expect(mockSetQueryWithHistory).toHaveBeenCalledTimes(2);
     });
   });
 });

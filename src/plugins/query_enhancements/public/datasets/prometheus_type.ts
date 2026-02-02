@@ -5,7 +5,6 @@
 
 import {
   CORE_SIGNAL_TYPES,
-  DATA_STRUCTURE_META_TYPES,
   DataStructure,
   DataStructureCustomMeta,
   Dataset,
@@ -33,13 +32,9 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
       language: 'PROMQL',
       timeFieldName: patternMeta?.timeFieldName || 'Time',
       signalType: CORE_SIGNAL_TYPES.METRICS,
-      dataSource: connection.parent
-        ? {
-            id: connection.parent.id,
-            title: connection.parent.title,
-            type: connection.parent.type,
-          }
-        : undefined,
+      dataSource: {
+        meta: connection.meta,
+      },
     } as Dataset;
   },
 
@@ -85,12 +80,6 @@ const fetchConnections = async (services: IDataPluginServices): Promise<DataStru
           id: so.attributes.connectionId,
           title: so.attributes.connectionId,
           type: DATASET.PROMETHEUS,
-          meta: {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            language: 'promql',
-            timeFieldName: 'Time',
-            dataSourceId: so.references.find((ref) => ref.type === 'data-source')?.id,
-          },
         }))
     );
   } catch (error) {

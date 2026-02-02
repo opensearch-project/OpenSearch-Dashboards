@@ -35,6 +35,19 @@ export const DEFAULT_HEADERS = deepFreeze({
   // access system indices using the standard OpenSearch APIs without logging a warning. After migrating to
   // use the new system index APIs, this header can be removed.
   'x-opensearch-product-origin': 'opensearch-dashboards',
-  // Request compressed responses from OpenSearch to reduce payload size and improve query latency.
-  'accept-encoding': 'gzip, deflate',
 });
+
+/**
+ * Returns default headers with optional compression header based on config.
+ * @param requestCompression Whether to request compressed responses from OpenSearch.
+ */
+export const getDefaultHeaders = (requestCompression: boolean = false) => {
+  if (requestCompression) {
+    return {
+      ...DEFAULT_HEADERS,
+      // Request compressed responses from OpenSearch to reduce payload size and improve query latency.
+      'accept-encoding': 'gzip, deflate',
+    };
+  }
+  return { ...DEFAULT_HEADERS };
+};

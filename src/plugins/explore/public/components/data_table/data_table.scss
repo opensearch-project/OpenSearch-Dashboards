@@ -33,7 +33,7 @@
 
     th {
       white-space: nowrap;
-      padding-right: $euiSizeS;
+      padding-right: $ouiSizeXXS;
 
       .fa {
         font-size: 1.1em;
@@ -48,31 +48,30 @@
     // To fight intruding styles that conflict with OUI's
     & > tbody > tr > td {
       line-height: inherit;
+      border-top: 0;
+    }
+
+    & > thead > tr > th {
+      border-bottom: 0;
     }
 
     /**
-    *  Style OpenSearch document _source in table view <dt>key:<dt><dd>value</dd>
+    *  Style OpenSearch document _source field key-value pairs
     *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
     *  row in the Context Log.
     */
 
-    dl.source {
-      margin-bottom: 0;
-      line-height: 2em;
-      word-break: break-word;
-
-      dt,
-      dd {
-        display: inline;
-      }
-
-      dt {
+    span.source {
+      .source__key {
         background-color: transparentize(shade($euiColorPrimary, 20%), 0.9);
         color: $euiTextColor;
         padding: calc($euiSizeXS / 2) $euiSizeXS;
         margin-right: $euiSizeXS;
-        word-break: normal;
         border-radius: $euiBorderRadius;
+      }
+
+      .source__value {
+        margin-right: $euiSizeXS;
       }
     }
   }
@@ -117,7 +116,7 @@
     text-align: center;
   }
 
-  .truncate-by-height {
+  .exploreDocTableCell__content {
     overflow: hidden;
   }
 
@@ -130,6 +129,8 @@
 
   .explore-table {
     border-collapse: separate;
+    table-layout: auto;
+    width: 100%;
 
     tr:first-child td {
       border-top: none;
@@ -140,6 +141,44 @@
       top: 0;
       background-color: $euiColorEmptyShade;
       z-index: 1;
+    }
+
+    th,
+    td {
+      min-width: 80px;
+      max-width: 400px;
+    }
+
+    // Cell content truncation: handle nested structure
+    td .exploreDocTableCell__content {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+
+      // Data field content: truncate with ellipsis
+      > span:first-child,
+      .exploreDocTableCell__dataField {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    // Allow expand/collapse column to be narrow
+    th:first-child,
+    td:first-child {
+      min-width: auto;
+      max-width: none;
+      width: 24px;
+    }
+
+    // Time column: let it size to content (uses width: 1% from table_cell.scss)
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    td.eui-textNoWrap {
+      min-width: auto;
+      max-width: none;
     }
 
     // sub tables should not have a leading border

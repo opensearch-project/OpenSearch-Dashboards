@@ -30,6 +30,7 @@ export const pplSearchStrategyProvider = (
     endpoint: 'enhancements.pplQuery',
     useJobs: false,
     shimResponse: true,
+    requestCompression: true,
   });
 
   return {

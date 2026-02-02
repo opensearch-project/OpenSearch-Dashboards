@@ -42,7 +42,7 @@ import vfs from 'vinyl-fs';
 import File from 'vinyl';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
-import tar, { ExtractOptions } from 'tar';
+import * as tar from 'tar';
 import { ToolingLog } from '@osd/dev-utils';
 import { standardize } from '@osd/cross-platform';
 
@@ -274,11 +274,7 @@ export async function getFileHash(path: string, algo: string) {
   return hash.digest('hex');
 }
 
-export async function untar(
-  source: string,
-  destination: string,
-  extractOptions: ExtractOptions = {}
-) {
+export async function untar(source: string, destination: string, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 

@@ -80,6 +80,7 @@ export const RESOURCE_TYPES = {
     LABEL_VALUES: 'label_values',
     METRICS: 'metrics',
     METRIC_METADATA: 'metric_metadata',
+    SERIES: 'series',
     ALERTS: 'alerts',
     ALERTS_GROUPS: 'alert_manager_alert_groups',
     RULES: 'rules',

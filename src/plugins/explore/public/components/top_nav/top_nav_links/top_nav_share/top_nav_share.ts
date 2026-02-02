@@ -35,6 +35,12 @@ export const getShareButtonRun = (
     state: legacyState,
     services,
   });
+
+  // Flush any pending URL state updates to ensure the share URL contains current state.
+  // URL updates are batched asynchronously, so without flushing, the URL may not reflect
+  // the latest state (e.g., _q and _a parameters) when captured.
+  services.osdUrlStateStorage?.flush();
+
   share.toggleShareContextMenu({
     anchorElement,
     allowEmbed: false,

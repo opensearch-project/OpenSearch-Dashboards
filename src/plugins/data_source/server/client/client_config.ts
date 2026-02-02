@@ -66,9 +66,9 @@ export function parseClientOptions(
     plugins: registeredSchema,
     requestTimeout: config.globalOpenSearchConfig.requestTimeout.asMilliseconds(),
     pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
-    headers: {
-      'accept-encoding': 'gzip, deflate',
-    },
+    headers: config.globalOpenSearchConfig.requestCompression
+      ? { 'accept-encoding': 'gzip, deflate' }
+      : {},
   };
 
   return clientOptions;

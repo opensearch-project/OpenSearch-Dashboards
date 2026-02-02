@@ -21,15 +21,14 @@ import {
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
+import { calculateStep, DEFAULT_RESOLUTION } from './prom_utils';
 
-// This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
-const AUTO_STEP_TARGET_SAMPLES = 50;
 // MAX_SERIES_TABLE: Maximum series for table display
 const MAX_SERIES_TABLE = 2000;
 // MAX_SERIES_VIZ: Maximum series for visualization. This should be lower than MAX_SERIES_TABLE
 const MAX_SERIES_VIZ = 100;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
-const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES_TABLE;
+const MAX_DATAPOINTS = DEFAULT_RESOLUTION * MAX_SERIES_TABLE;
 
 /**
  * Result from executing a single query in a multi-query context
@@ -58,10 +57,8 @@ export const promqlSearchStrategyProvider = (
           start: parsedFrom.unix(),
           end: parsedTo.unix(),
         };
-        const duration = (timeRange.end - timeRange.start) * 1000;
-        const step =
-          requestBody.step ??
-          Math.max(Math.ceil(duration / AUTO_STEP_TARGET_SAMPLES) / 1000, 0.001);
+        const durationMs = (timeRange.end - timeRange.start) * 1000;
+        const step = requestBody.step ?? calculateStep(durationMs);
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
@@ -148,9 +145,31 @@ async function executeMultipleQueries(
           response: queryRes,
         };
       } catch (error) {
+        let errorMessage = `Query ${parsedQuery.label} failed`;
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
+        // Try to extract detailed error from response body from SQL plugin
+        const responseBody = (error as any)?.body ?? (error as any)?.response;
+        if (responseBody) {
+          try {
+            const parsed =
+              typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
+            errorMessage =
+              parsed?.error?.details ??
+              parsed?.error?.reason ??
+              parsed?.error?.message ??
+              errorMessage;
+          } catch {
+            // error might come from other places, use original message if failed
+          }
+        }
+
         return {
           label: parsedQuery.label,
-          error: error instanceof Error ? error.message : `Query ${parsedQuery.label} failed`,
+          error: errorMessage,
         };
       }
     }
@@ -169,7 +188,7 @@ function formatMetricLabels(metric: Record<string, string>): string {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}="${value}"`);
 
-  return labelParts.length > 0 ? `{${labelParts.join(', ')}}` : '';
+  return `{${labelParts.join(', ')}}`;
 }
 
 /**
@@ -230,6 +249,13 @@ function createDataFrame(
       const labelsWithoutName = { ...metricResult.metric };
       delete labelsWithoutName.__name__;
 
+      const formattedLabels = formatMetricLabels(metricResult.metric);
+      const seriesName = isSingleQuery ? formattedLabels : `${result.label}: ${formattedLabels}`;
+      // TODO: remove escaping if not using vega
+      // Escape brackets in series name to prevent Vega's splitAccessPath from
+      // interpreting them as array index notation when used as field names
+      const escapedSeriesName = seriesName.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+
       metricResult.values.forEach(([timestamp, value]) => {
         const metricSignature = JSON.stringify({
           name: metricName,
@@ -254,14 +280,9 @@ function createDataFrame(
         }
 
         if (seriesIndex < MAX_SERIES_VIZ) {
-          const formattedLabels = formatMetricLabels(metricResult.metric);
-          const seriesName = isSingleQuery
-            ? formattedLabels
-            : `${result.label}: ${formattedLabels}`;
-
           allVizRows.push({
             Time: timeMs,
-            Series: seriesName,
+            Series: escapedSeriesName,
             Value: Number(value),
           });
         }

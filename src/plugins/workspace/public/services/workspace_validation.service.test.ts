@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { workspaceClientMock, WorkspaceClientMock } from '../workspace_client.mock';
 import { coreMock } from '../../../../core/public/mocks';
 import { WorkspaceValidationService } from './workspace_validation_service';
 import { waitFor } from '@testing-library/dom';
-import { WORKSPACE_FATAL_ERROR_APP_ID } from '../../common/constants';
+import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
 import { WorkspaceError } from '../../../../core/public';
 
 const setupWorkspaceValidationStart = () => {
@@ -71,13 +72,19 @@ describe('WorkspaceValidationService', () => {
     });
 
     it('should redirect from error page to workspace detail when workspace becomes valid', async () => {
-      const { core, service, initialized$ } = setupWorkspaceValidationStart();
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+
+      // Simulate being on the fatal error page by replacing currentAppId$ with a BehaviorSubject
+      core.application.currentAppId$ = new BehaviorSubject<string | undefined>(
+        WORKSPACE_FATAL_ERROR_APP_ID
+      );
 
       service.start(core);
-      initialized$.next(true);
+      core.workspaces.initialized$.next(true);
 
       await waitFor(() => {
-        expect(core.application.currentAppId$.subscribe).toHaveBeenCalledWith(expect.any(Function));
+        expect(core.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_DETAIL_APP_ID);
       });
     });
 

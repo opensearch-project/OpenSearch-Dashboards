@@ -106,6 +106,10 @@ interface RulesQuery {
   resourceType: typeof RESOURCE_TYPES.PROMETHEUS.RULES;
   resourceName: undefined;
 }
+interface SeriesQuery {
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.SERIES;
+  resourceName: string; // match[] selector, e.g. '{__name__=~"metric1|metric2"}'
+}
 type PrometheusResourceQuery = CommonQuery &
   (
     | LabelsQuery
@@ -115,6 +119,7 @@ type PrometheusResourceQuery = CommonQuery &
     | AlertsQuery
     | AlertsGroupsQuery
     | RulesQuery
+    | SeriesQuery
   );
 
 class PrometheusManager extends BaseConnectionManager<
@@ -155,8 +160,7 @@ class PrometheusManager extends BaseConnectionManager<
     const { resourceType, resourceName } = query;
     switch (resourceType) {
       case RESOURCE_TYPES.PROMETHEUS.LABELS: {
-        const labelsQueryString = resourceName ? `?match[]=${resourceName}` : '';
-        return `${BASE_RESOURCE_API}/labels${labelsQueryString}`;
+        return `${BASE_RESOURCE_API}/labels`;
       }
       case RESOURCE_TYPES.PROMETHEUS.ALERTS: {
         return `${BASE_RESOURCE_API}/alerts`;
@@ -168,14 +172,16 @@ class PrometheusManager extends BaseConnectionManager<
         return `${BASE_RESOURCE_API}/label/__name__/values`;
       }
       case RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA: {
-        const metricMetadataQueryString = resourceName ? `?metric=${resourceName}` : '';
-        return `${BASE_RESOURCE_API}/metadata${metricMetadataQueryString}`;
+        return `${BASE_RESOURCE_API}/metadata`;
       }
       case RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS: {
         return `${BASE_ALERT_MANAGER_API}/alerts/groups`;
       }
       case RESOURCE_TYPES.PROMETHEUS.RULES: {
         return `${BASE_RESOURCE_API}/rules`;
+      }
+      case RESOURCE_TYPES.PROMETHEUS.SERIES: {
+        return `${BASE_RESOURCE_API}/series`;
       }
       default: {
         throw Error(`unknown resource type: ${resourceType}`);
@@ -194,14 +200,35 @@ class PrometheusManager extends BaseConnectionManager<
     });
   }
 
-  handlePostRequest(context: RequestHandlerContext, request: ResourcesRequest) {
+  handlePostRequest(
+    context: RequestHandlerContext,
+    request: ResourcesRequest<{ start?: number; end?: number }>
+  ) {
     const { id: dataSourceName } = request.body.connection;
     const { type: resourceType, name: resourceName } = request.body.resource;
+    const content = request.body.content;
+    const queryParams: Record<string, string> = {};
+
+    if (resourceType === RESOURCE_TYPES.PROMETHEUS.LABELS && resourceName) {
+      queryParams['match[]'] = resourceName;
+    } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA && resourceName) {
+      queryParams.metric = resourceName;
+    } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.SERIES && resourceName) {
+      queryParams['match[]'] = resourceName;
+    }
+
+    if (content?.start !== undefined) {
+      queryParams.start = String(content.start);
+    }
+    if (content?.end !== undefined) {
+      queryParams.end = String(content.end);
+    }
+
     const query = {
       dataSourceName,
       resourceType,
       resourceName,
-      query: {},
+      query: queryParams,
     } as PrometheusResourceQuery;
     return this.getResources(context, request, query);
   }

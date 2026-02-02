@@ -3,6 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock @ag-ui/client and @ag-ui/core before any imports that use them
+jest.mock('@ag-ui/client', () => ({
+  parseSSEStream: jest.fn(),
+  runHttpRequest: jest.fn(),
+}));
+
+jest.mock('@ag-ui/core', () => ({
+  EventType: {
+    RUN_STARTED: 'RUN_STARTED',
+    RUN_FINISHED: 'RUN_FINISHED',
+    RUN_ERROR: 'RUN_ERROR',
+    TEXT_MESSAGE_START: 'TEXT_MESSAGE_START',
+    TEXT_MESSAGE_CONTENT: 'TEXT_MESSAGE_CONTENT',
+    TEXT_MESSAGE_END: 'TEXT_MESSAGE_END',
+    TOOL_CALL_START: 'TOOL_CALL_START',
+    TOOL_CALL_ARGS: 'TOOL_CALL_ARGS',
+    TOOL_CALL_END: 'TOOL_CALL_END',
+  },
+}));
+
+// Mock the query_assist module to prevent transitive @ag-ui imports
+jest.mock('../../../../application/utils/query_assist', () => ({
+  generatePromQLWithAgUi: jest.fn(),
+}));
+
 // Mock all dependencies BEFORE any imports - targeting the specific problematic chain
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
@@ -94,7 +119,7 @@ jest.mock('@osd/monaco', () => ({
 
 // Now import after mocking
 import { act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { monaco } from '@osd/monaco';
 import { useQueryPanelEditor } from './use_query_panel_editor';
@@ -517,6 +542,7 @@ describe('useQueryPanelEditor', () => {
       });
 
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
@@ -548,8 +574,9 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should not trigger autosuggestion when text is empty', () => {
+    it('should trigger autosuggestion immediately when text is empty', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectQueryString')) return '';
@@ -559,8 +586,13 @@ describe('useQueryPanelEditor', () => {
 
       renderHook(() => useQueryPanelEditor());
 
-      // Should not set up focus event listener when text is empty
-      expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
+      // Should set up focus event listener and trigger suggestions immediately when text is empty
+      expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
+      expect(mockEditor.trigger).toHaveBeenCalledWith(
+        'keyboard',
+        'editor.action.triggerSuggest',
+        {}
+      );
     });
   });
 

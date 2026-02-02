@@ -17,7 +17,6 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "typescript": "4.5.5",
     "tsd": "^0.21.0"
   }
 }

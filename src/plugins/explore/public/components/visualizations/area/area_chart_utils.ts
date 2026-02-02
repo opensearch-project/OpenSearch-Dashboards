@@ -77,6 +77,7 @@ export const createAreaSeries = <T extends BaseChartStyle>({
     return {
       name,
       type: 'line',
+      showSymbol: false,
       connectNulls: true,
       areaStyle: {
         opacity: styles.areaOpacity || DEFAULT_OPACITY,
@@ -120,6 +121,7 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
     return cateColumns.map((item: string, seriesIndex: number) => ({
       name: String(item),
       type: 'line',
+      showSymbol: false,
       stack: `Total_${index}`, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
@@ -162,13 +164,15 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-    throw new Error('transformedData must be an array with data rows');
+    newState.series = [];
+    return newState;
   }
 
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
   const series = [
     {
       type: 'line',
+      showSymbol: false,
       name: getSeriesDisplayName(valueField, Object.values(axisColumnMappings)),
       connectNulls: true,
       areaStyle: {
@@ -204,13 +208,9 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
     throw new Error('axisColumnMappings must be available for createStackAreaSeries');
   }
 
-  if (!aggregatedData) {
-    throw new Error('aggregatedData must be available for createStackAreaSeries');
-  }
-
-  // Check if aggregatedData is in the expected 2D array format
-  if (!Array.isArray(aggregatedData) || aggregatedData.length < 2) {
-    throw new Error('aggregatedData must be a 2D array with header and data rows');
+  if (!aggregatedData || !Array.isArray(aggregatedData) || aggregatedData.length < 2) {
+    newState.series = [];
+    return newState;
   }
 
   // Find the x-axis column from axisColumnMappings
@@ -232,6 +232,7 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
   const newseries = cateColumns.map((categoryName: string, index: number) => ({
     name: String(categoryName),
     type: 'line',
+    showSymbol: false,
     stack: 'Total',
     areaStyle: {
       opacity: styles.areaOpacity || DEFAULT_OPACITY,

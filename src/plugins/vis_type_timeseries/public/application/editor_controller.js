@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
 import { getSavedObjectsClient, getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
@@ -37,6 +37,7 @@ import { VisEditor } from './components/vis_editor_lazy';
 export class EditorController {
   constructor(el, vis, eventEmitter, embeddableHandler) {
     this.el = el;
+    this.root = null;
 
     this.embeddableHandler = embeddableHandler;
     this.eventEmitter = eventEmitter;
@@ -72,7 +73,11 @@ export class EditorController {
 
     !this.state.isLoaded && (await this.fetchDefaultParams());
 
-    render(
+    if (!this.root) {
+      this.root = createRoot(this.el);
+    }
+
+    this.root.render(
       <I18nContext>
         <VisEditor
           config={getUISettings()}
@@ -86,12 +91,14 @@ export class EditorController {
           embeddableHandler={this.embeddableHandler}
           eventEmitter={this.eventEmitter}
         />
-      </I18nContext>,
-      this.el
+      </I18nContext>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
   }
 }

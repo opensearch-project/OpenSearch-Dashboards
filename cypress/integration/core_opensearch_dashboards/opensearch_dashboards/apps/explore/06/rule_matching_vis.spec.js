@@ -362,7 +362,7 @@ export const runCreateVisTests = () => {
       cy.get('body').click(0, 0);
 
       // Verify the visualization are displayed
-      cy.get('.visualization').should('be.visible');
+      cy.get('.exploreVisContainer canvas').should('be.visible');
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
     });
   });

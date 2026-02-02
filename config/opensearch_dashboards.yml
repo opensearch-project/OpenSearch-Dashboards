@@ -145,6 +145,9 @@
 # WARNING: Index patterns are user-supplied data. Disabling this will place the expectation that you are handling the data safely.
 # opensearch.disablePrototypePoisoningProtection: true
 
+# Request compressed responses from OpenSearch to reduce payload size and improve query latency.
+# opensearch.requestCompression: true
+
 # Specifies the path where OpenSearch Dashboards creates the process ID file.
 # pid.file: /var/run/opensearchDashboards.pid
 
@@ -410,6 +413,9 @@
 
 # @experimental Set the value to true to enable discover traces
 # explore.discoverTraces.enabled: true
+
+# @experimental Set the value to true to enable discover metrics
+# explore.discoverMetrics.enabled: true
 
 # @experimental Set the enabled value to true and provide an AG-UI agent to enable chat
 # chat:

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GaugeSeriesOption } from 'echarts';
-import { PipelineFn } from '../utils/echarts_spec';
+import { GaugeSeriesOption, CustomSeriesOption } from 'echarts';
+import { PipelineFn, EChartsSpecState, BaseChartStyle } from '../utils/echarts_spec';
 import { GaugeChartStyle } from './gauge_vis_config';
 import { getSeriesDisplayName } from '../utils/series';
 import { calculateValue } from '../utils/calculation';
@@ -45,10 +45,10 @@ export const createGaugeSeries = ({
   const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
 
-  const series: GaugeSeriesOption[] = [];
+  const series: Array<GaugeSeriesOption | CustomSeriesOption> = [];
 
   // TODO use instance width and height
-  const fontSizeFactor = 50;
+  const fontSizeFactor = 12;
 
   seriesFields.forEach((item: string) => {
     if (!transformedData.length || !Array.isArray(transformedData[0])) {
@@ -80,9 +80,6 @@ export const createGaugeSeries = ({
     const selectedUnit = getUnitById(styles?.unitId);
 
     const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
-
-    const valueFontSize = fontSizeFactor * (selectedUnit?.fontScale ?? 1);
-    const titleFontSize = fontSizeFactor / 3;
 
     const { minBase, maxBase } = getMaxAndMinBase(
       minNumber,
@@ -122,19 +119,24 @@ export const createGaugeSeries = ({
       type: 'gauge',
       center: ['50%', '60%'],
       startAngle: 200,
+      radius: '100%',
       endAngle: -20,
-      radius: '90%',
+      z: 5,
       min: minBase,
       max: maxBase,
       progress: {
-        show: false,
+        show: true,
+        width: fontSizeFactor + 2,
+        itemStyle: {
+          color: getColors().backgroundShade,
+        },
       },
       pointer: {
         show: false,
       },
       axisLine: {
         lineStyle: {
-          width: 6,
+          width: fontSizeFactor + 4,
           ...(normalizeThresholds.length > 0 && { color: normalizeThresholds }),
         },
       },
@@ -151,25 +153,14 @@ export const createGaugeSeries = ({
         show: false,
       },
       title: {
-        show: styles.showTitle ?? false,
-        offsetCenter: [0, `${(selectedUnit?.fontScale ?? 1) * 3} %`],
-        fontSize: titleFontSize,
-        color: getColors().text,
+        show: false,
       },
       detail: {
-        valueAnimation: true,
-        width: '60%',
-        offsetCenter: [0, '-15%'],
-        fontSize: valueFontSize,
-        fontWeight: 'bolder',
-        formatter: () => {
-          return displayValue;
-        },
-        color: styles?.useThresholdColor ? textColor : getColors().text,
+        show: false,
       },
       data: [
         {
-          value: calculatedValue,
+          value: maxBase,
           name: styles?.title || seriesDisplayName,
         },
       ],
@@ -178,9 +169,10 @@ export const createGaugeSeries = ({
     const valueArc: GaugeSeriesOption = {
       type: 'gauge',
       center: ['50%', '60%'],
+      radius: '100%',
       startAngle: 200,
       endAngle: -20,
-      radius: '102%',
+      z: 10,
       min: minBase,
       max: maxBase,
       itemStyle: {
@@ -222,11 +214,88 @@ export const createGaugeSeries = ({
       ],
     };
 
-    series.push(thresholdArc);
+    const textCustom: CustomSeriesOption = {
+      type: 'custom',
+      coordinateSystem: 'polar',
+      tooltip: { show: false },
+      data: [
+        {
+          value: calculatedValue,
+        },
+      ],
+      renderItem(params, api) {
+        const width = api.getWidth();
+        const height = api.getHeight();
+
+        const textSizeFactor = Math.min(width, height) / 20;
+        const valueFontSize = 2 * textSizeFactor * (selectedUnit?.fontScale ?? 1);
+        const titleFontSize = textSizeFactor / 2;
+        return {
+          type: 'group',
+          x: width * 0.5,
+          y: height * 0.6,
+          children: [
+            {
+              type: 'text' as const,
+              style: {
+                x: 0,
+                y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
+                text: displayValue,
+                textAlign: 'center',
+                fontSize: valueFontSize,
+                fontWeight: 'bold',
+                fill: textColor,
+              },
+            },
+            ...(styles.showTitle
+              ? [
+                  {
+                    type: 'text' as const,
+                    style: {
+                      x: 0,
+                      y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
+                      text: styles?.title || seriesDisplayName,
+                      textAlign: 'center',
+                      fontSize: titleFontSize,
+                      fill: getColors().text,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        };
+      },
+    };
+
     series.push(valueArc);
+    series.push(thresholdArc);
+    series.push(textCustom);
   });
 
   newState.series = series;
 
   return newState;
+};
+
+export const assembleGaugeSpec = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { baseConfig, transformedData = [], series } = state;
+
+  const spec = {
+    ...baseConfig,
+    // Polar coordinate for text layer
+    angleAxis: { show: false },
+    radiusAxis: {
+      show: false,
+    },
+    polar: {
+      center: ['50%', '60%'],
+      radius: '100%',
+    },
+    dataset: { source: transformedData },
+    series,
+  };
+
+  return { ...state, spec };
 };
