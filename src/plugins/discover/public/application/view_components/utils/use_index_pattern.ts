@@ -72,6 +72,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           const indexPatternList = await data.indexPatterns.getCache();
           const newId = getIndexPatternId(
             '',
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             indexPatternList || [],
             uiSettings.get('defaultIndex')
           );

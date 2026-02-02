@@ -100,6 +100,7 @@ export const UpdateAwsCredentialModal = ({
               })}
             >
               <EuiText size="s" data-test-subj="data-source-update-credential-service-name">
+                {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
                 {sigV4ServiceOptions.find((option) => option.value === service)?.text}
               </EuiText>
             </EuiCompressedFormRow>

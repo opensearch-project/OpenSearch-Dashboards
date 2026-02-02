@@ -87,6 +87,7 @@ export async function extractUntrackedMessagesTask({
 
       for (const { name, content } of files) {
         const reporterWithContext = reporter.withContext({ name });
+        // @ts-expect-error TS2571 TODO(ts-error): fixme
         for (const [id] of extractFunction(content, reporterWithContext)) {
           const errorMessage = `Untracked file contains i18n label (${id}).`;
           reporterWithContext.report(createFailError(errorMessage));

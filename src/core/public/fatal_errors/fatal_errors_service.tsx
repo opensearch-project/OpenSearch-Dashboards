@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 
@@ -142,15 +142,15 @@ export class FatalErrorsService {
     const container = document.createElement('div');
     this.rootDomElement.appendChild(container);
 
-    render(
+    const root = createRoot(container);
+    root.render(
       <i18n.Context>
         <FatalErrorsScreen
           buildNumber={injectedMetadata.getOpenSearchDashboardsBuildNumber()}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           errorInfo$={this.errorInfo$}
         />
-      </i18n.Context>,
-      container
+      </i18n.Context>
     );
   }
 

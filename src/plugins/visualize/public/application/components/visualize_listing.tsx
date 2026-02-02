@@ -44,6 +44,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
 import { getUiActions } from '../../services';
 import { SAVED_OBJECT_DELETE_TRIGGER } from '../../../../saved_objects_management/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { HeaderVariant } from '../../../../../core/public/index';
 import { constructVisBuilderPath } from '../utils/construct_vis_builder_path';
 

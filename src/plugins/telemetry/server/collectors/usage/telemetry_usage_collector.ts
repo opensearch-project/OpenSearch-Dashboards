@@ -81,6 +81,7 @@ export async function readTelemetryFile<T extends object>(
       const data = load(yaml.toString());
 
       // don't bother returning empty objects
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       if (Object.keys(data).length) {
         // ensure { "a.b": "value" } becomes { "a": { "b": "value" } }
         return ensureDeepObject(data);

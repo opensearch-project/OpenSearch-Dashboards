@@ -27,6 +27,7 @@ const tokenDictionary: TokenDictionary = {
   JOIN: 5,
   SEMICOLON: 6,
   SELECT: 7,
+  ID: 8,
 };
 
 describe('Autocomplete Utils', () => {

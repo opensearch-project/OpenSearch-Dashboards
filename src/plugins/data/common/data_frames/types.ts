@@ -146,9 +146,10 @@ export interface QueryFailedStatusResponse {
   body: IDataFrameError;
 }
 
-export type FetchStatusResponse =
+export type FetchStatusResponse = { queryId?: string } & (
   | QueryFailedStatusResponse
   | QuerySuccessStatusResponse
-  | { status?: string };
+  | { status?: string }
+);
 
 export type PollQueryResultsHandler = () => Promise<FetchStatusResponse>;

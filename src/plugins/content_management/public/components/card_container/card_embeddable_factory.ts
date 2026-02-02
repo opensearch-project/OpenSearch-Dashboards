@@ -14,6 +14,10 @@ export class CardEmbeddableFactoryDefinition implements EmbeddableFactoryDefinit
     return false;
   }
 
+  public canCreateNew() {
+    return false;
+  }
+
   public async create(initialInput: CardEmbeddableInput, parent?: IContainer) {
     return new CardEmbeddable(initialInput, parent);
   }

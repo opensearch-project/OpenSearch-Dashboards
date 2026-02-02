@@ -14,11 +14,13 @@ describe('Test on ShowDataSourceOption', () => {
     const item: DataSourceOption = {
       id: '1',
       label: 'DataSource 1',
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       visible: true,
     };
     const defaultDataSource = null;
 
     const component = shallow(
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       <DataSourceItem option={item} defaultDataSource={defaultDataSource} />
     );
 
@@ -36,6 +38,7 @@ describe('Test on ShowDataSourceOption', () => {
     const defaultDataSource = '1';
 
     const component = shallow(
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       <DataSourceItem option={item} defaultDataSource={defaultDataSource} />
     );
 
@@ -48,10 +51,12 @@ describe('Test on ShowDataSourceOption', () => {
     const item: DataSourceOption = {
       id: 'default data source',
       label: 'DataSource 1',
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       visible: true,
     };
     const defaultDataSource = 'default data source';
     const wrapper = shallow(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <DataSourceItem className="test" option={item} defaultDataSource={defaultDataSource} />
     );
 

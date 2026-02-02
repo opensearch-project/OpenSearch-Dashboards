@@ -19,6 +19,7 @@ const ComponentForRender = (props: { renderFn: typeof renderImportSampleDataApp 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (container.current) {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const destroyFn = props.renderFn(container.current, coreStartMocks);
       return () => {
         destroyFn.then((res) => res());

@@ -1,0 +1,57 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Override app-wrapper min-height to prevent scroll bar
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+.app-wrapper {
+  min-height: 60vh !important;
+}
+
+.exploreTraceView {
+  &__loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+
+  &__resizableContainer {
+    height: calc(100vh - 140px);
+  }
+
+  &__mainPanel {
+    height: 100%;
+  }
+
+  &__sidebarPanel {
+    height: 100%;
+  }
+
+  &__tabsContainer {
+    padding-left: $ouiSizeXXS;
+    padding-right: $ouiSizeXXS;
+    padding-bottom: $ouiSizeXXS;
+  }
+
+  &__filtersContainer {
+    padding: 0 $ouiSizeXXS;
+  }
+
+  &__serviceLegendColorIndicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
+  }
+}
+
+.visStylePanelLeft {
+  padding-left: $ouiSizeXXS;
+  padding-right: $ouiSizeXXS;
+}
+
+.visStylePanelRight {
+  padding-left: $ouiSizeXXS;
+  padding-right: $ouiSizeXXS;
+}

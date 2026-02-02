@@ -42,6 +42,7 @@ const WorkspaceInitialPage = (props: { isDashboardAdmin: boolean }) => {
   return (
     <IntlProvider locale="en">
       <Provider>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceInitial registeredUseCases$={registeredUseCases$} />
       </Provider>
     </IntlProvider>

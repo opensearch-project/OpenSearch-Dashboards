@@ -47,6 +47,7 @@ export const DataTab = () => {
   const aggProps = useAggs();
   const [activeSchemaFields, setActiveSchemaFields] = useState<SchemaDisplayStates>(() => {
     return schemas.all.reduce((acc, schema) => {
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       acc[schema.name] = [];
       return acc;
     }, {});
@@ -56,6 +57,7 @@ export const DataTab = () => {
 
   useEffect(() => {
     const newState = schemas.all.reduce((acc, schema) => {
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       acc[schema.name] = [];
       return acc;
     }, {});

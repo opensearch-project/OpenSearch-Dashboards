@@ -26,6 +26,7 @@ const setup = (options?: Partial<WorkspacePermissionSettingInputProps>) => {
       onPermissionModesChange={onPermissionModesChangeMock}
       onDelete={onDeleteMock}
       onTypeChange={onTypeChangeMock}
+      userOrGroupDisabled={false}
       {...options}
     />
   );

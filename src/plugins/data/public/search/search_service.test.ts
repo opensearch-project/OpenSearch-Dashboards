@@ -32,6 +32,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { CoreSetup, CoreStart } from '../../../../core/public';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
+import { IOpenSearchDashboardsSearchRequest } from '../../common';
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -69,6 +70,42 @@ describe('Search service', () => {
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
       expect(start).toHaveProperty('searchSource');
+    });
+  });
+
+  describe('getLanguageId', () => {
+    const getLanguageId = (request: IOpenSearchDashboardsSearchRequest) => {
+      return (searchService as any).getLanguageId(request);
+    };
+
+    it('returns language from query.queries[0].language when available', () => {
+      const request = {
+        params: { body: { query: { queries: [{ language: 'PPL' }] } } },
+      } as IOpenSearchDashboardsSearchRequest;
+
+      expect(getLanguageId(request)).toBe('PPL');
+    });
+
+    it('returns "kuery" when query.bool is present', () => {
+      const request = {
+        params: { body: { query: { bool: { must: [] } } } },
+      } as IOpenSearchDashboardsSearchRequest;
+
+      expect(getLanguageId(request)).toBe('kuery');
+    });
+
+    it('returns undefined when neither query.queries[0].language nor query.bool is present', () => {
+      const request = { params: { body: { query: {} } } } as IOpenSearchDashboardsSearchRequest;
+
+      expect(getLanguageId(request)).toBeUndefined();
+    });
+
+    it('returns undefined when request.params.body.query has empty queries array', () => {
+      const request = {
+        params: { body: { query: { queries: [] } } },
+      } as IOpenSearchDashboardsSearchRequest;
+
+      expect(getLanguageId(request)).toBeUndefined();
     });
   });
 });

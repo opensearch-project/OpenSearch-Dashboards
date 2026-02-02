@@ -24,6 +24,7 @@ import {
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
+import { UiSettingScope } from '../../../../core/public';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';
@@ -37,7 +38,10 @@ import {
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
-import { DataConnectionSavedObjectAttributes } from '../../../data_source/common/data_connections';
+import {
+  DataConnectionSavedObjectAttributes,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../../data_source/common/data_connections';
 import { DataSourceEngineType } from '../../../data_source/common/data_sources';
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
@@ -46,8 +50,10 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   if (!Array.isArray(res)) {
     throw new Error('Unexpected response format: expected an array of direct query connections.');
   }
-  const directQueryConnections: DataSourceTableItem[] = res.map(
-    (dataConnection: DirectQueryDatasourceDetails) => ({
+  const directQueryConnections: DataSourceTableItem[] = res
+    // Prometheus will come from data-connection saved objects
+    .filter((dc: DirectQueryDatasourceDetails) => dc.connector !== 'PROMETHEUS')
+    .map((dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataSourceId}-${dataConnection.name}`,
       title: dataConnection.name,
       type:
@@ -58,8 +64,7 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,
       parentId: dataSourceId,
-    })
-  );
+    }));
   return directQueryConnections;
 };
 
@@ -86,8 +91,10 @@ export const getRemoteClusterConnections = async (dataSourceId: string, http: Ht
 
 export const getLocalClusterConnections = async (http: HttpSetup) => {
   const res = await http.get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=`);
-  const localClusterConnections: DataSourceTableItem[] = res.map(
-    (dataConnection: DirectQueryDatasourceDetails) => ({
+  const localClusterConnections: DataSourceTableItem[] = res
+    // Prometheus will come from data-connection saved objects
+    .filter((dc: DirectQueryDatasourceDetails) => dc.connector !== 'PROMETHEUS')
+    .map((dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataConnection.name}`,
       title: dataConnection.name,
       type:
@@ -98,8 +105,7 @@ export const getLocalClusterConnections = async (http: HttpSetup) => {
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,
       parentId: LOCAL_CLUSTER,
-    })
-  );
+    }));
   return localClusterConnections;
 };
 
@@ -272,25 +278,27 @@ export async function getDataSourcesWithFields(
 
 export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  scope: UiSettingScope
 ) {
-  if (!getDefaultDataSourceId(uiSettings)) {
-    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+  if (!(await getDefaultDataSourceId(uiSettings, scope))) {
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false, scope);
   }
 }
 
 export async function setFirstDataSourceAsDefault(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient,
-  exists: boolean
+  exists: boolean,
+  scope: UiSettingScope
 ) {
   if (exists) {
-    uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
+    await uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, scope);
   }
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId);
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId, scope);
   }
 }
 
@@ -335,8 +343,20 @@ export function getFilteredDataSources(
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 }
 
-export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient) {
+export async function getDefaultDataSourceId(
+  uiSettings?: IUiSettingsClient,
+  scope?: UiSettingScope
+) {
   if (!uiSettings) return null;
+  // if specify the scope, then we will call getUserProvidedWithScope to request from server
+  // otherwise, we will get defaultDataSource stored in cache
+  if (scope) {
+    const result = await uiSettings.getUserProvidedWithScope<string | null>(
+      DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+      scope
+    );
+    return result;
+  }
   return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 
@@ -428,11 +448,24 @@ export async function deleteDataSourceById(
 
 export async function deleteMultipleDataSources(
   savedObjectsClient: SavedObjectsClientContract,
-  selectedDataSources: DataSourceTableItem[]
+  selectedDataSources: DataSourceTableItem[],
+  http: HttpSetup
 ) {
   await Promise.all(
     selectedDataSources.map(async (selectedDataSource) => {
-      await deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
+      if (selectedDataSource.objectType === DATA_CONNECTION_SAVED_OBJECT_TYPE) {
+        const savedObject = await savedObjectsClient.get(
+          DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          selectedDataSource.id
+        );
+        const dataSourceMDSId = savedObject.references.find((r) => r.type === 'data-source')?.id;
+        return http.delete(
+          `${DATACONNECTIONS_BASE}/${selectedDataSource.title}/dataSourceMDSId=${
+            dataSourceMDSId || ''
+          }`
+        );
+      }
+      return deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
     })
   );
 }
@@ -553,6 +586,9 @@ export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGr
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
   'UiSettings'
+);
+export const [getWorkspaces, setWorkspaces] = createGetterSetter<CoreStart['workspaces']>(
+  'Workspaces'
 );
 
 export interface HideLocalCluster {

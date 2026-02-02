@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
+import { waitFor } from '@testing-library/react';
 import * as utils from '../utils';
 import { DataSourceTable } from './data_source_table';
 import { mount, ReactWrapper } from 'enzyme';
@@ -21,6 +22,7 @@ import {
 } from '../../mocks';
 import { BehaviorSubject } from 'rxjs';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
+import { UiSettingScope } from '../../../../../core/public';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -33,7 +35,16 @@ const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 describe('DataSourceTable', () => {
   const mockedContext = {
     ...mockManagementPlugin.createDataSourceManagementContext(),
-    application: { capabilities: { dataSource: { canManage: true } } },
+    application: {
+      capabilities: {
+        dataSource: {
+          canManage: true,
+        },
+        dashboards: {
+          isDashboardAdmin: false,
+        },
+      },
+    },
   };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -69,7 +80,7 @@ describe('DataSourceTable', () => {
   describe('should get datasources successful', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -172,11 +183,43 @@ describe('DataSourceTable', () => {
         // @ts-ignore
         await component.find(confirmModalIdentifier).props().onConfirm();
       });
-      component.update();
+
       expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
-      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
       // @ts-ignore
-      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+      await waitFor(() => {
+        component.update();
+        expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+      });
+    });
+
+    it('should get workspace-scope default data source if currently in a workspace', async () => {
+      mockedContext.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>({
+        id: 'workspace-id',
+        name: 'workspace name',
+      });
+
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+      expect(uiSettings.getUserProvidedWithScope).toHaveBeenCalledWith(
+        'defaultDataSource',
+        UiSettingScope.WORKSPACE
+      );
     });
   });
 
@@ -215,7 +258,8 @@ describe('DataSourceTable', () => {
   describe('data source table with actions', () => {
     beforeEach(() => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
     });
 
     test('should display set as default action', async () => {
@@ -257,7 +301,11 @@ describe('DataSourceTable', () => {
         .find('[data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"]')
         .first()
         .simulate('click');
-      expect(uiSettings.set).toBeCalledWith(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, 'alpha-test');
+      expect(uiSettings.set).toBeCalledWith(
+        DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+        'alpha-test',
+        UiSettingScope.WORKSPACE
+      );
 
       // reset to original value
       mockedContext.workspaces.currentWorkspace$ = currentWorkspace$;
@@ -310,7 +358,7 @@ describe('DataSourceTable', () => {
       });
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
-        ...capabilities,
+        dataSource: { canManage: false },
         dashboards: { isDashboardAdmin: true },
       };
 
@@ -400,7 +448,7 @@ describe('DataSourceTable', () => {
       // Mock that the current user is dashboard admin
       mockedContext.application.capabilities = {
         ...capabilities,
-        dashboards: { isDashboardAdmin: true },
+        dataSource: { canManage: true },
       };
 
       await act(async () => {
@@ -437,10 +485,11 @@ describe('DataSourceTable', () => {
 
   describe('should handle datasources with empty description correctly', () => {
     beforeEach(async () => {
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(
         Promise.resolve(getMappedDataSourcesWithEmptyDescription)
       );
-      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -478,6 +527,7 @@ describe('DataSourceTable', () => {
 
   describe('should handle opensearch remote clusters', () => {
     beforeEach(async () => {
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(
         Promise.resolve(getDataSourcesWithCrossClusterConnections)
       );
@@ -515,6 +565,38 @@ describe('DataSourceTable', () => {
 
       // validate that we are now able to see the remote clusters
       expect(component.text()).toContain('connectionAlias1');
+    });
+  });
+
+  describe('uiSettings APIs throw failure', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(
+        Promise.reject(new Error('Failed to get default data source'))
+      );
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+    test('should show warning when fail to get default data source', async () => {
+      await waitFor(() => {
+        expect(mockedContext.notifications.toasts.addWarning).toHaveBeenCalled();
+      });
     });
   });
 });

@@ -10,7 +10,7 @@ import { CreateAccelerationButton } from './create_acceleration_button';
 import { DirectQueryLoadingStatus, CreateAccelerationForm } from '../../../../../framework/types';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { useDirectQuery } from '../../../../../framework/hooks/direct_query_hook';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 jest.mock('../../../../../framework/hooks/direct_query_hook');
 jest.mock('./utils', () => ({
@@ -123,6 +123,7 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -134,6 +135,7 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -146,6 +148,7 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -168,6 +171,7 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -194,6 +198,7 @@ describe('CreateAccelerationButton', () => {
       await act(async () => {
         const onClick = wrapper.find(EuiButton).prop('onClick');
         if (onClick) {
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           onClick({} as React.MouseEvent<HTMLElement>);
         }
       });

@@ -62,9 +62,13 @@ export function parseClientOptions(
   const clientOptions: ClientOptions = {
     node: endpoint,
     ssl: sslConfig,
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     plugins: registeredSchema,
     requestTimeout: config.globalOpenSearchConfig.requestTimeout.asMilliseconds(),
     pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
+    headers: config.globalOpenSearchConfig.requestCompression
+      ? { 'accept-encoding': 'gzip, deflate' }
+      : {},
   };
 
   return clientOptions;

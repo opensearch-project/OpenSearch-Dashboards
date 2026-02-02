@@ -109,6 +109,7 @@ export class DataSourceSavedObjectsClientWrapper {
             wrapperOptions,
             id,
             attributes,
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             options
           );
 
@@ -143,12 +144,14 @@ export class DataSourceSavedObjectsClientWrapper {
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
     private authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
-    private endpointBlockedIps?: string[]
+    private endpointBlockedIps?: string[],
+    private endpointAllowlistedSuffixes?: string[]
   ) {}
 
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     await this.validateAttributes(attributes);
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { endpoint, auth } = attributes;
 
     switch (auth.type) {
@@ -186,6 +189,7 @@ export class DataSourceSavedObjectsClientWrapper {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { auth, endpoint } = attributes;
 
     if (endpoint) {
@@ -252,6 +256,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async validateAttributes<T = unknown>(attributes: T) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { title, endpoint, auth } = attributes;
     this.validateTitle(title);
     this.validateEndpoint(endpoint);
@@ -259,9 +264,18 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private validateEndpoint(endpoint: string) {
-    if (!isValidURL(endpoint, this.endpointBlockedIps)) {
+    const validationResult = isValidURL(
+      endpoint,
+      this.endpointBlockedIps,
+      this.endpointAllowlistedSuffixes
+    );
+    if (!validationResult.valid) {
+      // Log detailed error for server-side debugging
+      this.logger.error(`Endpoint validation failed for ${endpoint}: ${validationResult.error}`);
+
+      // Throw error with safe user message
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"endpoint" attribute is not valid or allowed'
+        validationResult.userMessage || 'Endpoint URL validation failed'
       );
     }
   }
@@ -285,6 +299,7 @@ export class DataSourceSavedObjectsClientWrapper {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { type, credentials } = auth;
 
     if (!type) {
@@ -476,6 +491,7 @@ export class DataSourceSavedObjectsClientWrapper {
     encryptionContext: EncryptionContext
   ) {
     const {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       credentials: { username, password },
     } = auth;
 
@@ -490,6 +506,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
     const {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       credentials: { accessKey, secretKey, region, service },
     } = auth;
 

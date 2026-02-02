@@ -16,7 +16,7 @@ import {
 } from '../../../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
 import { EditDataSourceForm } from './edit_data_source_form';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import {
   AuthType,
   noAuthCredentialAuthMethod,
@@ -24,6 +24,9 @@ import {
   usernamePasswordAuthMethod,
 } from '../../../../types';
 import { AuthenticationMethod, AuthenticationMethodRegistry } from '../../../../auth_registry';
+
+// Helper to flush all pending timers and microtasks
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 const titleFieldIdentifier = 'dataSourceTitle';
 const titleFormRowIdentifier = '[data-test-subj="editDataSourceTitleFormRow"]';
@@ -36,6 +39,7 @@ const usernameFormRowIdentifier = '[data-test-subj="editDatasourceUsernameFormRo
 const passwordFieldIdentifier = '[data-test-subj="updateDataSourceFormPasswordField"]';
 const updatePasswordBtnIdentifier = '[data-test-subj="editDatasourceUpdatePasswordBtn"]';
 const updateAwsCredsBtnIdentifier = '[data-test-subj="editDatasourceUpdateAwsCredentialBtn"]';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 const regionFieldIdentifier = 'dataSourceRegion';
 const accessKeyFieldIdentifier = 'dataSourceAccessKey';
 const accessKeyFormRowIdentifier = '[data-test-subj="editDataSourceFormAccessKeyField"]';
@@ -78,28 +82,32 @@ describe('Datasource Management: Edit Datasource Form', () => {
   };
 
   describe('Case 1: With Username & Password', () => {
-    beforeEach(() => {
-      component = mount(
-        wrapWithIntl(
-          <EditDataSourceForm
-            existingDataSource={mockDataSourceAttributesWithAuth}
-            existingDatasourceNamesList={existingDatasourceNamesList}
-            isDefault={false}
-            onDeleteDataSource={mockFn}
-            handleSubmit={mockFn}
-            onSetDefaultDataSource={mockFn}
-            handleTestConnection={mockFn}
-            displayToastMessage={mockFn}
-            canManageDataSource={true}
-          />
-        ),
-        {
-          wrappingComponent: OpenSearchDashboardsContextProvider,
-          wrappingComponentProps: {
-            services: mockedContext,
-          },
-        }
-      );
+    beforeEach(async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            // @ts-expect-error TS2739 TODO(ts-error): fixme
+            <EditDataSourceForm
+              existingDataSource={mockDataSourceAttributesWithAuth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              handleSubmit={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={true}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
       component.update();
     });
 
@@ -193,6 +201,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -212,6 +221,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             .find('[data-test-subj="datasource-edit-cancelButton"]')
             .first()
             .simulate('click');
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -226,6 +236,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -243,6 +254,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           );
           component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
           expect(mockFn).toHaveBeenCalled();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -250,28 +262,32 @@ describe('Datasource Management: Edit Datasource Form', () => {
   });
 
   describe('Case 2: With No Authentication', () => {
-    beforeEach(() => {
-      component = mount(
-        wrapWithIntl(
-          <EditDataSourceForm
-            existingDataSource={mockDataSourceAttributesWithNoAuth}
-            existingDatasourceNamesList={existingDatasourceNamesList}
-            isDefault={false}
-            onDeleteDataSource={mockFn}
-            onSetDefaultDataSource={mockFn}
-            handleSubmit={mockFn}
-            handleTestConnection={mockFn}
-            displayToastMessage={mockFn}
-            canManageDataSource={true}
-          />
-        ),
-        {
-          wrappingComponent: OpenSearchDashboardsContextProvider,
-          wrappingComponentProps: {
-            services: mockedContext,
-          },
-        }
-      );
+    beforeEach(async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <EditDataSourceForm
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
+              existingDataSource={mockDataSourceAttributesWithNoAuth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleSubmit={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={true}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
       component.update();
     });
 
@@ -330,6 +346,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -347,6 +364,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           );
           component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
           expect(mockFn).toHaveBeenCalled();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -363,28 +381,32 @@ describe('Datasource Management: Edit Datasource Form', () => {
   });
 
   describe('Case 3: With AWSsigv4', () => {
-    beforeEach(() => {
-      component = mount(
-        wrapWithIntl(
-          <EditDataSourceForm
-            existingDataSource={mockDataSourceAttributesWithSigV4Auth}
-            existingDatasourceNamesList={existingDatasourceNamesList}
-            isDefault={false}
-            onDeleteDataSource={mockFn}
-            handleSubmit={mockFn}
-            onSetDefaultDataSource={mockFn}
-            handleTestConnection={mockFn}
-            displayToastMessage={mockFn}
-            canManageDataSource={true}
-          />
-        ),
-        {
-          wrappingComponent: OpenSearchDashboardsContextProvider,
-          wrappingComponentProps: {
-            services: mockedContext,
-          },
-        }
-      );
+    beforeEach(async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <EditDataSourceForm
+              // @ts-expect-error TS2741 TODO(ts-error): fixme
+              existingDataSource={mockDataSourceAttributesWithSigV4Auth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              handleSubmit={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={true}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
       component.update();
     });
 
@@ -493,6 +515,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -512,6 +535,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             .find('[data-test-subj="datasource-edit-cancelButton"]')
             .first()
             .simulate('click');
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -526,6 +550,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             // @ts-ignore
             component.find(descriptionFormRowIdentifier).first().props().isInvalid
           ).toBeUndefined();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -543,6 +568,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
           );
           component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
           expect(mockFn).toHaveBeenCalled();
+          // @ts-expect-error TS2794 TODO(ts-error): fixme
           resolve();
         }, 100)
       );
@@ -550,29 +576,33 @@ describe('Datasource Management: Edit Datasource Form', () => {
   });
 
   describe('Case 4: With Cross Cluster Connection Alias', () => {
-    beforeEach(() => {
-      component = mount(
-        wrapWithIntl(
-          <EditDataSourceForm
-            existingDataSource={mockDataSourceAttributesWithNoAuth}
-            existingDatasourceNamesList={existingDatasourceNamesList}
-            isDefault={false}
-            onDeleteDataSource={mockFn}
-            handleSubmit={mockFn}
-            onSetDefaultDataSource={mockFn}
-            handleTestConnection={mockFn}
-            displayToastMessage={mockFn}
-            canManageDataSource={true}
-            crossClusterConnectionAlias="test-cluster"
-          />
-        ),
-        {
-          wrappingComponent: OpenSearchDashboardsContextProvider,
-          wrappingComponentProps: {
-            services: mockedContext,
-          },
-        }
-      );
+    beforeEach(async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <EditDataSourceForm
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
+              existingDataSource={mockDataSourceAttributesWithNoAuth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              handleSubmit={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={true}
+              crossClusterConnectionAlias="test-cluster"
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
       component.update();
     });
 
@@ -603,55 +633,63 @@ describe('Datasource Management: Edit Datasource Form', () => {
   });
 
   describe('Case 5: Cross Cluster Connection Error Cases', () => {
-    beforeEach(() => {
-      component = mount(
-        wrapWithIntl(
-          <EditDataSourceForm
-            existingDataSource={mockDataSourceAttributesWithNoAuth}
-            existingDatasourceNamesList={existingDatasourceNamesList}
-            isDefault={false}
-            onDeleteDataSource={mockFn}
-            handleSubmit={mockFn}
-            onSetDefaultDataSource={mockFn}
-            handleTestConnection={mockFn}
-            displayToastMessage={mockFn}
-            canManageDataSource={true}
-            crossClusterConnectionAlias="test:cluster"
-          />
-        ),
-        {
-          wrappingComponent: OpenSearchDashboardsContextProvider,
-          wrappingComponentProps: {
-            services: mockedContext,
-          },
-        }
-      );
+    beforeEach(async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <EditDataSourceForm
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
+              existingDataSource={mockDataSourceAttributesWithNoAuth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              handleSubmit={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={true}
+              crossClusterConnectionAlias="test:cluster"
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
       component.update();
     });
 
-    test('should not allow editing when data source is not manageable', () => {
-      component = mount(
-        wrapWithIntl(
-          <EditDataSourceForm
-            existingDataSource={mockDataSourceAttributesWithNoAuth}
-            existingDatasourceNamesList={existingDatasourceNamesList}
-            isDefault={false}
-            onDeleteDataSource={mockFn}
-            handleSubmit={mockFn}
-            onSetDefaultDataSource={mockFn}
-            handleTestConnection={mockFn}
-            displayToastMessage={mockFn}
-            canManageDataSource={false}
-            crossClusterConnectionAlias="test-cluster"
-          />
-        ),
-        {
-          wrappingComponent: OpenSearchDashboardsContextProvider,
-          wrappingComponentProps: {
-            services: mockedContext,
-          },
-        }
-      );
+    test('should not allow editing when data source is not manageable', async () => {
+      await act(async () => {
+        component = mount(
+          wrapWithIntl(
+            <EditDataSourceForm
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
+              existingDataSource={mockDataSourceAttributesWithNoAuth}
+              existingDatasourceNamesList={existingDatasourceNamesList}
+              isDefault={false}
+              onDeleteDataSource={mockFn}
+              handleSubmit={mockFn}
+              onSetDefaultDataSource={mockFn}
+              handleTestConnection={mockFn}
+              displayToastMessage={mockFn}
+              canManageDataSource={false}
+              crossClusterConnectionAlias="test-cluster"
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+        await flushPromises();
+      });
       component.update();
 
       expect(component.find('[data-test-subj="datasource-edit-saveButton"]').exists()).toBe(false);
@@ -678,7 +716,7 @@ describe('With Registered Authentication', () => {
     comp.update();
   };
 
-  test('should call registered crendential form', () => {
+  test('should call registered crendential form', async () => {
     const mockedCredentialForm = jest.fn();
     const authTypeToBeTested = 'Some Auth Type';
     const authMethodToBeTest = {
@@ -694,27 +732,32 @@ describe('With Registered Authentication', () => {
     mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
     mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTest);
 
-    component = mount(
-      wrapWithIntl(
-        <EditDataSourceForm
-          existingDataSource={mockDataSourceAttributesWithNoAuth}
-          existingDatasourceNamesList={existingDatasourceNamesList}
-          isDefault={false}
-          onDeleteDataSource={jest.fn()}
-          handleSubmit={jest.fn()}
-          onSetDefaultDataSource={jest.fn()}
-          handleTestConnection={jest.fn()}
-          displayToastMessage={jest.fn()}
-          canManageDataSource={true}
-        />
-      ),
-      {
-        wrappingComponent: OpenSearchDashboardsContextProvider,
-        wrappingComponentProps: {
-          services: mockedContext,
-        },
-      }
-    );
+    await act(async () => {
+      component = mount(
+        wrapWithIntl(
+          <EditDataSourceForm
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
+            existingDataSource={mockDataSourceAttributesWithNoAuth}
+            existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
+            onDeleteDataSource={jest.fn()}
+            handleSubmit={jest.fn()}
+            onSetDefaultDataSource={jest.fn()}
+            handleTestConnection={jest.fn()}
+            displayToastMessage={jest.fn()}
+            canManageDataSource={true}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+      await flushPromises();
+    });
+    component.update();
 
     expect(mockedCredentialForm).toHaveBeenCalled();
   });
@@ -736,34 +779,41 @@ describe('With Registered Authentication', () => {
     mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
     mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTest);
 
-    component = mount(
-      wrapWithIntl(
-        <EditDataSourceForm
-          existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
-          existingDatasourceNamesList={existingDatasourceNamesList}
-          isDefault={false}
-          onDeleteDataSource={jest.fn()}
-          handleSubmit={mockedSubmitHandler}
-          onSetDefaultDataSource={jest.fn()}
-          handleTestConnection={jest.fn()}
-          displayToastMessage={jest.fn()}
-          canManageDataSource={true}
-        />
-      ),
-      {
-        wrappingComponent: OpenSearchDashboardsContextProvider,
-        wrappingComponentProps: {
-          services: mockedContext,
-        },
-      }
-    );
+    await act(async () => {
+      component = mount(
+        wrapWithIntl(
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
+          <EditDataSourceForm
+            existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
+            existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
+            onDeleteDataSource={jest.fn()}
+            handleSubmit={mockedSubmitHandler}
+            onSetDefaultDataSource={jest.fn()}
+            handleTestConnection={jest.fn()}
+            displayToastMessage={jest.fn()}
+            canManageDataSource={true}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+      await flushPromises();
+    });
+    component.update();
 
     await new Promise((resolve) =>
       setTimeout(() => {
         updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
         expect(
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           component.find(descriptionFormRowIdentifier).first().props().isInvalid
         ).toBeUndefined();
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         resolve();
       }, 100)
     );
@@ -772,12 +822,14 @@ describe('With Registered Authentication', () => {
         /* Updated description*/
         updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
         expect(
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           component.find(descriptionFormRowIdentifier).first().props().isInvalid
         ).toBeUndefined();
 
         expect(component.find('[data-test-subj="datasource-edit-saveButton"]').exists()).toBe(true);
         component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
         expect(mockedSubmitHandler).toHaveBeenCalled();
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         resolve();
       }, 100)
     );

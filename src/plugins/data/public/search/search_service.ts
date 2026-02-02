@@ -149,6 +149,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
+  // Get language id from the request if available. QueryStringManager returns
+  // the global language id, which won't work in dashboard with different
+  // visualizations.
+  private getLanguageId(request: Parameters<ISearchStart['search']>[0]): string | undefined {
+    if (request.params?.body?.query?.queries?.[0]?.language)
+      return request.params.body.query.queries[0].language;
+    if (request.params?.body?.query?.bool) return 'kuery';
+  }
+
   public start(
     { application, http, notifications, uiSettings }: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
@@ -157,7 +166,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
       if (isEnhancedEnabled && !options?.strategy) {
         const queryStringManager = getQueryService().queryString;
-        const language = queryStringManager.getQuery().language;
+        const language = this.getLanguageId(request) || queryStringManager.getQuery().language;
         const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
         queryStringManager.getLanguageService().setUiOverridesByUserQueryLanguage(language);
 

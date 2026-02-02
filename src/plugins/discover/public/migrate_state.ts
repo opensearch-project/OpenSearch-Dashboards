@@ -15,11 +15,13 @@ interface DiscoverParams extends CommonParams {
   id?: string;
 }
 
+// @ts-expect-error TS6196 TODO(ts-error): fixme
 interface ContextParams extends CommonParams {
   indexPattern: string;
   id: string;
 }
 
+// @ts-expect-error TS6196 TODO(ts-error): fixme
 interface DocParams extends CommonParams {
   indexPattern: string;
   index: string;

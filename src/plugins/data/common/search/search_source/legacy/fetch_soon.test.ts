@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import { setImmediate } from 'timers';
-
 import { SearchResponse } from 'elasticsearch';
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
@@ -57,9 +55,6 @@ const mockResponses: Record<string, SearchResponse<any>> = {
   } as SearchResponse<any>,
 };
 
-jest.useFakeTimers('legacy');
-setImmediate(() => {});
-
 jest.mock('./call_client', () => ({
   callClient: jest.fn((requests: SearchRequest[]) => {
     // Allow a request object to specify which mockResponse it wants to receive (_mockResponseId)
@@ -78,7 +73,14 @@ jest.mock('./call_client', () => ({
 
 describe('fetchSoon', () => {
   beforeEach(() => {
+    // @ts-expect-error TS2559 TODO(ts-error): fixme
+    jest.useFakeTimers('legacy');
     (callClient as jest.Mock).mockClear();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test('should execute asap if config is set to not batch searches', () => {

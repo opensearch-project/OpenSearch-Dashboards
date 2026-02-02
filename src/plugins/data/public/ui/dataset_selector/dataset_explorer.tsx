@@ -51,39 +51,77 @@ export const DatasetExplorer = ({
   const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
+  const [autoSelectionDone, setAutoSelectionDone] = useState<Set<number>>(new Set());
   const datasetService = queryString.getDatasetService();
 
-  const fetchNextDataStructure = async (
-    nextPath: DataStructure[],
-    dataType: string,
-    options?: DataStructureFetchOptions
-  ) => datasetService.fetchOptions(services, nextPath, dataType, options);
+  const fetchNextDataStructure = React.useCallback(
+    async (nextPath: DataStructure[], dataType: string, options?: DataStructureFetchOptions) =>
+      datasetService.fetchOptions(services, nextPath, dataType, options),
+    [datasetService, services]
+  );
 
-  const selectDataStructure = async (item: DataStructure | undefined, newPath: DataStructure[]) => {
-    if (!item) {
-      setExplorerDataset(undefined);
+  const selectDataStructure = React.useCallback(
+    async (item: DataStructure | undefined, newPath: DataStructure[]) => {
+      if (!item) {
+        setExplorerDataset(undefined);
+        return;
+      }
+      const lastPathItem = newPath[newPath.length - 1];
+      const nextPath = [...newPath, item];
+
+      const typeConfig = datasetService.getType(nextPath[1].id);
+      if (!typeConfig) return;
+
+      if (!lastPathItem.hasNext) {
+        const dataset = typeConfig!.toDataset(nextPath);
+        setExplorerDataset(dataset as BaseDataset);
+        return;
+      }
+
+      setLoading(true);
+      const nextDataStructure = await fetchNextDataStructure(nextPath, typeConfig.id);
+      setLoading(false);
+
+      setPath([...newPath, nextDataStructure]);
+    },
+    [datasetService, fetchNextDataStructure, setPath]
+  );
+
+  // Auto-select if there's only one option at the current level, or if at data source level
+  React.useEffect(() => {
+    const currentIndex = path.length - 1;
+    const current = path[currentIndex];
+
+    // Skip if we've already auto-selected at this level
+    if (autoSelectionDone.has(currentIndex)) {
       return;
     }
-    const lastPathItem = newPath[newPath.length - 1];
-    const nextPath = [...newPath, item];
 
-    const typeConfig = datasetService.getType(nextPath[1].id);
-    if (!typeConfig) return;
-
-    if (!lastPathItem.hasNext) {
-      const dataset = typeConfig!.toDataset(nextPath);
-      setExplorerDataset(dataset as BaseDataset);
+    // Skip if loading or if there are no children
+    if (loading || !current.children || current.children.length === 0) {
       return;
     }
 
-    setLoading(true);
-    const nextDataStructure = await fetchNextDataStructure(nextPath, typeConfig.id);
-    setLoading(false);
+    // Check if we're at the data source level (children have type DATA_SOURCE)
+    const isDataSourceLevel = current.children.some((child) => child.type === 'DATA_SOURCE');
 
-    setPath([...newPath, nextDataStructure]);
-  };
+    // Auto-select if there's exactly one child, OR if we're at data source level (always select first)
+    if (current.children.length === 1 || isDataSourceLevel) {
+      const firstChild = current.children[0];
+      // Mark this level as auto-selected
+      setAutoSelectionDone((prev) => new Set([...prev, currentIndex]));
+      // Automatically select it
+      selectDataStructure(firstChild, path.slice(0, currentIndex + 1));
+    }
+  }, [path, loading, autoSelectionDone, selectDataStructure]);
 
-  const columnCount = path[path.length - 1]?.hasNext ? path.length + 1 : path.length;
+  // Skip first column if it only has one child (auto-selected)
+  const shouldSkipFirstColumn = path.length > 0 && path[0].children?.length === 1;
+  const visiblePath = shouldSkipFirstColumn ? path.slice(1) : path;
+  const columnCount =
+    visiblePath.length > 0 && visiblePath[visiblePath.length - 1]?.hasNext
+      ? visiblePath.length + 1
+      : visiblePath.length;
 
   return (
     <>
@@ -94,7 +132,7 @@ export const DatasetExplorer = ({
               <h1>
                 <FormattedMessage
                   id="data.explorer.datasetSelector.advancedSelector.title.step1"
-                  defaultMessage="Step 1: Select data"
+                  defaultMessage="Step 1: Select data source"
                 />
               </h1>
               <EuiText>
@@ -165,7 +203,9 @@ export const DatasetExplorer = ({
             }, minmax(200px, 240px)) minmax(300px, 1fr)`,
           }}
         >
-          {path.map((current, index) => {
+          {visiblePath.map((current, visibleIndex) => {
+            // Calculate the actual index in the full path
+            const index = shouldSkipFirstColumn ? visibleIndex + 1 : visibleIndex;
             const isLast = index === path.length - 1;
             const isFinal = isLast && !current.hasNext;
             return (
@@ -182,15 +222,24 @@ export const DatasetExplorer = ({
                 >
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
-                {current.multiSelect ? (
+                {current.DataStructureCreator ? (
+                  <current.DataStructureCreator
+                    path={path}
+                    setPath={setPath}
+                    index={index}
+                    selectDataStructure={selectDataStructure}
+                    services={services}
+                    // @ts-ignore custom component can have their own fetch options
+                    fetchDataStructure={fetchNextDataStructure}
+                  />
+                ) : current.multiSelect ? (
                   <DatasetTable
                     services={services}
                     path={path}
                     setPath={setPath}
                     index={index}
-                    explorerDataset={explorerDataset}
                     selectDataStructure={selectDataStructure}
-                    fetchNextDataStructure={fetchNextDataStructure}
+                    fetchDataStructure={fetchNextDataStructure}
                   />
                 ) : (
                   <EuiSelectable
@@ -218,6 +267,38 @@ export const DatasetExplorer = ({
                       },
                       searchable: true,
                     })}
+                    emptyMessage={
+                      !current.children || current.children.length === 0 ? (
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="data.explorer.datasetSelector.advancedSelector.noDataSources"
+                              defaultMessage="No data source associated. "
+                            />
+                            <FormattedMessage
+                              id="data.explorer.datasetSelector.advancedSelector.noDataSourcesAction"
+                              defaultMessage="Please associate one using the"
+                            />
+                            <br />
+                            <EuiLink
+                              href={`${services.http.basePath.get()}/app/dataSources`}
+                              target="_blank"
+                              external
+                            >
+                              <FormattedMessage
+                                id="data.explorer.datasetSelector.advancedSelector.dataSourcesPage"
+                                defaultMessage="data sources page"
+                              />
+                            </EuiLink>
+                            <br />
+                            <FormattedMessage
+                              id="data.explorer.datasetSelector.advancedSelector.noDataSourcesActionEnd"
+                              defaultMessage="Then re-open this window."
+                            />
+                          </p>
+                        </EuiText>
+                      ) : undefined
+                    }
                     height="full"
                     className="datasetExplorer__selectable"
                     data-test-subj="datasetExplorerSelectable"
@@ -233,15 +314,16 @@ export const DatasetExplorer = ({
               </div>
             );
           })}
-          {!!path[path.length - 1]?.hasNext && <LoadingEmptyColumn isLoading={loading} />}
+          {visiblePath.length > 0 && !!visiblePath[visiblePath.length - 1]?.hasNext && (
+            <LoadingEmptyColumn isLoading={loading} />
+          )}
         </div>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty data-test-subj="datasetSelectorCancel" onClick={onCancel}>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.cancel"
             defaultMessage="Cancel"
-            data-test-subj="datasetSelectorCancel"
           />
         </EuiButtonEmpty>
         <EuiButton

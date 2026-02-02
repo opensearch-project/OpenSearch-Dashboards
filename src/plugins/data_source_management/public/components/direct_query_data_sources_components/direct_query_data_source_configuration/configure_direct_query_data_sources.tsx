@@ -41,6 +41,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
 }) => {
   const { type: urlType } = useParams<{ type: string }>();
   const {
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     chrome,
     setBreadcrumbs,
     notifications: { toasts },
@@ -113,7 +114,11 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         break;
       case 'PROMETHEUS':
         const prometheusProperties =
-          authMethod === 'basicauth'
+          authMethod === 'noauth'
+            ? {
+                'prometheus.uri': storeURI,
+              }
+            : authMethod === 'basicauth'
             ? {
                 'prometheus.uri': storeURI,
                 'prometheus.auth.type': authMethod,
@@ -142,7 +147,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     response
       .then(() => {
         toasts.addSuccess(`Data source ${name} created`);
-        history.push('/manage');
+        history.push('/');
       })
       .catch((err) => {
         const formattedError = formatError(err.name, err.message, err.body.message);
@@ -203,6 +208,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     switch (datasourceType) {
       case 'S3GLUE':
         return (
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <ConfigureS3DatasourcePanel
             useNewUX={useNewUX}
             navigation={navigation}

@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderActionMenu } from './header_action_menu';
 import { MountPoint, UnmountCallback } from '../../../types';

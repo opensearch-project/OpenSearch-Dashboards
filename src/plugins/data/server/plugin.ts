@@ -41,6 +41,7 @@ import { DqlTelemetryService } from './dql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { CorrelationsService } from './correlations';
 import { getUiSettings } from './ui_settings';
 
 export interface DataEnhancements {
@@ -86,6 +87,7 @@ export class DataServerPlugin
   private readonly indexPatterns = new IndexPatternsService();
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
+  private readonly correlationsService = new CorrelationsService();
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -104,6 +106,7 @@ export class DataServerPlugin
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
+    this.correlationsService.setup(core);
     this.dqlTelemetryService.setup(core, { usageCollection });
 
     core.uiSettings.register(getUiSettings(core.workspace.isWorkspaceEnabled()));

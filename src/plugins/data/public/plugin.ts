@@ -46,6 +46,13 @@ import { UiService } from './ui/ui_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import {
+  DataViewsService,
+  onRedirectNoDataView,
+  onUnsupportedTimePattern as onUnsupportedDataViewTimePattern,
+  DataViewsApiClient,
+  UiSettingsPublicToCommon as DataViewsUiSettingsPublicToCommon,
+} from './data_views';
+import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
   onUnsupportedTimePattern,
@@ -63,6 +70,8 @@ import {
   setSearchService,
   setUiService,
   setUiSettings,
+  setDataViews,
+  setSavedObjects,
 } from './services';
 import { opensearchaggs } from './search/expressions';
 import {
@@ -93,8 +102,15 @@ import { DefaultDslDataSource } from './data_sources/default_datasource';
 import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
-import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
+import { getSuggestions as getPromptSuggestions } from './antlr/prompt/code_completion';
+import {
+  getDefaultSuggestions as getPPLSuggestions,
+  getSimplifiedPPLSuggestions,
+} from './antlr/opensearch_ppl/code_completion';
+import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
+import { promqlTriggerCharacters } from './antlr/promql/constants';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
+import { ResourceClientFactory } from './resources';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -120,6 +136,7 @@ export class DataPublicPlugin
   private readonly storage: DataStorage;
   private readonly sessionStorage: DataStorage;
   private readonly config: ConfigSchema;
+  private resourceClientFactory!: ResourceClientFactory;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -158,7 +175,8 @@ export class DataPublicPlugin
       notifications: core.notifications,
     });
 
-    uiActions.registerAction(
+    uiActions.addTriggerAction(
+      APPLY_FILTER_TRIGGER,
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
@@ -180,17 +198,27 @@ export class DataPublicPlugin
     autoComplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
     autoComplete.addQuerySuggestionProvider('kuery', getDQLSuggestions);
     autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
+    autoComplete.addQuerySuggestionProvider('PPL_Simplified', getSimplifiedPPLSuggestions); // Support implicit PPL queries that don't necessarily start with source = datasetName
+    autoComplete.addQuerySuggestionProvider('AI', getPromptSuggestions);
+    autoComplete.addQuerySuggestionProvider(
+      'PROMQL',
+      getPromQLSuggestions,
+      promqlTriggerCharacters
+    );
 
     const useNewSavedQueriesUI =
       core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
       this.config.savedQueriesNewUI.enabled;
     setUseNewSavedQueriesUI(useNewSavedQueriesUI);
 
+    this.resourceClientFactory = new ResourceClientFactory(core.http);
+
     return {
       autocomplete: autoComplete,
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      resourceClientFactory: this.resourceClientFactory,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
         if (enhancements.search) searchService.__enhance(enhancements.search);
         if (enhancements.editor)
@@ -213,6 +241,7 @@ export class DataPublicPlugin
     setOverlays(overlays);
     setUiSettings(uiSettings);
     setApplication(application);
+    setSavedObjects(savedObjects);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -243,6 +272,34 @@ export class DataPublicPlugin
       }),
     });
     setIndexPatterns(indexPatterns);
+
+    const dataViews = new DataViewsService({
+      patterns: indexPatterns,
+      uiSettings: new DataViewsUiSettingsPublicToCommon(uiSettings),
+      savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
+      apiClient: new DataViewsApiClient(http),
+      fieldFormats,
+      onNotification: (toastInputFields) => {
+        notifications.toasts.add(toastInputFields);
+      },
+      onError: notifications.toasts.addError.bind(notifications.toasts),
+      onRedirectNoDataView: onRedirectNoDataView(
+        application.capabilities,
+        application.navigateToApp,
+        overlays
+      ),
+      onUnsupportedTimePattern: onUnsupportedDataViewTimePattern(
+        notifications.toasts,
+        application.navigateToApp
+      ),
+      // If workspace is enabled, only workspace owner/OSD admin can update ui setting.
+      ...(application.capabilities.workspaces.enabled && {
+        canUpdateUiSetting:
+          workspaces?.currentWorkspace$.getValue()?.owner ||
+          application.capabilities?.dashboards?.isDashboardAdmin !== false,
+      }),
+    });
+    setDataViews(dataViews);
 
     const query = this.queryService.start({
       storage: this.storage,
@@ -280,6 +337,7 @@ export class DataPublicPlugin
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,
+      dataViews,
       indexPatterns,
       query,
       search,
@@ -287,6 +345,7 @@ export class DataPublicPlugin
         dataSourceService,
         dataSourceFactory,
       },
+      resourceClientFactory: this.resourceClientFactory,
     };
 
     registerDefaultDataSource(dataServices);

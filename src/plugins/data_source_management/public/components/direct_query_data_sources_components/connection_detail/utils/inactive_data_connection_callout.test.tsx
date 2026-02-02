@@ -10,7 +10,7 @@ import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DirectQueryDatasourceType } from '../../../../types';
 import { DATACONNECTIONS_BASE, DATACONNECTIONS_UPDATE_STATUS, EDIT } from '../../../../constants';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -49,6 +49,7 @@ describe('InactiveDataConnectionCallout', () => {
   };
 
   const shallowComponent = (props = defaultProps) =>
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     shallow(<InactiveDataConnectionCallout {...props} />);
 
   test('renders correctly', () => {

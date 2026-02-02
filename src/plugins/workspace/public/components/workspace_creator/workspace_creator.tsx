@@ -23,10 +23,10 @@ import {
   convertPermissionSettingsToPermissions,
   WorkspacePermissionSetting,
 } from '../workspace_form';
-import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
@@ -35,6 +35,9 @@ import { DataSourceConnectionType } from '../../../common/types';
 import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
+import { getUseCaseFeatureConfig } from '../../../../../core/public';
+import { UseCaseService } from '../../services';
+import { detectTraceData, createAutoDetectedDatasets } from '../../../../explore/public';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -51,20 +54,24 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       savedObjects,
       dataSourceManagement,
       navigationUI: { HeaderControl },
+      useCaseService,
+      data: dataPlugin,
     },
   } = useOpenSearchDashboards<{
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
+    useCaseService: UseCaseService;
+    data: DataPublicPluginStart;
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [goToCollaborators, setGoToCollaborators] = useState(false);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
-  const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
+  const { availableUseCases } = useFormAvailableUseCases({
     savedObjects,
     registeredUseCases$,
-    onlyAllowEssentialEnabled: true,
+    useCaseService,
   });
 
   const location = useLocation();
@@ -144,7 +151,85 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
             const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
               ?.features[0].id;
-            // Redirect page after one second, leave one second time to show create successful toast.
+
+            // For observability workspaces, run trace detection and create datasets if found
+            const isObservabilityWorkspace = useCaseId === 'observability';
+            if (isObservabilityWorkspace && savedObjects && dataPlugin?.dataViews) {
+              try {
+                // Set workspace context for saved objects client
+                savedObjects.client.setCurrentWorkspace(newWorkspaceId);
+
+                // Get selected data sources (OpenSearch connections only)
+                const dataSourceConnections = (selectedDataSourceConnections ?? []).filter(
+                  ({ connectionType }) =>
+                    connectionType === DataSourceConnectionType.OpenSearchConnection
+                );
+
+                // Create mapping from dataSourceId to name
+                const dataSourceIdToName = new Map(
+                  dataSourceConnections.map(({ id, name }) => [id, name])
+                );
+
+                // If no data sources selected, check local cluster
+                const dataSourcesToCheck =
+                  dataSourceConnections.length > 0
+                    ? dataSourceConnections.map(({ id }) => id)
+                    : [undefined]; // undefined means local cluster
+
+                let datasetsCreatedCount = 0;
+
+                // Run detection for each data source
+                for (const dataSourceId of dataSourcesToCheck) {
+                  try {
+                    const detection = await detectTraceData(
+                      savedObjects.client,
+                      dataPlugin.dataViews,
+                      dataSourceId
+                    );
+
+                    if (detection.tracesDetected || detection.logsDetected) {
+                      // Add datasource title to detection
+                      if (dataSourceId) {
+                        detection.dataSourceTitle = dataSourceIdToName.get(dataSourceId);
+                      } else {
+                        detection.dataSourceTitle = 'Local Cluster';
+                      }
+
+                      await createAutoDetectedDatasets(
+                        savedObjects.client,
+                        detection,
+                        dataSourceId
+                      );
+                      datasetsCreatedCount++;
+                    }
+                  } catch (error) {
+                    // Continue with other data sources even if one fails
+                  }
+                }
+
+                if (datasetsCreatedCount > 0) {
+                  notifications?.toasts.addSuccess({
+                    title: i18n.translate('workspace.create.traceDatasetsCreated', {
+                      defaultMessage: 'Trace datasets created automatically',
+                    }),
+                    text:
+                      datasetsCreatedCount > 1
+                        ? i18n.translate('workspace.create.traceDatasetsCreatedMultiple', {
+                            defaultMessage: 'Created datasets for {count} data sources',
+                            values: { count: datasetsCreatedCount },
+                          })
+                        : undefined,
+                  });
+                }
+              } catch (error) {
+                // Don't block workspace creation if trace detection fails
+              } finally {
+                // Clear the workspace context to prevent subsequent operations from targeting the new workspace
+                savedObjects.client.setCurrentWorkspace(undefined as any);
+              }
+            }
+
+            // Redirect to workspace after a short delay
             window.setTimeout(() => {
               if (isPermissionEnabled && goToCollaborators) {
                 navigateToAppWithinWorkspace(
@@ -163,7 +248,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               );
             }, 1000);
           }
-          return;
+          return { result: true, success: true };
         } else {
           throw new Error(result?.error ? result?.error : 'create workspace failed');
         }
@@ -188,14 +273,15 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       availableUseCases,
       isPermissionEnabled,
       goToCollaborators,
+      savedObjects,
+      dataPlugin,
     ]
   );
 
   const isFormReadyToRender =
     application &&
     savedObjects &&
-    // Default values only worked for component mount, should wait for isOnlyAllowEssential and availableUseCases loaded
-    isOnlyAllowEssential !== undefined &&
+    // Default values only worked for component mount, should wait for availableUseCases loaded
     availableUseCases !== undefined;
 
   return (
@@ -230,6 +316,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               isSubmitting={isFormSubmitting}
               goToCollaborators={goToCollaborators}
               onGoToCollaboratorsChange={setGoToCollaborators}
+              onAppLeave={() => {}}
             />
           )}
         </EuiPageContent>

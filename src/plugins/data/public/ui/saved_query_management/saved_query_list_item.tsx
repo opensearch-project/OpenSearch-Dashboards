@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 
 import React, { Fragment, useState } from 'react';

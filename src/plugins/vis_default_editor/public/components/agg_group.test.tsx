@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
@@ -161,7 +161,9 @@ describe('DefaultEditorAgg component', () => {
     });
 
     expect(reorderAggs).toHaveBeenCalledWith(
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       defaultProps.state.data.aggs!.aggs[0],
+      // @ts-expect-error TS2532 TODO(ts-error): fixme
       defaultProps.state.data.aggs!.aggs[1]
     );
   });

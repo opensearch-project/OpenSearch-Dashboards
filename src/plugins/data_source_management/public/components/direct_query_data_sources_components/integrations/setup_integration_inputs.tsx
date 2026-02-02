@@ -7,6 +7,8 @@ import {
   EuiCallOut,
   EuiCheckableCard,
   EuiComboBox,
+  EuiCompressedSwitch,
+  EuiDatePicker,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -16,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../framework/utils/shared';
 import { IntegrationConfigProps, IntegrationSetupInputs } from './setup_integration';
@@ -256,6 +259,29 @@ export function IntegrationQueryInputs({
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
+  const getStartDate = () => {
+    if (config.refreshRangeDays === 0) {
+      return null;
+    }
+    return moment().subtract(config.refreshRangeDays, 'days');
+  };
+
+  const handleDateChange = (date: moment.Moment | null) => {
+    if (date) {
+      const now = moment();
+      const diffDays = now.diff(date, 'days');
+      updateConfig({ refreshRangeDays: Math.max(1, diffDays) });
+    }
+  };
+
+  const handleNoLimitToggle = (checked: boolean) => {
+    if (checked) {
+      updateConfig({ refreshRangeDays: 0 });
+    } else {
+      updateConfig({ refreshRangeDays: 7 }); // Default to 7 days when disabling no limit
+    }
+  };
+
   return (
     <>
       <EuiFormRow
@@ -272,6 +298,31 @@ export function IntegrationQueryInputs({
           }}
           isInvalid={config.connectionTableName.length === 0}
         />
+      </EuiFormRow>
+      <EuiFormRow
+        label="Initial Data Range"
+        helpText="Select the start date for the initial data to include. Data from this date to now will be loaded."
+      >
+        <>
+          <EuiCompressedSwitch
+            label="Load all data (no time limit)"
+            checked={config.refreshRangeDays === 0}
+            onChange={(e) => handleNoLimitToggle(e.target.checked)}
+          />
+          {config.refreshRangeDays > 0 && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiDatePicker
+                selected={getStartDate()}
+                onChange={handleDateChange}
+                maxDate={moment()}
+                showTimeSelect={false}
+                dateFormat="YYYY-MM-DD"
+                placeholder="Select start date"
+              />
+            </>
+          )}
+        </>
       </EuiFormRow>
       <EuiFormRow
         label="S3 Data Location"
@@ -346,6 +397,7 @@ export function IntegrationWorkflowsInputs({
       isInvalid={![...useWorkflows.values()].includes(true)}
       error={['Must select at least one workflow.']}
     >
+      {/* @ts-expect-error TS2786 TODO(ts-error): fixme */}
       <SetupWorkflowSelector
         integration={integration}
         useWorkflows={useWorkflows}

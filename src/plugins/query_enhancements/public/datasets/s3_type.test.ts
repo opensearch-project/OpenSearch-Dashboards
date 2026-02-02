@@ -228,6 +228,7 @@ describe('s3TypeConfig', () => {
       },
     };
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     mockHttp.fetch = jest.fn(({ method }: { method: string }) => {
       switch (method) {
         case 'POST':

@@ -5,6 +5,7 @@
 
 import { ISearchInterceptor } from '../../../search';
 import {
+  Filter,
   OSD_FIELD_TYPES,
   Query,
   QueryEditorExtensionConfig,
@@ -30,6 +31,7 @@ export interface RecentQueriesTableProps {
   queryString: QueryStringContract;
   onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
   isVisible: boolean;
+  className?: string;
 }
 
 export interface EditorEnhancements {
@@ -66,4 +68,7 @@ export interface LanguageConfig {
   supportedAppNames?: string[];
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
+  addFiltersToQuery?: (query: string, filters: Filter[]) => string;
+  /** Add filters to the natural language prompt. */
+  addFiltersToPrompt?: (prompt: string, filters: Filter[]) => string;
 }

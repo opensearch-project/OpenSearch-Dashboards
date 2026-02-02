@@ -82,6 +82,7 @@ interface TimeFieldConfig {
 export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldState> {
   static contextType = context;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: IndexPatternManagmentContextValue;
 
   state: StepTimeFieldState = {

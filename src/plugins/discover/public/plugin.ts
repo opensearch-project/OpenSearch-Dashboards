@@ -78,6 +78,7 @@ declare module '../../share/public' {
   }
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExplorePluginSetup } from '../../explore/public';
 
 /**
  * @public
@@ -132,6 +133,7 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
   usageCollection: UsageCollectionSetup;
+  explore?: ExplorePluginSetup;
 }
 
 /**
@@ -303,13 +305,17 @@ export class DiscoverPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
+    // If Explore plugin is enabled, it will register a Discover menu to the
+    // side nav in observability workspaces, we should skip registration here.
+    if (!plugins.explore) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: PLUGIN_ID,
+          category: undefined,
+          order: 300,
+        },
+      ]);
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
@@ -411,7 +417,6 @@ export class DiscoverPlugin
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     setUiActions(plugins.uiActions);
-
     this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
@@ -422,6 +427,30 @@ export class DiscoverPlugin
 
       return { core, plugins };
     };
+
+    // Register discover navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.discover',
+          name: i18n.translate('discover.keyboardShortcut.goToDiscover.name', {
+            defaultMessage: 'Go to discover',
+          }),
+          pluginId: 'discover',
+          category: i18n.translate('discover.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g d',
+          execute: () => {
+            core.application.navigateToApp('explore/logs');
+          },
+        });
+      }
+    }
 
     this.initializeServices();
 

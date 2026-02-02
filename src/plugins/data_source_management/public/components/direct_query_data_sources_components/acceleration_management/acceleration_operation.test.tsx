@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useAccelerationOperation } from './acceleration_operation';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration, DirectQueryLoadingStatus } from '../../../../framework/types';
@@ -63,6 +63,7 @@ describe('useAccelerationOperation', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       result.current.performOperation(mockAcceleration, 'delete', false);
     });
 
@@ -83,6 +84,7 @@ describe('useAccelerationOperation', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       result.current.performOperation(mockAcceleration, 'delete', false);
     });
 
@@ -106,6 +108,7 @@ describe('useAccelerationOperation', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       result.current.performOperation(mockAcceleration, 'delete', false);
     });
 

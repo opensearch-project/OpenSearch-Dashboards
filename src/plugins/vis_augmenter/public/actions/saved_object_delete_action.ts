@@ -49,7 +49,9 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
     try {
       const loader = getSavedAugmentVisLoader();
       const augmentVisObjs = await getAugmentVisSavedObjs(savedObjectId, loader);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const augmentVisIdsToDelete = augmentVisObjs.map(
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         (augmentVisObj) => augmentVisObj.id as string
       );
 

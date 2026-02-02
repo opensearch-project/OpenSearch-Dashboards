@@ -45,6 +45,7 @@ describe('TableVisApp', () => {
         tableGroups={[]}
         visConfig={({} as unknown) as TableVisConfig}
         event={jest.fn()}
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         uiState={tableUiStateMock}
       />
     );
@@ -58,6 +59,7 @@ describe('TableVisApp', () => {
         tableGroups={[table1, table2]}
         visConfig={({} as unknown) as TableVisConfig}
         event={jest.fn()}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         uiState={tableUiStateMock}
       />
     );

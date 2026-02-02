@@ -39,7 +39,6 @@ import {
   EuiPagination,
   EuiText,
   EuiSpacer,
-  EuiListGroupItem,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -70,6 +69,8 @@ interface Props {
   onClearSavedQuery: () => void;
   closeMenuPopover: () => void;
   saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
+  saveQueryIsDisabled?: boolean;
+  textSize?: React.ComponentProps<typeof EuiText>['size'];
 }
 
 export function SavedQueryManagementComponent({
@@ -83,6 +84,8 @@ export function SavedQueryManagementComponent({
   closeMenuPopover,
   useNewSavedQueryUI,
   saveQuery,
+  saveQueryIsDisabled,
+  textSize = 's',
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -220,50 +223,63 @@ export function SavedQueryManagementComponent({
       className="osdSavedQueryManagement__popover"
       data-test-subj="saved-query-management-popover"
     >
-      <EuiListGroup>
-        <EuiListGroupItem
-          label={i18n.translate('data.saved_query_management.save_query_item_label', {
-            defaultMessage: 'Save query',
-          })}
-          data-test-subj="saved-query-management-save-button"
-          iconType="save"
-          onClick={() => {
-            closeMenuPopover();
-            const saveQueryFlyout = overlays?.openFlyout(
-              toMountPoint(
-                <SaveQueryFlyout
-                  savedQueryService={savedQueryService}
-                  onClose={() => saveQueryFlyout?.close().then()}
-                  onSave={saveQuery}
-                  showFilterOption={true}
-                  showTimeFilterOption={true}
-                  savedQuery={loadedSavedQuery?.attributes}
-                />
-              )
-            );
-          }}
-        />
-        <EuiListGroupItem
-          label={i18n.translate('data.saved_query_management.open_query_item_label', {
-            defaultMessage: 'Open query',
-          })}
-          data-test-subj="saved-query-management-open-button"
-          iconType="folderOpen"
-          onClick={() => {
-            closeMenuPopover();
-            const openSavedQueryFlyout = overlays?.openFlyout(
-              toMountPoint(
-                <OpenSavedQueryFlyout
-                  savedQueryService={savedQueryService}
-                  notifications={notifications}
-                  onClose={() => openSavedQueryFlyout?.close().then()}
-                  onQueryOpen={onLoad}
-                  handleQueryDelete={handleDelete}
-                />
-              )
-            );
-          }}
-        />
+      <EuiListGroup className="osdSavedQueryManagement__newUIList">
+        <div className="osdSavedQueryManagement__newUIItem">
+          <EuiButtonEmpty
+            className="osdSavedQueryManagement__newUIButton"
+            data-test-subj="saved-query-management-save-button"
+            disabled={saveQueryIsDisabled}
+            iconType="save"
+            onClick={() => {
+              closeMenuPopover();
+              const saveQueryFlyout = overlays?.openFlyout(
+                toMountPoint(
+                  <SaveQueryFlyout
+                    savedQueryService={savedQueryService}
+                    onClose={() => saveQueryFlyout?.close().then()}
+                    onSave={saveQuery}
+                    showFilterOption={true}
+                    showTimeFilterOption={true}
+                    savedQuery={loadedSavedQuery?.attributes}
+                  />
+                )
+              );
+            }}
+          >
+            <EuiText size={textSize}>
+              {i18n.translate('data.saved_query_management.save_query_item_label', {
+                defaultMessage: 'Save query',
+              })}
+            </EuiText>
+          </EuiButtonEmpty>
+        </div>
+        <div className="osdSavedQueryManagement__newUIItem">
+          <EuiButtonEmpty
+            className="osdSavedQueryManagement__newUIButton"
+            data-test-subj="saved-query-management-open-button"
+            iconType="folderOpen"
+            onClick={() => {
+              closeMenuPopover();
+              const openSavedQueryFlyout = overlays?.openFlyout(
+                toMountPoint(
+                  <OpenSavedQueryFlyout
+                    savedQueryService={savedQueryService}
+                    notifications={notifications}
+                    onClose={() => openSavedQueryFlyout?.close().then()}
+                    onQueryOpen={onLoad}
+                    handleQueryDelete={handleDelete}
+                  />
+                )
+              );
+            }}
+          >
+            <EuiText size={textSize}>
+              {i18n.translate('data.saved_query_management.open_query_item_label', {
+                defaultMessage: 'Open query',
+              })}
+            </EuiText>
+          </EuiButtonEmpty>
+        </div>
       </EuiListGroup>
     </div>
   ) : (

@@ -1,0 +1,15 @@
+{
+  "id": "chat",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "navigation",
+    "opensearchDashboardsReact",
+    "contextProvider",
+    "charts"
+  ],
+  "optionalPlugins": ["dataSource"],
+  "requiredBundles": ["dataSourceManagement"]
+}

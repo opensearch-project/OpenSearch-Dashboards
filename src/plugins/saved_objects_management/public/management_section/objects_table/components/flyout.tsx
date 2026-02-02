@@ -145,6 +145,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   constructor(props: FlyoutProps) {
     super(props);
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     this.state = {
       conflictedIndexPatterns: undefined,
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
@@ -830,6 +831,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     );
   }
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   onSelectedDataSourceChange = (e) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
     this.setState({ selectedDataSourceId: dataSourceId });
@@ -868,6 +870,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             ),
           }}
         >
+          {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
           <DataSourceSelector
             savedObjectsClient={this.props.savedObjects}
             notifications={this.props.notifications.toasts}

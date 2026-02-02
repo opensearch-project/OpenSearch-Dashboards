@@ -1,2 +1,0 @@
-fix:
-- Path alias not properly resolved if the source code was copied and built from another directory ([#9784](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9784))

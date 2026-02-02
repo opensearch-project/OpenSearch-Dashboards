@@ -4,6 +4,7 @@
 /.opensearch
 /.chromium
 /package.json.bak
+.claude/
 .DS_Store
 .node_binaries
 .native_modules
@@ -19,6 +20,7 @@ target
 /bwc_tmp
 .jruby
 .idea
+.specify
 *.iml
 *.log
 /test/*/failure_debug
@@ -47,6 +49,7 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
+.kiro
 *.sublime-*
 npm-debug.log*
 .tern-project
@@ -79,3 +82,4 @@ snapshots.js
 # Ignore the lighthousereport generatated
 .lighthouserc.js
 .lhci_output.json
+/.lighthouseci/

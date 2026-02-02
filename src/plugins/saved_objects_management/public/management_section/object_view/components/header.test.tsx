@@ -63,6 +63,7 @@ describe('Intro component', () => {
     onDeleteClick: () => undefined,
     useUpdatedUX: false,
     navigationUI: ({
+      // @ts-expect-error TS7031 TODO(ts-error): fixme
       HeaderControl: ({ controls }) => {
         return controls?.[0].ariaLabel ?? controls?.[0].label ?? null;
       },

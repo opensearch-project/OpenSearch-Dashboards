@@ -7,6 +7,7 @@ import { AuditableEvent, Auditor, Logger, OpenSearchDashboardsRequest } from 'sr
 
 export class LoggingAuditor implements Auditor {
   constructor(
+    // @ts-expect-error TS6138 TODO(ts-error): fixme
     private readonly request: OpenSearchDashboardsRequest,
     private readonly logger: Logger
   ) {}

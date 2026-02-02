@@ -28,11 +28,13 @@ describe('Search usage telemetry', () => {
       .toPromise();
     expect(configObject.search.usageTelemetry.enabled).toBe(false);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const searchUsage = usageProvider(mockCoreSetup, initializerContext);
     expect(searchUsage.trackSuccess(1)).resolves.not.toThrow();
   });
 
   it('trackError should not throw with disabled usageTelemetry', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const searchUsage = usageProvider(mockCoreSetup, initializerContext);
     expect(searchUsage.trackError.name).toBe('trackError');
     expect(searchUsage.trackError()).resolves.not.toThrow();

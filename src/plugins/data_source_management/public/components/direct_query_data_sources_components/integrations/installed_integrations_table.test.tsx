@@ -4,7 +4,7 @@
  */
 
 import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
 import React from 'react';
 import {
   InstallIntegrationFlyout,
@@ -14,6 +14,7 @@ import { IntegrationInstanceResult } from '../../../../framework/types';
 import { HttpStart } from 'opensearch-dashboards/public';
 
 const mockHttp: Partial<HttpStart> = {
+  // @ts-expect-error TS2739 TODO(ts-error): fixme
   basePath: {
     prepend: (url: string) => url,
   },

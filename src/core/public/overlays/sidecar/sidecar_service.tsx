@@ -5,7 +5,8 @@
 /* eslint-disable max-classes-per-file */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { I18nStart } from '../../i18n';
@@ -122,6 +123,7 @@ export class SidecarService {
   private activeSidecar: SidecarRef | null = null;
   private targetDomElement: Element | null = null;
   private readonly stop$ = new ReplaySubject(1);
+  private sidecarRoot?: Root;
 
   public start({ i18n, targetDomElement }: StartDeps): OverlaySidecarStart {
     this.targetDomElement = targetDomElement;
@@ -163,7 +165,7 @@ export class SidecarService {
         if (this.activeSidecar) {
           setSidecarConfig({ paddingSize: 0 });
           this.activeSidecar.close();
-          this.cleanupDom();
+          this.cleanupDom(sidecarConfig$);
         }
 
         const sidecar = new SidecarRef();
@@ -172,22 +174,25 @@ export class SidecarService {
         // If a sidecar gets closed through it's SidecarRef, remove it from the dom
         sidecar.onClose.then(() => {
           if (this.activeSidecar === sidecar) {
-            this.cleanupDom();
+            this.cleanupDom(sidecarConfig$);
           }
         });
 
         this.activeSidecar = sidecar;
 
-        render(
-          <Sidecar
-            sidecarConfig$={sidecarConfig$}
-            setSidecarConfig={setSidecarConfig}
-            options={options}
-            i18n={i18n}
-            mount={mount}
-          />,
-          this.targetDomElement
-        );
+        // Only create root and render if targetDomElement exists
+        if (this.targetDomElement) {
+          this.sidecarRoot = createRoot(this.targetDomElement);
+          this.sidecarRoot.render(
+            <Sidecar
+              sidecarConfig$={sidecarConfig$}
+              setSidecarConfig={setSidecarConfig}
+              options={options}
+              i18n={i18n}
+              mount={mount}
+            />
+          );
+        }
 
         return sidecar;
       },
@@ -206,11 +211,15 @@ export class SidecarService {
    * or their children. To avoid potential subtle bugs in child components that rely on
    * unmounting for cleanup behavior, this function ensures proper cleanup of the DOM.
    */
-  private cleanupDom(): void {
-    if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.innerHTML = '';
+  private cleanupDom(sidecarConfig$?: BehaviorSubject<ISidecarConfig | undefined>): void {
+    if (this.sidecarRoot) {
+      this.sidecarRoot.unmount();
+      this.sidecarRoot = undefined;
     }
     this.activeSidecar = null;
+    // Reset the sidecar configuration to remove any padding from the main window
+    if (sidecarConfig$) {
+      sidecarConfig$.next(undefined);
+    }
   }
 }

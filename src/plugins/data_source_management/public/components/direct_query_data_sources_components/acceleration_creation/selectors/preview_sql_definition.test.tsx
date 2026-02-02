@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { PreviewSQLDefinition } from './preview_sql_definition';
 import { EuiButton } from '@elastic/eui';
 import { coreMock } from '../../../../../../../core/public/mocks';
@@ -42,6 +42,7 @@ describe('PreviewSQLDefinition', () => {
   const mountComponent = async () => {
     const wrapper = mount(
       <PreviewSQLDefinition
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         accelerationFormData={mockAccelerationFormData}
         setAccelerationFormData={mockSetAccelerationFormData}
         resetFlyout={mockResetFlyout}

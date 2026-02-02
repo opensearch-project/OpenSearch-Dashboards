@@ -115,6 +115,7 @@ export const canPreselectTimeField = (indices: MatchedItem[]) => {
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: IndexPatternManagmentContextValue;
 
   state = {
@@ -265,7 +266,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     if (query.length === 1 && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
-      setTimeout(() => target.setSelectionRange(1, 1));
+      setTimeout(() => target.setSelectionRange?.(1, 1));
     } else {
       if (query === '*' && appendedWildcard) {
         query = '';

@@ -34,6 +34,7 @@ describe('application config plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const plugin = new ApplicationConfigPlugin(initializerContext);
 
     const coreSetup = {
@@ -48,6 +49,7 @@ describe('application config plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const setup = await plugin.setup(coreSetup);
 
     const client1: ConfigurationClient = {
@@ -60,6 +62,7 @@ describe('application config plugin', () => {
     setup.registerConfigurationClient(client1);
 
     const request = {};
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(setup.getConfigurationClient(request)).toBe(client1);
 
     const client2: ConfigurationClient = {
@@ -76,21 +79,25 @@ describe('application config plugin', () => {
       'Configuration client is already registered! Cannot register again!'
     );
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(setup.getConfigurationClient(request)).toBe(client1);
   });
 
   it('getConfigurationClient returns opensearch client when no external registration', async () => {
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let capturedLRUCacheConstructorArgs = [];
 
     const cache = {
       get: jest.fn(),
     };
 
+    // @ts-expect-error TS2339, TS7019 TODO(ts-error): fixme
     LRUCache.mockImplementation(function (...args) {
       capturedLRUCacheConstructorArgs = args;
       return cache;
     });
 
+    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let capturedConfigurationClientConstructorArgs = [];
 
     const client: ConfigurationClient = {
@@ -100,6 +107,7 @@ describe('application config plugin', () => {
       deleteEntityConfig: jest.fn(),
     };
 
+    // @ts-expect-error TS2339, TS7019 TODO(ts-error): fixme
     OpenSearchConfigurationClient.mockImplementation(function (...args) {
       capturedConfigurationClientConstructorArgs = args;
       return client;
@@ -125,6 +133,7 @@ describe('application config plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const plugin = new ApplicationConfigPlugin(initializerContext);
 
     const coreSetup = {
@@ -139,6 +148,7 @@ describe('application config plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const setup = await plugin.setup(coreSetup);
 
     const scopedClient = {
@@ -153,12 +163,15 @@ describe('application config plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await plugin.start(coreStart);
 
     const request = {};
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(setup.getConfigurationClient(request)).toBe(client);
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(capturedLRUCacheConstructorArgs).toEqual([
       {
         max: 100,
@@ -166,6 +179,7 @@ describe('application config plugin', () => {
       },
     ]);
 
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(capturedConfigurationClientConstructorArgs).toEqual([
       scopedClient,
       '.osd_test',

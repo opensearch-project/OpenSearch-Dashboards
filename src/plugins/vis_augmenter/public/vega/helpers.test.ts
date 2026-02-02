@@ -452,7 +452,9 @@ describe('helpers', function () {
       );
       // deleting the scale fields since this contain generated
       // fields based on timezone env it is run in
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       delete expectedSpec.vconcat[1].encoding.x.scale;
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       delete returnSpec.vconcat[1].encoding.x.scale;
       expect(returnSpec).toEqual(expectedSpec);
     });
@@ -465,7 +467,9 @@ describe('helpers', function () {
       );
       // deleting the scale fields since this contain generated
       // fields based on timezone env it is run in
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       delete expectedSpec.vconcat[1].encoding.x.scale;
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       delete returnSpec.vconcat[1].encoding.x.scale;
       expect(returnSpec).toEqual(expectedSpec);
     });
@@ -478,7 +482,9 @@ describe('helpers', function () {
       );
       // deleting the scale fields since this contain generated
       // fields based on timezone env it is run in
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       delete expectedSpec.vconcat[1].encoding.x.scale;
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       delete returnSpec.vconcat[1].encoding.x.scale;
       expect(returnSpec).toEqual(expectedSpec);
     });

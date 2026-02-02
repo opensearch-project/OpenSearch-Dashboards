@@ -44,6 +44,9 @@ const setup = (
       operationType={WorkspaceOperationType.Create}
       availableUseCases={createMockedRegisteredUseCases()}
       dataSourceManagement={dataSourceManagement}
+      onAppLeave={() => {}}
+      onGoToCollaboratorsChange={() => {}}
+      goToCollaborators={false}
     />
   );
 };

@@ -22,6 +22,7 @@ export const useCanSave = () => {
 };
 
 // TODO: Need to finalize the error messages
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const getErrorMsg = (isEmpty, hasNoChange, hasDraftAgg) => {
   if (isEmpty) {
     return i18n.translate('visBuilder.saveVisualizationTooltip.empty', {

@@ -6,7 +6,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { ReviewPrometheusDatasource } from './review_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
 import { Role } from '../../../../types';
@@ -27,6 +27,7 @@ const mountComponent = (props = {}) => {
   const combinedProps = { ...defaultProps, ...props };
   return mount(
     <MemoryRouter>
+      {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
       <ReviewPrometheusDatasource {...combinedProps} />
     </MemoryRouter>
   );
@@ -39,6 +40,7 @@ jest.mock('history', () => {
     ...originalModule,
     createMemoryHistory: () => {
       const history = originalModule.createMemoryHistory();
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       history.entries.forEach((entry) => {
         entry.key = 'consistentKey';
       });

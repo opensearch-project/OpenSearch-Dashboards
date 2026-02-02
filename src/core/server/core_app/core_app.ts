@@ -38,7 +38,9 @@ import { Logger } from '../logging';
 /** @internal */
 export class CoreApp {
   private readonly logger: Logger;
+  private readonly coreContext: CoreContext;
   constructor(core: CoreContext) {
+    this.coreContext = core;
     this.logger = core.logger.get('core-app');
   }
   setup(coreSetup: InternalCoreSetup) {
@@ -93,6 +95,15 @@ export class CoreApp {
     coreSetup.http.registerStaticDir(
       '/node_modules/@osd/ui-framework/dist/{path*}',
       fromRoot('node_modules/@osd/ui-framework/dist')
+    );
+
+    // Register worker files directory for code editor with buildHash for cache-busting
+    // Serves from: build/opensearch-dashboards/node_modules/@osd/monaco/target/public/
+    // Uses buildNum for cache invalidation on version changes (same pattern as bundles)
+    const buildHash = this.coreContext.env.packageInfo.buildNum.toString();
+    coreSetup.http.registerStaticDir(
+      `/${buildHash}/editor/workers/{path*}`,
+      fromRoot('node_modules/@osd/monaco/target/public')
     );
   }
 }

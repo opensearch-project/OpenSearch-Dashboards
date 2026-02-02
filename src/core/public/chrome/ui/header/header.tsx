@@ -46,7 +46,7 @@ import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -61,6 +61,7 @@ import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { useObservableValue } from '../../../utils';
+import { KeyboardShortcutStart } from '../../../keyboard_shortcut';
 import {
   getOsdSidecarPaddingStyle,
   ISidecarConfig,
@@ -70,6 +71,7 @@ import {
   ChromeBranding,
   ChromeBreadcrumbEnricher,
   ChromeHelpExtension,
+  ChromeGlobalBanner,
 } from '../../chrome_service';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { OnIsLockedUpdate } from './';
@@ -86,6 +88,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
+import { HeaderBanner } from './header_banner';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -128,7 +131,9 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
-  globalSearchCommands?: GlobalSearchCommand[];
+  globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
+  keyboardShortcut?: KeyboardShortcutStart;
+  globalSearchCommands$: Observable<GlobalSearchCommand[]>;
 }
 
 const hasValue = (value: any) => {
@@ -154,7 +159,7 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
-  globalSearchCommands,
+  keyboardShortcut,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -163,6 +168,7 @@ export function Header({
   const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
+  const globalBanner = useObservable(observables.globalBanner$ || of(undefined), undefined);
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);
@@ -191,7 +197,7 @@ export function Header({
   const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
 
   const setIsNavOpen = useCallback(
-    (value) => {
+    (value: boolean) => {
       /**
        * When use updated header, we will regard the lock state as source of truth
        */
@@ -204,13 +210,33 @@ export function Header({
     [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
   );
 
+  const handleToggleNavOpen = useCallback(() => {
+    setIsNavOpen(!isNavOpen);
+  }, [setIsNavOpen, isNavOpen]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'toggle_navbar',
+    pluginId: 'core',
+    name: i18n.translate('core.chrome.header.toggleNavbar.name', {
+      defaultMessage: 'Toggle navbar',
+    }),
+    category: i18n.translate('core.chrome.header.category.panelLayout', {
+      defaultMessage: 'Panel / Layout',
+    }),
+    keys: 'shift+b',
+    execute: handleToggleNavOpen,
+  });
+
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
-  const className = classnames('hide-for-sharing', 'headerGlobalNav');
+
+  const className = classnames('hide-for-sharing', 'headerGlobalNav', {
+    'headerGlobalNav--withBanner': !!globalBanner,
+  });
   const { useExpandedHeader = true } = branding;
   const useApplicationHeader = headerVariant === HeaderVariant.APPLICATION;
 
@@ -281,7 +307,7 @@ export function Header({
           aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
             defaultMessage: 'Toggle primary navigation',
           })}
-          onClick={() => setIsNavOpen(!isNavOpen)}
+          onClick={handleToggleNavOpen}
           aria-expanded={isNavOpen}
           aria-pressed={isNavOpen}
           aria-controls={navId}
@@ -571,7 +597,7 @@ export function Header({
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
         {renderBreadcrumbs(false, false)}
-
+        <EuiHeaderSection grow={true} />
         {renderPrimaryHeaderRight()}
       </EuiHeader>
 
@@ -640,6 +666,7 @@ export function Header({
         {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
+          <EuiFlexItem grow={false}>{renderBreadcrumbs(false, false)}</EuiFlexItem>
           {actionMenu}
         </EuiHeaderSection>
         <EuiHeaderSection side="right">
@@ -657,6 +684,7 @@ export function Header({
 
   return (
     <>
+      <HeaderBanner globalBanner={globalBanner} />
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
@@ -687,7 +715,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
-            globalSearchCommands={globalSearchCommands}
+            globalSearchCommands$={observables.globalSearchCommands$}
           />
         ) : (
           <CollapsibleNav

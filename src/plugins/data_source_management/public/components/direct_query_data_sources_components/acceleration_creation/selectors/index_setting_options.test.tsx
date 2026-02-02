@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiSuperSelect, EuiSelect } from '@elastic/eui';
 import { IndexSettingOptions } from './index_setting_options';
 import { CreateAccelerationForm } from '../../../../../framework/types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import {
   ACCELERATION_REFRESH_TIME_INTERVAL,
   ACCELERATION_TIME_INTERVAL,
@@ -109,6 +109,7 @@ describe('IndexSettingOptions', () => {
     );
 
     act(() => {
+      // @ts-expect-error TS2722 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(0).prop('onChange')({
         target: { value: '20' },
       } as React.ChangeEvent<HTMLInputElement>);
@@ -144,6 +145,7 @@ describe('IndexSettingOptions', () => {
 
     const wrapper = mount(
       <IndexSettingOptions
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         accelerationFormData={materializedViewFormData}
         setAccelerationFormData={setAccelerationFormData}
       />
@@ -185,6 +187,7 @@ describe('IndexSettingOptions', () => {
 
     const wrapper = mount(
       <IndexSettingOptions
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         accelerationFormData={materializedViewFormData}
         setAccelerationFormData={setAccelerationFormData}
       />

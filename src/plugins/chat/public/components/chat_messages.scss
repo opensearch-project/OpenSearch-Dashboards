@@ -1,0 +1,99 @@
+.chatMessages {
+  grid-area: messages;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0;
+
+  &--fullscreen {
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  &__context {
+    grid-area: context;
+    border-bottom: 1px solid $euiColorLightShade;
+    padding: 8px 0;
+    overflow-x: auto;
+    max-width: 100%;
+    min-height: 0;
+  }
+
+  &__emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  &__emptyStateHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+
+    h3 {
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  &__suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  &__suggestionCard {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
+  }
+
+  &__loadingIndicator {
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  &__thinkingText {
+    color: $euiColorMediumShade;
+    font-style: italic;
+    font-size: 14px;
+    padding: 8px 12px;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}

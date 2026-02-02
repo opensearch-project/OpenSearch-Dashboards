@@ -39,6 +39,7 @@ const createSetupContractMock = (): jest.Mocked<SavedObjectsManagementPluginSetu
     columns: columnServiceMock.createSetup(),
     serviceRegistry: serviceRegistryMock.create(),
   };
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return mock;
 };
 
@@ -47,6 +48,7 @@ const createStartContractMock = (): jest.Mocked<SavedObjectsManagementPluginStar
     actions: actionServiceMock.createStart(),
     columns: columnServiceMock.createStart(),
   };
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return mock;
 };
 

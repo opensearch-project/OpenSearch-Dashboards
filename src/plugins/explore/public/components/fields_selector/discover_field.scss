@@ -1,0 +1,73 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+$hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
+
+.exploreSidebarItem__fieldPopoverPanel {
+  min-width: 260px;
+  max-width: 300px;
+}
+
+.osdDiscoverSideBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+.toggleFieldFilterButton {
+  span:is([class$="__textShift"]) {
+    min-width: 0;
+  }
+}
+
+.exploreSidebarField {
+  min-height: $hoverIconSize;
+  position: relative;
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    // adding padding as action buttons will always be visible in small viewport
+    padding-right: 52px;
+  }
+
+  // Enable text truncation for field names
+  &__name {
+    display: block;
+    max-width: 100%;
+    min-width: 0; // Required for flexbox truncation
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiFlexItem {
+    min-width: 0; // Allow flex item to shrink for truncation
+  }
+
+  // Fix EuiToolTip anchor breaking width inheritance
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiToolTipAnchor {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  &__actionButtons {
+    background-color: $euiColorLightestShade;
+    position: absolute;
+    right: $ouiSizeXXS;
+    display: flex;
+    gap: $euiSizeXS;
+    opacity: 0;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      background-color: transparent;
+      opacity: 1;
+    }
+  }
+
+  &:hover .exploreSidebarField__actionButtons {
+    opacity: 1;
+  }
+}

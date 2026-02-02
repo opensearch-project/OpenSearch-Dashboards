@@ -37,7 +37,7 @@ env:
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
-  CYPRESS_MEMORY_LIMIT: '10240'
+  CYPRESS_MEMORY_LIMIT: '12288'
   CYPRESS_CACHE_FOLDER: '${{ github.workspace }}/.cypress-cache'
   # Optimize Chrome
   CYPRESS_CHROME_ARGS: >-
@@ -45,14 +45,14 @@ env:
     --no-sandbox
     --disable-gpu
     --disable-software-rasterizer
-    --js-flags="--max-old-space-size=10240"
+    --js-flags="--max-old-space-size=12288"
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  OSD_OPTIMIZER_MAX_WORKERS: 8
-  NODE_OPTIONS: '--max-old-space-size=10240 --max-semi-space-size=64 --dns-result-order=ipv4first'
+  OSD_OPTIMIZER_MAX_WORKERS: 12
+  NODE_OPTIONS: '--max-old-space-size=12288 --max-semi-space-size=128 --dns-result-order=ipv4first'
   COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
-  LATEST_VERSION: '2.17.0'
+  LATEST_VERSION: '3.4.0'
 
 jobs:
   cypress-tests:
@@ -117,20 +117,50 @@ jobs:
           - group: 15
             config: query_enhanced
             test_location: source
+          # Explore tests - group 1
+          - group: 10Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 2
+          - group: 12Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 3
+          - group: 13Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 4
+          - group: 14Explore
+            config: explore
+            test_location: source
+          # Explore tests - group 5
+          - group: 15Explore
+            config: explore
+            test_location: source
+
+          - group: 16Explore
+            config: explore
+            test_location: source
+          - group: 17Explore
+            config: explore
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: '--user 1001 --shm-size=2g'
+      options: '--user 1001 --shm-size=4g'
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true' ||
+        matrix.config == 'explore' &&
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
-        'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
-      OPENSEARCH_SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true' ||
+        'node ../scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false --home.disableExperienceModal=true' }}
+      OPENSEARCH_SNAPSHOT_CMD:
+        ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' }}
+        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E action.auto_create_index=true' ||
+        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E action.auto_create_index=true' }}
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
@@ -173,14 +203,16 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@^1.22.10
+          yarn config set network-timeout 1000000 -g
 
       - name: Run bootstrap
         run: yarn osd bootstrap
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12 --dist
 
       - name: Checkout FT repo
+        if: matrix.test_location == 'ftr'
         uses: actions/checkout@v4
         with:
           path: ${{ env.FTR_PATH }}
@@ -207,8 +239,8 @@ jobs:
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
           echo "SPEC=${FORMATTED_SPEC}"
 
-      # Setup spec files for Dashboards in-house cypress tests
-      - name: Setup spec files for Dashboards tests
+      # Setup spec files for OSD in-house cypress tests
+      - name: Setup spec files for OSD tests
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
@@ -219,7 +251,7 @@ jobs:
       - name: Get Cypress version
         id: cypress_version
         run: |
-          echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
+          echo "cypress_version=$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
 
       - name: Cache Cypress
         id: cache-cypress
@@ -243,39 +275,76 @@ jobs:
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       - name: Download OpenSearch
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
 
       - name: Extract OpenSearch
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           tar -xzf opensearch-*.tar.gz
           rm -f opensearch-*.tar.gz
         shell: bash
 
-      - name: Remove security plugin
-        if: matrix.config == 'query_enhanced'
+      - name: Remove security plugin and plugins that depend on security
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-skills"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-ml"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-anomaly-detection"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-flow-framework"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
+      - name: Configure OpenSearch for index creation
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
+        run: |
+          echo "action.auto_create_index: true" >> ./opensearch-${{ env.LATEST_VERSION }}/config/opensearch.yml
+          echo "cluster.routing.allocation.disk.threshold_enabled: false" >> ./opensearch-${{ env.LATEST_VERSION }}/config/opensearch.yml
+        shell: bash
+
       - name: Run OpenSearch
-        if: matrix.config == 'query_enhanced'
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
         shell: bash
 
-      # Clear Cypress Cache before running Dashboards tests
+      - name: Start Prometheus
+        if: matrix.group == '14Explore'
+        run: |
+          PROM_VERSION="3.8.1"
+          curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
+
+          # Start Prometheus with fixture config
+          ./prometheus-${PROM_VERSION}.linux-amd64/prometheus \
+            --config.file=./cypress/fixtures/prometheus/prometheus.yml \
+            --storage.tsdb.path=/tmp/prometheus-data \
+            --web.listen-address=:9090 \
+            --web.enable-lifecycle \
+            --web.enable-admin-api &
+
+          # Wait for Prometheus to be ready
+          echo "Waiting for Prometheus to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9090/-/healthy > /dev/null 2>&1; then
+              echo "Prometheus is ready!"
+              break
+            fi
+            echo "Attempt $i: Prometheus not ready yet..."
+            sleep 2
+          done
+        shell: bash
+
+      # Clear Cypress Cache before running OSD tests
       - name: Clear Cypress Cache
         if: matrix.test_location == 'source'
         run: npx cypress cache clear
 
-      # Run Dashboards Cypress tests within the source repo
-      - name: Run Dashboards Cypress tests with query enhancements
-        if: matrix.test_location == 'source' && matrix.config == 'query_enhanced'
+      # Run OSD Cypress tests within the source repo
+      - name: Run OSD Cypress tests with query enhancements
+        if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore') && matrix.group != '14Explore'
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force
@@ -283,7 +352,18 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
-      - name: Run Dashboards Cypress tests without query enhancements
+      - name: Run OSD Cypress tests with Prometheus (part of Explore group 14)
+        if: matrix.test_location == 'source' && matrix.group == '14Explore'
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npx cypress install --force
+          start: ${{ env.START_CMD }}
+          wait-on: 'http://localhost:9200, http://localhost:5601, http://localhost:9090/-/healthy'
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+        env:
+          PROMETHEUS_CONNECTION_URL: 'http://localhost:9090'
+
+      - name: Run OSD Cypress tests without query enhancements
         if: matrix.test_location == 'source' && matrix.config == 'dashboard'
         uses: cypress-io/github-action@v6
         with:
@@ -292,7 +372,6 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
-      # Compress and upload artifacts for FT repo
       - name: Compress FT repo artifacts
         if: always() && matrix.test_location == 'ftr'
         run: |
@@ -313,25 +392,24 @@ jobs:
           path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
 
-      # Compress and upload artifacts for Dashboards repo
-      - name: Compress Dashboards repo artifacts
+      - name: Compress OSD repo artifacts
         if: always() && matrix.test_location == 'source'
         run: |
-          mkdir -p dashboard-artifacts
+          mkdir -p osd-artifacts
             for dir in screenshots videos results; do
               if [ -d "cypress/$dir" ]; then
-                cp -r "cypress/$dir" dashboard-artifacts/
+                cp -r "cypress/$dir" osd-artifacts/
               fi
           done
-          tar -czf dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz -C dashboard-artifacts .
+          tar -czf osd-cypress-artifacts-${{ matrix.group }}.tar.gz -C osd-artifacts .
         shell: bash
 
-      - name: Upload Dashboards repo artifacts
+      - name: Upload OSD repo artifacts
         if: always() && matrix.test_location == 'source'
         uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-artifacts-${{ matrix.group }}
-          path: dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz
+          name: osd-cypress-artifacts-${{ matrix.group }}
+          path: osd-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
           overwrite: true
 

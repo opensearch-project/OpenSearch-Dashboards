@@ -17,6 +17,7 @@ const OriginalDate = Date;
 
 global.Date = jest.fn((...args) => {
   if (args.length) {
+    // @ts-expect-error TS2556 TODO(ts-error): fixme
     return new OriginalDate(...args);
   }
   return fixedDate;
@@ -44,6 +45,7 @@ jest.mock('../../../../framework/catalog_cache/cache_manager', () => ({
 
 const mockHttp: Partial<HttpStart> = {};
 const mockNotifications: Partial<NotificationsStart> = {
+  // @ts-expect-error TS2740 TODO(ts-error): fixme
   toasts: {
     addWarning: jest.fn(),
   },
@@ -68,6 +70,7 @@ const datasource = {
 const renderComponent = (props = {}) => {
   return render(
     <AssociatedObjectsTab
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       datasource={datasource}
       cacheLoadingHooks={cacheLoadingHooks}
       selectedDatabase="testDatabase"

@@ -1,0 +1,135 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.datasetSelect {
+  &__tooltip {
+    min-width: 400px;
+  }
+
+  &__textWrapper {
+    align-items: center;
+    margin-inline-end: $euiSizeXS;
+    gap: $euiSizeXS;
+  }
+
+  &__text {
+    text-align: left;
+    white-space: nowrap;
+    font-weight: $euiFontWeightBold;
+    flex: 1;
+    max-width: 275px;
+    text-overflow: ellipsis;
+    height: $euiSizeL;
+    line-height: $euiSizeL;
+    overflow: hidden;
+  }
+
+  &__checkbox {
+    flex: 1;
+    align-self: center;
+  }
+
+  &__contextMenu {
+    width: 400px;
+    overflow-y: hidden;
+
+    button:is([class*="euiContextMenuItem"]) {
+      padding: $euiSizeXS;
+
+      &:nth-of-type(1) {
+        padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+      }
+
+      &:focus {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+    button:is([class*="euiContextMenuPanelTitle"]) {
+      padding: $euiSizeXS;
+
+      &:nth-of-type(1) {
+        padding: $euiSizeS;
+      }
+
+      &:focus {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+    span:is([class*="datasetDetails__defaultBadge"]) {
+      transform: translateX(-100%) translateX($euiSizeXS * 2);
+    }
+  }
+
+  &__selectable {
+    width: 100%;
+    overflow-y: auto;
+    max-height: 300px;
+  }
+
+  &__searchContainer {
+    border-bottom: $euiBorderThin;
+    font-size: $euiFontSizeS;
+  }
+
+  &__list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  &__advancedButton {
+    width: 100%;
+  }
+
+  &__footer {
+    padding: $euiSizeXS;
+  }
+
+  &__footerItem {
+    width: 100%;
+  }
+
+  &__advancedModal {
+    width: 1200px;
+    height: 800px;
+
+    // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
+    max-height: calc(90vh - $euiSizeL);
+
+    /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+    .euiModal__flex {
+      max-height: none;
+    }
+
+    .osdOverlayMountWrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .euiModalBody {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .euiModalBody__overflow {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
+  }
+
+  &__timeBasedDisclaimer {
+    margin: 0;
+    margin-bottom: 2px;
+  }
+}

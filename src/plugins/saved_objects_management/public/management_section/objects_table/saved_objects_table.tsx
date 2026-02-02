@@ -73,6 +73,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { convertIndexPatternTerminology } from '../../../../opensearch_dashboards_utils/public';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
@@ -136,6 +137,7 @@ export interface SavedObjectsTableProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigationUI: NavigationPublicPluginStart['ui'];
   useUpdatedUX: boolean;
+  isDatasetManagementEnabled: boolean;
 }
 
 export interface SavedObjectsTableState {
@@ -202,6 +204,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       currentWorkspace: this.props.workspaces.currentWorkspace$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
@@ -373,6 +376,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const workspace = this.props.workspaces;
     this.currentWorkspaceSubscription = workspace.currentWorkspace$.subscribe((newValue) =>
       this.setState({
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         currentWorkspace: newValue,
       })
     );
@@ -1124,6 +1128,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       namespaceRegistry,
       useUpdatedUX,
       navigationUI,
+      isDatasetManagementEnabled,
     } = this.props;
 
     const selectionConfig = {
@@ -1131,11 +1136,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
     const typeCounts = savedObjectCounts.type || {};
 
-    const filterOptions = allowedTypes.map((type) => ({
-      value: type,
-      name: type,
-      view: `${type} (${typeCounts[type] || 0})`,
-    }));
+    const filterOptions = allowedTypes.map((type) => {
+      const convertedName = convertIndexPatternTerminology(type, isDatasetManagementEnabled);
+      return {
+        value: type,
+        name: convertedName,
+        view: `${convertedName} (${typeCounts[type] || 0})`,
+      };
+    });
 
     const filters: EuiSearchBarProps['filters'] = [
       {
@@ -1214,11 +1222,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           useUpdatedUX={useUpdatedUX}
           navigationUI={navigationUI}
           applications={applications}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           currentWorkspaceName={currentWorkspace?.name}
           showImportButton={!workspaceEnabled || !!currentWorkspace}
         />
         {!useUpdatedUX && <EuiSpacer size="xs" />}
         <RedirectAppLinks application={applications}>
+          {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
           <Table
             basePath={http.basePath}
             itemId={'id'}
@@ -1230,6 +1240,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onTableChange={this.onTableChange}
             filters={filters}
             onExport={this.onExport}
+            // @ts-expect-error TS2532 TODO(ts-error): fixme
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
             onDuplicate={() =>
@@ -1259,6 +1270,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             showDuplicate={this.state.workspaceEnabled}
             onRefresh={this.refreshObjects}
             useUpdatedUX={useUpdatedUX}
+            isDatasetManagementEnabled={isDatasetManagementEnabled}
           />
         </RedirectAppLinks>
       </EuiPageContent>

@@ -51,7 +51,7 @@ export const selectSpecificSuggestion = (suggestionText) => {
       cy.get('.monaco-list-row.focused').then(() => {
         cy.get('.monaco-list-row').then(($rows) => {
           const exactMatch = $rows.filter((_, row) => {
-            return Cypress.$(row).attr('aria-label') === suggestionText;
+            return Cypress.$(row).text().includes(suggestionText);
           });
 
           if (exactMatch.length > 0) {
@@ -166,6 +166,12 @@ export const createOtherQueryUsingAutocomplete = (config) => {
     .wait(1000)
     .within(() => {
       // Handle initial language-specific setup
+      // For PPL, clear any pre-populated template first
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').clear({ force: true });
+        cy.wait(200); // Allow editor to process the clear
+      }
+
       langConfig.initialCommands.forEach((command) => {
         if (command.input) {
           typeAndSelectSuggestion(command.input, command.value);
@@ -363,6 +369,12 @@ export const createQuery = (config, useKeyboard = false) => {
     .should('have.class', 'vs')
     .wait(1000)
     .within(() => {
+      // For PPL, clear any pre-populated template first
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').clear({ force: true });
+        cy.wait(200); // Allow editor to process the clear
+      }
+
       cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
         selectSuggestion('source', useKeyboard);
@@ -373,7 +385,7 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('where', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       } else if (config.language === QueryLanguages.SQL.name) {
         selectSuggestion('SELECT', useKeyboard);
         selectSuggestion('*', useKeyboard);
@@ -382,10 +394,10 @@ export const createQuery = (config, useKeyboard = false) => {
         selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       } else if (config.language === QueryLanguages.DQL.name) {
         selectSuggestion('unique_category', useKeyboard);
-        selectSuggestion('Configuration', useKeyboard);
+        selectSuggestion('Development', useKeyboard);
       }
     });
 };

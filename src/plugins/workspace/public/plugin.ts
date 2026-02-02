@@ -7,6 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
+import { debounce } from 'lodash';
 import {
   Plugin,
   CoreStart,
@@ -46,13 +47,13 @@ import {
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
+import { DataPublicPluginStart } from '../../../plugins/data/public';
 import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
   getUseCaseUrl,
   isAppAccessibleInWorkspace,
-  isNavGroupInFeatureConfigs,
 } from './utils';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { WorkspaceListCard } from './components/service_card';
@@ -73,6 +74,8 @@ import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { WorkspaceValidationService } from './services/workspace_validation_service';
 import { workspaceSearchPages } from './components/global_search/search_pages_command';
+import { isNavGroupInFeatureConfigs } from '../../../core/public';
+import { searchAssets } from './components/global_search/search_assets_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -90,6 +93,7 @@ interface WorkspacePluginSetupDeps {
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
   navigation: NavigationPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export class WorkspacePlugin
@@ -296,15 +300,17 @@ export class WorkspacePlugin
     await this.workspaceValidationService.setup(core, workspaceId);
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
-      const [coreStart, { navigation }] = await core.getStartServices();
+      const [coreStart, { navigation, data }] = await core.getStartServices();
       const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
 
-      const services = {
+      const services: Services = {
         ...coreStart,
         workspaceClient,
         dataSourceManagement,
         collaboratorTypes: this.collaboratorTypes,
         navigationUI: navigation.ui,
+        useCaseService: this.useCase,
+        data,
       };
 
       return renderApp(params, services, {
@@ -435,6 +441,8 @@ export class WorkspacePlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    const useCase = this.useCase;
+
     if (core.chrome.navGroup.getNavGroupEnabled() && contentManagement) {
       // workspace essential use case overview
       core.application.register({
@@ -453,6 +461,7 @@ export class WorkspacePlugin
             dataSourceManagement,
             contentManagement: contentManagementStart,
             navigationUI: navigationStart.ui,
+            useCaseService: useCase,
           };
 
           return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
@@ -490,6 +499,7 @@ export class WorkspacePlugin
             dataSourceManagement,
             contentManagement: contentManagementStart,
             navigationUI: navigationStart.ui,
+            useCaseService: useCase,
           };
 
           return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);
@@ -538,6 +548,33 @@ export class WorkspacePlugin
         workspaceSearchPages(query, this.registeredUseCases$, this.coreStart, callback),
     });
 
+    let resolver: (payload: Awaited<ReturnType<typeof searchAssets>>) => void;
+    const debouncedSearchAssets = debounce((...args: Parameters<typeof searchAssets>) => {
+      searchAssets(...args).then(resolver);
+    }, 200);
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'assetsSearch',
+      type: 'SAVED_OBJECTS',
+      run: async (query: string, callback, options) => {
+        const [{ workspaces, http }] = await core.getStartServices();
+        const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+        const visibleWorkspaceIds = workspaces.workspaceList$.getValue().map(({ id }) => id);
+
+        return new Promise((resolve) => {
+          resolver = resolve;
+          debouncedSearchAssets({
+            http,
+            query,
+            currentWorkspaceId,
+            abortSignal: options?.abortSignal,
+            visibleWorkspaceIds,
+            onAssetClick: callback,
+          });
+        });
+      },
+    });
+
     if (workspaceId) {
       core.chrome.registerCollapsibleNavHeader(() => {
         if (!this.coreStart) {
@@ -561,6 +598,8 @@ export class WorkspacePlugin
       ui: {
         AddCollaboratorsModal,
       },
+      registerSupportedUseCasesForServerlessCollections: this.useCase
+        .registerSupportedUseCasesForServerlessCollections,
     };
   }
 
@@ -662,6 +701,7 @@ export class WorkspacePlugin
         workspaceClient,
         navigationUI: navigation.ui,
         collaboratorTypes: this.collaboratorTypes,
+        useCaseService: this.useCase,
       };
       contentManagement.registerContentProvider({
         id: 'default_workspace_list',

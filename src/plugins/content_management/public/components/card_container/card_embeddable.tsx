@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { EuiCard, EuiCardProps, EuiToolTip } from '@elastic/eui';
 
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
@@ -23,17 +23,20 @@ export type CardEmbeddableInput = EmbeddableInput & {
 export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
   public readonly type = CARD_EMBEDDABLE;
   private node: HTMLElement | null = null;
+  private root: Root | null = null;
 
   constructor(initialInput: CardEmbeddableInput, parent?: IContainer) {
     super(initialInput, {}, parent);
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
+    this.root = createRoot(node);
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
       title: this.input?.getTitle?.() || this.input?.title || '',
@@ -51,13 +54,13 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
       cardProps.footer = this.input?.getFooter?.();
     }
 
-    ReactDOM.render(<EuiCard {...cardProps} />, node);
+    this.root.render(<EuiCard {...cardProps} />);
   }
 
   public destroy() {
     super.destroy();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 

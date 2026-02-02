@@ -40,6 +40,7 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
         index: this.configurationIndexName,
         id: entityValidated,
       });
+      // @ts-expect-error TS2571 TODO(ts-error): fixme
       const value = data?.body?._source?.value;
 
       this.cache.set(entityValidated, value);
@@ -129,14 +130,17 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     }
   }
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   transformIndexSearchResponse(hits): Map<string, string> {
     const configurations = {};
 
     for (let i = 0; i < hits.length; i++) {
       const doc = hits[i];
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       configurations[doc._id] = doc?._source?.value;
     }
 
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     return configurations;
   }
 }

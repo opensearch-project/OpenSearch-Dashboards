@@ -18,6 +18,7 @@ import {
   SavedObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  Logger,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
@@ -36,6 +37,7 @@ const generateSavedObjectsForbiddenError = () =>
   );
 
 export class WorkspaceIdConsumerWrapper {
+  private readonly logger: Logger;
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
     options?: T
@@ -46,8 +48,14 @@ export class WorkspaceIdConsumerWrapper {
     const workspaceIdsInUserOptions = options?.workspaces;
     let finalWorkspaces: string[] = [];
     if (options?.hasOwnProperty('workspaces')) {
-      // In order to get all data sources in workspace
-      finalWorkspaces = workspaceIdsInUserOptions || [];
+      if (workspaceIdsInUserOptions?.includes('*')) {
+        this.logger.warn(
+          'DEPRECATED: Using workspace="*" is deprecated and will be removed in future release.'
+        );
+      }
+      // In order to get all data sources in workspace, use * to skip appending workspace id automatically
+      // TODO: Remove workspace="*" in future release.
+      finalWorkspaces = (workspaceIdsInUserOptions || []).filter((id) => id !== '*');
     } else if (workspaceIdParsedFromRequest) {
       finalWorkspaces = [workspaceIdParsedFromRequest];
     }
@@ -239,5 +247,7 @@ export class WorkspaceIdConsumerWrapper {
     };
   };
 
-  constructor(private readonly workspaceClient: IWorkspaceClientImpl) {}
+  constructor(private readonly workspaceClient: IWorkspaceClientImpl, logger: Logger) {
+    this.logger = logger;
+  }
 }

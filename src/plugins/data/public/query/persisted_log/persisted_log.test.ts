@@ -63,6 +63,7 @@ describe('PersistedLog', () => {
 
   describe('expected API', () => {
     test('has expected methods', () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, {}, storage);
 
       expect(typeof log.add).toBe('function');
@@ -80,6 +81,7 @@ describe('PersistedLog', () => {
     });
 
     test('writes to storage', () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, {}, storage);
       const newItem = { first: 'diana', last: 'prince' };
 
@@ -93,6 +95,7 @@ describe('PersistedLog', () => {
   describe('persisting data', () => {
     test('fetches records from storage', () => {
       storage.get.mockReturnValue(payload);
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, {}, storage);
 
       const items = log.get();
@@ -102,6 +105,7 @@ describe('PersistedLog', () => {
 
     test('prepends new records', () => {
       storage.get.mockReturnValue(payload.slice(0));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, {}, storage);
       const newItem = { first: 'selina', last: 'kyle' };
 
@@ -120,6 +124,7 @@ describe('PersistedLog', () => {
       }
       storage.get.mockReturnValue(bulkData);
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, { maxLength: historyLimit }, storage);
       log.add(['new array 1']);
       const items = log.add(['new array 2']);
@@ -129,6 +134,7 @@ describe('PersistedLog', () => {
 
     test('should observe the filterDuplicates option', () => {
       storage.get.mockReturnValue(payload.slice(0));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, { filterDuplicates: true }, storage);
       const newItem = payload[1];
 
@@ -138,6 +144,7 @@ describe('PersistedLog', () => {
 
     test('should truncate the list upon initialization if too long', () => {
       storage.get.mockReturnValue(payload.slice(0));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, { maxLength: 1 }, storage);
       const items = log.get();
       expect(items.length).toBe(1);
@@ -145,6 +152,7 @@ describe('PersistedLog', () => {
 
     test('should allow a maxLength of 0', () => {
       storage.get.mockReturnValue(payload.slice(0));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const log = new PersistedLog(historyName, { maxLength: 0 }, storage);
       const items = log.get();
       expect(items.length).toBe(0);

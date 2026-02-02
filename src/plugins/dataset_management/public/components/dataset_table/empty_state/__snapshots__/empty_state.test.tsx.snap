@@ -1,0 +1,160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState should render normally 1`] = `
+<Fragment>
+  <EuiPageContent
+    className="inpEmptyState"
+    data-test-subj="datasetEmptyState"
+    grow={false}
+    horizontalPosition="center"
+  >
+    <EuiPageContentHeader>
+      <EuiPageContentHeaderSection>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              defaultMessage="Ready to try OpenSearch Dashboards? First, you need data."
+              id="datasetManagement.createDataset.emptyState.noDataTitle"
+              values={Object {}}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+    </EuiPageContentHeader>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPageContentBody>
+      <EuiFlexGrid
+        className="inpEmptyState__cardGrid"
+        columns={3}
+        responsive={true}
+      >
+        <EuiFlexItem>
+          <EuiCard
+            className="inpEmptyState__card"
+            description={
+              <FormattedMessage
+                defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
+                id="datasetManagement.createDataset.emptyState.sampleDataCardDescription"
+                values={Object {}}
+              />
+            }
+            icon={
+              <EuiIcon
+                color="subdued"
+                size="xl"
+                type="heatmap"
+              />
+            }
+            onClick={[Function]}
+            title={
+              <FormattedMessage
+                defaultMessage="Add sample data"
+                id="datasetManagement.createDataset.emptyState.sampleDataCardTitle"
+                values={Object {}}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer
+        size="xxl"
+      />
+      <div
+        className="inpEmptyState__footer"
+      >
+        <EuiFlexGrid
+          columns={3}
+        >
+          <EuiFlexItem
+            className="inpEmptyState__footerFlexItem"
+          >
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <EuiLink
+                      external={true}
+                      href="https://opensearch.org/docs/mocked-test-branch"
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Read documentation"
+                        id="datasetManagement.createDataset.emptyState.readDocs"
+                        values={Object {}}
+                      />
+                    </EuiLink>,
+                    "title": <FormattedMessage
+                      defaultMessage="Want to learn more?"
+                      id="datasetManagement.createDataset.emptyState.learnMore"
+                      values={Object {}}
+                    />,
+                  },
+                ]
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            className="inpEmptyState__footerFlexItem"
+          >
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <EuiLink
+                      data-test-subj="refreshIndicesButton"
+                      onClick={[Function]}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Check for new data"
+                        id="datasetManagement.createDataset.emptyState.checkDataButton"
+                        values={Object {}}
+                      />
+                       
+                      <EuiIcon
+                        size="s"
+                        type="refresh"
+                      />
+                    </EuiLink>,
+                    "title": <FormattedMessage
+                      defaultMessage="Think you already have data?"
+                      id="datasetManagement.createDataset.emptyState.haveData"
+                      values={Object {}}
+                    />,
+                  },
+                ]
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </div>
+    </EuiPageContentBody>
+  </EuiPageContent>
+  <EuiSpacer />
+  <EuiText
+    color="subdued"
+    size="xs"
+    textAlign="center"
+  >
+    <FormattedMessage
+      defaultMessage="Some indices may be hidden. Try to {link} anyway."
+      id="datasetManagement.createDataset.emptyState.createAnyway"
+      values={
+        Object {
+          "link": <EuiLink
+            data-test-subj="createAnyway"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="create an index pattern"
+              id="datasetManagement.createDataset.emptyState.createAnywayLink"
+              values={Object {}}
+            />
+          </EuiLink>,
+        }
+      }
+    />
+  </EuiText>
+</Fragment>
+`;

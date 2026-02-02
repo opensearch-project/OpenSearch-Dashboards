@@ -1,0 +1,62 @@
+.exploreDocTableHeader {
+  text-align: left;
+
+  // nested for specificity
+  .exploreDocTableHeaderField {
+    padding: $ouiSizeXXS;
+
+    // Outer wrapper: flex container for header text + action buttons
+    > span {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+
+      // EuiToolTip wrapper: size to content, but shrink when needed
+      > span:first-child {
+        flex: 0 1 auto; // don't grow, can shrink, size to content
+        min-width: 0;
+        overflow: hidden;
+      }
+    }
+
+    // Header text: truncate with ellipsis
+    .header-text {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.exploreDocTableHeader button {
+  margin-left: $euiSizeXS;
+}
+
+.exploreDocTableHeader__move,
+.exploreDocTableHeader__sortChange {
+  opacity: 0;
+
+  &:focus,
+  th:hover & {
+    opacity: 1;
+  }
+}
+
+.exploreDocTableHeaderField {
+  &__actionButton {
+    opacity: 0;
+    height: 10px;
+    width: 10px;
+    transition: opacity $euiAnimSpeedFast;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      opacity: 1;
+    }
+  }
+
+  &:hover &__actionButton,
+  &:focus &__actionButton {
+    opacity: 1;
+  }
+}

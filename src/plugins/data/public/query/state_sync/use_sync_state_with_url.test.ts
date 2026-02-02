@@ -22,7 +22,7 @@ import {
 import { QueryService, QueryStart } from '../query_service';
 import { TimefilterContract } from '../timefilter';
 import { ISearchInterceptor } from '../../search';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useSyncQueryStateWithUrl } from './use_sync_state_with_url';
 import * as SyncQueryStateWithUrl from './sync_state_with_url';
 
@@ -58,6 +58,7 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
 describe('use_sync_query_state_with_url', () => {
   let queryServiceStart: QueryStart;
   let filterManager: FilterManager;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let timefilter: TimefilterContract;
   let osdUrlStateStorage: IOsdUrlStateStorage;
   let history: History;
@@ -73,7 +74,9 @@ describe('use_sync_query_state_with_url', () => {
   let filterManagerChangeTriggered = jest.fn();
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let gF: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let aF: Filter;
 
   beforeEach(() => {

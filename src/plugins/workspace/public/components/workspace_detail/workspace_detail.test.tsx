@@ -224,7 +224,7 @@ describe('WorkspaceDetail', () => {
   });
 
   it('delete button will been shown at page header', async () => {
-    const mockHeaderControl = ({ controls }) => {
+    const mockHeaderControl = ({ controls }: any) => {
       return controls?.[0]?.run?.() ?? null;
     };
     const { getByText, getByTestId } = render(
@@ -243,7 +243,7 @@ describe('WorkspaceDetail', () => {
   });
 
   it('set default workspace button will been shown at page header', async () => {
-    const mockHeaderControl = ({ controls }) => {
+    const mockHeaderControl = ({ controls }: any) => {
       return controls?.[1]?.label ?? null;
     };
     const { getByText } = render(WorkspaceDetailPage({ header: mockHeaderControl }));
@@ -251,14 +251,14 @@ describe('WorkspaceDetail', () => {
   });
 
   it('Workspace overview button will been shown at page header', async () => {
-    const mockHeaderControlLabel = ({ controls }) => {
+    const mockHeaderControlLabel = ({ controls }: any) => {
       return controls?.[2]?.label ?? null;
     };
     const { getByText } = render(WorkspaceDetailPage({ header: mockHeaderControlLabel }));
     expect(getByText('Workspace overview')).toBeInTheDocument();
 
     const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(jest.fn());
-    const mockHeaderControl = ({ controls }) => {
+    const mockHeaderControl = ({ controls }: any) => {
       return controls?.[2]?.run?.() ?? null;
     };
     render(WorkspaceDetailPage({ header: mockHeaderControl }));
@@ -274,9 +274,9 @@ describe('WorkspaceDetail', () => {
         defaultValues: { ...defaultValues, description: '<script>alert("description")</script>' },
       })
     );
-    expect(getByTestId('workspaceForm-workspaceDetails-descriptionInputText').value).toEqual(
-      '<script>alert("description")</script>'
-    );
+    expect(
+      (getByTestId('workspaceForm-workspaceDetails-descriptionInputText') as HTMLInputElement).value
+    ).toEqual('<script>alert("description")</script>');
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
   });

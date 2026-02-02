@@ -47,6 +47,7 @@ describe('AccessControlTab Component', () => {
   });
 
   it('renders in view mode by default', async () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<AccessControlTab {...defaultProps} />);
 
     await waitFor(() => {
@@ -57,6 +58,7 @@ describe('AccessControlTab Component', () => {
   });
 
   it('switches to edit mode when Edit button is clicked', async () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<AccessControlTab {...defaultProps} />);
 
     fireEvent.click(screen.getByText('Edit'));
@@ -68,6 +70,7 @@ describe('AccessControlTab Component', () => {
   });
 
   it('switches back to view mode when Cancel button is clicked', async () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<AccessControlTab {...defaultProps} />);
 
     fireEvent.click(screen.getByText('Edit'));
@@ -83,6 +86,7 @@ describe('AccessControlTab Component', () => {
   });
 
   it('saves changes and switches back to view mode when Save button is clicked', async () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<AccessControlTab {...defaultProps} />);
 
     fireEvent.click(screen.getByText('Edit'));
@@ -104,6 +108,7 @@ describe('AccessControlTab Component', () => {
   });
 
   it('matches snapshot', async () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const { asFragment } = render(<AccessControlTab {...defaultProps} />);
     await waitFor(() => {
       expect(asFragment()).toMatchSnapshot();

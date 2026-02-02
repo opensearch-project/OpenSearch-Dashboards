@@ -50,6 +50,7 @@ export function toEditableConfig({
   value,
   isCustom,
   isOverridden,
+  isPermissionControlled,
   userSettingsEnabled,
 }: {
   def: PublicUiSettingsParams & UserProvidedValues<any>;
@@ -57,6 +58,7 @@ export function toEditableConfig({
   value: SavedObjectAttribute;
   isCustom: boolean;
   isOverridden: boolean;
+  isPermissionControlled: boolean;
   userSettingsEnabled: boolean;
 }) {
   if (!def) {
@@ -73,6 +75,7 @@ export function toEditableConfig({
     category: def.category && def.category.length ? def.category : [DEFAULT_CATEGORY],
     isCustom,
     isOverridden,
+    isPermissionControlled,
     readonly: !!def.readonly,
     defVal: def.value,
     type: getValType(def, value),

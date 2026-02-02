@@ -17,6 +17,7 @@ import { initHome } from './home_render';
 import { coreMock } from '../../../../core/public/mocks';
 import {
   getLearnOpenSearchConfig,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   getWhatsNewConfig,
   registerHomeListCard,
 } from './components/home_list_card';

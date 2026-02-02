@@ -108,6 +108,7 @@ export function createRegionMapTypeDefinition(dependencies) {
 provided base maps, or add your own. Darker colors represent higher values.',
     }),
     icon: 'visMapRegion',
+    isClassic: true,
     visConfig: {
       defaults: {
         layerChosenByUser: DEFAULT_MAP_CHOICE,

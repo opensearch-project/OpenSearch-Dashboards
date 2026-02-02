@@ -5,15 +5,22 @@
 
 import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
-import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
+import {
+  httpServerMock,
+  savedObjectsClientMock,
+  coreMock,
+  loggingSystemMock,
+} from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { workspaceClientMock } from '../workspace_client.mock';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
+  const loggingService = loggingSystemMock.create();
+  const logger = loggingService.get();
   const mockedWorkspaceClient = workspaceClientMock.create();
-  const wrapperInstance = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+  const wrapperInstance = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient, logger);
   const mockedClient = savedObjectsClientMock.create();
   const workspaceEnabledMockRequest = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(workspaceEnabledMockRequest, {
@@ -77,7 +84,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should throw error when passing in invalid workspaces`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -209,7 +219,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should pass a empty workspace array`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -226,7 +239,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should throw error when passing in invalid workspaces`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -242,6 +258,32 @@ describe('WorkspaceIdConsumerWrapper', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
       expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
+    });
+
+    it(`Should not throw error when passing in '*'`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      await mockedWrapperClient.find({
+        type: ['dashboard', 'visualization'],
+        workspaces: ['*'],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: ['dashboard', 'visualization'],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'DEPRECATED: Using workspace="*" is deprecated and will be removed in future release.'
+        )
+      );
     });
   });
 
@@ -309,7 +351,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should get object when there is no workspace in options/request`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -366,7 +411,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should get data source when user is data source admin`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, { isDataSourceAdmin: true, requestWorkspaceId: 'foo' });
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -415,14 +463,26 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'dashboard',
         id: 'dashboard_id',
         attributes: { description: 'description' },
-        references: ['reference_id'],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['foo'],
       },
       {
         type: 'dashboard',
         id: 'dashboard_error_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         error: {
           statusCode: 404,
           error: 'Not Found',
@@ -433,32 +493,62 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'visualization',
         id: 'visualization_id',
         attributes: { description: 'description' },
-        references: ['reference_id'],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['bar'],
       },
       {
         type: 'config',
         id: 'config_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'workspace',
         id: 'workspace_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'data-source',
         id: 'global_data_source_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
       },
       {
         type: 'data-source',
         id: 'data_source_id',
         attributes: {},
-        references: [],
+        references: [
+          {
+            name: 'reference_name',
+            type: 'reference_type',
+            id: 'reference_id',
+          },
+        ],
         workspaces: ['foo'],
       },
     ];
@@ -480,7 +570,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
               },
               "id": "dashboard_id",
               "references": Array [
-                "reference_id",
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
               ],
               "type": "dashboard",
               "workspaces": Array [
@@ -495,7 +589,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "statusCode": 404,
               },
               "id": "dashboard_error_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "dashboard",
             },
             Object {
@@ -512,13 +612,25 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "config_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "config",
             },
             Object {
               "attributes": Object {},
               "id": "workspace_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "workspace",
             },
             Object {
@@ -535,7 +647,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
               "workspaces": Array [
                 "foo",
@@ -559,7 +677,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
               },
               "id": "dashboard_id",
               "references": Array [
-                "reference_id",
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
               ],
               "type": "dashboard",
               "workspaces": Array [
@@ -574,7 +696,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "statusCode": 404,
               },
               "id": "dashboard_error_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "dashboard",
             },
             Object {
@@ -591,13 +719,25 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "config_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "config",
             },
             Object {
               "attributes": Object {},
               "id": "workspace_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "workspace",
             },
             Object {
@@ -614,7 +754,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
               "workspaces": Array [
                 "foo",
@@ -626,7 +772,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should bulkGet objects when there is no workspace in options/request`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -656,7 +805,10 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should bulkGet data source when user is data source admin`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
+        mockedWorkspaceClient,
+        logger
+      );
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, { isDataSourceAdmin: true, requestWorkspaceId: 'foo' });
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -677,7 +829,11 @@ describe('WorkspaceIdConsumerWrapper', () => {
               },
               "id": "dashboard_id",
               "references": Array [
-                "reference_id",
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
               ],
               "type": "dashboard",
               "workspaces": Array [
@@ -692,7 +848,13 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "statusCode": 404,
               },
               "id": "dashboard_error_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "dashboard",
             },
             Object {
@@ -709,25 +871,49 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "id": "config_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "config",
             },
             Object {
               "attributes": Object {},
               "id": "workspace_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "workspace",
             },
             Object {
               "attributes": Object {},
               "id": "global_data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
             },
             Object {
               "attributes": Object {},
               "id": "data_source_id",
-              "references": Array [],
+              "references": Array [
+                Object {
+                  "id": "reference_id",
+                  "name": "reference_name",
+                  "type": "reference_type",
+                },
+              ],
               "type": "data-source",
               "workspaces": Array [
                 "foo",

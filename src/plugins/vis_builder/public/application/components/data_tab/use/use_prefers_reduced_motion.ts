@@ -14,6 +14,7 @@ export function usePrefersReducedMotion() {
 
   useEffect(() => {
     const mediaQueryList = window.matchMedia(QUERY);
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const listener = (event) => {
       setPrefersReducedMotion(!event.matches);
     };

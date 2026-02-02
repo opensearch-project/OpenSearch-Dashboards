@@ -71,6 +71,7 @@ jest.mock('../associated_object_management/utils/associated_objects_tab_utils', 
 
 const mockApplication = coreMock.createSetup().application;
 const mockUiSettings = coreMock.createSetup().uiSettings;
+const mockWorkspaces = coreMock.createSetup().workspaces;
 const mockdataSourceSelection = new DataSourceSelectionService();
 
 jest.mock('../../utils', () => ({
@@ -78,6 +79,7 @@ jest.mock('../../utils', () => ({
   getDataSourcesWithFields: jest.fn(),
   getApplication: () => mockApplication,
   getUiSettings: () => mockUiSettings,
+  getWorkspaces: () => mockWorkspaces,
   getHideLocalCluster: () => ({ enabled: true }),
   getDataSourceSelection: () => mockdataSourceSelection,
 }));
@@ -105,9 +107,11 @@ const renderComponent = ({
         <DirectQueryDataConnectionDetail
           featureFlagStatus={featureFlagStatus}
           http={http as HttpStart}
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           notifications={notifications as NotificationsStart}
           application={application as ApplicationStart}
           setBreadcrumbs={setBreadcrumbs}
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           savedObjects={savedObjects as SavedObjectsStart}
           useNewUX={false}
           setHeaderActionMenu={setHeaderActionMenu}

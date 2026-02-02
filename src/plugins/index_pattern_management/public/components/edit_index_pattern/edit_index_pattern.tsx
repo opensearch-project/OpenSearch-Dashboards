@@ -165,6 +165,7 @@ export const EditIndexPattern = withRouter(
         if (indexPattern.id) {
           Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
             const datasetService = data.query.queryString.getDatasetService();
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             datasetService.removeFromRecentDatasets(indexPattern.id);
             history.push('');
           });

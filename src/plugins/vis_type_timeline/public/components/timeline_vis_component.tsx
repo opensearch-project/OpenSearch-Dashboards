@@ -197,6 +197,7 @@ function TimelineVisComponent({
 
         // legend has been re-created. Apply focus on legend element when previously set
         if (focusedSeries || focusedSeries === 0) {
+          // @ts-expect-error TS2532 TODO(ts-error): fixme
           canvasNode.find('div.legend table .legendLabel>span').get(focusedSeries).focus();
         }
       }

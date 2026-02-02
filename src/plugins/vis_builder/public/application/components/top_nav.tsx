@@ -23,6 +23,7 @@ import { TopNavMenuData, TopNavMenuItemRenderType } from '../../../../navigation
 import { opensearchFilters, useConnectStorageToQueryState } from '../../../../data/public';
 import { RootState } from '../../../../data_explorer/public';
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 function useDeepEffect(callback, dependencies) {
   const currentDepsRef = useRef(dependencies);
 
@@ -78,6 +79,7 @@ export const TopNav = () => {
       const navActions = getNavActions(
         {
           visualizationIdFromUrl,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
           saveDisabledReason,
           dispatch,
@@ -92,6 +94,7 @@ export const TopNav = () => {
               visualizationIdFromUrl,
               savedVisBuilderVis: saveStateToSavedObject(
                 savedVisBuilderVis,
+                // @ts-expect-error TS2345 TODO(ts-error): fixme
                 rootState,
                 indexPattern
               ),
@@ -107,6 +110,7 @@ export const TopNav = () => {
               visualizationIdFromUrl,
               savedVisBuilderVis: saveStateToSavedObject(
                 savedVisBuilderVis,
+                // @ts-expect-error TS2345 TODO(ts-error): fixme
                 rootState,
                 indexPattern
               ),

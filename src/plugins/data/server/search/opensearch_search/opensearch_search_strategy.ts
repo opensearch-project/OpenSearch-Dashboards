@@ -79,6 +79,7 @@ export const opensearchSearchStrategyProvider = (
 
       try {
         const isOpenSearchHostsEmpty =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           openSearchServiceSetup?.legacy?.client?.config?.hosts?.length === 0;
 
         if (dataSource?.dataSourceEnabled() && isOpenSearchHostsEmpty && !request.dataSourceId) {

@@ -51,6 +51,7 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
     i18n.translate('visualize.discover.visualizeFieldLabel', {
       defaultMessage: 'Visualize field',
     }),
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   isCompatible: async () => !!getApplication().capabilities.visualize.show,
   getHref: async (context) => {
     const url = await getVisualizeUrl(context);

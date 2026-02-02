@@ -99,6 +99,7 @@ export default class TransformObjStream extends Stream.Transform {
       const source = get(event, 'source', {});
       data.req = {
         url: event.path,
+        routePath: event.route || '',
         method: event.method || '',
         headers: event.headers,
         remoteAddress: source.remoteAddress,

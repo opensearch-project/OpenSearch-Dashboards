@@ -58,7 +58,7 @@ import {
   OpenSearchServiceStart,
   IScopedClusterClient,
 } from './opensearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpServiceSetup, HttpServiceStart, OpenSearchDashboardsRequest } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -361,6 +361,7 @@ export {
   StringValidationRegexString,
   CURRENT_USER_PLACEHOLDER,
   UiSettingScope,
+  CURRENT_WORKSPACE_PLACEHOLDER,
 } from './ui_settings';
 
 export {
@@ -384,6 +385,8 @@ export {
   WORKSPACE_TYPE,
   DEFAULT_NAV_GROUPS,
   WORKSPACE_PATH_PREFIX,
+  WORKSPACE_USE_CASE_PREFIX,
+  getUseCaseFeatureConfig,
 } from '../utils';
 
 export {
@@ -448,6 +451,9 @@ export interface RequestHandlerContext {
     dynamicConfig: {
       client: IDynamicConfigurationClient;
       asyncLocalStore: AsyncLocalStorageContext | undefined;
+      createStoreFromRequest: (
+        req: OpenSearchDashboardsRequest
+      ) => AsyncLocalStorageContext | undefined;
     };
     auditor: Auditor;
   };

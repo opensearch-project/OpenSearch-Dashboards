@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiText, EuiCompressedFormRow, EuiCompressedFieldText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -40,6 +41,7 @@ export const NameRow: React.FC<ConfigureNameProps> = ({
           }),
         });
         const dataconnections = await response.json();
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         setExistingNames(dataconnections.jsonData.map((x) => x.DATASOURCE_NAME));
       } catch (error) {
         // eslint-disable-next-line no-console

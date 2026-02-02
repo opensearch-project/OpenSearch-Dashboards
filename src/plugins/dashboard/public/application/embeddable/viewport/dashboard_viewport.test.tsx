@@ -28,13 +28,15 @@
  * under the License.
  */
 
+// @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
+import { act } from 'react';
+import { waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import sizeMe from 'react-sizeme';
-import { nextTick } from 'test_utils/enzyme_helpers';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
@@ -176,13 +178,18 @@ test('renders exit full screen button when in full screen mode', async () => {
     'ExitFullScreenButton'
   );
 
-  props.container.updateInput({ isFullScreenMode: false });
-  component.update();
-  await nextTick();
+  // Wrap container input update in act() for React 18
+  await act(async () => {
+    props.container.updateInput({ isFullScreenMode: false });
+  });
 
-  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).not.toBe(
-    'ExitFullScreenButton'
-  );
+  // Use waitFor to wait for the component to re-render after the RxJS subscription triggers state update
+  await waitFor(() => {
+    component.update();
+    expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).not.toBe(
+      'ExitFullScreenButton'
+    );
+  });
 
   component.unmount();
 });
@@ -203,13 +210,18 @@ test('renders exit full screen button when in full screen mode and empty screen'
     'ExitFullScreenButton'
   );
 
-  props.container.updateInput({ isFullScreenMode: false });
-  component.update();
-  await nextTick();
+  // Wrap container input update in act() for React 18
+  await act(async () => {
+    props.container.updateInput({ isFullScreenMode: false });
+  });
 
-  expect((component.find('.dshDashboardEmptyScreen').childAt(0).type() as any).name).not.toBe(
-    'ExitFullScreenButton'
-  );
+  // Use waitFor to wait for the component to re-render after the RxJS subscription triggers state update
+  await waitFor(() => {
+    component.update();
+    expect((component.find('.dshDashboardEmptyScreen').childAt(0).type() as any).name).not.toBe(
+      'ExitFullScreenButton'
+    );
+  });
 
   component.unmount();
 });

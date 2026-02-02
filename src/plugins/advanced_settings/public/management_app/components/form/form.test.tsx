@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { act } from 'react';
 import ReactDOM from 'react-dom';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
@@ -39,10 +39,7 @@ import { notificationServiceMock } from '../../../../../../core/public/mocks';
 import { SettingsChanges } from '../../types';
 import { Form } from './form';
 
-jest.mock('react-dom', () => ({
-  ...jest.requireActual('react-dom'),
-  createPortal: jest.fn((element) => element),
-}));
+// Note: We don't mock createPortal because we provide an actual app-wrapper element in the DOM
 
 jest.mock('../field', () => ({
   Field: () => {
@@ -51,7 +48,10 @@ jest.mock('../field', () => ({
 }));
 
 beforeAll(() => {
-  ReactDOM.createPortal = jest.fn((children: any) => children);
+  // Create app-wrapper element for portal target
+  const appWrapper = document.createElement('div');
+  appWrapper.id = 'app-wrapper';
+  document.body.appendChild(appWrapper);
 
   const localStorage: Record<string, any> = {
     'core.chrome.isLocked': true,
@@ -68,7 +68,11 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  (ReactDOM.createPortal as jest.Mock).mockClear();
+  // Clean up app-wrapper element
+  const appWrapper = document.getElementById('app-wrapper');
+  if (appWrapper) {
+    document.body.removeChild(appWrapper);
+  }
   delete (window as any).localStorage;
 });
 
@@ -78,6 +82,7 @@ const defaults = {
   value: 'value',
   description: 'description',
   isOverridden: false,
+  isPermissionControlled: false,
   type: 'string' as UiSettingsType,
   isCustom: false,
   defVal: 'defVal',
@@ -134,6 +139,9 @@ const save = jest.fn((changes: SettingsChanges) => Promise.resolve([true]));
 const clearQuery = () => {};
 
 describe('Form', () => {
+  beforeEach(() => {
+    save.mockClear();
+  });
   it('should render normally', async () => {
     const component = shallowWithI18nProvider(
       <Form
@@ -210,7 +218,7 @@ describe('Form', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should hide bottom bar when clicking on the cancel changes button', async () => {
+  it('should hide bottom bar when clicking on the cancel changes button', () => {
     const wrapper = mountWithI18nProvider(
       <Form
         settings={settings}
@@ -225,18 +233,30 @@ describe('Form', () => {
         dockLinks={{} as any}
       />
     );
-    (wrapper.instance() as Form).setState({
-      unsavedChanges: {
-        'dashboard:test:setting': {
-          value: 'changedValue',
+
+    // Wrap setState in act() for React 18
+    act(() => {
+      (wrapper.instance() as Form).setState({
+        unsavedChanges: {
+          'dashboard:test:setting': {
+            value: 'changedValue',
+          },
         },
-      },
+      });
     });
-    const updated = wrapper.update();
-    expect(updated.exists('[data-test-subj="advancedSetting-bottomBar"]')).toEqual(true);
-    await findTestSubject(updated, `advancedSetting-cancelButton`).simulate('click');
-    updated.update();
-    expect(updated.exists('[data-test-subj="advancedSetting-bottomBar"]')).toEqual(false);
+    wrapper.update();
+    // Portal content is rendered in app-wrapper element
+    expect(document.querySelector('[data-test-subj="advancedSetting-bottomBar"]')).not.toBeNull();
+
+    // Click cancel button - portal content is in document, not wrapper
+    act(() => {
+      const cancelButton = document.querySelector(
+        '[data-test-subj="advancedSetting-cancelButton"]'
+      ) as HTMLElement;
+      cancelButton.click();
+    });
+    wrapper.update();
+    expect(document.querySelector('[data-test-subj="advancedSetting-bottomBar"]')).toBeNull();
   });
 
   it('should show a reload toast when saving setting requiring a page reload', async () => {
@@ -255,16 +275,27 @@ describe('Form', () => {
         dockLinks={{} as any}
       />
     );
-    (wrapper.instance() as Form).setState({
-      unsavedChanges: {
-        'dashboard:test:setting': {
-          value: 'changedValue',
-        },
-      },
-    });
-    const updated = wrapper.update();
 
-    findTestSubject(updated, `advancedSetting-saveButton`).simulate('click');
+    // Wrap setState in act() for React 18
+    act(() => {
+      (wrapper.instance() as Form).setState({
+        unsavedChanges: {
+          'dashboard:test:setting': {
+            value: 'changedValue',
+          },
+        },
+      });
+    });
+    wrapper.update();
+
+    // Click save button - portal content is in document
+    act(() => {
+      const saveButton = document.querySelector(
+        '[data-test-subj="advancedSetting-saveButton"]'
+      ) as HTMLElement;
+      saveButton.click();
+    });
+
     expect(save).toHaveBeenCalled();
     await save({ 'dashboard:test:setting': 'changedValue' });
     expect(toasts.add).toHaveBeenCalledWith(
@@ -276,7 +307,7 @@ describe('Form', () => {
     );
   });
 
-  it('should save an array typed field when user provides an empty string correctly', async () => {
+  it('should save an array typed field when user provides an empty string correctly', () => {
     const wrapper = mountWithI18nProvider(
       <Form
         settings={settings}
@@ -292,19 +323,30 @@ describe('Form', () => {
       />
     );
 
-    (wrapper.instance() as Form).setState({
-      unsavedChanges: {
-        'general:test:array': {
-          value: '',
+    // Wrap setState in act() for React 18
+    act(() => {
+      (wrapper.instance() as Form).setState({
+        unsavedChanges: {
+          'general:test:array': {
+            value: '',
+          },
         },
-      },
+      });
+    });
+    wrapper.update();
+
+    // Click save button - portal content is in document
+    act(() => {
+      const saveButton = document.querySelector(
+        '[data-test-subj="advancedSetting-saveButton"]'
+      ) as HTMLElement;
+      saveButton.click();
     });
 
-    findTestSubject(wrapper.update(), `advancedSetting-saveButton`).simulate('click');
     expect(save).toHaveBeenCalledWith({ 'general:test:array': [] });
   });
 
-  it('should save an array typed field when user provides a comma separated string correctly', async () => {
+  it('should save an array typed field when user provides a comma separated string correctly', () => {
     const wrapper = mountWithI18nProvider(
       <Form
         settings={settings}
@@ -320,15 +362,26 @@ describe('Form', () => {
       />
     );
 
-    (wrapper.instance() as Form).setState({
-      unsavedChanges: {
-        'general:test:array': {
-          value: 'test1, test2',
+    // Wrap setState in act() for React 18
+    act(() => {
+      (wrapper.instance() as Form).setState({
+        unsavedChanges: {
+          'general:test:array': {
+            value: 'test1, test2',
+          },
         },
-      },
+      });
+    });
+    wrapper.update();
+
+    // Click save button - portal content is in document
+    act(() => {
+      const saveButton = document.querySelector(
+        '[data-test-subj="advancedSetting-saveButton"]'
+      ) as HTMLElement;
+      saveButton.click();
     });
 
-    findTestSubject(wrapper.update(), `advancedSetting-saveButton`).simulate('click');
     expect(save).toHaveBeenCalledWith({ 'general:test:array': ['test1', 'test2'] });
   });
 });

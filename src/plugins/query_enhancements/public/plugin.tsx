@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
@@ -16,6 +16,7 @@ import {
 } from '../../data/public';
 import { ConfigSchema } from '../common/config';
 import { s3TypeConfig } from './datasets';
+import { prometheusTypeConfig } from './datasets/prometheus_type';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
@@ -26,6 +27,10 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { PPLFilterUtils } from './search/filters';
+import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
+import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
+import { PrometheusResourceClient } from './resources';
 
 export class QueryEnhancementsPlugin
   implements
@@ -40,6 +45,8 @@ export class QueryEnhancementsPlugin
   private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
   private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
   private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
+  private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private appIdSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -51,6 +58,7 @@ export class QueryEnhancementsPlugin
     { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
+    const { currentAppId$ } = this;
 
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];
@@ -68,9 +76,18 @@ export class QueryEnhancementsPlugin
         usageCollector: data.search.usageCollector,
       }),
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
+      addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
       fields: {
         sortable: false,
-        filterable: false,
+        get filterable() {
+          const currentAppId = currentAppId$.getValue();
+          // PPL filters are only supported in explore and dashboards, return
+          // undefined to use `filterable` value from field definitions.
+          if (currentAppId?.startsWith('explore/') || currentAppId === 'dashboards')
+            return undefined;
+          return false;
+        },
         visualizable: false,
         formatter: (value: string, type: OSD_FIELD_TYPES) => {
           switch (type) {
@@ -90,8 +107,8 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
-      editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      editorSupportedAppNames: ['discover', 'explore'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore', 'dataset_management'],
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
@@ -216,6 +233,68 @@ export class QueryEnhancementsPlugin
 
     queryString.getDatasetService().registerType(s3TypeConfig);
 
+    const promqlLanguageConfig: LanguageConfig = {
+      id: 'PROMQL',
+      title: 'PromQL',
+      search: new PromQLSearchInterceptor({
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      }),
+      getQueryString: (currentQuery: Query) => '',
+      fields: {
+        sortable: false,
+        filterable: false,
+        visualizable: false,
+        formatter: (value: string, type: OSD_FIELD_TYPES) => {
+          switch (type) {
+            case OSD_FIELD_TYPES.DATE:
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // Date fields need special formatting in order for discover table formatter to render in the correct time zone
+
+            default:
+              return value;
+          }
+        },
+      },
+      docLink: {
+        title: i18n.translate('queryEnhancements.promqlLanguage.docLink', {
+          defaultMessage: 'PromQL documentation',
+        }),
+        url: 'https://prometheus.io/docs/prometheus/latest/querying/basics/',
+      },
+      showDocLinks: false,
+      editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
+      editorSupportedAppNames: ['explore'],
+      supportedAppNames: ['explore'],
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.promqlSampleQuery.upMetric', {
+            defaultMessage: 'Query the up metric',
+          }),
+          query: `up`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.promqlSampleQuery.rateQuery', {
+            defaultMessage: 'Query rate of HTTP requests',
+          }),
+          query: `rate(http_requests_total[5m])`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.promqlSampleQuery.aggregation', {
+            defaultMessage: 'Sum by job',
+          }),
+          query: `sum by (job) (rate(http_requests_total[5m]))`,
+        },
+      ],
+    };
+    queryString.getLanguageService().registerLanguage(promqlLanguageConfig);
+    queryString.getDatasetService().registerType(prometheusTypeConfig);
+
+    // Register prometheus resource client
+    data.resourceClientFactory.register('prometheus', (http) => new PrometheusResourceClient(http));
+
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
       resultSummaryEnabled$: this.resultSummaryEnabled$,
@@ -230,8 +309,16 @@ export class QueryEnhancementsPlugin
     setStorage(this.storage);
     setData(data);
     setUiActions(uiActions);
+    this.appIdSubscription = core.application.currentAppId$.subscribe((appId) => {
+      this.currentAppId$.next(appId);
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appIdSubscription) {
+      this.appIdSubscription.unsubscribe();
+    }
+  }
 }

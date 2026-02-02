@@ -6,7 +6,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { ReviewS3Datasource } from './review_amazon_s3_data_source';
 import { AuthMethod } from '../../../constants';
 import { Role } from '../../../../types';
@@ -39,6 +39,7 @@ jest.mock('history', () => {
     ...originalModule,
     createMemoryHistory: () => {
       const history = originalModule.createMemoryHistory();
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
       history.entries.forEach((entry) => {
         entry.key = 'consistentKey';
       });

@@ -50,6 +50,7 @@ describe('Intercept logout handler', () => {
 
   it('Intercept logout handler should clear the cache session', () => {
     const logoutInterceptFn = catalogRequestIntercept();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     logoutInterceptFn(logoutPath, null);
     expect(sessionStorage.removeItem).toBeCalledWith(ASYNC_QUERY_DATASOURCE_CACHE);
     expect(sessionStorage.removeItem).toBeCalledWith(ASYNC_QUERY_ACCELERATIONS_CACHE);

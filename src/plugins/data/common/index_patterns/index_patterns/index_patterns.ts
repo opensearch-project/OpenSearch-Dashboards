@@ -63,6 +63,7 @@ const savedObjectType = 'index-pattern';
 
 export interface IndexPatternSavedObjectAttrs {
   title: string;
+  displayName?: string;
 }
 
 interface IndexPatternsServiceDeps {
@@ -403,6 +404,9 @@ export class IndexPatternsService {
       version,
       attributes: {
         title,
+        displayName,
+        description,
+        signalType,
         timeFieldName,
         intervalName,
         fields,
@@ -410,6 +414,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
+        schemaMappings,
       },
       references,
     } = savedObject;
@@ -418,6 +423,7 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
@@ -425,6 +431,9 @@ export class IndexPatternsService {
       id,
       version,
       title,
+      displayName,
+      description,
+      signalType,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -432,6 +441,7 @@ export class IndexPatternsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
+      schemaMappings: parsedSchemaMappings,
     };
   };
 
@@ -539,7 +549,6 @@ export class IndexPatternsService {
    * Get an index pattern by title if cached
    * @param id
    */
-
   getByTitle = (title: string, ignoreErrors: boolean = false): IndexPattern => {
     const indexPattern = indexPatternCache.getByTitle(title);
     if (!indexPattern && !ignoreErrors) {

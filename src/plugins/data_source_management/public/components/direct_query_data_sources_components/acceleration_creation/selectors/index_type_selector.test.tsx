@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { IndexTypeSelector } from './index_type_selector';
 import { EuiSuperSelect, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import {
@@ -163,6 +163,7 @@ describe('IndexTypeSelector', () => {
 
     const options = wrapper.find(EuiSuperSelect).prop('options');
     expect(options).toHaveLength(3);
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     expect(options.map((option) => option.value)).toEqual(['skipping', 'covering', 'materialized']);
   });
 });

@@ -8,6 +8,7 @@ import { formatTimePickerDate } from './utils';
 
 describe('Data Frame Utils', () => {
   describe('formatTimePickerDate function', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     Date.now = jest.fn(() => new Date('2024-05-04T12:30:00.000Z'));
 
     test('should return a correctly formatted date', () => {

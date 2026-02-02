@@ -54,6 +54,7 @@ describe('ImportModeControl', () => {
     jest.resetAllMocks();
   });
 
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   const props: ImportModeControlProps = { initialValues, updateSelection, isLegacyFile: false };
 
   it('returns partial import mode control when used with a legacy file', async () => {

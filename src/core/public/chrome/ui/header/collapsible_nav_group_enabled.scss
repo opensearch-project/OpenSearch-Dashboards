@@ -1,4 +1,9 @@
 .context-nav-wrapper {
+  top: var(--global-banner-height, 0);
+  height: calc(100% - var(--global-banner-height, 0));
+
+  // TODO: Remove this after https://github.com/opensearch-project/oui/issues/1622 is resolved
+  z-index: $ouiZHeader - 3 !important;
   border: none !important;
   border-top-right-radius: $euiSizeL;
   background-color: $euiSideNavBackgroundColor;
@@ -85,7 +90,7 @@
   }
 
   .bottom-container {
-    padding: 0 $euiSize;
+    padding: 0 $euiSizeM;
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
 
@@ -102,7 +107,7 @@
     }
 
     &.bottom-container-expanded {
-      gap: 16px;
+      gap: $euiSizeM;
       padding-top: $euiSizeM;
       padding-bottom: $euiSizeM;
       border-top: $euiBorderThin;

@@ -32,6 +32,7 @@ import { Server } from '@hapi/hapi';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
 import { CspConfig } from '../csp';
+import { CspReportOnlyConfig } from '../csp_report_only';
 import { mockRouter, RouterMock } from './router/router.mock';
 import {
   InternalHttpServiceSetup,
@@ -113,6 +114,7 @@ const createInternalSetupContractMock = () => {
     registerStaticDir: jest.fn(),
     basePath: createBasePathMock(),
     csp: CspConfig.DEFAULT,
+    cspReportOnly: CspReportOnlyConfig.DEFAULT,
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
     getServerInfo: jest.fn(),
@@ -141,6 +143,7 @@ const createSetupContractMock = () => {
     registerOnPreResponse: internalMock.registerOnPreResponse,
     basePath: internalMock.basePath,
     csp: CspConfig.DEFAULT,
+    cspReportOnly: CspReportOnlyConfig.DEFAULT,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     auth: {

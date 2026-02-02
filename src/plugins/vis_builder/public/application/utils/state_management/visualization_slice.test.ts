@@ -92,6 +92,7 @@ describe('visualizationSlice', () => {
 
     const result = visualizationSlice.reducer(initialStateWithAgg, action);
     expect(
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       result.activeVisualization?.aggConfigParams?.[0]?.params?.[aggParamValue.paramName]
     ).toEqual(aggParamValue.value);
   });

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { PublicAppInfo } from 'opensearch-dashboards/public';
+import { PublicAppInfo, UseCaseId } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -166,12 +166,16 @@ const WorkspaceCreator = ({
       navigationUI: {
         HeaderControl: () => null,
       },
+      useCaseService: {
+        supportedUseCasesForServerless: [UseCaseId.ESSENTIAL_USE_CASE_ID],
+      },
     },
   });
   const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
     <Provider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
@@ -201,7 +205,7 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
-    window.location = location;
+    window.location = location as Location;
   });
 
   it('should not create workspace when name is empty', async () => {

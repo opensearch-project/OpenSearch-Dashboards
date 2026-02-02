@@ -117,6 +117,14 @@ describe('BasePath', () => {
 
       expect(basePath.prepend('http://localhost:5601/a/b')).toBe('http://localhost:5601/a/b');
     });
+
+    it('returns path unchanged for prepend with malformed auth in url', () => {
+      const basePath = new BasePath('a/b');
+
+      expect(basePath.prepend('http://user:%E0%A4@example.com')).toBe(
+        'http://user:%E0%A4@example.com'
+      );
+    });
   });
 
   describe('#remove()', () => {

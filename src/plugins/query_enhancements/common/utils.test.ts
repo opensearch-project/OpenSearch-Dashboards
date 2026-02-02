@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isPPLSearchQuery, throwFacetError } from './utils';
+import { isPPLSearchQuery, throwFacetError, formatDate } from './utils';
 import { Query } from 'src/plugins/data/common';
 
 describe('throwFacetError', () => {
@@ -110,6 +110,62 @@ describe('throwFacetError', () => {
       expect(err.name).toBeUndefined();
       expect(err.status).toBeUndefined();
     }
+  });
+});
+
+describe('formatDate', () => {
+  it('should format date string with milliseconds', () => {
+    const dateString = '2025-07-30T20:30:31.567Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-07-30 20:30:31.567');
+  });
+
+  it('should format date string with zero milliseconds', () => {
+    const dateString = '2025-07-30T20:30:31.000Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-07-30 20:30:31.000');
+  });
+
+  it('should format date string with single digit milliseconds', () => {
+    const dateString = '2025-07-30T20:30:31.005Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-07-30 20:30:31.005');
+  });
+
+  it('should format date string with double digit milliseconds', () => {
+    const dateString = '2025-07-30T20:30:31.050Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-07-30 20:30:31.050');
+  });
+
+  it('should format date string with maximum milliseconds', () => {
+    const dateString = '2025-07-30T20:30:31.999Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-07-30 20:30:31.999');
+  });
+
+  it('should handle different date formats', () => {
+    const dateString = '2025-01-01T00:00:00.123Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-01-01 00:00:00.123');
+  });
+
+  it('should pad single digit months and days', () => {
+    const dateString = '2025-01-05T09:08:07.456Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-01-05 09:08:07.456');
+  });
+
+  it('should handle leap year dates', () => {
+    const dateString = '2024-02-29T12:34:56.789Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2024-02-29 12:34:56.789');
+  });
+
+  it('should handle end of year dates', () => {
+    const dateString = '2025-12-31T23:59:59.999Z';
+    const result = formatDate(dateString);
+    expect(result).toBe('2025-12-31 23:59:59.999');
   });
 });
 

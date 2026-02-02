@@ -40,6 +40,7 @@ export function checkEnglishOnly(message: string) {
 
 export function verifySelectFormatNode(node: SelectFormatNode) {
   if (node.type !== 'selectFormat') {
+    // @ts-expect-error TS2351 TODO(ts-error): fixme
     throw new parser.SyntaxError(
       'Unable to verify select format icu-syntax',
       'selectFormat',
@@ -51,6 +52,7 @@ export function verifySelectFormatNode(node: SelectFormatNode) {
   for (const option of node.options) {
     if (option.type === 'optionalFormatPattern') {
       if (!checkEnglishOnly(option.selector)) {
+        // @ts-expect-error TS2351 TODO(ts-error): fixme
         throw new parser.SyntaxError(
           'selectFormat Selector must be in english',
           'English only selector',
@@ -71,12 +73,16 @@ export function verifyICUMessage(message: string) {
       }
     }
   } catch (error: unknown) {
+    // @ts-expect-error TS2359, TS2571 TODO(ts-error): fixme
     if (error instanceof parser.SyntaxError && error.name === 'SyntaxError') {
       const errorWithContext = createParserErrorMessage(message, {
         loc: {
+          // @ts-expect-error TS2571 TODO(ts-error): fixme
           line: error.location.start.line,
+          // @ts-expect-error TS2571 TODO(ts-error): fixme
           column: error.location.start.column - 1,
         },
+        // @ts-expect-error TS2571 TODO(ts-error): fixme
         message: error.message,
       });
       throw errorWithContext;

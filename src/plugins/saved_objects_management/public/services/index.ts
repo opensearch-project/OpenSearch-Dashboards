@@ -51,6 +51,7 @@ export {
 export {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumn,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   SavedObjectsManagementNamespace,
   SavedObjectsManagementRecord,
 } from './types';

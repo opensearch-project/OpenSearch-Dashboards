@@ -558,16 +558,16 @@ jobs:
       matrix:
         version:
           [
-            osd-2.0.0,
-            osd-2.1.0,
-            osd-2.2.0,
-            osd-2.3.0,
-            osd-2.4.0,
-            osd-2.5.0,
-            osd-2.6.0,
-            osd-2.7.0,
-            osd-2.8.0,
-            osd-2.9.0,
+            osd_2.0.0,
+            osd_2.1.0,
+            osd_2.2.0,
+            osd_2.3.0,
+            osd_2.4.0,
+            osd_2.5.0,
+            osd_2.6.0,
+            osd_2.7.0,
+            osd_2.8.0,
+            osd_2.9.0,
           ]
     steps:
       - name: Checkout code
@@ -602,7 +602,7 @@ jobs:
         id: verify-opensearch-exists
         run: |
           if curl -I -L ${{ env.OPENSEARCH_URL }}; then
-            echo "name=version-exists::true" >> $GITHUB_OUTPUT
+            echo "version-exists=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Skipping tests

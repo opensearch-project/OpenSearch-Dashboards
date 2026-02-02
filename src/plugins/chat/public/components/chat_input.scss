@@ -1,0 +1,41 @@
+.chatInput {
+  grid-area: input;
+  display: flex;
+  flex-direction: column;
+
+  &__inputRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &__fieldWrapper {
+    position: relative;
+    width: 100%;
+
+    textarea {
+      position: relative;
+      z-index: 1;
+      background: transparent !important;
+    }
+  }
+
+  &__ghostText {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px;
+    pointer-events: none;
+    color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    line-height: 1.5;
+
+    &--subdued {
+      opacity: 0.6;
+    }
+  }
+}

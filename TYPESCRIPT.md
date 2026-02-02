@@ -1,5 +1,11 @@
 ## TypeScriptifying OpenSearch Dashboards Tips
 
+### TypeScript error checks
+
+OpenSearch Dashboards runs `tsc` to check type errors in the code base in [GitHub workflow](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/-/.github/workflows/build_and_test_workflow.yml). Enforcing type check not only eliminates potential bugs, but also aids development with higher quality code base when reading code or requesting code completions.
+
+There are pre-existing type errors that were introduced before this check, and they are ignored in PRs with `// @ts-expect-error`. Fix them if you can. The type check workflow should pass before a PR is merged.
+
 ### Converting existing code
 
 To convert existing code over to TypeScript:

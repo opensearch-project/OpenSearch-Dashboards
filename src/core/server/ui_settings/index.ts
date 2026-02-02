@@ -51,4 +51,4 @@ export {
   UiSettingScope,
 } from './types';
 
-export { CURRENT_USER_PLACEHOLDER } from './utils';
+export { CURRENT_USER_PLACEHOLDER, CURRENT_WORKSPACE_PLACEHOLDER } from './utils';

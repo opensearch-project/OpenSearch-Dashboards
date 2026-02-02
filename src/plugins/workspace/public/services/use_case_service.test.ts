@@ -57,6 +57,7 @@ const setupUseCaseStart = (options?: { navGroupEnabled?: boolean }) => {
     workspaceConfigurableApps$,
     useCaseStart: useCase.start({
       chrome,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       workspaceConfigurableApps$,
       ...options,
     }),
@@ -113,6 +114,11 @@ describe('UseCaseService', () => {
           },
           {
             id: 'indexPatterns',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 400,
+          },
+          {
+            id: 'datasets',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 400,
           },

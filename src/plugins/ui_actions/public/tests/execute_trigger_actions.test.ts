@@ -75,6 +75,10 @@ const reset = () => {
 };
 beforeEach(reset);
 
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 test('executes a single action mapped to a trigger', async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {

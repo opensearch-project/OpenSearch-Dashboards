@@ -283,13 +283,16 @@ export async function getDataTelemetry(opensearchClient: OpenSearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         isECS: !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type,
         shipper: indexMappings[name]?.mappings?._meta?.beat,
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,
         managedBy: indexMappings[name]?.mappings?._meta?.managed_by,
         dataStreamDataset:
+          // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
           indexMappings[name]?.mappings?.properties.data_stream?.properties.dataset?.value,
         dataStreamType:
+          // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
           indexMappings[name]?.mappings?.properties.data_stream?.properties.type?.value,
       };
 

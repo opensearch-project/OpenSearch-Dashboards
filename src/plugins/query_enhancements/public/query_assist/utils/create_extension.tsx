@@ -4,11 +4,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { HttpSetup } from 'opensearch-dashboards/public';
+import { ENABLE_AI_FEATURES, HttpSetup } from 'opensearch-dashboards/public';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { useObservable } from 'react-use';
-import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
   DataPublicPluginSetup,
@@ -22,7 +22,7 @@ import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../compon
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
-import { isPPLSupportedType } from './language_support';
+import { isPPLSupportedType, isPromQLSupportedType } from './language_support';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -78,10 +78,12 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
     switchMap(async (query) => {
       // currently query assist tool relies on opensearch API to get index
       // mappings, external data source types (e.g. s3) are not supported
+      // but Prometheus datasets are supported for PromQL query assist
       if (
         query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH && // datasource is MDS OpenSearch
         query.dataset?.dataSource?.type !== 'DATA_SOURCE' && // datasource is MDS OpenSearch when using indexes
-        !isPPLSupportedType(query.dataset?.type)
+        !isPPLSupportedType(query.dataset?.type) &&
+        !isPromQLSupportedType(query.dataset?.type)
       )
         return [];
 
@@ -104,13 +106,24 @@ export const createQueryAssistExtension = (
     question: '',
     generatedQuery: '',
   });
+
+  const assistantEnabled$ = new BehaviorSubject<boolean>(true);
+  core.getStartServices().then(([coreStart, depsStart]) => {
+    const enabled = coreStart.uiSettings.get(ENABLE_AI_FEATURES);
+    assistantEnabled$.next(enabled);
+  });
+
   return {
     id: 'query-assist',
     order: 1000,
     getDataStructureMeta: async (dataSourceId) => {
-      // [TODO] - The timmeout exists because the loading of the Datasource menu is prevented until this request completes. This if a single cluster is down the request holds the whole menu level in a loading state. We should make this call non blocking and load the datasource meta in the background.
-      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId, 3000) // 3s timeout for quick check
-        .then((languages) => languages.length > 0);
+      // [TODO] - The timmeout exists because the loading of the Datasource menu is prevented until this request completes.
+      // This if a single cluster is down the request holds the whole menu level in a loading state. We should make this
+      // call non blocking and load the datasource meta in the background.
+      const isEnabled =
+        assistantEnabled$.value &&
+        (await getAvailableLanguagesForDataSource(http, dataSourceId, 3000) // 3s timeout for quick check
+          .then((languages) => languages.length > 0));
       if (isEnabled) {
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,
@@ -122,7 +135,18 @@ export const createQueryAssistExtension = (
       }
     },
     isEnabled$: () =>
-      getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0)),
+      getAvailableLanguages$(http, data).pipe(
+        withLatestFrom(
+          data.query.queryString.getUpdates$().pipe(
+            startWith(data.query.queryString.getQuery()),
+            map((query) => query.language)
+          )
+        ),
+        map(
+          ([availableLanguages, currentLanguage]) =>
+            availableLanguages.includes(currentLanguage) && assistantEnabled$.value
+        )
+      ),
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
@@ -130,6 +154,7 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
+          assistantEnabled$={assistantEnabled$}
           queryState$={assistQueryState$}
         >
           <QueryAssistBar dependencies={dependencies} />
@@ -143,6 +168,7 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
+          assistantEnabled$={assistantEnabled$}
           queryState$={assistQueryState$}
           invert
         >
@@ -159,6 +185,7 @@ export const createQueryAssistExtension = (
           dependencies={dependencies}
           http={http}
           data={data}
+          assistantEnabled$={assistantEnabled$}
           isQuerySummaryCollapsed$={isQuerySummaryCollapsed$}
           isSummaryAgentAvailable$={isSummaryAgentAvailable$}
           {...(config.summary.enabled && { resultSummaryEnabled$ })}
@@ -185,6 +212,7 @@ interface QueryAssistWrapperProps {
   http: HttpSetup;
   data: DataPublicPluginSetup;
   invert?: boolean;
+  assistantEnabled$: BehaviorSubject<boolean>;
   isQuerySummaryCollapsed$?: BehaviorSubject<boolean>;
   resultSummaryEnabled$?: BehaviorSubject<boolean>;
   isSummaryAgentAvailable$?: BehaviorSubject<boolean>;
@@ -238,7 +266,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
     };
   }, [props]);
 
-  if (!visible) return null;
+  if (!visible || !props.assistantEnabled$.value) return null;
   return (
     <>
       <QueryAssistContext.Provider

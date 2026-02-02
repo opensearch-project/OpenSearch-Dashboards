@@ -69,6 +69,7 @@ const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
 );
 
 const uiActionsStartMock = uiActionsPluginMock.createStartContract();
+// @ts-expect-error TS2345 TODO(ts-error): fixme
 uiActionsStartMock.getTrigger.mockReturnValue({
   id: '',
   exec: jest.fn(),
@@ -244,6 +245,8 @@ describe('QueryAssistBar', () => {
         index: 'Default Index Pattern',
         language: 'PPL',
         dataSourceId: 'mock-data-source-id',
+        currentTime: expect.any(String),
+        timeField: '@timestamp',
       });
     });
 

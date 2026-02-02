@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiAccordion, EuiFieldNumber } from '@elastic/eui';
 import { IndexAdvancedSettings } from './index_advanced_settings';
 import { CreateAccelerationForm } from '../../../../../framework/types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 jest.mock('../create/utils', () => ({
   hasError: jest.fn(),
@@ -88,6 +88,7 @@ describe('IndexAdvancedSettings', () => {
     );
 
     await act(async () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(0).prop('onChange')!({ target: { value: '5' } });
     });
 
@@ -107,6 +108,7 @@ describe('IndexAdvancedSettings', () => {
     );
 
     await act(async () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(1).prop('onChange')!({ target: { value: '3' } });
     });
 

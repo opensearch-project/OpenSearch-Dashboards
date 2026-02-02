@@ -8,6 +8,7 @@ import {
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
+
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
@@ -80,6 +81,8 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'observability-applications',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
+      'datasets',
     ] as string[],
   },
   'security-analytics': {
@@ -104,6 +107,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'opensearch_security_analytics_dashboards',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
     ] as string[],
   },
   essentials: {
@@ -127,6 +131,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'anomaly-detection-dashboards',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
     ] as string[],
   },
   search: {
@@ -147,6 +152,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'searchRelevance',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
     ] as string[],
   },
 });
@@ -162,7 +168,6 @@ export enum AssociationDataSourceModalMode {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
 }
-export const USE_CASE_PREFIX = 'use-case-';
 export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
 
 // Workspace will handle both data source and data connection type saved object.

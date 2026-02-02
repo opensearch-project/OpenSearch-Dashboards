@@ -72,6 +72,16 @@ export const DEFAULT_QUERY = {
   },
 };
 
+export const EMPTY_QUERY = {
+  QUERY: '',
+  DATASET: {
+    TYPE: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    DATASOURCE: {
+      TYPE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+    },
+  },
+};
+
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
   DOC_HIGHLIGHT: 'doc_table:highlight',

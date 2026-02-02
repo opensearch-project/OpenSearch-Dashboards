@@ -9,20 +9,19 @@ import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
   isFeatureIdInsideUseCase,
-  isNavGroupInFeatureConfigs,
   getDataSourcesList,
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
   prependWorkspaceToBreadcrumbs,
-  getIsOnlyAllowEssentialUseCase,
+  areAllDataSourcesOpenSearchServerless,
   mergeDataSourcesWithConnections,
   fetchDataSourceConnections,
   getUseCaseUrl,
   fetchRemoteClusterConnections,
 } from './utils';
-import { WorkspaceAvailability } from '../../../core/public';
+import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { USE_CASE_PREFIX, AssociationDataSourceModalMode } from '../common/constants';
+import { AssociationDataSourceModalMode } from '../common/constants';
 import {
   SigV4ServiceName,
   DataSourceEngineType,
@@ -32,7 +31,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { DataSourceConnectionType } from '../common/types';
+import { DataSource, DataSourceConnectionType } from '../common/types';
 
 const startMock = coreMock.createStart();
 const STATIC_USE_CASES = createMockedRegisteredUseCases();
@@ -363,22 +362,6 @@ describe('workspace utils: isFeatureIdInsideUseCase', () => {
   });
 });
 
-describe('workspace utils: isNavGroupInFeatureConfigs', () => {
-  it('should return false if nav group not in feature configs', () => {
-    expect(
-      isNavGroupInFeatureConfigs('dataAdministration', [
-        'use-case-observability',
-        'use-case-search',
-      ])
-    ).toBe(false);
-  });
-  it('should return true if nav group in feature configs', () => {
-    expect(
-      isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
-    ).toBe(true);
-  });
-});
-
 describe('workspace utils: getDataSourcesList', () => {
   const mockedSavedObjectClient = startMock.savedObjects.client;
 
@@ -524,7 +507,7 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
         },
       ],
     });
-    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(true);
+    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(true);
   });
 
   it('should return false when not all data sources are serverless', async () => {
@@ -552,7 +535,7 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
         },
       ],
     });
-    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(false);
+    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(false);
   });
 });
 
@@ -704,7 +687,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
   const workspace = {
     id: 'workspace-1',
     name: 'test workspace 1',
-    features: [`${USE_CASE_PREFIX}search`],
+    features: [`${WORKSPACE_USE_CASE_PREFIX}search`],
   };
 
   it('should not enrich breadcrumbs when out a workspace', async () => {
@@ -990,6 +973,52 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
       },
     ]);
   });
+
+  it('should exclude Prometheus connections from relatedConnections', () => {
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+    ];
+    const directQueryConnections = [
+      {
+        id: 'id1-prometheus',
+        name: 'prometheus-connection',
+        parentId: 'id1',
+        description: 'Prometheus connection',
+        type: 'Prometheus',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+      {
+        id: 'id1-s3',
+        name: 's3-connection',
+        parentId: 'id1',
+        description: 'S3 connection',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+    ];
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
+    // Prometheus connection should be in the flat list but not in relatedConnections
+    expect(result).toContainEqual(
+      expect.objectContaining({
+        id: 'id1-prometheus',
+        type: 'Prometheus',
+      })
+    );
+    // OpenSearch connection should only have S3 in relatedConnections, not Prometheus
+    const openSearchConnection = result.find((r) => r.id === 'id1');
+    expect(openSearchConnection?.relatedConnections).toHaveLength(1);
+    expect(openSearchConnection?.relatedConnections?.[0].type).toBe('Amazon S3');
+  });
 });
 
 describe('workspace utils: getUseCaseUrl', () => {
@@ -1172,15 +1201,15 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
     const coreStart = coreMock.createStart();
     const httpMock = coreStart.http;
 
-    const dataSources = [
+    const dataSources = ([
       {
         id: 'id1',
         title: 'title1',
-        dataSourceEngineType: 'InvalidEngineType',
+        dataSourceEngineType: 'InvalidEngineType' as DataSourceEngineType,
         description: '',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       },
-    ];
+    ] as unknown) as DataSource[]; // force InvalidEngineType to be a valid type
 
     const result = await fetchRemoteClusterConnections(dataSources, httpMock);
 

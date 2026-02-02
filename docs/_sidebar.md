@@ -13,10 +13,15 @@
   - [Openapi](openapi/README.md)
   - Plugins
     - data
+      - datasets
+        - [Data_views](plugins/data/datasets/data_views.md)
       - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
     - discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
+    - explore
+      - [Explore plugin components](plugins/explore/explore-plugin-components.md)
+      - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
@@ -29,13 +34,16 @@
       - [I18n](../src/dev/i18n/README.md)
     - plugins
       - [Application_config](../src/plugins/application_config/README.md)
+      - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
+      - [Chat](../src/plugins/chat/README.md)
       - console
         - public
           - application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
       - [Content_management](../src/plugins/content_management/README.md)
+      - [Context_provider](../src/plugins/context_provider/README.md)
       - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
@@ -43,6 +51,11 @@
       - [Data_importer](../src/plugins/data_importer/README.md)
       - [Data_source](../src/plugins/data_source/README.md)
       - [Data_source_management](../src/plugins/data_source_management/README.md)
+      - dataset_management
+        - public
+          - components
+            - create_dataset_wizard
+              - [CREATE_DATASET](../src/plugins/dataset_management/public/components/create_dataset_wizard/CREATE_DATASET.md)
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)
@@ -102,6 +115,7 @@
     - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
     - [Routing_example](../examples/routing_example/README.md)
     - [Search_examples](../examples/search_examples/README.md)
+    - [State_management_example](../examples/state_management_example/README.md)
     - [Ui_action_examples](../examples/ui_action_examples/README.md)
     - [Ui_actions_explorer](../examples/ui_actions_explorer/README.md)
     - [Url_generators_examples](../examples/url_generators_examples/README.md)
@@ -111,6 +125,7 @@
     - [Opensearch eslint config opensearch dashboards](../packages/opensearch-eslint-config-opensearch-dashboards/README.md)
     - [Opensearch safer lodash set](../packages/opensearch-safer-lodash-set/README.md)
     - [Osd ace](../packages/osd-ace/README.md)
+    - [Osd agents](../packages/osd-agents/README.md)
     - [Osd apm config loader](../packages/osd-apm-config-loader/README.md)
     - [Osd babel preset](../packages/osd-babel-preset/README.md)
     - [Osd config](../packages/osd-config/README.md)
@@ -130,7 +145,6 @@
     - [Osd pm](../packages/osd-pm/README.md)
     - [Osd spec to console](../packages/osd-spec-to-console/README.md)
     - [Osd std](../packages/osd-std/README.md)
-    - [Osd storybook](../packages/osd-storybook/README.md)
     - [Osd stylelint config](../packages/osd-stylelint-config/README.md)
     - [Osd stylelint plugin stylelint](../packages/osd-stylelint-plugin-stylelint/README.md)
     - [Osd telemetry tools](../packages/osd-telemetry-tools/README.md)
@@ -193,6 +207,10 @@
     - [Opensearch dashboards.release notes 3.0.0 alpha1](../release-notes/opensearch-dashboards.release-notes-3.0.0-alpha1.md)
     - [Opensearch dashboards.release notes 3.0.0 beta1](../release-notes/opensearch-dashboards.release-notes-3.0.0-beta1.md)
     - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
+    - [Opensearch dashboards.release notes 3.1.0](../release-notes/opensearch-dashboards.release-notes-3.1.0.md)
+    - [Opensearch dashboards.release notes 3.2.0](../release-notes/opensearch-dashboards.release-notes-3.2.0.md)
+    - [Opensearch dashboards.release notes 3.3.0](../release-notes/opensearch-dashboards.release-notes-3.3.0.md)
+    - [Opensearch dashboards.release notes 3.4.0](../release-notes/opensearch-dashboards.release-notes-3.4.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
@@ -209,3 +227,4 @@
   - [TESTING](../TESTING.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
+  - [Testing_strategy](../testing_strategy.md)

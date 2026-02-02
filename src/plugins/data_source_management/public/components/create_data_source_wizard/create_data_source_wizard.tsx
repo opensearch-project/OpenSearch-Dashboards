@@ -24,6 +24,7 @@ import {
   handleSetDefaultDatasource,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
+import { UiSettingScope } from '../../../../../core/public';
 
 type CreateDataSourceWizardProps = RouteComponentProps;
 
@@ -39,12 +40,14 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     uiSettings,
     navigation,
     application,
+    workspaces,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* State Variables */
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const useNewUX = uiSettings.get('home:useNewHomePage');
+  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
 
   /* Set breadcrumb */
   useEffectOnce(() => {
@@ -86,7 +89,11 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
       // Set the first create data source as default data source.
-      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      await handleSetDefaultDatasource(
+        savedObjects.client,
+        uiSettings,
+        currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL
+      );
       props.history.push('');
     } catch (e) {
       setIsLoading(false);

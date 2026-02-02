@@ -58,6 +58,7 @@ describe('AuthenticationMethodRegistry', () => {
       const typeA = registry.getAuthenticationMethod('typeA')!;
 
       expect(() => {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         typeA.credentialForm = React.createElement('div', {}, 'Welcome!');
       }).toThrow();
       expect(() => {

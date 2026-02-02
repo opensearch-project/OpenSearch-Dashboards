@@ -15,15 +15,15 @@
     "classnames": "^2.3.1",
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
-    "react": "^16.14.0",
+    "react": "^18.2.0",
     "uuid": "3.3.2"
   },
   "peerDependencies": {
     "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.9.1"
+    "@cfaester/enzyme-adapter-react-18": "^0.8.0"
   },
   "devDependencies": {
-    "@elastic/eui": "npm:@opensearch-project/oui@1.19.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.22.1",
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "comment-stripper": "^0.0.4",
@@ -31,8 +31,8 @@
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
-    "sass-embedded": "1.66.1",
-    "sass-loader": "npm:@amoo-miki/sass-loader@10.4.1-node-sass-9.0.0-libsass-3.6.5-with-sass-embedded.rc1",
+    "sass-embedded": "1.93.3",
+    "sass-loader": "16.0.5",
     "postcss": "^8.4.31",
     "sinon": "^7.4.2"
   }

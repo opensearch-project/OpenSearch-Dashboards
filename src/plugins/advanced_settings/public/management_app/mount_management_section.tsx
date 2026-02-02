@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
@@ -69,6 +69,7 @@ export async function mountManagementSection(
     { navigation },
   ] = await getStartServices();
 
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   const canSave = application.capabilities.advancedSettings.save as boolean;
 
   if (!canSave) {
@@ -113,7 +114,8 @@ export async function mountManagementSection(
       }
     : {};
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <I18nProvider>
       {params.wrapInPage ? (
         <EuiPageContent
@@ -127,11 +129,10 @@ export async function mountManagementSection(
       ) : (
         content
       )}
-    </I18nProvider>,
-    params.element
+    </I18nProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }
 
@@ -142,14 +143,14 @@ export const renderUserSettingsApp = async (
     navigation: NavigationPublicPluginStart;
   }
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <UserSettingsApp />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

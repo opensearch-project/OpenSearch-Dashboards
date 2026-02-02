@@ -67,7 +67,9 @@ export function handleOpenSearchDashboardsStats(
   } = response;
 
   const os = {
+    // @ts-expect-error TS2783 TODO(ts-error): fixme
     platform: 'unknown',
+    // @ts-expect-error TS2783 TODO(ts-error): fixme
     platformRelease: 'unknown',
     ...opensearchDashboardsStats.os,
   };

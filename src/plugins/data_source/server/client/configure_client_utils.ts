@@ -46,6 +46,7 @@ export const getRootClient = (
 
   const cacheKey = generateCacheKey(endpoint, cacheKeySuffix);
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   return getClientFromPool(cacheKey, type);
 };
 

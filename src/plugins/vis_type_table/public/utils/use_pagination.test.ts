@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { AggTypes, TableVisParams } from '../types';
 import { usePagination } from './use_pagination';
 
@@ -22,6 +22,7 @@ describe('usePagination', () => {
       ...visParams,
       perPage: '',
     };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => usePagination(params, 20));
     expect(result.current).toEqual(undefined);
   });

@@ -9,6 +9,7 @@ import {
   SQL_ENDPOINT,
 } from '../../framework/utils/shared';
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const PPLPlugin = function (Client, config, components) {
   const ca = components.clientAction.factory;
   Client.prototype.ppl = components.clientAction.namespaceFactory();

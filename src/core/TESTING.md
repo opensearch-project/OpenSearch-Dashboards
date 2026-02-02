@@ -33,13 +33,7 @@ This document outlines best practices and patterns for testing OpenSearch Dashbo
 
 ## Strategy
 
-In general, we recommend three tiers of tests:
-
-- Unit tests: small, fast, exhaustive, make heavy use of mocks for external dependencies
-- Integration tests: higher-level tests that verify interactions between systems (eg. HTTP APIs, OpenSearch API calls, calling other plugin contracts).
-- End-to-end tests (e2e): tests that verify user-facing behavior through the browser
-
-These tiers should roughly follow the traditional ["testing pyramid"](https://martinfowler.com/articles/practical-test-pyramid.html), where there are more exhaustive testing at the unit level, fewer at the integration level, and very few at the functional level.
+See [/TESTING.md](/TESTING.md) for an overview and guidelines on different types of tests in OpenSearch Dashboards.
 
 ## New concerns in the OpenSearch Dashboards Platform
 
@@ -246,91 +240,11 @@ Main subjects for tests should be:
 - main business logic.
 - dependencies on other plugins.
 
-##### Functional Test Runner
-
-If your plugin relies on the opensearch server to store data and supports additional configuration, you can leverage the Functional Test Runner(FTR) to implement integration tests.
-FTR bootstraps an opensearch and a OpenSearch Dashboards instance and runs the test suite against it.
-Pros:
-
-- runs the whole Elastic stack
-- tests cross-plugin integration
-- emulates a real user interaction with the stack
-- allows adjusting config values
-
-Cons:
-
-- slow start
-- hard to debug
-- brittle tests
-
-###### Example
-
-You can reuse existing [api_integration](/test/api_integration/config.js) setup by registering a test file within a [test loader](/test/api_integration/apis/index.js). More about the existing FTR setup in the [contribution guide](/CONTRIBUTING.md#running-specific-opensearch-dashboards-tests)
-
-The tests cover:
-
-- authenticated / non-authenticated user access (when applicable)
-
-- request validation
-
-```typescript
-// test/api_integration/apis/my_plugin/something.ts
-export default function({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  describe('myPlugin', () => {
-    it('validate params before to store text', async () => {
-      const response = await supertest
-        .post('/myPlugin/formatter/text')
-        .set('content-type', 'application/json')
-        .send({ text: 'aaa'.repeat(100) })
-        .expect(400);
-
-      expect(response.body).to.have.property('message');
-      expect(response.body.message).to.contain('must have a maximum length of [100]');
-    });
-  });
-```
-
-- the main logic of the plugin
-
-```typescript
-export default function({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  describe('myPlugin', () => {
-    it('stores text', async () => {
-      const response = await supertest
-        .post('/myPlugin/formatter/text')
-        .set('content-type', 'application/json')
-        .send({ text: 'aaa' })
-        .expect(200);
-
-      expect(response.body).to.have.property('id');
-      expect(response.body.id).to.be.a('string');
-    });
-
-    it('retrieves text', async () => {
-      const { body } = await supertest
-        .post('/myPlugin/formatter/text')
-        .set('content-type', 'application/json')
-        .send({ text: 'bbb' })
-        .expect(200);
-
-      const response = await supertest.get(`/myPlugin/formatter/text/${body.id}`).expect(200);
-      expect(response.text).be('bbb');
-    });
-
-    it('returns NotFound error when cannot find a text', async () => {
-      await supertest
-        .get('/myPlugin/something/missing')
-        .expect(404, 'Saved object [myPlugin-type/missing] not found');
-    });
-  });
-```
-
 ##### TestUtils
 
-It can be utilized if your plugin doesn't interact with the opensearch server or mocks the own methods doing so.
+It can be utilized if your plugin doesn't interact with the OpenSearch server or mocks the own methods doing so.
 Runs tests against real OpenSearch Dashboards server instance.
+
 Pros:
 
 - runs the real OpenSearch Dashboards instance
@@ -418,6 +332,114 @@ describe('myPlugin', () => {
     });
   });
 });
+```
+
+#### Functional tests
+
+Functional tests are end-to-end tests that verify behavior in a web browser.
+
+##### Cypress tests
+
+If your plugin relies on the opensearch server to store data and supports additional configuration, you can leverage Cypress to implement integration tests.
+FTR bootstraps an OpenSearch and a OpenSearch Dashboards instance and runs the test suite against it.
+
+Cypress tests live in [cypress/integration](/cypress/integration) directory.
+
+Pros:
+
+- runs the whole OpenSearch stack
+- tests cross-plugin integration
+- emulates a real user interaction with the stack
+- allows adjusting config values
+
+Cons:
+
+- slow start
+- hard to debug
+- brittle tests
+
+###### Example
+
+```ts
+it('GET /myPlugin/formatter', () => {
+  cy.request({
+    method: 'GET',
+    url: '/myPlugin/formatter',
+    qs: { text: 'input string'.repeat(100) },
+    failOnStatusCode: false
+  }).then((response) => {
+    expect(response.status).to.eq(400);
+    expect(response.body).to.have.property('message');
+  });
+})
+```
+
+##### Functional Test Runner
+
+There are some legacy functional tests implemented using Selenium using functional test runner (FTR). This section contains information on Selenium tests, but new functional tests should be added using Cypress.
+
+###### Example
+
+You can reuse existing [api_integration](/test/api_integration/config.js) setup by registering a test file within a [test loader](/test/api_integration/apis/index.js). More about the existing FTR setup in the [contribution guide](/CONTRIBUTING.md#running-specific-opensearch-dashboards-tests)
+
+The tests cover:
+
+- authenticated / non-authenticated user access (when applicable)
+
+- request validation
+
+```typescript
+// test/api_integration/apis/my_plugin/something.ts
+export default function({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  describe('myPlugin', () => {
+    it('validate params before to store text', async () => {
+      const response = await supertest
+        .post('/myPlugin/formatter/text')
+        .set('content-type', 'application/json')
+        .send({ text: 'aaa'.repeat(100) })
+        .expect(400);
+
+      expect(response.body).to.have.property('message');
+      expect(response.body.message).to.contain('must have a maximum length of [100]');
+    });
+  });
+```
+
+- the main logic of the plugin
+
+```typescript
+export default function({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  describe('myPlugin', () => {
+    it('stores text', async () => {
+      const response = await supertest
+        .post('/myPlugin/formatter/text')
+        .set('content-type', 'application/json')
+        .send({ text: 'aaa' })
+        .expect(200);
+
+      expect(response.body).to.have.property('id');
+      expect(response.body.id).to.be.a('string');
+    });
+
+    it('retrieves text', async () => {
+      const { body } = await supertest
+        .post('/myPlugin/formatter/text')
+        .set('content-type', 'application/json')
+        .send({ text: 'bbb' })
+        .expect(200);
+
+      const response = await supertest.get(`/myPlugin/formatter/text/${body.id}`).expect(200);
+      expect(response.text).be('bbb');
+    });
+
+    it('returns NotFound error when cannot find a text', async () => {
+      await supertest
+        .get('/myPlugin/something/missing')
+        .expect(404, 'Saved object [myPlugin-type/missing] not found');
+    });
+  });
 ```
 
 ### Applications

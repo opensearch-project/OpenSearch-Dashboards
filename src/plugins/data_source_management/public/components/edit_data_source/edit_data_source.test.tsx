@@ -13,7 +13,7 @@ import React from 'react';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
 import { ScopedHistory } from 'opensearch-dashboards/public';
 import * as utils from '../utils';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
@@ -76,6 +76,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
 
   describe('should load resources successfully', () => {
     beforeEach(async () => {
+      spyOn(utils, 'getDefaultDataSourceId').and.returnValue(Promise.resolve('test1'));
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
       spyOn(utils, 'getDataSourceById').and.returnValue(
         Promise.resolve(mockDataSourceAttributesWithAuth)
@@ -151,14 +152,14 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       expect(uiSettings.set).toHaveBeenCalled();
     });
 
-    test('should delete datasource successfully', async () => {
+    test('should delete default datasource and set new default data source successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
-      spyOn(uiSettings, 'get').and.callFake((key) => {
+      spyOn(uiSettings, 'getUserProvidedWithScope').and.callFake((key) => {
         if (key === 'home:useNewHomePage') {
           return false;
         }
-        return 'test1';
+        return Promise.resolve('test1');
       });
       await act(async () => {
         // @ts-ignore

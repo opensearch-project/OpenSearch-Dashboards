@@ -23,7 +23,7 @@ import { connectStorageToQueryState } from './connect_to_query_state';
 import { createBrowserHistory, History } from 'history';
 import { QueryStringContract } from '../query_string';
 import { ISearchInterceptor } from '../../search';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useConnectStorageToQueryState } from './use_connect_to_query_state';
 
 jest.mock('./connect_to_query_state');
@@ -42,10 +42,15 @@ describe('use_connect_storage_to_query_state', () => {
   let osdUrlStateStorage: IOsdUrlStateStorage;
   let indexPatternsMock: IndexPatternsService;
   let history: History;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let gF1: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let gF2: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let aF1: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let aF2: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let q1: Query;
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 

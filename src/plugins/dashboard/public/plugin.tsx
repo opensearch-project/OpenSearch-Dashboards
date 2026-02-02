@@ -127,6 +127,7 @@ import {
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
+import { bootstrap } from './ui_triggers';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -219,6 +220,9 @@ export class DashboardPlugin
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, urlForwarding, data, usageCollection }: SetupDependencies
   ): DashboardSetup {
+    // bootstrap UI Actions
+    bootstrap(uiActions);
+
     this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
       DashboardFeatureFlagConfig
     >();
@@ -403,6 +407,7 @@ export class DashboardPlugin
         const history = createHashHistory(); // need more research
         const services: DashboardServices = {
           ...coreStart,
+          uiActions: pluginsStart.uiActions,
           pluginInitializerContext: this.initializerContext,
           opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
           history,
@@ -426,6 +431,7 @@ export class DashboardPlugin
           uiSettings: coreStart.uiSettings,
           savedQueryService: dataStart.query.savedQueries,
           embeddable: embeddableStart,
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           embeddableCapabilities: {
             visualizeCapabilities: coreStart.application.capabilities.visualize,
@@ -575,6 +581,30 @@ export class DashboardPlugin
       plugins.data,
       core.application
     );
+
+    // Register dashboard navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.dashboard',
+          name: i18n.translate('dashboard.keyboardShortcut.goToDashboard.name', {
+            defaultMessage: 'Go to dashboard',
+          }),
+          pluginId: 'dashboard',
+          category: i18n.translate('dashboard.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g b',
+          execute: () => {
+            core.application.navigateToApp('dashboards');
+          },
+        });
+      }
+    }
 
     const changeViewAction = new ReplacePanelAction(
       core,

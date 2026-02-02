@@ -35,6 +35,7 @@ describe(`Workspace routes`, () => {
       logger: loggingSystemMock.create().get(),
       maxImportExportSize: Number.MAX_SAFE_INTEGER,
       isPermissionControlEnabled: false,
+      isDataSourceEnabled: true,
     });
 
     await server.start({ dynamicConfigService: mockDynamicConfigService });

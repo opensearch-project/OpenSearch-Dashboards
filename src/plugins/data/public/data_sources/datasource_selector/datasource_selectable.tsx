@@ -42,8 +42,11 @@ const mapToOption = (
   if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
       ...baseOption,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       label: dataSet.title as string,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       value: dataSet.id as string,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       key: dataSet.id as string,
     };
   }
@@ -95,6 +98,7 @@ const consolidateDataSourceGroups = (
   return [...dataSets, ...dataSources].reduce((dsGroup, item) => {
     if ('list' in item && item.ds) {
       // Confirm item is a DataSet
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const options = item.list.map((dataset) => mapToOption(item.ds, dataset));
       options.forEach((option) => addOrUpdateGroup(dsGroup, item.ds, option));
     } else {

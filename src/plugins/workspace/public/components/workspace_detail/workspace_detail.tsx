@@ -49,6 +49,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
       chrome,
       notifications,
     },
+    overlays,
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
     dataSourceManagement?: DataSourceManagementPluginSetup;
@@ -82,7 +83,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
 
   // When user has unsaved changes and navigates to other page, will show a confirm modal.
   useEffect(() => {
-    onAppLeave((actions) => {
+    onAppLeave?.((actions) => {
       if (isEditing && numberOfChanges > 0) {
         return actions.confirm(
           i18n.translate('workspace.detail.navigate.message', {
@@ -239,6 +240,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
               );
             }, 1000);
           }}
+          openModal={overlays.openModal}
         />
       )}
       {isEditing && (

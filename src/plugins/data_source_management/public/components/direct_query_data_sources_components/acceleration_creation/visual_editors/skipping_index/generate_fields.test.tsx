@@ -10,7 +10,7 @@
 
 import { waitFor } from '@testing-library/dom';
 import { configure, mount } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 import { createAccelerationEmptyDataMock } from '../../../../../mocks';
@@ -23,6 +23,7 @@ describe('Generate fields in skipping index', () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       <GenerateFields
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}

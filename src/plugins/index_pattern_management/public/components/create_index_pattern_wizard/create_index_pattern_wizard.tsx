@@ -87,6 +87,7 @@ export class CreateIndexPatternWizard extends Component<
 > {
   static contextType = contextType;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: IndexPatternManagmentContextValue;
 
   dataSourceEnabled: boolean;

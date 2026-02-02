@@ -36,7 +36,6 @@ interface Props {
 export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onError }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const associationModalRef = useRef<OverlayRef>();
-
   const {
     chrome,
     savedObjects,
@@ -50,10 +49,6 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
 
   const closePopover = useCallback(() => {
     setIsOpen(false);
-  }, []);
-
-  const openPopover = useCallback(() => {
-    setIsOpen(true);
   }, []);
 
   const onAssociateDataSource = useCallback(
@@ -152,7 +147,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
       fill
       iconType="arrowDown"
       iconSide="right"
-      onClick={openPopover}
+      onClick={() => setIsOpen((prevState) => !prevState)}
     >
       <EuiIcon type="plusInCircle" />{' '}
       {i18n.translate('workspace.dataSources.associationButton.label', {

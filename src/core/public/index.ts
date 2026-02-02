@@ -102,6 +102,9 @@ import {
 } from './context';
 import { Branding } from '../types';
 import { WorkspacesStart, WorkspacesSetup } from './workspace';
+import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
+import { ChatServiceSetup, ChatServiceStart } from './chat';
+import type { TelemetryServiceSetup, TelemetryServiceStart } from './telemetry';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -110,13 +113,18 @@ export { CoreContext, CoreSystem } from './core_system';
 export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
+  WORKSPACE_USE_CASE_PREFIX,
   cleanWorkspaceId,
+  isNavGroupInFeatureConfigs,
+  getUseCaseFeatureConfig,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
   SEARCH_USE_CASE_ID,
   ESSENTIAL_USE_CASE_ID,
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
+  ENABLE_AI_FEATURES,
+  UseCaseId,
 } from '../utils';
 export {
   AppCategory,
@@ -284,6 +292,12 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link WorkspacesSetup} */
   workspaces: WorkspacesSetup;
+  /** {@link KeyboardShortcutsSetup} */
+  keyboardShortcut: KeyboardShortcutSetup;
+  /** {@link ChatServiceSetup} */
+  chat: ChatServiceSetup;
+  /** {@link TelemetryServiceSetup} */
+  telemetry: TelemetryServiceSetup;
 }
 
 /**
@@ -340,6 +354,12 @@ export interface CoreStart {
   };
   /** {@link WorkspacesStart} */
   workspaces: WorkspacesStart;
+  /** {@link KeyboardShortcutStart} */
+  keyboardShortcut?: KeyboardShortcutStart;
+  /** {@link ChatServiceStart} */
+  chat: ChatServiceStart;
+  /** {@link TelemetryServiceStart} */
+  telemetry: TelemetryServiceStart;
 }
 
 export {
@@ -412,6 +432,33 @@ export {
   IWorkspaceResponse,
 } from './workspace';
 
-export { debounce } from './utils';
+export {
+  KeyboardShortcutSetup,
+  KeyboardShortcutStart,
+  ShortcutDefinition,
+  KeyboardShortcutHelpModal,
+} from './keyboard_shortcut';
+
+export {
+  ChatServiceInterface,
+  ChatServiceSetup,
+  ChatServiceStart,
+  ChatImplementationFunctions,
+  Message,
+  ChatWindowState,
+} from './chat';
+
+export { debounce, getNonce } from './utils';
 
 export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';
+
+export {
+  TelemetryService,
+  TelemetryServiceStart,
+  TelemetryEvent,
+  TelemetryMetric,
+  TelemetryError,
+  PluginTelemetryRecorder,
+  TelemetryServiceSetup,
+  TelemetryProvider,
+} from './telemetry';

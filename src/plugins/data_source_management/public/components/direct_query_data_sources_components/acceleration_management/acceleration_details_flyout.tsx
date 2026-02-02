@@ -151,6 +151,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const onConfirmOperation = () => {
     if (operationType && props.acceleration) {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       performOperation(props.acceleration, operationType, featureFlagStatus, dataSourceMDSId);
       setShowConfirmationOverlay(false);
     }
@@ -175,14 +176,17 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const [mappings, setMappings] = useState();
   const [indexInfo, setIndexInfo] = useState();
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const updateMapping = (result) => {
     setMappings(result);
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const updateSetting = (result, slectedIndex: string) => {
     setSettings(result.data[slectedIndex]);
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const updateIndexInfo = (result) => {
     setIndexInfo(result);
   };

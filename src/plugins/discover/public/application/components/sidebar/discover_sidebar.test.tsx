@@ -91,6 +91,7 @@ function getCompProps(): DiscoverSidebarProps {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   return {
     columns: ['extension'],
     fieldCounts,

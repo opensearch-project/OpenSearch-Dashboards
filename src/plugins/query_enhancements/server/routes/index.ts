@@ -15,6 +15,7 @@ import { ISearchStrategy } from '../../../data/server';
 import { API } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
+import { registerResourceRoutes } from './resources';
 
 /**
  * Coerce status code to 503 for 500 errors from dependency services. Only use
@@ -87,6 +88,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               })
             ),
             timeRange: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           }),
         },
       },
@@ -136,4 +138,5 @@ export function defineRoutes(
   });
   registerDataSourceConnectionsRoutes(router, client);
   registerQueryAssistRoutes(router);
+  registerResourceRoutes(router);
 }

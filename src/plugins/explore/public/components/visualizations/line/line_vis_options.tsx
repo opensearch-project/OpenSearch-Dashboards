@@ -1,0 +1,134 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { isEmpty } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { LineChartStyle, LineChartStyleOptions } from './line_vis_config';
+import { StyleControlsProps } from '../utils/use_visualization_types';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
+import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
+import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { TitleOptionsPanel } from '../style_panel/title/title';
+import { AxisRole, VisFieldType } from '../types';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+
+export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyle>;
+
+export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
+  styleOptions,
+  onStyleChange,
+  numericalColumns = [],
+  categoricalColumns = [],
+  dateColumns = [],
+  axisColumnMappings,
+  updateVisualization,
+}) => {
+  const updateStyleOption = <K extends keyof LineChartStyleOptions>(
+    key: K,
+    value: LineChartStyleOptions[K]
+  ) => {
+    onStyleChange({ [key]: value });
+  };
+
+  // Determine if the legend should be shown based on the selected mappings
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
+  const hasYSecondMapping = !!axisColumnMappings?.[AxisRole.Y_SECOND];
+  const shouldShowTimeMarker = axisColumnMappings?.[AxisRole.X]?.schema === VisFieldType.Date;
+
+  const shouldShowLegend = hasColorMapping || hasFacetMapping || hasYSecondMapping;
+  // The mapping object will be an empty object if no fields are selected on the axes selector. No
+  // visualization is generated in this case so we shouldn't display style option panels.
+  const hasMappingSelected = !isEmpty(axisColumnMappings);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <AxesSelectPanel
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          currentMapping={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          chartType="line"
+        />
+      </EuiFlexItem>
+
+      {hasMappingSelected && (
+        <>
+          <EuiFlexItem grow={false}>
+            <LineExclusiveVisOptions
+              shouldShowTimeMarker={shouldShowTimeMarker}
+              addTimeMarker={styleOptions.addTimeMarker}
+              lineStyle={styleOptions.lineStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              onAddTimeMarkerChange={(addTimeMarker) =>
+                updateStyleOption('addTimeMarker', addTimeMarker)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AllAxesOptions
+              axisColumnMappings={axisColumnMappings}
+              standardAxes={styleOptions.standardAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('standardAxes', standardAxes)
+              }
+              showFullTimeRange={styleOptions.showFullTimeRange}
+              onShowFullTimeRangeChange={(showFullTimeRange) =>
+                updateStyleOption('showFullTimeRange', showFullTimeRange)
+              }
+            />
+          </EuiFlexItem>
+
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={shouldShowLegend}
+          />
+
+          <EuiFlexItem grow={false}>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
+              }}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
+              }
+            />
+          </EuiFlexItem>
+        </>
+      )}
+    </EuiFlexGroup>
+  );
+};

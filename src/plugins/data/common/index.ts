@@ -30,6 +30,7 @@
 
 export * from './constants';
 export * from './opensearch_query';
+export * from './data_views';
 export * from './data_frames';
 export * from './datasets';
 export * from './field_formats';
@@ -41,6 +42,7 @@ export * from './search';
 export * from './types';
 export * from './utils';
 export * from './storage';
+export * from './correlations/types';
 
 /**
  * Use data plugin interface instead
@@ -48,3 +50,4 @@ export * from './storage';
  */
 
 export { IndexPatternAttributes } from './types';
+export { DataViewAttributes } from './types';

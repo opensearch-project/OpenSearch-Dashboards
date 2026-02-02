@@ -75,13 +75,13 @@ export interface WorkspaceFormProps {
   onSubmit?: (
     formData: WorkspaceFormSubmitData,
     refresh?: boolean
-  ) => Promise<{ result: boolean; success: true } | undefined>;
+  ) => Promise<{ result: boolean; success: boolean } | undefined>;
   defaultValues?: Partial<WorkspaceFormSubmitData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
-  onAppLeave: AppMountParameters['onAppLeave'];
+  onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
 export interface AvailableUseCaseItem

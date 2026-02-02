@@ -36,6 +36,7 @@ export const convertResult = ({
   fields?: SearchSourceFields;
   options?: ISearchOptions;
 }): SearchResponse<any> => {
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const body = response.body;
   if (body.hasOwnProperty('error')) {
     return response;
@@ -126,6 +127,20 @@ export const convertResult = ({
   }
   searchResponse.hits.hits = hits;
 
+  // Handle instant data for Prometheus queries - transform to hits format
+  if (data.meta?.instantData) {
+    const instantData = data.meta.instantData;
+    const instantHits = instantData.rows.map((row: Record<string, unknown>) => ({
+      _index: data.name,
+      _source: row,
+    }));
+    (searchResponse as any).instantHits = {
+      hits: instantHits,
+      total: instantHits.length,
+    };
+    (searchResponse as any).instantFieldSchema = instantData.schema;
+  }
+
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
     if (!dataWithAggs.aggs) {
@@ -139,7 +154,13 @@ export const convertResult = ({
         const buckets = value as Array<{ key: string; value: number }>;
         searchResponse.aggregations[id] = {
           buckets: buckets.map((bucket) => {
-            const timestamp = new Date(bucket.key).getTime();
+            // checks if bucket.key already has timezone information (Z, +, or - after position 10 for timezone offset), and if not, appends 'Z' to treat it as UTC before converting to timestamp
+            const timestamp =
+              bucket.key.includes('Z') ||
+              bucket.key.includes('+') ||
+              (bucket.key.includes('-') && bucket.key.lastIndexOf('-') > 10)
+                ? new Date(bucket.key).getTime()
+                : new Date(bucket.key + 'Z').getTime();
             searchResponse.hits.total += bucket.value;
             return {
               key_as_string: bucket.key,
@@ -167,15 +188,19 @@ export const convertResult = ({
  * @returns field type
  */
 export const getFieldType = (field: IFieldType | Partial<IFieldType>): string | undefined => {
-  const fieldName = field.name?.toLowerCase();
-  if (fieldName?.includes('date') || fieldName?.includes('timestamp')) {
+  const rawType = field.type?.toString().toLowerCase();
+  if (rawType) {
+    if (rawType === 'struct') return 'object';
+    if (rawType === 'timestamp') return 'date';
+    return rawType;
+  }
+
+  const fieldName = field.name?.toLowerCase() ?? '';
+  if (fieldName.includes('date') || fieldName.includes('timestamp')) {
     return 'date';
   }
   if (field.values?.some((value) => value instanceof Date || datemath.isDateTime(value))) {
     return 'date';
-  }
-  if (field.type === 'struct') {
-    return 'object';
   }
 
   return field.type;

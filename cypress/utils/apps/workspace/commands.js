@@ -15,11 +15,14 @@ Cypress.Commands.add(
       indexPatternHasTimefield = true,
       dataSource,
       isEnhancement = false,
+      signalType = 'logs',
     } = opts;
 
-    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern').as(
-      'createIndexPatternInterception'
-    );
+    // TODO: use the UI creation flow to add signalType once we have it
+    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern', (req) => {
+      req.body.attributes = { ...req.body.attributes, signalType };
+      req.continue();
+    }).as('createIndexPatternInterception');
 
     // Navigate to Workspace Specific IndexPattern Page
     cy.osd.navigateToWorkSpaceSpecificPage({
@@ -135,3 +138,49 @@ Cypress.Commands.add(
     cy.getElementByTestId('headerApplicationTitle').should('be.visible');
   }
 );
+
+Cypress.Commands.add('createWorkspaceWithEndpoint', (endpoint, { settings, ...workspace } = {}) => {
+  const createWorkspace = () => {
+    return cy.request({
+      method: 'POST',
+      url: `${endpoint}/api/workspaces`,
+      headers: {
+        'osd-xsrf': true,
+      },
+      body: {
+        attributes: {
+          ...workspace,
+          features: workspace.features || ['use-case-observability'],
+          description: workspace.description || 'test_description',
+        },
+        settings,
+      },
+      failOnStatusCode: false,
+    });
+  };
+
+  return createWorkspace().then((resp) => {
+    if (resp && resp.body && resp.body.success) {
+      return resp.body.result;
+    } else if (resp?.body?.error && resp.body.error.includes('Maximum number of workspaces')) {
+      // If we hit the workspace limit, use existing cleanup logic and retry
+      cy.log('Hit workspace limit, running existing cleanup logic...');
+
+      // Use the existing deleteAllOldWorkspaces function
+      return cy.osd.deleteAllOldWorkspaces().then(() => {
+        cy.wait(2000); // Brief wait for cleanup to complete
+        return createWorkspace().then((retryResp) => {
+          if (retryResp && retryResp.body && retryResp.body.success) {
+            return retryResp.body.result;
+          } else {
+            throw new Error(
+              `Create workspace ${workspace.name} failed after cleanup: ${retryResp?.body?.error}`
+            );
+          }
+        });
+      });
+    } else {
+      throw new Error(`Create workspace ${workspace.name} failed: ${resp?.body?.error}`);
+    }
+  });
+});

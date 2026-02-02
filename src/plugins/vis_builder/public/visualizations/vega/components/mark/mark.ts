@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import { AxisFormats } from '../utils/types';
 import { buildAxes } from '../axes';
 
@@ -147,6 +148,7 @@ export const buildMarkForVega = (
   return baseMark;
 };
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const buildXScale = (chartType: VegaMarkType, dimensions) => {
   // For date-based data, use a time scale regardless of the chart type.
   if (dimensions.x && dimensions.x.format && dimensions.x.format.id === 'date') {

@@ -8,6 +8,19 @@
   }
 }
 
+.osdTopNavMenuGroup {
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  > .euiFlexItem {
+    width: auto !important;
+    flex-basis: auto !important;
+  }
+
+  h1 {
+    font-size: $euiFontSizeS;
+  }
+}
+
 .osdTopNavMenuGroupedActions {
   background-color: $euiPageBackgroundColor;
 
@@ -66,6 +79,7 @@
 }
 
 .osdTopNavMenuScreenTitle {
+
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   .euiTitle {
     line-height: $euiFormControlCompressedHeight;
@@ -83,4 +97,11 @@
 .osdTopNavMenuSpread .euiHeaderLinks__list {
   width: 100%;
   justify-content: space-between;
+}
+
+.osdTopNavCustomSubmitButton {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
 }

@@ -40,7 +40,7 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
-      return obj.attributes.title;
+      return obj.attributes.displayName || obj.attributes.title;
     },
     getEditUrl(obj) {
       return `/management/opensearch-dashboards/indexPatterns/patterns/${encodeURIComponent(

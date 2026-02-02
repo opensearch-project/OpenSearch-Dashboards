@@ -7,6 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { DataSelectorRefresher } from './data_selector_refresher'; // adjust the import path as necessary
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { DATA_SELECTOR_REFRESHER_POPOVER_TEXT } from '../constants';
 import { ToolTipDelay } from '@elastic/eui/src/components/tool_tip/tool_tip';
 import { EuiToolTipProps } from '@elastic/eui';

@@ -32,7 +32,7 @@ interface WorkspaceFormContextProps {
     React.SetStateAction<WorkspaceFormDataState['permissionSettings']>
   >;
   setSelectedDataSourceConnections: React.Dispatch<React.SetStateAction<DataSourceConnection[]>>;
-  onAppLeave: AppMountParameters['onAppLeave'];
+  onAppLeave?: AppMountParameters['onAppLeave'];
   handleSubmitPermissionSettings: (
     permissionSettings: WorkspacePermissionSetting[]
   ) => Promise<void>;

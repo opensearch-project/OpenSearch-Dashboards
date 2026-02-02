@@ -9,7 +9,7 @@ import {
   openSearchSqlAutocompleteData,
   processVisitedRules,
 } from './opensearch_sql_autocomplete';
-import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
+import { OpenSearchSQLParser } from '@osd/antlr-grammar';
 import { TokenStream } from 'antlr4ng';
 import { ColumnValuePredicate } from '../shared/types';
 jest.mock('./table');

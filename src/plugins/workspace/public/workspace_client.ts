@@ -4,7 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { BehaviorSubject } from 'rxjs';
 import {
   HttpFetchError,
   HttpFetchOptions,
@@ -237,6 +236,42 @@ export class WorkspaceClient implements IWorkspaceClient {
 
       await this.updateWorkspaceList();
     }
+
+    return result;
+  }
+
+  /**
+   * Deletes multiple workspaces by a list of workspace id
+   *
+   * @param id
+   * @returns {Promise<IResponse<null>>} result for this operation
+   */
+  public async batchDelete(
+    ids: string[]
+  ): Promise<{ success: number; fail: number; failedIds: string[] }> {
+    const result: { success: number; fail: number; failedIds: string[] } = {
+      success: 0,
+      fail: 0,
+      failedIds: [],
+    };
+
+    for (const id of ids) {
+      try {
+        const response = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
+        if (response?.success) {
+          result.success += 1;
+        } else {
+          result.fail += 1;
+          result.failedIds.push(id);
+        }
+      } catch (error) {
+        result.fail += 1;
+        result.failedIds.push(id);
+      }
+    }
+
+    this.workspaces.currentWorkspaceId$.next('');
+    await this.updateWorkspaceList();
 
     return result;
   }

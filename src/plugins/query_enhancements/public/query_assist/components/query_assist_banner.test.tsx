@@ -24,6 +24,7 @@ const renderQueryAssistBanner = (overrideProps: Partial<QueryAssistBannerProps> 
   >(
     {
       languages: ['test-lang1', 'test-lang2'],
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       dependencies: {
         language: 'default',
         onSelectLanguage: jest.fn(),

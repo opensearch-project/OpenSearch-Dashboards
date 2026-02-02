@@ -56,6 +56,8 @@ import { SecurityService } from './security/security_service';
 import { CrossCompatibilityService } from './cross_compatibility';
 
 import { config as cspConfig } from './csp';
+import { config as cspReportOnlyConfig } from './csp_report_only';
+import { config as cspModificationsConfig } from './csp_modifications';
 import { config as opensearchConfig } from './opensearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
@@ -366,6 +368,8 @@ export class Server {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
+      cspReportOnlyConfig,
+      cspModificationsConfig,
       opensearchConfig,
       loggingConfig,
       httpConfig,

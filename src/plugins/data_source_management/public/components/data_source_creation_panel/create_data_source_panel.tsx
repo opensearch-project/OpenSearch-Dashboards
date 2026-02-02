@@ -25,10 +25,13 @@ export const CreateDataSourcePanel: React.FC<CreateDataSourcePanelProps> = ({
   ...props
 }) => {
   const {
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     chrome,
     application,
     setBreadcrumbs,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     notifications: { toasts },
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     uiSettings,
     navigation,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;

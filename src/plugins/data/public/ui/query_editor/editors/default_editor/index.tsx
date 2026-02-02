@@ -39,7 +39,32 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
     // Call the original editorDidMount function
     editorDidMount(editor);
 
-    // Return the original editor instance
+    // Add command to retrigger suggestions after Tab completion
+    editor.addCommand(monaco.KeyCode.Tab, () => {
+      // First let the default Tab behavior happen
+      editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+
+      // Then retrigger suggestions after a short delay
+      setTimeout(() => {
+        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      }, 100);
+    });
+
+    // Overiding the Enter command
+    editor.addCommand(monaco.KeyCode.Enter, () => {
+      // Check if suggestion widget is visible using Monaco's built-in context
+      const contextKeyService = (editor as any)._contextKeyService;
+      const suggestWidgetVisible = contextKeyService?.getContextKeyValue('suggestWidgetVisible');
+
+      if (suggestWidgetVisible) {
+        // Accept the selected suggestion if widget is visible
+        editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+      } else {
+        // Only trigger newline if suggestion widget is not visible
+        editor.trigger('keyboard', 'type', { text: '\n' });
+      }
+    });
+
     return editor;
   };
   return (
@@ -71,6 +96,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
             showWords: false, // Disable word-based suggestions
           },
           acceptSuggestionOnEnter: 'off',
+          tabCompletion: 'on', // Enable Tab for suggestion acceptance
         }}
         suggestionProvider={{
           triggerCharacters: [' '],

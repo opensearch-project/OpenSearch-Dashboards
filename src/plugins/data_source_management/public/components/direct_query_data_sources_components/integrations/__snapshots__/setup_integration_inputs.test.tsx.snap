@@ -25,6 +25,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
         "connectionType": "s3",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -76,6 +77,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
         "connectionType": "s3",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -144,6 +146,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] 
         "connectionType": "s3",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -265,6 +268,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
         "connectionType": "s3",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -316,6 +320,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
         "connectionType": "s3",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -384,6 +389,7 @@ exports[`Integration Setup Inputs Renders the S3 connector form without workflow
         "connectionType": "s3",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -491,6 +497,7 @@ exports[`Integration Setup Inputs Renders the connection inputs 1`] = `
       "connectionType": "s3",
       "displayName": "Test Instance Name",
       "enabledWorkflows": Array [],
+      "refreshRangeDays": 7,
     }
   }
   integration={
@@ -1011,6 +1018,7 @@ exports[`Integration Setup Inputs Renders the connection inputs with a locked co
       "connectionType": "s3",
       "displayName": "Test Instance Name",
       "enabledWorkflows": Array [],
+      "refreshRangeDays": 7,
     }
   }
   integration={
@@ -1499,6 +1507,7 @@ exports[`Integration Setup Inputs Renders the details inputs 1`] = `
       "connectionType": "s3",
       "displayName": "Test Instance Name",
       "enabledWorkflows": Array [],
+      "refreshRangeDays": 7,
     }
   }
   integration={
@@ -1646,6 +1655,7 @@ exports[`Integration Setup Inputs Renders the index form as expected 1`] = `
         "connectionType": "index",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -1697,6 +1707,7 @@ exports[`Integration Setup Inputs Renders the index form as expected 1`] = `
         "connectionType": "index",
         "displayName": "Test Instance Name",
         "enabledWorkflows": Array [],
+        "refreshRangeDays": 7,
       }
     }
     integration={
@@ -1745,6 +1756,7 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
       "connectionType": "s3",
       "displayName": "Test Instance Name",
       "enabledWorkflows": Array [],
+      "refreshRangeDays": 7,
     }
   }
   integration={
@@ -1885,6 +1897,290 @@ exports[`Integration Setup Inputs Renders the query inputs 1`] = `
             id="generated-id-help-0"
           >
             Select a table name to associate with your data.
+          </div>
+        </EuiFormHelpText>
+      </div>
+    </div>
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText="Select the start date for the initial data to include. Data from this date to now will be loaded."
+    label="Initial Data Range"
+    labelType="label"
+  >
+    <div
+      className="euiFormRow"
+      id="generated-id-row"
+    >
+      <div
+        className="euiFormRow__labelWrapper"
+      >
+        <EuiFormLabel
+          className="euiFormRow__label"
+          htmlFor="generated-id"
+          isFocused={false}
+          type="label"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Initial Data Range
+          </label>
+        </EuiFormLabel>
+      </div>
+      <div
+        className="euiFormRow__fieldWrapper"
+      >
+        <EuiCompressedSwitch
+          checked={false}
+          label="Load all data (no time limit)"
+          onChange={[Function]}
+        >
+          <EuiSwitch
+            checked={false}
+            compressed={true}
+            label="Load all data (no time limit)"
+            onChange={[Function]}
+          >
+            <div
+              className="euiSwitch euiSwitch--primary euiSwitch--compressed"
+            >
+              <button
+                aria-checked={false}
+                aria-labelledby="generated-id"
+                className="euiSwitch__button"
+                id="generated-id"
+                onClick={[Function]}
+                role="switch"
+                type="button"
+              >
+                <span
+                  className="euiSwitch__body"
+                >
+                  <span
+                    className="euiSwitch__thumb"
+                  />
+                  <span
+                    className="euiSwitch__track"
+                  />
+                </span>
+              </button>
+              <span
+                className="euiSwitch__label"
+                id="generated-id"
+                onClick={[Function]}
+              >
+                Load all data (no time limit)
+              </span>
+            </div>
+          </EuiSwitch>
+        </EuiCompressedSwitch>
+        <EuiSpacer
+          size="s"
+        >
+          <div
+            className="euiSpacer euiSpacer--s"
+          />
+        </EuiSpacer>
+        <EuiDatePicker
+          accessibleMode={true}
+          adjustDateOnChange={true}
+          compressed={false}
+          dateFormat="YYYY-MM-DD"
+          fullWidth={false}
+          inputRef={[Function]}
+          isLoading={false}
+          maxDate={"2026-01-22T12:00:00.000Z"}
+          onChange={[Function]}
+          placeholder="Select start date"
+          popoverPlacement="bottom-start"
+          selected={"2026-01-15T12:00:00.000Z"}
+          shadow={true}
+          shouldCloseOnSelect={true}
+          showIcon={true}
+          showMonthDropdown={true}
+          showTimeSelect={false}
+          showYearDropdown={true}
+          timeFormat="hh:mm A"
+          yearDropdownItemNumber={7}
+        >
+          <span>
+            <span
+              className="euiDatePicker euiDatePicker--shadow"
+            >
+              <EuiFormControlLayout
+                fullWidth={false}
+                icon="calendar"
+                isLoading={false}
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <EuiValidatableControl>
+                      <DatePicker
+                        accessibleMode={true}
+                        adjustDateOnChange={true}
+                        allowSameDay={false}
+                        className="euiDatePicker euiFieldText euiFieldText--withIcon"
+                        dateFormat="YYYY-MM-DD"
+                        dateFormatCalendar="MMMM YYYY"
+                        disabled={false}
+                        disabledKeyboardNavigation={false}
+                        dropdownMode="scroll"
+                        maxDate={"2026-01-22T12:00:00.000Z"}
+                        monthsShown={1}
+                        nextMonthButtonLabel="Next month"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onClickOutside={[Function]}
+                        onFocus={[Function]}
+                        onInputClick={[Function]}
+                        onInputError={[Function]}
+                        onKeyDown={[Function]}
+                        onMonthChange={[Function]}
+                        onSelect={[Function]}
+                        onYearChange={[Function]}
+                        placeholderText="Select start date"
+                        popperPlacement="bottom-start"
+                        preventOpenOnFocus={false}
+                        previousMonthButtonLabel="Previous Month"
+                        readOnly={false}
+                        renderDayContents={[Function]}
+                        selected={"2026-01-15T12:00:00.000Z"}
+                        shouldCloseOnSelect={true}
+                        showMonthDropdown={true}
+                        showTimeSelect={false}
+                        showYearDropdown={true}
+                        strictParsing={false}
+                        timeCaption="Time"
+                        timeFormat="hh:mm A"
+                        timeIntervals={30}
+                        withPortal={false}
+                        yearDropdownItemNumber={7}
+                      >
+                        <PopperComponent
+                          hidePopper={true}
+                          popperComponent={null}
+                          popperModifiers={
+                            Object {
+                              "preventOverflow": Object {
+                                "boundariesElement": "viewport",
+                                "enabled": true,
+                                "escapeWithReference": true,
+                              },
+                            }
+                          }
+                          popperPlacement="bottom-start"
+                          popperProps={Object {}}
+                          targetComponent={
+                            <div
+                              className="react-datepicker__input-container"
+                            >
+                              <input
+                                aria-label="Press the down key to open a popover containing a calendar."
+                                className="euiDatePicker euiFieldText euiFieldText--withIcon"
+                                disabled={false}
+                                onBlur={[Function]}
+                                onChange={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                onKeyDown={[Function]}
+                                placeholder="Select start date"
+                                readOnly={false}
+                                type="text"
+                                value="2026-01-15"
+                              />
+                            </div>
+                          }
+                        >
+                          <Manager>
+                            <Reference>
+                              <InnerReference
+                                setReferenceNode={[Function]}
+                              >
+                                <div
+                                  className="react-datepicker-wrapper"
+                                >
+                                  <div
+                                    className="react-datepicker__input-container"
+                                  >
+                                    <input
+                                      aria-label="Press the down key to open a popover containing a calendar."
+                                      className="euiDatePicker euiFieldText euiFieldText--withIcon"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      onKeyDown={[Function]}
+                                      placeholder="Select start date"
+                                      readOnly={false}
+                                      type="text"
+                                      value="2026-01-15"
+                                    />
+                                  </div>
+                                </div>
+                              </InnerReference>
+                            </Reference>
+                          </Manager>
+                        </PopperComponent>
+                      </DatePicker>
+                    </EuiValidatableControl>
+                    <EuiFormControlLayoutIcons
+                      icon="calendar"
+                      isLoading={false}
+                    >
+                      <div
+                        className="euiFormControlLayoutIcons"
+                      >
+                        <EuiFormControlLayoutCustomIcon
+                          size="m"
+                          type="calendar"
+                        >
+                          <span
+                            className="euiFormControlLayoutCustomIcon"
+                          >
+                            <EuiIcon
+                              aria-hidden="true"
+                              className="euiFormControlLayoutCustomIcon__icon"
+                              size="m"
+                              type="calendar"
+                            >
+                              <span
+                                aria-hidden="true"
+                                className="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="calendar"
+                                size="m"
+                              />
+                            </EuiIcon>
+                          </span>
+                        </EuiFormControlLayoutCustomIcon>
+                      </div>
+                    </EuiFormControlLayoutIcons>
+                  </div>
+                </div>
+              </EuiFormControlLayout>
+            </span>
+          </span>
+        </EuiDatePicker>
+        <EuiFormHelpText
+          className="euiFormRow__text"
+          id="generated-id-help-0"
+          key="Select the start date for the initial data to include. Data from this date to now will be loaded."
+        >
+          <div
+            className="euiFormHelpText euiFormRow__text"
+            id="generated-id-help-0"
+          >
+            Select the start date for the initial data to include. Data from this date to now will be loaded.
           </div>
         </EuiFormHelpText>
       </div>

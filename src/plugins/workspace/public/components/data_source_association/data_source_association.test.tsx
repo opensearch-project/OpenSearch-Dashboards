@@ -16,6 +16,7 @@ import { AssociationDataSourceModalContent } from './association_data_source_mod
 import { DataSourceConnectionType } from 'src/plugins/workspace/common/types';
 import { BehaviorSubject } from 'rxjs';
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
+import { createMockWorkspaceClient } from '../../workspace_client.mock';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
@@ -38,8 +39,8 @@ describe('<DataSourceAssociation />', () => {
       return () => render(<>{node}</>);
     });
     servicesMock.overlays.openModal.mockImplementation((fn) => {
-      fn();
-      return { close: jest.fn(), onClose: jest.fn() };
+      fn(document.createElement('div'));
+      return { close: jest.fn(), onClose: Promise.resolve() };
     });
   });
 
@@ -71,10 +72,8 @@ describe('<DataSourceAssociation />', () => {
       .fn()
       .mockResolvedValue({ success: true, result: [{ id: 'id1' }, { id: 'id2' }] });
     servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      ...createMockWorkspaceClient(),
       associate: associateMock,
-      copy: jest.fn(),
-      dissociate: jest.fn(),
-      ui: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
@@ -108,10 +107,8 @@ describe('<DataSourceAssociation />', () => {
       .fn()
       .mockResolvedValue({ success: true, result: [{ id: 'id1' }, { id: 'id2' }] });
     servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      ...createMockWorkspaceClient(),
       associate: associateMock,
-      copy: jest.fn(),
-      dissociate: jest.fn(),
-      ui: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
@@ -143,10 +140,8 @@ describe('<DataSourceAssociation />', () => {
   it('should display error toast when associate data source failed', async () => {
     const associateMock = jest.fn().mockRejectedValue(new Error());
     servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      ...createMockWorkspaceClient(),
       associate: associateMock,
-      copy: jest.fn(),
-      dissociate: jest.fn(),
-      ui: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 
@@ -182,10 +177,8 @@ describe('<DataSourceAssociation />', () => {
       result: [{ id: 'id1', error: new Error() }, { id: 'id2' }],
     });
     servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      ...createMockWorkspaceClient(),
       associate: associateMock,
-      copy: jest.fn(),
-      dissociate: jest.fn(),
-      ui: jest.fn(),
     });
     servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
 

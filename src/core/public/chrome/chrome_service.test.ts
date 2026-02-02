@@ -43,6 +43,7 @@ import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock, workspacesServiceMock } from '../mocks';
 import { HeaderVariant } from './constants';
+import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
 
 class FakeApp implements App {
   public title: string;
@@ -80,6 +81,7 @@ function defaultStartDeps(availableApps?: App[]) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    keyboardShortcut: keyboardShortcutServiceMock.createStart(),
     updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
@@ -98,11 +100,10 @@ function defaultStartDeps(availableApps?: App[]) {
 }
 
 async function start({
-  options = { browserSupportsCsp: true },
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
-  const service = new ChromeService(options);
+  const service = new ChromeService();
 
   service.setup({ uiSettings: startDeps.uiSettings });
 
@@ -134,7 +135,7 @@ describe('setup', () => {
   it('register custom Nav Header render', async () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
-    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
     const chromeSetup = chrome.setup({ uiSettings });
@@ -151,7 +152,7 @@ describe('setup', () => {
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
-    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
     const chromeSetup = chrome.setup({ uiSettings });
@@ -167,7 +168,7 @@ describe('setup', () => {
 
   it('should register page search', () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
-    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const chrome = new ChromeService();
 
     const registerSearchCommandSpy = jest.fn();
     jest.spyOn((chrome as any).globalSearch, 'setup').mockReturnValue({
@@ -185,20 +186,6 @@ describe('setup', () => {
 });
 
 describe('start', () => {
-  it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const { startDeps } = await start({ options: { browserSupportsCsp: false } });
-
-    expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "title": [Function],
-          },
-        ],
-      ]
-    `);
-  });
-
   it('does not add legacy browser warning if browser supports CSP', async () => {
     const { startDeps } = await start();
 
@@ -207,7 +194,6 @@ describe('start', () => {
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
     const { startDeps } = await start({
-      options: { browserSupportsCsp: false },
       cspConfigMock: { warnLegacyBrowsers: false },
     });
 
@@ -221,6 +207,13 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
+    });
+
+    it('renders the Header component correctly', async () => {
+      const { chrome } = await start();
+      const headerComponent = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      // Verify that the Header component renders without errors
+      expect(headerComponent).toBeDefined();
     });
   });
 

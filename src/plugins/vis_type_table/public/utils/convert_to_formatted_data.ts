@@ -68,6 +68,7 @@ export const convertToFormattedData = (
       };
 
       const isDate = dimension?.format?.id === 'date' || dimension?.format?.params?.id === 'date';
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const allowsNumericalAggregations = formatter?.allowsNumericalAggregations;
 
       if (allowsNumericalAggregations || isDate || visConfig.totalFunc === AggTypes.COUNT) {

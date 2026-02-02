@@ -49,6 +49,7 @@ function StyleOptions(props: StyleOptionsProps) {
         paramName="outlineWeight"
         value={stateParams.outlineWeight}
         setValue={setValue}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         id="borderThicknessId"
       />
     </EuiPanel>

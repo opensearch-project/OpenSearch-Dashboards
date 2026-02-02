@@ -257,6 +257,7 @@ export class LegacyCoreEditor implements CoreEditor {
         for (i = 0; i < session.getLength(); i++) {
           session.getTokens(i);
         }
+        // @ts-expect-error TS2794 TODO(ts-error): fixme
         resolve();
       });
     });

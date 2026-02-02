@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor, screen } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { WorkspaceUseCaseOverviewApp } from './workspace_use_case_overview_app';
 import { of } from 'rxjs';
 import { coreMock } from '../../../../core/public/mocks';

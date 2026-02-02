@@ -95,6 +95,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleGetConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -132,6 +133,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleGetConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -177,6 +179,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleGetEntityConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -218,6 +221,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleGetEntityConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -267,6 +271,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleUpdateEntityConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -315,6 +320,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleUpdateEntityConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -361,6 +367,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleDeleteEntityConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
@@ -405,6 +412,7 @@ describe('application config routes', () => {
 
       const returnedResponse = await handleDeleteEntityConfig(
         getConfigurationClient,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         request,
         response,
         logger
