@@ -33,7 +33,7 @@ import { mountWithIntl, shallowWithIntl, wrapWithIntl } from 'test_utils/enzyme_
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
@@ -71,7 +71,7 @@ describe('TelemetryManagementSectionComponent', () => {
     ).toMatchSnapshot();
   });
 
-  it('renders null because query does not match the SEARCH_TERMS', () => {
+  it('renders null because query does not match the SEARCH_TERMS', async () => {
     const onQueryMatchChange = jest.fn();
     const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
@@ -105,6 +105,11 @@ describe('TelemetryManagementSectionComponent', () => {
     );
 
     try {
+      // Wait for initial render to settle
+      await waitFor(() => {
+        expect(component.container.querySelector('.euiPanel')).toBeInTheDocument();
+      });
+
       component.rerender(
         wrapWithIntl(
           <React.Suspense fallback={<span>Fallback</span>}>
@@ -120,7 +125,9 @@ describe('TelemetryManagementSectionComponent', () => {
           </React.Suspense>
         )
       );
-      expect(onQueryMatchChange).toHaveBeenCalledWith(false);
+      await waitFor(() => {
+        expect(onQueryMatchChange).toHaveBeenCalledWith(false);
+      });
       expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
     } finally {
       component.unmount();

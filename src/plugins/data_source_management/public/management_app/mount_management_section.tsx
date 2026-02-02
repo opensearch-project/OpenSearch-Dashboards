@@ -8,7 +8,7 @@ import { MountPoint, StartServicesAccessor } from 'src/core/public';
 import { EuiPageContent } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../../management/public';
@@ -126,7 +126,8 @@ export async function mountManagementSection(
     </Router>
   );
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         {params.wrapInPage ? (
@@ -137,12 +138,11 @@ export async function mountManagementSection(
           content
         )}
       </I18nProvider>
-    </OpenSearchDashboardsContextProvider>,
-    params.element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

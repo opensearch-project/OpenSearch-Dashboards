@@ -29,18 +29,22 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
 import { OptionsMenu } from './options';
 
 let isOpen = false;
+let root: Root | null = null;
 
 const container = document.createElement('div');
 
 const onClose = () => {
-  ReactDOM.unmountComponentAtNode(container);
+  if (root) {
+    root.unmount();
+    root = null;
+  }
   isOpen = false;
 };
 
@@ -65,6 +69,7 @@ export function showOptionsPopover({
   isOpen = true;
 
   document.body.appendChild(container);
+  root = createRoot(container);
   const element = (
     <I18nProvider>
       <EuiWrappingPopover id="popover" button={anchorElement} isOpen={true} closePopover={onClose}>
@@ -77,5 +82,5 @@ export function showOptionsPopover({
       </EuiWrappingPopover>
     </I18nProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

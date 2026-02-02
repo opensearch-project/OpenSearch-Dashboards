@@ -14,6 +14,9 @@ export const configSchema = schema.object({
   discoverTraces: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  discoverMetrics: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

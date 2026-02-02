@@ -24,7 +24,13 @@ import {
 } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
-import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  applyTimeRange,
+} from '../utils/echarts_spec';
 import {
   convertTo2DArray,
   transform,
@@ -61,8 +67,9 @@ export const createSimpleLineChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
       buildAxisConfigs,
+      applyTimeRange,
       createLineSeries({
         styles,
         categoryField: timeField,
@@ -74,6 +81,7 @@ export const createSimpleLineChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -232,8 +240,10 @@ export const createLineBarChart = (
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig({
         title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
       assembleSpec
     )({
@@ -241,6 +251,7 @@ export const createLineBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -437,6 +448,7 @@ export const createMultiLineChart = (
     if (!timeField || !valueField || !colorField) {
       throw Error('Missing axis config or color field for multi lines chart');
     }
+
     const result = pipe(
       transform(
         sortByTime(timeField),
@@ -452,8 +464,10 @@ export const createMultiLineChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createLineSeries({
         styles,
         categoryField: timeField,
@@ -465,6 +479,7 @@ export const createMultiLineChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -639,8 +654,10 @@ export const createFacetedMultiLineChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createFacetLineSeries({
         styles,
         categoryField: timeField,
@@ -652,6 +669,7 @@ export const createFacetedMultiLineChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -842,7 +860,10 @@ export const createCategoryLineChart = (
     // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
     const result = pipe(
       transform(convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}` }),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
+        legend: { show: false },
+      }),
       buildAxisConfigs,
       createLineSeries({
         styles,
@@ -977,6 +998,7 @@ export const createCategoryMultiLineChart = (
         title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       createLineSeries({

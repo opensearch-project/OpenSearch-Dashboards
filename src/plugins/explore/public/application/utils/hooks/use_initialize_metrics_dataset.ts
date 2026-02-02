@@ -29,9 +29,11 @@ export const useInitializeMetricsDataset = ({
         return;
       }
 
-      if (currentQuery.dataset && currentQuery.dataset.type !== 'PROMETHEUS') {
-        const clearedQuery = { ...currentQuery, dataset: undefined };
-        dispatch(setQueryWithHistory(clearedQuery));
+      if (
+        (currentQuery.dataset && currentQuery.dataset.type !== 'PROMETHEUS') ||
+        (!currentQuery.dataset && currentQuery.language !== 'PROMQL')
+      ) {
+        dispatch(setQueryWithHistory({ ...currentQuery, dataset: undefined, language: 'PROMQL' }));
       }
 
       try {

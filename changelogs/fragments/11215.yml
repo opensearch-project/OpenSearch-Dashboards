@@ -1,0 +1,2 @@
+fix:
+- Update correlationType for trace-to-logs objects ([#11215](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11215))

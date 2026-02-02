@@ -41,7 +41,7 @@ describe('line_vis_config', () => {
       expect(defaults.addTimeMarker).toBe(false);
 
       // Verify line style
-      expect(defaults.lineStyle).toBe('both');
+      expect(defaults.lineStyle).toBe('line');
       expect(defaults.lineMode).toBe('straight');
       expect(defaults.lineWidth).toBe(2);
 

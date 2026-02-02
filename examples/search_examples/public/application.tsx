@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { SearchExamplesApp } from './components/app';
@@ -39,7 +39,8 @@ export const renderApp = (
   { navigation, data }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <SearchExamplesApp
       basename={appBasePath}
       notifications={notifications}
@@ -47,9 +48,8 @@ export const renderApp = (
       navigation={navigation}
       data={data}
       http={http}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

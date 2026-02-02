@@ -1204,4 +1204,5 @@ export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
   connectionLocation: '',
   checkpointLocation: '',
   enabledWorkflows: [],
+  refreshRangeDays: 7,
 };

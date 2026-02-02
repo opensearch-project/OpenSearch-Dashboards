@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimelineTicks } from './timeline_ruler_hooks';
 
 describe('useTimelineTicks', () => {

@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { ManagementApp, ManagementAppDependencies } from './components/management_app';
@@ -38,10 +38,10 @@ export const renderApp = async (
   { history, appBasePath, element }: AppMountParameters,
   dependencies: ManagementAppDependencies
 ) => {
-  ReactDOM.render(
-    <ManagementApp dependencies={dependencies} appBasePath={appBasePath} history={history} />,
-    element
+  const root = createRoot(element);
+  root.render(
+    <ManagementApp dependencies={dependencies} appBasePath={appBasePath} history={history} />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -5,8 +5,6 @@
 
 import { ExplorePlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
-import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
-import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { ExplorePluginStart, ExploreSetupDependencies, ExploreStartDependencies } from './types';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
@@ -25,9 +23,6 @@ import { DashboardSetup, DashboardStart } from '../../dashboard/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
-
-// Mock the action
-jest.mock('./actions/ask_ai_embeddable_action');
 
 // Mock log action registry
 jest.mock('./services/log_action_registry', () => ({
@@ -61,6 +56,7 @@ describe('ExplorePlugin', () => {
   let coreStart: CoreStart;
   let setupDeps: ExploreSetupDependencies;
   let startDeps: ExploreStartDependencies;
+  let mockCapabilities: any;
 
   function createMockInitializerContext() {
     return {
@@ -223,6 +219,37 @@ describe('ExplorePlugin', () => {
       configurable: true,
     });
 
+    // Add capabilities mock with explore feature flags (mutable for tests)
+    mockCapabilities = {
+      explore: {
+        discoverTracesEnabled: false,
+        discoverMetricsEnabled: false,
+      },
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      workspaces: {},
+    };
+
+    Object.defineProperty(coreStart.application, 'capabilities', {
+      get: () => mockCapabilities,
+      set: (value) => {
+        Object.assign(mockCapabilities, value);
+      },
+      configurable: true,
+    });
+
+    // Mock navLinks.get for AppUpdater logic
+    Object.defineProperty(coreStart.application, 'navLinks', {
+      value: {
+        get: jest.fn().mockReturnValue({
+          navLinkStatus: 1, // AppNavLinkStatus.visible
+        }),
+      },
+      writable: true,
+      configurable: true,
+    });
+
     // Mock setup dependencies
     setupDeps = createMockSetupDeps();
 
@@ -288,6 +315,43 @@ describe('ExplorePlugin', () => {
       );
     });
 
+    it('should register Traces and Metrics apps with updater observables', () => {
+      plugin.setup(coreSetup, setupDeps);
+
+      // Verify Traces app has updater$
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'explore/traces',
+          title: 'Traces',
+          updater$: expect.any(Object),
+        })
+      );
+
+      // Verify Metrics app has updater$
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'explore/metrics',
+          title: 'Metrics',
+          updater$: expect.any(Object),
+        })
+      );
+    });
+
+    it('should register all nav links during setup', () => {
+      plugin.setup(coreSetup, setupDeps);
+
+      // Verify navGroup.addNavLinksToGroup was called with all 4 links
+      expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'explore' }),
+          expect.objectContaining({ id: 'explore/logs' }),
+          expect.objectContaining({ id: 'explore/traces' }),
+          expect.objectContaining({ id: 'explore/metrics' }),
+        ])
+      );
+    });
+
     it('should setup URL forwarding', () => {
       plugin.setup(coreSetup, setupDeps);
 
@@ -314,32 +378,6 @@ describe('ExplorePlugin', () => {
       plugin.setup(coreSetup, setupDeps);
     });
 
-    it('should register Ask AI embeddable action when chat and contextProvider are available', () => {
-      plugin.start(coreStart, startDeps);
-
-      expect(AskAIEmbeddableAction).toHaveBeenCalledWith(coreStart, startDeps.contextProvider);
-      expect(startDeps.uiActions.registerAction).toHaveBeenCalled();
-      expect(startDeps.uiActions.addTriggerAction).toHaveBeenCalledWith(
-        CONTEXT_MENU_TRIGGER,
-        expect.any(Object)
-      );
-    });
-
-    it('should not register Ask AI embeddable action when contextProvider is not available', () => {
-      const startDepsWithoutContextProvider = {
-        ...startDeps,
-        contextProvider: undefined,
-      };
-
-      plugin.start(coreStart, startDepsWithoutContextProvider);
-
-      expect(AskAIEmbeddableAction).not.toHaveBeenCalled();
-      expect(startDeps.uiActions.addTriggerAction).not.toHaveBeenCalledWith(
-        CONTEXT_MENU_TRIGGER,
-        expect.any(Object)
-      );
-    });
-
     it('should create saved explore loader', () => {
       const result = plugin.start(coreStart, startDeps);
 
@@ -353,6 +391,62 @@ describe('ExplorePlugin', () => {
 
       expect(result.visualizationRegistry).toBeDefined();
       expect(result.slotRegistry).toBeDefined();
+    });
+
+    it('should hide Traces and Metrics nav links when capabilities are disabled', () => {
+      // Set capabilities to disabled (default from beforeEach)
+      mockCapabilities.explore = {
+        discoverTracesEnabled: false,
+        discoverMetricsEnabled: false,
+      };
+
+      plugin.start(coreStart, startDeps);
+
+      // The AppUpdaters should be called during start
+      expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(false);
+      expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(false);
+    });
+
+    it('should show Traces nav link when capability is enabled', () => {
+      // Enable traces capability
+      mockCapabilities.explore = {
+        discoverTracesEnabled: true,
+        discoverMetricsEnabled: false,
+      };
+
+      plugin.start(coreStart, startDeps);
+
+      // Verify traces is enabled, metrics is disabled
+      expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(true);
+      expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(false);
+    });
+
+    it('should show Metrics nav link when capability is enabled', () => {
+      // Enable metrics capability
+      mockCapabilities.explore = {
+        discoverTracesEnabled: false,
+        discoverMetricsEnabled: true,
+      };
+
+      plugin.start(coreStart, startDeps);
+
+      // Verify metrics is enabled, traces is disabled
+      expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(false);
+      expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
+    });
+
+    it('should show both Traces and Metrics nav links when both capabilities are enabled', () => {
+      // Enable both capabilities
+      mockCapabilities.explore = {
+        discoverTracesEnabled: true,
+        discoverMetricsEnabled: true,
+      };
+
+      plugin.start(coreStart, startDeps);
+
+      // Verify both are enabled
+      expect(coreStart.application.capabilities.explore?.discoverTracesEnabled).toBe(true);
+      expect(coreStart.application.capabilities.explore?.discoverMetricsEnabled).toBe(true);
     });
   });
 

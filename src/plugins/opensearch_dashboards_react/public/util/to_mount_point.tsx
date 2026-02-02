@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { MountPoint } from 'opensearch-dashboards/public';
 
@@ -40,8 +40,9 @@ import { MountPoint } from 'opensearch-dashboards/public';
  */
 export const toMountPoint = (node: React.ReactNode): MountPoint => {
   const mount = (element: HTMLElement) => {
-    ReactDOM.render(<I18nProvider>{node}</I18nProvider>, element);
-    return () => ReactDOM.unmountComponentAtNode(element);
+    const root = createRoot(element);
+    root.render(<I18nProvider>{node}</I18nProvider>);
+    return () => root.unmount();
   };
   // only used for tests and snapshots serialization
   if (process.env.NODE_ENV !== 'production') {

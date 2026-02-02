@@ -10,10 +10,12 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { GlobalBanner } from './components/global_banner';
 import { BANNER_CONTAINER_ID } from '../common';
 import { HttpStart } from '../../../core/public';
+
+let root: Root | null = null;
 
 /**
  * Renders the banner component into the DOM
@@ -23,7 +25,10 @@ export const renderBanner = (http: HttpStart): void => {
   const container = document.getElementById(BANNER_CONTAINER_ID);
 
   if (container) {
-    ReactDOM.render(React.createElement(GlobalBanner, { http }), container);
+    if (!root) {
+      root = createRoot(container);
+    }
+    root.render(React.createElement(GlobalBanner, { http }));
   } else {
     // Use requestAnimationFrame to wait for the next paint cycle
     requestAnimationFrame(() => renderBanner(http));
@@ -34,8 +39,8 @@ export const renderBanner = (http: HttpStart): void => {
  * Unmounts the banner component from the DOM
  */
 export const unmountBanner = (): void => {
-  const container = document.getElementById(BANNER_CONTAINER_ID);
-  if (container) {
-    ReactDOM.unmountComponentAtNode(container);
+  if (root) {
+    root.unmount();
+    root = null;
   }
 };

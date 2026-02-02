@@ -47,8 +47,8 @@ export const BottomRightContainer = () => {
   });
 
   if (dataset == null) {
-    // Show auto-detect callout for traces and logs flavors
-    if (flavorId === ExploreFlavor.Traces || flavorId === ExploreFlavor.Logs) {
+    // Show auto-detect callout only for traces flavor
+    if (flavorId === ExploreFlavor.Traces) {
       return (
         <CanvasPanel>
           <>
@@ -106,12 +106,10 @@ export const BottomRightContainer = () => {
     status === QueryExecutionStatus.ERROR
   ) {
     return (
-      <>
+      <CanvasPanel>
         <DiscoverChartContainer />
-        <CanvasPanel>
-          <ResizableVisControlAndTabs />
-        </CanvasPanel>
-      </>
+        <ResizableVisControlAndTabs />
+      </CanvasPanel>
     );
   }
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { History, createMemoryHistory } from 'history';
 import { IBasePath } from '../../http';
 import { BasePath } from '../../http/base_path';
@@ -41,17 +41,20 @@ describe('renderApp', () => {
   let history: History;
   let unmount: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     basePath = new BasePath();
     element = document.createElement('div');
     history = createMemoryHistory();
-    unmount = renderApp({ element, history } as any, { basePath });
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      unmount = renderApp({ element, history } as any, { basePath });
+    });
   });
 
   afterEach(() => unmount());
 
-  it('renders generic errors', () => {
-    act(() => {
+  it('renders generic errors', async () => {
+    await act(async () => {
       history.push('/app/error');
     });
     // innerText not working in jsdom, so use innerHTML
@@ -60,8 +63,8 @@ describe('renderApp', () => {
     );
   });
 
-  it('renders urlOverflow errors', () => {
-    act(() => {
+  it('renders urlOverflow errors', async () => {
+    await act(async () => {
       history.push('/app/error?errorType=urlOverflow');
     });
     expect(element.querySelector('.euiTitle')!.innerHTML).toMatchInlineSnapshot(

@@ -37,61 +37,57 @@ export const TraceAutoDetectCallout: React.FC = () => {
 
     // Run detection
     const runDetection = async () => {
-      // Check if user dismissed this before
-      const dismissed = localStorage.getItem(DISMISSED_KEY);
-      if (dismissed === 'true') {
-        // Check if there are any existing trace datasets
-        // If not, clear the dismissal so user can see the callout again
-        try {
-          const allIndexPatterns = await services.indexPatterns.getIds();
+      // Always check if there are existing trace datasets first
+      // This prevents unnecessary wildcard queries when datasets already exist
+      try {
+        const allIndexPatterns = await services.indexPatterns.getIds();
+        if (!isMounted) return;
+
+        let hasTraceDatasets = false;
+
+        for (const id of allIndexPatterns) {
           if (!isMounted) return;
-
-          let hasTraceDatasets = false;
-
-          for (const id of allIndexPatterns) {
+          try {
+            const indexPattern = await services.indexPatterns.get(id);
             if (!isMounted) return;
-            try {
-              const indexPattern = await services.indexPatterns.get(id);
-              if (!isMounted) return;
 
-              if (indexPattern.signalType === CORE_SIGNAL_TYPES.TRACES) {
-                hasTraceDatasets = true;
-                break;
-              }
-            } catch (error) {
-              if (error instanceof Error && error.name === 'AbortError') {
-                return;
-              }
-              continue;
+            if (indexPattern.signalType === CORE_SIGNAL_TYPES.TRACES) {
+              hasTraceDatasets = true;
+              break;
             }
-          }
-
-          if (!isMounted) return;
-
-          // If no trace datasets exist, clear dismissal and run detection
-          if (!hasTraceDatasets) {
-            localStorage.removeItem(DISMISSED_KEY);
-          } else {
-            // Has trace datasets and was dismissed, so keep it dismissed
-            if (isMounted) {
-              setIsDismissed(true);
-              setIsDetecting(false);
+          } catch (error) {
+            if (error instanceof Error && error.name === 'AbortError') {
+              return;
             }
-            return;
+            continue;
           }
-        } catch (error) {
-          if (error instanceof Error && error.name === 'AbortError') {
-            return;
-          }
-          // If check fails, respect the dismissal
+        }
+
+        if (!isMounted) return;
+
+        // If trace datasets exist, skip detection entirely
+        if (hasTraceDatasets) {
           if (isMounted) {
             setIsDismissed(true);
             setIsDetecting(false);
           }
           return;
         }
+
+        // No trace datasets exist - check if user dismissed this before
+        const dismissed = localStorage.getItem(DISMISSED_KEY);
+        if (dismissed === 'true') {
+          // User dismissed and no datasets exist, clear dismissal to show callout again
+          localStorage.removeItem(DISMISSED_KEY);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        // If check fails, still try detection
       }
 
+      // Only run detection if no trace datasets exist
       try {
         const results = await detectTraceDataAcrossDataSources(
           services.savedObjects.client,

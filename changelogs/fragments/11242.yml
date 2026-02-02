@@ -1,0 +1,2 @@
+fix:
+- Fixed an issue that pivot function not handle timestamp properly ([#11242](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11242))

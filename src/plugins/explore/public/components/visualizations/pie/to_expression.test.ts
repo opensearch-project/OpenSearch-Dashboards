@@ -53,6 +53,14 @@ const defaultStyleOptions: PieChartStyle = {
   },
 };
 
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
+
 describe('to_expression', () => {
   // Sample data for testing
 

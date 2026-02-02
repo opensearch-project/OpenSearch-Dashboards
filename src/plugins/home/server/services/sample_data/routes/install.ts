@@ -73,9 +73,13 @@ const insertDataIntoIndex = (
   }
 
   const bulkInsert = async (docs: any) => {
-    const insertCmd = { index: { _index: index } };
     const bulk: any[] = [];
     docs.forEach((doc: any) => {
+      const insertCmd: any = { index: { _index: index } };
+      if (doc._id) {
+        insertCmd.index._id = doc._id;
+        delete doc._id;
+      }
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });

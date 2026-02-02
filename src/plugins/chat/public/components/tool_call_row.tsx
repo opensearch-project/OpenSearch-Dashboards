@@ -15,14 +15,17 @@ interface TimelineToolCall {
   toolName: string;
   status: 'running' | 'completed' | 'error';
   result?: string;
+  arguments?: string;
   timestamp: number;
 }
 
 interface ToolCallRowProps {
   toolCall: TimelineToolCall;
+  onApprove?: () => void;
+  onReject?: () => void;
 }
 
-export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
+export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall, onApprove, onReject }) => {
   // Always call useContext at the top level - React Hook rules
   const context = useContext(AssistantActionContext);
 
@@ -42,96 +45,95 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
     renderer &&
     (toolCall.toolName === 'request_user_confirmation' || // Always render for user confirmation
       isGraphTool || // Always render for graph visualization (both names)
+      context.shouldUseCustomRenderer?.(actualToolName) || // Use custom renderer if specified
       (toolCall.status === 'completed' && toolCall.result && toolCall.toolName === 'ppl_query')); // Other completed tools
 
   if (shouldUseCustomRenderer) {
+    // Check context toolCallStates for immediate data availability
+    let args;
+    let result;
+
+    if (context?.toolCallStates) {
+      const ourToolState = context.toolCallStates.get(toolCall.id);
+      if (ourToolState?.args) {
+        args = ourToolState.args;
+      }
+      if (ourToolState?.result) {
+        result = ourToolState.result;
+      }
+    }
+
+    // Also try to parse result from toolCall.result
+    if (!result && toolCall.result) {
+      try {
+        result = JSON.parse(toolCall.result);
+      } catch (error) {
+        // Not JSON, use as is
+        result = toolCall.result;
+      }
+    }
+    // Also try to parse arguments from toolCall.arguuments
+    if (!args && toolCall.arguments) {
+      try {
+        args = JSON.parse(toolCall.arguments);
+      } catch (error) {
+        // Not JSON, use as is
+        args = toolCall.arguments;
+      }
+    }
+
+    // Determine the correct status and result
+    let renderStatus: 'pending' | 'executing' | 'complete' | 'failed' = 'executing';
+    const renderResult = result;
+
+    // If we have a result from the context, the tool is complete
+    if (result && typeof result === 'object' && result.success !== undefined) {
+      renderStatus = result.success ? 'complete' : 'failed';
+    } else if (toolCall.status === 'completed') {
+      renderStatus = 'complete';
+    } else if (toolCall.status === 'error') {
+      renderStatus = 'failed';
+    }
+
     // For graph visualization tools, get the data from context
     if (isGraphTool) {
-      // Check context toolCallStates for immediate data availability
-      let args;
-      let result;
-
-      if (context?.toolCallStates) {
-        const ourToolState = context.toolCallStates.get(toolCall.id);
-        if (ourToolState?.args) {
-          args = ourToolState.args;
-        }
-        if (ourToolState?.result) {
-          result = ourToolState.result;
-        }
-      }
-
-      // Also try to parse result from toolCall.result
-      if (!result && toolCall.result) {
-        try {
-          result = JSON.parse(toolCall.result);
-        } catch (error) {
-          // Not JSON, use as is
-          result = toolCall.result;
-        }
-      }
-
-      // Determine the correct status and result
-      let renderStatus = 'executing';
-      const renderResult = result;
-
-      // If we have a result from the context, the tool is complete
-      if (result && typeof result === 'object' && result.success !== undefined) {
-        renderStatus = result.success ? 'complete' : 'failed';
-      } else if (toolCall.status === 'completed') {
-        renderStatus = 'complete';
-      } else if (toolCall.status === 'error') {
-        renderStatus = 'failed';
-      }
-
       return (
         <div className="toolCallRow">
           {renderer({
             status: renderStatus,
             args,
             result: renderResult,
-            error: toolCall.status === 'error' ? toolCall.result : undefined,
+            error:
+              toolCall.status === 'error'
+                ? new Error(toolCall.result || 'Unknown error')
+                : undefined,
           })}
         </div>
       );
     }
 
-    // For user confirmation, we don't need to parse result - just pass the status and args
-    if (toolCall.toolName === 'request_user_confirmation') {
-      return (
-        <div className="toolCallRow">
-          {renderer({
-            status: toolCall.status === 'running' ? 'executing' : 'complete',
-            args: undefined, // Args would come from the tool execution context
-            result: toolCall.result,
-            error: undefined,
-          })}
+    return (
+      <div className="toolCallRow">
+        <div className="toolCallRow__icon">
+          <EuiIcon type="wrench" size="m" color="accent" />
         </div>
-      );
-    }
-
-    // For other tools, try to parse JSON result
-    try {
-      const parsedResult = JSON.parse(toolCall.result!);
-      const isStructuredResult =
-        typeof parsedResult === 'object' &&
-        (parsedResult.success !== undefined || parsedResult.graphData !== undefined);
-
-      if (isStructuredResult) {
-        return (
-          <div className="toolCallRow">
+        <div>
+          <div className="toolCallRow__info">
             {renderer({
-              status: 'complete',
-              args: parsedResult.graphData || parsedResult,
-              result: parsedResult,
-              error: undefined,
+              status: renderStatus,
+              args,
+              result,
+              onApprove,
+              onReject,
+              error:
+                toolCall.status === 'error'
+                  ? new Error(toolCall.result || 'Unknown error')
+                  : undefined,
             })}
           </div>
-        );
-      }
-    } catch (error) {
-      // Tool result is not JSON, fall through to default rendering
-    }
+        </div>
+      </div>
+    );
   }
 
   // Direct graph rendering for graph visualization tools (fallback)
@@ -379,6 +381,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
             {toolCall.status === 'running' ? 'Running' : toolCall.status}
           </EuiBadge>
         </div>
+
         {toolCall.result && toolCall.status === 'completed' && (
           <div className="toolCallRow__result">
             <EuiAccordion

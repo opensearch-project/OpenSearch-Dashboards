@@ -46,7 +46,7 @@ export const LICENSE_ALLOWLIST = [
   '(MIT OR Apache-2.0)',
   '(MIT AND BSD-3-Clause)',
   '(MIT OR CC0-1.0)',
-  '(MIT OR GPL-3.0)',
+  '(MIT OR GPL-3.0-or-later)',
   '(MPL-2.0 OR Apache-2.0)',
   '(OFL-1.1 AND MIT)',
   '(Unlicense OR Apache-2.0)',
@@ -99,7 +99,5 @@ export const DEV_ONLY_LICENSE_ALLOWLIST = ['MPL-2.0'];
 
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
-  'jackspeak@3.4.0': ['BlueOak-1.0.0'],
-  'path-scurry@1.11.1': ['BlueOak-1.0.0'],
   'walk@2.3.9': ['MIT'],
 };

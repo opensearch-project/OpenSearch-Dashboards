@@ -20,7 +20,7 @@ export const EmptyTableCell: React.FC<EmptyTableCellProps> = ({ colName }) => {
     <td
       key={colName}
       data-test-subj="docTableField"
-      className="exploreDocTableCell eui-textBreakAll eui-textBreakWord"
+      className="exploreDocTableCell eui-textTruncate"
     >
       <span>-</span>
     </td>

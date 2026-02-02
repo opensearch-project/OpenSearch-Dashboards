@@ -30,7 +30,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
