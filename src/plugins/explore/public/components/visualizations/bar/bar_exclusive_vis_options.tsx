@@ -95,18 +95,6 @@ export const BarExclusiveVisOptions = ({
         </EuiFormRow>
       )} */}
 
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.vis.bar.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
-          })}
-          data-test-subj="useThresholdColorButton"
-          checked={useThresholdColor ?? false}
-          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-        />
-      </EuiFormRow>
-
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
           defaultMessage: 'Size',
@@ -122,6 +110,18 @@ export const BarExclusiveVisOptions = ({
           buttonSize="compressed"
           isFullWidth
           data-test-subj="barSizeModeButtonGroup"
+        />
+      </EuiFormRow>
+
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.bar.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
+          })}
+          data-test-subj="useThresholdColorButton"
+          checked={useThresholdColor ?? false}
+          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
         />
       </EuiFormRow>
 
