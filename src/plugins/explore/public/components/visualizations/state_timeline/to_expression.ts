@@ -105,6 +105,7 @@ export const createNumericalStateTimeline = (
       createBaseConfig({
         title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
         addTrigger: false,
+        legend: { show: styleOptions.addLegend },
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField }),
@@ -334,6 +335,7 @@ export const createCategoricalStateTimeline = (
       createBaseConfig({
         title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
         addTrigger: false,
+        legend: { show: styleOptions.addLegend },
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField }),
@@ -565,6 +567,7 @@ export const createSingleCategoricalStateTimeline = (
       createBaseConfig({
         title: `${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
         addTrigger: false,
+        legend: { show: styleOptions.addLegend },
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
@@ -810,6 +813,7 @@ export const createSingleNumericalStateTimeline = (
       createBaseConfig({
         title: `${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
         addTrigger: false,
+        legend: { show: styleOptions.addLegend },
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),

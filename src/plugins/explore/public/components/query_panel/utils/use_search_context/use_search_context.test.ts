@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useSearchContext } from './use_search_context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { BehaviorSubject } from 'rxjs';

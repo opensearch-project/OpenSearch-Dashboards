@@ -77,6 +77,7 @@ export const createAreaSeries = <T extends BaseChartStyle>({
     return {
       name,
       type: 'line',
+      showSymbol: false,
       connectNulls: true,
       areaStyle: {
         opacity: styles.areaOpacity || DEFAULT_OPACITY,
@@ -120,6 +121,7 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
     return cateColumns.map((item: string, seriesIndex: number) => ({
       name: String(item),
       type: 'line',
+      showSymbol: false,
       stack: `Total_${index}`, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
@@ -170,6 +172,7 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
   const series = [
     {
       type: 'line',
+      showSymbol: false,
       name: getSeriesDisplayName(valueField, Object.values(axisColumnMappings)),
       connectNulls: true,
       areaStyle: {
@@ -229,6 +232,7 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
   const newseries = cateColumns.map((categoryName: string, index: number) => ({
     name: String(categoryName),
     type: 'line',
+    showSymbol: false,
     stack: 'Total',
     areaStyle: {
       opacity: styles.areaOpacity || DEFAULT_OPACITY,

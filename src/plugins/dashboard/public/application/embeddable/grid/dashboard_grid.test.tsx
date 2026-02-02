@@ -32,6 +32,8 @@
 import sizeMe from 'react-sizeme';
 
 import React from 'react';
+import { act } from 'react';
+import { waitFor } from '@testing-library/react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
@@ -124,7 +126,7 @@ test('renders DashboardGrid', () => {
   expect(panelElements.length).toBe(2);
 });
 
-test('renders DashboardGrid with no visualizations', () => {
+test('renders DashboardGrid with no visualizations', async () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <OpenSearchDashboardsContextProvider services={options}>
@@ -132,12 +134,19 @@ test('renders DashboardGrid with no visualizations', () => {
     </OpenSearchDashboardsContextProvider>
   );
 
-  props.container.updateInput({ panels: {} });
-  component.update();
-  expect(component.find('EmbeddableChildPanel').length).toBe(0);
+  // Wrap container input update in act() for React 18
+  await act(async () => {
+    props.container.updateInput({ panels: {} });
+  });
+
+  // Use waitFor to wait for the component to re-render after the RxJS subscription triggers state update
+  await waitFor(() => {
+    component.update();
+    expect(component.find('EmbeddableChildPanel').length).toBe(0);
+  });
 });
 
-test('DashboardGrid removes panel when removed from container', () => {
+test('DashboardGrid removes panel when removed from container', async () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <OpenSearchDashboardsContextProvider services={options}>
@@ -148,13 +157,21 @@ test('DashboardGrid removes panel when removed from container', () => {
   const originalPanels = props.container.getInput().panels;
   const filteredPanels = { ...originalPanels };
   delete filteredPanels['1'];
-  props.container.updateInput({ panels: filteredPanels });
-  component.update();
-  const panelElements = component.find('EmbeddableChildPanel');
-  expect(panelElements.length).toBe(1);
+
+  // Wrap container input update in act() for React 18
+  await act(async () => {
+    props.container.updateInput({ panels: filteredPanels });
+  });
+
+  // Use waitFor to wait for the component to re-render after the RxJS subscription triggers state update
+  await waitFor(() => {
+    component.update();
+    const panelElements = component.find('EmbeddableChildPanel');
+    expect(panelElements.length).toBe(1);
+  });
 });
 
-test('DashboardGrid renders expanded panel', () => {
+test('DashboardGrid renders expanded panel', async () => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <OpenSearchDashboardsContextProvider services={options}>
@@ -162,22 +179,33 @@ test('DashboardGrid renders expanded panel', () => {
     </OpenSearchDashboardsContextProvider>
   );
 
-  props.container.updateInput({ expandedPanelId: '1' });
-  component.update();
-  // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
-  expect(component.find('EmbeddableChildPanel').length).toBe(2);
+  // Wrap container input update in act() for React 18
+  await act(async () => {
+    props.container.updateInput({ expandedPanelId: '1' });
+  });
 
-  expect(
-    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
-  ).toBe('1');
+  // Use waitFor to wait for the component to re-render after the RxJS subscription triggers state update
+  await waitFor(() => {
+    component.update();
+    // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
+    expect(component.find('EmbeddableChildPanel').length).toBe(2);
+    expect(
+      (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
+    ).toBe('1');
+  });
 
-  props.container.updateInput({ expandedPanelId: undefined });
-  component.update();
-  expect(component.find('EmbeddableChildPanel').length).toBe(2);
+  // Wrap second container input update in act() for React 18
+  await act(async () => {
+    props.container.updateInput({ expandedPanelId: undefined });
+  });
 
-  expect(
-    (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
-  ).toBeUndefined();
+  await waitFor(() => {
+    component.update();
+    expect(component.find('EmbeddableChildPanel').length).toBe(2);
+    expect(
+      (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
+    ).toBeUndefined();
+  });
 });
 
 test('DashboardGrid unmount unsubscribes', (done) => {

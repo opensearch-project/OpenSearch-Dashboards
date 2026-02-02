@@ -29,8 +29,9 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { act, Simulate } from 'react-dom/test-utils';
+import { createRoot, Root } from 'react-dom/client';
+import { act } from 'react';
+import { Simulate } from 'react-dom/test-utils';
 import { useUiSetting$ } from './use_ui_setting';
 import { createOpenSearchDashboardsReactContext } from '../context';
 import { OpenSearchDashboardsServices } from '../context/types';
@@ -55,6 +56,7 @@ const mock = (): [OpenSearchDashboardsServices, Subject<any>] => {
 };
 
 let container: HTMLDivElement | null;
+let root: Root | null;
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -63,7 +65,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  document.body.removeChild(container!);
+  if (root) {
+    act(() => {
+      root!.unmount();
+    });
+    root = null;
+  }
+  if (container) {
+    document.body.removeChild(container!);
+  }
   container = null;
 });
 
@@ -86,12 +96,14 @@ describe('useUiSetting', () => {
     const [core] = mock();
     const { Provider } = createOpenSearchDashboardsReactContext(core);
 
-    ReactDOM.render(
-      <Provider>
-        <TestConsumer setting="foo" />
-      </Provider>,
-      container
-    );
+    act(() => {
+      root = createRoot(container!);
+      root.render(
+        <Provider>
+          <TestConsumer setting="foo" />
+        </Provider>
+      );
+    });
 
     const strong = container!.querySelector('strong');
     expect(strong!.textContent).toBe('bar');
@@ -103,12 +115,14 @@ describe('useUiSetting', () => {
     const [core] = mock();
     const { Provider } = createOpenSearchDashboardsReactContext(core);
 
-    ReactDOM.render(
-      <Provider>
-        <TestConsumer setting="foo" />
-      </Provider>,
-      container
-    );
+    act(() => {
+      root = createRoot(container!);
+      root.render(
+        <Provider>
+          <TestConsumer setting="foo" />
+        </Provider>
+      );
+    });
 
     expect(core.uiSettings!.get).toHaveBeenCalledTimes(1);
     expect((core.uiSettings!.get as any).mock.calls[0][0]).toBe('foo');
@@ -135,12 +149,14 @@ describe('useUiSetting$', () => {
     const [core] = mock();
     const { Provider } = createOpenSearchDashboardsReactContext(core);
 
-    ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="foo" />
-      </Provider>,
-      container
-    );
+    act(() => {
+      root = createRoot(container!);
+      root.render(
+        <Provider>
+          <TestConsumerX setting="foo" />
+        </Provider>
+      );
+    });
 
     const strong = container!.querySelector('strong');
     expect(strong!.textContent).toBe('bar');
@@ -152,12 +168,14 @@ describe('useUiSetting$', () => {
     const core = coreMock.createStart();
     const { Provider } = createOpenSearchDashboardsReactContext(core);
 
-    ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="non_existing" />
-      </Provider>,
-      container
-    );
+    act(() => {
+      root = createRoot(container!);
+      root.render(
+        <Provider>
+          <TestConsumerX setting="non_existing" />
+        </Provider>
+      );
+    });
 
     expect(core.uiSettings!.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
   });
@@ -168,12 +186,14 @@ describe('useUiSetting$', () => {
 
     expect(useObservableSpy).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="theme:darkMode" />
-      </Provider>,
-      container
-    );
+    act(() => {
+      root = createRoot(container!);
+      root.render(
+        <Provider>
+          <TestConsumerX setting="theme:darkMode" />
+        </Provider>
+      );
+    });
 
     expect(useObservableSpy).toHaveBeenCalledTimes(1);
     expect(useObservableSpy.mock.calls[0][0]).toBe(subject);
@@ -183,12 +203,14 @@ describe('useUiSetting$', () => {
     const [core] = mock();
     const { Provider } = createOpenSearchDashboardsReactContext(core);
 
-    ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="a" newValue="c" />
-      </Provider>,
-      container
-    );
+    act(() => {
+      root = createRoot(container!);
+      root.render(
+        <Provider>
+          <TestConsumerX setting="a" newValue="c" />
+        </Provider>
+      );
+    });
 
     expect(core.uiSettings!.set).toHaveBeenCalledTimes(0);
 

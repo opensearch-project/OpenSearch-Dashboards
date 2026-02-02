@@ -24,7 +24,6 @@ import {
   createScatterSeries,
   createCategoryScatterSeries,
   createSizeScatterSeries,
-  assembleSizeScatterSpec,
 } from './scatter_chart_utils';
 import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
@@ -312,7 +311,7 @@ export const createThreeMetricOneCateScatter = (
         colorField,
         sizeField,
       }),
-      assembleSizeScatterSpec()
+      assembleSpec
     )({
       data: transformedData,
       styles,

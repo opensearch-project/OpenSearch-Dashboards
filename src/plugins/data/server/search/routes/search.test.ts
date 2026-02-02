@@ -45,6 +45,11 @@ import { registerSearchRoute } from './search';
 import { DataPluginStart } from '../../plugin';
 import { dataPluginMock } from '../../mocks';
 
+// Mock getRequestAbortedSignal to avoid RxJS fromEvent issues with mock requests
+jest.mock('../../lib', () => ({
+  getRequestAbortedSignal: jest.fn().mockReturnValue(new AbortController().signal),
+}));
+
 describe('Search service', () => {
   let mockDataStart: MockedKeys<DataPluginStart>;
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;

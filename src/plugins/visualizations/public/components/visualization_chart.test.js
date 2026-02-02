@@ -28,8 +28,6 @@
  * under the License.
  */
 
-jest.useFakeTimers();
-
 import React from 'react';
 import { render, mount } from 'enzyme';
 import { VisualizationChart } from './visualization_chart';
@@ -53,6 +51,15 @@ class VisualizationStub {
 }
 
 describe('<VisualizationChart/>', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
   const vis = {
     type: {
       title: 'Test Visualization',
@@ -73,6 +80,8 @@ describe('<VisualizationChart/>', () => {
     const wrapper = mount(<VisualizationChart vis={vis} />);
     jest.runAllTimers();
     await renderPromise;
+    // In React 18, need to update the wrapper after async operations
+    wrapper.update();
     expect(wrapper.find('.visChart').text()).toMatch(/markdown/);
   });
 });

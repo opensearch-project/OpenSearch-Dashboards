@@ -38,7 +38,7 @@ jest.mock('./track', () => ({ track: jest.fn() }));
 jest.mock('../../contexts/request_context', () => ({ useRequestActionContext: jest.fn() }));
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { ContextValue, ServicesContextProvider } from '../../contexts';
 import { serviceContextMock } from '../../contexts/services_context.mock';

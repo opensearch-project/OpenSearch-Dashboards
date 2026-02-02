@@ -6,7 +6,7 @@
 import { unparse } from 'papaparse';
 import { saveAs } from 'file-saver';
 import moment from 'moment';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import {
   useSelector,
   useDispatch,
@@ -201,11 +201,9 @@ describe('useDiscoverDownloadCsv', () => {
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
       });
-      result.all.map((resultIteration) => {
-        expect(
-          (resultIteration as ReturnType<typeof useDiscoverDownloadCsv>).isLoading
-        ).toBeFalsy();
-      });
+      // For Visible option, isLoading should remain false and onLoading should not be called
+      expect(result.current.isLoading).toBeFalsy();
+      expect(mockOnLoading).not.toHaveBeenCalled();
     });
 
     it('calling downloadCsvForOption calls onLoading() when Visible option is selected', async () => {
@@ -221,10 +219,9 @@ describe('useDiscoverDownloadCsv', () => {
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
-      // check the second last one as the last one turns it back to false
-      expect(
-        (result.all[result.all.length - 2] as ReturnType<typeof useDiscoverDownloadCsv>).isLoading
-      ).toBeTruthy();
+      // For Max option, onLoading is called (indicating loading was set to true)
+      // and then isLoading goes back to false after completion
+      expect(mockOnLoading).toHaveBeenCalled();
       expect(result.current.isLoading).toBeFalsy();
     });
 

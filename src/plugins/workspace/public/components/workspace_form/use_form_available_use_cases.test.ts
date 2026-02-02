@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceUseCase } from '../../types';
 import { DEFAULT_NAV_GROUPS, UseCaseId } from '../../../../../core/public';
@@ -79,7 +79,7 @@ describe('useFormAvailableUseCases', () => {
     const registeredUseCases$ = new BehaviorSubject(mockUseCases);
     (areAllDataSourcesOpenSearchServerless as jest.Mock).mockResolvedValue(true);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useFormAvailableUseCases({
         savedObjects: mockSavedObjectsClient,
         registeredUseCases$,
@@ -87,14 +87,14 @@ describe('useFormAvailableUseCases', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.availableUseCases).toEqual([
-      expect.objectContaining({
-        ...DEFAULT_NAV_GROUPS.essentials,
-        disabled: true,
-      }),
-    ]);
+    await waitFor(() => {
+      expect(result.current.availableUseCases).toEqual([
+        expect.objectContaining({
+          ...DEFAULT_NAV_GROUPS.essentials,
+          disabled: true,
+        }),
+      ]);
+    });
   });
 
   it('should handle error when fetching serverless status and default to non-serverless behavior', async () => {
@@ -103,7 +103,7 @@ describe('useFormAvailableUseCases', () => {
       new Error('Failed to fetch')
     );
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useFormAvailableUseCases({
         savedObjects: mockSavedObjectsClient,
         registeredUseCases$,
@@ -111,17 +111,17 @@ describe('useFormAvailableUseCases', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.availableUseCases).toEqual([
-      expect.objectContaining({
-        id: 'useCase1',
-        title: 'Use Case 1',
-        systematic: false,
-      }),
-      expect.objectContaining(DEFAULT_NAV_GROUPS.essentials),
-      expect.objectContaining(DEFAULT_NAV_GROUPS.all),
-    ]);
+    await waitFor(() => {
+      expect(result.current.availableUseCases).toEqual([
+        expect.objectContaining({
+          id: 'useCase1',
+          title: 'Use Case 1',
+          systematic: false,
+        }),
+        expect.objectContaining(DEFAULT_NAV_GROUPS.essentials),
+        expect.objectContaining(DEFAULT_NAV_GROUPS.all),
+      ]);
+    });
   });
 
   it('should not update serverless status after unmount', async () => {
@@ -210,7 +210,7 @@ describe('useFormAvailableUseCases', () => {
     const registeredUseCases$ = new BehaviorSubject(mockUseCases);
     (areAllDataSourcesOpenSearchServerless as jest.Mock).mockResolvedValue(true);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useFormAvailableUseCases({
         savedObjects: mockSavedObjectsClient,
         registeredUseCases$,
@@ -218,18 +218,18 @@ describe('useFormAvailableUseCases', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.availableUseCases).toEqual([
-      expect.objectContaining({
-        id: 'useCase1',
-        title: 'Use Case 1',
-        disabled: false, // Should not be disabled when multiple use cases are supported
-      }),
-      expect.objectContaining({
-        ...DEFAULT_NAV_GROUPS.essentials,
-        disabled: false, // Should not be disabled when multiple use cases are supported
-      }),
-    ]);
+    await waitFor(() => {
+      expect(result.current.availableUseCases).toEqual([
+        expect.objectContaining({
+          id: 'useCase1',
+          title: 'Use Case 1',
+          disabled: false, // Should not be disabled when multiple use cases are supported
+        }),
+        expect.objectContaining({
+          ...DEFAULT_NAV_GROUPS.essentials,
+          disabled: false, // Should not be disabled when multiple use cases are supported
+        }),
+      ]);
+    });
   });
 });

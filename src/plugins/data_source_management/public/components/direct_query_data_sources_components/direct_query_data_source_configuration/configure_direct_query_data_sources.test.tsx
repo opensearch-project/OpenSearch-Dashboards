@@ -7,7 +7,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_sources';
 import { NotificationsStart } from '../../../../../../core/public';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { createMemoryHistory } from 'history';
 
 const mockSetBreadcrumbs = jest.fn();

@@ -8,7 +8,6 @@ import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -95,17 +94,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     };
   }, [data.query.state$]);
 
-  // Create osdUrlStateStorage from storage
-  const osdUrlStateStorage = useMemo(() => {
-    return createOsdUrlStateStorage({
-      useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: scopedHistory,
-    });
-  }, [uiSettings, scopedHistory]);
-
+  // Use the shared osdUrlStateStorage instance from services to avoid
+  // multiple instances competing to update the same URL, which causes
+  // lost updates (e.g., _q and _a being overwritten when _g is synced).
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
-    osdUrlStateStorage
+    services.osdUrlStateStorage!
   );
 
   const dispatch = useDispatch();

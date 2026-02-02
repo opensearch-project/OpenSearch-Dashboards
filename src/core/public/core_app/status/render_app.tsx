@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import type { AppMountParameters } from '../../application';
 import type { HttpSetup } from '../../http';
@@ -42,14 +42,14 @@ interface Deps {
 }
 
 export const renderApp = ({ element }: AppMountParameters, { http, notifications }: Deps) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <StatusApp http={http} notifications={notifications} />
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

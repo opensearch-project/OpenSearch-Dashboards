@@ -11,8 +11,5 @@
   },
   "dependencies": {
     "@osd/std": "1.0.0"
-  },
-  "devDependencies": {
-    "typescript": "4.5.5"
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import * as utils from '../../utils';
 import { mount, ReactWrapper } from 'enzyme';
 import { RouteComponentProps } from 'react-router-dom';

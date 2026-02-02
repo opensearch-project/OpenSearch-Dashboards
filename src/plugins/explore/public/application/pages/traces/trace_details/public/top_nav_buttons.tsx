@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import {
   EuiOverlayMask,
@@ -135,8 +135,9 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
   useEffect(() => {
     if (setMenuMountPoint && !isFlyout) {
       const mount: MountPoint = (element) => {
-        ReactDOM.render(<HeaderContent />, element);
-        return () => ReactDOM.unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(<HeaderContent />);
+        return () => root.unmount();
       };
       setMenuMountPoint(mount);
 

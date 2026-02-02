@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiAccordion, EuiFieldNumber } from '@elastic/eui';
 import { IndexAdvancedSettings } from './index_advanced_settings';
 import { CreateAccelerationForm } from '../../../../../framework/types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 jest.mock('../create/utils', () => ({
   hasError: jest.fn(),
