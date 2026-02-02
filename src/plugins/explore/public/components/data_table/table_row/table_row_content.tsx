@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import { EuiSmallButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
 import React, { useState } from 'react';
@@ -38,7 +38,7 @@ const getCellClassName = (timeFieldName?: string, colName?: string): string => {
   if (timeFieldName === colName) {
     return `${baseClass} eui-textNoWrap`;
   }
-  return `${baseClass} eui-textBreakAll eui-textBreakWord`;
+  return `${baseClass} eui-textTruncate`;
 };
 
 const shouldShowEmptyCell = (row: any, formattedValue: any): boolean => {
@@ -79,13 +79,14 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
           data-test-subj="docTableExpandToggleColumn"
           className="exploreDocTableCell__toggleDetails"
         >
-          <EuiSmallButtonIcon
+          <EuiButtonIcon
             color="text"
             onClick={onToggleExpand}
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             aria-label={i18n.translate('explore.defaultTable.docTableExpandToggleColumnLabel', {
               defaultMessage: `Toggle row details`,
             })}
+            size="xs"
             data-test-subj="docTableExpandToggleColumn"
           />
         </td>

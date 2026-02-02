@@ -9,137 +9,71 @@ exports[`ImportTypeSelector should render 1`] = `
       <span
         class="euiTitle euiTitle--xsmall"
       >
-        Import Type
+        Import type
       </span>
     </legend>
-    <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    <fieldset
+      class="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text euiButtonGroup--fullWidth"
     >
-      <div
-        class="euiFlexItem"
+      <legend
+        class="euiScreenReaderOnly"
       >
-        <div
-          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+        Import type
+      </legend>
+      <div
+        class="euiButtonGroup__buttons"
+      >
+        <label
+          class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+          for="generated-id"
         >
-          <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--primary euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+          <span
+            class="euiButtonContent euiButton__content"
           >
-            <div
-              class="euiRadio euiRadio--noLabel"
+            <span
+              class="euiButton__text euiButtonGroupButton__textShift"
+              data-text="Upload"
+              title="Upload"
             >
               <input
                 checked=""
-                class="euiRadio__input"
-                id="file-selection"
+                class="euiScreenReaderOnly"
+                data-test-subj="file"
+                id="generated-id"
+                name="generated-id"
                 type="radio"
                 value=""
               />
-              <div
-                class="euiRadio__circle"
-              />
-            </div>
-          </div>
-          <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
-          >
-            <label
-              class="euiCheckableCard__label"
-              for="file-selection"
-            >
-              <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <div
-                  class="euiFlexItem"
-                >
-                  <div
-                    class="euiText euiText--medium"
-                  >
-                    Upload
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <span
-                      aria-label="Info"
-                      data-euiicon-type="iInCircle"
-                      tabindex="0"
-                    />
-                  </span>
-                </div>
-              </div>
-            </label>
-          </div>
-        </div>
-      </div>
-      <div
-        class="euiFlexItem"
-      >
-        <div
-          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard"
+              Upload
+            </span>
+          </span>
+        </label>
+        <label
+          class="euiButtonGroupButton euiButtonGroupButton--text"
+          for="generated-id"
         >
-          <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+          <span
+            class="euiButtonContent euiButton__content"
           >
-            <div
-              class="euiRadio euiRadio--noLabel"
+            <span
+              class="euiButton__text euiButtonGroupButton__textShift"
+              data-text="Text"
+              title="Text"
             >
               <input
-                class="euiRadio__input"
-                id="text-selection"
+                class="euiScreenReaderOnly"
+                data-test-subj="text"
+                id="generated-id"
+                name="generated-id"
                 type="radio"
                 value=""
               />
-              <div
-                class="euiRadio__circle"
-              />
-            </div>
-          </div>
-          <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
-          >
-            <label
-              class="euiCheckableCard__label"
-              for="text-selection"
-            >
-              <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <div
-                  class="euiFlexItem"
-                >
-                  <div
-                    class="euiText euiText--medium"
-                  >
-                    Text
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <span
-                      aria-label="Info"
-                      data-euiicon-type="iInCircle"
-                      tabindex="0"
-                    />
-                  </span>
-                </div>
-              </div>
-            </label>
-          </div>
-        </div>
+              Text
+            </span>
+          </span>
+        </label>
       </div>
-    </div>
-    <div
-      class="euiSpacer euiSpacer--m"
-    />
+    </fieldset>
   </fieldset>
 </div>
 `;

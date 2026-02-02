@@ -55,6 +55,9 @@ export class ChatService {
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
 
+  // Cache for datasourceId to avoid repeated lookups
+  private cachedDataSourceId?: string;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
@@ -72,7 +75,10 @@ export class ChatService {
       // Set thread ID in core service
       this.coreChatService.setThreadId(currentChatState.threadId);
     }
-    this.currentMessages = currentChatState?.messages || [];
+
+    // Clean up trailing error messages from interrupted sessions (e.g., page refresh)
+    const messages = currentChatState?.messages || [];
+    this.currentMessages = this.removeTrailingErrorMessages(messages);
 
     // Subscribe to assistant action service to keep tools in sync
     const assistantActionService = AssistantActionService.getInstance();
@@ -99,7 +105,7 @@ export class ChatService {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  private generateMessageId(): string {
+  public generateMessageId(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
@@ -247,7 +253,7 @@ export class ChatService {
     // If ChatWindow is available, delegate to its sendMessage for proper timeline management
     if (this.chatWindowRef?.current && this.isWindowOpen()) {
       try {
-        await this.chatWindowRef.current.sendMessage({ content });
+        await this.chatWindowRef.current.sendMessage({ content, messages });
 
         // Create a user message for consistency with the return type
         const userMessage: UserMessage = {
@@ -273,11 +279,50 @@ export class ChatService {
   }
 
   /**
+   * Extract data source ID from page context
+   * Looks for page contexts with appId and dataset.dataSource.id structure
+   */
+  private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
+    // Find page context by checking for 'page' category and appId in value
+    const pageContext = allContexts.find((ctx) => {
+      // Look for contexts in 'page' category instead of filtering by ID existence
+      if (!ctx.categories?.includes('page')) return false;
+
+      try {
+        const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
+        return value?.appId; // Page contexts have appId
+      } catch {
+        return false;
+      }
+    });
+
+    if (!pageContext) return undefined;
+
+    const contextValue =
+      typeof pageContext.value === 'string' ? JSON.parse(pageContext.value) : pageContext.value;
+
+    // TODO: Consider adding more robust nested field search for dataSource.id
+    // if the standard dataset.dataSource.id pattern is not found
+    return contextValue?.dataset?.dataSource?.id;
+  }
+
+  /**
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
   private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
     try {
+      // Try to get data source from page context first
+      const contextStore = (window as any).assistantContextStore;
+      const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+      const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
+      if (pageDataSourceId) {
+        this.cachedDataSourceId = pageDataSourceId;
+        return pageDataSourceId;
+      }
+
+      // Fallback to existing workspace-aware logic
       if (!this.uiSettings) {
         // eslint-disable-next-line no-console
         console.warn('UI Settings not available, using default data source');
@@ -302,12 +347,21 @@ export class ChatService {
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
 
+      this.cachedDataSourceId = dataSourceId || undefined;
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Failed to determine workspace-aware data source, proceeding without:', error);
+      console.warn('Failed to determine data source, proceeding without:', error);
       return undefined; // Graceful fallback - undefined means local cluster
     }
+  }
+
+  /**
+   * Get the current cached data source ID
+   * Returns the datasourceId that was last retrieved
+   */
+  public async getCurrentDataSourceId(): Promise<string | undefined> {
+    return this.cachedDataSourceId || (await this.getWorkspaceAwareDataSourceId());
   }
 
   public async sendMessage(
@@ -320,11 +374,31 @@ export class ChatService {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
-    const userMessage: UserMessage = {
-      id: this.generateMessageId(),
-      role: 'user',
-      content: content.trim(),
-    };
+
+    // Check if the last message in the array is a user message with array content
+    // If so, append the text to the existing content array (for multimodal messages)
+    let userMessage: UserMessage;
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+    const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
+
+    if (hasArrayContent && lastMessage) {
+      // Remove the last message from the array since we'll merge it with the new message
+      messages = messages.slice(0, -1);
+
+      // Append text to the existing content array (preserves order from caller)
+      userMessage = {
+        ...lastMessage,
+        id: this.generateMessageId(),
+        content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
+      };
+    } else {
+      // No array content, create a simple text message
+      userMessage = {
+        id: this.generateMessageId(),
+        role: 'user',
+        content: content.trim(),
+      };
+    }
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getWorkspaceAwareDataSourceId();
@@ -483,6 +557,34 @@ export class ChatService {
     }
   }
 
+  /**
+   * Remove trailing system error messages from restored chat sessions.
+   * This prevents stale "network error" messages from interrupted connections (page refresh)
+   * from appearing when the user returns to the chat.
+   */
+  private removeTrailingErrorMessages(messages: any[]): any[] {
+    if (!messages.length) {
+      return messages;
+    }
+
+    // Work backwards from the end, removing trailing system error messages
+    let endIndex = messages.length;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+
+      // Check if this is the specific network error from page refresh
+      if (message.role === 'system' && message.content === 'Error: network error') {
+        endIndex = i; // Mark for removal
+      } else {
+        // Stop when we hit a non-error message
+        break;
+      }
+    }
+
+    // Return array without trailing error messages
+    return messages.slice(0, endIndex);
+  }
+
   public saveCurrentChatStatePublic(): void {
     this.saveCurrentChatState();
   }
@@ -502,9 +604,11 @@ export class ChatService {
       return;
     }
 
-    // Get all contexts with IDs (dynamic contexts) and remove them
+    // Get all contexts with IDs that are NOT page contexts (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
-    const dynamicContexts = allContexts.filter((ctx: any) => ctx.id);
+    const dynamicContexts = allContexts.filter(
+      (ctx: any) => ctx.id && !ctx.categories?.includes('page')
+    );
 
     dynamicContexts.forEach((ctx: any) => {
       contextStore.removeContextById(ctx.id);

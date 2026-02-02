@@ -1,2 +1,0 @@
-fix:
-- Filter OSD field types for correlation schema mappings ([#10784](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10784))

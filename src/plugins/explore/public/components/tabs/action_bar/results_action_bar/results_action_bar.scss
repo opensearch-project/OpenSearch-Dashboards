@@ -1,11 +1,9 @@
 .explore-results-action-bar {
-  border-bottom: $ouiBorderThin;
   flex-grow: 0;
-  padding: $euiSizeXS 0;
 
   &__explore-download-csv-flex-item {
-    margin-left: $euiSizeS;
-    margin-right: $euiSizeS;
+    margin-left: $ouiSizeXXS;
+    margin-right: $ouiSizeXXS;
   }
 
   &__extensions-container {

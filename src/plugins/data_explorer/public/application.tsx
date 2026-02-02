@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../core/public';
@@ -20,7 +20,8 @@ export const renderApp = (
   store: Store
 ) => {
   const { history, element } = params;
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
@@ -33,9 +34,8 @@ export const renderApp = (
           </services.i18n.Context>
         </ReduxProvider>
       </OpenSearchDashboardsContextProvider>
-    </Router>,
-    element
+    </Router>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

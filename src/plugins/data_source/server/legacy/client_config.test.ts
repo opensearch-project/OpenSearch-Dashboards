@@ -195,4 +195,21 @@ describe('parseClientOptions', () => {
       })
     );
   });
+
+  test('sets suggestCompression to true when requestCompression is true', () => {
+    const config = {
+      enabled: true,
+      clientPool: {
+        size: 5,
+      },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(10, 'seconds'),
+        pingTimeout: duration(20, 'seconds'),
+        requestCompression: true,
+      },
+    } as DataSourcePluginConfigType;
+
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    expect(parsedConfig.suggestCompression).toBe(true);
+  });
 });

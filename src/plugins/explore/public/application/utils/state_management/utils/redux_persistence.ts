@@ -23,7 +23,9 @@ import {
 } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import {
+  DEFAULT_COLUMNS_SETTING,
   DEFAULT_TRACE_COLUMNS_SETTING,
+  DEFAULT_LOGS_COLUMNS_SETTING,
   ExploreFlavor,
   EXPLORE_DEFAULT_LANGUAGE,
 } from '../../../../../common';
@@ -77,8 +79,10 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
         id: queryState.dataset.id,
         title: queryState.dataset.title,
         type: queryState.dataset.type,
+        language: queryState.dataset.language,
         timeFieldName: queryState.dataset.timeFieldName,
         dataSource: queryState.dataset.dataSource,
+        signalType: queryState.dataset.signalType,
       };
     }
 
@@ -86,10 +90,17 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const resolvedQueryState = await getPreloadedQueryState(services, urlDataset);
 
     // Use the resolved dataset but preserve other query state from URL if available
+    // When the dataset changes (due to signal type filtering), also update the language
+    const datasetChanged =
+      queryState?.dataset?.id !== resolvedQueryState.dataset?.id ||
+      queryState?.dataset?.type !== resolvedQueryState.dataset?.type;
+
     const finalQueryState: QueryState = queryState
       ? {
           ...queryState,
           dataset: resolvedQueryState.dataset,
+          language: datasetChanged ? resolvedQueryState.language : queryState.language,
+          query: datasetChanged ? '' : queryState.query,
         }
       : resolvedQueryState;
     services.data.query.queryString.setQuery(finalQueryState);
@@ -102,7 +113,23 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
-    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
+
+    // Handle legacy state with special logic for columns
+    let finalLegacyState = appState?.legacy;
+    if (!finalLegacyState || !finalLegacyState.columns || finalLegacyState.columns.length === 0) {
+      // If no legacy state or columns are empty/missing, load defaults
+      finalLegacyState = await getPreloadedLegacyState(services);
+    } else {
+      const correctedColumns = await getColumnsForDataset(services, finalLegacyState.columns);
+
+      if (correctedColumns) {
+        finalLegacyState = {
+          ...finalLegacyState,
+          columns: correctedColumns,
+        };
+      }
+    }
+
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
@@ -148,6 +175,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
  */
 const fetchFirstAvailableDataset = async (
   services: ExploreServices,
+  flavor: ExploreFlavor | null,
   requiredSignalType?: string
 ): Promise<Dataset | undefined> => {
   try {
@@ -156,7 +184,9 @@ const fetchFirstAvailableDataset = async (
       return undefined;
     }
 
-    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType('INDEX_PATTERN');
+    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType(
+      flavor === ExploreFlavor.Metrics ? 'PROMETHEUS' : 'INDEX_PATTERN'
+    );
     if (!typeConfig) {
       return undefined;
     }
@@ -184,15 +214,21 @@ const fetchFirstAvailableDataset = async (
             dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
           );
 
+          // Get effective signal type from dataView or dataset (for Prometheus which sets signalType directly)
+          const effectiveSignalType = dataView?.signalType || dataset.signalType;
+
           // If requiredSignalType is specified, dataset must match it
           if (requiredSignalType) {
-            if (dataView?.signalType === requiredSignalType) {
+            if (effectiveSignalType === requiredSignalType) {
               return dataset;
             }
           } else {
-            // If requiredSignalType is not specified (i.e., not Traces),
-            // dataset should not have signalType equal to Traces
-            if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
+            // If requiredSignalType is not specified (i.e., Logs flavor),
+            // dataset should not have signalType equal to Traces or Metrics
+            if (
+              effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+            ) {
               return dataset;
             }
           }
@@ -220,11 +256,18 @@ const resolveDataset = async (
   const currentAppId = await getCurrentAppId(services);
   const flavorFromAppId = getFlavorFromAppId(currentAppId);
   const requiredSignalType =
-    flavorFromAppId === ExploreFlavor.Traces ? CORE_SIGNAL_TYPES.TRACES : undefined;
+    flavorFromAppId === ExploreFlavor.Traces
+      ? CORE_SIGNAL_TYPES.TRACES
+      : flavorFromAppId === ExploreFlavor.Metrics
+      ? CORE_SIGNAL_TYPES.METRICS
+      : undefined;
 
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
+  const defaultQuery =
+    flavorFromAppId === ExploreFlavor.Metrics
+      ? undefined
+      : services.data?.query?.queryString?.getDefaultQuery();
   const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
   // If we have an existing dataset, validate SignalType compatibility
@@ -235,15 +278,21 @@ const resolveDataset = async (
         existingDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
       );
 
+      // Get effective signal type from dataView or preferredDataset (for Prometheus which sets signalType directly)
+      const effectiveSignalType = dataView?.signalType || preferredDataset?.signalType;
+
       // If requiredSignalType is specified, dataset must match it
       if (requiredSignalType) {
-        if (dataView?.signalType === requiredSignalType) {
+        if (effectiveSignalType === requiredSignalType) {
           return existingDataset;
         }
       } else {
-        // If requiredSignalType is not specified (i.e., not Traces),
-        // dataset should not have signalType equal to Traces
-        if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
+        // If requiredSignalType is not specified (i.e., Logs flavor),
+        // dataset should not have signalType equal to Traces or Metrics
+        if (
+          effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+          effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+        ) {
           return existingDataset;
         }
       }
@@ -254,7 +303,7 @@ const resolveDataset = async (
   }
 
   // Fetch first available dataset with required SignalType
-  return await fetchFirstAvailableDataset(services, requiredSignalType);
+  return await fetchFirstAvailableDataset(services, flavorFromAppId, requiredSignalType);
 };
 
 /**
@@ -278,8 +327,10 @@ const getPreloadedQueryState = async (
         id: selectedDataset.id,
         title: selectedDataset.title,
         type: selectedDataset.type,
+        language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
+        signalType: selectedDataset.signalType,
       };
     }
   }
@@ -287,7 +338,7 @@ const getPreloadedQueryState = async (
   if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: EXPLORE_DEFAULT_LANGUAGE,
+      language: minimalDataset.language || EXPLORE_DEFAULT_LANGUAGE,
     });
 
     // override the initial query to be an empty string
@@ -385,7 +436,9 @@ export const getPreloadedLegacyState = async (services: ExploreServices): Promis
   const defaultColumns =
     flavorFromAppId === ExploreFlavor.Traces
       ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
-      : services.uiSettings?.get('defaultColumns');
+      : flavorFromAppId === ExploreFlavor.Logs
+      ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
+      : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
 
   return {
     // Fields that exist in data_explorer + discover
@@ -409,4 +462,30 @@ const getPreloadedMetaState = (services: ExploreServices) => {
   return {
     isInitialized: false,
   };
+};
+
+const getColumnsForDataset = async (
+  services: ExploreServices,
+  currentColumns?: string[]
+): Promise<string[] | null> => {
+  if (currentColumns && currentColumns.length > 0) {
+    return null;
+  }
+
+  try {
+    const currentAppId = await getCurrentAppId(services);
+    const currentFlavor = getFlavorFromAppId(currentAppId);
+    const isTracesFlavor = currentFlavor === ExploreFlavor.Traces;
+
+    const tracesDefaultColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING) || [
+      'spanId',
+    ];
+    const logsDefaultColumns = services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING) || [
+      '_source',
+    ];
+
+    return isTracesFlavor ? tracesDefaultColumns : logsDefaultColumns;
+  } catch (error) {
+    return null;
+  }
 };

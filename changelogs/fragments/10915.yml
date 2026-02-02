@@ -1,2 +1,0 @@
-fix:
-- @osd-std package url parse method does not throw page crashing errors ([#10915](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10915))

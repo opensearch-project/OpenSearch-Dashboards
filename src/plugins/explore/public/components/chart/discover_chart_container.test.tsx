@@ -74,14 +74,16 @@ jest.mock('./explore_traces_chart', () => ({
   ),
 }));
 
-jest.mock('../panel/canvas_panel', () => ({
-  CanvasPanel: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="canvas-panel">{children}</div>
-  ),
-}));
-
 jest.mock('../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
+}));
+
+jest.mock('../../application/utils/state_management/actions/trace_query_actions', () => ({
+  prepareTraceCacheKeys: jest.fn(() => ({
+    requestCacheKey: 'trace-requests:test-query',
+    errorCacheKey: 'trace-errors:test-query',
+    latencyCacheKey: 'trace-latency:test-query',
+  })),
 }));
 
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
@@ -92,12 +94,31 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   })),
   defaultPrepareQueryString: jest.fn(() => 'test-cache-key'),
   prepareHistogramCacheKey: jest.fn(() => 'histogram:test-cache-key'),
+  defaultResultsProcessor: jest.fn(() => ({
+    hits: { hits: [], total: 10, max_score: 1.0 },
+    fieldCounts: {},
+  })),
+  executeRequestCountQuery: jest.fn(() => ({
+    type: 'query/executeRequestCountQuery/pending',
+    payload: undefined,
+    meta: { requestId: 'test', arg: {} },
+  })),
+  executeErrorCountQuery: jest.fn(() => ({
+    type: 'query/executeErrorCountQuery/pending',
+    payload: undefined,
+    meta: { requestId: 'test', arg: {} },
+  })),
+  executeLatencyQuery: jest.fn(() => ({
+    type: 'query/executeLatencyQuery/pending',
+    payload: undefined,
+    meta: { requestId: 'test', arg: {} },
+  })),
 }));
 
 jest.mock(
-  '../../application/utils/state_management/actions/processors/trace_chart_data_processor',
+  '../../application/utils/state_management/actions/processors/trace_aggregation_processor',
   () => ({
-    tracesHistogramResultsProcessor: jest.fn(() => ({
+    processTraceAggregationResults: jest.fn(() => ({
       requestChartData: { values: [], xAxisOrderedValues: [] },
       errorChartData: { values: [], xAxisOrderedValues: [] },
       latencyChartData: { values: [], xAxisOrderedValues: [] },
@@ -106,6 +127,18 @@ jest.mock(
     })),
   })
 );
+
+jest.mock('../../application/utils/state_management/actions/utils', () => ({
+  createHistogramConfigWithInterval: jest.fn(() => ({
+    histogramConfigs: undefined,
+    aggs: {},
+    effectiveInterval: '5m',
+    finalInterval: '5m',
+    fromDate: '2023-01-01 00:00:00.000',
+    toDate: '2023-01-01 01:00:00.000',
+    timeFieldName: 'endTime',
+  })),
+}));
 
 describe('DiscoverChartContainer', () => {
   const createMockStore = (hasResults = true, breakdownField?: string, queryStatusMap = {}) => {
@@ -156,6 +189,7 @@ describe('DiscoverChartContainer', () => {
           lastExecutedTranslatedQuery: '',
           queryExecutionButtonStatus: 'REFRESH',
           isQueryEditorDirty: false,
+          hasUserInitiatedQuery: false,
         },
         results: hasResults
           ? {
@@ -168,6 +202,30 @@ describe('DiscoverChartContainer', () => {
                 fieldSchema: [],
               },
               'histogram:test-cache-key': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 10, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'trace-requests:test-query': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 10, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'trace-errors:test-query': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 5, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'trace-latency:test-query': {
                 elapsedMs: 100,
                 took: 10,
                 timed_out: false,
@@ -202,14 +260,12 @@ describe('DiscoverChartContainer', () => {
 
   it('renders logs chart when flavor is logs and data is available', () => {
     renderComponent(true, ExploreFlavor.Logs);
-    expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
     expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     expect(screen.queryByTestId('explore-traces-chart')).not.toBeInTheDocument();
   });
 
   it('renders traces chart when flavor is traces and data is available', () => {
     renderComponent(true, ExploreFlavor.Traces);
-    expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
     expect(screen.getByTestId('explore-traces-chart')).toBeInTheDocument();
     expect(screen.queryByTestId('explore-logs-chart')).not.toBeInTheDocument();
   });
@@ -250,11 +306,11 @@ describe('DiscoverChartContainer', () => {
   });
 
   it('returns null when traces flavor has no request chart data', () => {
-    // Mock tracesHistogramResultsProcessor to return null requestChartData
-    const { tracesHistogramResultsProcessor } = jest.requireMock(
-      '../../application/utils/state_management/actions/processors/trace_chart_data_processor'
+    // Mock processTraceAggregationResults to return null requestChartData
+    const { processTraceAggregationResults } = jest.requireMock(
+      '../../application/utils/state_management/actions/processors/trace_aggregation_processor'
     );
-    tracesHistogramResultsProcessor.mockReturnValueOnce({
+    processTraceAggregationResults.mockReturnValueOnce({
       requestChartData: null,
       errorChartData: { values: [], xAxisOrderedValues: [] },
       latencyChartData: { values: [], xAxisOrderedValues: [] },
@@ -417,6 +473,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:test-cache-key': {
@@ -438,7 +495,6 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
       expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     });
 
@@ -527,6 +583,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:test-cache-key': {
@@ -548,7 +605,7 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
 
       prepareHistogramCacheKey.mockClear();
       prepareHistogramCacheKey.mockImplementation((_query: any, isBreakdown: boolean) => {
@@ -635,6 +692,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:breakdown-cache-key': {
@@ -655,7 +713,7 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     });
 
     it('does not detect breakdown error when breakdown succeeds', () => {
@@ -733,6 +791,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:breakdown-cache-key': {
@@ -754,7 +813,6 @@ describe('DiscoverChartContainer', () => {
         </Provider>
       );
 
-      expect(screen.getByTestId('canvas-panel')).toBeInTheDocument();
       expect(screen.getByTestId('explore-logs-chart')).toBeInTheDocument();
     });
   });

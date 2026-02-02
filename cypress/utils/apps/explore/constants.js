@@ -11,6 +11,7 @@ export const clusterName = 'test_cluster';
 export const clusterConnection = 'http://localhost:9200';
 
 export const S3_CLUSTER = Cypress.env('S3_ENGINE') || {};
+export const PROMETHEUS_CLUSTER = Cypress.env('PROMETHEUS') || {};
 
 export const DS_API_PREFIX = '/api/saved_objects';
 export const DS_API = {
@@ -35,9 +36,9 @@ export const INDEX_PATTERN_WITH_NO_TIME_1 = 'data_logs_small_no_time_1*';
 export const INVALID_INDEX = 'index_that_does_not_exist';
 
 export const TRACE_INDEX_PATTERN = 'otel_v1_apm_span_*';
-export const TRACE_TIME_FIELD = 'endTimeUnixNano';
+export const TRACE_TIME_FIELD = 'endTime';
 export const TRACE_INDEX = 'otel_v1_apm_span_sample_1';
-export const LOG_INDEX_PATTERN = 'logs*';
+export const LOG_INDEX_PATTERN = 'logs_otel*';
 export const LOG_TIME_FIELD = '@timestamp';
 export const LOG_INDEX = 'logs_otel_v1_000001';
 

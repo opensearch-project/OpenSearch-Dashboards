@@ -29,15 +29,23 @@ jest.mock('./utils', () => ({
   buildPPLHistogramQuery: jest.fn((queryString) => queryString),
   processRawResultsForHistogram: jest.fn((_queryString, rawResults) => rawResults),
   createHistogramConfigWithInterval: jest.fn(() => ({
-    toDsl: jest.fn().mockReturnValue({}),
-    aggs: [
-      {},
-      {
-        buckets: {
-          getInterval: jest.fn(() => ({ interval: '1h', scale: 1 })),
+    histogramConfigs: {
+      toDsl: jest.fn().mockReturnValue({}),
+      aggs: [
+        {},
+        {
+          buckets: {
+            getInterval: jest.fn(() => ({ interval: '1h', scale: 1 })),
+          },
         },
-      },
-    ],
+      ],
+    },
+    aggs: {},
+    effectiveInterval: 'auto',
+    finalInterval: '5m',
+    fromDate: 'now-1h',
+    toDate: 'now',
+    timeFieldName: 'endTime',
   })),
 }));
 
@@ -134,6 +142,27 @@ jest.mock('../slices', () => ({
 
 jest.mock('../../../../components/fields_selector/lib/field_calculator', () => ({
   getFieldValueCounts: jest.fn(),
+}));
+
+jest.mock('./trace_aggregation_builder', () => ({
+  buildRequestCountQuery: jest.fn(
+    (baseQuery) => `${baseQuery} | stats count() by span(endTime, 5m)`
+  ),
+  buildErrorCountQuery: jest.fn(
+    (baseQuery) => `${baseQuery} | where status.code = 2 | stats count() by span(endTime, 5m)`
+  ),
+  buildLatencyQuery: jest.fn(
+    (baseQuery) => `${baseQuery} | stats avg(durationInNanos) by span(endTime, 5m)`
+  ),
+  createTraceAggregationConfig: jest.fn((timeField, interval, breakdownField) => ({
+    timeField,
+    interval,
+    breakdownField,
+  })),
+}));
+
+jest.mock('../../../../helpers/get_flavor_from_app_id', () => ({
+  getCurrentFlavor: jest.fn().mockResolvedValue('logs'),
 }));
 
 // Global mocks
@@ -673,9 +702,20 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         elapsedMs: 200,
       } as any;
 
-      const result = histogramResultsProcessor(rawResults, mockDataView, mockData, 'auto');
+      const result = histogramResultsProcessor(
+        rawResults,
+        mockDataView,
+        mockData,
+        'auto',
+        mockServices.uiSettings
+      );
 
-      expect(mockCreateHistogramConfigs).toHaveBeenCalledWith(mockDataView, 'auto', mockData);
+      expect(mockCreateHistogramConfigs).toHaveBeenCalledWith(
+        mockDataView,
+        'auto',
+        mockData,
+        mockServices.uiSettings
+      );
       expect(result.bucketInterval).toEqual({ interval: '1h', scale: 1 });
       expect(result.chartData).toEqual([{ x: 1609459200000, y: 5 }]);
     });
@@ -690,7 +730,13 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         elapsedMs: 100,
       } as any;
 
-      const result = histogramResultsProcessor(rawResults, dataViewWithoutTime, mockData, 'auto');
+      const result = histogramResultsProcessor(
+        rawResults,
+        dataViewWithoutTime,
+        mockData,
+        'auto',
+        mockServices.uiSettings
+      );
 
       expect(mockCreateHistogramConfigs).not.toHaveBeenCalled();
       expect(result.chartData).toBeUndefined();
@@ -706,7 +752,13 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         elapsedMs: 100,
       } as any;
 
-      const result = histogramResultsProcessor(rawResults, mockDataView, mockData, 'auto');
+      const result = histogramResultsProcessor(
+        rawResults,
+        mockDataView,
+        mockData,
+        'auto',
+        mockServices.uiSettings
+      );
 
       expect(result.chartData).toBeUndefined();
       expect(result.bucketInterval).toBeUndefined();
@@ -721,8 +773,19 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           elapsedMs: 50,
         } as any;
 
-        histogramResultsProcessor(rawResults, mockDataView, mockData, interval);
-        expect(mockCreateHistogramConfigs).toHaveBeenCalledWith(mockDataView, interval, mockData);
+        histogramResultsProcessor(
+          rawResults,
+          mockDataView,
+          mockData,
+          interval,
+          mockServices.uiSettings
+        );
+        expect(mockCreateHistogramConfigs).toHaveBeenCalledWith(
+          mockDataView,
+          interval,
+          mockData,
+          mockServices.uiSettings
+        );
       });
     });
 
@@ -771,7 +834,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         rawResultsWithBreakdown,
         mockDataView,
         mockData,
-        'auto'
+        'auto',
+        mockServices.uiSettings
       );
 
       expect(result.bucketInterval).toEqual({ interval: '1h', scale: 1 });
@@ -800,7 +864,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         rawResultsWithoutBreakdown,
         mockDataView,
         mockData,
-        'auto'
+        'auto',
+        mockServices.uiSettings
       );
 
       expect(result.chartData).toEqual([{ x: 1609459200000, y: 5 }]);
@@ -837,7 +902,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         rawResultsWithEmptyBreakdown,
         mockDataView,
         mockData,
-        'auto'
+        'auto',
+        mockServices.uiSettings
       );
 
       expect(result.chartData).toEqual(mockChartData);
@@ -864,7 +930,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         rawResultsWithBreakdown,
         mockDataView,
         mockData,
-        'auto'
+        'auto',
+        mockServices.uiSettings
       );
 
       expect(result.chartData).toBeUndefined();
@@ -913,7 +980,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         rawResultsWithMultiBreakdown,
         mockDataView,
         mockData,
-        'auto'
+        'auto',
+        mockServices.uiSettings
       );
 
       expect(result.chartData).toEqual(mockChartData);
@@ -1116,6 +1184,40 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       await thunk(mockDispatch, mockGetState, undefined);
 
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('explore_visualization_tab');
+    });
+
+    it('should skip histogram query when language is PROMQL', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'up{job="prometheus"}', language: 'PROMQL', dataset: null },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      mockDefaultPreparePplQuery.mockReturnValue({
+        query: 'up{job="prometheus"}',
+        language: 'PROMQL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
+
+      const histogramActions = mockDispatch.mock.calls.filter(
+        (call) =>
+          call[0]?.type === 'query/executeHistogramQuery/pending' ||
+          call[0]?.type?.includes('executeHistogramQuery')
+      );
+      expect(histogramActions).toHaveLength(0);
     });
 
     it('should handle missing tab registry gracefully', async () => {

@@ -22,6 +22,8 @@ import { ChatHeaderButton, ChatLayoutMode } from './components/chat_header_butto
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
+import { CommandRegistryService } from './services/command_registry_service';
+import { ConfirmationService } from './services/confirmation_service';
 
 const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
   const state = test as ChatWindowState | null;
@@ -41,6 +43,8 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
   private suggestedActionsService = new SuggestedActionsService();
+  private commandRegistryService = new CommandRegistryService();
+  private confirmationService = new ConfirmationService();
   private paddingSizeSubscription?: Subscription;
   private unsubscribeWindowStateChange?: () => void;
   private coreSetup?: CoreSetup;
@@ -84,9 +88,17 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   public setup(core: CoreSetup): ChatPluginSetup {
     // Store core setup reference for later use
     this.coreSetup = core;
+    const suggestedActionsSetup = this.suggestedActionsService.setup();
+    const commandRegistrySetup = this.commandRegistryService.setup();
+
+    // Register suggested actions service with core chat service
+    if (this.coreSetup?.chat?.setSuggestedActionsService) {
+      this.coreSetup.chat.setSuggestedActionsService(suggestedActionsSetup);
+    }
 
     return {
-      suggestedActionsService: this.suggestedActionsService.setup(),
+      suggestedActionsService: suggestedActionsSetup,
+      commandRegistry: commandRegistrySetup,
     };
   }
 
@@ -122,12 +134,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       });
     }
 
-    // Register suggested actions service with core chat service
-    if (this.coreSetup?.chat?.setSuggestedActionsService) {
-      const suggestedActionsServiceStart = this.suggestedActionsService.start();
-      this.coreSetup.chat.setSuggestedActionsService(suggestedActionsServiceStart);
-    }
-
     // Register chat button in header with conditional visibility
     core.chrome.navControls.registerPrimaryHeaderRight({
       order: 1000,
@@ -142,6 +148,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
             contextProvider: deps.contextProvider,
             charts: deps.charts,
             suggestedActionsService: this.suggestedActionsService!,
+            confirmationService: this.confirmationService,
           })
         );
         unmountComponent = mountPoint(element);
@@ -189,5 +196,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.paddingSizeSubscription?.unsubscribe();
     this.unsubscribeWindowStateChange?.();
     this.chatService?.destroy();
+    this.confirmationService.cleanAll();
   }
 }

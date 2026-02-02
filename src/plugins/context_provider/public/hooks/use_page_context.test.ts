@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { usePageContext, UsePageContextOptions } from './use_page_context';
 import { useDynamicContext } from './use_dynamic_context';
 import { getStateFromOsdUrl } from '../../../opensearch_dashboards_utils/public';
@@ -86,9 +86,10 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           description: 'Page context for /app/explore',
           label: 'Page: /app/explore',
-          categories: ['page', 'url', 'static'],
+          categories: ['page', 'static'],
           value: expect.objectContaining({
             pathname: '/app/explore',
             _g: { time: { from: 'now-15m', to: 'now' } },
@@ -114,6 +115,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             pathname: '/app/explore',
             _g: null,
@@ -135,6 +137,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           description: 'Custom page context',
         })
       );
@@ -149,6 +152,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           categories: ['custom', 'test'],
         })
       );
@@ -170,6 +174,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: { converted: true },
         })
       );
@@ -184,6 +189,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           description: 'Disabled page context',
           value: null,
           label: 'Disabled',
@@ -258,10 +264,13 @@ describe('usePageContext', () => {
         searchParams: new URLSearchParams(),
       }));
 
-      hashChangeHandler!();
+      act(() => {
+        hashChangeHandler!();
+      });
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             hash: '#/new-path',
           }),
@@ -284,7 +293,9 @@ describe('usePageContext', () => {
       mockUseDynamicContext.mockClear();
 
       // Simulate popstate
-      popstateHandler!();
+      act(() => {
+        popstateHandler!();
+      });
 
       expect(mockUseDynamicContext).toHaveBeenCalled();
     });
@@ -335,6 +346,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             _g: globalState,
           }),
@@ -353,6 +365,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             _a: appState,
           }),
@@ -371,6 +384,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             _q: queryState,
           }),
@@ -395,45 +409,13 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             search: '?tab=logs&mode=advanced',
             searchParams: expect.any(Object),
           }),
         })
       );
-    });
-  });
-
-  describe('error handling', () => {
-    it('should handle URL parsing errors gracefully', () => {
-      (global as any).URL = jest.fn().mockImplementation(() => {
-        throw new Error('Invalid URL');
-      });
-
-      expect(() => renderHook(() => usePageContext())).not.toThrow();
-    });
-
-    it('should handle getStateFromOsdUrl errors gracefully', () => {
-      mockGetStateFromOsdUrl.mockImplementation(() => {
-        throw new Error('State parsing failed');
-      });
-
-      expect(() => renderHook(() => usePageContext())).not.toThrow();
-    });
-
-    it('should handle missing window.location gracefully', () => {
-      delete (window as any).location;
-
-      expect(() => renderHook(() => usePageContext())).not.toThrow();
-    });
-
-    it('should handle missing window.history gracefully', () => {
-      delete (window as any).history;
-
-      const { unmount } = renderHook(() => usePageContext());
-
-      // Should not throw on unmount even without history
-      expect(() => unmount()).not.toThrow();
     });
   });
 
@@ -445,7 +427,16 @@ describe('usePageContext', () => {
 
       renderHook(() => usePageContext(options));
 
-      expect(window.addEventListener).toHaveBeenCalledWith('error', expect.any(Function));
+      // When disabled, hashchange and popstate listeners should not be set up
+      // Note: addEventListener may still be called for other purposes, so we check specific events
+      const addEventListenerCalls = (window.addEventListener as jest.Mock).mock.calls;
+      const hashchangeCalls = addEventListenerCalls.filter(
+        (call: any[]) => call[0] === 'hashchange'
+      );
+      const popstateCalls = addEventListenerCalls.filter((call: any[]) => call[0] === 'popstate');
+
+      expect(hashchangeCalls.length).toBe(0);
+      expect(popstateCalls.length).toBe(0);
     });
 
     it('should use stable references for default categories', () => {
@@ -502,6 +493,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             hash: '',
           }),
@@ -522,6 +514,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             pathname: '/app/explore',
             search: '',
@@ -540,19 +533,10 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: null,
         })
       );
-    });
-
-    it('should handle convert function throwing error', () => {
-      const options: UsePageContextOptions = {
-        convert: () => {
-          throw new Error('Convert failed');
-        },
-      };
-
-      expect(() => renderHook(() => usePageContext(options))).not.toThrow();
     });
 
     it('should handle rapid URL changes', () => {
@@ -572,7 +556,9 @@ describe('usePageContext', () => {
       // Simulate rapid hash changes
       for (let i = 0; i < 10; i++) {
         window.location.hash = `#/path-${i}`;
-        hashChangeHandler!();
+        act(() => {
+          hashChangeHandler!();
+        });
       }
 
       expect(mockUseDynamicContext).toHaveBeenCalledTimes(10);

@@ -127,6 +127,20 @@ export const convertResult = ({
   }
   searchResponse.hits.hits = hits;
 
+  // Handle instant data for Prometheus queries - transform to hits format
+  if (data.meta?.instantData) {
+    const instantData = data.meta.instantData;
+    const instantHits = instantData.rows.map((row: Record<string, unknown>) => ({
+      _index: data.name,
+      _source: row,
+    }));
+    (searchResponse as any).instantHits = {
+      hits: instantHits,
+      total: instantHits.length,
+    };
+    (searchResponse as any).instantFieldSchema = instantData.schema;
+  }
+
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
     if (!dataWithAggs.aggs) {

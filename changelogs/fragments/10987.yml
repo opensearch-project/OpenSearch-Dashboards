@@ -1,2 +1,0 @@
-fix:
-- Replace lodash.get with safeGet helper to prevent prototype pollution ([#10987](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10987))

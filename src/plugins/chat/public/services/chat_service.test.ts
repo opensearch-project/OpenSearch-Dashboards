@@ -13,6 +13,11 @@ import { ChatServiceStart } from '../../../../core/public';
 // Mock AgUiAgent
 jest.mock('./ag_ui_agent');
 
+// Mock data source management
+jest.mock('../../../data_source_management/public', () => ({
+  getDefaultDataSourceId: jest.fn(),
+}));
+
 describe('ChatService', () => {
   let chatService: ChatService;
   let mockAgent: jest.Mocked<AgUiAgent>;
@@ -345,6 +350,126 @@ describe('ChatService', () => {
         undefined
       ); // dataSourceId is undefined when no uiSettings provided
     });
+
+    it('should merge text with multimodal content when last message has array content', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const imageMessage: Message = {
+        id: 'image-msg-1',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/jpeg',
+            data: 'base64encodeddata',
+          },
+        ],
+      };
+
+      const result = await chatService.sendMessage('Analyze this image', [imageMessage]);
+
+      // Should merge image with text into a single message
+      expect(result.userMessage.content).toEqual([
+        {
+          type: 'binary',
+          mimeType: 'image/jpeg',
+          data: 'base64encodeddata',
+        },
+        {
+          type: 'text',
+          text: 'Analyze this image',
+        },
+      ]);
+
+      // Should have a new ID
+      expect(result.userMessage.id).not.toBe('image-msg-1');
+      expect(result.userMessage.id).toMatch(/^msg-\d+-[a-z0-9]{9}$/);
+
+      // Should only send the merged message (not the original image message)
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [result.userMessage],
+        }),
+        undefined
+      );
+    });
+
+    it('should preserve order when merging multimodal content', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const multimodalMessage: Message = {
+        id: 'multi-msg-1',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/png',
+            data: 'firstimage',
+          },
+          {
+            type: 'binary',
+            mimeType: 'image/jpeg',
+            data: 'secondimage',
+          },
+        ],
+      };
+
+      const result = await chatService.sendMessage('What are these?', [multimodalMessage]);
+
+      // Should preserve order: first image, second image, then text
+      expect(result.userMessage.content).toEqual([
+        {
+          type: 'binary',
+          mimeType: 'image/png',
+          data: 'firstimage',
+        },
+        {
+          type: 'binary',
+          mimeType: 'image/jpeg',
+          data: 'secondimage',
+        },
+        {
+          type: 'text',
+          text: 'What are these?',
+        },
+      ]);
+    });
+
+    it('should create simple text message when no array content exists', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const textMessage: Message = {
+        id: 'text-msg-1',
+        role: 'user',
+        content: 'Previous message',
+      };
+
+      const result = await chatService.sendMessage('New message', [textMessage]);
+
+      // Should create a simple text message (not array)
+      expect(result.userMessage.content).toBe('New message');
+      expect(Array.isArray(result.userMessage.content)).toBe(false);
+    });
+
+    it('should not merge when last message is not a user message', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const assistantMessage: Message = {
+        id: 'assistant-msg-1',
+        role: 'assistant',
+        content: 'I am the assistant',
+      };
+
+      const result = await chatService.sendMessage('User message', [assistantMessage]);
+
+      // Should create a simple text message
+      expect(result.userMessage.content).toBe('User message');
+      expect(Array.isArray(result.userMessage.content)).toBe(false);
+    });
   });
 
   describe('sendToolResult', () => {
@@ -477,9 +602,9 @@ describe('ChatService', () => {
       // Mock context store
       mockContextStore = {
         getAllContexts: jest.fn(() => [
-          { id: 'ctx1', description: 'Context 1', value: 'data1' },
-          { id: 'ctx2', description: 'Context 2', value: 'data2' },
-          { description: 'Page Context', value: 'page-data' }, // No ID = page context
+          { id: 'ctx1', categories: ['dynamic'], description: 'Context 1', value: 'data1' },
+          { id: 'ctx2', categories: ['dynamic'], description: 'Context 2', value: 'data2' },
+          { categories: ['page', 'static'], description: 'Page Context', value: 'page-data' }, // Page context with categories
         ]),
         removeContextById: jest.fn(),
       };
@@ -532,10 +657,11 @@ describe('ChatService', () => {
       // Should get all contexts
       expect(mockContextStore.getAllContexts).toHaveBeenCalled();
 
-      // Should remove only contexts with IDs (dynamic contexts)
+      // Should remove only contexts with IDs that are NOT page contexts (dynamic contexts)
       expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx1');
       expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx2');
       expect(mockContextStore.removeContextById).toHaveBeenCalledTimes(2);
+      // Page context should not be removed as it has 'page' category
     });
 
     it('should handle missing context store gracefully', () => {
@@ -1076,7 +1202,7 @@ describe('ChatService', () => {
 
       const result = await chatService.sendMessageWithWindow('test message', []);
 
-      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test message' });
+      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test message', messages: [] });
       expect(result.userMessage.content).toBe('test message');
       expect(result.observable).toBeDefined();
     });
@@ -1153,6 +1279,348 @@ describe('ChatService', () => {
       });
 
       expect(completed).toBe(true);
+    });
+  });
+
+  describe('extractDataSourceIdFromPageContext', () => {
+    it('should extract data source ID from valid page context', () => {
+      const contexts = [
+        {
+          // Context without page category - should be skipped
+          id: 'some-id',
+          categories: ['dynamic'],
+          description: 'Some other context',
+          value: { appId: 'other-app', dataset: { dataSource: { id: 'wrong-id' } } },
+        },
+        {
+          // Valid page context with page category
+          categories: ['page', 'static'],
+          description: 'Explore application page context',
+          value: {
+            appId: 'explore',
+            dataset: { dataSource: { id: 'correct-data-source-id' } },
+          },
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBe('correct-data-source-id');
+    });
+
+    it('should handle page context with stringified value', () => {
+      const contexts = [
+        {
+          categories: ['page', 'static'],
+          description: 'Investigation page context',
+          value: JSON.stringify({
+            appId: 'investigation-notebooks',
+            dataset: { dataSource: { id: 'investigation-data-source' } },
+          }),
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBe('investigation-data-source');
+    });
+
+    it('should return undefined when no page context found', () => {
+      const contexts = [
+        {
+          id: 'text-selection',
+          categories: ['dynamic'],
+          description: 'Selected text context',
+          value: 'some text',
+        },
+        {
+          id: 'document-expansion',
+          categories: ['dynamic'],
+          description: 'Expanded document',
+          value: { documentData: 'test' },
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when page context lacks appId', () => {
+      const contexts = [
+        {
+          categories: ['page', 'static'],
+          description: 'Invalid page context',
+          value: { dataset: { dataSource: { id: 'some-id' } } }, // Missing appId
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when page context lacks dataset.dataSource.id', () => {
+      const contexts = [
+        {
+          categories: ['page', 'static'],
+          description: 'Page context without data source',
+          value: { appId: 'explore' }, // Missing dataset
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle malformed JSON gracefully', () => {
+      const contexts = [
+        {
+          categories: ['page', 'static'],
+          description: 'Malformed context',
+          value: 'invalid-json-{',
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should skip contexts without page category and find first valid page context', () => {
+      const contexts = [
+        {
+          id: 'context-with-id',
+          categories: ['dynamic'],
+          description: 'Context without page category',
+          value: { appId: 'explore', dataset: { dataSource: { id: 'wrong-id' } } },
+        },
+        {
+          categories: ['page', 'static'],
+          description: 'First page context',
+          value: { appId: 'explore', dataset: { dataSource: { id: 'first-id' } } },
+        },
+        {
+          categories: ['page', 'static'],
+          description: 'Second page context',
+          value: { appId: 'investigation', dataset: { dataSource: { id: 'second-id' } } },
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBe('first-id'); // Should return first valid page context
+    });
+
+    it('should handle empty contexts array', () => {
+      const result = (chatService as any).extractDataSourceIdFromPageContext([]);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getWorkspaceAwareDataSourceId with page context priority', () => {
+    let mockUiSettings: any;
+    let mockWorkspaces: any;
+
+    beforeEach(() => {
+      mockUiSettings = {
+        get: jest.fn(),
+      };
+      mockWorkspaces = {
+        currentWorkspaceId$: {
+          getValue: jest.fn().mockReturnValue(null),
+        },
+      };
+
+      // Set default return value for getDefaultDataSourceId mock
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('workspace-data-source-id');
+    });
+
+    it('should prioritize page context data source over workspace data source', async () => {
+      // Set up page context with data source
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Explore page context',
+            value: {
+              appId: 'explore',
+              dataset: { dataSource: { id: 'page-data-source-id' } },
+            },
+          },
+        ]),
+      };
+
+      // Create service with uiSettings and workspaces
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBe('page-data-source-id');
+    });
+
+    it('should fallback to workspace data source when no page context', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('workspace-fallback-id');
+
+      // Set up context store without page context
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            id: 'text-selection',
+            categories: ['dynamic'],
+            description: 'Selected text',
+            value: 'some text',
+          },
+        ]),
+      };
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBe('workspace-fallback-id');
+    });
+
+    it('should fallback to workspace data source when page context has invalid data', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('workspace-fallback-id');
+
+      // Set up page context without data source
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Invalid page context',
+            value: { appId: 'explore' }, // Missing dataset
+          },
+        ]),
+      };
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBe('workspace-fallback-id');
+    });
+
+    it('should return undefined when no context store available', async () => {
+      // Remove context store
+      delete (global as any).window.assistantContextStore;
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      // Should still fallback to workspace data source even without context store
+      expect(result).toBe('workspace-data-source-id');
+    });
+
+    it('should handle context store errors gracefully', async () => {
+      // Set up context store that throws error
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockImplementation(() => {
+          throw new Error('Context store error');
+        }),
+      };
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBeUndefined();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('removeTrailingErrorMessages', () => {
+    it('should remove trailing network error messages', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+        { id: 'error-123', role: 'system', content: 'Error: network error' },
+        { id: 'error-456', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+
+      expect(result).toEqual([
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+      ]);
+    });
+
+    it('should preserve other system messages', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'system', content: 'Connection restored' },
+        { id: 'error-123', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+
+      expect(result).toEqual([
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'system', content: 'Connection restored' },
+      ]);
+    });
+
+    it('should preserve other error messages', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
+        { id: 'error-456', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+
+      expect(result).toEqual([
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
+      ]);
+    });
+
+    it('should handle empty message array', () => {
+      const result = (chatService as any).removeTrailingErrorMessages([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle messages with no trailing errors', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+      expect(result).toEqual(messages);
+    });
+
+    it('should handle all messages being network errors', () => {
+      const messages = [
+        { id: 'error-123', role: 'system', content: 'Error: network error' },
+        { id: 'error-456', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+      expect(result).toEqual([]);
     });
   });
 });

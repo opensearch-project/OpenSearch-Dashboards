@@ -11,25 +11,34 @@ import {
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/explore/histogram_interaction';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runHistogramBreakdownTests = () => {
+  // THe tests have some issues in Neo, They are currently skipped Need to revisit them again.
   describe('histogram breakdown', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspace,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      // Create workspace and dataset using our new helper function
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -71,6 +80,7 @@ const runHistogramBreakdownTests = () => {
         cy.getElementByTestId('discoverChart').should('be.visible');
       });
 
+      //
       it(`check breakdown persistence with interval changes for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
 

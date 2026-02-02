@@ -13,6 +13,7 @@ import {
 } from '../../../../core/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
+import { injectSystemPrompt } from '../prompts';
 
 /**
  * Forward request to external AG-UI server
@@ -85,7 +86,8 @@ export function defineRoutes(
   getCapabilitiesResolver?: () =>
     | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
     | undefined,
-  mlCommonsAgentId?: string
+  mlCommonsAgentId?: string,
+  observabilityAgentId?: string
 ) {
   // Proxy route for AG-UI requests
   router.post(
@@ -112,13 +114,16 @@ export function defineRoutes(
       const dataSourceId = request.query?.dataSourceId;
 
       try {
+        // Inject server-side system prompt if present
+        injectSystemPrompt(request.body.messages, request.body.forwardedProps?.queryAssistLanguage);
+
         // Check if ML Commons agentic features are enabled via capabilities
         const capabilitiesResolver = getCapabilitiesResolver?.();
         const capabilities = capabilitiesResolver ? await capabilitiesResolver(request) : undefined;
 
-        // Initialize ML agent routers based on current capabilities (if not already done)
+        // Initialize ML agent routers based on current capabilities or configured agent IDs
         // This ensures routers are registered based on actual runtime capabilities
-        MLAgentRouterRegistry.initialize(capabilities);
+        MLAgentRouterRegistry.initialize(capabilities, observabilityAgentId);
 
         // Get the registered ML agent router (if any)
         const mlRouter = MLAgentRouterFactory.getRouter();
@@ -131,7 +136,8 @@ export function defineRoutes(
             response,
             logger,
             mlCommonsAgentId,
-            dataSourceId
+            dataSourceId,
+            observabilityAgentId
           );
         }
 

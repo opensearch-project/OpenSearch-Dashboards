@@ -307,7 +307,7 @@ export const SharedGlobalConfigKeys = {
     'dashboardAdmin',
     'futureNavigation',
   ] as const,
-  opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
+  opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'requestCompression'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes', 'permission'] as const,
 };

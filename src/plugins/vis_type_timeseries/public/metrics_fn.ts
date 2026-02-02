@@ -38,7 +38,27 @@ import {
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
+// @ts-ignore
+import { metricsRequestHandlerRaw } from './request_handler_raw';
 import { VisRenderValue } from '../../visualizations/public';
+import { getUISettings } from './services';
+import { CLIENT_SIDE_EVALUATION_SETTING } from '../common/constants';
+
+/**
+ * Request handler wrapper that selects between client-side and server-side
+ * math evaluation based on the UI setting.
+ */
+// @ts-ignore
+const metricsRequestHandlerWrapper = async (params) => {
+  const config = getUISettings();
+  const useClientSideEval = config.get(CLIENT_SIDE_EVALUATION_SETTING, true);
+
+  if (useClientSideEval) {
+    return metricsRequestHandlerRaw(params);
+  } else {
+    return metricsRequestHandler(params);
+  }
+};
 
 type Input = OpenSearchDashboardsContext | null;
 type Output = Promise<Render<RenderValue>>;
@@ -94,7 +114,7 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
     const { PersistedState } = await import('../../visualizations/public');
     const uiState = new PersistedState(uiStateParams);
 
-    const response = await metricsRequestHandler({
+    const response = await metricsRequestHandlerWrapper({
       timeRange: get(input, 'timeRange', null),
       query: get(input, 'query', null),
       filters: get(input, 'filters', null),

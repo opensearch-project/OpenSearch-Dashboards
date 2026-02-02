@@ -1,0 +1,307 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric_utils assembleForMetric should configure spec correctly for metric visualization 1`] = `
+Object {
+  "grid": Object {
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
+    "top": "50%",
+  },
+  "legend": Object {
+    "show": false,
+  },
+  "tooltip": Object {
+    "show": false,
+  },
+  "xAxis": Object {
+    "show": false,
+    "silent": true,
+  },
+  "yAxis": Object {
+    "show": false,
+    "silent": true,
+  },
+}
+`;
+
+exports[`metric_utils assembleForMetric should preserve existing spec properties while hiding axes 1`] = `
+Object {
+  "grid": Object {
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
+    "top": "50%",
+  },
+  "legend": Object {
+    "show": false,
+  },
+  "tooltip": Object {
+    "show": false,
+  },
+  "xAxis": Object {
+    "data": Array [
+      "A",
+      "B",
+      "C",
+    ],
+    "show": false,
+    "silent": true,
+    "type": "category",
+  },
+  "yAxis": Object {
+    "max": 100,
+    "min": 0,
+    "show": false,
+    "silent": true,
+    "type": "value",
+  },
+}
+`;
+
+exports[`metric_utils createMetricChartSeries renderItem function tests should snapshot renderItem output for basic metric 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 15,
+        "fontWeight": "normal",
+        "text": "Test Title",
+        "textAlign": "center",
+        "x": 0,
+        "y": 0,
+      },
+      "type": "text",
+    },
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 50,
+        "fontWeight": "bold",
+        "text": "250 ",
+        "textAlign": "center",
+        "x": 0,
+        "y": 20,
+      },
+      "type": "text",
+    },
+    Object {
+      "style": Object {
+        "fill": "#00BD6B",
+        "fontSize": 20,
+        "text": "+150.00%",
+        "textAlign": "center",
+        "x": 0,
+        "y": 75,
+      },
+      "type": "text",
+    },
+  ],
+  "type": "group",
+  "x": 150,
+  "y": 20,
+}
+`;
+
+exports[`metric_utils createMetricChartSeries renderItem function tests should snapshot renderItem output with custom font sizes 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 24,
+        "fontWeight": "normal",
+        "text": "Custom Fonts",
+        "textAlign": "center",
+        "x": 0,
+        "y": 0,
+      },
+      "type": "text",
+    },
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 80,
+        "fontWeight": "bold",
+        "text": "250 ",
+        "textAlign": "center",
+        "x": 0,
+        "y": 29,
+      },
+      "type": "text",
+    },
+    Object {
+      "style": Object {
+        "fill": "#00BD6B",
+        "fontSize": 16,
+        "text": "+150.00%",
+        "textAlign": "center",
+        "x": 0,
+        "y": 114,
+      },
+      "type": "text",
+    },
+  ],
+  "type": "group",
+  "x": 150,
+  "y": 20,
+}
+`;
+
+exports[`metric_utils createMetricChartSeries renderItem function tests should snapshot renderItem output without title or percentage 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 15,
+        "fontWeight": "normal",
+        "text": "",
+        "textAlign": "center",
+        "x": 0,
+        "y": 0,
+      },
+      "type": "text",
+    },
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 50,
+        "fontWeight": "bold",
+        "text": "250 ",
+        "textAlign": "center",
+        "x": 0,
+        "y": 20,
+      },
+      "type": "text",
+    },
+    Object {
+      "style": Object {
+        "fill": "#313131",
+        "fontSize": 20,
+        "text": "",
+        "textAlign": "center",
+        "x": 0,
+        "y": 75,
+      },
+      "type": "text",
+    },
+  ],
+  "type": "group",
+  "x": 150,
+  "y": 20,
+}
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create basic metric series structure 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with custom font sizes 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with inverted percentage colors 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with percentage display 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with sparkline when date field is provided 1`] = `
+Array [
+  Object {
+    "areaStyle": Object {
+      "opacity": 0.5,
+    },
+    "encode": Object {
+      "x": "date_field",
+      "y": "value_field",
+    },
+    "name": "Test Metric",
+    "renderItem": undefined,
+    "symbol": "none",
+    "type": "line",
+    "z": 1,
+  },
+  Object {
+    "encode": Object {
+      "x": "date_field",
+    },
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with threshold colors enabled 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with unit formatting 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric without title 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create multiple metric series 1`] = `
+Array [
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+  Object {
+    "renderItem": "function",
+    "type": "custom",
+    "z": 10,
+  },
+]
+`;

@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { ScopedHistory, CoreStart, MountPoint } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
@@ -71,15 +71,15 @@ export const renderApp = async (
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={startServices}>
       <HomeApp directories={directories} solutions={solutions} />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
   };
 };
@@ -91,15 +91,15 @@ export const renderImportSampleDataApp = async (
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
   }
 ) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={startServices}>
       <ImportSampleDataApp />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 
@@ -109,17 +109,17 @@ export const renderSearchUseCaseOverviewApp = async (
   contentManagementStart: ContentManagementPluginStart,
   navigation: NavigationPublicPluginStart
 ) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
       <SearchUseCaseOverviewApp
         contentManagement={contentManagementStart}
         navigation={navigation}
       />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

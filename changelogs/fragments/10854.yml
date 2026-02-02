@@ -1,7 +1,0 @@
-refactor:
-- Refactor explore embeddable to use the new discover data table component ([#10854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10854))
-
-fix:
-- Align the label format of vis style panel in different places ([#10854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10854))
-- Optimize vis performance when there were too many legends ([#10854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10854))
-- Prevent incorrect point positioning in dual-axis chart hover states ([#10854](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10854))

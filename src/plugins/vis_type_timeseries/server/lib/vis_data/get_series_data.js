@@ -94,5 +94,6 @@ export async function getSeriesData(req, panel) {
         ...handleErrorResponse(panel)(err),
       };
     }
+    throw err;
   }
 }

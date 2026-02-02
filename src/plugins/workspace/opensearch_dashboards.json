@@ -3,11 +3,19 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "savedObjects",
-    "opensearchDashboardsReact",
-    "navigation"
+  "requiredPlugins": ["savedObjects", "opensearchDashboardsReact", "navigation", "data"],
+  "optionalPlugins": [
+    "savedObjectsManagement",
+    "management",
+    "dataSourceManagement",
+    "contentManagement",
+    "dataSource"
   ],
-  "optionalPlugins": ["savedObjectsManagement","management","dataSourceManagement","contentManagement", "dataSource"],
-  "requiredBundles": ["opensearchDashboardsReact","dataSource", "dataSourceManagement","contentManagement"]
+  "requiredBundles": [
+    "opensearchDashboardsReact",
+    "dataSource",
+    "dataSourceManagement",
+    "contentManagement",
+    "explore"
+  ]
 }

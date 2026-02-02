@@ -81,7 +81,7 @@ export const BarExclusiveVisOptions = ({
 
   return (
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
-      {!shouldDisableUseThresholdColor && (
+      {/* {!shouldDisableUseThresholdColor && (
         <EuiFormRow>
           <EuiSwitch
             compressed
@@ -93,7 +93,7 @@ export const BarExclusiveVisOptions = ({
             onChange={(e) => onUseThresholdColorChange(e.target.checked)}
           />
         </EuiFormRow>
-      )}
+      )} */}
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
@@ -110,6 +110,18 @@ export const BarExclusiveVisOptions = ({
           buttonSize="compressed"
           isFullWidth
           data-test-subj="barSizeModeButtonGroup"
+        />
+      </EuiFormRow>
+
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.bar.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
+          })}
+          data-test-subj="useThresholdColorButton"
+          checked={useThresholdColor ?? false}
+          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
         />
       </EuiFormRow>
 

@@ -8,16 +8,20 @@ import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold, VisFieldType } from '../types';
 import { calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
-import { getSchemaByAxis } from '../utils/utils';
+import { getSchemaByAxis, getChartRender } from '../utils/utils';
 import {
   getBarOrientation,
   thresholdsToGradient,
   symbolOpposite,
-  processThresholds,
   generateParams,
+  generateThresholds,
+  generateValueThresholds,
+  createBarGaugeSeries,
+  assembleBarGaugeSpec,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { mergeThresholdsWithBase } from '../style_panel/threshold/threshold_utils';
+import { pipe, createBaseConfig } from '../utils/echarts_spec';
+import { aggregate, transform } from '../utils/data_transformation';
 
 export const createBarGaugeSpec = (
   transformedData: Array<Record<string, any>>,
@@ -27,6 +31,43 @@ export const createBarGaugeSpec = (
   styleOptions: BarGaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const { xAxis, yAxis } = getBarOrientation(styleOptions, axisColumnMappings);
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for bar gauge chart');
+    }
+
+    let categoryField = '';
+    let valueField = '';
+
+    if (xAxis.schema === VisFieldType.Categorical) {
+      categoryField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Categorical) {
+      categoryField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          calculateType: styleOptions.valueCalculation,
+        })
+      ), // Bar gauge uses individual series with custom itemStyle per bar, can't use 2d array format
+      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
+      createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
+      assembleBarGaugeSpec
+    )({
+      data: transformedData,
+      styles: styleOptions,
+      axisConfig: {},
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getBarOrientation(
     styleOptions,
     axisColumnMappings
@@ -51,6 +92,7 @@ export const createBarGaugeSpec = (
   let maxNumber: number = -Infinity;
   let minNumber: number = Infinity;
   let maxTextLength: number = 0;
+  const valueStops: number[] = [];
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
@@ -75,6 +117,7 @@ export const createBarGaugeSpec = (
         [numericField]: isValidNumber ? calculate : null,
         displayValue,
       });
+      valueStops.push(...(isValidNumber ? [calculate] : []));
     }
   }
 
@@ -98,36 +141,19 @@ export const createBarGaugeSpec = (
         ]
       : styleOptions?.thresholdOptions?.thresholds;
 
-  const { textColor, mergedThresholds } = mergeThresholdsWithBase(
+  const mergedThresholds = generateThresholds(
     minBase,
     maxBase,
-    styleOptions?.thresholdOptions?.baseColor,
-    styleOptions?.thresholdOptions?.thresholds
+    styleOptions?.thresholdOptions?.thresholds ?? [],
+    styleOptions?.thresholdOptions?.baseColor
   );
 
-  // transfer value to threshold
-  const valueToThreshold = [];
-
-  for (const record of newRecord) {
-    for (let i = mergedThresholds.length - 1; i >= 0; i--) {
-      if (numericField && record[numericField] >= mergedThresholds[i].value) {
-        valueToThreshold.push({ value: record[numericField], color: mergedThresholds[i].color });
-        break;
-      }
-    }
-  }
-
-  // only use value-based thresholds in gradient mode
-  const finalThreshold = styleOptions?.exclusive.displayMode === 'gradient' ? valueToThreshold : [];
-
-  const completeThreshold = [...mergedThresholds, ...(invalidCase ? [] : finalThreshold)].sort(
-    (a, b) => a.value - b.value
-  );
-
-  // filter out value thresholds that are beyond maxBase, this ensures that the gradient mode on different bar is always aligned.
-  const processedThresholds = processThresholds(
-    completeThreshold.filter((t) => t.value <= maxBase)
-  );
+  const processedThresholds = [
+    ...mergedThresholds,
+    ...(styleOptions?.exclusive.displayMode === 'gradient'
+      ? generateValueThresholds(minBase, maxBase, valueStops, mergedThresholds)
+      : []),
+  ].sort((a, b) => a.value - b.value);
 
   const gradientParams = generateParams(processedThresholds, styleOptions, isXaxisNumerical);
 

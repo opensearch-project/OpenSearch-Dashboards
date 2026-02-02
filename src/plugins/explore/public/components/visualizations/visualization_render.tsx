@@ -3,21 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
-import { convertStringsToMappings } from './visualization_builder_utils';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
-import { toExpression } from './utils/to_expression';
-import { ExpressionRendererEvent, ExpressionsStart } from '../../../../expressions/public';
+import { ExpressionsStart } from '../../../../expressions/public';
 import { VisualizationEmptyState } from './visualization_empty_state';
-import { visualizationRegistry } from './visualization_registry';
 import { RenderChartConfig } from './types';
-import { opensearchFilters, TimeRange } from '../../../../data/public';
+import { TimeRange } from '../../../../data/public';
+import { VegaRender } from './vega_render';
+import { EchartsRender } from './echarts_render';
+import { createVisSpec } from './utils/create_vis_spec';
+import { getChartRender } from './utils/utils';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -33,11 +34,9 @@ const defaultStyleOptions: TableChartStyle = {
   ...defaultTableChartStyles,
   showColumnFilter: false,
   showFooter: false,
-  pageSize: 10,
+  pageSize: 50,
   globalAlignment: 'left',
 };
-
-const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 export const VisualizationRender = ({
   data$,
@@ -76,50 +75,6 @@ export const VisualizationRender = ({
     };
   }, [from, to]);
 
-  const spec = useMemo(() => {
-    if (!visualizationData) {
-      return;
-    }
-
-    if (!visConfig?.type) {
-      return;
-    }
-
-    const rule = visualizationRegistry.findRuleByAxesMapping(visConfig?.axesMapping ?? {}, columns);
-    if (!rule || !rule.toSpec) {
-      return;
-    }
-    const axisColumnMappings = convertStringsToMappings(visConfig?.axesMapping ?? {}, columns);
-    return rule.toSpec(
-      visualizationData.transformedData,
-      visualizationData.numericalColumns,
-      visualizationData.categoricalColumns,
-      visualizationData.dateColumns,
-      visConfig.styles,
-      visConfig.type,
-      axisColumnMappings,
-      timeRange
-    );
-  }, [columns, visConfig, visualizationData, timeRange]);
-
-  const onExpressionEvent = useCallback(
-    async (e: ExpressionRendererEvent) => {
-      if (!onSelectTimeRange) {
-        return;
-      }
-      if (e.name === 'applyFilter') {
-        if (e.data && e.data.filters) {
-          const { timeRange: extractedTimeRange } = opensearchFilters.extractTimeRange(
-            e.data.filters,
-            e.data.timeFieldName
-          );
-          onSelectTimeRange(extractedTimeRange);
-        }
-      }
-    },
-    [onSelectTimeRange]
-  );
-
   if (!visualizationData || columns.length === 0) {
     return null;
   }
@@ -145,7 +100,6 @@ export const VisualizationRender = ({
         rows={rows}
         columns={columns}
         styleOptions={defaultStyleOptions}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
         showStyleSelector={false}
         disableActions={false}
       />
@@ -154,19 +108,50 @@ export const VisualizationRender = ({
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (!ExpressionRenderer) {
-      return null;
-    }
-    const expression = toExpression(searchContext, spec);
     return (
-      <ExpressionRenderer
-        key={JSON.stringify(searchContext) + expression}
-        expression={expression}
+      <ChartRender
+        data={visualizationData}
+        config={visConfig}
+        timeRange={timeRange}
+        ExpressionRenderer={ExpressionRenderer}
         searchContext={searchContext}
-        onEvent={onExpressionEvent}
+        onSelectTimeRange={onSelectTimeRange}
       />
     );
   }
 
   return <VisualizationEmptyState />;
+};
+
+const ChartRender = ({
+  data,
+  config,
+  timeRange,
+  onSelectTimeRange,
+  searchContext,
+  ExpressionRenderer,
+}: {
+  data?: VisData;
+  config?: RenderChartConfig;
+  timeRange: TimeRange;
+  onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  searchContext?: ExecutionContextSearch;
+  ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+}) => {
+  const spec = useMemo(() => {
+    return createVisSpec({ data, config, timeRange });
+  }, [config, data, timeRange]);
+
+  if (getChartRender() === 'echarts') {
+    return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+  }
+
+  return (
+    <VegaRender
+      searchContext={searchContext}
+      ExpressionRenderer={ExpressionRenderer}
+      onSelectTimeRange={onSelectTimeRange}
+      spec={spec}
+    />
+  );
 };

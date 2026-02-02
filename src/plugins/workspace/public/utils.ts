@@ -343,8 +343,11 @@ export const fulfillRelatedConnections = (
   directQueryConnections: DataSourceConnection[]
 ) => {
   return connections.map((connection) => {
+    // Exclude Prometheus connections - they are shown as flat list, not nested under OpenSearch
     const relatedConnections = directQueryConnections.filter(
-      (directQueryConnection) => directQueryConnection.parentId === connection.id
+      (directQueryConnection) =>
+        directQueryConnection.parentId === connection.id &&
+        directQueryConnection.type !== 'Prometheus'
     );
     return {
       ...connection,

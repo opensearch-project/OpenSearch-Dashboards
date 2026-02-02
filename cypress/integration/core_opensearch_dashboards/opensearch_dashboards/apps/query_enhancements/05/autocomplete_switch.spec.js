@@ -4,42 +4,52 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
   INDEX_WITH_TIME_2,
   QueryLanguages,
-  DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
+
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/query_enhancements/shared';
+
 import {
   generateAutocompleteTestConfiguration,
   generateAutocompleteTestConfigurations,
   LanguageConfigs,
   getDatasetName,
 } from '../../../../../../utils/apps/query_enhancements/autocomplete';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+  createDatasetWithEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId1 = getRandomizedDatasetId();
+const datasetId2 = getRandomizedDatasetId();
 
 export const runAutocompleteTests = () => {
   describe('discover autocomplete tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_2,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId1,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
+
+      createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, datasetId2, {
+        title: `${INDEX_WITH_TIME_2}*`,
+        signalType: 'logs',
+        timestamp: 'timestamp',
       });
     });
 

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.exploreQueryPanel {
-  &__editorsWrapper {
-    margin-top: $ouiSizeS;
-  }
+.exploreQueryPanel.exploreQueryPanel {
+  border-top: 0;
+  padding-bottom: $ouiSizeXXS;
 }

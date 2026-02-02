@@ -104,6 +104,7 @@ import { Branding } from '../types';
 import { WorkspacesStart, WorkspacesSetup } from './workspace';
 import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
 import { ChatServiceSetup, ChatServiceStart } from './chat';
+import type { TelemetryServiceSetup, TelemetryServiceStart } from './telemetry';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -295,6 +296,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   keyboardShortcut: KeyboardShortcutSetup;
   /** {@link ChatServiceSetup} */
   chat: ChatServiceSetup;
+  /** {@link TelemetryServiceSetup} */
+  telemetry: TelemetryServiceSetup;
 }
 
 /**
@@ -355,6 +358,8 @@ export interface CoreStart {
   keyboardShortcut?: KeyboardShortcutStart;
   /** {@link ChatServiceStart} */
   chat: ChatServiceStart;
+  /** {@link TelemetryServiceStart} */
+  telemetry: TelemetryServiceStart;
 }
 
 export {
@@ -443,6 +448,17 @@ export {
   ChatWindowState,
 } from './chat';
 
-export { debounce } from './utils';
+export { debounce, getNonce } from './utils';
 
 export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';
+
+export {
+  TelemetryService,
+  TelemetryServiceStart,
+  TelemetryEvent,
+  TelemetryMetric,
+  TelemetryError,
+  PluginTelemetryRecorder,
+  TelemetryServiceSetup,
+  TelemetryProvider,
+} from './telemetry';

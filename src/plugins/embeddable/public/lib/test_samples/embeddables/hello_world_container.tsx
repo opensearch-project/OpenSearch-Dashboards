@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
@@ -59,6 +59,7 @@ interface HelloWorldContainerOptions {
 
 export class HelloWorldContainer extends Container<InheritedInput, HelloWorldContainerInput> {
   public readonly type = HELLO_WORLD_CONTAINER;
+  private root: Root | null = null;
 
   constructor(
     input: ContainerInput<{ firstName: string; lastName: string }>,
@@ -76,14 +77,22 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
   }
 
   public render(node: HTMLElement) {
-    ReactDOM.render(
+    this.root = createRoot(node);
+    this.root.render(
       <I18nProvider>
         <HelloWorldContainerComponent
           container={this}
           panelComponent={this.options.panelComponent}
         />
-      </I18nProvider>,
-      node
+      </I18nProvider>
     );
+  }
+
+  public destroy() {
+    super.destroy();
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
   }
 }

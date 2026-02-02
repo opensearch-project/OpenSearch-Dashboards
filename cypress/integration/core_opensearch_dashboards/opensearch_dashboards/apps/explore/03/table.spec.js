@@ -6,17 +6,21 @@
 import {
   DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
-  INDEX_WITHOUT_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetWithTimeId = getRandomizedDatasetId();
 
 const generateTableTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -34,25 +38,18 @@ const generateTableTestConfiguration = (dataset, datasetType, language) => {
 export const runTableTests = () => {
   describe('discover table tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITHOUT_TIME_1,
-        timefieldName: '',
-        indexPatternHasTimefield: false,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and first dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetWithTimeId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern with time
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -71,10 +68,7 @@ export const runTableTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateTableTestConfiguration, {

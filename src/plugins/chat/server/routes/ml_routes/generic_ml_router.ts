@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createGunzip } from 'zlib';
+import { Readable } from 'stream';
 import {
   Logger,
   RequestHandlerContext,
   OpenSearchDashboardsRequest,
   IOpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,
-  Capabilities,
+  OpenSearchClient,
 } from '../../../../../core/server';
 import { MLAgentRouter } from './ml_agent_router';
 
@@ -78,20 +80,20 @@ function isStreamResponse(response: MLClientResponse): response is MLStreamRespo
  */
 export class GenericMLRouter implements MLAgentRouter {
   async forward(
-    context: RequestHandlerContext,
+    context: RequestHandlerContext & {
+      dataSource?: {
+        opensearch: {
+          getClient: (dataSourceId: string) => Promise<OpenSearchClient>;
+        };
+      };
+    },
     request: OpenSearchDashboardsRequest,
     response: OpenSearchDashboardsResponseFactory,
     logger: Logger,
     configuredAgentId?: string,
-    dataSourceId?: string
+    dataSourceId?: string,
+    observabilityAgentId?: string
   ): Promise<IOpenSearchDashboardsResponse<any>> {
-    if (!configuredAgentId) {
-      return response.customError({
-        statusCode: 503,
-        body: { message: 'ML Commons agent ID not configured' },
-      });
-    }
-
     // Validate request body
     if (!request.body || typeof request.body !== 'object') {
       return response.customError({
@@ -100,25 +102,58 @@ export class GenericMLRouter implements MLAgentRouter {
       });
     }
 
-    const mlClient = findMLClient(context);
-    if (!mlClient) {
+    const language = request.body.forwardedProps?.queryAssistLanguage;
+    const agentId = language ? observabilityAgentId : configuredAgentId;
+
+    if (!agentId) {
       return response.customError({
         statusCode: 503,
-        body: { message: 'ML client not available in request context' },
+        body: { message: 'ML Commons agent ID not configured' },
       });
+    }
+
+    let mlClient = findMLClient(context);
+    if (!mlClient) {
+      mlClient = {
+        request: async (params: any) => {
+          const client =
+            dataSourceId && context.dataSource
+              ? await context.dataSource.opensearch.getClient(dataSourceId)
+              : context.core.opensearch.client.asCurrentUser;
+
+          const result = await client.transport.request(
+            {
+              method: params.method,
+              path: params.path,
+              body: params.body,
+            },
+            {
+              asStream: params.stream,
+              requestTimeout: params.timeout,
+              maxRetries: 0,
+            }
+          );
+          return {
+            status: result.statusCode || 200,
+            statusText: 'OK',
+            headers: result.headers || {},
+            body: result.body,
+          };
+        },
+      };
     }
 
     try {
       logger.info('Forwarding request to ML Commons agent', {
-        agentId: configuredAgentId,
+        agentId,
+        language,
         dataSourceId,
       });
 
-      // Use detected ML client from request context
       const mlResponse: MLClientResponse = await mlClient.request(
         {
           method: 'POST',
-          path: `/_plugins/_ml/agents/${configuredAgentId}/_execute/stream`,
+          path: `/_plugins/_ml/agents/${agentId}/_execute/stream`,
           body: JSON.stringify(request.body),
           datasourceId: dataSourceId, // Use actual dataSourceId from request
           stream: true,
@@ -130,6 +165,25 @@ export class GenericMLRouter implements MLAgentRouter {
 
       // Handle streaming response properly using type guard
       if (isStreamResponse(mlResponse)) {
+        const contentEncoding =
+          mlResponse.headers['content-encoding'] || mlResponse.headers['Content-Encoding'];
+        const encHeader = Array.isArray(contentEncoding)
+          ? contentEncoding.join(',')
+          : contentEncoding ?? '';
+        const encodings = encHeader
+          .toLowerCase()
+          .split(',')
+          .map((e) => e.trim());
+        let responseBody: NodeJS.ReadableStream = mlResponse.body;
+
+        if (encodings.includes('gzip')) {
+          const gunzip = createGunzip();
+          gunzip.on('error', (err) => {
+            logger.error(`Gzip decompression error: ${err.message}`);
+          });
+          responseBody = (mlResponse.body as Readable).pipe(gunzip);
+        }
+
         return response.custom({
           statusCode: mlResponse.status,
           headers: {
@@ -137,7 +191,7 @@ export class GenericMLRouter implements MLAgentRouter {
             'Content-Encoding': 'identity',
             Connection: 'keep-alive',
           },
-          body: mlResponse.body,
+          body: responseBody,
         });
       } else {
         return response.custom({
@@ -152,19 +206,10 @@ export class GenericMLRouter implements MLAgentRouter {
     } catch (error) {
       logger.error(`Error forwarding to ML Commons agent: ${error}`);
 
-      if (error instanceof Error && error.message.includes('404')) {
-        return response.customError({
-          statusCode: 404,
-          body: { message: `ML Commons agent "${configuredAgentId}" not found` },
-        });
-      }
-
       return response.customError({
-        statusCode: 500,
+        statusCode: error?.status || 500,
         body: {
-          message: `ML Commons agent error: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
+          message: error?.message || 'Unknown error',
         },
       });
     }

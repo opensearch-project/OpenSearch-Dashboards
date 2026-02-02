@@ -1,2 +1,0 @@
-fix:
-- Fix field formatter not applied to explore query result ([#10574](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10574))

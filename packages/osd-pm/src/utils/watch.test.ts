@@ -44,6 +44,10 @@ describe('#waitUntilWatchIsReady', () => {
     });
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   test('`waitUntilWatchIsReady` correctly handles `webpack` output', async () => {
     buildOutputStream.emit('data', Buffer.from('$ webpack'));
     buildOutputStream.emit('data', Buffer.from('Chunk Names'));
@@ -78,10 +82,14 @@ describe('#waitUntilWatchIsReady', () => {
   });
 
   test('`waitUntilWatchIsReady` fails if output stream receives error', async () => {
+    // Start awaiting the rejection first to avoid unhandled promise rejection
+    const rejectionPromise = expect(completionHintPromise).rejects.toThrow(/Uh, oh!/);
+
+    // Then emit the error
     buildOutputStream.emit('error', new Error('Uh, oh!'));
 
     jest.runAllTimers();
 
-    await expect(completionHintPromise).rejects.toThrow(/Uh, oh!/);
+    await rejectionPromise;
   });
 });
