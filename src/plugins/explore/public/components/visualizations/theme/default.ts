@@ -40,6 +40,10 @@ export function createEchartsTheme(colors: ReturnType<typeof getColors>) {
     splitArea: {
       show: false,
     },
+    nameTextStyle: {
+      color: colors.text,
+      fontWeight: 'bold',
+    },
   };
 
   return {
@@ -76,6 +80,7 @@ export function createEchartsTheme(colors: ReturnType<typeof getColors>) {
     visualMap: {
       color: [colors.statusGreen, colors.statusYellow, colors.statusOrange, colors.statusRed],
     },
+    animationDuration: 500,
   };
 }
 

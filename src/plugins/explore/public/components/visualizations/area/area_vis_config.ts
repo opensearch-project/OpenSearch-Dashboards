@@ -26,6 +26,7 @@ export interface AreaChartStyleOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;

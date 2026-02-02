@@ -26,6 +26,7 @@ jest.mock('../utils/utils', () => {
   const actual = jest.requireActual('../utils/utils');
   return {
     ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
     applyTimeRangeToEncoding: jest.fn(() => undefined),
   };
 });
