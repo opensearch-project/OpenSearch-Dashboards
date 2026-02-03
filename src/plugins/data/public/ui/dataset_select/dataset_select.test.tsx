@@ -482,10 +482,10 @@ describe('DatasetSelect', () => {
     });
 
     // The UI should still show the trace dataset, not the incompatible log dataset
-    // It should NOT clear the selection or show "Select data"
+    // It should NOT clear the selection or show "Select dataset"
     expect(screen.getByText('Trace Dataset')).toBeInTheDocument();
     expect(screen.queryByText('Log Dataset')).not.toBeInTheDocument();
-    expect(screen.queryByText('Select data')).not.toBeInTheDocument();
+    expect(screen.queryByText('Select dataset')).not.toBeInTheDocument();
   });
 
   it('handles errors when fetching datasets gracefully', async () => {
@@ -537,9 +537,9 @@ describe('DatasetSelect', () => {
       { timeout: 3000 }
     );
 
-    // Component should render without crashing and show "Select data" text
+    // Component should render without crashing and show "Select dataset" text
     expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
-    expect(screen.getByText('Select data')).toBeInTheDocument();
+    expect(screen.getByText('Select dataset')).toBeInTheDocument();
 
     consoleErrorSpy.mockRestore();
   });
@@ -551,14 +551,14 @@ describe('DatasetSelect', () => {
     expect(button).toHaveClass('euiButtonEmpty-isDisabled');
   });
 
-  it('displays "Select data" when no dataset is selected', async () => {
+  it('displays "Select dataset" when no dataset is selected', async () => {
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
     mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
 
     renderWithContext();
 
     await waitFor(() => {
-      expect(screen.getByText('Select data')).toBeInTheDocument();
+      expect(screen.getByText('Select dataset')).toBeInTheDocument();
     });
   });
 
