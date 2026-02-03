@@ -4,7 +4,6 @@
  */
 
 import { AggregationType } from '../../types';
-import { inferBucketSize } from '../../bar/bar_chart_utils';
 import { aggregateValues } from './utils/aggregation';
 
 interface BinConfig {
@@ -168,9 +167,8 @@ export const bin = (options: {
     const rawStep = (max - min) / binConfig.count;
     step = getNiceNumber(rawStep);
   } else {
-    // Priority 3: Infer from data and round to nice number
-    const inferredSize = inferBucketSize(data, binField);
-    const rawStep = inferredSize || (max - min) / 30; // fallback to 30 bins
+    // Priority 3: get step with default bucket count 30 and round to nice number
+    const rawStep = (max - min) / 30; // fallback to 30 bins
     step = getNiceNumber(rawStep);
   }
 
@@ -227,11 +225,9 @@ export const bin = (options: {
         aggregatedValue = aggregateValues(AggregationType.COUNT, binRange.values) ?? 0;
       }
 
-      // Format bucket as "start-end"
-      const bucket = `${binRange.start}-${binRange.end}`;
-
       return {
-        bucket,
+        start: binRange.start,
+        end: binRange.end,
         value: aggregatedValue,
       };
     });
