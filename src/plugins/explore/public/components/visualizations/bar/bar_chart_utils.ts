@@ -247,9 +247,8 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
 
   const series = seriesFields.map((seriesField, index) => {
     const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
-    return {
+    const seriesConfig: any = {
       type: 'bar',
-      stack: 'total',
       emphasis: {
         focus: 'self',
       },
@@ -270,6 +269,13 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
         },
       }),
     };
+
+    // Apply stack configuration based on stackMode
+    if (options.kind === 'bar' && 'stackMode' in styles && styles.stackMode === 'total') {
+      seriesConfig.stack = 'total';
+    }
+
+    return seriesConfig;
   }) as BarSeriesOption[];
   newState.series = series;
 
@@ -304,32 +310,42 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
     const header = seriesData[0];
     const cateColumns = seriesFields(header);
 
-    return cateColumns.map((item: string, i: number) => ({
-      name: String(item),
-      type: 'bar',
-      stack: `stack_${index}`, // each grid should have a exclusive stack key
-      encode: {
-        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
-        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
-      },
-      datasetIndex: index,
-      gridIndex: index,
-      xAxisIndex: index,
-      yAxisIndex: index,
-      emphasis: {
-        focus: 'self',
-      },
-      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-      barCategoryGap:
-        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-      ...(styles.showBarBorder && {
-        itemStyle: {
-          borderWidth: styles.barBorderWidth,
-          borderColor: styles.barBorderColor,
+    return cateColumns.map((item: string, i: number) => {
+      const seriesConfig: any = {
+        name: String(item),
+        type: 'bar',
+        encode: {
+          [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
+          [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
         },
-      }),
-      ...(i === 0 && thresholdLines),
-    }));
+        datasetIndex: index,
+        gridIndex: index,
+        xAxisIndex: index,
+        yAxisIndex: index,
+        emphasis: {
+          focus: 'self',
+        },
+        barWidth:
+          styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+        barCategoryGap:
+          styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+        ...(styles.showBarBorder && {
+          itemStyle: {
+            borderWidth: styles.barBorderWidth,
+            borderColor: styles.barBorderColor,
+          },
+        }),
+        ...(i === 0 && thresholdLines),
+      };
+
+      // Apply stack configuration based on stackMode for faceted bar charts
+      if (styles.stackMode === 'total') {
+        seriesConfig.stack = `stack_${index}`; // each grid should have a exclusive stack key
+      }
+      // If stackMode is 'none', we don't add the stack property, which makes bars non-stacked
+
+      return seriesConfig;
+    });
   });
 
   newState.series = allSeries?.flat() as BarSeriesOption[];

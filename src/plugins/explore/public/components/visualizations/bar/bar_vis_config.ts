@@ -39,6 +39,7 @@ export interface BarChartStyleOptions {
   showBarBorder?: boolean;
   barBorderWidth?: number;
   barBorderColor?: string;
+  stackMode?: 'none' | 'total';
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -61,9 +62,9 @@ export interface BarChartStyleOptions {
 }
 
 export type BarChartStyle = Required<
-  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle'>
+  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle' | 'stackMode'>
 > &
-  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle'>;
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'stackMode'>;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
@@ -82,6 +83,7 @@ export const defaultBarChartStyles: BarChartStyle = {
   showBarBorder: false,
   barBorderWidth: 1,
   barBorderColor: '#000000',
+  stackMode: 'none',
 
   // Threshold options
   thresholdOptions: {

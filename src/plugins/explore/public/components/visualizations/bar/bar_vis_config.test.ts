@@ -25,6 +25,7 @@ describe('bar_vis_config', () => {
         showBarBorder: false,
         barBorderWidth: 1,
         barBorderColor: '#000000',
+        stackMode: 'none',
 
         // Threshold and grid
         thresholdOptions: {
