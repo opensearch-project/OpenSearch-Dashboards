@@ -13,7 +13,13 @@ import {
 } from '../utils/utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
-import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+} from '../utils/echarts_spec';
 import {
   createScatterSeries,
   createCategoryScatterSeries,
@@ -69,6 +75,9 @@ export const createTwoMetricScatter = (
       transform(convertTo2DArray(allColumns)),
       createBaseConfig({ title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name}` }),
       buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h === yField),
+      }),
       createScatterSeries({
         styles,
         xField,
