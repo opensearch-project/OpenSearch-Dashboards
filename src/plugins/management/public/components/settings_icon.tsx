@@ -10,6 +10,7 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { Observable } from 'rxjs';
 import { DEFAULT_NAV_GROUPS, NavGroupItemInMap } from '../../../../core/public';
+import { AppearanceSettingsContent } from './appearance_settings_content';
 
 export function SettingsIcon({ core }: { core: CoreStart }) {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -30,18 +31,8 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
     }
   };
 
-  const onThemeClick = () => {
+  const handleAppearanceApply = () => {
     setPopover(false);
-    // Navigate to theme settings or open theme modal
-    core.application.navigateToApp('settings');
-  };
-
-  const onDarkModeClick = () => {
-    setPopover(false);
-    // Toggle dark mode
-    const currentDarkMode = core.uiSettings.get('theme:darkMode');
-    core.uiSettings.set('theme:darkMode', !currentDarkMode);
-    window.location.reload();
   };
 
   const mainPanelItems: Array<{
@@ -69,7 +60,6 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
         defaultMessage: 'Appearances',
       }),
       key: 'appearances',
-      icon: 'color',
       panel: 1,
     });
   }
@@ -84,24 +74,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       title: i18n.translate('management.settings.appearances.title', {
         defaultMessage: 'Appearances',
       }),
-      items: [
-        {
-          name: i18n.translate('management.settings.appearances.theme', {
-            defaultMessage: 'Theme settings',
-          }),
-          key: 'theme',
-          icon: 'brush',
-          onClick: onThemeClick,
-        },
-        {
-          name: i18n.translate('management.settings.appearances.darkMode', {
-            defaultMessage: 'Toggle dark mode',
-          }),
-          key: 'darkMode',
-          icon: 'moon',
-          onClick: onDarkModeClick,
-        },
-      ],
+      content: <AppearanceSettingsContent core={core} onApply={handleAppearanceApply} />,
     },
   ];
 
@@ -125,8 +98,9 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}
       ownFocus={false}
+      panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 }
