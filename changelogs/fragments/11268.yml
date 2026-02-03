@@ -1,0 +1,2 @@
+fix:
+- Add thresholds visual map for scatter ([#11268](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11268))
