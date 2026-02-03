@@ -30,7 +30,7 @@
 
 import { throwError, of } from 'rxjs';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from 'test_utils/helpers';
@@ -96,7 +96,8 @@ async function mountDoc(update = false, indexPatternGetter: any = null) {
   };
   const indexPatternService = {
     get: indexPatternGetter ? indexPatternGetter : jest.fn(() => Promise.resolve(indexPattern)),
-    isLongNumeralsSupported: jest.fn(),
+    // Return a promise that resolves to keep the async flow working
+    isLongNumeralsSupported: jest.fn(() => Promise.resolve(false)),
   } as any;
 
   const props = {
@@ -108,8 +109,9 @@ async function mountDoc(update = false, indexPatternGetter: any = null) {
   let comp!: ReactWrapper;
   await act(async () => {
     comp = mountWithIntl(<Doc {...props} />);
-    if (update) comp.update();
   });
+  // Always update to ensure enzyme wrapper reflects current React state
+  comp.update();
   if (update) {
     await waitForPromises();
     comp.update();
@@ -119,7 +121,9 @@ async function mountDoc(update = false, indexPatternGetter: any = null) {
 
 describe('Test of <Doc /> of Discover', () => {
   test('renders loading msg', async () => {
-    const comp = await mountDoc();
+    // Use a promise that never resolves to keep the component in loading state
+    const neverResolvingGetter = jest.fn(() => new Promise(() => {}));
+    const comp = await mountDoc(false, neverResolvingGetter);
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
   });
 

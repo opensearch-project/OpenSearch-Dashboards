@@ -24,16 +24,15 @@ const clearMonacoEditor = () => {
     .then(() => {
       // First ensure we have focus
       return forceFocusEditor().then(() => {
-        // Try different key combinations for selection
+        // Use simpler clearing methods to avoid trigger timeouts
         return cy
           .get('.inputarea')
-          .type('{ctrl}a', { force: true })
+          .clear({ force: true })
           .wait(100)
-          .type('{backspace}', { force: true })
+          .type('{selectAll}{del}', { force: true })
           .wait(100)
-          .type('{meta}a', { force: true })
-          .wait(100)
-          .type('{backspace}', { force: true });
+          .type('{ctrl+a}{backspace}', { force: true })
+          .wait(100);
       });
     });
 };
@@ -66,8 +65,11 @@ Cypress.Commands.add('clearQueryEditor', () => {
             return clearWithRetry(attempt + 1);
           } else {
             cy.log('Failed to clear editor after all attempts');
-            // Instead of throwing error, try one last time with extra waiting
-            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
+            // Instead of throwing error, try one last simple clear
+            return cy
+              .get('.inputarea')
+              .clear({ force: true })
+              .type('{selectAll}{del}', { force: true });
           }
         });
       });
@@ -94,16 +96,41 @@ Cypress.Commands.add('setQueryEditor', (value, options = {}) => {
   // editor. Clicking on a random element removes the popover.
   cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
 
-  // clear the editor first and then set
   cy.clearQueryEditor().then(() => {
-    return cy
-      .get('.inputarea')
+    cy.get('.inputarea')
       .should('be.visible')
-      .wait(200)
+      .focus() // Ensure focus is set
+      .wait(300) // Wait for clearing to settle
+      .then(($editor) => {
+        // Verify editor is truly empty before typing
+        const content = $editor.val() || $editor.text() || '';
+        cy.log(`Editor content before typing new query: "${content}"`);
+
+        // If there's still content, do one final clear right before typing
+        if (content.trim() !== '') {
+          cy.log('Found residual content, doing final clear before typing');
+          cy.get('.inputarea')
+            .focus()
+            .type('{selectAll}{del}', { force: true })
+            .wait(100)
+            .clear({ force: true })
+            .wait(100);
+        }
+      });
+
+    // Get the inputarea again and continue with typing
+    cy.get('.inputarea')
+      .focus() // Re-focus before typing
+      .wait(200) // Give editor time to be ready
       .type(escape ? `${value}{esc}` : value, {
-        delay: 40,
+        delay: 50, // Slightly slower typing to ensure each character registers
         force: true,
-        ...typeOptions, // Pass through all other options to type command
+        ...typeOptions,
+      })
+      .then(($editor) => {
+        // Log what was actually typed for debugging
+        const finalContent = $editor.val() || $editor.text() || '';
+        cy.log(`Final editor content after typing: "${finalContent}"`);
       });
   });
 
@@ -143,51 +170,28 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
 Cypress.Commands.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
-    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
-      req.continue((res) => {
-        if (res.statusCode === 404) {
-          res.send(200, { status: 'ok', data: {} });
-        }
-      });
-    }).as('agentConfigRequest');
-
-    cy.getElementByTestId('datasetSelectorButton')
-      .should('be.visible')
-      .should('not.be.disabled')
-      .click();
+    cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
+
     cy.get(`[title="Indexes"]`).click();
+
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Ensure "Index name" mode is selected (not "Index wildcard")
-    cy.getElementByTestId('index-scope-selector')
+    // Use the unified index selector - type to search and click from results
+    cy.getElementByTestId('unified-index-selector-search')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    // Select "Index name" if not already selected
-    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
-
-    // Verify selection
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index name');
-
-    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.getElementByTestId('index-selector-search')
-      .should('be.visible')
-      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .click({ force: true })
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render
-    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the dropdown to appear with results
+    cy.getElementByTestId('unified-index-selector-dropdown').should('be.visible');
 
-    // Now look for the dataset-index-selector within the popover
-    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+    // Click the matching index from the dropdown list
+    cy.getElementByTestId('unified-index-selector-list')
       .should('be.visible')
       .within(() => {
-        // Look for the index by title attribute in the popover
+        // Find and click the index by its label in the EuiSelectable
         cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
       });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -210,10 +214,6 @@ Cypress.Commands.add(
       );
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
-
-      // Wait for modal to close by checking dataset selector button is ready
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.getElementByTestId('datasetSelectorButton').should('be.visible').should('not.be.disabled');
     }
   }
 );
@@ -223,6 +223,10 @@ Cypress.Commands.add(
   (indexPattern, dataSourceName, datasetEnabled = false) => {
     const title = datasetEnabled ? indexPattern : `${dataSourceName}::${indexPattern}`;
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+
+    // Wait for dropdown list to appear
+    cy.get('.euiSelectableList').should('be.visible');
+
     cy.get(`[title="${title}"]`).should('be.visible').click();
 
     // verify that it has been selected
@@ -230,10 +234,10 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('setDataset', (dataset, dataSourceName, type, datasetEnabled = false) => {
+Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
   switch (type) {
     case 'INDEX_PATTERN':
-      cy.setIndexPatternAsDataset(dataset, dataSourceName, datasetEnabled);
+      cy.setIndexPatternAsDataset(dataset, dataSourceName);
       break;
     case 'INDEXES':
       cy.setIndexAsDataset(dataset, dataSourceName);
@@ -248,7 +252,13 @@ Cypress.Commands.add(
   (indexPattern, dataSourceName, language, finalAction = 'submit') => {
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
+    // Note: If only Index Patterns exist, the type selection will be hidden
+    // Try to click Index Patterns if it exists, otherwise continue
+    cy.get('body').then(($body) => {
+      if ($body.find(`[title="Index Patterns"]`).length > 0) {
+        cy.get(`[title="Index Patterns"]`).click();
+      }
+    });
 
     cy.getElementByTestId('datasetExplorerWindow')
       .find(`[title="${dataSourceName}::${indexPattern}"]`)

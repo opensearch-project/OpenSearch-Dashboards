@@ -38,6 +38,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  applyTimeRange,
 } from '../utils/echarts_spec';
 import {
   aggregate,
@@ -95,12 +96,12 @@ export const createBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
-      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      createBarSeries({ kind: 'bar', styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({
       data: transformedData,
@@ -240,12 +241,17 @@ export const createTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} Over Time`,
+        legend: { show: false },
+      }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       createBarSeries({
+        kind: 'bar',
         styles,
         categoryField: timeField,
         seriesFields: [valueField],
@@ -256,6 +262,7 @@ export const createTimeBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -404,12 +411,17 @@ export const createGroupedTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} Over Time by ${colorColumn.name}`,
+        legend: { show: styles.addLegend },
+      }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       createBarSeries({
+        kind: 'bar',
         styles,
         categoryField: timeField,
         seriesFields(headers) {
@@ -422,6 +434,7 @@ export const createGroupedTimeBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -584,8 +597,11 @@ export const createFacetedTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings.y?.name} Over Time by ${axisColumnMappings.color?.name} (Faceted by ${axisColumnMappings.facet?.name})`,
+      }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
@@ -600,6 +616,7 @@ export const createFacetedTimeBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
     return result.spec;
   }
@@ -761,12 +778,16 @@ export const createStackedBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+        legend: { show: styles.addLegend },
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
       createBarSeries({
+        kind: 'bar',
         styles,
         categoryField,
         seriesFields(headers) {
@@ -904,12 +925,12 @@ export const createDoubleNumericalBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({ title: `${xAxis?.name} with ${yAxis?.name}`, legend: { show: false } }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
-      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      createBarSeries({ kind: 'bar', styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({
       data: transformedData,
@@ -918,6 +939,7 @@ export const createDoubleNumericalBarChart = (
       axisColumnMappings: axisColumnMappings ?? {},
     });
 
+    // TODO: check if this is needed
     if (styles.switchAxes) {
       result.yAxisConfig.type = 'category';
     } else {

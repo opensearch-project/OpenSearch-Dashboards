@@ -65,7 +65,7 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [PPL_FIELD_TYPES.ARRAY]: VisFieldType.Unknown,
 };
 
-export const DEFAULT_OPACITY = 0.87;
+export const DEFAULT_OPACITY = 0.5;
 export const AXIS_LABEL_MAX_LENGTH = 100;
 
 const DEFAULT_AXIS_CONFIG: StandardAxes = {

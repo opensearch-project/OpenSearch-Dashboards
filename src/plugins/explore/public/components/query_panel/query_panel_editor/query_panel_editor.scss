@@ -21,7 +21,7 @@
 
   &__placeholder {
     position: absolute;
-    left: 29px; // hard-code to match where the text is in editor
+    left: 45px; // hard-code to match where the text is in editor
     top: 50%;
     transform: translateY(-50%);
     font-size: $ouiFontSizeXS;
@@ -72,5 +72,21 @@
 
   50% {
     background-position: 100% 50%;
+  }
+}
+
+// Multi-query gutter label decoration (A, B, C, A,B, etc.)
+// Individual ::before content rules are created dynamically via JavaScript
+// to support any label combination without hardcoding.
+.monaco-editor .glyph-margin-widgets .cgmr.query-label-gutter {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+
+  &::before {
+    font-weight: 600;
+    font-size: 10px;
+    color: $ouiColorPrimary;
   }
 }

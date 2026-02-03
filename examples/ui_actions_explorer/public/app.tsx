@@ -29,7 +29,7 @@
  */
 
 import React, { useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
 import {
@@ -112,12 +112,12 @@ export const renderApp = (
     ...coreStart,
     uiActions,
   };
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <ActionsExplorer />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

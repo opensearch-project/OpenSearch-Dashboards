@@ -44,12 +44,6 @@ exports[`Sidecar component it should emit setSidecarConfig with new style when r
               </div>,
             },
             Object {},
-            Object {
-              "enqueueForceUpdate": [Function],
-              "enqueueReplaceState": [Function],
-              "enqueueSetState": [Function],
-              "isMounted": [Function],
-            },
           ],
           Array [
             Object {
@@ -294,12 +288,6 @@ exports[`Sidecar component it should have a height style when dockedDirection is
               </div>,
             },
             Object {},
-            Object {
-              "enqueueForceUpdate": [Function],
-              "enqueueReplaceState": [Function],
-              "enqueueSetState": [Function],
-              "isMounted": [Function],
-            },
           ],
           Array [
             Object {
@@ -724,12 +712,6 @@ exports[`Sidecar component it should have a height style when isHidden is true 1
               </div>,
             },
             Object {},
-            Object {
-              "enqueueForceUpdate": [Function],
-              "enqueueReplaceState": [Function],
-              "enqueueSetState": [Function],
-              "isMounted": [Function],
-            },
           ],
           Array [
             Object {
@@ -1244,12 +1226,6 @@ exports[`Sidecar component it should have a width style when dockedDirection is 
               </div>,
             },
             Object {},
-            Object {
-              "enqueueForceUpdate": [Function],
-              "enqueueReplaceState": [Function],
-              "enqueueSetState": [Function],
-              "isMounted": [Function],
-            },
           ],
           Array [
             Object {

@@ -241,7 +241,9 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                 ...recentAccessItem.meta,
                 workspaceName: findWorkspace?.name,
                 updatedAt: moment(obj?.updated_at).valueOf(),
-                link: workspaceEnabled ? href : link,
+                link: workspaceEnabled
+                  ? href
+                  : basePath.prepend(link, { withoutClientBasePath: true }),
                 label: label || obj.meta.title,
               };
             })

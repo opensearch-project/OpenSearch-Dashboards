@@ -7,9 +7,13 @@ import {
   BarSeriesOption,
   LineSeriesOption,
   CustomSeriesOption,
+  GaugeSeriesOption,
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
+  PieSeriesOption,
+  ScatterSeriesOption,
+  HeatmapSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -17,12 +21,13 @@ import {
   Positions,
   StandardAxes,
   TimeUnit,
-  VisColumn,
   VisFieldType,
   Threshold,
   ThresholdOptions,
+  AxisRole,
 } from '../types';
 import { convertThresholds } from './utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Base style interface that all chart styles should extend
@@ -44,16 +49,26 @@ export interface BaseChartStyle {
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
   addLegend?: boolean;
+  legendPosition?: Positions;
+  showFullTimeRange?: boolean;
+}
+
+interface Axis {
+  name: string;
+  schema: VisFieldType;
+  column: string;
 }
 
 /**
  * Configuration for ECharts axes (after swapping)
  */
 export interface EChartsAxisConfig {
-  xAxis?: VisColumn;
-  yAxis?: VisColumn;
+  xAxis?: Axis;
+  yAxis?: Axis;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2Axis?: Axis;
+  y2AxisStyle?: StandardAxes;
 }
 
 /**
@@ -62,8 +77,9 @@ export interface EChartsAxisConfig {
 export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
-  axisConfig: EChartsAxisConfig;
+  axisConfig?: EChartsAxisConfig;
   axisColumnMappings: AxisColumnMappings;
+  timeRange?: { from: string; to: string };
 }
 
 /**
@@ -74,11 +90,19 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   // Built incrementally
   // TODO: avoid any
   transformedData?: any[];
-  baseConfig?: any;
+  baseConfig?: Pick<EChartsOption, 'title' | 'tooltip' | 'legend'>;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
-  visualMap?: any;
+  series?: Array<
+    | BarSeriesOption
+    | LineSeriesOption
+    | CustomSeriesOption
+    | PieSeriesOption
+    | GaugeSeriesOption
+    | ScatterSeriesOption
+    | HeatmapSeriesOption
+  >;
+  visualMap?: EChartsOption['visualMap'];
   // Final output
   spec?: EChartsOption;
 }
@@ -102,7 +126,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: Axis | undefined): 'category' | 'value' | 'time' {
   if (!axis) return 'value';
 
   switch (axis.schema) {
@@ -119,27 +143,37 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
+export const createBaseConfig = <T extends BaseChartStyle>({
+  title,
+  addTrigger = true,
+  legend,
+}: {
+  title?: string;
+  addTrigger?: boolean;
+  legend?: EChartsOption['legend'];
+}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBaseConfig');
-  }
 
   const baseConfig = {
     title: {
-      text: styles.titleOptions?.show
-        ? styles.titleOptions?.titleName || `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`
-        : undefined,
+      text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
     },
     tooltip: {
+      extraCssText: `overflow-y: auto; max-height: 50%;`,
+      enterable: true, // for y direction overflow
+      confine: true, // for x direction
       show: styles.tooltipOptions?.mode !== 'hidden',
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
+      ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
+      axisPointer: { type: 'shadow' as const },
     },
-    legend: {},
+    legend: {
+      type: 'scroll',
+      ...legend,
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' as const }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
+    },
   };
 
   return { ...state, baseConfig };
@@ -151,18 +185,20 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, transformedData = [] } = state;
+  const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
-  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+  const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
+  const hasY2 = axisColumnMappings.y2 !== undefined && axisConfig?.y2Axis;
 
   const getConfig = (
-    axis: VisColumn | undefined,
+    axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
-    gridNumber?: number
+    gridNumber?: number,
+    addSplitLineStyle: boolean = false
   ) => {
     return {
       type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle }),
+      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
       ...(hasFacet && { gridIndex: gridNumber }),
     };
   };
@@ -187,6 +223,11 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
 
     yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+
+    if (hasY2) {
+      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle, undefined, true);
+      yAxisConfig = [yAxisConfig, y2AxisConfig];
+    }
   }
 
   return { ...state, xAxisConfig, yAxisConfig };
@@ -198,22 +239,32 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
+  const {
+    baseConfig,
+    transformedData = [],
+    xAxisConfig,
+    yAxisConfig,
+    series,
+    visualMap,
+    axisColumnMappings,
+  } = state;
 
-  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+  const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
+  const hasFacet = hasMultiDatasets && axisColumnMappings.facet !== undefined;
 
-  const data = hasFacet
+  // Multi-datasets case (faceted or state-timeline)
+  const data = hasMultiDatasets
     ? transformedData.map((facetData: any) => ({ source: facetData }))
     : { source: transformedData };
 
   const facetNumber = transformedData.length;
 
   let grid;
-  if (!hasFacet || facetNumber <= 1) grid = { top: 60, bottom: 60, left: 60, right: 60 };
-  else {
+
+  if (hasFacet && facetNumber > 1) {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
-    const rowHeight = 39; // slighly smaller to make legend fit
+    const rowHeight = 39; // slightly smaller to make legend fit
 
     grid = Array.from({ length: facetNumber }).map((_, i) => {
       const row = Math.floor(i / cols);
@@ -231,7 +282,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
   const spec = {
     ...baseConfig,
     dataset: data,
-
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
@@ -251,13 +301,16 @@ const POSITION_MAP = {
 
 export const applyAxisStyling = ({
   axisStyle,
+  addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
+  addSplitLineStyle?: boolean;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
+    axisLine: { show: true },
   };
 
   // Apply axis visibility
@@ -270,6 +323,12 @@ export const applyAxisStyling = ({
   if (axisStyle?.grid) {
     echartsAxisConfig.splitLine = {
       show: axisStyle.grid.showLines ?? true,
+      ...(addSplitLineStyle && {
+        lineStyle: {
+          type: 'dotted',
+          opacity: DEFAULT_OPACITY / 2,
+        },
+      }),
     };
   }
 
@@ -367,5 +426,76 @@ export const buildVisMap = ({
   return {
     ...state,
     visualMap,
+  };
+};
+
+/**
+ * Apply time range to axis if showFullTimeRange is enabled
+ */
+export const applyTimeRange = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { styles, axisColumnMappings, timeRange, xAxisConfig, yAxisConfig } = state;
+
+  if (!styles.showFullTimeRange || !timeRange?.from || !timeRange?.to) {
+    return state;
+  }
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => col?.schema === VisFieldType.Date
+  );
+
+  if (!timeAxisEntry) {
+    return state;
+  }
+
+  const [axisRole] = timeAxisEntry as [AxisRole, any];
+
+  // Process time values
+  const processTimeValue = (iso: string) => {
+    const date = new Date(iso);
+    return isNaN(date.getTime()) ? iso : date;
+  };
+
+  const minTime = processTimeValue(timeRange.from);
+  const maxTime = processTimeValue(timeRange.to);
+
+  let updatedXAxisConfig = xAxisConfig;
+  let updatedYAxisConfig = yAxisConfig;
+
+  if (axisRole === AxisRole.X) {
+    if (Array.isArray(xAxisConfig)) {
+      updatedXAxisConfig = xAxisConfig.map((config) => ({
+        ...config,
+        min: minTime,
+        max: maxTime,
+      }));
+    } else if (xAxisConfig) {
+      updatedXAxisConfig = {
+        ...xAxisConfig,
+        min: minTime,
+        max: maxTime,
+      };
+    }
+  } else if (axisRole === AxisRole.Y) {
+    if (Array.isArray(yAxisConfig)) {
+      updatedYAxisConfig = yAxisConfig.map((config) => ({
+        ...config,
+        min: minTime,
+        max: maxTime,
+      }));
+    } else if (yAxisConfig) {
+      updatedYAxisConfig = {
+        ...yAxisConfig,
+        min: minTime,
+        max: maxTime,
+      };
+    }
+  }
+
+  return {
+    ...state,
+    xAxisConfig: updatedXAxisConfig,
+    yAxisConfig: updatedYAxisConfig,
   };
 };

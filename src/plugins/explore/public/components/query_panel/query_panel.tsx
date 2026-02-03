@@ -29,7 +29,7 @@ const QueryPanel = () => {
   usePPLExecuteQueryAction(setEditorTextWithQuery);
 
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <QueryPanelWidgets />
       <div className="exploreQueryPanel__editorsWrapper">
         <QueryPanelEditor />

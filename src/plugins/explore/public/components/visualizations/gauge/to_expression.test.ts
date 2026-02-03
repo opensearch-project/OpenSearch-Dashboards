@@ -19,6 +19,14 @@ jest.mock('../utils/calculation', () => ({
   calculateValue: jest.fn(() => 50),
 }));
 
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
+
 describe('createGauge', () => {
   const mockNumericalColumn: VisColumn = {
     id: 1,

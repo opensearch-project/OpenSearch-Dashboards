@@ -6,7 +6,7 @@
 import { unparse } from 'papaparse';
 import { saveAs } from 'file-saver';
 import moment from 'moment';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import {
   useSelector,
   useDispatch,
@@ -34,6 +34,12 @@ jest.mock('papaparse', () => ({
 jest.mock('../../../../application/legacy/discover/application/utils/state_management', () => ({
   useSelector: jest.fn(),
   useDispatch: jest.fn(),
+}));
+
+// Mock the useDisplayedColumnNames hook to avoid Redux context requirement
+import { useDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
+jest.mock('../../../../helpers/use_displayed_columns', () => ({
+  useDisplayedColumnNames: jest.fn(),
 }));
 
 const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
@@ -164,6 +170,9 @@ describe('useDiscoverDownloadCsv', () => {
     beforeEach(() => {
       (useDispatch as jest.MockedFunction<any>).mockReturnValue(mockDispatch);
       (useSelector as jest.MockedFunction<any>).mockImplementation(() => mockDisplayedColumnNames);
+      (useDisplayedColumnNames as jest.MockedFunction<any>).mockReturnValue(
+        mockDisplayedColumnNames
+      );
       (unparse as jest.MockedFunction<any>).mockImplementation(mockUnparse);
       mockDispatch.mockResolvedValue({ payload: mockRows });
     });
@@ -172,6 +181,7 @@ describe('useDiscoverDownloadCsv', () => {
       (useDispatch as jest.MockedFunction<any>).mockClear();
       (saveAs as jest.MockedFunction<any>).mockClear();
       (useSelector as jest.MockedFunction<any>).mockClear();
+      (useDisplayedColumnNames as jest.MockedFunction<any>).mockClear();
       (unparse as jest.MockedFunction<any>).mockClear();
       mockDispatch.mockClear();
       mockOnLoading.mockClear();
@@ -191,11 +201,9 @@ describe('useDiscoverDownloadCsv', () => {
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Visible);
       });
-      result.all.map((resultIteration) => {
-        expect(
-          (resultIteration as ReturnType<typeof useDiscoverDownloadCsv>).isLoading
-        ).toBeFalsy();
-      });
+      // For Visible option, isLoading should remain false and onLoading should not be called
+      expect(result.current.isLoading).toBeFalsy();
+      expect(mockOnLoading).not.toHaveBeenCalled();
     });
 
     it('calling downloadCsvForOption calls onLoading() when Visible option is selected', async () => {
@@ -211,10 +219,9 @@ describe('useDiscoverDownloadCsv', () => {
       await act(async () => {
         await result.current.downloadCsvForOption(DownloadCsvFormId.Max);
       });
-      // check the second last one as the last one turns it back to false
-      expect(
-        (result.all[result.all.length - 2] as ReturnType<typeof useDiscoverDownloadCsv>).isLoading
-      ).toBeTruthy();
+      // For Max option, onLoading is called (indicating loading was set to true)
+      // and then isLoading goes back to false after completion
+      expect(mockOnLoading).toHaveBeenCalled();
       expect(result.current.isLoading).toBeFalsy();
     });
 

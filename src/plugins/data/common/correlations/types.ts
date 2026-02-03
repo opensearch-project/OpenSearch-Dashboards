@@ -5,8 +5,19 @@
 
 import { SavedObject, SavedObjectAttributes } from '../../../../core/types';
 
+/**
+ * Correlation type prefixes used throughout the codebase.
+ * @experimental These prefixes are experimental and might change in future releases.
+ */
+export const CORRELATION_TYPE_PREFIXES = {
+  APM_CONFIG: 'APM-Config-',
+  TRACE_TO_LOGS: 'trace-to-logs-',
+} as const;
+
 // @experimental This schema is experimental and might change in future releases.
 export interface CorrelationSavedObjectAttributes extends SavedObjectAttributes {
+  title?: string;
+
   correlationType: string;
 
   version: string;

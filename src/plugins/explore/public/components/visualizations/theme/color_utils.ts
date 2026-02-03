@@ -6,7 +6,7 @@
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { getColors } from './default_colors';
 
-function hexToRgb(hex: string) {
+export function hexToRgb(hex: string) {
   hex = hex.replace(/^#/, '');
   if (hex.length === 3) {
     hex = hex
@@ -21,7 +21,7 @@ function hexToRgb(hex: string) {
   };
 }
 
-function rgbToHex(r: number, g: number, b: number) {
+export function rgbToHex(r: number, g: number, b: number) {
   return (
     '#' +
     [r, g, b]
@@ -49,16 +49,6 @@ function generateColorGroup(start: string, end: string, groupName: string, nums:
 }
 
 export const getColorGroups = () => {
-  if (darkMode) {
-    return {
-      red: generateColorGroup('#ffb3b8', '#DB0000', 'red'),
-      orange: generateColorGroup('#ffcb7e', '#FF6A3D', 'orange'),
-      yellow: generateColorGroup('#fff2b3', '#F90', 'yellow'),
-      green: generateColorGroup('#c9f2c2', '#00BD6B', 'green'),
-      blue: generateColorGroup('#c0d8ff', '#7598FF', 'blue'),
-      purple: generateColorGroup('#deb7f2', '#A669E2', 'purple'),
-    };
-  }
   return {
     red: generateColorGroup('#DB0000', '#ffb3b8', 'red'),
     orange: generateColorGroup('#FF4B14', '#ffcb7e', 'orange'),

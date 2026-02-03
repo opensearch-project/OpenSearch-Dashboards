@@ -10,23 +10,13 @@ import {
   RequestHandlerContext,
 } from 'src/core/server';
 import { BaseConnectionManager, QueryExecutor } from './base_connection_manager';
-import { GetResourcesResponse, QueryResponse } from '../clients/base_connection_client';
-import { URI } from '../../../common/constants';
+import { GetResourcesResponse } from '../clients/base_connection_client';
+import { URI, RESOURCE_TYPES } from '../../../common/constants';
 import { PrometheusConnectionClient } from '../clients/prometheus_connection_client';
 import { ResourcesRequest } from '../../routes/resources/routes';
 
 const BASE_RESOURCE_API = 'api/v1';
 const BASE_ALERT_MANAGER_API = 'alertmanager/api/v2';
-
-const PROMETHEUS_RESOURCE_TYPES = {
-  LABELS: 'labels',
-  LABEL_VALUES: 'label_values',
-  METRICS: 'metrics',
-  METRIC_METADATA: 'metric_metadata',
-  ALERTS: 'alerts',
-  ALERTS_GROUPS: 'alert_manager_alert_groups',
-  RULES: 'rules',
-} as const;
 
 // docs: https://prometheus.io/docs/concepts/metric_types/#metric-types
 type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
@@ -89,32 +79,36 @@ interface CommonQuery {
   query: Record<string, string>;
 }
 interface LabelsQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.LABELS;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.LABELS;
   resourceName?: string;
 }
 interface LabelValuesQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES;
   resourceName: string;
 }
 interface MetricsQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.METRICS;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.METRICS;
   resourceName: undefined;
 }
 interface MetricMetadataQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA;
   resourceName?: string;
 }
 interface AlertsQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.ALERTS;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.ALERTS;
   resourceName: undefined;
 }
 interface AlertsGroupsQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS;
   resourceName: undefined;
 }
 interface RulesQuery {
-  resourceType: typeof PROMETHEUS_RESOURCE_TYPES.RULES;
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.RULES;
   resourceName: undefined;
+}
+interface SeriesQuery {
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.SERIES;
+  resourceName: string; // match[] selector, e.g. '{__name__=~"metric1|metric2"}'
 }
 type PrometheusResourceQuery = CommonQuery &
   (
@@ -125,6 +119,7 @@ type PrometheusResourceQuery = CommonQuery &
     | AlertsQuery
     | AlertsGroupsQuery
     | RulesQuery
+    | SeriesQuery
   );
 
 class PrometheusManager extends BaseConnectionManager<
@@ -164,28 +159,29 @@ class PrometheusManager extends BaseConnectionManager<
   private getResourceURI(query: PrometheusResourceQuery): string {
     const { resourceType, resourceName } = query;
     switch (resourceType) {
-      case PROMETHEUS_RESOURCE_TYPES.LABELS: {
-        const labelsQueryString = resourceName ? `?match[]=${resourceName}` : '';
-        return `${BASE_RESOURCE_API}/labels${labelsQueryString}`;
+      case RESOURCE_TYPES.PROMETHEUS.LABELS: {
+        return `${BASE_RESOURCE_API}/labels`;
       }
-      case PROMETHEUS_RESOURCE_TYPES.ALERTS: {
+      case RESOURCE_TYPES.PROMETHEUS.ALERTS: {
         return `${BASE_RESOURCE_API}/alerts`;
       }
-      case PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES: {
+      case RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES: {
         return `${BASE_RESOURCE_API}/label/${resourceName}/values`;
       }
-      case PROMETHEUS_RESOURCE_TYPES.METRICS: {
+      case RESOURCE_TYPES.PROMETHEUS.METRICS: {
         return `${BASE_RESOURCE_API}/label/__name__/values`;
       }
-      case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA: {
-        const metricMetadataQueryString = resourceName ? `?metric=${resourceName}` : '';
-        return `${BASE_RESOURCE_API}/metadata${metricMetadataQueryString}`;
+      case RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA: {
+        return `${BASE_RESOURCE_API}/metadata`;
       }
-      case PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS: {
+      case RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS: {
         return `${BASE_ALERT_MANAGER_API}/alerts/groups`;
       }
-      case PROMETHEUS_RESOURCE_TYPES.RULES: {
+      case RESOURCE_TYPES.PROMETHEUS.RULES: {
         return `${BASE_RESOURCE_API}/rules`;
+      }
+      case RESOURCE_TYPES.PROMETHEUS.SERIES: {
+        return `${BASE_RESOURCE_API}/series`;
       }
       default: {
         throw Error(`unknown resource type: ${resourceType}`);
@@ -204,14 +200,35 @@ class PrometheusManager extends BaseConnectionManager<
     });
   }
 
-  handlePostRequest(context: RequestHandlerContext, request: ResourcesRequest) {
+  handlePostRequest(
+    context: RequestHandlerContext,
+    request: ResourcesRequest<{ start?: number; end?: number }>
+  ) {
     const { id: dataSourceName } = request.body.connection;
     const { type: resourceType, name: resourceName } = request.body.resource;
+    const content = request.body.content;
+    const queryParams: Record<string, string> = {};
+
+    if (resourceType === RESOURCE_TYPES.PROMETHEUS.LABELS && resourceName) {
+      queryParams['match[]'] = resourceName;
+    } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA && resourceName) {
+      queryParams.metric = resourceName;
+    } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.SERIES && resourceName) {
+      queryParams['match[]'] = resourceName;
+    }
+
+    if (content?.start !== undefined) {
+      queryParams.start = String(content.start);
+    }
+    if (content?.end !== undefined) {
+      queryParams.end = String(content.end);
+    }
+
     const query = {
       dataSourceName,
       resourceType,
       resourceName,
-      query: {},
+      query: queryParams,
     } as PrometheusResourceQuery;
     return this.getResources(context, request, query);
   }

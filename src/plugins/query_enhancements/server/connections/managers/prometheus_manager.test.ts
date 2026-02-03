@@ -4,7 +4,7 @@
  */
 
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'src/core/server';
-import { URI } from '../../../common/constants';
+import { URI, RESOURCE_TYPES } from '../../../common/constants';
 import { prometheusManager, PromQLQueryParams, PromQLQueryResponse } from './prometheus_manager';
 import { QueryExecutor } from './base_connection_manager';
 
@@ -37,6 +37,7 @@ describe('PrometheusManager', () => {
     it('should fetch labels', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['__name__', 'instance', 'job'],
         },
       };
@@ -44,7 +45,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         query: {},
       });
 
@@ -63,6 +64,7 @@ describe('PrometheusManager', () => {
     it('should fetch labels with match parameter', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['cpu', 'mode'],
         },
       };
@@ -70,14 +72,14 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: 'node_cpu_seconds_total',
-        query: {},
+        query: { 'match[]': 'node_cpu_seconds_total' },
       });
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
-        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels?match[]=node_cpu_seconds_total`,
-        querystring: '',
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
+        querystring: 'match%5B%5D=node_cpu_seconds_total',
         method: 'GET',
       });
       expect(result.status).toBe('success');
@@ -86,6 +88,7 @@ describe('PrometheusManager', () => {
     it('should fetch label values', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['prometheus', 'node_exporter'],
         },
       };
@@ -93,7 +96,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'label_values',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES,
         resourceName: 'job',
         query: {},
       });
@@ -109,6 +112,7 @@ describe('PrometheusManager', () => {
     it('should fetch metrics', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['up', 'node_cpu_seconds_total', 'prometheus_http_requests_total'],
         },
       };
@@ -116,7 +120,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'metrics',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRICS,
         resourceName: undefined,
         query: {},
       });
@@ -136,6 +140,7 @@ describe('PrometheusManager', () => {
     it('should fetch metric metadata', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             up: [{ type: 'gauge', help: 'Target up status', unit: '' }],
           },
@@ -145,7 +150,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'metric_metadata',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         query: {},
       });
 
@@ -162,6 +167,7 @@ describe('PrometheusManager', () => {
     it('should fetch metric metadata with specific metric', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             up: [{ type: 'gauge', help: 'Target up status', unit: '' }],
           },
@@ -171,14 +177,14 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'metric_metadata',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         resourceName: 'up',
-        query: {},
+        query: { metric: 'up' },
       });
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
-        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/metadata?metric=up`,
-        querystring: '',
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/metadata`,
+        querystring: 'metric=up',
         method: 'GET',
       });
     });
@@ -186,6 +192,7 @@ describe('PrometheusManager', () => {
     it('should fetch alerts', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             alerts: [{ labels: { alertname: 'TestAlert' }, state: 'firing' }],
           },
@@ -195,7 +202,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'alerts',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS,
         resourceName: undefined,
         query: {},
       });
@@ -210,6 +217,7 @@ describe('PrometheusManager', () => {
     it('should fetch alert manager alert groups', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: [{ labels: { alertname: 'TestAlert' }, alerts: [] }],
         },
       };
@@ -217,7 +225,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'alert_manager_alert_groups',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS,
         resourceName: undefined,
         query: {},
       });
@@ -232,6 +240,7 @@ describe('PrometheusManager', () => {
     it('should fetch rules', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             groups: [{ name: 'test-rules', rules: [] }],
           },
@@ -241,7 +250,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'rules',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.RULES,
         resourceName: undefined,
         query: {},
       });
@@ -256,6 +265,7 @@ describe('PrometheusManager', () => {
     it('should include query parameters in querystring', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['label1'],
         },
       };
@@ -263,7 +273,7 @@ describe('PrometheusManager', () => {
 
       await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         query: { start: '1638316800', end: '1638320400' },
       });
 
@@ -279,6 +289,7 @@ describe('PrometheusManager', () => {
     it('should handle POST request and call getResources', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['label1', 'label2'],
         },
       };
@@ -304,6 +315,7 @@ describe('PrometheusManager', () => {
     it('should handle POST request with resourceName', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['value1', 'value2'],
         },
       };
@@ -316,11 +328,89 @@ describe('PrometheusManager', () => {
         },
       } as unknown) as OpenSearchDashboardsRequest;
 
-      const result = await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/label/job/values`,
         querystring: '',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request with time range content', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['label1', 'label2'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'labels', name: undefined },
+          content: { start: 1638316800, end: 1638320400 },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
+        querystring: 'start=1638316800&end=1638320400',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request for labels with metric and time range', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['cpu', 'mode'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'labels', name: 'node_cpu_seconds_total' },
+          content: { start: 1638316800, end: 1638320400 },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
+        querystring: 'match%5B%5D=node_cpu_seconds_total&start=1638316800&end=1638320400',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request for metric metadata with metric name and time range', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: { up: [{ type: 'gauge', help: 'Target up status', unit: '' }] },
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'metric_metadata', name: 'up' },
+          content: { start: 1638316800, end: 1638320400 },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/metadata`,
+        querystring: 'metric=up&start=1638316800&end=1638320400',
         method: 'GET',
       });
     });
@@ -373,13 +463,10 @@ describe('PrometheusManager', () => {
       const result = await prometheusManager.query(mockContext, mockRequest, params);
 
       expect(mockExecutor.execute).toHaveBeenCalledWith(mockContext, mockRequest, params);
-      expect(result).toEqual({
-        status: 'success',
-        data: mockQueryResponse,
-      });
+      expect(result).toEqual(mockQueryResponse);
     });
 
-    it('should return failed status when query executor throws error', async () => {
+    it('should throw error when query executor throws error', async () => {
       const mockExecutor: QueryExecutor<PromQLQueryParams, PromQLQueryResponse> = {
         execute: jest.fn().mockRejectedValue(new Error('Query timeout')),
       };
@@ -401,13 +488,9 @@ describe('PrometheusManager', () => {
         dataconnection: 'prom-conn',
       };
 
-      const result = await prometheusManager.query(mockContext, mockRequest, params);
-
-      expect(result).toEqual({
-        status: 'failed',
-        data: undefined,
-        error: 'Query timeout',
-      });
+      await expect(prometheusManager.query(mockContext, mockRequest, params)).rejects.toThrow(
+        'Query timeout'
+      );
     });
 
     it('should throw error when no query executor is set', async () => {

@@ -4,12 +4,11 @@
  */
 
 import Papa from 'papaparse';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import {
-  DATASOURCE_NAME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITHOUT_TIME_1,
-} from '../../../../../../utils/apps/explore/constants';
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/explore/shared';
+import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/explore/constants';
 import {
   downloadCsvAndVerify,
   generateDownloadCsvTestConfigurations,
@@ -21,32 +20,29 @@ import {
   prepareDiscoverPageForDownload,
   toggleFieldsForCsvDownload,
 } from '../../../../../../utils/apps/explore/download_csv';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetWithTimeId = getRandomizedDatasetId();
 
 const runDownloadCsvTests = () => {
   describe('Download as CSV', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITHOUT_TIME_1,
-        timefieldName: '',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-        indexPatternHasTimefield: false,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and first dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetWithTimeId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern with time
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     afterEach(() => {
@@ -55,10 +51,7 @@ const runDownloadCsvTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateDownloadCsvTestConfigurations().forEach((config) => {

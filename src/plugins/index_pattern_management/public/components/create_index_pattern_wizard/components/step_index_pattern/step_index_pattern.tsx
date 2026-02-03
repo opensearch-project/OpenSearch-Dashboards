@@ -266,7 +266,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     if (query.length === 1 && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
-      setTimeout(() => target.setSelectionRange(1, 1));
+      setTimeout(() => target.setSelectionRange?.(1, 1));
     } else {
       if (query === '*' && appendedWildcard) {
         query = '';

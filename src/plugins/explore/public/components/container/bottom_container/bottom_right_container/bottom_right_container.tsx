@@ -24,6 +24,7 @@ import { useDatasetContext } from '../../../../application/context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
+import { TraceAutoDetectCallout } from '../../../trace_auto_detect_callout';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
@@ -46,6 +47,19 @@ export const BottomRightContainer = () => {
   });
 
   if (dataset == null) {
+    // Show auto-detect callout only for traces flavor
+    if (flavorId === ExploreFlavor.Traces) {
+      return (
+        <CanvasPanel>
+          <>
+            <EuiSpacer size="xxl" />
+            <TraceAutoDetectCallout />
+          </>
+        </CanvasPanel>
+      );
+    }
+
+    // Show default empty state for other flavors
     return (
       <CanvasPanel>
         <>
@@ -92,12 +106,10 @@ export const BottomRightContainer = () => {
     status === QueryExecutionStatus.ERROR
   ) {
     return (
-      <>
+      <CanvasPanel>
         <DiscoverChartContainer />
-        <CanvasPanel>
-          <ResizableVisControlAndTabs />
-        </CanvasPanel>
-      </>
+        <ResizableVisControlAndTabs />
+      </CanvasPanel>
     );
   }
 

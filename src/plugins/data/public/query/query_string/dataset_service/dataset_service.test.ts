@@ -207,6 +207,53 @@ describe('DatasetService', () => {
     );
   });
 
+  test('cacheDataset passes dataSourceMeta when dataSource has meta', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+      dataSource: {
+        id: 'ds-1',
+        title: 'Data Source 1',
+        type: 'OpenSearch',
+        version: '1.0',
+        meta: { prometheusUrl: 'http://localhost:9090', customField: 'value' },
+      },
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset, mockDataPluginServices);
+    expect(indexPatterns.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceMeta: { prometheusUrl: 'http://localhost:9090', customField: 'value' },
+      }),
+      true
+    );
+  });
+
+  test('cacheDataset sets dataSourceMeta to undefined when dataSource has no meta', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+      dataSource: {
+        id: 'ds-1',
+        title: 'Data Source 1',
+        type: 'OpenSearch',
+        version: '1.0',
+      },
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset, mockDataPluginServices);
+    expect(indexPatterns.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceMeta: undefined,
+      }),
+      true
+    );
+  });
+
   test('saveDataset creates and saves a new dataset without data source', async () => {
     const mockDataset = {
       id: 'test-dataset',

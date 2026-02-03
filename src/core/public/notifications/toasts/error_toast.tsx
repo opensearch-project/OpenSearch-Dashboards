@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import {
   EuiSmallButton,
@@ -148,6 +148,7 @@ export function ErrorToast({
 }
 
 const mount = (component: React.ReactElement) => (container: HTMLElement) => {
-  ReactDOM.render(component, container);
-  return () => ReactDOM.unmountComponentAtNode(container);
+  const root = createRoot(container);
+  root.render(component);
+  return () => root.unmount();
 };

@@ -1,0 +1,2 @@
+feat:
+- Add dynamic setting flag for Explore Traces + Metrics ([#11220](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11220))

@@ -8,8 +8,8 @@
     "devOnly": true
   },
   "scripts": {
-    "build": "webpack",
-    "osd:watch": "webpack --watch --progress",
+    "build": "rspack --config webpack.config.js",
+    "osd:watch": "rspack --config webpack.config.js --watch",
     "prettier": "prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
@@ -35,7 +35,6 @@
     "@types/tempy": "^0.2.0",
     "@types/write-pkg": "^3.1.0",
     "@yarnpkg/lockfile": "^1.1.0",
-    "babel-loader": "^8.2.3",
     "chalk": "^4.1.0",
     "cmd-shim": "^2.1.0",
     "cpy": "^8.0.0",
@@ -59,9 +58,7 @@
     "strip-ansi": "^6.0.0",
     "strong-log-transformer": "^2.1.0",
     "tempy": "^0.3.0",
-    "typescript": "4.5.5",
     "unlazy-loader": "^0.1.3",
-    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
     "webpack-cli": "^4.9.2",
     "write-pkg": "^4.0.0"
   },

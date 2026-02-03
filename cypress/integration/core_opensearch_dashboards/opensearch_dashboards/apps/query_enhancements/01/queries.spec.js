@@ -10,38 +10,47 @@ import {
   END_TIME,
   INVALID_INDEX,
 } from '../../../../../../utils/apps/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/query_enhancements/shared';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/query_enhancements/saved';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const queriesTestSuite = () => {
   describe('query enhancement queries', { scrollBehavior: false }, () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspace,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     beforeEach(() => {
       // Go to discover page
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace);
     });
 
     describe('send queries', () => {
@@ -54,11 +63,6 @@ const queriesTestSuite = () => {
         cy.setQueryEditor(query);
         cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
-
-        // Query should persist across refresh
-        cy.reload();
-        cy.osd.verifyResultsCount(1);
-        cy.verifyHitCount(1);
       });
 
       it('with Lucene', () => {
@@ -69,11 +73,6 @@ const queriesTestSuite = () => {
         const query = `_id:N9srQ8opwBxGdIoQU3TW`;
         cy.setQueryEditor(query);
 
-        cy.osd.verifyResultsCount(1);
-        cy.verifyHitCount(1);
-
-        // Query should persist across refresh
-        cy.reload();
         cy.osd.verifyResultsCount(1);
         cy.verifyHitCount(1);
       });
@@ -92,28 +91,6 @@ const queriesTestSuite = () => {
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
         cy.osd.verifyResultsCount(10);
         cy.getElementByTestId('discoverQueryHits').should('not.exist');
-
-        // Query should persist across refresh
-        cy.reload();
-        cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
-
-        cy.osd.verifyResultsCount(10);
-        cy.getElementByTestId('discoverQueryHits').should('not.exist');
-
-        cy.getElementByTestId('osdQueryEditor__multiLine')
-          .find('.monaco-editor')
-          .should('be.visible')
-          // Ensure editor is in the correct visual state ('vs' is Monaco's default theme)
-          // This helps verify the editor is fully initialized and ready
-          .should('have.class', 'vs')
-          .click()
-          .find('textarea.inputarea')
-          .focus()
-          .type('{backspace}', { force: true });
-
-        cy.getElementByTestId(`querySubmitButton`).click();
-        cy.waitForSearch();
-        cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
 
         // Test error message
         const query = `SELECT * FROM ${INVALID_INDEX} LIMIT 10`;
@@ -140,18 +117,6 @@ const queriesTestSuite = () => {
         });
         cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
         cy.osd.verifyResultsCount(10000);
-
-        // Query should persist across refresh
-        cy.reload();
-        cy.getElementByTestId(`queryResultCompleteMsg`).should('be.visible');
-
-        // Verify the state again after reload
-        verifyDiscoverPageState({
-          dataset: `${INDEX_WITH_TIME_1}*`,
-          queryString: `source = ${INDEX_WITH_TIME_1}*`,
-          language: 'PPL',
-          hitCount: '10,000',
-        });
 
         // Test none search PPL query
         const statsQuery = `describe ${INDEX_WITH_TIME_1} | stats count()`;

@@ -5,59 +5,24 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { darkMode, euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { DEFAULT_DARK, DEFAULT_LIGHT, ECHARTS_DARK, ECHARTS_LIGHT } from './color_palettes';
 
 export const getColors = () => {
   // Temporary change to rollout discover visualization theme changes for development before OUI theme changes
   // been implemented accordingly.
-  const isExperimental =
-    localStorage.getItem('__DEVELOPMENT__.discover.vis.theme') === 'experimental';
-  if (isExperimental) {
+  const theme = localStorage.getItem('__DEVELOPMENT__.discover.vis.theme') || 'echarts';
+  if (theme === 'experimental') {
     if (darkMode) {
-      return {
-        statusBlue: '#006CE0',
-        statusGreen: '#00BD6B',
-        statusYellow: '#F90',
-        statusOrange: '#FF6A3D',
-        statusRed: '#DB0000',
-        text: '#FFF',
-        grid: '#27252C',
-        backgroundShade: '#27252C',
-        categories: [
-          '#7598FF',
-          '#A669E2',
-          '#FF4B14',
-          '#F90',
-          '#006CE0',
-          '#008559',
-          '#EB003B',
-          '#FFE8BD',
-          '#00A4BD',
-          '#D600BA',
-        ],
-      };
+      return DEFAULT_DARK;
     }
-    return {
-      statusBlue: '#004A9E',
-      statusGreen: '#00BD6B',
-      statusYellow: '#F90',
-      statusOrange: '#FF6A3D',
-      statusRed: '#DB0000',
-      text: '#313131',
-      grid: '#F5F7FF',
-      backgroundShade: '#f1f1f1ff',
-      categories: [
-        '#5C7FFF',
-        '#A669E2',
-        '#FF4B14',
-        '#F90',
-        '#003B8F',
-        '#005237',
-        '#EB003B',
-        '#7A2B00',
-        '#00A4BD',
-        '#B2008F',
-      ],
-    };
+    return DEFAULT_LIGHT;
+  }
+
+  if (theme === 'echarts') {
+    if (darkMode) {
+      return ECHARTS_DARK;
+    }
+    return ECHARTS_LIGHT;
   }
 
   return {
@@ -67,6 +32,7 @@ export const getColors = () => {
     statusOrange: '#FF6A3D',
     statusRed: '#DB0000',
     text: euiThemeVars.euiTextColor,
+    subText: euiThemeVars.euiTextColors.subdued,
     grid: euiThemeVars.euiColorChartLines,
     backgroundShade: darkMode ? '#27252C' : '#f1f1f1ff',
     categories: euiPaletteColorBlind(),

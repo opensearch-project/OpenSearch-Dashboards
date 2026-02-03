@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HttpSetup, IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
@@ -73,7 +73,8 @@ export function renderApp({
   const api = createApi({ http });
   const opensearchHostService = createOpenSearchHostService({ api });
 
-  render(
+  const root = createRoot(element);
+  root.render(
     <I18nContext>
       <ServicesContextProvider
         value={{
@@ -97,9 +98,8 @@ export function renderApp({
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>
-    </I18nContext>,
-    element
+    </I18nContext>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

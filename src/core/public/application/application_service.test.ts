@@ -54,7 +54,7 @@ import {
   InternalApplicationStart,
 } from './types';
 import { MountPoint } from '../types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { workspacesServiceMock } from '../mocks';
 
 const createApp = (props: Partial<App>): App => {

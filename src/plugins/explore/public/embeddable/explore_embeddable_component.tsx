@@ -17,6 +17,7 @@ import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
 import { SAMPLE_SIZE_SETTING } from '../../common';
+import { EchartsRender } from '../components/visualizations/echarts_render';
 
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
@@ -117,6 +118,12 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       );
     }
 
+    if (searchProps.spec && !searchProps.spec.$schema) {
+      return (
+        <EchartsRender spec={searchProps.spec} onSelectTimeRange={searchProps.onSelectTimeRange} />
+      );
+    }
+
     return (
       <ReactExpressionRenderer
         expression={searchProps.expression ?? ''}
@@ -135,7 +142,6 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       direction="column"
       responsive={false}
       data-test-subj="embeddedSavedExplore"
-      className="eui-xScrollWithShadows eui-yScrollWithShadows"
     >
       <EuiFlexItem style={{ minHeight: 0 }} data-test-subj="osdExploreContainer">
         {getEmbeddableContent()}

@@ -5,20 +5,28 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { coreMock } from '../../../../core/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { coreMock, workspacesServiceMock } from '../../../../core/public/mocks';
 import { WorkspaceCollaboratorsApp } from './workspace_collaborators_app';
 import { OpenSearchDashboardsContextProvider } from '../../../../plugins/opensearch_dashboards_react/public';
-import { of } from 'rxjs';
 
 const setup = () => {
   const coreStartMock = coreMock.createStart();
+  // Use BehaviorSubject instead of of([]) to avoid infinite loops with useObservable in React 18
+  const collaboratorTypes$ = new BehaviorSubject([]);
+  // Create a mock currentWorkspace$ as BehaviorSubject to avoid infinite loops
+  const currentWorkspace$ = new BehaviorSubject(null);
   const services = {
     ...coreStartMock,
+    workspaces: {
+      ...workspacesServiceMock.createStartContract(),
+      currentWorkspace$,
+    },
     navigationUI: {
       HeaderControl: () => null,
     },
     collaboratorTypes: {
-      getTypes$: () => of([]),
+      getTypes$: () => collaboratorTypes$,
     },
   };
   const renderResult = render(

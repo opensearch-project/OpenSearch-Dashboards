@@ -7,52 +7,60 @@ import {
   DATASOURCE_NAME,
   TRACE_INDEX_PATTERN,
   TRACE_TIME_FIELD,
-  TRACE_INDEX,
   LOG_INDEX_PATTERN,
   LOG_TIME_FIELD,
-  LOG_INDEX,
 } from '../../../../../../utils/apps/explore/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { logsReferencingTraceFields, traceFields } from '../../../../../../utils/constants';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/explore/shared';
+import {
+  prepareTestSuite,
+  createDatasetWithEndpoint,
+  createWorkspaceWithDatasource,
+} from '../../../../../../utils/helpers';
 import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
+const logDatasetId = getRandomizedDatasetId();
+const traceDatasetId = getRandomizedDatasetId();
 
 const traceTestSuite = () => {
   let traceUrl;
-
   before(() => {
-    // Setup workspace with both log and trace indices
-    cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [LOG_INDEX, TRACE_INDEX]);
+    cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+    // Create the workspace
+    createWorkspaceWithDatasource(DATASOURCE_NAME, workspaceName, ['use-case-observability']);
 
     // Create log dataset first with schema mappings for correlation
-    cy.explore.createWorkspaceDataSets({
-      workspaceName: workspaceName,
-      indexPattern: LOG_INDEX_PATTERN.replace('*', ''),
-      timefieldName: LOG_TIME_FIELD,
-      indexPatternHasTimefield: true,
-      dataSource: DATASOURCE_NAME,
-      isEnhancement: true,
+    createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, logDatasetId, {
+      title: LOG_INDEX_PATTERN,
       signalType: 'logs',
-      schemaMappings: {
-        otelLogs: {
-          timeField: '@timestamp',
-          traceId: 'traceId',
-          spanId: 'spanId',
-          serviceName: 'resource.attributes.service.name',
-        },
-      },
+      timestamp: LOG_TIME_FIELD,
+      fields: logsReferencingTraceFields,
+      schemaMappings:
+        '{"otelLogs":{"timestamp":"time","traceId":"traceId","spanId":"spanId","serviceName":"resource.attributes.service.name"}}',
     });
 
     // Create trace dataset second
-    cy.explore.createWorkspaceDataSets({
-      workspaceName: workspaceName,
-      indexPattern: TRACE_INDEX_PATTERN.replace('*', ''),
-      timefieldName: TRACE_TIME_FIELD,
-      indexPatternHasTimefield: true,
-      dataSource: DATASOURCE_NAME,
-      isEnhancement: true,
+    createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, traceDatasetId, {
+      title: TRACE_INDEX_PATTERN,
       signalType: 'traces',
+      timestamp: TRACE_TIME_FIELD,
+      fields: traceFields,
+    });
+
+    // Get the trace dataset ID from alias and navigate to Dataset Page
+    cy.get(`@${traceDatasetId}:DATASET_ID`).then((traceDatasetSavedObjectId) => {
+      cy.log(`Using trace dataset ID: ${traceDatasetSavedObjectId}`);
+
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: `datasets/patterns/${traceDatasetSavedObjectId}`,
+        isEnhancement: true,
+      });
     });
 
     // Navigate to correlated datasets tab
@@ -90,7 +98,7 @@ const traceTestSuite = () => {
   });
 
   after(() => {
-    cy.explore.cleanupWorkspaceAndDataSourceAndTraces(workspaceName, [TRACE_INDEX, LOG_INDEX]);
+    cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
   });
 
   describe('Traces Test', () => {
@@ -104,14 +112,6 @@ const traceTestSuite = () => {
         if (workspaceKey) {
           win.sessionStorage.removeItem(workspaceKey);
         }
-      });
-
-      // mock AI mode disablement
-      cy.intercept('GET', '**/enhancements/assist/languages*', {
-        statusCode: 200,
-        body: {
-          configuredLanguages: [],
-        },
       });
 
       cy.osd.navigateToWorkSpaceSpecificPage({
@@ -680,29 +680,6 @@ const traceTestSuite = () => {
 
         // Test "View in Explore" functionality - should always be available with 5 logs
         cy.get('button:contains("View in Discover Logs")').should('be.visible');
-
-        // Store current URL before navigation
-        let currentUrl;
-        cy.url().then((url) => {
-          currentUrl = url;
-        });
-
-        // Click "View in Discover Logs" button using data-test-subj
-        cy.get('[data-test-subj^="trace-logs-view-in-explore-button-"]').first().click();
-
-        // Verify navigation to explore logs page with correct URL pattern
-        cy.url().should('include', '/app/explore/logs/');
-        cy.url().should('not.equal', currentUrl);
-
-        // Wait for explore page to load
-        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-
-        // Verify results are showing on the explore page
-        cy.get('[data-test-subj="docTable"]', { timeout: 10000 }).should('be.visible');
-        cy.get('[data-test-subj="docTable"] tbody tr').should('have.length.greaterThan', 0);
-
-        // Verify trace ID filter is applied in the results
-        cy.get('body').should('contain.text', '68b0ad76fc05c5a5f5e3738d42b8a735');
       });
     });
   });

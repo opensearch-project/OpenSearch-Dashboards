@@ -59,28 +59,22 @@ const isEditorEmpty = () => {
     .then((text) => text.trim() === '');
 };
 
-const selectIndexWildcardMode = (indexPattern, appendWildcard = true) => {
-  // Select "Index wildcard" from the scope selector
-  cy.getElementByTestId('index-scope-selector')
-    .should('be.visible')
-    .find('[data-test-subj="comboBoxSearchInput"]')
-    .click()
-    .clear()
-    .type('Index wildcard{enter}');
+const selectIndexWildcardMode = (indexPattern) => {
+  // UI now auto-appends wildcard when typing single character, so just use the pattern as-is
+  const pattern = indexPattern;
 
-  // Wait for the selection to take effect by verifying the text changed
-  cy.getElementByTestId('index-scope-selector')
-    .find('[data-test-subj="comboBoxInput"]')
-    .should('contain.text', 'Index wildcard')
-    .should('be.visible');
-
-  // Enter the pattern with optional wildcard appending
-  const pattern = appendWildcard ? `${indexPattern}*{enter}` : `${indexPattern}{enter}`;
-  cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
+  // Type the pattern into the unified search field
+  cy.getElementByTestId('unified-index-selector-search')
     .should('be.visible')
-    .find('[data-test-subj="multiWildcardPatternInput"]')
+    .click({ force: true })
     .clear()
     .type(pattern);
+
+  // Click the "Add wildcard" button to add the pattern
+  cy.getElementByTestId('unified-index-selector-add-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
 };
 
 cy.explore.add('clearQueryEditor', () => {
@@ -103,12 +97,8 @@ cy.explore.add('clearQueryEditor', () => {
             return clearWithRetry(attempt + 1);
           } else {
             cy.log('Failed to clear editor after all attempts');
-            // Instead of throwing error, try one last time ensuring editor is ready
-            return cy
-              .get('.monaco-editor')
-              .should('be.visible')
-              .then(forceFocusEditor)
-              .then(clearMonacoEditor);
+            // Instead of throwing error, try one last time with extra waiting
+            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
           }
         });
       });
@@ -167,6 +157,17 @@ cy.explore.add('setTopNavDate', (start, end, submit = true) => {
     message: `Start: ${start} :: End: ${end}`,
   });
 
+  // In React 18, popovers may not be fully closed from a previous setTopNavDate call
+  // due to automatic batching. Close any open popovers first.
+  cy.get('body', opts).then(($body) => {
+    if ($body.find('[data-test-subj="superDatePickerAbsoluteTab"]').length > 0) {
+      cy.get('body').type('{esc}', opts);
+      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', { timeout: 1000, ...opts }).should(
+        'not.exist'
+      );
+    }
+  });
+
   /* Find any one of the two buttons that change/open the date picker:
    *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
    *      * in some versions of OUI, the switch will open the date selection dialog as well
@@ -191,11 +192,14 @@ cy.explore.add('setTopNavDate', (start, end, submit = true) => {
       .click(opts);
   });
 
-  // Click absolute tab
-  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).click(opts);
+  // Click absolute tab for start date
+  // Use .first() because in React 18, both start and end date popovers may briefly
+  // be open simultaneously due to timing/batching differences, resulting in 2 tabs
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).first(opts).click(opts);
 
   // Type absolute start date
   cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
+    .first(opts)
     .click(opts)
     .clear(opts)
     .type(start, {
@@ -234,6 +238,17 @@ cy.explore.add('setRelativeTopNavDate', (time, timeUnit) => {
 
   const opts = { log: false };
 
+  // In React 18, popovers may not be fully closed from a previous call
+  // due to automatic batching. Close any open popovers first.
+  cy.get('body', opts).then(($body) => {
+    if ($body.find('[data-test-subj="superDatePickerAbsoluteTab"]').length > 0) {
+      cy.get('body').type('{esc}', opts);
+      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', { timeout: 1000, ...opts }).should(
+        'not.exist'
+      );
+    }
+  });
+
   /* Find any one of the two buttons that change/open the date picker:
    *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
    *      * in some versions of OUI, the switch will open the date selection dialog as well
@@ -258,23 +273,27 @@ cy.explore.add('setRelativeTopNavDate', (time, timeUnit) => {
       .click(opts);
   });
 
-  // Click absolute tab
-  cy.getElementByTestId('superDatePickerRelativeTab', opts).click(opts);
+  // Click relative tab for start date
+  // Use .first() because in React 18, both start and end date popovers may briefly
+  // be open simultaneously due to timing/batching differences, resulting in 2 tabs
+  cy.getElementByTestId('superDatePickerRelativeTab', opts).first(opts).click(opts);
 
-  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').clear().type(time);
+  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').first(opts).clear().type(time);
   cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
   cy.getElementByTestId('exploreQueryExecutionButton').click();
 });
 
 cy.explore.add('updateTopNav', (options) => {
-  cy.getElementByTestId('exploreQueryExecutionButton', options).click({ force: true });
+  cy.getElementByTestId('exploreQueryExecutionButton', options).click({
+    force: true,
+  });
 });
 
 cy.explore.add(
   'saveQuery',
   (name, description = ' ', includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
-      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
     });
     cy.getElementByTestId('saved-query-management-save-button').click();
 
@@ -291,7 +310,9 @@ cy.explore.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
+      .contains('was saved')
+      .should('be.visible');
   }
 );
 
@@ -299,7 +320,7 @@ cy.explore.add(
   'updateSavedQuery',
   (name = '', saveAsNewQuery = false, includeFilters = true, includeTimeFilter = false) => {
     cy.whenTestIdNotFound('saved-query-management-popover', () => {
-      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
+      cy.getElementByTestId('queryPanelFooterSaveQueryButton').click({ force: true });
     });
     cy.getElementByTestId('saved-query-management-save-button').click();
 
@@ -329,7 +350,9 @@ cy.explore.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
+      .contains('was saved')
+      .should('be.visible');
     cy.osd.waitForSync();
   }
 );
@@ -337,7 +360,11 @@ cy.explore.add(
 cy.explore.add('loadSavedQuery', (name) => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
-  cy.getElementByTestId('saved-query-management-open-button').click();
+  // Wait for the popover to fully render before clicking the open button
+  cy.getElementByTestId('saved-query-management-open-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
   // click button through popover
@@ -355,7 +382,11 @@ cy.explore.add('clearSavedQuery', () => {
 cy.explore.add('deleteSavedQuery', (name) => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
-  cy.getElementByTestId('saved-query-management-open-button').click();
+  // Wait for the popover to fully render before clicking the open button
+  cy.getElementByTestId('saved-query-management-open-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
   cy.getElementByTestId('euiFlyoutCloseButton')
     .parent()
     .contains(name)
@@ -363,7 +394,9 @@ cy.explore.add('deleteSavedQuery', (name) => {
     .click();
 
   cy.getElementByTestId('confirmModalConfirmButton').click();
-  cy.osd.waitForSync();
+
+  cy.wait(2000);
+  cy.get('.euiFlyoutFooter').find('button[type="button"]').contains('Cancel').first().click();
 });
 
 cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
@@ -386,8 +419,7 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
       throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
   }
 
-  // Wait for dataset selection to complete by verifying the button is ready
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+  cy.wait(3000);
 });
 
 cy.explore.add(
@@ -405,39 +437,24 @@ cy.explore.add(
       .should('be.visible')
       .should('not.be.disabled')
       .click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Indexes"]`).click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Ensure "Index name" mode is selected (not "Index wildcard")
-    cy.getElementByTestId('index-scope-selector')
+    // Use the unified index selector - type to search and click from results
+    cy.getElementByTestId('unified-index-selector-search')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    // Select "Index name" if not already selected
-    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
-
-    // Verify selection
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index name');
-
-    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.getElementByTestId('index-selector-search')
-      .should('be.visible')
-      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .click({ force: true })
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render
-    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the dropdown to appear with results
+    cy.getElementByTestId('unified-index-selector-dropdown').should('be.visible');
 
-    // Now look for the dataset-index-selector within the popover
-    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+    // Click the matching index from the dropdown list
+    cy.getElementByTestId('unified-index-selector-list')
       .should('be.visible')
       .within(() => {
-        // Look for the index by title attribute in the popover
+        // Find and click the index by its label in the EuiSelectable
         cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
       });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -457,9 +474,7 @@ cy.explore.add(
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
     }
-    // Wait for dataset selection to complete
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+    cy.wait(3000);
   }
 );
 
@@ -481,9 +496,7 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
 
-  // Wait for dataset selection to complete
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+  cy.wait(3000);
 });
 
 cy.explore.add(
@@ -505,21 +518,19 @@ cy.explore.add(
       .click();
 
     // Step 3 - Click advanced selector button
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
 
-    // Step 4 - Select Indexes
-    cy.get(`[title="Indexes"]`).should('be.visible');
-    cy.get(`[title="Indexes"]`).click();
+    // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
     // Step 5 - Select data source
     cy.get(`[title="${dataSourceName}"]`).should('be.visible');
     cy.get(`[title="${dataSourceName}"]`).click();
 
     // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
-    selectIndexWildcardMode(indexPattern, true);
+    selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
-    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click({ force: true });
 
     // Step 9 - Select language (if provided)
     if (language) {
@@ -540,9 +551,7 @@ cy.explore.add(
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
     }
-    // Wait for dataset selection to complete
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+    cy.wait(3000);
   }
 );
 
@@ -550,11 +559,12 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   cy.explore.clearQueryEditor();
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
+  cy.wait(2000);
   cy.explore.setQueryEditor(query);
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is correct
@@ -577,6 +587,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   // Ensure chart type is correct
   cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
   cy.get(`#${chartType}`).should('match', '[role="option"][aria-selected="true"]');
+
   cy.get('body').click(0, 0);
 });
 
@@ -641,7 +652,7 @@ cy.explore.add(
     // Therefore it is unreliable to leverage the "create" button to navigate to this page
     if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'neo') {
       cy.get('@WORKSPACE_ID').then((workspaceId) => {
-        cy.visit(`/w/${workspaceId}/app/indexPatterns/create`);
+        cy.visit(`/w/${workspaceId}/app/datasets`);
       });
     } else {
       // Navigate to Workspace Specific IndexPattern Page
@@ -650,35 +661,32 @@ cy.explore.add(
         page: 'datasets',
         isEnhancement,
       });
-
-      // Step 2 - Wait for create dataset button to be fully ready before clicking
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.getElementByTestId('createDatasetButton')
-        .should('exist')
-        .should('be.visible')
-        .should('not.be.disabled');
-      cy.getElementByTestId('createDatasetButton').click({ force: true });
-
-      // Step 3 - Select signal type (logs or traces)
-      if (signalType === 'logs') {
-        cy.getElementByTestId('createLogsDataset').should('be.visible').click({ force: true });
-      }
-
-      if (signalType === 'traces') {
-        cy.getElementByTestId('createTracesDataset').should('be.visible').click({ force: true });
-      }
     }
 
-    // Step 4 - Select Indexes
-    cy.get(`[title="Indexes"]`).should('be.visible');
-    cy.get(`[title="Indexes"]`).click();
+    // Adding a wait here as sometimes the button doesn't click below
+    cy.wait(2000);
+
+    // Step 2 - Click create dataset button
+    cy.getElementByTestId('createDatasetButton').should('exist').should('be.visible');
+    cy.getElementByTestId('createDatasetButton').click({ force: true });
+
+    // Step 3 - Select signal type (logs or traces)
+    if (signalType === 'logs') {
+      cy.getElementByTestId('createLogsDataset').should('be.visible').click({ force: true });
+    }
+
+    if (signalType === 'traces') {
+      cy.getElementByTestId('createTracesDataset').should('be.visible').click({ force: true });
+    }
+
+    // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
     // Step 5 - Select data source
     cy.get(`[title="${dataSource}"]`).should('be.visible');
     cy.get(`[title="${dataSource}"]`).click();
 
-    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern (no wildcard appending)
-    selectIndexWildcardMode(indexPattern, false);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
+    selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
@@ -755,13 +763,44 @@ cy.explore.add(
       .click();
 
     // Step 14 - Wait for dataset creation request and save ID
-    cy.wait('@createDatasetInterception', { timeout: 15000 }).then((interception) => {
+    cy.wait('@createDatasetInterception').then((interception) => {
       // Save the created index pattern ID as an alias
       cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
     });
 
-    // Step 15 - Verify page title contains the index pattern (this will wait for the page to update)
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(3000);
+
+    // Step 15 - Verify page title contains the index pattern
     cy.getElementByTestId('headerApplicationTitle').should('contain', indexPattern);
   }
 );
+
+// TODO: Replace once we have APM datasource
+// Navigate to traces page by getting logs URL and replacing /logs with /traces
+cy.explore.add('navigateToTracesViaLogsUrl', (opts) => {
+  const { workspaceName, isEnhancement = false } = opts;
+
+  // First navigate to logs page to get the URL structure
+  cy.osd.navigateToWorkSpaceSpecificPage({
+    workspaceName: workspaceName,
+    page: 'explore/logs',
+    isEnhancement: isEnhancement,
+  });
+
+  // Get the current URL and modify it to point to traces
+  cy.url().then((logsUrl) => {
+    // Replace /logs with /traces and remove everything after /traces
+    const baseUrl = logsUrl.replace('/logs', '/traces');
+    const tracesIndex = baseUrl.indexOf('/traces');
+    const tracesUrl = baseUrl.substring(0, tracesIndex + '/traces'.length);
+    cy.log(`Navigating from logs URL: ${logsUrl} to traces URL: ${tracesUrl}`);
+    cy.visit(tracesUrl);
+  });
+
+  cy.osd.waitForLoader(isEnhancement);
+
+  // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+  // editor. Clicking on a random element removes the popover.
+  cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
+  cy.wait(1000);
+});

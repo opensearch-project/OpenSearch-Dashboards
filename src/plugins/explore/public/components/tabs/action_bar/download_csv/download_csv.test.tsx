@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { IntlProvider } from 'react-intl';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, act, waitFor } from '@testing-library/react';
 import { DiscoverDownloadCsv, DiscoverDownloadCsvProps } from './download_csv';
 
 jest.mock('@osd/i18n', () => ({
@@ -175,7 +175,7 @@ describe('DiscoverDownloadCsv', () => {
       });
     });
 
-    it('keyboard shortcut opens popover when not loading', () => {
+    it('keyboard shortcut opens popover when not loading', async () => {
       render(<TestHarness />);
 
       // Get the execute function from the keyboard shortcut registration
@@ -186,11 +186,15 @@ describe('DiscoverDownloadCsv', () => {
 
       const executeFunction = keyboardShortcutCall[0].execute;
 
-      // Execute the keyboard shortcut
-      executeFunction();
+      // Execute the keyboard shortcut (wrap in act for React 18)
+      await act(async () => {
+        executeFunction();
+      });
 
       // Verify popover opens
-      expect(screen.getByTestId('dscDownloadCsvPopoverContent')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('dscDownloadCsvPopoverContent')).toBeInTheDocument();
+      });
     });
 
     it('keyboard shortcut does nothing when loading', () => {

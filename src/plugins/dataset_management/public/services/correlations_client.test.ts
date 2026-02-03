@@ -8,7 +8,7 @@ import { CorrelationsClient } from './correlations_client';
 import {
   CorrelationSavedObject,
   CorrelationAttributes,
-  CORRELATION_TYPES,
+  CORRELATION_TYPE_PREFIXES,
   CORRELATION_VERSION,
 } from '../types/correlations';
 
@@ -157,14 +157,17 @@ describe('CorrelationsClient', () => {
     it('should create a new correlation with correct structure', async () => {
       const createData = {
         traceDatasetId: 'trace-123',
+        traceDatasetTitle: 'my-trace-dataset',
         logDatasetIds: ['logs-456', 'logs-789'],
       };
+
+      const expectedCorrelationType = `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}my-trace-dataset`;
 
       const mockResponse: CorrelationSavedObject = {
         id: 'new-correlation',
         type: 'correlations',
         attributes: {
-          correlationType: CORRELATION_TYPES.TRACES_LOGS,
+          correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
@@ -186,7 +189,8 @@ describe('CorrelationsClient', () => {
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'correlations',
         {
-          correlationType: CORRELATION_TYPES.TRACES_LOGS,
+          title: 'trace-to-logs_my-trace-dataset',
+          correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
@@ -208,14 +212,17 @@ describe('CorrelationsClient', () => {
     it('should create correlation with single log dataset', async () => {
       const createData = {
         traceDatasetId: 'trace-123',
+        traceDatasetTitle: 'my-trace-dataset',
         logDatasetIds: ['logs-456'],
       };
+
+      const expectedCorrelationType = `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}my-trace-dataset`;
 
       const mockResponse: CorrelationSavedObject = {
         id: 'new-correlation',
         type: 'correlations',
         attributes: {
-          correlationType: CORRELATION_TYPES.TRACES_LOGS,
+          correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
@@ -239,6 +246,7 @@ describe('CorrelationsClient', () => {
     it('should allow custom correlationType and version', async () => {
       const createData = {
         traceDatasetId: 'trace-123',
+        traceDatasetTitle: 'my-trace-dataset',
         logDatasetIds: ['logs-456'],
         correlationType: 'Custom-Type',
         version: '2.0.0',

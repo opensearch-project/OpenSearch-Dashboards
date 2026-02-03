@@ -62,7 +62,7 @@ export interface OptimizerState {
   offlineBundles: Bundle[];
 }
 
-const msToSec = (ms: number) => Math.round(ms / 100) / 10;
+const msToSec = (ms: number) => Math.round(ms / 10) / 100;
 
 /**
  * merge a state and some updates into a new optimizer state, apply some
