@@ -263,7 +263,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
 
   const fontFactor =
     containerFactor /
-    (barNumbers * displayValues.reduce((acc, display) => Math.max(acc, String(display).length), 0));
+    (barNumbers * displayValues.reduce((acc, display) => Math.max(acc, String(display).length), 1));
 
   // text color only display the corresponding threshold color and ignore min/max control
   const fontColors = values.map((value) => {

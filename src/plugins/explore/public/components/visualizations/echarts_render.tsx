@@ -37,10 +37,17 @@ export const EchartsRender = React.memo(
     const debouncedSizeChange = useMemo(
       () =>
         debounce((size: { width: number; height: number }) => {
+          containerSizeRef.current = size;
           onContainerSizeChange?.(size);
         }, 100),
       [onContainerSizeChange]
     );
+
+    useEffect(() => {
+      return () => {
+        debouncedSizeChange.cancel();
+      };
+    }, [debouncedSizeChange]);
 
     const containerResizeObserver = useMemo(
       () =>
