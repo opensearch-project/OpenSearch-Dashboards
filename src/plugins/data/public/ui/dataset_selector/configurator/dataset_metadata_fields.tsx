@@ -8,6 +8,8 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
 
+import './configurator_v2.scss';
+
 export interface DatasetMetadataFieldsProps {
   displayName?: string;
   description?: string;
@@ -26,12 +28,23 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate(
-          'data.explorer.datasetSelector.advancedSelector.configurator.datasetNameLabelOptional',
-          {
-            defaultMessage: 'Dataset name – optional',
-          }
-        )}
+        label={
+          <>
+            {i18n.translate(
+              'data.explorer.datasetSelector.advancedSelector.configurator.datasetNameLabel',
+              {
+                defaultMessage: 'Dataset name',
+              }
+            )}
+            <span className="datasetConfigurator-optionalSuffix">
+              &nbsp;&ndash;&nbsp;
+              <FormattedMessage
+                id="data.explorer.datasetSelector.advancedSelector.configurator.optionalText"
+                defaultMessage="optional"
+              />
+            </span>
+          </>
+        }
         display="columnCompressed"
         fullWidth
       >
@@ -43,12 +56,23 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate(
-          'data.explorer.datasetSelector.advancedSelector.configurator.datasetDescriptionLabelOptional',
-          {
-            defaultMessage: 'Dataset description – optional',
-          }
-        )}
+        label={
+          <>
+            {i18n.translate(
+              'data.explorer.datasetSelector.advancedSelector.configurator.datasetDescriptionLabel',
+              {
+                defaultMessage: 'Dataset description',
+              }
+            )}
+            <span className="datasetConfigurator-optionalSuffix">
+              &nbsp;&ndash;&nbsp;
+              <FormattedMessage
+                id="data.explorer.datasetSelector.advancedSelector.configurator.optionalText"
+                defaultMessage="optional"
+              />
+            </span>
+          </>
+        }
         display="columnCompressed"
         fullWidth
       >

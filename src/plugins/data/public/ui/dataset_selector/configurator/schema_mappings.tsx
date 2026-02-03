@@ -10,6 +10,8 @@ import React, { useState } from 'react';
 import { DatasetField } from '../../../../common';
 import { SchemaConfig } from './schema_config';
 
+import './configurator_v2.scss';
+
 export interface SchemaMappingsProps {
   /** Available fields from the dataset */
   availableFields: DatasetField[];
@@ -66,7 +68,12 @@ export const SchemaMappings: React.FC<SchemaMappingsProps> = ({
             <strong>
               <FormattedMessage
                 id="data.explorer.datasetSelector.advancedSelector.configurator.schemaMappingsTitle"
-                defaultMessage="Schema Mappings – optional"
+                defaultMessage="Schema Mappings {optionalSuffix}"
+                values={{
+                  optionalSuffix: (
+                    <span className="datasetConfigurator-optionalSuffix">– optional</span>
+                  ),
+                }}
               />
             </strong>
           </EuiText>

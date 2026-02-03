@@ -60,7 +60,8 @@ describe('SchemaMappings Component', () => {
 
   it('should render the accordion with correct title', () => {
     renderWithIntl(<SchemaMappings {...defaultProps} />);
-    expect(screen.getByText('Schema Mappings – optional')).toBeInTheDocument();
+    expect(screen.getByText('Schema Mappings')).toBeInTheDocument();
+    expect(screen.getByText('– optional')).toBeInTheDocument();
   });
 
   it('should render accordion component', () => {
@@ -72,20 +73,23 @@ describe('SchemaMappings Component', () => {
   it('should toggle accordion when clicked', () => {
     renderWithIntl(<SchemaMappings {...defaultProps} />);
 
-    const accordionButton = screen.getByText('Schema Mappings – optional');
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
 
     // Click to open
-    fireEvent.click(accordionButton);
+    fireEvent.click(accordionButton!);
     expect(screen.getByText('OTel logs - optional')).toBeInTheDocument();
 
     // Click to close
-    fireEvent.click(accordionButton);
+    fireEvent.click(accordionButton!);
     // Content may still be in DOM but accordion should toggle
   });
 
   it('should render schema attributes after expanding accordion', () => {
     renderWithIntl(<SchemaMappings {...defaultProps} />);
-    fireEvent.click(screen.getByText('Schema Mappings – optional'));
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
+    fireEvent.click(accordionButton!);
 
     expect(screen.getByText('Trace ID')).toBeInTheDocument();
     expect(screen.getByText('Span ID')).toBeInTheDocument();
@@ -96,7 +100,9 @@ describe('SchemaMappings Component', () => {
   it('should call onChange when a field is selected', () => {
     const mockOnChange = jest.fn();
     renderWithIntl(<SchemaMappings {...defaultProps} onChange={mockOnChange} />);
-    fireEvent.click(screen.getByText('Schema Mappings – optional'));
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
+    fireEvent.click(accordionButton!);
 
     const select = screen.getByTestId('schemaMappingSelect-otelLogs-traceId');
     fireEvent.change(select, { target: { value: 'field1' } });
@@ -121,7 +127,9 @@ describe('SchemaMappings Component', () => {
     };
 
     renderWithIntl(<SchemaMappings {...propsWithMapping} />);
-    fireEvent.click(screen.getByText('Schema Mappings – optional'));
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
+    fireEvent.click(accordionButton!);
 
     const select = screen.getByTestId('schemaMappingSelect-otelLogs-traceId');
     fireEvent.change(select, { target: { value: '' } });
@@ -131,7 +139,9 @@ describe('SchemaMappings Component', () => {
 
   it('should filter fields by type when attribute has type specified', () => {
     renderWithIntl(<SchemaMappings {...defaultProps} />);
-    fireEvent.click(screen.getByText('Schema Mappings – optional'));
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
+    fireEvent.click(accordionButton!);
 
     const timestampSelect = screen.getByTestId('schemaMappingSelect-otelLogs-timestamp');
     const options = timestampSelect.querySelectorAll('option');
@@ -154,7 +164,9 @@ describe('SchemaMappings Component', () => {
     };
 
     renderWithIntl(<SchemaMappings {...propsWithMapping} />);
-    fireEvent.click(screen.getByText('Schema Mappings – optional'));
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
+    fireEvent.click(accordionButton!);
 
     const traceIdSelect = screen.getByTestId(
       'schemaMappingSelect-otelLogs-traceId'
@@ -170,7 +182,9 @@ describe('SchemaMappings Component', () => {
   it('should handle multiple attribute changes independently', () => {
     const mockOnChange = jest.fn();
     renderWithIntl(<SchemaMappings {...defaultProps} onChange={mockOnChange} />);
-    fireEvent.click(screen.getByText('Schema Mappings – optional'));
+    const accordion = screen.getByTestId('schemaMappingsAccordion');
+    const accordionButton = accordion.querySelector('button');
+    fireEvent.click(accordionButton!);
 
     const traceIdSelect = screen.getByTestId('schemaMappingSelect-otelLogs-traceId');
     fireEvent.change(traceIdSelect, { target: { value: 'field1' } });

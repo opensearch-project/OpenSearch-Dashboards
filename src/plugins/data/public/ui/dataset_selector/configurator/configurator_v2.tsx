@@ -31,6 +31,8 @@ import { SaveAsDatasetOption } from './save_as_dataset_option';
 import { DatasetMetadataFields } from './dataset_metadata_fields';
 import { useDatasetFields } from './use_dataset_fields';
 
+import './configurator_v2.scss';
+
 export const ConfiguratorV2 = ({
   services,
   baseDataset,
@@ -151,11 +153,7 @@ export const ConfiguratorV2 = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiForm
-          className="datasetConfigurator"
-          data-test-subj="datasetConfigurator"
-          style={{ paddingLeft: '24px' }}
-        >
+        <EuiForm className="datasetConfigurator" data-test-subj="datasetConfigurator">
           {(alwaysShowDatasetFields || saveAsDataset) && (
             <DatasetMetadataFields
               displayName={dataset.displayName}
@@ -221,12 +219,26 @@ export const ConfiguratorV2 = ({
               </EuiFormRow>
             ) : (
               <EuiFormRow
-                label={`${i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
-                  {
-                    defaultMessage: 'Time field',
-                  }
-                )}${showNonTimeFieldDatasets ? ' – optional' : ''}`}
+                label={
+                  showNonTimeFieldDatasets ? (
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabelOptional"
+                      defaultMessage="Time field {optionalSuffix}"
+                      values={{
+                        optionalSuffix: (
+                          <span className="datasetConfigurator-optionalSuffix">– optional</span>
+                        ),
+                      }}
+                    />
+                  ) : (
+                    i18n.translate(
+                      'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
+                      {
+                        defaultMessage: 'Time field',
+                      }
+                    )
+                  )
+                }
                 display="columnCompressed"
                 fullWidth
               >
