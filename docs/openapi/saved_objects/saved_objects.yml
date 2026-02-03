@@ -9,35 +9,88 @@ info:
 tags:
   - name: saved objects
     description: Manage Dashboards saved objects, including dashboards, visualizations, saved search, and more.
+components:
+  parameters:
+    type:
+      name: type
+      in: path
+      description: The type of SavedObject to retrieve.
+      required: true
+      schema:
+        type: string
+        enum:
+          - dashboard
+          - config
+          - index-pattern
+        example: dashboard
+    id: 
+      name: id
+      in: path
+      description: Unique id of the saved object.
+      required: true
+      schema:
+        type: string
+        example: I2CFyW_27a48aa0-b274-11ef-b63c-9f43fceaea0c_7adfa750-4c81-11e8-b3d7-01146121b73d
+  schemas:
+    SavedObjectCreateRequest:
+      type: object
+      required:
+        - attributes
+      properties:
+        attributes:
+          type: object
+          description: The metadata of the saved object to be created, and the object is not validated.
+        migrationVersion:
+          type: object
+          description: The information about the migrations that have been applied to this saved object to be created.
+        references:
+          description: List of objects that describe other saved objects the created object references. 
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              type:
+                type: string
+        initialNamespaces:
+          description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+          type: array
+          items:
+            type: string
+        workspaces:
+          type: array
+          items:
+            type: string
+          description: Workspaces that this saved object exists in.
+    400_bad_request:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400
 paths:
-  /api/saved_objects/{type}/{id}:
-    get:
-      tags:
-        - saved objects
-      summary: Retrieve a single saved object by type and id.
-      parameters:
-      - $ref: '#/components/parameters/id'
-      - $ref: '#/components/parameters/type'
-      responses:
-        '200':
-          description: The saved object is successfully retrieved. 
-          content:
-            application/json:
-              schema:
-                type: object
-        '404':
-          description: The saved object does not exist.
-          content:
-            application/json:
-              schema:
-                type: object
+  /api/saved_objects/{type}:
     post:
       tags:
         - saved objects
-      summary: Create a new saved object with type and id.
+      summary: Create a new saved object without specifying an ID
       parameters:
-        - $ref: '#components/parameters/type'
-        - $ref: '#components/parameters/id'
+        - $ref: '#/components/parameters/type'
         - in: query
           name: overwrite
           description: If set to true, will overwrite the existing saved object with same type and id.
@@ -48,38 +101,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - attributes
-              properties:
-                attributes:
-                  type: object
-                  description: The metadata of the saved object to be created, and the object is not validated.
-                migrationVersion:
-                  type: object
-                  description: The information about the migrations that have been applied to this saved object to be created.
-                references:
-                  description: List of objects that describe other saved objects the created object references. 
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      type:
-                        type: string
-                initialNamespaces:
-                  description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
-                  type: array
-                  items:
-                    type: string
-                workspaces:
-                  type: array
-                  items:
-                    type: string
-                  description: Workspaces that this saved object exists in.
+              $ref: '#/components/schemas/SavedObjectCreateRequest'
             examples:
               indexPattern:
                 summary: Example of creating an index pattern saved object
@@ -137,13 +159,133 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+        '409':
+          description: There was a conflict when processing the request, usually due to a saved object with the same id
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: An internal server error occurred when processing the request
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/{type}/{id}:
+    get:
+      tags:
+        - saved objects
+      summary: Retrieve a single saved object by type and id.
+      parameters:
+      - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/type'
+      responses:
+        '200':
+          description: The saved object is successfully retrieved. 
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+        - saved objects
+      summary: Create a new saved object with a specific ID
+      parameters:
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/id'
+        - in: query
+          name: overwrite
+          description: If set to true, will overwrite the existing saved object with same type and id.
+          schema: 
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedObjectCreateRequest'
+            examples:
+              indexPattern:
+                summary: Example of creating an index pattern saved object
+                value:
+                  attributes:
+                    title: 'my-index-pattern'
+                    fields: '[{"count":"1","name":"@timestamp","searchable":"true"}]'
+                  references:
+                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
+                      name: 'dataSource'
+                      type: 'data-source'
+              vegaVisualization:
+                summary: Example of creating a Vega visualization saved object
+                value:
+                  attributes:
+                    title: 'my-vega-visualization'
+                    visState: '{"title":"vegaVisualization","type":"vega","aggs":[]}}'
+                    uiStateJSON: '{}'
+                    description: ''
+                    version: 1
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
+                    }
+                  references:
+                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
+                      name: 'dataSource'
+                      type: 'data-source'
+              dashboards:
+                summary: Example of creating a dashboard saved object
+                value:
+                  attributes:
+                    title: 'Revenue Dashboard'
+                    description: 'Revenue dashboard'
+                    panelsJSON: '[{"version":"2.9.0","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c"},"panelIndex":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c","embeddableConfig":{},"panelRefName":"panel_0"}]'
+                    optionsJSON: '{"hidePanelTitles":false,"useMargins":true}'
+                    version: 1
+                    timeRestore: true
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
+                    }
+                  references:
+                    - id: '37cc8650-b882-11e8-a6d9-e546fe2bba5f'
+                      name: 'panel_0'
+                      type: 'visualization'  
+      responses:
+        '200':
+          description: The creation request is successful
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+        '409':
+          description: There was a conflict when processing the request, usually due to a saved object with the same id
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: An internal server error occurred when processing the request
+          content:
+            application/json:
+              schema:
+                type: object
     put:
       tags:
         - saved objects
       summary: Update existing saved object
       parameters:
-        - $ref: '#components/parameters/type'
-        - $ref: '#components/parameters/id'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/id'
       requestBody:
         required: true
         content:
@@ -188,8 +330,8 @@ paths:
         - saved objects
       summary: Delete a saved object
       parameters:
-        - $ref: '#components/parameters/type'
-        - $ref: '#components/parameters/id'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/id'
         - in: query
           name: force
           description: If set to true, will force deletion of an object that exists in multiple namespaces.
@@ -526,7 +668,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object  
+                type: object
   /api/saved_objects/_import:
     post:
       tags:
@@ -830,38 +972,3 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
-components:
-  parameters:
-    type:
-      name: type
-      in: path
-      description: The type of SavedObject to retrieve.
-      required: true
-      schema:
-        type: string
-    id: 
-      name: id
-      in: path
-      description: Unique id of the saved object.
-      required: true
-      schema:
-        type: string
-  schemas:
-    400_bad_request:
-      title: Bad request
-      type: object
-      required:
-        - error
-        - message
-        - statusCode
-      properties:
-        error:
-          type: string
-          enum:
-            - Bad Request
-        message:
-          type: string
-        statusCode:
-          type: integer
-          enum:
-            - 400
