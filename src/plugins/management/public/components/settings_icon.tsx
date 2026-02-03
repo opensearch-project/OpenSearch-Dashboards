@@ -4,13 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
@@ -23,6 +17,8 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
     core.chrome.navGroup.getNavGroupsMap$()
   );
   const navGroupMap = useObservable(navGroupsMapRef.current, undefined);
+  const enableUserControl = core.uiSettings.get('theme:enableUserControl');
+
   const onItemClick = (groupId: string) => {
     setPopover(false);
     core.chrome.navGroup.setCurrentNavGroup(groupId);
@@ -33,19 +29,80 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       }
     }
   };
-  const items = [
-    <EuiContextMenuItem
-      key={DEFAULT_NAV_GROUPS.settingsAndSetup.id}
-      onClick={() => onItemClick(DEFAULT_NAV_GROUPS.settingsAndSetup.id)}
-    >
-      {DEFAULT_NAV_GROUPS.settingsAndSetup.title}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key={DEFAULT_NAV_GROUPS.dataAdministration.id}
-      onClick={() => onItemClick(DEFAULT_NAV_GROUPS.dataAdministration.id)}
-    >
-      {DEFAULT_NAV_GROUPS.dataAdministration.title}
-    </EuiContextMenuItem>,
+
+  const onThemeClick = () => {
+    setPopover(false);
+    // Navigate to theme settings or open theme modal
+    core.application.navigateToApp('settings');
+  };
+
+  const onDarkModeClick = () => {
+    setPopover(false);
+    // Toggle dark mode
+    const currentDarkMode = core.uiSettings.get('theme:darkMode');
+    core.uiSettings.set('theme:darkMode', !currentDarkMode);
+    window.location.reload();
+  };
+
+  const mainPanelItems: Array<{
+    name: string;
+    key: string;
+    onClick?: () => void;
+    icon?: string;
+    panel?: number;
+  }> = [
+    {
+      name: DEFAULT_NAV_GROUPS.settingsAndSetup.title,
+      key: DEFAULT_NAV_GROUPS.settingsAndSetup.id,
+      onClick: () => onItemClick(DEFAULT_NAV_GROUPS.settingsAndSetup.id),
+    },
+    {
+      name: DEFAULT_NAV_GROUPS.dataAdministration.title,
+      key: DEFAULT_NAV_GROUPS.dataAdministration.id,
+      onClick: () => onItemClick(DEFAULT_NAV_GROUPS.dataAdministration.id),
+    },
+  ];
+
+  if (enableUserControl) {
+    mainPanelItems.push({
+      name: i18n.translate('management.settings.appearances.title', {
+        defaultMessage: 'Appearances',
+      }),
+      key: 'appearances',
+      icon: 'color',
+      panel: 1,
+    });
+  }
+
+  const panels = [
+    {
+      id: 0,
+      items: mainPanelItems,
+    },
+    {
+      id: 1,
+      title: i18n.translate('management.settings.appearances.title', {
+        defaultMessage: 'Appearances',
+      }),
+      items: [
+        {
+          name: i18n.translate('management.settings.appearances.theme', {
+            defaultMessage: 'Theme settings',
+          }),
+          key: 'theme',
+          icon: 'brush',
+          onClick: onThemeClick,
+        },
+        {
+          name: i18n.translate('management.settings.appearances.darkMode', {
+            defaultMessage: 'Toggle dark mode',
+          }),
+          key: 'darkMode',
+          icon: 'moon',
+          onClick: onDarkModeClick,
+        },
+      ],
+    },
   ];
 
   return (
@@ -69,7 +126,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       closePopover={() => setPopover(false)}
       ownFocus={false}
     >
-      <EuiContextMenuPanel hasFocus={false} size="s" items={items} />
+      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
     </EuiPopover>
   );
 }
