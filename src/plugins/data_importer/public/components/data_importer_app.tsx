@@ -418,18 +418,18 @@ export const DataImporterPluginApp = ({
         <EuiTitle size="xs">
           <span>
             {i18n.translate('dataImporter.importIdentifier', {
-              defaultMessage: 'Import identifier (optional)',
+              defaultMessage: 'Upload alias (optional)',
             })}
           </span>
         </EuiTitle>
         <EuiFormRow
           helpText={i18n.translate('dataImporter.importIdentifierHelp', {
             defaultMessage:
-              'Create a filtered alias for this dataset to enable index sharing. Example: "hosts", "products"',
+              'Create a filtered alias for this dataset, to easily reference it later.',
           })}
         >
           <EuiFieldText
-            placeholder="e.g., hosts, products, users"
+            placeholder="Alias name"
             value={importIdentifier}
             onChange={(e) => setImportIdentifier(e.target.value)}
           />
