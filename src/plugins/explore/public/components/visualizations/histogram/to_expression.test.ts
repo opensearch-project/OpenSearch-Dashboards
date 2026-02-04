@@ -8,6 +8,14 @@ import { createNumericalHistogramChart, createSingleHistogramChart } from './to_
 import { defaultHistogramChartStyles } from './histogram_vis_config';
 import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, AggregationType } from '../types';
 
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
+
 const mockNumericalColumn: VisColumn = {
   id: 1,
   name: 'Count',

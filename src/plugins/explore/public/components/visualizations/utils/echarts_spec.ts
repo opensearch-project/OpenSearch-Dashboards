@@ -27,6 +27,7 @@ import {
   AxisRole,
 } from '../types';
 import { convertThresholds } from './utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Base style interface that all chart styles should extend
@@ -66,6 +67,8 @@ export interface EChartsAxisConfig {
   yAxis?: Axis;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2Axis?: Axis;
+  y2AxisStyle?: StandardAxes;
 }
 
 /**
@@ -87,7 +90,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   // Built incrementally
   // TODO: avoid any
   transformedData?: any[];
-  baseConfig?: any;
+  baseConfig?: Pick<EChartsOption, 'title' | 'tooltip' | 'legend'>;
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<
@@ -99,7 +102,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
     | ScatterSeriesOption
     | HeatmapSeriesOption
   >;
-  visualMap?: any;
+  visualMap?: EChartsOption['visualMap'];
   // Final output
   spec?: EChartsOption;
 }
@@ -160,15 +163,16 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       enterable: true, // for y direction overflow
       confine: true, // for x direction
       show: styles.tooltipOptions?.mode !== 'hidden',
-      ...(axisConfig && addTrigger && { trigger: 'axis' }),
-      axisPointer: { type: 'shadow' },
+      ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
+      axisPointer: { type: 'shadow' as const },
     },
     legend: {
+      type: 'scroll',
       ...legend,
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' }
+        ? { orient: 'vertical' as const }
         : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
     },
   };
 
@@ -184,15 +188,17 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
+  const hasY2 = axisColumnMappings.y2 !== undefined && axisConfig?.y2Axis;
 
   const getConfig = (
     axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
-    gridNumber?: number
+    gridNumber?: number,
+    addSplitLineStyle: boolean = false
   ) => {
     return {
       type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle }),
+      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
       ...(hasFacet && { gridIndex: gridNumber }),
     };
   };
@@ -217,6 +223,11 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
 
     yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+
+    if (hasY2) {
+      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle, undefined, true);
+      yAxisConfig = [yAxisConfig, y2AxisConfig];
+    }
   }
 
   return { ...state, xAxisConfig, yAxisConfig };
@@ -236,7 +247,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     visualMap,
     axisColumnMappings,
-    styles,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -251,16 +261,7 @@ export const assembleSpec = <T extends BaseChartStyle>(
 
   let grid;
 
-  // TODO long-term method to handle legend display
-  if (!hasFacet || facetNumber <= 1) {
-    const gridMap = {
-      [Positions.LEFT]: { top: '5%', right: '5%', bottom: '5%' },
-      [Positions.RIGHT]: { top: '5%', left: '5%', bottom: '5%' },
-      [Positions.TOP]: { right: '5%', left: '5%', bottom: '5%' },
-      [Positions.BOTTOM]: { right: '5%', left: '5%', top: '5%' },
-    };
-    grid = gridMap[styles.legendPosition ?? Positions.TOP];
-  } else {
+  if (hasFacet && facetNumber > 1) {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
     const rowHeight = 39; // slightly smaller to make legend fit
@@ -300,8 +301,10 @@ const POSITION_MAP = {
 
 export const applyAxisStyling = ({
   axisStyle,
+  addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
+  addSplitLineStyle?: boolean;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
@@ -320,6 +323,12 @@ export const applyAxisStyling = ({
   if (axisStyle?.grid) {
     echartsAxisConfig.splitLine = {
       show: axisStyle.grid.showLines ?? true,
+      ...(addSplitLineStyle && {
+        lineStyle: {
+          type: 'dotted',
+          opacity: DEFAULT_OPACITY / 2,
+        },
+      }),
     };
   }
 

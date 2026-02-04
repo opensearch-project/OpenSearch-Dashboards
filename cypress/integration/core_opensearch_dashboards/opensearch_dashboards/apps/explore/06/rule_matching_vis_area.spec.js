@@ -58,7 +58,7 @@ export const runCreateVisTests = () => {
         shouldManualSelectChartType: true,
       });
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -67,7 +67,7 @@ export const runCreateVisTests = () => {
       cy.get('[aria-controls="allAxesSection"]').click();
       cy.getElementByTestId('showAxisSwitch').first().click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
@@ -79,7 +79,7 @@ export const runCreateVisTests = () => {
         shouldManualSelectChartType: true,
       });
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -90,7 +90,7 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('thresholdModeSelect').should('be.visible').select('Solid lines');
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });

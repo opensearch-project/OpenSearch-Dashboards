@@ -18,6 +18,7 @@ import { TimeRange } from '../../../../data/public';
 import { VegaRender } from './vega_render';
 import { EchartsRender } from './echarts_render';
 import { createVisSpec } from './utils/create_vis_spec';
+import { getChartRender } from './utils/utils';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -33,11 +34,9 @@ const defaultStyleOptions: TableChartStyle = {
   ...defaultTableChartStyles,
   showColumnFilter: false,
   showFooter: false,
-  pageSize: 10,
+  pageSize: 50,
   globalAlignment: 'left',
 };
-
-const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 export const VisualizationRender = ({
   data$,
@@ -76,10 +75,6 @@ export const VisualizationRender = ({
     };
   }, [from, to]);
 
-  const spec = useMemo(() => {
-    return createVisSpec({ data: visualizationData, config: visConfig, timeRange });
-  }, [visConfig, visualizationData, timeRange]);
-
   if (!visualizationData || columns.length === 0) {
     return null;
   }
@@ -105,7 +100,6 @@ export const VisualizationRender = ({
         rows={rows}
         columns={columns}
         styleOptions={defaultStyleOptions}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
         showStyleSelector={false}
         disableActions={false}
       />
@@ -114,18 +108,50 @@ export const VisualizationRender = ({
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (!spec.$schema) {
-      return <EchartsRender spec={spec} />;
-    }
     return (
-      <VegaRender
-        searchContext={searchContext}
+      <ChartRender
+        data={visualizationData}
+        config={visConfig}
+        timeRange={timeRange}
         ExpressionRenderer={ExpressionRenderer}
+        searchContext={searchContext}
         onSelectTimeRange={onSelectTimeRange}
-        spec={spec}
       />
     );
   }
 
   return <VisualizationEmptyState />;
+};
+
+const ChartRender = ({
+  data,
+  config,
+  timeRange,
+  onSelectTimeRange,
+  searchContext,
+  ExpressionRenderer,
+}: {
+  data?: VisData;
+  config?: RenderChartConfig;
+  timeRange: TimeRange;
+  onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  searchContext?: ExecutionContextSearch;
+  ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+}) => {
+  const spec = useMemo(() => {
+    return createVisSpec({ data, config, timeRange });
+  }, [config, data, timeRange]);
+
+  if (getChartRender() === 'echarts') {
+    return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+  }
+
+  return (
+    <VegaRender
+      searchContext={searchContext}
+      ExpressionRenderer={ExpressionRenderer}
+      onSelectTimeRange={onSelectTimeRange}
+      spec={spec}
+    />
+  );
 };

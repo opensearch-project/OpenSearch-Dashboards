@@ -176,17 +176,21 @@ export const getSwappedAxisRole = (
 ): {
   xAxis?: VisColumn;
   yAxis?: VisColumn;
+  y2Axis?: VisColumn;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2AxisStyle?: StandardAxes;
 } => {
   const xAxis = axisColumnMappings?.x;
   const yAxis = axisColumnMappings?.y;
+  const y2Axis = axisColumnMappings?.y2;
 
   const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
   const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
 
   if (!styles?.switchAxes) {
-    return { xAxis, xAxisStyle, yAxis, yAxisStyle };
+    return { xAxis, xAxisStyle, yAxis, yAxisStyle, ...(y2Axis && { y2Axis, y2AxisStyle }) };
   }
 
   return {
@@ -204,6 +208,7 @@ export const getSwappedAxisRole = (
           ...(xAxisStyle?.position ? { position: swapPosition(xAxisStyle.position) } : undefined),
         }
       : undefined,
+    ...(y2Axis && { y2Axis, y2AxisStyle }), // switch axes won't apply to y2(line-bar chart)
   };
 };
 
@@ -458,9 +463,9 @@ export function parseUTCDate(input: string | number): Date {
 export const getChartRender = () => {
   try {
     const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
-    return chartRender || 'vega';
+    return chartRender || 'echarts';
   } catch (e) {
-    return 'vega';
+    return 'echarts';
   }
 };
 
