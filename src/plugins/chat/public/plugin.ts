@@ -115,7 +115,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     );
 
     // Always initialize chat service - core service handles enablement
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+    // Pass http client for basePath handling in API calls
+    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces, core.http);
 
     if (!isEnabled) {
       return {

@@ -16,6 +16,7 @@ import {
   ChatServiceStart,
   ChatWindowState,
   WorkspacesStart,
+  HttpSetup,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 
@@ -61,10 +62,11 @@ export class ChatService {
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
-    workspaces?: WorkspacesStart
+    workspaces?: WorkspacesStart,
+    http?: HttpSetup
   ) {
-    // No need to pass URL anymore - agent will use the proxy endpoint
-    this.agent = new AgUiAgent();
+    // Pass http client for basePath handling in dev mode
+    this.agent = new AgUiAgent('/api/chat/proxy', http);
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
