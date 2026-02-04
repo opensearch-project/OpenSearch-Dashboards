@@ -22,7 +22,7 @@
     "@types/parse-link-header": "^1.0.0",
     "@types/strip-ansi": "^5.2.1",
     "@types/xml2js": "^0.4.5",
-    "diff": "^4.0.1"
+    "diff": "^4.0.4"
   },
   "dependencies": {
     "chalk": "^4.1.0",
