@@ -49,7 +49,7 @@ export function runMochaCli() {
   // check that we aren't leaking any globals
   process.argv.push('--check-leaks');
   // prevent globals injected from canvas plugins from triggering leak check
-  process.argv.push('--globals', '__core-js_shared__,core,_,ch');
+  process.argv.push('--globals', '__core-js_shared__,core,_, ');
 
   // ensure that mocha requires the setup_node_env script
   process.argv.push('--require', require.resolve('../../setup_node_env'));
