@@ -25,7 +25,7 @@ export class JSONProcessor implements IFileProcessor {
     const document = JSON.parse(text);
 
     // Inject lookup field if provided
-    const doc = lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+    const doc = lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
 
     const isSuccessful = await new Promise<boolean>(async (resolve) => {
       try {
@@ -65,7 +65,7 @@ export class JSONProcessor implements IFileProcessor {
 
             // Inject lookup field if provided
             const doc =
-              lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+              lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
 
             await client.index({
               index: indexName,

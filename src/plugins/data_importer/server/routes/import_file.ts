@@ -106,7 +106,17 @@ export function importFileRoute(
 
       if (request.query.createMode) {
         const mapping = request.body.mapping;
-        const mappingObj = mapping ? JSON.parse(mapping) : {};
+        let mappingObj = {};
+
+        if (mapping) {
+          try {
+            mappingObj = JSON.parse(mapping);
+          } catch (e) {
+            return response.badRequest({
+              body: `Invalid mapping JSON: ${e}`,
+            });
+          }
+        }
 
         // Add __lookup field to mapping if using import identifier
         if (request.query.importIdentifier) {
@@ -162,7 +172,7 @@ export function importFileRoute(
             });
           } catch (aliasError) {
             // Log error but don't fail the import
-            context.dataImporter!.logger.error(
+            context.dataImporter?.logger.error(
               `Failed to create alias ${request.query.importIdentifier}: ${aliasError}`
             );
           }

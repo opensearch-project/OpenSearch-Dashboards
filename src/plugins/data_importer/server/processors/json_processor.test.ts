@@ -73,7 +73,7 @@ describe('JSONProcessor', () => {
 
       expect(clientMock.index).toHaveBeenCalledWith({
         index: 'foo',
-        body: { [lookupField]: lookupId, ...validJson },
+        body: { ...validJson, [lookupField]: lookupId },
       });
     });
   });
@@ -145,7 +145,7 @@ describe('JSONProcessor', () => {
 
       expect(clientMock.index).toHaveBeenCalledWith({
         index: 'foo',
-        body: { [lookupField]: lookupId, ...validJson },
+        body: { ...validJson, [lookupField]: lookupId },
       });
     });
   });

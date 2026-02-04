@@ -54,7 +54,7 @@ export class NDJSONProcessor implements IFileProcessor {
             try {
               // Inject lookup field if provided
               const doc =
-                lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+                lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
 
               await client.index({
                 index: indexName,

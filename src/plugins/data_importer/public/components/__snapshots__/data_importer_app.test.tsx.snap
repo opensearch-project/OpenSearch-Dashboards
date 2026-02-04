@@ -183,6 +183,7 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
               <input
                 aria-describedby="generated-id-help-0"
                 class="euiFieldText"
+                data-test-subj="importIdentifierInput"
                 id="generated-id"
                 placeholder="Alias name"
                 type="text"
@@ -652,6 +653,7 @@ exports[`App should render with MDS 1`] = `
                     <input
                       aria-describedby="generated-id-help-0"
                       class="euiFieldText"
+                      data-test-subj="importIdentifierInput"
                       id="generated-id"
                       placeholder="Alias name"
                       type="text"
@@ -1053,6 +1055,7 @@ exports[`App should render with Router when embedded is false 1`] = `
                     <input
                       aria-describedby="generated-id-help-0"
                       class="euiFieldText"
+                      data-test-subj="importIdentifierInput"
                       id="generated-id"
                       placeholder="Alias name"
                       type="text"
@@ -1454,6 +1457,7 @@ exports[`App should render without MDS 1`] = `
                     <input
                       aria-describedby="generated-id-help-0"
                       class="euiFieldText"
+                      data-test-subj="importIdentifierInput"
                       id="generated-id"
                       placeholder="Alias name"
                       type="text"

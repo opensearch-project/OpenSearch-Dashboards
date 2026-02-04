@@ -39,7 +39,7 @@ export class CSVProcessor implements IFileProcessor {
             const curRow = ++totalRows;
             try {
               // Inject lookup field if provided
-              const document = lookupId && lookupField ? { [lookupField]: lookupId, ...row } : row;
+              const document = lookupId && lookupField ? { ...row, [lookupField]: lookupId } : row;
 
               await client.index({
                 index: indexName,
@@ -86,7 +86,7 @@ export class CSVProcessor implements IFileProcessor {
             const curRow = ++totalRows;
             try {
               // Inject lookup field if provided
-              const document = lookupId && lookupField ? { [lookupField]: lookupId, ...row } : row;
+              const document = lookupId && lookupField ? { ...row, [lookupField]: lookupId } : row;
 
               await client.index({
                 index: indexName,

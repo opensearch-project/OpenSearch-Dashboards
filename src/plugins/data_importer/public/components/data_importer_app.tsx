@@ -432,6 +432,7 @@ export const DataImporterPluginApp = ({
             placeholder="Alias name"
             value={importIdentifier}
             onChange={(e) => setImportIdentifier(e.target.value)}
+            data-test-subj="importIdentifierInput"
           />
         </EuiFormRow>
 
