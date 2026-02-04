@@ -83,7 +83,6 @@ export const defaultBarChartStyles: BarChartStyle = {
   showBarBorder: false,
   barBorderWidth: 1,
   barBorderColor: '#000000',
-  stackMode: 'none',
 
   // Threshold options
   thresholdOptions: {

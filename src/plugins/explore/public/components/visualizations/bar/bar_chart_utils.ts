@@ -247,7 +247,7 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
 
   const series = seriesFields.map((seriesField, index) => {
     const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
-    const seriesConfig: any = {
+    const seriesConfig = {
       type: 'bar',
       emphasis: {
         focus: 'self',
@@ -268,14 +268,13 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
           borderColor: styles.barBorderColor,
         },
       }),
+      // Apply stack configuration based on stackMode
+      ...(options.kind === 'bar' &&
+        'stackMode' in styles &&
+        styles.stackMode === 'total' && { stack: 'total' }),
     };
 
-    // Apply stack configuration based on stackMode
-    if (options.kind === 'bar' && 'stackMode' in styles && styles.stackMode === 'total') {
-      seriesConfig.stack = 'total';
-    }
-
-    return seriesConfig;
+    return seriesConfig as BarSeriesOption;
   }) as BarSeriesOption[];
   newState.series = series;
 
@@ -311,7 +310,7 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
     const cateColumns = seriesFields(header);
 
     return cateColumns.map((item: string, i: number) => {
-      const seriesConfig: any = {
+      const seriesConfig = {
         name: String(item),
         type: 'bar',
         encode: {
@@ -336,15 +335,10 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
           },
         }),
         ...(i === 0 && thresholdLines),
+        ...(styles.stackMode === 'total' && { stack: `stack_${index}` }),
       };
 
-      // Apply stack configuration based on stackMode for faceted bar charts
-      if (styles.stackMode === 'total') {
-        seriesConfig.stack = `stack_${index}`; // each grid should have a exclusive stack key
-      }
-      // If stackMode is 'none', we don't add the stack property, which makes bars non-stacked
-
-      return seriesConfig;
+      return seriesConfig as BarSeriesOption;
     });
   });
 
