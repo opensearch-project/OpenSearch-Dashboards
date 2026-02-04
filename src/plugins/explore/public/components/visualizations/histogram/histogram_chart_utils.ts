@@ -53,11 +53,11 @@ export const createHistogramSeries = <T extends BaseChartStyle>(
     const seriesFieldIndex = headers.indexOf(seriesField);
     return {
       type: 'custom',
+      id: seriesField,
       name,
       encode: {
         x: binStartField,
         y: seriesField,
-        tooltip: [binStartField, binEndField, seriesFieldIndex],
       },
       ...(index === 0 && thresholdLines),
       renderItem(params, api) {
@@ -102,12 +102,20 @@ export const createHistogramSeries = <T extends BaseChartStyle>(
   const tooltip: EChartsOption['tooltip'] = {
     trigger: 'item',
     show: styles.tooltipOptions.mode !== 'hidden',
+    className: 'chartCustomTooltip',
     formatter(params) {
       if (!Array.isArray(params) && Array.isArray(params.value)) {
-        const bucketStart = format.encodeHTML(String(params.value[0])) ?? '-';
-        const bucketEnd = format.encodeHTML(String(params.value[1])) ?? '-';
-        const value = format.encodeHTML(String(params.value[2])) ?? '-';
-        return `Bucket: [${bucketStart}, ${bucketEnd})<br/>Value: ${value}`;
+        const dimensionNames = params.dimensionNames ?? [];
+        const bucketStart =
+          format.encodeHTML(String(params.value[dimensionNames.indexOf(binStartField)])) ?? '-';
+        const bucketEnd =
+          format.encodeHTML(String(params.value[dimensionNames.indexOf(binEndField)])) ?? '-';
+        const value =
+          format.encodeHTML(String(params.value[dimensionNames.indexOf(params.seriesId ?? '')])) ??
+          '-';
+        return `${bucketStart} - ${bucketEnd}<p><span>${
+          params.seriesName ?? 'value'
+        }</span> <b>${value}</b></p>`;
       }
       return '-';
     },
