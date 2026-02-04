@@ -55,6 +55,31 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
       <EuiSpacer
         size="s"
       />
+      <EuiTitle
+        size="xs"
+      >
+        <span>
+          Upload alias (optional)
+        </span>
+      </EuiTitle>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        helpText="Create a filtered alias for this dataset, to easily reference it later."
+        labelType="label"
+      >
+        <EuiFieldText
+          onChange={[Function]}
+          placeholder="Alias name"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiSpacer
+        size="s"
+      />
       <ImportFileContentBody
         enabledFileTypes={
           Array [
@@ -223,6 +248,31 @@ exports[`App should render with MDS 1`] = `
               <EuiSpacer
                 size="s"
               />
+              <EuiTitle
+                size="xs"
+              >
+                <span>
+                  Upload alias (optional)
+                </span>
+              </EuiTitle>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                helpText="Create a filtered alias for this dataset, to easily reference it later."
+                labelType="label"
+              >
+                <EuiFieldText
+                  onChange={[Function]}
+                  placeholder="Alias name"
+                  value=""
+                />
+              </EuiFormRow>
+              <EuiSpacer
+                size="s"
+              />
               <ImportFileContentBody
                 enabledFileTypes={
                   Array [
@@ -349,6 +399,31 @@ exports[`App should render without MDS 1`] = `
                     }
                   }
                   sortMatchesBy="none"
+                />
+              </EuiFormRow>
+              <EuiSpacer
+                size="s"
+              />
+              <EuiTitle
+                size="xs"
+              >
+                <span>
+                  Upload alias (optional)
+                </span>
+              </EuiTitle>
+              <EuiFormRow
+                describedByIds={Array []}
+                display="row"
+                fullWidth={false}
+                hasChildLabel={true}
+                hasEmptyLabelSpace={false}
+                helpText="Create a filtered alias for this dataset, to easily reference it later."
+                labelType="label"
+              >
+                <EuiFieldText
+                  onChange={[Function]}
+                  placeholder="Alias name"
+                  value=""
                 />
               </EuiFormRow>
               <EuiSpacer

@@ -59,6 +59,23 @@ describe('JSONProcessor', () => {
       expect(response.total).toBe(1);
       expect(response.failedRows).toMatchObject([1]);
     });
+
+    it('should inject lookup field when lookupId and lookupField are provided', async () => {
+      const lookupId = 'test-lookup-id';
+      const lookupField = '__lookup';
+
+      await processor.ingestText(JSON.stringify(validJson), {
+        client: clientMock,
+        indexName: 'foo',
+        lookupId,
+        lookupField,
+      });
+
+      expect(clientMock.index).toHaveBeenCalledWith({
+        index: 'foo',
+        body: { [lookupField]: lookupId, ...validJson },
+      });
+    });
   });
 
   describe('ingestFile()', () => {
@@ -112,6 +129,24 @@ describe('JSONProcessor', () => {
       expect(clientMock.index).toHaveBeenCalledTimes(1);
       expect(response.total).toBe(1);
       expect(response.failedRows).toMatchObject([1]);
+    });
+
+    it('should inject lookup field when lookupId and lookupField are provided', async () => {
+      const lookupId = 'test-lookup-id';
+      const lookupField = '__lookup';
+      const validJsonFileStream = Readable.from([JSON.stringify(validJson)]);
+
+      await processor.ingestFile(validJsonFileStream, {
+        client: clientMock,
+        indexName: 'foo',
+        lookupId,
+        lookupField,
+      });
+
+      expect(clientMock.index).toHaveBeenCalledWith({
+        index: 'foo',
+        body: { [lookupField]: lookupId, ...validJson },
+      });
     });
   });
 
