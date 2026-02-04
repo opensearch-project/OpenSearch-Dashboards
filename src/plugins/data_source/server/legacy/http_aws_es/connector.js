@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SignatureV4 } from '@aws-sdk/signature-v4';
-import { HttpRequest } from '@aws-sdk/protocol-http';
+import { SignatureV4 } from '@smithy/signature-v4';
+import { HttpRequest } from '@smithy/protocol-http';
 import { Sha256 } from '@aws-crypto/sha256-js';
-import { AbortController } from '@aws-sdk/abort-controller';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { createGunzip, createInflate } from 'zlib';
 
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
