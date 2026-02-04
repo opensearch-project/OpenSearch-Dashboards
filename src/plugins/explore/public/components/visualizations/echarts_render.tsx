@@ -32,12 +32,9 @@ export const EchartsRender = React.memo(
     // grid config computed at runtime
     const gridConfigRef = useRef<echarts.GridComponentOption | null>(null);
 
-    const containerSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
-
     const debouncedSizeChange = useMemo(
       () =>
         debounce((size: { width: number; height: number }) => {
-          containerSizeRef.current = size;
           onContainerSizeChange?.(size);
         }, 100),
       [onContainerSizeChange]
@@ -57,8 +54,7 @@ export const EchartsRender = React.memo(
           }
           const { width, height } = entries[0].contentRect;
 
-          if (!isEqual(containerSizeRef.current, { width, height }))
-            debouncedSizeChange({ width, height });
+          debouncedSizeChange({ width, height });
         }),
       [debouncedSizeChange]
     );
