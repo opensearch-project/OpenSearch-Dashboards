@@ -5,7 +5,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { CoreStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 

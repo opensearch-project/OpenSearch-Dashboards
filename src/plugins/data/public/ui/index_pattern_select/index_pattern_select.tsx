@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import { Required } from '@osd/utility-types';
 import { EuiCompressedComboBox, EuiComboBoxProps } from '@elastic/eui';

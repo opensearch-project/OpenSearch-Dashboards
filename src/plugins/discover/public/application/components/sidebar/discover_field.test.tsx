@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';

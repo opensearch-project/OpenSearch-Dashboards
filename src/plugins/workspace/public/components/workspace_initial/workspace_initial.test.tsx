@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
+
 import { WorkspaceInitial } from './workspace_initial';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';

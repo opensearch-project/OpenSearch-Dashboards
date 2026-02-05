@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
+import { useCallback, useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import useUnmount from 'react-use/lib/useUnmount';

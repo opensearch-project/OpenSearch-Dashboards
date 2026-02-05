@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useState, useCallback, ReactNode } from 'react';
 import { AssistantAction, ToolStatus } from '../hooks/use_assistant_action';
 
 export interface ToolCallState {

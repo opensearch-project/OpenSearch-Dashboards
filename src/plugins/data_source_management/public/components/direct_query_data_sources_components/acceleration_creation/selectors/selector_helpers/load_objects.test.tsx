@@ -5,7 +5,7 @@
 
 import { mount } from 'enzyme';
 import { act } from 'react';
-import React from 'react';
+
 import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { SelectorLoadObjects } from './load_objects';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';

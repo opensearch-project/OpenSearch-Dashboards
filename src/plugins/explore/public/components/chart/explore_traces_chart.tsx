@@ -5,7 +5,7 @@
 
 import './_histogram.scss';
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import {

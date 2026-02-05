@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, Query } from '../../../../common';
 import { getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';

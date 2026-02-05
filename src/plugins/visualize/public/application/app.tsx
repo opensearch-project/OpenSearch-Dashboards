@@ -29,7 +29,7 @@
  */
 
 import './app.scss';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';

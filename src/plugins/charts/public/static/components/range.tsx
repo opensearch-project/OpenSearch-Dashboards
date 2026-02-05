@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 

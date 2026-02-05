@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import IndexPatternSelect from './index_pattern_select';
 import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
 

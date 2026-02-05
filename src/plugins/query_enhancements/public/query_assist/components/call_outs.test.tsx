@@ -4,7 +4,7 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { ComponentProps, PropsWithChildren } from 'react';
+import { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryAssistCallOut } from './call_outs';
 

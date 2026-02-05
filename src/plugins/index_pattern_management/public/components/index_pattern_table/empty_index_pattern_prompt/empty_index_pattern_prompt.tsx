@@ -30,7 +30,6 @@
 
 import './empty_index_pattern_prompt.scss';
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';

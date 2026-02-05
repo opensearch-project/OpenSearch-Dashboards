@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
+import { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@osd/i18n';

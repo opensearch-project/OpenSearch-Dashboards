@@ -4,7 +4,7 @@
  */
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import React from 'react';
+
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../core/public/mocks';
 import { TraceAutoDetectCallout } from './trace_auto_detect_callout';

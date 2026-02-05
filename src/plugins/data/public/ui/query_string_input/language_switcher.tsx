@@ -42,7 +42,7 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface Props {

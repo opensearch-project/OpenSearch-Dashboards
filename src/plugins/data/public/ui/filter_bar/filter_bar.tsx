@@ -39,7 +39,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { stringify } from '@osd/std';
 

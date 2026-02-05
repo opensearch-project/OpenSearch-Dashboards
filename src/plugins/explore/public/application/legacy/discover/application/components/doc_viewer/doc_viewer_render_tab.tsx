@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { DocViewRenderFn, DocViewRenderProps } from '../../../../../../types/doc_views_types';
 
 interface Props {

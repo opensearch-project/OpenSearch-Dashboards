@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { Header } from '../header';
 import { shallow } from 'enzyme';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';

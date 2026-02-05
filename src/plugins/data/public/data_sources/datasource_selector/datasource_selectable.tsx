@@ -5,7 +5,7 @@
 
 import { EuiCompressedComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { DataSetWithDataSource, DataSource, IndexPatternOption } from '../datasource';
 import { DataSelectorRefresher } from './data_selector_refresher';
 import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';

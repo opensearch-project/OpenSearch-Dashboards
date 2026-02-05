@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { findTestSubject } from 'test_utils/helpers';
 import { DocViewTable } from './table';

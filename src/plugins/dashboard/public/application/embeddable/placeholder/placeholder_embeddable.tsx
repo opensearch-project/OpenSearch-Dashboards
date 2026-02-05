@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';

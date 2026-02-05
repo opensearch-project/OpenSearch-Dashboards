@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { VectorLayer, IServiceSettings } from '../../../maps_legacy/public';

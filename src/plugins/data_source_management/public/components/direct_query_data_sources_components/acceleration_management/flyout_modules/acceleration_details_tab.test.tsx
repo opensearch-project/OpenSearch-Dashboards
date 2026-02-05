@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { AccelerationDetailsTab } from './acceleration_details_tab';
 import { ApplicationStart } from 'opensearch-dashboards/public';

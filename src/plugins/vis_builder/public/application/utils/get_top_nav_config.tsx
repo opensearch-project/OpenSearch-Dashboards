@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuData } from '../../../../navigation/public';
 import {

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 
 import type { ApplicationStart } from '../../../../../core/public';

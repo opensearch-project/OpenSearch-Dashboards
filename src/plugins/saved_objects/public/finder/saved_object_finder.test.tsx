@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
 import { coreMock } from '../../../../core/public/mocks';

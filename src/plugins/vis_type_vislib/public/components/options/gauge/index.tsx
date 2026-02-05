@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';

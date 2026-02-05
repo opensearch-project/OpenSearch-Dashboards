@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { WorkspaceFormSummaryPanel, FieldSummaryItem } from './workspace_form_summary_panel';
 import { RightSidebarScrollField } from './utils';

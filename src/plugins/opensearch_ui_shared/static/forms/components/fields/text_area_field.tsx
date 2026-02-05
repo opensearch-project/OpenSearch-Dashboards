@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCompressedFormRow, EuiCompressedTextArea } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';

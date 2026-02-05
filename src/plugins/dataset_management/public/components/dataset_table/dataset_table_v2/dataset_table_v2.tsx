@@ -6,7 +6,7 @@ import './dataset_table_v2.scss';
 
 import { EuiInMemoryTable, EuiSpacer, EuiPageContent } from '@elastic/eui';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useEffectOnce, useObservable } from 'react-use';
 import { of } from 'rxjs';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';

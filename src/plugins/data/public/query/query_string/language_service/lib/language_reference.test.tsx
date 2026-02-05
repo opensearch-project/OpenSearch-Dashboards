@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, cleanup, act, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LanguageReference } from './language_reference';

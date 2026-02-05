@@ -27,7 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,

@@ -4,7 +4,7 @@
  */
 import './samples.scss';
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 
 import { EuiBasicTable, EuiCompressedFormRow } from '@elastic/eui';
 

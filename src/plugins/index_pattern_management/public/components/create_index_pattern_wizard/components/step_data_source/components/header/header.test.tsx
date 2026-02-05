@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { render } from '@testing-library/react';
 // @ts-expect-error TS2305, TS6133 TODO(ts-error): fixme

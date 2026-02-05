@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent } from '@testing-library/react';
 import { WorkspaceColumn } from './workspace_column';

@@ -4,7 +4,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DataViewField, DataView } from '../../../../data/public';
 import { Bucket, FieldDetails } from './types';
 import { FieldIcon } from '../../../../opensearch_dashboards_react/public';

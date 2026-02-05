@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { OsdError } from '../../../../opensearch_dashboards_utils/common';

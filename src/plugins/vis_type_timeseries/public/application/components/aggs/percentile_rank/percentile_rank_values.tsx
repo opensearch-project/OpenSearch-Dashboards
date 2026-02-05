@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { last } from 'lodash';
 
 import { EuiFlexGroup } from '@elastic/eui';

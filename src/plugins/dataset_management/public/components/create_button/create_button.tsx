@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Component, Fragment } from 'react';
+import { Component, Fragment } from 'react';
 
 import {
   EuiBadge,

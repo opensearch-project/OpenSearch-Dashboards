@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';
 import { EuiCompressedFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from 'src/plugins/data/public';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactNode, OptionHTMLAttributes } from 'react';
+import { ReactNode, OptionHTMLAttributes } from 'react';
 import { EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';

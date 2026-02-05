@@ -8,7 +8,7 @@ import { EuiBadge, EuiLink } from '@elastic/eui';
 import { DataSourceColumn } from './data_source_column';
 import { DataSourceTableItem } from '../../types';
 import * as utils from '../utils';
-import React from 'react';
+
 import { DSM_APP_ID } from '../../plugin';
 
 describe('DataSourceColumn', () => {

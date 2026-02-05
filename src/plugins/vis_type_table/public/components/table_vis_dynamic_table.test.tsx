@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableVisDynamicTable } from './table_vis_dynamic_table';

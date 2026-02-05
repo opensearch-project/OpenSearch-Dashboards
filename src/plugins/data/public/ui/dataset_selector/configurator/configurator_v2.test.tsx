@@ -5,7 +5,7 @@
 
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+
 import { IntlProvider } from 'react-intl';
 import { BaseDataset } from '../../../../common';
 import { setIndexPatterns, setQueryService } from '../../../services';

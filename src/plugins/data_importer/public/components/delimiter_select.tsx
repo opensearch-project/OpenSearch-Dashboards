@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiTitle, EuiSelect } from '@elastic/eui';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';

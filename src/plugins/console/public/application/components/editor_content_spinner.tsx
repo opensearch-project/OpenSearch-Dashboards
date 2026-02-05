@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { EuiLoadingContent, EuiPageContent } from '@elastic/eui';
 
 export const EditorContentSpinner: FunctionComponent = () => {

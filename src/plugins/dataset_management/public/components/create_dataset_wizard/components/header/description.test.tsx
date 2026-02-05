@@ -5,7 +5,7 @@
 
 import { Description } from './description';
 import { mount } from 'enzyme';
-import React from 'react';
+
 import { mockManagementPlugin } from '../../../../mocks';
 
 const mockContext = mockManagementPlugin.createDatasetManagmentContext();

@@ -4,7 +4,7 @@
  */
 
 import { EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import './option.scss';
 
 interface Props {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { toExpression } from './utils/to_expression';
 import { ExecutionContextSearch } from '../../../../expressions/common/';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactElement, Component } from 'react';
+import { ReactElement, Component } from 'react';
 
 import {
   EuiGlobalToastList,

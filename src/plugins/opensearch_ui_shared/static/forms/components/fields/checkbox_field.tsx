@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCompressedFormRow, EuiCompressedCheckbox } from '@elastic/eui';
 import uuid from 'uuid';
 

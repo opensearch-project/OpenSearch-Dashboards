@@ -34,7 +34,7 @@ import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, within, fireEvent } from '@testing-library/react';
-import React from 'react';
+
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';

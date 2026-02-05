@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
 import { EuiCompressedFormRow, EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';

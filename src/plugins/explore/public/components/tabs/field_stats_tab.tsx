@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { FieldStatsContainer } from '../field_stats/field_stats_container';
 
 export const FieldStatsTab = () => {

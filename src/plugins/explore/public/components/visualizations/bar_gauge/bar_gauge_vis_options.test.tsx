@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { BarGaugeVisStyleControls, BarGaugeVisStyleControlsProps } from './bar_gauge_vis_options';
 import { defaultBarGaugeChartStyles } from './bar_gauge_vis_config';

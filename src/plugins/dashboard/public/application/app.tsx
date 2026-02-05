@@ -4,7 +4,7 @@
  */
 
 import './app.scss';
-import React from 'react';
+
 import { Route, Switch } from 'react-router-dom';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardEditor, DashboardListing, DashboardNoMatch } from './components';

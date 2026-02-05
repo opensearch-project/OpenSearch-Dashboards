@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { createAction, IncompatibleActionError, ActionType } from '../../ui_actions';
 import { CoreStart } from '../../../../../../core/public';

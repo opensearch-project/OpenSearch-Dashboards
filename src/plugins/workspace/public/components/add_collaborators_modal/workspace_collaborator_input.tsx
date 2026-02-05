@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,

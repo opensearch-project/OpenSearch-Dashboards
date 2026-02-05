@@ -29,7 +29,7 @@
  */
 
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+
 import { createRoot, Root } from 'react-dom/client';
 import { Markdown } from '../../../../opensearch_dashboards_react/public';
 import { Embeddable } from './embeddable';

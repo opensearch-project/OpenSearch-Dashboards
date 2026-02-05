@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { AssociatedObjectsRefreshButton } from './associated_objects_refresh_button';
 import { EuiButton } from '@elastic/eui';

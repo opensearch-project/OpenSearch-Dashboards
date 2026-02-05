@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';

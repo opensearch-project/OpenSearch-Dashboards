@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import { EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 

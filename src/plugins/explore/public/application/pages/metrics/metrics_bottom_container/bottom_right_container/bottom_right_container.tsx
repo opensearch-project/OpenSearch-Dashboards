@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { selectQueryStatusMapByKey } from '../../../../utils/state_management/selectors';

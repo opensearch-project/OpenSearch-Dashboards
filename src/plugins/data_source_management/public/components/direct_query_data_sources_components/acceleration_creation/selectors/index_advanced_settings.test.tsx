@@ -4,7 +4,7 @@
  */
 
 import { mount } from 'enzyme';
-import React from 'react';
+
 import { EuiAccordion, EuiFieldNumber } from '@elastic/eui';
 import { IndexAdvancedSettings } from './index_advanced_settings';
 import { CreateAccelerationForm } from '../../../../../framework/types';

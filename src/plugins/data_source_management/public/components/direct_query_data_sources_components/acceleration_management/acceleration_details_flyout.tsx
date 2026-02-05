@@ -15,7 +15,7 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration } from '../../../../framework/types';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';

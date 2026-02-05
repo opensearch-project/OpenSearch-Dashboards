@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TraceLogsTab } from './trace_logs_tab';
 import { LogHit } from '../../server/ppl_request_logs';

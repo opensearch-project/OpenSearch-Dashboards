@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { DefaultDiscoverTable } from './default_discover_table';

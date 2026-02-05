@@ -5,7 +5,7 @@
 
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+
 import { MetricsDataTable } from './metrics_data_table';
 import { IPrometheusSearchResult } from '../../application/utils/state_management/slices';
 

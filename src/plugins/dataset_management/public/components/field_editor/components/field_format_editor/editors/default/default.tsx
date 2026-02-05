@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { PureComponent, ReactText } from 'react';
+import { PureComponent, ReactText } from 'react';
 import { i18n } from '@osd/i18n';
 
 import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';

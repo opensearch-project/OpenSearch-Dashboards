@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLink,

@@ -5,7 +5,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react';
-import React from 'react';
+
 import { Provider } from 'react-redux';
 import { ExploreMetricsDataTable } from './explore_metrics_data_table';
 import {

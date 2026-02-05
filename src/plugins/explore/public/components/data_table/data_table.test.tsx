@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { IntlProvider } from 'react-intl';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

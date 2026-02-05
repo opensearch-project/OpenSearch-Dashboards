@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, KeyboardEvent } from 'react';
+import { Component, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
 import { EuiKeyboardAccessible, keys } from '@elastic/eui';

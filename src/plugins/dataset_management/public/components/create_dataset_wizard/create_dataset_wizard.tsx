@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactElement, Component } from 'react';
+import { ReactElement, Component } from 'react';
 
 import {
   EuiGlobalToastList,

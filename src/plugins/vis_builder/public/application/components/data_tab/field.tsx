@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { EuiDraggable, EuiPopover } from '@elastic/eui';
 
 import { IndexPatternField } from '../../../../../data/public';

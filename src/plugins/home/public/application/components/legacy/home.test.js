@@ -55,8 +55,8 @@ jest.mock('../../opensearch_dashboards_services', () => ({
 }));
 
 jest.mock('../../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
-  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+  OverviewPageFooter: jest.fn().mockReturnValue(null),
+  OverviewPageHeader: jest.fn().mockReturnValue(null),
   withOpenSearchDashboards: jest.fn((component) => component),
 }));
 

@@ -9,7 +9,6 @@
  * GitHub history for details.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react';
 import { GlobalBanner } from './global_banner';

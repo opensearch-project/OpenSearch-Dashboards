@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, FC, MutableRefObject, useRef } from 'react';
+import { createContext, FC, MutableRefObject, useRef } from 'react';
 import type { monaco } from '@osd/monaco';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Container, EmbeddableStart } from '../../../../embeddable/public';
 import { CardList } from './card_list';

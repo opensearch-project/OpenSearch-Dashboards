@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { ImportSummary, ImportSummaryProps } from './import_summary';

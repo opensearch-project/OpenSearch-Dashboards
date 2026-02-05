@@ -37,7 +37,6 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import React from 'react';
 import { mount } from 'enzyme';
 
 import { DashboardListing } from './dashboard_listing';

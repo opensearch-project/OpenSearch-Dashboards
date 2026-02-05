@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { render, screen, waitFor } from '@testing-library/react';
 import { AskAIEmbeddableAction } from './ask_ai_embeddable_action';

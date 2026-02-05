@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import moment from 'moment';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../framework/utils/shared';

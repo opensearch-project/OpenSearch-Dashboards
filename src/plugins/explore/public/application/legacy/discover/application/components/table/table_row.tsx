@@ -29,7 +29,7 @@
  */
 
 import classNames from 'classnames';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import DOMPurify from 'dompurify';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { LoadingState } from '../loading_state';
 import { shallow } from 'enzyme';
 

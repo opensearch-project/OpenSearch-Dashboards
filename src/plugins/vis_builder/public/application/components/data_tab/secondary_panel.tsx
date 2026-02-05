@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Component, useCallback, useMemo, useState } from 'react';
+import { Component, useCallback, useMemo, useState } from 'react';
 import { cloneDeep, get } from 'lodash';
 import { useDebounce } from 'react-use';
 import { i18n } from '@osd/i18n';

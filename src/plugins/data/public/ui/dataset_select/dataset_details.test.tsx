@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';

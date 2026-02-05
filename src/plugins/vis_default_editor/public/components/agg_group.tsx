@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
+import { useEffect, useReducer, useMemo, useCallback } from 'react';
 import {
   EuiTitle,
   EuiDragDropContext,

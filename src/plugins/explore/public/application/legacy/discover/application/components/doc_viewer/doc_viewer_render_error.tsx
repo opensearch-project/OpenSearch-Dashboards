@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 import {
   formatMsg,

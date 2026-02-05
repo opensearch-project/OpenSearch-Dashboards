@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
 import { createMemoryHistory } from 'history';

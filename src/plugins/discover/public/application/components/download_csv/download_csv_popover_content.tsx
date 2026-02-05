@@ -4,7 +4,7 @@
  */
 
 import './download_csv_popover_content.scss';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { EuiCompressedRadioGroup, EuiSmallButton, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';

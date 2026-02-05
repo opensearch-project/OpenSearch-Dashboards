@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactNode, Suspense } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 import { VisualizationNoResults } from './visualization_noresults';

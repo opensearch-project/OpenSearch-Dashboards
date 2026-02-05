@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { createRoot, Root } from 'react-dom/client';

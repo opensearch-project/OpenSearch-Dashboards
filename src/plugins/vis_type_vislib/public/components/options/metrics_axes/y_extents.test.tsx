@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { YExtents, YExtentsProps } from './y_extents';
 import { ScaleTypes } from '../../../utils/collections';

@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { DiscoverViewServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../inspector/public';

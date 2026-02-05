@@ -3,15 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, {
-  createContext,
-  DragEvent,
-  FC,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, DragEvent, FC, ReactNode, useContext, useEffect, useState } from 'react';
 import { DragDataType } from './types';
 
 // TODO: Replace any with correct type

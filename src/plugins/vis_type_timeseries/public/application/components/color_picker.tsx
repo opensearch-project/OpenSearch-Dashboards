@@ -31,7 +31,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 // The color picker is not yet accessible.
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   EuiIconTip,
   EuiColorPicker,

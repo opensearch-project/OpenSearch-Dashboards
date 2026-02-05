@@ -29,7 +29,7 @@
  */
 
 import './doc_viewer.scss';
-import React from 'react';
+
 import { EuiTabbedContent } from '@elastic/eui';
 import { getDocViewsRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewerTab } from './doc_viewer_tab';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { AskAIActionItem } from './ask_ai_action_item';
 // @ts-expect-error TS2307 TODO(ts-error): fixme

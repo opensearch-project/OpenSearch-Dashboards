@@ -29,7 +29,7 @@
  */
 
 import './visualize_listing.scss';
-import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import { useCallback, useRef, useMemo, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useUnmount, useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';

@@ -7,7 +7,7 @@ import { waitFor } from '@testing-library/dom';
 import { configure, mount } from 'enzyme';
 import Adapter from '@cfaester/enzyme-adapter-react-18';
 import toJson from 'enzyme-to-json';
-import React from 'react';
+
 import { CreateAccelerationForm } from '../../../../../framework/types';
 import {
   coveringIndexDataMock,

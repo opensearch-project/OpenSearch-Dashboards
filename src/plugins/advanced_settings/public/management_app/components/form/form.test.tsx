@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import ReactDOM from 'react-dom';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';

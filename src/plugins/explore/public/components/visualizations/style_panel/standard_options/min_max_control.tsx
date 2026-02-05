@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { DebouncedFieldNumber } from '../utils';

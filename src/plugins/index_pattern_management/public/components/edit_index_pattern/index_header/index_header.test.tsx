@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { createOpenSearchDashboardsReactContext } from '../../../../../opensearch_dashboards_react/public';
 import { coreMock, workspacesServiceMock } from '../../../../../../core/public/mocks';

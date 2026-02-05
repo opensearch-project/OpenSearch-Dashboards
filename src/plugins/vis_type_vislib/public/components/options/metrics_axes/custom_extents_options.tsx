@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 
 import { ValueAxis } from '../../../types';

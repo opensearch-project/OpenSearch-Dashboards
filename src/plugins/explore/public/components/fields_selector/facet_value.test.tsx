@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { FacetValue } from './facet_value';
 import { IndexPatternField } from '../../../../data/public';

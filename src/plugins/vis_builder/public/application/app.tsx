@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { EuiPage, EuiResizableContainer } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';

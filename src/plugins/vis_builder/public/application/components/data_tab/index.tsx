@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DraggableLocation, DropResult, EuiDragDropContext } from '@elastic/eui';
 import { FieldSelector } from './field_selector';
 

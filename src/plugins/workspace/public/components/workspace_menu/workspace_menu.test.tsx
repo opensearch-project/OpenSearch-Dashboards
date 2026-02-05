@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { WorkspaceMenu } from './workspace_menu';

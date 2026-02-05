@@ -242,7 +242,7 @@ export const setHistogramIntervalIfRelevant = (language, interval) => {
 export const resetPageState = () => {
   // Resets the Page state by clicking the New button
   cy.log('Resetting the Page by clikcing on New Button');
-  cy.getElementByTestId('discoverNewButton').click();
+  cy.getElementByTestId('discoverNewButton').click({ force: true });
   cy.wait(2000);
 };
 

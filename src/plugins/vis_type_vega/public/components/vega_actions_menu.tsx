@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   EuiSmallButtonIcon,
   EuiContextMenuPanel,

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { Header } from '../header';
 import { mount } from 'enzyme';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';

@@ -4,7 +4,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+
 import { MetricsRawTable } from './metrics_raw_table';
 import { IPrometheusSearchResult } from '../../application/utils/state_management/slices';
 

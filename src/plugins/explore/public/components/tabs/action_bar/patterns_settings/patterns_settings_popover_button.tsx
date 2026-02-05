@@ -4,7 +4,7 @@
  */
 
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useSelector } from 'react-redux';
 import { PatternsSettingsPopoverContent } from './patterns_settings_popover_content';

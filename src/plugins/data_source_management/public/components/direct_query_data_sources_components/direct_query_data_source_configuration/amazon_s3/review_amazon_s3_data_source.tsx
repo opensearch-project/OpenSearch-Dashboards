@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiSmallButton,
 } from '@elastic/eui';
-import React from 'react';
+
 import { AuthMethod } from '../../../constants';
 import { Role } from '../../../../types';
 

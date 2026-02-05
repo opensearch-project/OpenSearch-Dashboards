@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { AppContainer } from './app_container';
 import { View } from '../services/view_service/view';
 import { AppMountParameters } from '../../../../core/public';

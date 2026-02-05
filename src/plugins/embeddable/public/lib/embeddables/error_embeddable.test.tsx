@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableRoot } from './embeddable_root';

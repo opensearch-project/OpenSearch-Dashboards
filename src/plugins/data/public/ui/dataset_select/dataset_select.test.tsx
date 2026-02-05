@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+
 import { coreMock } from '../../../../../core/public/mocks';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';
 import { CORE_SIGNAL_TYPES, DataStorage, DEFAULT_DATA } from '../../../common';

@@ -99,6 +99,7 @@ export const runSharedLinksTests = () => {
             isEnhancement: true,
           });
         } else {
+          cy.wait(2000);
           resetPageState();
         }
       });

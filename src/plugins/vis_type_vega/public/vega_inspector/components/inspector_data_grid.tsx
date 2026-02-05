@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiDataGrid, EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
 import { VegaRuntimeData } from '../vega_adapter';
 

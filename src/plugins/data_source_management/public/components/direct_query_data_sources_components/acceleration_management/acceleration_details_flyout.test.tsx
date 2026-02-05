@@ -6,7 +6,7 @@
 import { act, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import React from 'react';
+
 import { AccelerationDetailsFlyout } from './acceleration_details_flyout';
 import { HttpStart, NotificationsStart, ApplicationStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration } from '../../../../framework/types';

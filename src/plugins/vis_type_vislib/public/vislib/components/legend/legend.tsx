@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
+import { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 

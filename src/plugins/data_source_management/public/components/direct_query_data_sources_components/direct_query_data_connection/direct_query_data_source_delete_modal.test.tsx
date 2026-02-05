@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { DeleteModal } from './direct_query_data_source_delete_modal';
 import {

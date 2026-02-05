@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { act } from 'react';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';

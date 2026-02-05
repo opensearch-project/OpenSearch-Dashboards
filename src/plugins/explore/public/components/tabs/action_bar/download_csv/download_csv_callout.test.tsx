@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render, screen } from '@testing-library/react';
 import { DiscoverDownloadCsvCallout } from './download_csv_callout';

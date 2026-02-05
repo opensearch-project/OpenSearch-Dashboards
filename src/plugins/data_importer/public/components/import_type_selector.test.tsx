@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { IMPORT_CHOICE_FILE, ImportTypeSelector } from './import_type_selector';
 

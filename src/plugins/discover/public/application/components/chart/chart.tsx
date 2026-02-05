@@ -5,7 +5,7 @@
 
 import './_histogram.scss';
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';

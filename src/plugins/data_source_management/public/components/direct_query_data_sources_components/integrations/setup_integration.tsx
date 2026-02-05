@@ -18,7 +18,7 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { Color } from './utils';
 import { addIntegrationRequest } from './create_integration_helpers';

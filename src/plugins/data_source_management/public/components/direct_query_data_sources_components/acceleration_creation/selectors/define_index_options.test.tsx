@@ -4,7 +4,7 @@
  */
 
 import { mount } from 'enzyme';
-import React from 'react';
+
 import { EuiFieldText, EuiLink, EuiMarkdownFormat, EuiModal } from '@elastic/eui';
 import { DefineIndexOptions } from './define_index_options';
 import { CreateAccelerationForm } from '../../../../../framework/types';

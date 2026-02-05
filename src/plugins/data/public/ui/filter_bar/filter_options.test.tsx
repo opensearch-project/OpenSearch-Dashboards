@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { FilterOptions } from './filter_options';
 import { SavedQueryAttributes } from '../../query';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

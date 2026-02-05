@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 

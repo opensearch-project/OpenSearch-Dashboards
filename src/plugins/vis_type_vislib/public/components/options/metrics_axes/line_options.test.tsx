@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { LineOptions, LineOptionsParams } from './line_options';
 import { NumberInputOption } from '../../../../../charts/public';

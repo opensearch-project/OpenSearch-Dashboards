@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent, waitFor, screen, act } from '@testing-library/react';
 import { AddToDashboardModal } from './add_to_dashboard_modal'; // adjust path if needed

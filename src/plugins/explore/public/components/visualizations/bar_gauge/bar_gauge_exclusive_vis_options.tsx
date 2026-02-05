@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiSwitch, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import React from 'react';
+
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { StyleAccordion } from '../style_panel/style_accordion';
 

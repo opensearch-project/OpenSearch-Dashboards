@@ -4,7 +4,7 @@
  */
 
 import './tabs.scss';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';

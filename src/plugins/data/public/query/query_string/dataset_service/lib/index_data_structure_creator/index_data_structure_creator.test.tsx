@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { IndexDataStructureCreator } from './index_data_structure_creator';

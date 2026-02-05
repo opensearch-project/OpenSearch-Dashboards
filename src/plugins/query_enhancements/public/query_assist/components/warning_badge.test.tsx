@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { IntlProvider } from 'react-intl';
 import { WarningBadge } from './warning_badge';
 

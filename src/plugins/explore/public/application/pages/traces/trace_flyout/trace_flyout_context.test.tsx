@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TraceFlyoutProvider, useTraceFlyoutContext } from './trace_flyout_context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';

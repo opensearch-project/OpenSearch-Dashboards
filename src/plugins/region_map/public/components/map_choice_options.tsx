@@ -4,7 +4,7 @@
  */
 
 import './map_choice_options.scss';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   EuiPanel,
   EuiSpacer,

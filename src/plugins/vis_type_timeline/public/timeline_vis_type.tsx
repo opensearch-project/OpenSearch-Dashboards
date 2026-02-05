@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { lazy } from 'react';
+import { lazy } from 'react';
 import { i18n } from '@osd/i18n';
 
 import { DefaultEditorSize } from '../../vis_default_editor/public';

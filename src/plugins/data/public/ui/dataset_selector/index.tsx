@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import React from 'react';
+
 import { Dataset, Query, TimeRange } from '../../../common';
 import {
   DatasetSelector,

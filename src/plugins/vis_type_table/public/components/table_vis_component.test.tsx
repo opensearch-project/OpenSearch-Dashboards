@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { shallow, mount } from 'enzyme';
 import { TableVisConfig, ColumnSort, AggTypes } from '../types';

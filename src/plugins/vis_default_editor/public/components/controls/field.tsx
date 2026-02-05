@@ -29,7 +29,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useMount } from 'react-use';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';

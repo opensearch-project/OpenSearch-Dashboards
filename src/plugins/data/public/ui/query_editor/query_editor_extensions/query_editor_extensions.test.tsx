@@ -4,7 +4,7 @@
  */
 
 import { render, waitFor } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { QueryEditorExtension } from './query_editor_extension';
 import QueryEditorExtensions from './query_editor_extensions';
 

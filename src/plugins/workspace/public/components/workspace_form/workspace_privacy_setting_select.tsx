@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiCompressedSuperSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { privacyType2TextMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
 

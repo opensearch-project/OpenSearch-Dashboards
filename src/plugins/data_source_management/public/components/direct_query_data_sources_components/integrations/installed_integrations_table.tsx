@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, CSSProperties, useEffect } from 'react';
+import { useState, CSSProperties, useEffect } from 'react';
 import {
   EuiSpacer,
   EuiPanel,

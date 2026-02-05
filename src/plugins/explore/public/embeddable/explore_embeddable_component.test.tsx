@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { SearchProps } from './explore_embeddable';

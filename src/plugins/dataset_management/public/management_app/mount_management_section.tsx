@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route } from 'react-router-dom';
 

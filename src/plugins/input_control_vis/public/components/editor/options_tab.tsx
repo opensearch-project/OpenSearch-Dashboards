@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 
 import { EuiForm, EuiCompressedFormRow, EuiCompressedSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
