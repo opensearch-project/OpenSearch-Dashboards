@@ -35,7 +35,7 @@ interface BarExclusiveVisOptionsProps {
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
-  onStackModeChange: (stackMode: 'none' | 'total') => void;
+  onStackModeChange?: (stackMode: 'none' | 'total') => void;
   shouldDisableUseThresholdColor?: boolean;
 }
 
@@ -145,7 +145,7 @@ export const BarExclusiveVisOptions = ({
             })}
             options={stackModeOptions}
             idSelected={stackMode}
-            onChange={(id) => onStackModeChange(id as 'none' | 'total')}
+            onChange={(id) => onStackModeChange?.(id as 'none' | 'total')}
             buttonSize="compressed"
             isFullWidth
             data-test-subj="barStackModeButtonGroup"
