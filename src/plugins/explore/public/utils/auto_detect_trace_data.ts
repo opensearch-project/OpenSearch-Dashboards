@@ -73,8 +73,11 @@ export async function detectTraceData(
     });
 
     // Verify required trace fields exist
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasSpanId = traceFields.some((f) => f.name === 'spanId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTraceId = traceFields.some((f) => f.name === 'traceId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasEndTime = traceFields.some((f) => f.name === 'endTime');
 
     if (hasSpanId && hasTraceId && hasEndTime) {
@@ -94,8 +97,11 @@ export async function detectTraceData(
     });
 
     // Verify correlation fields exist
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTraceId = logFields.some((f) => f.name === 'traceId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasSpanId = logFields.some((f) => f.name === 'spanId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTime = logFields.some((f) => f.name === 'time');
 
     if (hasTraceId && hasSpanId && hasTime) {

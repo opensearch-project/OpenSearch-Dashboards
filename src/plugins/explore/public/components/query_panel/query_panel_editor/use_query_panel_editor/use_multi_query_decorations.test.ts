@@ -4,6 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { monaco } from '@osd/monaco';
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
 
@@ -259,6 +260,7 @@ describe('useMultiQueryDecorations', () => {
 
     // Update with new editor
     act(() => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       result.current.updateDecorations(newMockEditor, 'PROMQL');
     });
 

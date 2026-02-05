@@ -38,6 +38,7 @@ export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root?: Root;
 

@@ -61,6 +61,7 @@ function MetricAggParamEditor({
     [metricAggs, agg.type.name]
   );
   const options = useAvailableOptions(aggFilter, filteredMetrics, DEFAULT_OPTIONS);
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
 
   return (

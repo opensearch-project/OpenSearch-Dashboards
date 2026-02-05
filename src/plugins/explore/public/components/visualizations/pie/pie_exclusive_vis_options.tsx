@@ -26,6 +26,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
   };
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="pieSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.pie', {

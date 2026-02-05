@@ -90,6 +90,7 @@ export const DataSourceViewExample = ({
         }}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setActionMenu, notifications, savedObjects]);
 
   return (

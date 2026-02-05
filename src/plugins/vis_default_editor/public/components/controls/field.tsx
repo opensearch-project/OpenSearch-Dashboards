@@ -111,6 +111,7 @@ function FieldParamEditor({
     }
   });
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
 
   return (

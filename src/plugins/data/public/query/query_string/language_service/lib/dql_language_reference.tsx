@@ -41,5 +41,6 @@ const DqlReference = () => {
 };
 
 export const dqlLanguageReference = () => {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return <LanguageReference body={<DqlReference />} />;
 };

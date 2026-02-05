@@ -28,22 +28,75 @@
  * under the License.
  */
 
-import { parse } from 'eslint/lib/options';
-
-const options = parse(process.argv);
 process.env.OPENSEARCH_DASHBOARDS_RESOLVER_HARD_CACHE = 'true';
 
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
+const { ESLint } = require('eslint');
+
+async function main() {
+  const cliArgs = process.argv.slice(2);
+
+  let fix = false;
+  let cache = true;
+  let format = 'stylish';
+  const patterns = [];
+
+  // Parse CLI arguments
+  for (let i = 0; i < cliArgs.length; i++) {
+    const arg = cliArgs[i];
+
+    if (arg === '--fix') {
+      fix = true;
+    } else if (arg === '--no-cache') {
+      cache = false;
+    } else if (arg === '--format' || arg === '-f') {
+      format = cliArgs[++i];
+    } else if (arg.startsWith('--format=')) {
+      format = arg.slice('--format='.length);
+    } else if (
+      arg === '--ext' ||
+      arg === '--config' ||
+      arg === '-c' ||
+      arg === '--ignore-path' ||
+      arg === '--ignore-pattern' ||
+      arg === '--output-file' ||
+      arg === '-o' ||
+      arg === '--max-warnings' ||
+      arg === '--resolve-plugins-relative-to' ||
+      arg === '--rulesdir' ||
+      arg === '--print-config'
+    ) {
+      // Skip flags with values that we don't need to handle
+      i++;
+    } else if (!arg.startsWith('-')) {
+      patterns.push(arg);
+    }
+  }
+
+  const eslint = new ESLint({
+    fix,
+    cache,
+    extensions: ['.js', '.mjs', '.ts', '.tsx'],
+  });
+
+  const results = await eslint.lintFiles(patterns.length > 0 ? patterns : ['.']);
+
+  if (fix) {
+    await ESLint.outputFixes(results);
+  }
+
+  const formatter = await eslint.loadFormatter(format);
+  const output = await formatter.format(results);
+  if (output) {
+    console.log(output);
+  }
+
+  const errorCount = results.reduce((sum, r) => sum + r.errorCount, 0);
+  if (errorCount > 0) {
+    process.exitCode = 1;
+  }
 }
 
-if (!process.argv.includes('--no-cache')) {
-  process.argv.push('--cache');
-}
-
-if (!process.argv.includes('--ext')) {
-  process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-}
-
-// common-js is required so that logic before this executes before loading eslint
-require('eslint/bin/eslint');
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 2;
+});

@@ -19,6 +19,7 @@ import {
   executeQueries,
   defaultPrepareQueryString,
 } from '../../../../utils/state_management/actions/query_actions';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DiscoverChartContainer } from '../../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
@@ -30,6 +31,7 @@ export const BottomRightContainer = () => {
 
   const onRefresh = () => {
     if (services) {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     }
   };

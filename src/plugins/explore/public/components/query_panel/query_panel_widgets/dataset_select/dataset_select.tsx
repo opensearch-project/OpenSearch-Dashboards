@@ -247,6 +247,7 @@ export const DatasetSelectWidget = () => {
     <div ref={containerRef} className="exploreDatasetSelectWrapper">
       <DatasetSelect
         onSelect={handleDatasetSelect}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         appName="explore"
         supportedTypes={supportedTypes}
         signalType={flavorId}

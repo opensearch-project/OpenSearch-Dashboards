@@ -13,7 +13,9 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiModalHeader,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';

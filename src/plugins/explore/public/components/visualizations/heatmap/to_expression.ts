@@ -4,6 +4,7 @@
  */
 
 import { HeatmapChartStyle } from './heatmap_vis_config';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AggregationType, VisFieldType } from '../types';
 import {
   applyAxisStyling,

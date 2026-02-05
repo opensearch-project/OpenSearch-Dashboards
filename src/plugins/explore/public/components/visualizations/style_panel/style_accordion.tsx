@@ -18,6 +18,7 @@ export const StyleAccordion: React.FC<StyleAccordionProps> = ({
   id,
   accordionLabel,
   initialIsOpen,
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   children,
 }) => {
   return (

@@ -41,6 +41,7 @@ export const LIST_CONTAINER = 'LIST_CONTAINER';
 
 export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root: Root | null = null;
 

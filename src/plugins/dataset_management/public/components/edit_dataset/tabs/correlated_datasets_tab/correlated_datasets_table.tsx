@@ -6,8 +6,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiInMemoryTable,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiButtonIcon,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiFlexGroup,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiFlexItem,
   EuiToolTip,
   EuiConfirmModal,
@@ -37,6 +40,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
   loading = false,
   message,
 }) => {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const { data, uiSettings, savedObjects } = useOpenSearchDashboards<
     DatasetManagmentContext
   >().services;
@@ -186,6 +190,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
     <>
       <EuiInMemoryTable
         items={correlations}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         columns={columns}
         loading={loading}
         message={message}

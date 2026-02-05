@@ -211,6 +211,7 @@ export function useGraphTimeseriesDataAction(enabled: boolean = true) {
               <EuiText size="xs">
                 <strong>Query:</strong>
               </EuiText>
+              {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
               <EuiCode language="promql" fontSize="xs" paddingSize="xs">
                 {args.query}
               </EuiCode>

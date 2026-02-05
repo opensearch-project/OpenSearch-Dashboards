@@ -57,6 +57,7 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
       {hasMappingSelected && (
         <>
           <EuiFlexItem>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <StyleAccordion
               id="gaugeValueOptions"
               accordionLabel={i18n.translate('explore.stylePanel.gaugeValueOptions', {

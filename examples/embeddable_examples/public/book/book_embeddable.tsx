@@ -77,6 +77,7 @@ export class BookEmbeddable
   implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root: Root | null = null;
   private savedObjectId?: string;

@@ -51,6 +51,7 @@ describe('Header', () => {
     const component = mount(
       wrapWithIntl(<Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />),
       {
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,
@@ -65,6 +66,7 @@ describe('Header', () => {
     const component = mount(
       wrapWithIntl(<Header indexPatternName={indexPatternName} docLinks={mockedDocLinks} />),
       {
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,
@@ -86,6 +88,7 @@ describe('Header', () => {
         />
       ),
       {
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,

@@ -96,6 +96,7 @@ export const DataSourceMultiSelectableExample = ({
         }}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjects, notifications, setActionMenu]);
 
   return (

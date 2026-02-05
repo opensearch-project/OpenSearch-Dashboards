@@ -20,6 +20,7 @@ import { defaultPrepareQueryString } from '../../application/utils/state_managem
 jest.mock('./metrics_data_table', () => ({
   MetricsDataTable: ({ searchResult }: { searchResult: IPrometheusSearchResult }) => (
     <div data-testid="metrics-data-table">
+      {/* @ts-expect-error TS18048 TODO(ts-error): fixme */}
       Metrics Data Table - Rows: {searchResult.instantHits.total}
     </div>
   ),
@@ -36,6 +37,7 @@ describe('ExploreMetricsDataTable', () => {
 
     const cacheKey = defaultPrepareQueryString(queryObj);
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const mockSearchResult: IPrometheusSearchResult = searchResult || {
       took: 10,
       timed_out: false,
@@ -102,7 +104,9 @@ describe('ExploreMetricsDataTable', () => {
       timed_out: false,
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       hits: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         total: { value: 0, relation: 'eq' },
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         max_score: null,
         hits: [],
       },

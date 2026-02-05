@@ -88,6 +88,7 @@ function getHasMatch(search?: string, savedAttributes?: TodoSavedObjectAttribute
 export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
   public readonly type = TODO_REF_EMBEDDABLE;
   private subscription: Subscription;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root: Root | null = null;
   private savedObjectsClient: SavedObjectsClientContract;

@@ -54,6 +54,7 @@ export const sqlLanguageReference = (selectedLanguage) => {
 
   return (
     <LanguageReference
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       body={<SQLReference />}
       autoShow={shouldAutoShow}
       selectedLanguage={selectedLanguage}

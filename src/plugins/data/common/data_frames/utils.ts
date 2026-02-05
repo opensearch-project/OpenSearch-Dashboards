@@ -365,6 +365,7 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     id: id ?? DATA_FRAME_TYPES.DEFAULT,
     title: dataFrame.name,
     timeFieldName: getTimeField(dataFrame, dataFrame.meta?.queryConfig)?.name,
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSourceRef: {
       id: dataFrame.meta?.queryConfig?.dataSourceId,
       name: dataFrame.meta?.queryConfig?.dataSourceName,

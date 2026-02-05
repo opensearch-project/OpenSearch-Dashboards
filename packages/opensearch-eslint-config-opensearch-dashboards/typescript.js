@@ -77,6 +77,7 @@ module.exports = {
           experimentalObjectRestSpread: true,
           jsx: true,
         },
+        warnOnUnsupportedTypeScriptVersion: false,
         // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
         // typescript eslint. As we are not using rules that need types information, we can safely
         // disabling that feature setting the project to undefined. That issue is being addressed
@@ -177,6 +178,18 @@ module.exports = {
               },
             },
             {
+              // Object literal and type properties were not checked by the v3
+              // naming-convention rule. Allow any format to preserve that behavior.
+              selector: ['objectLiteralProperty', 'objectLiteralMethod', 'typeProperty'],
+              format: null,
+            },
+            {
+              // Import names were not checked by the v3 naming-convention rule.
+              // Allow any format to preserve that behavior.
+              selector: 'import',
+              format: null,
+            },
+            {
               selector: 'function',
               format: [
                 'camelCase',
@@ -253,7 +266,8 @@ module.exports = {
           'no-eval': 'error',
           'no-new-wrappers': 'error',
           'no-script-url': 'error',
-          'no-shadow': 'error',
+          'no-shadow': 'off',
+        '@typescript-eslint/no-shadow': 'error',
           'no-throw-literal': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',

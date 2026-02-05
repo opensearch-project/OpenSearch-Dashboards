@@ -46,7 +46,6 @@ export function DocViewTableRow({
   valueRaw,
 }: Props) {
   const valueClassName = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     exploreDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });

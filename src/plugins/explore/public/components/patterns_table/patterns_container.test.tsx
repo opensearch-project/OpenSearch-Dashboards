@@ -183,6 +183,7 @@ describe('PatternsContainer', () => {
     mockUseTabResults.mockReturnValueOnce({
       results: {
         hits: {
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           hits: rawApiHits,
           total: 3,
         },

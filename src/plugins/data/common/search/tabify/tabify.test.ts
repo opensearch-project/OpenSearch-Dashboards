@@ -137,6 +137,7 @@ describe('tabifyAggResponse Integration', () => {
     // check for something like an average bytes result
     function expectAvgBytes(val: string | number) {
       expect(typeof val).toBe('number');
+      // @ts-expect-error TS2365 TODO(ts-error): fixme
       expect(val === 0 || val > 1000).toBeDefined();
     }
 

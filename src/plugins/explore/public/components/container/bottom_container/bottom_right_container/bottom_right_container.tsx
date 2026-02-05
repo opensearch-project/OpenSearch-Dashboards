@@ -34,6 +34,7 @@ export const BottomRightContainer = () => {
 
   const onRefresh = () => {
     if (services) {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     }
   };

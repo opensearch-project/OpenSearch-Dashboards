@@ -13,6 +13,7 @@ export const CARD_CONTAINER = 'CARD_CONTAINER';
 
 export class CardContainer extends Container<{}, CardContainerInput> {
   public readonly type = CARD_CONTAINER;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root?: Root;
 

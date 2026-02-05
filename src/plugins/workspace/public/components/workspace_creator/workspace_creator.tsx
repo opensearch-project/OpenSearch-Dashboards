@@ -183,6 +183,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                   try {
                     const detection = await detectTraceData(
                       savedObjects.client,
+                      // @ts-expect-error TS2345 TODO(ts-error): fixme
                       dataPlugin.dataViews,
                       dataSourceId
                     );

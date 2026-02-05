@@ -32,6 +32,7 @@ export const useTimeFilter = () => {
       if (isQuickSelection) {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services }));
       }
     },

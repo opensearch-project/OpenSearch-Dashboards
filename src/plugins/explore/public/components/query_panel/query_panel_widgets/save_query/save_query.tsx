@@ -130,6 +130,7 @@ export const SaveQueryButton = () => {
       dispatch(setSavedQuery(savedQuery.id));
       dispatch(setQueryState(savedQuery.attributes.query));
       dispatch(
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         loadQueryActionCreator(
           services,
           setEditorTextWithQuery,
@@ -151,6 +152,7 @@ export const SaveQueryButton = () => {
 
       setIsPopoverOpen(false);
       dispatch(clearResults());
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
     [dispatch, services, setEditorTextWithQuery, timeFilter]

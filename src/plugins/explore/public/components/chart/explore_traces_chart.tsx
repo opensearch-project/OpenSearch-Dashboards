@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
   EuiCallOut,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -185,6 +186,7 @@ export const ExploreTracesChart = ({
       );
     });
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(executeQueries({ services }));
   };
   const timefilterUpdateHandler = useCallback(
@@ -197,6 +199,7 @@ export const ExploreTracesChart = ({
       );
       dispatch(clearResults());
       dispatch(clearQueryStatusMap());
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
     [dispatch, services]

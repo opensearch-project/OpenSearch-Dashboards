@@ -335,6 +335,7 @@ export const Configurator = ({
           onClick={async () => {
             let newDataset = dataset;
             if (shouldSelectIndexedView && selectedIndexedView) {
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               newDataset = await updateDatasetForIndexedView();
             }
             await queryString.getDatasetService().cacheDataset(newDataset, services);

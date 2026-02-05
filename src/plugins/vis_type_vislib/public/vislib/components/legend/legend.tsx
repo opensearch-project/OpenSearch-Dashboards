@@ -275,7 +275,6 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
             type="button"
             onClick={this.toggleLegend}
             className={classNames('visLegend__toggle osd-resetFocusState', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'visLegend__toggle--isOpen': open,
             })}
             aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {

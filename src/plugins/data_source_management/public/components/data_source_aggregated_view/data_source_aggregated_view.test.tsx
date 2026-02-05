@@ -270,7 +270,6 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
       // Should render only active options
       const euiSwitch = component.find(EuiSwitch);
       expect(euiSwitch.exists()).toBeTruthy();
-      // @ts-expect-error TS2322 TODO(ts-error): fixme
       euiSwitch.prop('onChange')({ target: { checked: true } });
       const expectedOptions = activeDataSourceIds.length
         ? [

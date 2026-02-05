@@ -86,6 +86,7 @@ const defaultConfig = {
 
 function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
   const renderInputRow = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText

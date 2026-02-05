@@ -46,6 +46,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
 
   return (
     <EuiCompressedFormRow
+      // @ts-expect-error TS2349 TODO(ts-error): fixme
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

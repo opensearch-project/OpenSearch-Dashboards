@@ -41,21 +41,14 @@ if (isUsingNpm) {
 // - `yarn osd bootstrap`: '{"remain":[],"cooked":["run","osd"],"original":["osd","bootstrap"]}'
 const rawArgv = process.env.npm_config_argv;
 
-if (rawArgv === undefined) {
-  return;
-}
+if (rawArgv !== undefined) {
+  try {
+    const argv = JSON.parse(rawArgv);
 
-try {
-  const argv = JSON.parse(rawArgv);
-
-  if (argv.cooked.includes('osd')) {
-    // all good, trying to install deps using `osd`
-    return;
+    if (!argv.cooked.includes('osd') && argv.cooked.includes('install')) {
+      console.log('\nWARNING: When installing dependencies, prefer `yarn osd bootstrap`\n');
+    }
+  } catch (e) {
+    // if it fails we do nothing, as this is just intended to be a helpful message
   }
-
-  if (argv.cooked.includes('install')) {
-    console.log('\nWARNING: When installing dependencies, prefer `yarn osd bootstrap`\n');
-  }
-} catch (e) {
-  // if it fails we do nothing, as this is just intended to be a helpful message
 }

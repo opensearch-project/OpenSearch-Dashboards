@@ -50,6 +50,7 @@ describe('TraceFlyout', () => {
   it('returns null when isFlyoutOpen is false', () => {
     mockUseTraceFlyoutContext.mockReturnValue({
       closeTraceFlyout: mockCloseTraceFlyout,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       flyoutData: mockFlyoutData,
       isFlyoutOpen: false,
       openTraceFlyout: jest.fn(),
@@ -62,6 +63,7 @@ describe('TraceFlyout', () => {
   it('renders flyout when data is available and flyout is open', () => {
     mockUseTraceFlyoutContext.mockReturnValue({
       closeTraceFlyout: mockCloseTraceFlyout,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       flyoutData: mockFlyoutData,
       isFlyoutOpen: true,
       openTraceFlyout: jest.fn(),
@@ -74,6 +76,7 @@ describe('TraceFlyout', () => {
   it('calls closeTraceFlyout when flyout is closed', () => {
     mockUseTraceFlyoutContext.mockReturnValue({
       closeTraceFlyout: mockCloseTraceFlyout,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       flyoutData: mockFlyoutData,
       isFlyoutOpen: true,
       openTraceFlyout: jest.fn(),

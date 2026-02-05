@@ -130,6 +130,7 @@ describe('ExploreEmbeddableFactory', () => {
       references: [],
     };
 
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const result = await factory.create(input as any);
 
     expect(ExploreEmbeddable).toHaveBeenCalledWith(
@@ -177,6 +178,7 @@ describe('ExploreEmbeddableFactory', () => {
       references: [],
     };
 
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const result = await factory.create(input as any);
 
     expect(ExploreEmbeddable).toHaveBeenCalledWith(

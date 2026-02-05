@@ -189,6 +189,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'line',
         undefined,
@@ -235,6 +236,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'line',
         mockAxisColumnMappings,
@@ -266,6 +268,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'line',
         mockAxisColumnMappings,
@@ -297,6 +300,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'bar',
         mockAxisColumnMappings,
@@ -328,6 +332,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'area',
         mockAxisColumnMappings,
@@ -368,6 +373,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'line',
         undefined,
@@ -406,6 +412,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'line',
         undefined,
@@ -460,6 +467,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions
       );
 
@@ -480,6 +488,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'bar'
       );
@@ -516,6 +525,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions
       );
 
@@ -537,6 +547,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'bar'
       );
@@ -559,6 +570,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'pie'
       );
@@ -595,6 +607,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions
       );
 
@@ -630,6 +643,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions
       );
 
@@ -656,6 +670,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'pie',
         mockAxisColumnMappings
@@ -693,6 +708,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions
       );
 
@@ -720,6 +736,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'bar',
         mockAxisColumnMappings
@@ -749,6 +766,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'area',
         mockAxisColumnMappings
@@ -786,6 +804,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions
       );
 
@@ -828,6 +847,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'bar',
         mockAxisColumnMappings,
@@ -859,6 +879,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'area',
         mockAxisColumnMappings,
@@ -890,6 +911,7 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         styleOptions,
         'line',
         mockAxisColumnMappings,

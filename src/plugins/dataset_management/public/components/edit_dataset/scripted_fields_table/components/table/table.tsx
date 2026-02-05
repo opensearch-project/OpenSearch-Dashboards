@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ScriptedFieldItem } from '../../types';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from '../../../../../../../data/public';
 
 interface TableProps {

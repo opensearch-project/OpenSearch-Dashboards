@@ -116,6 +116,7 @@ export const VisualizeListing = () => {
   }, [visualizations]);
 
   const editItem = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ editUrl, editApp }) => {
       if (editApp) {
         application.navigateToApp(editApp, { path: editUrl });
@@ -132,6 +133,7 @@ export const VisualizeListing = () => {
   // This function takes a legacy visualization item as input and constructs the appropriate path.
   // It then navigates to the VisBuilder app with the constructed path to migrate the legacy visualization.
   const visbuilderEditItem = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     async (item) => {
       const path = await constructVisBuilderPath(item, visualizeServices);
       application.navigateToApp('vis-builder', { path });
@@ -147,6 +149,7 @@ export const VisualizeListing = () => {
   ]);
 
   const fetchItems = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (filter) => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return savedVisualizations

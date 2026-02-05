@@ -104,6 +104,7 @@ describe('export_actions', () => {
           usingRegexPatterns: false,
         },
       },
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       queryEditor: {
         queryStatusMap: {},
         overallQueryStatus: {

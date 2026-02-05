@@ -31,6 +31,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
   const timeUnits = useMemo(() => getTimeUnits(), []);
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="bucketSection"
       accordionLabel={i18n.translate('explore.stylePanel.bar.tabs.bucket', {

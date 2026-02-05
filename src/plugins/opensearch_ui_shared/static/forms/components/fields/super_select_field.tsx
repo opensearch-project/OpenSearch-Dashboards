@@ -49,6 +49,7 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
   return (
     <EuiCompressedFormRow
       label={field.label}
+      // @ts-expect-error TS2349 TODO(ts-error): fixme
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

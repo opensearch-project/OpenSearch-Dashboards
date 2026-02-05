@@ -91,6 +91,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         title: dataView.title,
         type: dataView.type || 'INDEX_PATTERN',
         timeFieldName: dataView.timeFieldName,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSource: dataView.dataSourceRef
           ? {
               id: dataView.dataSourceRef.id,
@@ -454,6 +455,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [forceVisualizationResize, isEmbedded]);
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const traceDetailsLink = buildTraceDetailsUrl(spanId, traceId, dataset);
 
   const renderTraceDetailsContent = () => {

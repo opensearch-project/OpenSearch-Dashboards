@@ -90,6 +90,7 @@ const defaultConfig = {
 
 function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
   const renderInputRow = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (item: FromToModel, index, onChangeValue) => (
       <>
         <EuiFlexItem>

@@ -52,6 +52,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     const chatWindowRef = useRef<ChatWindowInstance>(null);
     const flyoutMountPoint = useRef(null);
 
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const setMountPoint = useCallback((mountPoint) => {
       flyoutMountPoint.current = mountPoint;
     }, []);

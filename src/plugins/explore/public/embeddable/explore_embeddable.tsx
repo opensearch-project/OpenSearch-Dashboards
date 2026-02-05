@@ -287,6 +287,7 @@ export class ExploreEmbeddable
         embeddable: this,
         filters: [
           {
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             range: {
               '*': {
                 mode: 'absolute',

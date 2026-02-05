@@ -15,6 +15,7 @@ describe('Datasource Management: Header', () => {
 
   test('should render normally', () => {
     const component = shallow(wrapWithIntl(<Header />), {
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       wrappingComponent: OpenSearchDashboardsContextProvider,
       wrappingComponentProps: {
         services: mockedContext,

@@ -13,6 +13,7 @@ export type CustomContentEmbeddableInput = EmbeddableInput & { render: () => Rea
 
 export class CustomContentEmbeddable extends Embeddable<CustomContentEmbeddableInput> {
   public readonly type = CUSTOM_CONTENT_EMBEDDABLE;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node: HTMLElement | null = null;
   private root: Root | null = null;
 

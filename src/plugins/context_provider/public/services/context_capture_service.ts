@@ -18,6 +18,7 @@ import { AssistantContextStoreImpl } from './assistant_context_store';
 export class ContextCaptureService {
   private assistantContextStore: AssistantContextStore;
 
+  // @ts-expect-error TS6138 TODO(ts-error): fixme
   constructor(private coreSetup: CoreSetup, private pluginsSetup: ContextProviderSetupDeps) {
     this.assistantContextStore = new AssistantContextStoreImpl();
   }

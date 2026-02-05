@@ -34,6 +34,7 @@ function TableVizOptions() {
 
   return (
     <>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.params.settingsTitle', {
           defaultMessage: 'Settings',

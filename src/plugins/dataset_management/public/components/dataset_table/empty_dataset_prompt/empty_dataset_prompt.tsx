@@ -48,6 +48,7 @@ export const EmptyDatasetPrompt = ({
     // Otherwise, fall back to the old CreateButton with creationOptions
     if (creationOptions) {
       return (
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         <CreateButton options={creationOptions}>
           <FormattedMessage
             id="datasetManagement.datasetTable.createBtn"

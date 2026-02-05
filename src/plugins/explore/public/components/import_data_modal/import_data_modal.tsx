@@ -75,6 +75,7 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
             notifications={services.notifications}
             http={services.http}
             navigation={services.navigation}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             config={services.dataImporterConfig}
             savedObjects={services.savedObjects}
             dataSourceEnabled={services.dataSourceEnabled}

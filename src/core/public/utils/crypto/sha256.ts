@@ -141,7 +141,7 @@ type BufferEncoding =
   | 'binary'
   | 'hex';
 
-/* eslint-disable  no-bitwise, no-shadow */
+/* eslint-disable  no-bitwise */
 export class Sha256 {
   private _a: number;
   private _b: number;
@@ -193,7 +193,7 @@ export class Sha256 {
 
     while (s < l) {
       const t = Math.min(data.length, f + this._blockSize - (s % this._blockSize));
-      const ch = t - f;
+      const ch = t - f; // eslint-disable-line @typescript-eslint/no-shadow
 
       for (let i = 0; i < ch; i++) {
         buffer[(s % this._blockSize) + i] = data[i + f];
@@ -237,7 +237,7 @@ export class Sha256 {
   }
 
   _update(M: Buffer) {
-    const W = this._w;
+    const W = this._w; // eslint-disable-line @typescript-eslint/no-shadow
 
     let a = this._a | 0;
     let b = this._b | 0;

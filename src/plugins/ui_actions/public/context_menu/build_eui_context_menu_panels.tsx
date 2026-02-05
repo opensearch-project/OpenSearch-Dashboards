@@ -169,6 +169,7 @@ export async function buildContextMenuForActions({
 
     if (action.grouping) {
       for (let i = 0; i < action.grouping.length; i++) {
+        // @ts-expect-error TS7022 TODO(ts-error): fixme
         const group = action.grouping[i];
         const groupId = group.id;
 

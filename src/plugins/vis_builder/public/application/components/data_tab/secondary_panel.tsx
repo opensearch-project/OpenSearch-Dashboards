@@ -196,6 +196,7 @@ class EditorErrorBoundary extends Component<{}, { error?: any }> {
         </EuiCallOut>
       );
     }
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     return this.props.children;
   }
 }

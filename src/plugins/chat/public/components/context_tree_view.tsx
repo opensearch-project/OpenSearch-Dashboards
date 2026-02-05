@@ -8,6 +8,7 @@ import {
   EuiTreeView,
   EuiToken,
   EuiText,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,

@@ -85,6 +85,7 @@ export const EmptyIndexPatternPrompt = ({
               />
             </p>
             {canSave && (
+              // @ts-expect-error TS2769 TODO(ts-error): fixme
               <CreateButton options={creationOptions}>
                 <FormattedMessage
                   id="indexPatternManagement.indexPatternTable.createBtn"

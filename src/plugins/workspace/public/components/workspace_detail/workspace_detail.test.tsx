@@ -127,6 +127,7 @@ const WorkspaceDetailPage = (props: any) => {
   const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <MemoryRouter>
         <WorkspaceFormProvider

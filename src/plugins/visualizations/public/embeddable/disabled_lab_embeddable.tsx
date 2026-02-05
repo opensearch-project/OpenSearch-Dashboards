@@ -37,6 +37,7 @@ import { VisualizeInput } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private domNode?: HTMLElement;
   private root?: Root;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;

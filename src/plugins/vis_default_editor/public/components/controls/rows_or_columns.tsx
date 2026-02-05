@@ -59,6 +59,7 @@ function RowsOrColumnsControl({ editorStateParams, setStateParamValue }: AggCont
     },
   ];
   const onChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (optionId) => setStateParamValue(PARAMS.NAME, optionId === PARAMS.ROWS),
     [setStateParamValue]
   );

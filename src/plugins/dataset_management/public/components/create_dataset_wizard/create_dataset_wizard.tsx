@@ -200,6 +200,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
         id: datasetId,
         title: dataset,
         timeFieldName,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSourceRef,
         signalType,
         ...this.state.datasetCreationType.getDatasetMappings(),

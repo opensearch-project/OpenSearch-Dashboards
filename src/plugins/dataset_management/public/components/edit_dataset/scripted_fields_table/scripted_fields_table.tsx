@@ -24,6 +24,7 @@ interface ScriptedFieldsTableProps {
   };
   onRemoveField?: () => void;
   painlessDocLink: string;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   saveDataset: DataPublicPluginStart['datasets']['updateSavedObject'];
   useUpdatedUX: boolean;
 }

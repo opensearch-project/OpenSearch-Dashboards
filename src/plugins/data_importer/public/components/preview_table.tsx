@@ -100,6 +100,7 @@ export const PreviewComponent = ({
               <EuiTableHeaderCell>Column</EuiTableHeaderCell>
             )}
           </EuiTableHeader>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <EuiTableBody>
             {totalRows > 0 &&
               filteredData?.slice(0, loadedRows).map((row, rowIndex) => (

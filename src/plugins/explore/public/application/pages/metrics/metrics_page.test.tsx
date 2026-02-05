@@ -146,6 +146,7 @@ describe('MetricsPage', () => {
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -170,6 +171,7 @@ describe('MetricsPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>
@@ -185,6 +187,7 @@ describe('MetricsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
@@ -197,6 +200,7 @@ describe('MetricsPage', () => {
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>

@@ -79,7 +79,6 @@ describe('AccelerationActionOverlay', () => {
 
   test('calls onConfirm when confirm button is clicked', () => {
     const wrapper = mountComponent();
-    // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
     wrapper.find(EuiConfirmModal).prop('onConfirm')();
     expect(defaultProps.onConfirm).toHaveBeenCalled();
   });
@@ -102,7 +101,6 @@ describe('AccelerationActionOverlay', () => {
     // Use invoke instead of simulate for React 18 compatibility
     await act(async () => {
       const onChange = wrapper.find(EuiFieldText).prop('onChange');
-      // @ts-expect-error TS2722 TODO(ts-error): fixme
       onChange({ target: { value: mockAcceleration.indexName } });
     });
     wrapper.update();

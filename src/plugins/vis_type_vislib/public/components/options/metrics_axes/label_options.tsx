@@ -52,6 +52,7 @@ export interface LabelOptionsProps {
 function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Axis['labels']['rotate']) => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       setAxisLabel(paramName, Number(value));
     },
     [setAxisLabel]

@@ -7,6 +7,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './configure_prometheus_data_source';
 import { AuthMethod } from '../../../constants';

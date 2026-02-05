@@ -176,6 +176,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
                 setVisibleColumns: setLocalVisibleColumns,
               }}
               rowCount={displayedRowCount}
+              // @ts-expect-error TS7006 TODO(ts-error): fixme
               renderCellValue={(props) =>
                 renderCellValue({
                   ...props,

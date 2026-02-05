@@ -31,6 +31,7 @@ jest.mock('./patterns_settings_popover_content', () => ({
 
 const PatternsSettingsPopoverButtonHarness = () => {
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <PatternsSettingsPopoverButton />
     </IntlProvider>

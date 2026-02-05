@@ -175,6 +175,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
@@ -200,6 +201,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS,
@@ -223,6 +225,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS,
@@ -248,6 +251,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.RULES,

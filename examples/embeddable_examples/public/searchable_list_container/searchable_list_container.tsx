@@ -50,6 +50,7 @@ interface ChildInput extends EmbeddableInput {
 
 export class SearchableListContainer extends Container<ChildInput, SearchableContainerInput> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root: Root | null = null;
 

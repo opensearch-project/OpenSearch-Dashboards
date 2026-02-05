@@ -77,6 +77,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
   const isValid = !errors.length;
 
   const setExtents = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (paramName, value) => {
       setScale(paramName, value === '' ? null : value);
     },

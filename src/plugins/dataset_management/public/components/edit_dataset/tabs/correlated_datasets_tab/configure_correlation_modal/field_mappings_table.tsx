@@ -131,6 +131,7 @@ export const FieldMappingsTable: React.FC<FieldMappingsTableProps> = ({ errors }
 
   return (
     <EuiBasicTable
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       items={items}
       columns={columns}
       data-test-subj="fieldMappingsTable"

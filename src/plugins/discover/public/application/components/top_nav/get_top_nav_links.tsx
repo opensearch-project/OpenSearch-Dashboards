@@ -207,7 +207,6 @@ const getLegacyTopNavLinks = (
     ariaLabel: i18n.translate('discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
     run: async (anchorElement) => {
       const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
       const sharingData = await getSharingData({

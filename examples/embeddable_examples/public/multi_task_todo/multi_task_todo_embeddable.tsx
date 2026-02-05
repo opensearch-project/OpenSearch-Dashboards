@@ -74,6 +74,7 @@ function getOutput(input: MultiTaskTodoInput) {
 export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, MultiTaskTodoOutput> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
   private subscription: Subscription;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root: Root | null = null;
 

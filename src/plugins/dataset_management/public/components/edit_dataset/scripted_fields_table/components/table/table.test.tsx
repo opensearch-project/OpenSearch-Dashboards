@@ -7,6 +7,7 @@ import { shallow } from 'enzyme';
 
 import { Table } from '../table';
 import { ScriptedFieldItem } from '../../types';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from 'src/plugins/data/public';
 
 const getDatasetMock = (mockedFields: any = {}) => ({ ...mockedFields } as IDataset);

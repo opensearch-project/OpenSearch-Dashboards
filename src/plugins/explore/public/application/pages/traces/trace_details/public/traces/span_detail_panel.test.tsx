@@ -86,6 +86,7 @@ describe('SpanDetailPanel', () => {
   });
 
   it('renders hierarchy table by default (timeline view)', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
@@ -101,6 +102,7 @@ describe('SpanDetailPanel', () => {
       activeView: TraceDetailTab.SPAN_LIST,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithSpanList} />);
 
     expect(document.querySelector('[data-testid="span-list-table"]')).toBeInTheDocument();
@@ -110,6 +112,7 @@ describe('SpanDetailPanel', () => {
   });
 
   it('calls onSpanSelect when span is clicked in hierarchy table', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     const flyoutButton = screen.getByText('Open Flyout');
@@ -124,6 +127,7 @@ describe('SpanDetailPanel', () => {
       activeView: TraceDetailTab.SPAN_LIST,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithSpanList} />);
 
     const flyoutButton = screen.getByText('Open Flyout');
@@ -138,6 +142,7 @@ describe('SpanDetailPanel', () => {
       onSpanSelect: undefined,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithoutOnSpanSelect} />);
 
     const flyoutButton = screen.getByText('Open Flyout');
@@ -153,6 +158,7 @@ describe('SpanDetailPanel', () => {
       colorMap: undefined,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithoutColorMap} />);
 
     // ServiceLegend is not rendered in the current component structure
@@ -165,6 +171,7 @@ describe('SpanDetailPanel', () => {
       colorMap: {},
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithEmptyColorMap} />);
 
     // ServiceLegend is not rendered in the current component structure
@@ -172,6 +179,7 @@ describe('SpanDetailPanel', () => {
   });
 
   it('renders correct panel structure', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     const panel = screen.getByTestId('span-detail-panel');
@@ -185,6 +193,7 @@ describe('SpanDetailPanel', () => {
       activeView: 'unknown_view',
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithUnknownView} />);
 
     // Should fall back to hierarchy table (timeline view)
@@ -195,6 +204,7 @@ describe('SpanDetailPanel', () => {
   it('handles window resize events', () => {
     const originalInnerWidth = window.innerWidth;
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     Object.defineProperty(window, 'innerWidth', {
@@ -223,6 +233,7 @@ describe('SpanDetailPanel', () => {
       payloadData: JSON.stringify([]),
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithNoSpans} />);
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
@@ -236,6 +247,7 @@ describe('SpanDetailPanel', () => {
       payloadData: JSON.stringify([mockSpanData[0]]),
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithSingleSpan} />);
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
@@ -254,6 +266,7 @@ describe('SpanDetailPanel', () => {
       payloadData: JSON.stringify(multipleSpans),
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithMultipleSpans} />);
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
@@ -283,6 +296,7 @@ describe('SpanDetailPanel', () => {
       return element;
     });
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     // Restore original createElement
@@ -295,6 +309,7 @@ describe('SpanDetailPanel', () => {
     const useObservableMock = jest.requireMock('react-use/lib/useObservable');
     useObservableMock.mockReturnValue(true);
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
@@ -308,6 +323,7 @@ describe('SpanDetailPanel', () => {
     const useObservableMock = jest.requireMock('react-use/lib/useObservable');
     useObservableMock.mockReturnValue(false);
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...defaultProps} />);
 
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
@@ -320,6 +336,7 @@ describe('SpanDetailPanel', () => {
       spanFilters: [{ field: 'serviceName', value: 'test-service' }],
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithSpanList} />);
 
     const spanTable = document.querySelector('[data-testid="span-list-table"]');
@@ -334,6 +351,7 @@ describe('SpanDetailPanel', () => {
       spanFilters: [{ field: 'serviceName', value: 'test-service' }],
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithTreeView} />);
 
     const hierarchyTable = document.querySelector('[data-testid="span-hierarchy-table"]');
@@ -347,6 +365,7 @@ describe('SpanDetailPanel', () => {
       colorMap: {},
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithEmptyColorMap} />);
 
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
@@ -358,6 +377,7 @@ describe('SpanDetailPanel', () => {
       colorMap: undefined,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithUndefinedColorMap} />);
 
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
@@ -369,6 +389,7 @@ describe('SpanDetailPanel', () => {
       activeView: undefined,
     };
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<SpanDetailPanel {...propsWithoutActiveView} />);
 
     // Should default to timeline view (hierarchy table)

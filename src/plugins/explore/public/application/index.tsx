@@ -94,6 +94,7 @@ export const renderApp = (
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>

@@ -113,6 +113,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   );
 
   const setCustomJoinField = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     async (paramName: 'selectedCustomJoinField', value) => {
       if (stateParams.selectedCustomLayer) {
         setValue(

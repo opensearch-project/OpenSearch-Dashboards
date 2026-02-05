@@ -118,6 +118,7 @@ describe('DataLinkOptions', () => {
     const handleChange = jest.fn();
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}
@@ -150,6 +151,7 @@ describe('DataLinkOptions', () => {
 
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [link] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}
@@ -178,6 +180,7 @@ describe('DataLinkOptions', () => {
 
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [link] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}

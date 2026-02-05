@@ -93,7 +93,6 @@ const runQuery = async (
       } else if (poll.status.toLowerCase().startsWith('fail')) {
         return {
           ok: false,
-          // @ts-expect-error TS2739 TODO(ts-error): fixme
           error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
         };
       }

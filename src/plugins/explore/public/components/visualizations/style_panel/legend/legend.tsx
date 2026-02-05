@@ -62,6 +62,7 @@ export const LegendOptionsPanel = ({
   ];
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="legendSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.legend', {

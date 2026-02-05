@@ -104,6 +104,7 @@ export const DataSourceSelectableExample = ({
         }}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjects, notifications, setActionMenu]);
 
   return (

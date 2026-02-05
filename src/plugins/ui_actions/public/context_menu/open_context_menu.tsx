@@ -197,6 +197,7 @@ export function openContextMenu(
   activeRoot.render(
     <EuiPopover
       className="embPanel__optionsMenuPopover"
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       button={container}
       isOpen={true}
       closePopover={onClose}

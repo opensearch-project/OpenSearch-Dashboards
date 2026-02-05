@@ -10,6 +10,7 @@ import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
 import { normalizeResultRows } from '../../../../../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { prepareQueryForLanguage } from '../../../languages';
 import { Query } from '../../../../../../../data/common';
 import { QueryExecutionStatus } from '../../types';

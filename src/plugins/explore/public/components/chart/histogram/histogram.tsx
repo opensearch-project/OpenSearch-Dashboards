@@ -411,6 +411,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
   const showLegend = hasMultipleSeries;
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <Chart size="100%">
       <Settings
         xDomain={xDomain}

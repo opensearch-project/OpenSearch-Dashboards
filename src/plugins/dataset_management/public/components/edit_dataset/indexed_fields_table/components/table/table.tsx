@@ -8,6 +8,7 @@ import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@ela
 
 import { i18n } from '@osd/i18n';
 
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
 

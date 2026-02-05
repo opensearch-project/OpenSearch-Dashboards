@@ -47,6 +47,7 @@ const mockBaseDataset: BaseDataset = {
   id: 'test-id',
   title: 'Test Dataset',
   type: 'index',
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   dataSource: {
     id: 'ds-id',
     title: 'Test Datasource',
@@ -70,6 +71,7 @@ describe('ConfiguratorV2', () => {
   it('renders correctly', async () => {
     await act(async () => {
       render(
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         <IntlProvider locale="en">
           <ConfiguratorV2
             services={mockServices as any}
@@ -95,6 +97,7 @@ describe('ConfiguratorV2', () => {
 
   it('calls onCancel when cancel is clicked', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
@@ -117,6 +120,7 @@ describe('ConfiguratorV2', () => {
 
   it('calls onPrevious when back is clicked', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
@@ -139,6 +143,7 @@ describe('ConfiguratorV2', () => {
 
   it('displays PPL language', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
@@ -156,6 +161,7 @@ describe('ConfiguratorV2', () => {
 
   it('shows time field select for non-index-pattern datasets', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
@@ -174,6 +180,7 @@ describe('ConfiguratorV2', () => {
 
   it('disables confirm when time field not selected', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
@@ -192,6 +199,7 @@ describe('ConfiguratorV2', () => {
 
   it('shows save dataset checkbox', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}

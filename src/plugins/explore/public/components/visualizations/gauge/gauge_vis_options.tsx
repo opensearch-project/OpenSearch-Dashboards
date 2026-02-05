@@ -56,6 +56,7 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <StyleAccordion
               id="gaugeSection"
               accordionLabel={i18n.translate('explore.stylePanel.gauge', {
@@ -103,6 +104,7 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <StyleAccordion
               id="gaugeValueOptions"
               accordionLabel={i18n.translate('explore.stylePanel.gaugeValueOptions', {

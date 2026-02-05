@@ -6,6 +6,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
+// @ts-expect-error TS2724, TS2305 TODO(ts-error): fixme
 import { IDataset, DataView } from '../../../../../../plugins/data/common/datasets';
 
 jest.mock('@elastic/eui', () => ({

@@ -26,6 +26,7 @@ export const EditorContext = createContext<InternalEditorContextValue>({
  * Globally manages the editors so that we have access to them throughout the page.
  * Since a ref is not serializable, we cannot store it in the Redux store.
  */
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 export const EditorContextProvider: FC = ({ children }) => {
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
 

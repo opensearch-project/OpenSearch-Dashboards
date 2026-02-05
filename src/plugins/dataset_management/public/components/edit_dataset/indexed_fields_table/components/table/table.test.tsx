@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
 import { Table } from './table';

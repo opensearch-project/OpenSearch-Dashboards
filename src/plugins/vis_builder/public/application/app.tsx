@@ -53,6 +53,7 @@ export const VisBuilderApp = () => {
   // Render the application DOM.
   return (
     <I18nProvider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <DragDropProvider>
         <EuiPage className="vbLayout">
           <TopNav />

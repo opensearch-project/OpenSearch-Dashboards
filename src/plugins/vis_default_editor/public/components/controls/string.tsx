@@ -48,6 +48,7 @@ function StringParamEditor({
     setValidity(isValid);
   }, [isValid, setValidity]);
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
 
   return (

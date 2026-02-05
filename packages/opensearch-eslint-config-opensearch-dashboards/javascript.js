@@ -38,7 +38,7 @@ module.exports = {
      */
     {
       files: ['**/*.js'],
-      parser: require.resolve('babel-eslint'),
+      parser: require.resolve('@babel/eslint-parser'),
 
       plugins: ['mocha', 'babel', 'import', 'no-unsanitized', 'prefer-object-spread'],
 
@@ -61,6 +61,10 @@ module.exports = {
         sourceType: 'module',
         ecmaVersion: 6,
         ecmaFeatures: { experimentalObjectRestSpread: true },
+        requireConfigFile: false,
+        babelOptions: {
+          presets: ['@babel/preset-react'],
+        },
       },
 
       rules: {

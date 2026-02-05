@@ -141,6 +141,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
   const handleDatasetClick = useCallback(
     (dataset: DetailedDataset) => {
       onClose();
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       application.navigateToApp('datasets', {
         path: `/patterns/${dataset.id}`,
       });
@@ -256,6 +257,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
             onClick: () => handleDatasetClick(dataset),
             style: { cursor: 'pointer' },
           })}
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           pagination={{
             pageSize: 10,
             pageSizeOptions: [10],
@@ -452,6 +454,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         new Map(filteredDatasets.map((dataset) => [dataset.id, dataset])).values()
       );
 
+      // @ts-expect-error TS7034 TODO(ts-error): fixme
       let defaultDataView;
       try {
         defaultDataView = await dataViews.getDefault();
@@ -464,6 +467,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         console.warn('[DatasetSelect] Default dataset not found, using first available:', error);
       }
       const defaultDataset =
+        // @ts-expect-error TS7005 TODO(ts-error): fixme
         deduplicatedDatasets.find((d) => d.id === defaultDataView?.id) ?? deduplicatedDatasets[0];
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;

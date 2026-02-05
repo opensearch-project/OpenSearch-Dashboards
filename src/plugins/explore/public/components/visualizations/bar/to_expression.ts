@@ -626,11 +626,14 @@ export const createFacetedTimeBarChart = (
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
 
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const metricField = yAxis?.column;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
   const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;

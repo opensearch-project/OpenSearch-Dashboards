@@ -23,6 +23,7 @@ export function createDatasetSelect({ core, data, storage }: DatasetSelectDeps) 
     return (
       <OpenSearchDashboardsContextProvider
         services={{
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           appName: props.appName,
           data,
           storage,

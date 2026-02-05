@@ -65,6 +65,7 @@ function pickMaxWorkerCount(dist: boolean) {
 
 function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result: any = {};
+  // @ts-expect-error TS2769 TODO(ts-error): fixme
   for (const [key, value] of Object.entries(obj) as any) {
     if (!keys.includes(key)) {
       result[key] = value;

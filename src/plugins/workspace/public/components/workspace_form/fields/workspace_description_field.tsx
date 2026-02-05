@@ -23,6 +23,7 @@ export const WorkspaceDescriptionField = ({
   onChange,
 }: WorkspaceDescriptionFieldProps) => {
   const handleChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (e) => {
       onChange(e.currentTarget.value);
     },

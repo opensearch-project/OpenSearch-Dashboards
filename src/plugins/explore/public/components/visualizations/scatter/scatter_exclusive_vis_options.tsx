@@ -48,6 +48,7 @@ export const ScatterExclusiveVisOptions = ({
 
   const pointShapes = getPointShapes();
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       data-test-subj="scatterExclusivePanel"
       id="scatterSection"

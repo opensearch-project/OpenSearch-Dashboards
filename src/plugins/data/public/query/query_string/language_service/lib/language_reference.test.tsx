@@ -12,6 +12,7 @@ import { IntlProvider } from 'react-intl';
 // Helper to wrap component with IntlProvider
 // @ts-expect-error TS7006 TODO(ts-error): fixme
 const renderWithIntl = (ui) => {
+  // @ts-expect-error TS2769 TODO(ts-error): fixme
   return render(<IntlProvider locale="en">{ui}</IntlProvider>);
 };
 
@@ -30,6 +31,7 @@ describe('LanguageReference Component', () => {
     await act(async () => {
       renderWithIntl(
         <LanguageReference
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body={<div data-test-subj="test-body">Test Body</div>}
           autoShow={true}
           selectedLanguage="SQL"
@@ -52,6 +54,7 @@ describe('LanguageReference Component', () => {
     await act(async () => {
       renderWithIntl(
         <LanguageReference
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body={<div data-test-subj="test-body">Test Body</div>}
           autoShow={false}
           selectedLanguage="PPL"
@@ -95,6 +98,7 @@ describe('LanguageReference Component', () => {
     await act(async () => {
       renderWithIntl(
         <LanguageReference
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body={<div data-test-subj="test-body">Test Body</div>}
           autoShow={true}
           selectedLanguage="SQL"
@@ -112,6 +116,7 @@ describe('LanguageReference Component', () => {
     await act(async () => {
       renderWithIntl(
         <LanguageReference
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body={<div data-test-subj="test-body">Test Body</div>}
           autoShow={false}
           selectedLanguage="SQL"

@@ -123,6 +123,7 @@ export const processTraceAggregationResults = ({
           );
           if (histogramConfigs) {
             const dimensions = getDimensions(histogramConfigs, dataPlugin);
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             if (dimensions?.x?.format?.id) {
               xAxisFormat = dimensions.x.format as { id: string; params: { pattern: string } };
             }

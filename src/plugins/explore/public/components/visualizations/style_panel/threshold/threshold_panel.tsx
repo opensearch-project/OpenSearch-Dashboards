@@ -37,6 +37,7 @@ export const ThresholdPanel = ({
 
   const options = useMemo(() => getThresholdOptions(), []);
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="thresholdSection"
       accordionLabel={i18n.translate('explore.stylePanel.threshold.title', {

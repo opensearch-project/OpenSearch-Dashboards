@@ -50,6 +50,7 @@ export const ExploreTabs = () => {
       if (needsExecution) {
         dispatch(clearQueryStatusMapByKey(newTabCacheKey));
         dispatch(
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           executeTabQuery({
             services,
             cacheKey: newTabCacheKey,

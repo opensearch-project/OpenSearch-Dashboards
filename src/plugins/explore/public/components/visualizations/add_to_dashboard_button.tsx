@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import React, { useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
@@ -52,7 +53,9 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     dashboard,
     savedObjects,
     toastNotifications,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     uiSettings,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     scopedHistory,
     data,
     keyboardShortcut,

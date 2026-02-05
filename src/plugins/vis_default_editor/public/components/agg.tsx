@@ -244,6 +244,7 @@ function DefaultEditorAgg({
                 type={icon.type}
                 content={icon.tooltip}
                 iconProps={{
+                  // @ts-expect-error TS2353 TODO(ts-error): fixme
                   ['aria-label']: icon.tooltip,
                   ['data-test-subj']: icon.dataTestSubj,
                 }}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MetricsDataTable } from './metrics_data_table';
@@ -24,7 +25,9 @@ describe('MetricsDataTable', () => {
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       total: { value: 0, relation: 'eq' },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       max_score: null,
       hits: [],
     },
@@ -69,6 +72,7 @@ describe('MetricsDataTable', () => {
     expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
     // Verify the component receives correct field schema for column configuration
     expect(mockSearchResult.instantFieldSchema).toHaveLength(4);
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(mockSearchResult.instantFieldSchema.map((f) => f.name)).toEqual([
       'Time',
       'cpu',
@@ -110,6 +114,7 @@ describe('MetricsDataTable', () => {
     const expectedFields = ['Time', 'cpu', 'mode', 'Value'];
     expectedFields.forEach((field) => {
       expect(
+        // @ts-expect-error TS18048 TODO(ts-error): fixme
         mockSearchResult.instantFieldSchema.find((schema) => schema.name === field)
       ).toBeDefined();
     });

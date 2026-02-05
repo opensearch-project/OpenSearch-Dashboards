@@ -307,6 +307,7 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   const sizeAxisMapping = Object.values(axisColumnMappings).find(
     (mapping) => mapping.column === sizeField
   );
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const sizeAxisName = sizeAxisMapping?.name || sizeField;
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
@@ -360,6 +361,7 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     }
   };
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   newState.visualMap = {
     show: styles.addLegend === true,
     type: 'continuous',

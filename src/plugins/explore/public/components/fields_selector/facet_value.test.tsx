@@ -42,6 +42,7 @@ describe('FacetValue', () => {
   });
 
   it('renders facet value with display text', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     expect(screen.getByText('success')).toBeInTheDocument();
@@ -49,6 +50,7 @@ describe('FacetValue', () => {
   });
 
   it('renders filter buttons', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     const filterButtons = screen.getAllByRole('button');
@@ -62,6 +64,7 @@ describe('FacetValue', () => {
   });
 
   it('calls onAddFilter with positive filter when plus button clicked', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     const filterForButton = screen.getByLabelText('Filter for success');
@@ -71,6 +74,7 @@ describe('FacetValue', () => {
   });
 
   it('calls onAddFilter with negative filter when minus button clicked', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     const filterOutButton = screen.getByLabelText('Filter out success');
@@ -80,6 +84,7 @@ describe('FacetValue', () => {
   });
 
   it('shows tooltip with bucket display value', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     const valueSpan = screen.getByTestId('field-success');
@@ -94,12 +99,14 @@ describe('FacetValue', () => {
       percent: 10,
     };
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} bucket={longBucket} useShortDots={true} />);
 
     expect(screen.getByTestId('field-very.long.field.name.here')).toBeInTheDocument();
   });
 
   it('renders bucket count', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     expect(screen.getByText('10')).toBeInTheDocument();
@@ -109,6 +116,7 @@ describe('FacetValue', () => {
   });
 
   it('has correct CSS classes', () => {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     render(<FacetValue {...mockProps} />);
 
     const container = screen.getByTestId('exploreSidebarFacetValue');

@@ -144,7 +144,9 @@ describe('field_calculator', function () {
     it('should return an array of values for _source fields', function () {
       const extensions = getFieldValues({
         hits,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         field: indexPattern.fields.getByName('extension') as IndexPatternField,
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         dataSet: indexPattern,
       });
       expect(extensions).toBeInstanceOf(Array);
@@ -159,7 +161,9 @@ describe('field_calculator', function () {
     it('should return an array of values for core meta fields', function () {
       const types = getFieldValues({
         hits,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         field: indexPattern.fields.getByName('_type') as IndexPatternField,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSet: indexPattern,
       });
       expect(types).toBeInstanceOf(Array);
@@ -177,8 +181,10 @@ describe('field_calculator', function () {
     beforeEach(function () {
       params = {
         hits: _.cloneDeep(realHits),
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         field: indexPattern.fields.getByName('extension') as IndexPatternField,
         count: 3,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSet: indexPattern,
       };
     });
@@ -233,17 +239,21 @@ describe('field_calculator', function () {
     });
 
     it('fails to analyze geo and attachment types', function () {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       params.field = indexPattern.fields.getByName('point') as IndexPatternField;
       expect(getFieldValueCounts(params).error).not.toBeUndefined();
 
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       params.field = indexPattern.fields.getByName('area') as IndexPatternField;
       expect(getFieldValueCounts(params).error).not.toBeUndefined();
 
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       params.field = indexPattern.fields.getByName('request_body') as IndexPatternField;
       expect(getFieldValueCounts(params).error).not.toBeUndefined();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       params.field = indexPattern.fields.getByName('ip') as IndexPatternField;
       expect(getFieldValueCounts(params).error).not.toBeUndefined();
     });
@@ -253,6 +263,7 @@ describe('field_calculator', function () {
     });
 
     it('counts the hits the field exists in', function () {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       params.field = indexPattern.fields.getByName('phpmemory') as IndexPatternField;
       expect(getFieldValueCounts(params).exists).toBe(5);
     });

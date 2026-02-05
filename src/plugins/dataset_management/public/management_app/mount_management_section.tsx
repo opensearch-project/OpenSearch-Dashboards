@@ -15,6 +15,7 @@ import { EuiPageContent } from '@elastic/eui';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   DatasetTableWithRouter,
   EditDatasetContainer,
   CreateEditFieldContainer,

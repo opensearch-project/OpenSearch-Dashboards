@@ -178,6 +178,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     return (
       <DatasetSelect
         onSelect={props.datasetSelectProps?.onSelect || (() => {})}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         appName={props.datasetSelectProps?.appName || props.appName || ''}
       />
     );

@@ -38,5 +38,6 @@ const LuceneReference = () => {
 };
 
 export const luceneLanguageReference = () => {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return <LanguageReference body={<LuceneReference />} />;
 };

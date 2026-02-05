@@ -19,6 +19,7 @@ describe('ImportModeControl Component', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     act(() => {
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       component = shallowWithIntl(
         <ImportModeControl
           initialValues={{ overwrite: false }}

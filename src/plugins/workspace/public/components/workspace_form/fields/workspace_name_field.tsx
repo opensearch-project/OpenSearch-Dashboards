@@ -27,6 +27,7 @@ export const WorkspaceNameField = ({
   showDescription = true,
 }: WorkspaceNameFieldProps) => {
   const handleChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (e) => {
       onChange(e.currentTarget.value);
     },

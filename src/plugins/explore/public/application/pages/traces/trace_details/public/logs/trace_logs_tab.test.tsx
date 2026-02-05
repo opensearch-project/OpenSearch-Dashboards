@@ -114,6 +114,7 @@ describe('TraceLogsTab', () => {
     });
 
     it('should handle empty logs data', () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       render(<TraceLogsTab {...defaultProps} logsData={[]} datasetLogs={{}} />);
 
       expect(screen.getByText('No logs found for this dataset')).toBeInTheDocument();
@@ -185,18 +186,21 @@ describe('TraceLogsTab', () => {
 
   describe('Props validation', () => {
     it('should handle null logs data gracefully', () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       render(<TraceLogsTab {...defaultProps} logsData={null as any} />);
 
       expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();
     });
 
     it('should handle undefined logs data gracefully', () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       render(<TraceLogsTab {...defaultProps} logsData={undefined as any} />);
 
       expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();
     });
 
     it('should handle empty logs data gracefully', () => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       render(<TraceLogsTab {...defaultProps} logsData={[]} />);
 
       expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();

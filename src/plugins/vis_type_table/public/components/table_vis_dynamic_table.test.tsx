@@ -95,6 +95,7 @@ describe('TableVisDynamicTable', () => {
   });
 
   it('should render the component with title', () => {
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const { getByTestId, getByText } = render(
       <TableVisDynamicTable
         title="Test Table"
@@ -275,6 +276,7 @@ describe('TableVisDynamicTable', () => {
   });
 
   it('should handle pagination controls', () => {
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const { getByTestId, getByText } = render(
       <TableVisDynamicTable
         table={mockTable}

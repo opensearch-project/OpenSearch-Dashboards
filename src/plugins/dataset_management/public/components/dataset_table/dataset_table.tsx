@@ -201,6 +201,7 @@ export const DatasetTable = ({ canSave, history }: Props) => {
     if (!canSave) return null;
 
     const button = (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <CreateButton options={creationOptions}>
         <FormattedMessage
           id="datasetManagement.datasetTable.createBtn"

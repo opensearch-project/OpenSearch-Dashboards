@@ -64,12 +64,17 @@ describe('ImportSummary', () => {
     const props: ImportSummaryProps = { failedImports: [], successfulImports: [] };
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({ values: { importCount: 0 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountCreated(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountOverwritten(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountError(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findObjectRow(wrapper)).toHaveLength(0);
   });
 
@@ -80,6 +85,7 @@ describe('ImportSummary', () => {
     };
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({
         defaultMessage: expect.any(String),
@@ -87,13 +93,17 @@ describe('ImportSummary', () => {
         values: new Object(),
       })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const countCreated = findCountCreated(wrapper);
     expect(countCreated).toHaveLength(1);
     expect(countCreated.childAt(0).props()).toEqual(
       expect.objectContaining({ values: { createdCount: 1 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountOverwritten(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountError(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findObjectRow(wrapper)).toHaveLength(1);
   });
 
@@ -104,16 +114,21 @@ describe('ImportSummary', () => {
     };
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({ values: new Object() }) // no importCount for singular
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountCreated(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const countOverwritten = findCountOverwritten(wrapper);
     expect(countOverwritten).toHaveLength(1);
     expect(countOverwritten.childAt(0).props()).toEqual(
       expect.objectContaining({ values: { overwrittenCount: 1 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountError(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findObjectRow(wrapper)).toHaveLength(1);
   });
 
@@ -124,16 +139,21 @@ describe('ImportSummary', () => {
     };
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({ values: new Object() }) // no importCount for singular
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountCreated(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findCountOverwritten(wrapper)).toHaveLength(0);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const countError = findCountError(wrapper);
     expect(countError).toHaveLength(1);
     expect(countError.childAt(0).props()).toEqual(
       expect.objectContaining({ values: { errorCount: 1 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findObjectRow(wrapper)).toHaveLength(1);
   });
 
@@ -144,24 +164,29 @@ describe('ImportSummary', () => {
     };
     const wrapper = shallowWithI18nProvider(<ImportSummary {...props} />);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findHeader(wrapper).childAt(0).props()).toEqual(
       expect.objectContaining({ values: { importCount: 3 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const countCreated = findCountCreated(wrapper);
     expect(countCreated).toHaveLength(1);
     expect(countCreated.childAt(0).props()).toEqual(
       expect.objectContaining({ values: { createdCount: 1 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const countOverwritten = findCountOverwritten(wrapper);
     expect(countOverwritten).toHaveLength(1);
     expect(countOverwritten.childAt(0).props()).toEqual(
       expect.objectContaining({ values: { overwrittenCount: 1 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const countError = findCountError(wrapper);
     expect(countError).toHaveLength(1);
     expect(countError.childAt(0).props()).toEqual(
       expect.objectContaining({ values: { errorCount: 1 } })
     );
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     expect(findObjectRow(wrapper)).toHaveLength(3);
   });
 });

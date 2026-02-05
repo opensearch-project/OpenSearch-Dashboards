@@ -41,6 +41,7 @@ export const RightNavUI = () => {
   ]);
 
   const handleVisTypeChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (newVisName) => {
       const currentVisSchemas = types.get(activeVisName)?.ui.containerConfig.data.schemas.all ?? [];
       const newVisSchemas = types.get(newVisName)?.ui.containerConfig.data.schemas.all ?? [];

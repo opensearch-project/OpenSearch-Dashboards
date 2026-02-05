@@ -31,6 +31,7 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
     typeof state === 'object' &&
     !!state &&
     typeof state.isWindowOpen === 'boolean' &&
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     [ChatLayoutMode.SIDECAR, ChatLayoutMode.FULLSCREEN].includes(state.windowMode) &&
     typeof state.paddingSize === 'number'
   );

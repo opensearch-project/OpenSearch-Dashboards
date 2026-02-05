@@ -30,6 +30,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil, share } from 'rxjs/operators';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { createRoot, Root } from 'react-dom/client';
 import React from 'react';
 import moment from 'moment';

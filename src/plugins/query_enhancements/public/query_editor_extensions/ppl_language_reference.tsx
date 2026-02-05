@@ -54,6 +54,7 @@ export const pplLanguageReference = (selectedLanguage) => {
 
   return (
     <LanguageReference
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       body={<PPLReference />}
       autoShow={shouldAutoShow}
       selectedLanguage={selectedLanguage}

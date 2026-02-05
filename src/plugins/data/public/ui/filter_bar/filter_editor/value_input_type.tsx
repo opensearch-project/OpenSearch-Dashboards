@@ -76,7 +76,7 @@ class ValueInputTypeUI extends Component<Props> {
               typeof value === 'string'
                 ? parseFloat(value)
                 : typeof value === 'bigint'
-                ? (value as BigInt).toString()
+                ? (value as bigint).toString()
                 : value
             }
             onChange={this.onNumberChange}
@@ -157,7 +157,7 @@ class ValueInputTypeUI extends Component<Props> {
     if (typeof params === 'string') {
       numValue = parseFloat(params);
     } else if (typeof params === 'bigint') {
-      numValue = (params as BigInt).toString();
+      numValue = (params as bigint).toString();
     }
     this.props.onChange(numValue ?? params);
   };

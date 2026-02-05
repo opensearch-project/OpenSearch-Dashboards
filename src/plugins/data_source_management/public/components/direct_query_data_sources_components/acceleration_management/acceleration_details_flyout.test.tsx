@@ -64,7 +64,6 @@ const operationSuccess = false;
 
 describe('AccelerationDetailsFlyout', () => {
   it('renders AccelerationDetailsFlyout component with default options', async () => {
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<AccelerationDetailsFlyout {...defaultProps} />);
@@ -73,7 +72,6 @@ describe('AccelerationDetailsFlyout', () => {
 
     await waitFor(() => {
       expect(
-        // @ts-expect-error TS7005 TODO(ts-error): fixme
         toJson(wrapper!, {
           noKey: false,
           mode: 'deep',
@@ -83,16 +81,13 @@ describe('AccelerationDetailsFlyout', () => {
   });
 
   it('calls resetFlyout on DiscoverIcon click', async () => {
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<AccelerationDetailsFlyout {...defaultProps} />);
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find('EuiButtonEmpty').at(1).simulate('click');
     });
 
@@ -100,47 +95,36 @@ describe('AccelerationDetailsFlyout', () => {
   });
 
   it('calls setOperationType and setShowConfirmationOverlay on SyncIcon click', async () => {
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<AccelerationDetailsFlyout {...defaultProps} />);
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find('EuiButtonEmpty').at(0).simulate('click');
     });
 
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Note: Functional components do not have state, so we verify the behavior instead
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find('AccelerationActionOverlay').prop('isVisible')).toBe(true);
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find('AccelerationActionOverlay').prop('actionType')).toBe('sync');
   });
 
   it('calls performOperation on confirmation overlay confirm', async () => {
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<AccelerationDetailsFlyout {...defaultProps} />);
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find('EuiButtonEmpty').at(0).simulate('click');
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find('AccelerationActionOverlay').props().onConfirm();
     });
 

@@ -109,6 +109,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
         mockAxisColumnMappings
       );
@@ -195,6 +196,7 @@ describe('to_expression', () => {
         exclusive: { ...mockStyleOptions.exclusive, showValues: true },
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createNumericalStateTimeline(mockData, [], [], [], styleWithText);
       expect(result.layer).toHaveLength(2);
     });
@@ -204,6 +206,7 @@ describe('to_expression', () => {
         ...mockStyleOptions,
         valueMappingOptions: { valueMappings: rangeMappings },
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createNumericalStateTimeline(mockData, [], [], [], styleWithLegend);
       expect(result.layer[0].encoding.color.legend.title).toBe('Ranges');
     });
@@ -213,6 +216,7 @@ describe('to_expression', () => {
         ...mockStyleOptions,
         legendTitle: 'default',
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createNumericalStateTimeline(mockData, [], [], [], styleWithLegend);
       expect(result.layer[0].encoding.color.legend.title).toBe('default');
     });
@@ -230,6 +234,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         mockStyleOptions,
         mockAxisColumnMappings
       );
@@ -269,6 +274,7 @@ describe('to_expression', () => {
         titleOptions: { show: true, titleName: 'Test Title' },
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createCategoricalStateTimeline(mockData, [], [], [], styleWithTitle);
       expect(result.title).toBe('Test Title');
     });
@@ -277,6 +283,7 @@ describe('to_expression', () => {
         ...mockStyleOptions,
         legendTitle: 'default',
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
       expect(result.layer[0].encoding.color.legend.title).toBe('default');
     });
@@ -293,6 +300,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         mockStyleOptions,
         mockAxisColumnMappings
       );
@@ -332,6 +340,7 @@ describe('to_expression', () => {
         },
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithThreshold);
       expect(result).toHaveProperty('data.values');
     });
@@ -340,6 +349,7 @@ describe('to_expression', () => {
         ...mockStyleOptions,
         legendTitle: 'default',
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
       expect(result.layer[0].encoding.color.legend.title).toBe('default');
     });

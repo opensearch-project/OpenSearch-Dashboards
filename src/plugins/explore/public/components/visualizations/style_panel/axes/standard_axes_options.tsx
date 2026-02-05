@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import React, { useMemo } from 'react';
 import {
   EuiFormRow,
@@ -10,6 +11,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiSplitPanel,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
@@ -123,6 +125,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   }
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="allAxesSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.allAxes', {

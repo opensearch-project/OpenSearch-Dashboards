@@ -87,40 +87,31 @@ describe('SelectorLoadDatabases', () => {
       stopLoading: stopDatabasesLoading,
     }));
 
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<SelectorLoadDatabases {...defaultProps} />);
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Click button to start loading
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find(EuiButtonIcon).simulate('click');
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Verify loading state
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(true);
 
     // Simulate SUCCESS status from the hook
     mockLoadStatus.current = DirectQueryLoadingStatus.SUCCESS;
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.setProps({}); // Trigger re-render with new status
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     expect(defaultProps.loadDatabases).toHaveBeenCalled();
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(false);
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiButtonIcon).exists()).toBe(true);
   });
 

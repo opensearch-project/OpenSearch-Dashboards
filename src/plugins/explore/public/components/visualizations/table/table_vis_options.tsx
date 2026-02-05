@@ -83,6 +83,7 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <StyleAccordion
           id="tableSection"
           accordionLabel={i18n.translate('explore.stylePanel.table.tableSection', {
@@ -147,6 +148,7 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
         </StyleAccordion>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <StyleAccordion
           id="thresholdSection"
           accordionLabel={i18n.translate('explore.stylePanel.table.threshold', {

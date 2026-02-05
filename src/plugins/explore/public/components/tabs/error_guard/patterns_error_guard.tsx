@@ -117,6 +117,7 @@ export const PatternsErrorGuard = ({ registryTab }: PatternsErrorGuardProps) => 
                   Promise.resolve().then(() => {
                     // Trigger query execution to reload the patterns tab
                     if (services) {
+                      // @ts-expect-error TS2345 TODO(ts-error): fixme
                       dispatch(executeQueries({ services }));
                     }
                   });

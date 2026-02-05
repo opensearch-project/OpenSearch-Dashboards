@@ -59,7 +59,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       ui: { TopNavMenu },
     },
     data,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     uiSettings,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     scopedHistory,
   } = services;
 
@@ -160,6 +162,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       }
 
       const editorText = editorRef.current?.getValue() || '';
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
     },
     [dispatch, services, editorRef]

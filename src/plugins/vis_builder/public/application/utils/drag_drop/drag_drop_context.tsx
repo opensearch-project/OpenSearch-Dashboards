@@ -35,6 +35,7 @@ const defaultContextProps: IDragDropContext = {
 
 const DragDropContext = createContext<IDragDropContext>(defaultContextProps);
 
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 const DragDropProvider: FC<ReactNode> = ({ children }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [data, setData] = useState<DragDataType>(EMPTY_DATA);

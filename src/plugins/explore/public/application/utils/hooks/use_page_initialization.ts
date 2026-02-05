@@ -53,6 +53,7 @@ export const useInitPage = () => {
           const query = {
             ...queryFromSavedSearch,
             ...queryFromUrl,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             query: queryFromUrl.query || queryFromSavedSearch.query,
           };
           if (query) {
@@ -90,6 +91,7 @@ export const useInitPage = () => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services }));
       }
     }

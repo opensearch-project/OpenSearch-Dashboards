@@ -58,8 +58,10 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         await dispatch(executeQueries({ services }));
         if (!activeTabId) {
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(detectAndSetOptimalTab({ services }));
         }
         dispatch(setIsInitialized(true));

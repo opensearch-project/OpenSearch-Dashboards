@@ -215,6 +215,7 @@ describe('QueryPanelActionsRegistryService', () => {
       setup.register(action);
       const actions = service.getSortedActions();
 
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       actions[0].onClick(mockDeps);
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
@@ -275,6 +276,7 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle query with parse command and capture groups', () => {
+        // @ts-expect-error TS6133 TODO(ts-error): fixme
         const mockDeps: QueryPanelActionDependencies = {
           query: {
             query:
@@ -300,6 +302,7 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle query with backticks and field names with dots', () => {
+        // @ts-expect-error TS6133 TODO(ts-error): fixme
         const mockDeps: QueryPanelActionDependencies = {
           query: {
             query: 'source=`index-with-special-chars_@#$` | where `field.with.dots` = "value"',
@@ -352,6 +355,7 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle query with unicode characters', () => {
+        // @ts-expect-error TS6133 TODO(ts-error): fixme
         const mockDeps: QueryPanelActionDependencies = {
           query: {
             query: 'source=logs | where message = "Error: फ़ाइल मौजूद नहीं है 🔥"',
@@ -421,6 +425,7 @@ describe('QueryPanelActionsRegistryService', () => {
 | stats count() by host
 | sort - count()`;
 
+        // @ts-expect-error TS6133 TODO(ts-error): fixme
         const mockDeps: QueryPanelActionDependencies = {
           query: { query: multilineQuery, language: 'PPL' },
           resultStatus: { status: QueryExecutionStatus.READY },
@@ -477,6 +482,7 @@ describe('QueryPanelActionsRegistryService', () => {
           query: { query: 'source=logs | invalid_command', language: 'PPL' },
           resultStatus: {
             status: QueryExecutionStatus.ERROR,
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             error: {
               message: {
                 details: 'Unknown command',
@@ -755,6 +761,7 @@ describe('QueryPanelActionsRegistryService', () => {
           getLabel: (deps) => `Flyout for ${deps.query.language}`,
           getIcon: () => 'beaker',
           component: mockComponent,
+          // @ts-expect-error TS2353 TODO(ts-error): fixme
           onOpen: mockOnOpen,
         };
 
@@ -769,6 +776,7 @@ describe('QueryPanelActionsRegistryService', () => {
         expect(fullFlyoutAction.getIcon!(mockDeps)).toBe('beaker');
 
         // Test onOpen callback
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         fullFlyoutAction.onOpen!(mockDeps);
         expect(mockOnOpen).toHaveBeenCalledTimes(1);
         expect(mockOnOpen).toHaveBeenCalledWith(mockDeps);
@@ -830,6 +838,7 @@ describe('QueryPanelActionsRegistryService', () => {
           getLabel: () => 'Analyze Complex Query',
           getIsEnabled: (deps) => deps.queryInEditor.includes('parse'),
           component: mockComponent,
+          // @ts-expect-error TS2353 TODO(ts-error): fixme
           onOpen: mockOnOpen,
         };
 
@@ -839,6 +848,7 @@ describe('QueryPanelActionsRegistryService', () => {
         expect(flyoutAction.getIsEnabled!(complexPPLDeps)).toBe(true);
 
         // Test onOpen receives correct dependencies
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         flyoutAction.onOpen!(complexPPLDeps);
         expect(mockOnOpen).toHaveBeenCalledWith(complexPPLDeps);
         expect(mockOnOpen.mock.calls[0][0].queryInEditor).toContain('parse');

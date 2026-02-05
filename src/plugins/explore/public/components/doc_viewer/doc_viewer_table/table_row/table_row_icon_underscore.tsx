@@ -28,6 +28,7 @@ export function DocViewTableRowIconUnderscore() {
       content={tooltipContent}
       color="warning"
       iconProps={{
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
         className: 'exploreDocViewer__warning',
         'data-test-subj': 'underscoreWarning',
       }}

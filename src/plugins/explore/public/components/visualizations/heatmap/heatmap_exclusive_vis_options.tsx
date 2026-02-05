@@ -43,6 +43,7 @@ export const HeatmapExclusiveVisOptions = ({
   const colorSchemas = useMemo(() => getColorSchemas(), []);
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="heatmapSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.heatmap', {

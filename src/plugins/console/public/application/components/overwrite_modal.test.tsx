@@ -19,6 +19,7 @@ describe('OverwriteModal Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     act(() => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       component = shallowWithIntl(<OverwriteModal onConfirm={mockOnConfirm} onSkip={mockOnSkip} />);
     });
 

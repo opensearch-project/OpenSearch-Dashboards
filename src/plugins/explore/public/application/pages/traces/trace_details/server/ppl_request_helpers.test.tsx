@@ -56,6 +56,7 @@ describe('ppl_request_helpers', () => {
           type: 'OpenSearch',
         },
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = buildPPLDataset(datasetWithDataSource);
       expect(result).toEqual({
         id: 'test-dataset-id',
@@ -119,6 +120,7 @@ describe('ppl_request_helpers', () => {
           type: 'OpenSearch',
         },
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = buildPPLQueryRequest(datasetWithDataSource, 'source = test-index');
       expect(result.params.body.query.dataset.dataSource).toEqual({
         id: 'external-datasource-id',

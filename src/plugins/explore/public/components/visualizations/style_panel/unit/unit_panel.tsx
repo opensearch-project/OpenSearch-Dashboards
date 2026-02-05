@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { UnitsCollection, getUnitById } from './collection';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { StyleAccordion } from '../style_accordion';
 import './style.scss';
 

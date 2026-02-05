@@ -4,12 +4,14 @@
  */
 
 import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { shallow, mount } from 'enzyme';
 import { TableVisConfig, ColumnSort, AggTypes } from '../types';
 import { TableVisComponent } from './table_vis_component';
 import { FormattedColumn } from '../types';
 import { FormattedTableContext } from '../table_vis_response_handler';
 import { TableVisDynamicTable } from './table_vis_dynamic_table';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { TableUiState } from '../utils/get_table_ui_state';
 
 const mockFormatter = {

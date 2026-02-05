@@ -61,6 +61,7 @@ function ColorRanges({
   }, [colorsRange]);
 
   const validateRange = useCallback(
+    // @ts-expect-error TS7031, TS7006 TODO(ts-error): fixme
     ({ from, to }, index) => {
       if (!colorsRange[index]) {
         return [false, false];

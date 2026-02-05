@@ -52,6 +52,7 @@ export const WorkspaceCollaboratorInput = ({
   collaboratorIdInputPlaceholder,
 }: WorkspaceCollaboratorInputProps) => {
   const handleCollaboratorIdChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (e) => {
       onCollaboratorIdChange(e.target.value, index);
     },

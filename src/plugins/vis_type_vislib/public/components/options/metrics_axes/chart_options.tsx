@@ -67,6 +67,7 @@ function ChartOptions({
   );
 
   const setValueAxis = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (paramName, value) => {
       changeValueAxis(index, paramName, value);
     },

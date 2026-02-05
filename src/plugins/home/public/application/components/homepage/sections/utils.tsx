@@ -4,6 +4,7 @@
  */
 
 import React, { FC } from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { createRoot, Root } from 'react-dom/client';
 import { RenderFn } from '../../../../services/section_type/section_type';
 

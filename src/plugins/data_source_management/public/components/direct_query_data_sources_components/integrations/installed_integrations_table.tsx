@@ -158,7 +158,6 @@ export const InstallIntegrationFlyout = ({
           http={http}
         />
       ) : (
-        // @ts-expect-error TS2786 TODO(ts-error): fixme
         <SetupIntegrationForm
           selectedClusterName={selectedClusterName}
           selectedDataSourceId={selectedDataSourceId}

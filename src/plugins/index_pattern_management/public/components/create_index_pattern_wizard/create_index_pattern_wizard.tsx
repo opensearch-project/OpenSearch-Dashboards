@@ -224,6 +224,7 @@ export class CreateIndexPatternWizard extends Component<
         id: indexPatternId,
         title: indexPattern,
         timeFieldName,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSourceRef,
         ...this.state.indexPatternCreationType.getIndexPatternMappings(),
       });

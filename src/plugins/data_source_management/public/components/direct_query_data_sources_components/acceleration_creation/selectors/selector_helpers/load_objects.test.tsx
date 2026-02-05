@@ -112,55 +112,43 @@ describe('SelectorLoadObjects', () => {
       stopLoading: stopLoadingAccelerations,
     }));
 
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<SelectorLoadObjects {...defaultProps} />);
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Click button to start loading
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find(EuiButtonIcon).simulate('click');
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Verify loading state
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(true);
 
     // Transition tables status to SUCCESS first (to avoid race condition in React 18)
     mockTablesLoadStatus.current = DirectQueryLoadingStatus.SUCCESS;
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.setProps({}); // Trigger re-render with new tables status
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     expect(defaultProps.loadTables).toHaveBeenCalled();
     // Still loading because accelerations status is not SUCCESS yet
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(true);
 
     // Now transition accelerations status to SUCCESS
     mockAccelerationsLoadStatus.current = DirectQueryLoadingStatus.SUCCESS;
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.setProps({}); // Trigger re-render with new accelerations status
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Now both statuses are SUCCESS, loading should be complete
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(false);
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiButtonIcon).exists()).toBe(true);
   });
 

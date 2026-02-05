@@ -524,7 +524,7 @@ describe('SpanMetadataTab', () => {
         spanId: 'mixed-case',
         attributes: {
           'HTTP.METHOD': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           'Http.Status_Code': 200,
           'AWS.REGION': 'us-west-2',
           'Service.Version': '1.0.0',

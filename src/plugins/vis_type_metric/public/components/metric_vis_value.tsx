@@ -65,9 +65,8 @@ export class MetricVisValue extends Component<MetricVisValueProps> {
     };
 
     const containerClassName = classNames('mtrVis__container', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mtrVis__container--light': metric.lightText,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       'mtrVis__container-isfilterable': hasFilter,
     });
 

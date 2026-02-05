@@ -48,6 +48,7 @@ describe('QueryEditorExtension', () => {
       onSelectLanguage: jest.fn(),
       isCollapsed: false,
       setIsCollapsed: jest.fn(),
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       query: mockQuery,
     },
     componentContainer: document.createElement('div'),

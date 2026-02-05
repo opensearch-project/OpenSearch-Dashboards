@@ -46,6 +46,7 @@ describe('<ResizableVisControlAndTabs />', () => {
   beforeEach(() => {
     mockUseSelector.mockClear();
     jest.spyOn(ReactUse, 'useObservable').mockReturnValue({});
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(new VB.VisualizationBuilder({}));
     mockUseTabError.mockReturnValue(null);
     mockUseOpenSearchDashboards.mockReturnValue({

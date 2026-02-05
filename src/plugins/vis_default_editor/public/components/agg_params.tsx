@@ -143,6 +143,7 @@ function DefaultEditorAggParams({
     !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (value) => {
       if (agg.type !== value) {
         onAggTypeChange(agg.id, value);

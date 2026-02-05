@@ -36,7 +36,9 @@ const TestComponent = () => {
           openTraceFlyout({
             traceId: 'test-trace',
             spanId: 'test-span',
+            // @ts-expect-error TS2740 TODO(ts-error): fixme
             dataset: { id: 'test-dataset', title: 'test', type: 'INDEX_PATTERN' },
+            // @ts-expect-error TS2739 TODO(ts-error): fixme
             rowData: { _source: {} },
           })
         }

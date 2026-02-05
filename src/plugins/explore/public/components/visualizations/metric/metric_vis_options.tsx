@@ -57,6 +57,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <StyleAccordion
               id="metricSection"
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
@@ -115,6 +116,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             </StyleAccordion>
           </EuiFlexItem>
           <EuiFlexItem>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <StyleAccordion
               id="metricValueOptions"
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
@@ -153,6 +155,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <StyleAccordion
               id="metricTextStyles"
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metricTextSize', {

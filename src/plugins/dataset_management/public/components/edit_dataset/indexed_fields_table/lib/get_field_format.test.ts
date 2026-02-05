@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from '../../../../../../data/public';
 import { getFieldFormat } from './get_field_format';
 

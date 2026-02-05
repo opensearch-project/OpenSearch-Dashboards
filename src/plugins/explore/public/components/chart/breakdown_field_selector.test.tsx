@@ -84,6 +84,7 @@ describe('BreakdownFieldSelector', () => {
             type: 'INDEX_PATTERN',
           },
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         queryEditor: {
           breakdownField,
           queryStatusMap,
@@ -270,6 +271,7 @@ describe('BreakdownFieldSelector', () => {
   it('shows loading state when isLoading is true', () => {
     (useDatasetContext as jest.MockedFunction<typeof useDatasetContext>).mockReturnValueOnce({
       dataset: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         fields: {
           getAll: jest.fn(() => []),
         },
@@ -288,6 +290,7 @@ describe('BreakdownFieldSelector', () => {
     (useDatasetContext as jest.MockedFunction<typeof useDatasetContext>).mockReturnValueOnce({
       dataset: {
         fields: {
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           getAll: jest.fn(() => [
             { name: 'numericField', displayName: 'Numeric Field', type: 'number', scripted: false },
           ]),

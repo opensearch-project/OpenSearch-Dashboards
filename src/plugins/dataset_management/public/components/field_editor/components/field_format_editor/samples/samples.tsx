@@ -64,6 +64,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           className="osdFieldFormatEditor__samples"
           compressed={true}
           items={samples}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           columns={columns}
         />
       </EuiCompressedFormRow>

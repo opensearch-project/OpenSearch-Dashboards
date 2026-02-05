@@ -676,6 +676,7 @@ describe('SavedObjectsFinder', () => {
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}

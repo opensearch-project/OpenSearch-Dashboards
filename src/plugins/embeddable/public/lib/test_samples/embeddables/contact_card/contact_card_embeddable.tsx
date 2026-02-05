@@ -63,6 +63,7 @@ export class ContactCardEmbeddable extends Embeddable<
   ContactCardEmbeddableOutput
 > {
   private subscription: Subscription;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: Element;
   private root: Root | null = null;
   public readonly type: string = CONTACT_CARD_EMBEDDABLE;

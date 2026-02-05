@@ -43,6 +43,7 @@ export function createComponentWithContext<Props = Record<string, any>>(
     services: PropTypes.object,
   };
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return shallow(<MyComponent {...props} />, {
     context: {
       services: mockedContext,

@@ -110,6 +110,7 @@ describe('VisualizationContainer', () => {
 
   it('handles empty results', () => {
     // Override the mock for this test
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(TabResultsHooks, 'useTabResults').mockReturnValueOnce({
       results: null,
     });

@@ -89,6 +89,7 @@ const mockBaseDataset: Dataset = {
   title: 'Sample Dataset',
   type: 'index-pattern',
   timeFieldName: 'timestamp',
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   dataSource: {
     id: 'test-connection-id',
     meta: { supportsTimeFilter: true },
@@ -115,6 +116,7 @@ beforeEach(() => {
 describe('Configurator Component', () => {
   it('should render the component with the correct title and description', () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         {/* Wrap with IntlProvider */}
         <Configurator
@@ -135,6 +137,7 @@ describe('Configurator Component', () => {
 
   it('should call onCancel when cancel button is clicked', () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -152,6 +155,7 @@ describe('Configurator Component', () => {
 
   it('should call onPrevious when previous button is clicked', () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -170,6 +174,7 @@ describe('Configurator Component', () => {
 
   it('should update state correctly when language is selected', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -192,6 +197,7 @@ describe('Configurator Component', () => {
 
   it('should fetch indexed views on mount', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -213,6 +219,7 @@ describe('Configurator Component', () => {
 
   it('should display indexed views when query indexed view toggle is checked', async () => {
     const container = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -240,6 +247,7 @@ describe('Configurator Component', () => {
 
   it('should update state correctly when indexed view is selected', async () => {
     const container = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -269,6 +277,7 @@ describe('Configurator Component', () => {
 
   it('should initialize selectedLanguage with the current language from queryString', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -289,6 +298,7 @@ describe('Configurator Component', () => {
     mockServices.getQueryService().queryString.getQuery.mockReturnValue({ language: 'de' });
 
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -315,6 +325,7 @@ describe('Configurator Component', () => {
     const servicesWithAppName = { ...mockServices, appName: 'unsupportedApp' };
 
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={servicesWithAppName as any}
@@ -333,6 +344,7 @@ describe('Configurator Component', () => {
 
   it('should display the supported language dropdown correctly', async () => {
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -360,6 +372,7 @@ describe('Configurator Component', () => {
     const servicesWithAppName = { ...mockServices, appName: 'supportedApp' };
 
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={servicesWithAppName as any}
@@ -383,6 +396,7 @@ describe('Configurator Component', () => {
       type: 'index',
     };
     const { container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -418,6 +432,7 @@ describe('Configurator Component', () => {
       type: 'index',
     };
     const { container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}
@@ -454,6 +469,7 @@ describe('Configurator Component', () => {
         },
       });
     const { container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices as any}

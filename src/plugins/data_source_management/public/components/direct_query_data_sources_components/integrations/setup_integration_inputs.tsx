@@ -397,7 +397,6 @@ export function IntegrationWorkflowsInputs({
       isInvalid={![...useWorkflows.values()].includes(true)}
       error={['Must select at least one workflow.']}
     >
-      {/* @ts-expect-error TS2786 TODO(ts-error): fixme */}
       <SetupWorkflowSelector
         integration={integration}
         useWorkflows={useWorkflows}

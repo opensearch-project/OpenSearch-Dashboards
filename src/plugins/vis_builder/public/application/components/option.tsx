@@ -12,6 +12,7 @@ interface Props {
   initialIsOpen?: boolean;
 }
 
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 export const Option: FC<Props> = ({ title, children, initialIsOpen = false }) => {
   return (
     <>

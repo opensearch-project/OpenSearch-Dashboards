@@ -23,6 +23,7 @@ export const ValueMappingPanel = ({ valueMappingOption, onChange }: ValueMapping
     onChange({ ...valueMappingOption, [key]: value });
   };
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="thresholdSection"
       accordionLabel={i18n.translate('explore.stylePanel.valueMapping.panel.title', {

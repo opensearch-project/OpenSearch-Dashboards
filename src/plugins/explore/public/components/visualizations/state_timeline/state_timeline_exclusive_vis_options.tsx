@@ -65,6 +65,7 @@ export const StateTimeLineExclusiveVisOptions = ({
   };
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="stateTimelineSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.stateTimeline', {

@@ -63,6 +63,7 @@ export const DataViewer = ({ vegaAdapter, ...rest }: DataViewerProps) => {
   const [dataGridAriaLabel, setDataGridAriaLabel] = useState<string>('');
 
   const onViewChange: EuiComboBoxProps<unknown>['onChange'] = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (selectedOptions) => {
       const newView = inspectDataSets!.find((view) => view.id === selectedOptions[0].label);
 

@@ -32,6 +32,7 @@ export const StandardOptionsPanel = ({
 }: StandardOptionsPanelProps) => {
   return (
     // TODO add unit panel to standardOptions panel
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="standardOptions"
       accordionLabel={i18n.translate('explore.stylePanel.threshold', {

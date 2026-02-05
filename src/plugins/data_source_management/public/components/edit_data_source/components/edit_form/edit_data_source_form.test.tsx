@@ -100,6 +100,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -280,6 +281,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -399,6 +401,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -595,6 +598,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -652,6 +656,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -682,6 +687,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -749,6 +755,7 @@ describe('With Registered Authentication', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -796,6 +803,7 @@ describe('With Registered Authentication', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,

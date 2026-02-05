@@ -25,6 +25,7 @@ export const TooltipOptionsPanel = ({
   }
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="tooltipSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.tooltip', {

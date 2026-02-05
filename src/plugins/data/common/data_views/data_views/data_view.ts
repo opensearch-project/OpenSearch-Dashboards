@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { SavedObjectsClientCommon, Dataset, DataSource, DataStructureCustomMeta } from '../..';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { IDataView, DataViewSpec } from '../types';

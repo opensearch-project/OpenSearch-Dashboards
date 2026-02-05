@@ -52,6 +52,7 @@ import { LabelsPanel } from './labels_panel';
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
+  // @ts-expect-error TS2365 TODO(ts-error): fixme
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
 

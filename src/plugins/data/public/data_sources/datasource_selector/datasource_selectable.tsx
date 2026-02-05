@@ -42,11 +42,8 @@ const mapToOption = (
   if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
       ...baseOption,
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       label: dataSet.title as string,
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       value: dataSet.id as string,
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       key: dataSet.id as string,
     };
   }

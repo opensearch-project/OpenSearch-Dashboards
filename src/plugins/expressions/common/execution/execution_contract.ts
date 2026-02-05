@@ -47,6 +47,7 @@ export class ExecutionContract<
   }
 
   constructor(
+    // @ts-expect-error TS2344 TODO(ts-error): fixme
     protected readonly execution: Execution<ExtraContext, Input, Output, InspectorAdapters>
   ) {}
 

@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from '../../../store';
 import {
   clearResults,
   setQueryStringWithHistory,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   setActiveTab,
   setQueryExecutionButtonStatus,
 } from '../../../slices';

@@ -10,6 +10,7 @@ interface Props {
   title: string;
 }
 
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 export const Option: FC<Props> = ({ title, children }) => {
   return (
     <>

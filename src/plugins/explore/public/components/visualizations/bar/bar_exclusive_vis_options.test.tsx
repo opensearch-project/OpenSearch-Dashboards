@@ -39,6 +39,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('renders with default props', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Check if the component renders with the correct title
@@ -64,6 +65,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('shows border options when showBarBorder is true', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
     // Check that the switch is checked
@@ -81,6 +83,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('calls onBarWidthChange when bar width is changed', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Get the bar width input and change its value
@@ -92,6 +95,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('calls onBarPaddingChange when bar padding is changed', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Get the bar padding input and change its value
@@ -103,6 +107,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('calls onShowBarBorderChange when show bar border is toggled', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Find the switch and click it
@@ -114,6 +119,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('calls onBarBorderWidthChange when border width is changed', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
     // Get the border width input and change its value
@@ -125,6 +131,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('renders color picker with correct color', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
     // For EuiColorPicker, we'll test that it's rendered
@@ -135,6 +142,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('renders help text for inputs', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Check if help text is rendered for bar width
@@ -145,6 +153,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('renders form labels correctly', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     expect(screen.getByText('Width')).toBeInTheDocument();
@@ -153,6 +162,7 @@ describe('BarExclusiveVisOptions', () => {
   });
 
   test('renders border form labels when showBarBorder is true', () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     render(<BarExclusiveVisOptions {...defaultProps} showBarBorder={true} />);
 
     // Check if border-related labels are rendered

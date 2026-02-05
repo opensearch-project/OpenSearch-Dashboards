@@ -99,6 +99,7 @@ export const BarExclusiveVisOptions = ({
         });
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
       {/* {!shouldDisableUseThresholdColor && (
         <EuiFormRow>

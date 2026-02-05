@@ -106,6 +106,7 @@ function NumberIntervalParamEditor({
   }, [isValid, setValidity]);
 
   const onChange: EuiFieldNumberProps['onChange'] = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ target }) => setValue(isNaN(target.valueAsNumber) ? '' : target.valueAsNumber),
     [setValue]
   );
@@ -125,6 +126,7 @@ function NumberIntervalParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation && !isValid}
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       helpText={get(editorConfig, 'interval.help')}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} direction={'column'}>

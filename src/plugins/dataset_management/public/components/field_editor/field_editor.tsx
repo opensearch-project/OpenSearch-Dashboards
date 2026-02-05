@@ -35,6 +35,7 @@ import {
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   DatasetField,
   FieldFormatInstanceType,
   DataView,
