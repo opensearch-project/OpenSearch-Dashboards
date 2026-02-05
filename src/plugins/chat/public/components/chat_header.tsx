@@ -28,7 +28,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="m">
-            <h3>Assistant</h3>
+            <h3>Ask AI</h3>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

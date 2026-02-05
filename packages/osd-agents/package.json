@@ -19,7 +19,7 @@
     "@langchain/aws": "^0.1.15",
     "@langchain/core": "^0.3.80",
     "@langchain/langgraph": "^0.4.9",
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@opensearch-project/opensearch": "^2.13.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
