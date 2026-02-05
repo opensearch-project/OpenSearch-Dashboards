@@ -122,6 +122,7 @@ export interface Props {
 
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+  _registeredLanguages: Set<string> = new Set();
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -167,34 +168,8 @@ export class CodeEditor extends React.Component<Props, {}> {
       });
     }
 
-    // Register language providers directly. We don't use onLanguage() because:
-    // 1. The language is typically already registered at module load time (e.g., PPL, SQL)
-    // 2. onLanguage() only fires when the language is first "encountered", which happens
-    //    during monaco.editor.createModel() BEFORE editorDidMount is called
-    if (this.props.suggestionProvider) {
-      monaco.languages.registerCompletionItemProvider(
-        this.props.languageId,
-        this.props.suggestionProvider
-      );
-    }
-
-    if (this.props.signatureProvider) {
-      monaco.languages.registerSignatureHelpProvider(
-        this.props.languageId,
-        this.props.signatureProvider
-      );
-    }
-
-    if (this.props.hoverProvider) {
-      monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-    }
-
-    if (this.props.languageConfiguration) {
-      monaco.languages.setLanguageConfiguration(
-        this.props.languageId,
-        this.props.languageConfiguration
-      );
-    }
+    // Register providers for the initial language
+    this._registerProvidersForLanguage(this.props.languageId);
 
     editor.onMouseDown((e) => {
       if (e.target.position) {
@@ -236,6 +211,51 @@ export class CodeEditor extends React.Component<Props, {}> {
   _updateDimensions = () => {
     if (this._editor) {
       this._editor.layout();
+    }
+  };
+
+  componentDidUpdate(prevProps: Props) {
+    // When language changes, register providers for the new language
+    if (prevProps.languageId !== this.props.languageId) {
+      this._registerProvidersForLanguage(this.props.languageId);
+    }
+  }
+
+  /**
+   * Register language providers for the given language ID.
+   * Tracks which languages have been registered to avoid duplicate registrations.
+   * Skips registration for unregistered languages to avoid errors.
+   */
+  _registerProvidersForLanguage = (languageId: string) => {
+    // Skip if we've already registered providers for this language
+    if (this._registeredLanguages.has(languageId)) {
+      return;
+    }
+
+    // Skip if the language is not registered with Monaco
+    const isLanguageRegistered = monaco.languages
+      .getLanguages()
+      .some((lang) => lang.id === languageId);
+    if (!isLanguageRegistered) {
+      return;
+    }
+
+    this._registeredLanguages.add(languageId);
+
+    if (this.props.suggestionProvider) {
+      monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+    }
+
+    if (this.props.signatureProvider) {
+      monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+    }
+
+    if (this.props.hoverProvider) {
+      monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+    }
+
+    if (this.props.languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
     }
   };
 }
