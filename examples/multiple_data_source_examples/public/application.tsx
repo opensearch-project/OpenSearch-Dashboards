@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
@@ -17,7 +17,8 @@ export const renderApp = (
   { appBasePath, element, setHeaderActionMenu }: AppMountParameters,
   navigation: NavigationPublicPluginStart
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <Home
       basename={appBasePath}
       notifications={notifications}
@@ -29,9 +30,8 @@ export const renderApp = (
       navigateToApp={application.navigateToApp}
       navigation={navigation}
       uiSettings={uiSettings}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

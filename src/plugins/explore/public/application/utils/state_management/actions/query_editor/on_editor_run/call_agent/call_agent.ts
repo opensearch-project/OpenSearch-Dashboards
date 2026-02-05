@@ -66,6 +66,7 @@ export const callAgentActionCreator = createAsyncThunk<
         question: editorText,
         dataSourceName: dataset.title,
         dataSourceId: dataset.dataSource?.id,
+        dataSourceMeta: dataset.dataSource?.meta as Record<string, unknown>,
       });
       dispatch(runQueryActionCreator(services, result.query));
       dispatch(setLastExecutedTranslatedQuery(result.query));

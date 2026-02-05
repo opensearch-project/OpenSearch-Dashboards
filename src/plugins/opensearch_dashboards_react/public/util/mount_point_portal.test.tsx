@@ -32,7 +32,7 @@ import React, { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { MountPoint, UnmountCallback } from 'opensearch-dashboards/public';
 import { MountPointPortal } from './mount_point_portal';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 describe('MountPointPortal', () => {
   let portalTarget: HTMLElement;

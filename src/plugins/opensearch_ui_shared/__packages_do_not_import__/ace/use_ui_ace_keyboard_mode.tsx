@@ -29,7 +29,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { keys, EuiText } from '@elastic/eui';
 
 import './_ui_ace_keyboard_mode.scss';
@@ -46,6 +46,7 @@ const OverlayText = () => (
 
 export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | null) {
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
+  const overlayRoot = useRef<Root | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
 
   useEffect(() => {
@@ -93,7 +94,8 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       overlayMountNode.current.addEventListener('focus', enableOverlay);
       overlayMountNode.current.addEventListener('keydown', onDismissOverlay);
 
-      ReactDOM.render(<OverlayText />, overlayMountNode.current);
+      overlayRoot.current = createRoot(overlayMountNode.current);
+      overlayRoot.current.render(<OverlayText />);
 
       aceTextAreaElement.parentElement!.insertBefore(overlayMountNode.current, aceTextAreaElement);
       aceTextAreaElement.setAttribute('tabindex', '-1');
@@ -111,6 +113,10 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       if (aceTextAreaElement) {
         document.removeEventListener('keydown', documentKeyDownListener, { capture: true });
         aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
+        if (overlayRoot.current) {
+          overlayRoot.current.unmount();
+          overlayRoot.current = null;
+        }
         const textAreaContainer = aceTextAreaElement.parentElement;
         if (textAreaContainer && textAreaContainer.contains(overlayMountNode.current!)) {
           textAreaContainer.removeChild(overlayMountNode.current!);

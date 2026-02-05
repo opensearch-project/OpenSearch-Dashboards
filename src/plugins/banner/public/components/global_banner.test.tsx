@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { GlobalBanner } from './global_banner';
 import { BannerConfig } from '../../common';
 import { coreMock } from '../../../../core/public/mocks';
@@ -58,9 +58,10 @@ describe('GlobalBanner', () => {
   });
 
   afterEach(() => {
-    if (wrapper) {
+    if (wrapper && wrapper.length > 0) {
       wrapper.unmount();
     }
+    wrapper = undefined;
   });
 
   test('fetches banner config on mount', async () => {

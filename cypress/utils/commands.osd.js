@@ -543,6 +543,20 @@ cy.osd.add('setTopNavDate', (start, end, submit = true) => {
     message: `Start: ${start} :: End: ${end}`,
   });
 
+  // In React 18, popovers may not be fully closed from a previous setTopNavDate call
+  // due to automatic batching. Close any open popovers first by clicking outside them.
+  // We do this by checking if any absolute tab is visible (meaning a popover is open)
+  // and if so, pressing Escape to close it.
+  cy.get('body', opts).then(($body) => {
+    if ($body.find('[data-test-subj="superDatePickerAbsoluteTab"]').length > 0) {
+      cy.get('body').type('{esc}', opts);
+      // Wait for popover to close
+      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', { timeout: 1000, ...opts }).should(
+        'not.exist'
+      );
+    }
+  });
+
   /* Find any one of the two buttons that change/open the date picker:
    *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
    *      * in some versions of OUI, the switch will open the date selection dialog as well
@@ -567,11 +581,14 @@ cy.osd.add('setTopNavDate', (start, end, submit = true) => {
       .click(opts);
   });
 
-  // Click absolute tab
-  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).click(opts);
+  // Click absolute tab for start date
+  // Use .first() because in React 18, both start and end date popovers may briefly
+  // be open simultaneously due to timing/batching differences, resulting in 2 tabs
+  cy.getElementByTestId('superDatePickerAbsoluteTab', opts).first(opts).click(opts);
 
   // Type absolute start date
   cy.getElementByTestId('superDatePickerAbsoluteDateInput', opts)
+    .first(opts)
     .click(opts)
     .clear(opts)
     .type(start, {
@@ -608,6 +625,17 @@ cy.osd.add('setRelativeTopNavDate', (time, timeUnit) => {
 
   const opts = { log: false };
 
+  // In React 18, popovers may not be fully closed from a previous call
+  // due to automatic batching. Close any open popovers first.
+  cy.get('body', opts).then(($body) => {
+    if ($body.find('[data-test-subj="superDatePickerAbsoluteTab"]').length > 0) {
+      cy.get('body').type('{esc}', opts);
+      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', { timeout: 1000, ...opts }).should(
+        'not.exist'
+      );
+    }
+  });
+
   /* Find any one of the two buttons that change/open the date picker:
    *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
    *      * in some versions of OUI, the switch will open the date selection dialog as well
@@ -632,10 +660,12 @@ cy.osd.add('setRelativeTopNavDate', (time, timeUnit) => {
       .click(opts);
   });
 
-  // Click absolute tab
-  cy.getElementByTestId('superDatePickerRelativeTab', opts).click(opts);
+  // Click relative tab for start date
+  // Use .first() because in React 18, both start and end date popovers may briefly
+  // be open simultaneously due to timing/batching differences, resulting in 2 tabs
+  cy.getElementByTestId('superDatePickerRelativeTab', opts).first(opts).click(opts);
 
-  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').clear().type(time);
+  cy.getElementByTestId('superDatePickerRelativeDateInputNumber').first(opts).clear().type(time);
   cy.getElementByTestId('superDatePickerRelativeDateInputUnitSelector').select(timeUnit);
   cy.getElementByTestId('querySubmitButton').click();
 });

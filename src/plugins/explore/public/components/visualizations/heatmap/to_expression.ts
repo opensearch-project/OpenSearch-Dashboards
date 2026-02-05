@@ -140,6 +140,7 @@ export const createRegularHeatmap = (
       createBaseConfig({
         title: `${valueName} by ${xAxis?.name} and ${yAxis?.name}`,
         addTrigger: false,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       buildVisMap({

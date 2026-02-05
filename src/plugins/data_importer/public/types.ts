@@ -12,8 +12,11 @@ export interface DataImporterPluginSetupDeps {
   dataSource?: DataSourcePluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataImporterPluginSetup {}
+import { PublicConfigSchema } from '../config';
+
+export interface DataImporterPluginSetup {
+  config: PublicConfigSchema;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataImporterPluginStart {}
 

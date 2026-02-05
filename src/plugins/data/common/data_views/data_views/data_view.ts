@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientCommon, Dataset, DataSource } from '../..';
+import { SavedObjectsClientCommon, Dataset, DataSource, DataStructureCustomMeta } from '../..';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { IDataView, DataViewSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -23,6 +23,7 @@ interface DataViewDeps {
  */
 export class DataView extends IndexPattern implements IDataView {
   public savedObjectsClient: SavedObjectsClientCommon;
+  public dataSourceMeta: DataViewSpec['dataSourceMeta'];
 
   constructor({
     spec = {},
@@ -40,6 +41,7 @@ export class DataView extends IndexPattern implements IDataView {
     });
 
     this.savedObjectsClient = savedObjectsClient;
+    this.dataSourceMeta = spec.dataSourceMeta;
   }
 
   public async initializeDataSourceRef(): Promise<void> {

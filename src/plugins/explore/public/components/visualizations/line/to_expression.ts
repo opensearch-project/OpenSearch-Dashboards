@@ -67,7 +67,7 @@ export const createSimpleLineChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
       buildAxisConfigs,
       applyTimeRange,
       createLineSeries({
@@ -240,6 +240,7 @@ export const createLineBarChart = (
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig({
         title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -447,6 +448,7 @@ export const createMultiLineChart = (
     if (!timeField || !valueField || !colorField) {
       throw Error('Missing axis config or color field for multi lines chart');
     }
+
     const result = pipe(
       transform(
         sortByTime(timeField),
@@ -462,6 +464,7 @@ export const createMultiLineChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -651,6 +654,7 @@ export const createFacetedMultiLineChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -856,7 +860,10 @@ export const createCategoryLineChart = (
     // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
     const result = pipe(
       transform(convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}` }),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
+        legend: { show: false },
+      }),
       buildAxisConfigs,
       createLineSeries({
         styles,
@@ -991,6 +998,7 @@ export const createCategoryMultiLineChart = (
         title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       createLineSeries({

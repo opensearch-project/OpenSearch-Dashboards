@@ -176,17 +176,21 @@ export const getSwappedAxisRole = (
 ): {
   xAxis?: VisColumn;
   yAxis?: VisColumn;
+  y2Axis?: VisColumn;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2AxisStyle?: StandardAxes;
 } => {
   const xAxis = axisColumnMappings?.x;
   const yAxis = axisColumnMappings?.y;
+  const y2Axis = axisColumnMappings?.y2;
 
   const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
   const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
 
   if (!styles?.switchAxes) {
-    return { xAxis, xAxisStyle, yAxis, yAxisStyle };
+    return { xAxis, xAxisStyle, yAxis, yAxisStyle, ...(y2Axis && { y2Axis, y2AxisStyle }) };
   }
 
   return {
@@ -204,6 +208,7 @@ export const getSwappedAxisRole = (
           ...(xAxisStyle?.position ? { position: swapPosition(xAxisStyle.position) } : undefined),
         }
       : undefined,
+    ...(y2Axis && { y2Axis, y2AxisStyle }), // switch axes won't apply to y2(line-bar chart)
   };
 };
 
@@ -424,34 +429,43 @@ export function applyTimeRangeToEncoding(
 }
 
 /**
- * Parses a date string as UTC time
- * Handles date strings without timezone information by treating them as UTC
+ * Parses a date string or timestamp as a Date object
  *
- * @param dateString - Date string in formats like "2025-12-10 00:00:00" or "2025-12-10T00:00:00"
- * @returns Date object representing the UTC time
+ * Behavior:
+ * - Numbers: Treated as Unix timestamps and passed directly to Date constructor
+ * - Strings with timezone info (Z, +HH:MM, -HH:MM): Parsed directly as-is
+ * - Strings without timezone info: Treated as UTC by converting to ISO format and appending 'Z'
+ *
+ * @param input - Date string (with or without timezone) or Unix timestamp (number)
+ * @returns Date object
  *
  * @example
- * parseUTCDate("2025-12-10 00:00:00") // Treats as UTC: 2025-12-10T00:00:00Z
- * parseUTCDate("2025-12-10T00:00:00") // Treats as UTC: 2025-12-10T00:00:00Z
- * parseUTCDate("2025-12-10T00:00:00Z") // Already UTC, parses correctly
+ * parseUTCDate(1704067200000) // Unix timestamp -> Date object
+ * parseUTCDate("2025-12-10 00:00:00") // No timezone -> Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00") // No timezone -> Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00Z") // Already has timezone -> Parses directly
+ * parseUTCDate("2025-12-10T00:00:00+08:00") // Already has timezone -> Parses directly
  */
-export function parseUTCDate(dateString: string): Date {
+export function parseUTCDate(input: string | number): Date {
+  if (typeof input === 'number') {
+    return new Date(input);
+  }
   // If already has timezone info (Z, +, or -), parse directly
-  if (dateString.includes('Z') || /[+-]\d{2}:\d{2}$/.test(dateString)) {
-    return new Date(dateString);
+  if (input.includes('Z') || /[+-]\d{2}:\d{2}$/.test(input)) {
+    return new Date(input);
   }
 
   // Convert space to 'T' for ISO 8601 format and add 'Z' for UTC
-  const isoString = dateString.replace(' ', 'T') + 'Z';
+  const isoString = input.replace(' ', 'T') + 'Z';
   return new Date(isoString);
 }
 
 export const getChartRender = () => {
   try {
     const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
-    return chartRender || 'vega';
+    return chartRender || 'echarts';
   } catch (e) {
-    return 'vega';
+    return 'echarts';
   }
 };
 
@@ -525,7 +539,7 @@ export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarke
       xAxis: new Date(),
       itemStyle: { color: 'red' },
       lineStyle: { type: 'dashed' },
-      label: { formatter: new Date().toISOString() },
+      label: { formatter: new Date().toISOString(), align: 'right' },
     });
   }
 

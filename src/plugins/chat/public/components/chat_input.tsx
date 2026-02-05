@@ -4,7 +4,7 @@
  */
 
 import React, { useRef } from 'react';
-import { EuiFieldText, EuiButtonIcon, EuiTextColor } from '@elastic/eui';
+import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
@@ -28,7 +28,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   onKeyDown,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Use custom hook for command menu keyboard handling
   const {
@@ -57,7 +57,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           />
         )}
         <div className="chatInput__fieldWrapper">
-          <EuiFieldText
+          <EuiTextArea
             inputRef={inputRef}
             placeholder="Ask anything. Type / for actions"
             value={input}
@@ -66,6 +66,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={isStreaming}
             autoFocus={true}
             fullWidth
+            resize="none"
+            rows={1}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">

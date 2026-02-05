@@ -82,7 +82,7 @@ describe('ConfiguratorV2', () => {
       );
     });
 
-    expect(screen.getByText('Step 2: Configure data')).toBeInTheDocument();
+    expect(screen.getByText('Step 2: Configure Dataset')).toBeInTheDocument();
 
     // Wait for async field fetching to complete
     await waitFor(

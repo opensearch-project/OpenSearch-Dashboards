@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import {
   EuiPage,
@@ -79,7 +79,8 @@ export const renderApp = (
   context: AppMountContext,
   { appBasePath, element }: AppMountParameters
 ) => {
-  render(<ChromelessApp basename={appBasePath} context={context} />, element);
+  const root = createRoot(element);
+  root.render(<ChromelessApp basename={appBasePath} context={context} />);
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

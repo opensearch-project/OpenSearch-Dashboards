@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { createRef } from 'react';
 import { useCommandMenuKeyboard } from './use_command_menu_keyboard';
 import { slashCommandRegistry, SlashCommand } from '../services/slash_commands';
@@ -23,7 +23,7 @@ jest.mock('../services/slash_commands', () => {
 describe('useCommandMenuKeyboard', () => {
   let mockOnInputChange: jest.Mock;
   let mockOnKeyDown: jest.Mock;
-  let inputRef: React.RefObject<HTMLInputElement>;
+  let inputRef: React.RefObject<HTMLTextAreaElement>;
 
   const mockCommands: SlashCommand[] = [
     {
@@ -48,13 +48,17 @@ describe('useCommandMenuKeyboard', () => {
     jest.clearAllMocks();
     mockOnInputChange = jest.fn();
     mockOnKeyDown = jest.fn();
-    inputRef = createRef<HTMLInputElement>();
+    inputRef = createRef<HTMLTextAreaElement>();
 
-    // Mock input element
+    // Mock textarea element
     Object.defineProperty(inputRef, 'current', {
       writable: true,
       value: {
         focus: jest.fn(),
+        style: {
+          height: '',
+        },
+        scrollHeight: 45,
       },
     });
 

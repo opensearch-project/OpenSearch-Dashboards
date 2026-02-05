@@ -30,7 +30,8 @@
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
   BehaviorSubject,
@@ -155,6 +156,7 @@ export class ChromeService {
   private navGroupStart?: ChromeNavGroupServiceStartContract;
   private applicationStart?: InternalApplicationStart;
   private globalBanner$ = new BehaviorSubject<ChromeGlobalBanner | undefined>(undefined);
+  private helpMenuRoot?: Root;
 
   constructor() {}
 
@@ -314,7 +316,8 @@ export class ChromeService {
       navControls.registerLeftBottom({
         order: 9000,
         mount: (element: HTMLElement) => {
-          ReactDOM.render(
+          this.helpMenuRoot = createRoot(element);
+          this.helpMenuRoot.render(
             <I18nProvider>
               <HeaderHelpMenu
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -325,10 +328,14 @@ export class ChromeService {
                 useUpdatedAppearance
                 keyboardShortcutService={keyboardShortcut}
               />
-            </I18nProvider>,
-            element
+            </I18nProvider>
           );
-          return () => ReactDOM.unmountComponentAtNode(element);
+          return () => {
+            if (this.helpMenuRoot) {
+              this.helpMenuRoot.unmount();
+              this.helpMenuRoot = undefined;
+            }
+          };
         },
       });
     }
@@ -537,9 +544,12 @@ export interface ChromeSetup {
  * @example
  * How to set the help dropdown extension:
  * ```tsx
+ * import { createRoot } from 'react-dom/client';
+ *
  * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ *   const root = createRoot(elem);
+ *   root.render(<MyHelpComponent />);
+ *   return () => root.unmount();
  * });
  * ```
  *

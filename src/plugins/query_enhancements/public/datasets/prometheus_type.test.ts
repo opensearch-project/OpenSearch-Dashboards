@@ -27,22 +27,19 @@ describe('prometheusTypeConfig', () => {
   });
 
   describe('toDataset', () => {
-    it('should convert DataStructure path to Dataset with dataSource', () => {
+    it('should convert DataStructure path to Dataset with dataSource meta', () => {
+      const connectionMeta = {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        timeFieldName: 'Time',
+        prometheusUrl: 'http://localhost:9090',
+      } as DataStructureCustomMeta;
       const mockPath: DataStructure[] = [
         { id: 'ds1', title: 'DataSource 1', type: 'DATA_SOURCE' },
         {
           id: 'prometheus-conn',
           title: 'Prometheus Connection',
           type: DATASET.PROMETHEUS,
-          meta: {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            timeFieldName: 'Time',
-          } as DataStructureCustomMeta,
-          parent: {
-            id: 'ds1',
-            title: 'DataSource 1',
-            type: 'DATA_SOURCE',
-          },
+          meta: connectionMeta,
         },
       ];
 
@@ -56,9 +53,7 @@ describe('prometheusTypeConfig', () => {
         timeFieldName: 'Time',
         signalType: CORE_SIGNAL_TYPES.METRICS,
         dataSource: {
-          id: 'ds1',
-          title: 'DataSource 1',
-          type: 'DATA_SOURCE',
+          meta: connectionMeta,
         },
       });
     });
@@ -80,21 +75,37 @@ describe('prometheusTypeConfig', () => {
       expect(result.timeFieldName).toBe('Time');
     });
 
-    it('should handle path without parent', () => {
+    it('should set dataSource.meta to connection.meta', () => {
+      const connectionMeta = {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        customField: 'value',
+      } as DataStructureCustomMeta;
       const mockPath: DataStructure[] = [
         {
           id: 'prometheus-conn',
           title: 'Prometheus Connection',
           type: DATASET.PROMETHEUS,
-          meta: {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-          } as DataStructureCustomMeta,
+          meta: connectionMeta,
         },
       ];
 
       const result = prometheusTypeConfig.toDataset(mockPath);
 
-      expect(result.dataSource).toBeUndefined();
+      expect(result.dataSource).toEqual({ meta: connectionMeta });
+    });
+
+    it('should set dataSource.meta to undefined when connection has no meta', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'prometheus-conn',
+          title: 'Prometheus Connection',
+          type: DATASET.PROMETHEUS,
+        },
+      ];
+
+      const result = prometheusTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({ meta: undefined });
     });
   });
 
@@ -136,18 +147,9 @@ describe('prometheusTypeConfig', () => {
       expect(result.children?.[0].id).toBe('prom-conn-1');
       expect(result.children?.[0].title).toBe('prom-conn-1');
       expect(result.children?.[0].type).toBe(DATASET.PROMETHEUS);
-      expect(result.children?.[0].meta).toEqual({
-        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-        language: 'promql',
-        timeFieldName: 'Time',
-        dataSourceId: 'ds1',
-      });
-      expect(result.children?.[1].meta).toEqual({
-        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-        language: 'promql',
-        timeFieldName: 'Time',
-        dataSourceId: undefined,
-      });
+      expect(result.children?.[1].id).toBe('prom-conn-2');
+      expect(result.children?.[1].title).toBe('prom-conn-2');
+      expect(result.children?.[1].type).toBe(DATASET.PROMETHEUS);
       expect(result.hasNext).toBe(false);
     });
 
