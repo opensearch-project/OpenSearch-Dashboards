@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { find } from 'lodash';
 import { reIdSeries } from './lib/re_id_series';
 import { Series } from './series';

@@ -30,7 +30,6 @@
 
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import React from 'react';
 
 export function KuiLocalTab({ className, children, isDisabled, isSelected, ...rest }) {
   const classes = classnames('kuiLocalTab', className, {

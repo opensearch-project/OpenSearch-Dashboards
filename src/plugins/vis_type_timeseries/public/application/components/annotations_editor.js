@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from './lib/collection_actions';
 import { OSD_FIELD_TYPES } from '../../../../../plugins/data/public';

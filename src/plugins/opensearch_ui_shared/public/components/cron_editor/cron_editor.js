@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { padStart } from 'lodash';
 import { FormattedMessage } from '@osd/i18n/react';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { RecentlyAccessed, NUM_LONG_LINKS } from './recently_accessed';
 import { findTestSubject } from '@elastic/eui/lib/test';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { render } from 'enzyme';
 
 import { BUTTON_TYPES, KuiLinkButton } from './button';

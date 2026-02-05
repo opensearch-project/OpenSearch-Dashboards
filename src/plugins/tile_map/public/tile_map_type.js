@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { convertToGeoJson, MapTypes } from '../../maps_legacy/public';
 import { Schemas } from '../../vis_default_editor/public';

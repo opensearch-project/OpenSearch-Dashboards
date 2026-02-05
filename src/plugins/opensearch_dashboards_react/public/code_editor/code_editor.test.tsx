@@ -91,19 +91,28 @@ test('editor mount setup', () => {
 
   const editorWillMount = jest.fn();
 
-  monaco.languages.onLanguage = jest.fn((languageId, func) => {
-    expect(languageId).toBe('loglang');
-
-    // Call the function immediately so we can see our providers
-    // get setup without a monaco editor setting up completely
-    func();
-  }) as any;
-
   monaco.languages.registerCompletionItemProvider = jest.fn();
   monaco.languages.registerSignatureHelpProvider = jest.fn();
   monaco.languages.registerHoverProvider = jest.fn();
 
   monaco.editor.defineTheme = jest.fn();
+
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
 
   const wrapper = shallow(
     <CodeEditor
@@ -126,8 +135,10 @@ test('editor mount setup', () => {
   // Verify our theme will be setup
   expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
 
-  // Verify our language features have been registered
-  expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
+  // Call editorDidMount to trigger provider registration
+  instance._editorDidMount(mockEditor, monaco);
+
+  // Verify our language features have been registered directly (not via onLanguage)
   expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);

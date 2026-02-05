@@ -137,24 +137,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     },
   });
 
-  // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
-  // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
-  useEffect(() => {
-    if (isQueryMode) {
-      const onDidFocusDisposable = editorRef.current?.onDidFocusEditorWidget(() => {
-        editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
-      });
-
-      if (!editorText) {
-        editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
-      }
-
-      return () => {
-        onDidFocusDisposable?.dispose();
-      };
-    }
-  }, [isQueryMode, editorRef, editorText]);
-
   const setEditorRef = useCallback(
     (editor: IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -279,6 +261,14 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         setEditorIsFocused(false);
       });
 
+      // Trigger suggestions on focus when in query mode (not prompt mode).
+      // Uses isPromptModeRef to always read the current mode without needing re-registration.
+      const suggestOnFocusDisposable = editor.onDidFocusEditorWidget(() => {
+        if (!isPromptModeRef.current) {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }
+      });
+
       editor.addAction(getCommandEnterAction(handleRun));
       editor.addAction(getShiftEnterAction());
 
@@ -344,6 +334,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       return () => {
         focusDisposable.dispose();
         blurDisposable.dispose();
+        suggestOnFocusDisposable.dispose();
         contentChangeDisposable.dispose();
         clearDecorations(editor);
         return editor;

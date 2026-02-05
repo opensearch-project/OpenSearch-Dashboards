@@ -167,6 +167,35 @@ export class CodeEditor extends React.Component<Props, {}> {
       });
     }
 
+    // Register language providers directly. We don't use onLanguage() because:
+    // 1. The language is typically already registered at module load time (e.g., PPL, SQL)
+    // 2. onLanguage() only fires when the language is first "encountered", which happens
+    //    during monaco.editor.createModel() BEFORE editorDidMount is called
+    if (this.props.suggestionProvider) {
+      monaco.languages.registerCompletionItemProvider(
+        this.props.languageId,
+        this.props.suggestionProvider
+      );
+    }
+
+    if (this.props.signatureProvider) {
+      monaco.languages.registerSignatureHelpProvider(
+        this.props.languageId,
+        this.props.signatureProvider
+      );
+    }
+
+    if (this.props.hoverProvider) {
+      monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
+    }
+
+    if (this.props.languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(
+        this.props.languageId,
+        this.props.languageConfiguration
+      );
+    }
+
     editor.onMouseDown((e) => {
       if (e.target.position) {
         if (e.event.detail === 1) {
@@ -185,24 +214,6 @@ export class CodeEditor extends React.Component<Props, {}> {
 
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
-
-    monaco.languages.onLanguage(languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
-    });
 
     return (
       <React.Fragment>

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import { Component, Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiIconTip } from '@elastic/eui';
 

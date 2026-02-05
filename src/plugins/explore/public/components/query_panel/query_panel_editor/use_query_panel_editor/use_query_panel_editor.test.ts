@@ -532,14 +532,9 @@ describe('useQueryPanelEditor', () => {
       };
     });
 
-    it('should trigger autosuggestion on focus when in query mode with text', () => {
-      // Set up hook with text in local state
+    it('should trigger autosuggestion on focus when in query mode', () => {
+      // Set up hook
       const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Add text to local state
-      act(() => {
-        result.current.onChange('SELECT *');
-      });
 
       mockUseSelector.mockImplementation((selector: any) => {
         if (!selector) return '';
@@ -553,12 +548,13 @@ describe('useQueryPanelEditor', () => {
 
       const mockOnDidFocusDisposable = { dispose: jest.fn() };
       mockEditor.onDidFocusEditorWidget.mockReturnValue(mockOnDidFocusDisposable);
-      mockEditorRef.current = mockEditor;
 
-      // Re-render hook to apply new selector values and trigger useEffect
-      renderHook(() => useQueryPanelEditor());
+      // Call editorDidMount to register the focus handler
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
 
-      // Check that focus event was set up
+      // Check that focus event was set up in editorDidMount
       expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
 
       // Simulate focus event
@@ -574,25 +570,43 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should trigger autosuggestion immediately when text is empty', () => {
+    it('should not trigger autosuggestion on focus when in prompt mode', () => {
+      // Set up mock to return prompt mode BEFORE rendering
       mockUseSelector.mockImplementation((selector: any) => {
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectIsPromptEditorMode')) return false;
-        if (selectorString.includes('selectQueryString')) return '';
-        return false;
+        if (selector === selectIsPromptEditorMode) return true; // prompt mode
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
       });
-      mockEditorRef.current = mockEditor;
 
-      renderHook(() => useQueryPanelEditor());
+      const mockOnDidFocusDisposable = { dispose: jest.fn() };
+      mockEditor.onDidFocusEditorWidget.mockReturnValue(mockOnDidFocusDisposable);
 
-      // Should set up focus event listener and trigger suggestions immediately when text is empty
+      // Render hook with prompt mode - isPromptModeRef will be initialized with true
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Verify the hook returns isPromptMode = true
+      expect(result.current.isPromptMode).toBe(true);
+
+      // Call editorDidMount to register the focus handler
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      // Focus handler is registered
       expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
-      expect(mockEditor.trigger).toHaveBeenCalledWith(
-        'keyboard',
-        'editor.action.triggerSuggest',
-        {}
-      );
+
+      // Simulate focus event - should NOT trigger suggestions in prompt mode
+      const focusCallback = mockEditor.onDidFocusEditorWidget.mock.calls[0][0];
+      mockEditor.trigger.mockClear();
+      act(() => {
+        focusCallback();
+      });
+
+      // trigger should not be called because we're in prompt mode
+      expect(mockEditor.trigger).not.toHaveBeenCalled();
     });
   });
 

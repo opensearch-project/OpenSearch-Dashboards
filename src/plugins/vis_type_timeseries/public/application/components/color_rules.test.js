@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { collectionActions } from './lib/collection_actions';
 import { ColorRules } from './color_rules';
 import { keys } from '@elastic/eui';

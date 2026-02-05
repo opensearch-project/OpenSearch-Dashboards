@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
 import { getSavedObjectsClient, getUISettings, getI18n } from '../services';

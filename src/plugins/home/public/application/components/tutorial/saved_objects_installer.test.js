@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { KuiTableHeaderCell } from './table_header_cell';

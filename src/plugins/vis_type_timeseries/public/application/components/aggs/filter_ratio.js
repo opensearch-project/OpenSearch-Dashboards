@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 import { render, mount } from 'enzyme';
 import { Visualization } from './visualization';
 

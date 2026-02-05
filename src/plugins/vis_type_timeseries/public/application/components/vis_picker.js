@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { injectI18n } from '@osd/i18n/react';
 import { PANEL_TYPES } from '../../../../../plugins/vis_type_timeseries/common/panel_types';
