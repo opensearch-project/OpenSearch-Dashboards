@@ -23,12 +23,12 @@ interface AppearanceSettingsContentProps {
 
 export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsContentProps) => {
   const { uiSettings } = core;
-
+  
   const themeVersionOptions = Object.keys(themeVersionLabelMap).map((v) => ({
     value: v,
     text: themeVersionLabelMap[v],
   }));
-
+  
   const colorModeOptions = [
     {
       value: 'light',
@@ -43,19 +43,23 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
       text: 'Use browser settings',
     },
   ];
-
+  
   const defaultThemeVersion = uiSettings.getDefault('theme:version');
   const defaultIsDarkMode = uiSettings.getDefault('theme:darkMode');
   const isUsingBrowserColorScheme =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
   const isDarkMode = uiSettings.get<boolean>('theme:darkMode');
   const themeVersion = uiSettings.get<string>('theme:version');
+  
+  // Check if settings are overridden by server
+  const isThemeVersionOverridden = uiSettings.isOverridden('theme:version');
+  const isDarkModeOverridden = uiSettings.isOverridden('theme:darkMode');
 
   const [selectedThemeVersion, setSelectedThemeVersion] = useState(
     themeVersionOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
       themeVersionValueMap[defaultThemeVersion]
   );
-
+  
   const [selectedColorMode, setSelectedColorMode] = useState(
     isUsingBrowserColorScheme
       ? colorModeOptions[2].value
@@ -74,35 +78,50 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
 
   const applyAppearanceSettings = async (e: SyntheticEvent) => {
     e.preventDefault();
+    
+    const pendingActions = [];
 
-    const pendingActions = [
-      uiSettings.set(
-        'theme:version',
-        themeVersionOptions.find((t) => selectedThemeVersion === t.value)?.value ?? ''
-      ),
-    ];
+    // Only update theme version if not overridden
+    if (!isThemeVersionOverridden) {
+      pendingActions.push(
+        uiSettings.set(
+          'theme:version',
+          themeVersionOptions.find((t) => selectedThemeVersion === t.value)?.value ?? ''
+        )
+      );
+    }
 
-    if (selectedColorMode === 'automatic') {
-      const systemPrefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      window.localStorage.setItem('useBrowserColorScheme', 'true');
+    // Only update dark mode if not overridden
+    if (!isDarkModeOverridden) {
+      if (selectedColorMode === 'automatic') {
+        const systemPrefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        window.localStorage.setItem('useBrowserColorScheme', 'true');
 
-      if (systemPrefersDarkMode !== isDarkMode) {
-        pendingActions.push(uiSettings.set('theme:darkMode', systemPrefersDarkMode));
+        if (systemPrefersDarkMode !== isDarkMode) {
+          pendingActions.push(uiSettings.set('theme:darkMode', systemPrefersDarkMode));
+        }
+      } else if ((selectedColorMode === 'dark') !== isDarkMode) {
+        pendingActions.push(uiSettings.set('theme:darkMode', selectedColorMode === 'dark'));
+        window.localStorage.removeItem('useBrowserColorScheme');
+      } else {
+        window.localStorage.removeItem('useBrowserColorScheme');
       }
-    } else if ((selectedColorMode === 'dark') !== isDarkMode) {
-      pendingActions.push(uiSettings.set('theme:darkMode', selectedColorMode === 'dark'));
-      window.localStorage.removeItem('useBrowserColorScheme');
+    }
+    
+    if (pendingActions.length > 0) {
+      await Promise.all(pendingActions);
+      
+      if (onApply) {
+        onApply();
+      }
+      
+      window.location.reload();
     } else {
-      window.localStorage.removeItem('useBrowserColorScheme');
+      // If no changes to apply, just close the popover
+      if (onApply) {
+        onApply();
+      }
     }
-
-    await Promise.all(pendingActions);
-
-    if (onApply) {
-      onApply();
-    }
-
-    window.location.reload();
   };
 
   return (
@@ -111,35 +130,49 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
         label={i18n.translate('management.settings.appearances.themeVersion', {
           defaultMessage: 'Theme version',
         })}
-        helpText={i18n.translate('management.settings.appearances.themeVersionHelp', {
-          defaultMessage: 'Default: {defaultVersion}',
-          values: { defaultVersion: defaultThemeVersion },
-        })}
+        helpText={
+          isThemeVersionOverridden
+            ? i18n.translate('management.settings.appearances.themeVersionOverridden', {
+                defaultMessage: 'This setting is overridden by the server',
+              })
+            : i18n.translate('management.settings.appearances.themeVersionHelp', {
+                defaultMessage: 'Default: {defaultVersion}',
+                values: { defaultVersion: defaultThemeVersion },
+              })
+        }
       >
         <EuiCompressedSelect
           options={themeVersionOptions}
           value={selectedThemeVersion}
           onChange={handleThemeVersionChange}
+          disabled={isThemeVersionOverridden}
         />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
         label={i18n.translate('management.settings.appearances.screenMode', {
           defaultMessage: 'Screen mode',
         })}
-        helpText={i18n.translate('management.settings.appearances.screenModeHelp', {
-          defaultMessage: 'Default: {defaultMode}',
-          values: {
-            defaultMode: colorModeOptions.find((t) => {
-              const defaultValue = defaultIsDarkMode ? 'dark' : 'light';
-              return defaultValue === t.value;
-            })?.text,
-          },
-        })}
+        helpText={
+          isDarkModeOverridden
+            ? i18n.translate('management.settings.appearances.screenModeOverridden', {
+                defaultMessage: 'This setting is overridden by the server',
+              })
+            : i18n.translate('management.settings.appearances.screenModeHelp', {
+                defaultMessage: 'Default: {defaultMode}',
+                values: {
+                  defaultMode: colorModeOptions.find((t) => {
+                    const defaultValue = defaultIsDarkMode ? 'dark' : 'light';
+                    return defaultValue === t.value;
+                  })?.text,
+                },
+              })
+        }
       >
         <EuiCompressedSelect
           options={colorModeOptions}
           value={selectedColorMode}
           onChange={handleColorModeChange}
+          disabled={isDarkModeOverridden}
         />
       </EuiCompressedFormRow>
       <EuiFlexGroup>
@@ -157,7 +190,11 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiCompressedFormRow hasEmptyLabelSpace>
-            <EuiSmallButton onClick={applyAppearanceSettings} type="submit">
+            <EuiSmallButton
+              onClick={applyAppearanceSettings}
+              type="submit"
+              disabled={isThemeVersionOverridden && isDarkModeOverridden}
+            >
               {i18n.translate('management.settings.appearances.apply', {
                 defaultMessage: 'Apply',
               })}
