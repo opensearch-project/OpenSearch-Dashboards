@@ -5,7 +5,6 @@
 
 /* eslint no-restricted-syntax: 0 */
 
-// @ts-check
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -65,11 +64,6 @@ function parseTypeScriptErrors(output) {
     const match = line.match(/(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)/);
     if (match) {
       const filePath = match[1];
-
-      // Skip errors from node_modules
-      if (filePath.includes('node_modules')) {
-        return;
-      }
 
       errors.push({
         file: filePath,
