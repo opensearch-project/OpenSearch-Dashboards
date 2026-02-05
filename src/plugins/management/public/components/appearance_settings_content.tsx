@@ -23,12 +23,12 @@ interface AppearanceSettingsContentProps {
 
 export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsContentProps) => {
   const { uiSettings } = core;
-  
+
   const themeVersionOptions = Object.keys(themeVersionLabelMap).map((v) => ({
     value: v,
     text: themeVersionLabelMap[v],
   }));
-  
+
   const colorModeOptions = [
     {
       value: 'light',
@@ -43,14 +43,14 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
       text: 'Use browser settings',
     },
   ];
-  
+
   const defaultThemeVersion = uiSettings.getDefault('theme:version');
   const defaultIsDarkMode = uiSettings.getDefault('theme:darkMode');
   const isUsingBrowserColorScheme =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
   const isDarkMode = uiSettings.get<boolean>('theme:darkMode');
   const themeVersion = uiSettings.get<string>('theme:version');
-  
+
   // Check if settings are overridden by server
   const isThemeVersionOverridden = uiSettings.isOverridden('theme:version');
   const isDarkModeOverridden = uiSettings.isOverridden('theme:darkMode');
@@ -59,7 +59,7 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
     themeVersionOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
       themeVersionValueMap[defaultThemeVersion]
   );
-  
+
   const [selectedColorMode, setSelectedColorMode] = useState(
     isUsingBrowserColorScheme
       ? colorModeOptions[2].value
@@ -78,7 +78,7 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
 
   const applyAppearanceSettings = async (e: SyntheticEvent) => {
     e.preventDefault();
-    
+
     const pendingActions = [];
 
     // Only update theme version if not overridden
@@ -107,14 +107,14 @@ export const AppearanceSettingsContent = ({ core, onApply }: AppearanceSettingsC
         window.localStorage.removeItem('useBrowserColorScheme');
       }
     }
-    
+
     if (pendingActions.length > 0) {
       await Promise.all(pendingActions);
-      
+
       if (onApply) {
         onApply();
       }
-      
+
       window.location.reload();
     } else {
       // If no changes to apply, just close the popover
