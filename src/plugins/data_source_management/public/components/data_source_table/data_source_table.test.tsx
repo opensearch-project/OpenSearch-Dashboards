@@ -494,6 +494,13 @@ describe('DataSourceTable', () => {
 
   describe('should handle datasources with empty description correctly', () => {
     beforeEach(async () => {
+      // Clear all history mock call history to prevent prior tests from leaking
+      // into the snapshot, which captures the serialized mock state.
+      Object.values(history).forEach((value) => {
+        if (typeof value === 'function' && typeof (value as jest.Mock).mockClear === 'function') {
+          (value as jest.Mock).mockClear();
+        }
+      });
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(
         Promise.resolve(getMappedDataSourcesWithEmptyDescription)
