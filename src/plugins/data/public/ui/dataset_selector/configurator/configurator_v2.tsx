@@ -7,8 +7,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
