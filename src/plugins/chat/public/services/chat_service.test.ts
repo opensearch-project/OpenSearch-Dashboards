@@ -26,6 +26,25 @@ describe('ChatService', () => {
   let mockUiSettings: any;
 
   beforeEach(() => {
+    // Suppress expected console warnings in tests
+    // These warnings occur when UI settings or workspace services aren't available in test scenarios
+    // This matches the pattern used in other test files (e.g., ag_ui_agent.test.ts, log_action_registry.test.ts)
+    consoleWarnSpy = jest
+      .spyOn(console, 'warn')
+      .mockImplementation((message: string, ...args: any[]) => {
+        // Filter out expected warnings that occur in test scenarios
+        if (
+          typeof message === 'string' &&
+          (message.includes('UI Settings not available') ||
+            message.includes('Workspaces service not available') ||
+            message.includes('Failed to determine data source'))
+        ) {
+          return; // Suppress expected warnings
+        }
+        // For other warnings, we could call the original, but since these are the only warnings
+        // appearing in these tests, we suppress all to match the codebase pattern
+      });
+
     // Clear all mocks
     jest.clearAllMocks();
 
@@ -131,6 +150,8 @@ describe('ChatService', () => {
   });
 
   afterEach(() => {
+    // Restore console.warn spy
+    consoleWarnSpy.mockRestore();
     jest.restoreAllMocks();
   });
 
@@ -684,6 +705,128 @@ describe('ChatService', () => {
       chatService.newThread();
 
       expect(mockAgent.resetConnection).toHaveBeenCalled();
+    });
+  });
+
+  describe('chat state persistence methods', () => {
+    let mockSessionStorage: { [key: string]: string };
+
+    beforeEach(() => {
+      // Mock sessionStorage behavior
+      mockSessionStorage = {};
+      const sessionStorageMock = {
+        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
+        setItem: jest.fn((key: string, value: string) => {
+          mockSessionStorage[key] = value;
+        }),
+        removeItem: jest.fn((key: string) => {
+          delete mockSessionStorage[key];
+        }),
+      };
+
+      // Update the global sessionStorage mock
+      (global as any).sessionStorage = sessionStorageMock;
+    });
+
+    describe('getCurrentMessages', () => {
+      it('should return current messages array', () => {
+        const testMessages = [
+          { id: '1', role: 'user', content: 'Hello' },
+          { id: '2', role: 'assistant', content: 'Hi there!' },
+        ];
+        (chatService as any).currentMessages = testMessages;
+
+        const result = chatService.getCurrentMessages();
+
+        expect(result).toEqual(testMessages);
+      });
+
+      it('should return empty array when no messages', () => {
+        (chatService as any).currentMessages = [];
+
+        const result = chatService.getCurrentMessages();
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('updateCurrentMessages', () => {
+      it('should update current messages and save to sessionStorage', () => {
+        const newMessages: Message[] = [
+          { id: '1', role: 'user' as const, content: 'Test message' },
+          { id: '2', role: 'assistant' as const, content: 'Test response' },
+        ];
+
+        chatService.updateCurrentMessages(newMessages);
+
+        expect((chatService as any).currentMessages).toEqual(newMessages);
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual(newMessages);
+      });
+
+      it('should handle empty messages array', () => {
+        chatService.updateCurrentMessages([]);
+
+        expect((chatService as any).currentMessages).toEqual([]);
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual([]);
+      });
+    });
+
+    describe('saveCurrentChatStatePublic', () => {
+      it('should save current state to sessionStorage', () => {
+        const testMessages = [{ id: '1', role: 'user', content: 'test' }];
+        (chatService as any).currentMessages = testMessages;
+
+        chatService.saveCurrentChatStatePublic();
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual(testMessages);
+      });
+
+      it('should handle sessionStorage errors gracefully', () => {
+        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        ((global as any).sessionStorage.setItem as jest.Mock).mockImplementation(() => {
+          throw new Error('Storage full');
+        });
+
+        expect(() => chatService.saveCurrentChatStatePublic()).not.toThrow();
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to save chat state to sessionStorage:',
+          expect.any(Error)
+        );
+
+        consoleSpy.mockRestore();
+      });
     });
   });
 
@@ -1478,7 +1621,7 @@ describe('ChatService', () => {
     let mockWorkspaces: any;
 
     beforeEach(() => {
-      mockUiSettings = {
+      nestedMockUiSettings = {
         get: jest.fn(),
       };
       mockWorkspaces = {
@@ -1509,7 +1652,7 @@ describe('ChatService', () => {
 
       // Create service with uiSettings and workspaces
       const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
+        nestedMockUiSettings,
         mockCoreChatService,
         mockWorkspaces
       );
