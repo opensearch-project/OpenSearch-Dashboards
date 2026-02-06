@@ -10,10 +10,15 @@ import {
   getGradientConfig,
   generateThresholds,
   generateValueThresholds,
+  createBarGaugeSeries,
+  createBarGaugeAxesConfig,
+  assembleBarGaugeSpec,
 } from './bar_gauge_utils';
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
+import { BaseChartStyle, PipelineFn, EChartsSpecState, getAxisType } from '../utils/echarts_spec';
 import { getColors } from '../theme/default_colors';
+import { mock } from 'node:test';
 
 describe('bar_gauge_utils', () => {
   describe('getBarOrientation', () => {
@@ -278,6 +283,320 @@ describe('bar_gauge_utils', () => {
         expect(result[1]).toEqual({ value: 50, color: '#FFFF00' });
         expect(result[2]).toEqual({ value: 80, color: '#0037ffff' });
       });
+    });
+  });
+});
+
+describe('bar_gauge_utils for echarts', () => {
+  describe('createBarGaugeAxesConfig', () => {
+    const mockAxisColumnMappings = {
+      x: {
+        id: 1,
+        name: 'category',
+        schema: VisFieldType.Categorical,
+        column: 'category',
+        validValuesCount: 10,
+        uniqueValuesCount: 5,
+      },
+      y: {
+        id: 2,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'value',
+        validValuesCount: 10,
+        uniqueValuesCount: 8,
+      },
+    };
+
+    it('should create axes config for vertical orientation', () => {
+      const styles = { exclusive: { orientation: 'vertical' as const } } as BarGaugeChartStyle;
+      const categories = ['A', 'B', 'C'];
+      const minBase = 0;
+      const maxBase = 100;
+
+      const result = createBarGaugeAxesConfig({
+        styles,
+        categories,
+        axisColumnMappings: mockAxisColumnMappings,
+        minBase,
+        maxBase,
+      });
+
+      expect(result.xAxisConfig).toEqual({
+        type: 'category',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        data: categories,
+      });
+
+      expect(result.yAxisConfig).toEqual({
+        type: 'value',
+        show: false,
+        max: maxBase,
+        min: minBase,
+        startValue: minBase,
+      });
+    });
+
+    it('should create axes config for horizontal orientation', () => {
+      const styles = { exclusive: { orientation: 'horizontal' as const } } as BarGaugeChartStyle;
+      const categories = ['A', 'B', 'C'];
+      const minBase = 0;
+      const maxBase = 100;
+
+      const result = createBarGaugeAxesConfig({
+        styles,
+        categories,
+        axisColumnMappings: mockAxisColumnMappings,
+        minBase,
+        maxBase,
+      });
+
+      expect(result.xAxisConfig).toEqual({
+        type: 'value',
+        show: false,
+        max: maxBase,
+        min: minBase,
+        startValue: minBase,
+      });
+
+      expect(result.yAxisConfig).toEqual({
+        type: 'category',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        data: categories,
+      });
+    });
+  });
+
+  describe('assembleBarGaugeSpec', () => {
+    it('should assemble bar gauge spec correctly', () => {
+      const mockState = {
+        baseConfig: { title: { text: 'Test Chart' } },
+        transformedData: [
+          { category: 'A', value: 10 },
+          { category: 'B', value: 20 },
+        ],
+        xAxisConfig: { type: 'category', data: ['A', 'B'] },
+        yAxisConfig: { type: 'value' },
+        series: [{ type: 'bar', data: [10, 20] }],
+      };
+
+      const result = assembleBarGaugeSpec(mockState);
+
+      expect(result.spec).toEqual({
+        title: { text: 'Test Chart' },
+        dataset: { source: mockState.transformedData },
+        xAxis: mockState.xAxisConfig,
+        yAxis: mockState.yAxisConfig,
+        series: mockState.series,
+        grid: { top: 50, right: 30, bottom: 40, left: 30 },
+      });
+    });
+  });
+
+  describe('createBarGaugeSeries', () => {
+    const mockTransformedData = [
+      { category: 'A', value: 25 },
+      { category: 'B', value: 50 },
+      { category: 'C', value: 75 },
+    ];
+
+    const mockAxisColumnMappings = {
+      x: {
+        id: 1,
+        name: 'category',
+        schema: VisFieldType.Categorical,
+        column: 'category',
+        validValuesCount: 3,
+        uniqueValuesCount: 3,
+      },
+      y: {
+        id: 2,
+        name: 'value',
+        schema: VisFieldType.Numerical,
+        column: 'value',
+        validValuesCount: 3,
+        uniqueValuesCount: 3,
+      },
+    };
+
+    const mockState = {
+      transformedData: mockTransformedData,
+      axisColumnMappings: mockAxisColumnMappings,
+    } as EChartsSpecState;
+
+    const mockStyles = {
+      exclusive: {
+        orientation: 'vertical',
+        displayMode: 'basic',
+        valueDisplay: 'hidden',
+        showUnfilledArea: true,
+      },
+      thresholdOptions: {
+        thresholds: [
+          { value: 30, color: '#FF0000' },
+          { value: 70, color: '#00FF00' },
+        ],
+        baseColor: '#00BD6B',
+      },
+      max: 100,
+      min: 0,
+    };
+
+    it('should create bar gauge series with basic display mode', () => {
+      const result = createBarGaugeSeries({
+        styles: mockStyles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series).toBeDefined();
+      expect(result.series).toHaveLength(2);
+      expect(result.series[0].name).toBe('unfilledArea');
+      expect(result.series[1].type).toBe('bar');
+      expect(result.series[1].data).toMatchObject([
+        { itemStyle: { color: '#00BD6B' }, value: 25 },
+        { itemStyle: { color: '#FF0000' }, value: 50 },
+        { itemStyle: { color: '#00FF00' }, value: 75 },
+      ]);
+    });
+
+    it('should create bar gauge series with gradient display mode', () => {
+      const thresholdsStyles = {
+        ...mockStyles,
+        exclusive: {
+          ...mockStyles.exclusive,
+          displayMode: 'gradient',
+        },
+      };
+      const result = createBarGaugeSeries({
+        styles: thresholdsStyles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series).toBeDefined();
+      expect(result.series).toHaveLength(2);
+      expect(result.series[1].type).toBe('bar');
+      expect(result.series[1].data[0].itemStyle.color.colorStops).toMatchObject([
+        { color: '#00BD6B', offset: 0 },
+        { color: '#00BD6B', offset: 1 },
+      ]);
+      expect(result.series[1].data[1].itemStyle.color.colorStops).toMatchObject([
+        { color: '#00BD6B', offset: 0 },
+        { color: '#FF0000', offset: 1 },
+      ]);
+    });
+
+    it('should create bar gauge series with stack display mode', () => {
+      const stackStyles = {
+        ...mockStyles,
+        exclusive: {
+          ...mockStyles.exclusive,
+          displayMode: 'stack',
+        },
+      };
+
+      const result = createBarGaugeSeries({
+        styles: stackStyles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series.length).toBe(4); // unfilled area + multiple stack series
+    });
+
+    it('should handle custom min/max values', () => {
+      const styles = {
+        ...mockStyles,
+        max: 80,
+        min: 20,
+      };
+
+      const result = createBarGaugeSeries({
+        styles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.yAxisConfig.max).toBe(80);
+      expect(result.yAxisConfig.min).toBe(20);
+    });
+
+    it('should handle hidden value display', () => {
+      const result = createBarGaugeSeries({
+        styles: mockStyles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series).toBeDefined();
+      expect(result.series[0].data[0].label.color).toBe('transparent');
+    });
+
+    it('should handle text color value display', () => {
+      const styles = {
+        ...mockStyles,
+        exclusive: {
+          ...mockStyles.exclusive,
+          valueDisplay: 'textColor',
+        },
+      };
+
+      const result = createBarGaugeSeries({
+        styles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series).toBeDefined();
+
+      expect(result.series[0].data[0].label.color).toBe(getColors().text);
+    });
+
+    it('should handle value color value display', () => {
+      const styles = {
+        ...mockStyles,
+        exclusive: {
+          ...mockStyles.exclusive,
+          valueDisplay: 'valueColor',
+        },
+      };
+      const result = createBarGaugeSeries({
+        styles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series).toBeDefined();
+      // Value color should be applied to labels based on thresholds
+      const labelColors = result.series[0].data.map((item) => item.label.color);
+      expect(labelColors).toHaveLength(3);
+      expect(labelColors[0]).toBe('#00BD6B'); // 25 < 30, uses base color
+      expect(labelColors[1]).toBe('#FF0000'); // 50 > 30 uses first threshold
+      expect(labelColors[2]).toBe('#00FF00'); // 75 > 70, uses second threshold
+    });
+
+    it('should handle invalid min/max case', () => {
+      const styles = {
+        ...mockStyles,
+        min: 90,
+        max: 20,
+      };
+
+      const result = createBarGaugeSeries({
+        styles,
+        categoryField: 'category',
+        valueField: 'value',
+      })(mockState);
+
+      expect(result.series).toBeDefined();
+      expect(result.series).toHaveLength(1); // Only unfilled area in invalid case
+      expect(result.yAxisConfig.max).toBe(100); // fake domain
+      expect(result.yAxisConfig.min).toBe(0);
     });
   });
 });
