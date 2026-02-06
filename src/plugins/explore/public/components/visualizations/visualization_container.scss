@@ -4,6 +4,8 @@
   overflow-x: auto;
   scrollbar-width: thin;
   flex-grow: 1;
+  border-top: $euiBorderThin;
+  margin-top: $euiSizeS;
 }
 
 .exploreVisPanel {
@@ -13,6 +15,8 @@
 }
 
 .exploreVisPanel__inner {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   overflow: visible;
   height: 100%;

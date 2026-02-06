@@ -103,7 +103,6 @@ export const createNumericalStateTimeline = (
         groupByMergedLabel(convertTo2DArray())
       ),
       createBaseConfig({
-        title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
         addTrigger: false,
         legend: { show: styleOptions.addLegend },
       }),
@@ -333,7 +332,6 @@ export const createCategoricalStateTimeline = (
         groupByMergedLabel(convertTo2DArray())
       ),
       createBaseConfig({
-        title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
         addTrigger: false,
         legend: { show: styleOptions.addLegend },
       }),
@@ -565,7 +563,6 @@ export const createSingleCategoricalStateTimeline = (
         groupByMergedLabel(convertTo2DArray())
       ),
       createBaseConfig({
-        title: `${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
         addTrigger: false,
         legend: { show: styleOptions.addLegend },
       }),
@@ -811,7 +808,6 @@ export const createSingleNumericalStateTimeline = (
         groupByMergedLabel(convertTo2DArray())
       ),
       createBaseConfig({
-        title: `${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
         addTrigger: false,
         legend: { show: styleOptions.addLegend },
       }),

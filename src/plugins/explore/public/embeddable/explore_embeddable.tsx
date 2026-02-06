@@ -176,6 +176,33 @@ export class ExploreEmbeddable
       });
   }
 
+  public getTitle(): string {
+    // Input from panel-specific config, if panel title is configured on panel, then it
+    // will override the embeddable title
+    if (this.input.title) {
+      return this.input.title;
+    }
+
+    // Title configured on visualization, it's the default panel title when this embeddable is
+    // added to a dashboard.
+    const { params } = JSON.parse(this.savedExplore.visualization || '{}');
+    if (params?.titleOptions?.titleName) {
+      return params.titleOptions.titleName;
+    }
+    if (params?.title) {
+      return params.title;
+    }
+
+    return '';
+  }
+
+  public getInput(): Readonly<ExploreInput> {
+    return {
+      ...this.input,
+      disabledActions: ['ACTION_CUSTOMIZE_PANEL'],
+    };
+  }
+
   private initializeSearchProps() {
     const { searchSource } = this.savedExplore;
     const indexPattern = searchSource.getField('index');

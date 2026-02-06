@@ -51,7 +51,7 @@ export const createSingleMetric = (
     // Echarts implementation here
     const result = pipe(
       transform(convertTo2DArray()),
-      createBaseConfig({ title: '' }),
+      createBaseConfig(),
       buildAxisConfigs,
       createMetricChartSeries({
         styles,

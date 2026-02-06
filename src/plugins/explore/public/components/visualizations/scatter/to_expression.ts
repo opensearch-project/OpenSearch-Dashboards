@@ -73,7 +73,7 @@ export const createTwoMetricScatter = (
 
     const result = pipe(
       transform(convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name}` }),
+      createBaseConfig(),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h === yField),
@@ -180,11 +180,7 @@ export const createTwoMetricOneCateScatter = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig({
-        title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        }`,
-      }),
+      createBaseConfig(),
       buildAxisConfigs,
       createCategoryScatterSeries({
         styles,
@@ -298,11 +294,7 @@ export const createThreeMetricOneCateScatter = (
 
     const result = pipe(
       transform(convertTo2DArray(allColumns)),
-      createBaseConfig({
-        title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        } (Size: ${axisColumnMappings?.[AxisRole.SIZE]?.name})`,
-      }),
+      createBaseConfig(),
       buildAxisConfigs,
       createSizeScatterSeries({
         styles,

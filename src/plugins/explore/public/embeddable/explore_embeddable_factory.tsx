@@ -73,7 +73,7 @@ export class ExploreEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('explore.embeddable.displayName', {
-      defaultMessage: 'visualization in discover',
+      defaultMessage: 'visualization',
     });
   }
 
