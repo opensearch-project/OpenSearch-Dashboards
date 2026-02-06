@@ -123,6 +123,7 @@ export interface Props {
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
   _registeredLanguages: Set<string> = new Set();
+  _providerDisposables: monaco.IDisposable[] = [];
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -221,6 +222,11 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
   }
 
+  componentWillUnmount() {
+    this._providerDisposables.forEach((d) => d.dispose());
+    this._providerDisposables = [];
+  }
+
   /**
    * Register language providers for the given language ID.
    * Tracks which languages have been registered to avoid duplicate registrations.
@@ -243,19 +249,27 @@ export class CodeEditor extends React.Component<Props, {}> {
     this._registeredLanguages.add(languageId);
 
     if (this.props.suggestionProvider) {
-      monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+      this._providerDisposables.push(
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+      );
     }
 
     if (this.props.signatureProvider) {
-      monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+      this._providerDisposables.push(
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+      );
     }
 
     if (this.props.hoverProvider) {
-      monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+      this._providerDisposables.push(
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+      );
     }
 
     if (this.props.languageConfiguration) {
-      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+      this._providerDisposables.push(
+        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration)
+      );
     }
   };
 }
