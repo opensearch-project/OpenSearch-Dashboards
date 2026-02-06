@@ -5,6 +5,7 @@
 /.chromium
 /package.json.bak
 .claude/
+CLAUDE.local.md
 .DS_Store
 .node_binaries
 .native_modules

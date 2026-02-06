@@ -7,6 +7,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
@@ -28,6 +30,8 @@ import { getSchemaConfigs } from './schema_config';
 import { SaveAsDatasetOption } from './save_as_dataset_option';
 import { DatasetMetadataFields } from './dataset_metadata_fields';
 import { useDatasetFields } from './use_dataset_fields';
+
+import './configurator_v2.scss';
 
 export const ConfiguratorV2 = ({
   services,
@@ -135,14 +139,14 @@ export const ConfiguratorV2 = ({
           <h1>
             <FormattedMessage
               id="data.explorer.datasetSelector.advancedSelector.configurator.title"
-              defaultMessage="Step 2: Configure data"
+              defaultMessage="Step 2: Configure Dataset"
             />
           </h1>
           <EuiText>
             <p>
               <FormattedMessage
                 id="data.explorer.datasetSelector.advancedSelector.configurator.description"
-                defaultMessage="Configure selected data based on parameters available."
+                defaultMessage="Configure selected dataset based on parameters available."
               />
             </p>
           </EuiText>
@@ -150,6 +154,15 @@ export const ConfiguratorV2 = ({
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm className="datasetConfigurator" data-test-subj="datasetConfigurator">
+          {(alwaysShowDatasetFields || saveAsDataset) && (
+            <DatasetMetadataFields
+              displayName={dataset.displayName}
+              description={dataset.description}
+              onDisplayNameChange={(value) => handleDatasetChange({ displayName: value })}
+              onDescriptionChange={(value) => handleDatasetChange({ description: value })}
+              showAsyncWarning={alwaysShowDatasetFields && isAsyncType}
+            />
+          )}
           <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.datasetLabel',
@@ -157,8 +170,10 @@ export const ConfiguratorV2 = ({
                 defaultMessage: 'Data',
               }
             )}
+            display="columnCompressed"
+            fullWidth
           >
-            <EuiFieldText disabled value={dataset.title} />
+            <EuiFieldText disabled value={dataset.title} compressed />
           </EuiFormRow>
           <EuiFormRow
             label={i18n.translate(
@@ -167,6 +182,8 @@ export const ConfiguratorV2 = ({
                 defaultMessage: 'Language',
               }
             )}
+            display="columnCompressed"
+            fullWidth
           >
             <EuiSelect
               options={languages.map((languageId) => ({
@@ -179,6 +196,7 @@ export const ConfiguratorV2 = ({
                 handleDatasetChange({ language: e.target.value });
               }}
               data-test-subj="advancedSelectorLanguageSelect"
+              compressed
             />
           </EuiFormRow>
           {supportsTimeFilter &&
@@ -190,17 +208,39 @@ export const ConfiguratorV2 = ({
                     defaultMessage: 'Time field',
                   }
                 )}
+                display="columnCompressed"
+                fullWidth
               >
-                <EuiFieldText disabled value={dataset.timeFieldName ?? 'No time field'} />
+                <EuiFieldText
+                  disabled
+                  value={dataset.timeFieldName ?? 'No time field'}
+                  compressed
+                />
               </EuiFormRow>
             ) : (
               <EuiFormRow
-                label={i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
-                  {
-                    defaultMessage: 'Time field',
-                  }
-                )}
+                label={
+                  showNonTimeFieldDatasets ? (
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabelOptional"
+                      defaultMessage="Time field {optionalSuffix}"
+                      values={{
+                        optionalSuffix: (
+                          <span className="datasetConfigurator-optionalSuffix">– optional</span>
+                        ),
+                      }}
+                    />
+                  ) : (
+                    i18n.translate(
+                      'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
+                      {
+                        defaultMessage: 'Time field',
+                      }
+                    )
+                  )
+                }
+                display="columnCompressed"
+                fullWidth
               >
                 <EuiSelect
                   options={[
@@ -223,6 +263,7 @@ export const ConfiguratorV2 = ({
                   }}
                   hasNoInitialSelection
                   data-test-subj="advancedSelectorTimeFieldSelect"
+                  compressed
                 />
               </EuiFormRow>
             ))}
@@ -243,15 +284,6 @@ export const ConfiguratorV2 = ({
               checked={saveAsDataset}
               onChange={setSaveAsDataset}
               disabled={saveAsDatasetDisabled}
-            />
-          )}
-          {(alwaysShowDatasetFields || saveAsDataset) && (
-            <DatasetMetadataFields
-              displayName={dataset.displayName}
-              description={dataset.description}
-              onDisplayNameChange={(value) => handleDatasetChange({ displayName: value })}
-              onDescriptionChange={(value) => handleDatasetChange({ description: value })}
-              showAsyncWarning={alwaysShowDatasetFields && isAsyncType}
             />
           )}
         </EuiForm>
@@ -282,7 +314,7 @@ export const ConfiguratorV2 = ({
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
-            defaultMessage="Select Data"
+            defaultMessage="Create Dataset"
           />
         </EuiButton>
       </EuiModalFooter>
