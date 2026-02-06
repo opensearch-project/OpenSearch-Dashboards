@@ -75,7 +75,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   };
 
   const getPositionsForAxis = (axis: StandardAxes) => {
-    const isY = axis.axisRole === AxisRole.Y;
+    const isY = axis.axisRole === AxisRole.Y || axis.axisRole === AxisRole.Y_SECOND;
     const flipped = !!switchAxes;
 
     // if switch axes, only switch label
@@ -295,6 +295,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                 </>
               )}
             </div>
+            {index < standardAxes.length - 1 && <EuiSpacer size="m" />}
           </EuiSplitPanel.Inner>
         );
       })}
