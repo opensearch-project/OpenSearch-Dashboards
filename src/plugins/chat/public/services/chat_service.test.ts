@@ -26,6 +26,25 @@ describe('ChatService', () => {
   let mockUiSettings: any;
 
   beforeEach(() => {
+    // Suppress expected console warnings in tests
+    // These warnings occur when UI settings or workspace services aren't available in test scenarios
+    // This matches the pattern used in other test files (e.g., ag_ui_agent.test.ts, log_action_registry.test.ts)
+    consoleWarnSpy = jest
+      .spyOn(console, 'warn')
+      .mockImplementation((message: string, ...args: any[]) => {
+        // Filter out expected warnings that occur in test scenarios
+        if (
+          typeof message === 'string' &&
+          (message.includes('UI Settings not available') ||
+            message.includes('Workspaces service not available') ||
+            message.includes('Failed to determine data source'))
+        ) {
+          return; // Suppress expected warnings
+        }
+        // For other warnings, we could call the original, but since these are the only warnings
+        // appearing in these tests, we suppress all to match the codebase pattern
+      });
+
     // Clear all mocks
     jest.clearAllMocks();
 
@@ -131,6 +150,8 @@ describe('ChatService', () => {
   });
 
   afterEach(() => {
+    // Restore console.warn spy
+    consoleWarnSpy.mockRestore();
     jest.restoreAllMocks();
   });
 
@@ -732,9 +753,9 @@ describe('ChatService', () => {
 
     describe('updateCurrentMessages', () => {
       it('should update current messages and save to sessionStorage', () => {
-        const newMessages = [
-          { id: '1', role: 'user', content: 'Test message' },
-          { id: '2', role: 'assistant', content: 'Test response' },
+        const newMessages: Message[] = [
+          { id: '1', role: 'user' as const, content: 'Test message' },
+          { id: '2', role: 'assistant' as const, content: 'Test response' },
         ];
 
         chatService.updateCurrentMessages(newMessages);
@@ -1500,7 +1521,7 @@ describe('ChatService', () => {
     let mockWorkspaces: any;
 
     beforeEach(() => {
-      mockUiSettings = {
+      nestedMockUiSettings = {
         get: jest.fn(),
       };
       mockWorkspaces = {
@@ -1531,7 +1552,7 @@ describe('ChatService', () => {
 
       // Create service with uiSettings and workspaces
       const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
+        nestedMockUiSettings,
         mockCoreChatService,
         mockWorkspaces
       );
