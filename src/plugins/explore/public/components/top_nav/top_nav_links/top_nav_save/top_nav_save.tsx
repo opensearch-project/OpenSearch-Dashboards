@@ -60,12 +60,10 @@ export const getSaveButtonRun = (
   const visualizationBuilder = getVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
 
-  const defaultTitle = (() => {
-    if (visConfig?.styles && 'titleOptions' in visConfig.styles) {
-      return visConfig.styles.titleOptions?.titleName || 'Untitled';
-    }
-    return 'Untitled';
-  })();
+  let defaultTitle = 'Untitled';
+  if (visConfig?.styles && 'titleOptions' in visConfig.styles) {
+    defaultTitle = visConfig.styles.titleOptions?.titleName || 'Untitled';
+  }
 
   const onSave = async ({
     newTitle,
