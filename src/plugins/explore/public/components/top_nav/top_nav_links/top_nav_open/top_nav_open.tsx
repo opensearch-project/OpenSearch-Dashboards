@@ -31,6 +31,7 @@ export const getOpenButtonRun = (services: ExploreServices): TopNavMenuIconRun =
       <OpenSearchDashboardsContextProvider services={services}>
         <OpenSearchPanel onClose={() => flyoutSession?.close?.().then()} />
       </OpenSearchDashboardsContextProvider>
-    )
+    ),
+    { 'data-test-subj': 'loadSearchForm' }
   );
 };

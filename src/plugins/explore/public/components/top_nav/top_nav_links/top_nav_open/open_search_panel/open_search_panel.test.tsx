@@ -78,7 +78,6 @@ describe('OpenSearchPanel', () => {
   it('renders flyout with header and footer', () => {
     render(<OpenSearchPanel onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('loadSearchForm')).toBeInTheDocument();
     expect(screen.getByText('Select Saved Search')).toBeInTheDocument();
     expect(screen.getByText('Manage searches')).toBeInTheDocument();
   });

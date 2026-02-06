@@ -17,7 +17,6 @@ import {
   EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiFlyoutBody,
@@ -65,7 +64,7 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
   } = useOpenSearchDashboards<ExploreServices>();
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiText size="s">
           <h2>
@@ -140,6 +139,6 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

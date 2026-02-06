@@ -30,6 +30,8 @@ Cypress.Commands.add('loadSaveSearch', (name) => {
 
   cy.getElementByTestId('discoverOpenButton', opts).click(opts);
 
+  cy.wait(2000);
+
   cy.getElementByTestId(`savedObjectTitle${toTestId(name)}`).click();
 
   cy.get('h1').contains(name).should('be.visible');

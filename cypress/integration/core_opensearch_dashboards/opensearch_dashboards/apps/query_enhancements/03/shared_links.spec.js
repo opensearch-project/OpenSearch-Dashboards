@@ -100,13 +100,6 @@ export const runSharedLinksTests = () => {
           });
         } else {
           cy.wait(2000);
-          // Dismiss any open overlay (e.g., flyout from expanded doc row in previous test)
-          cy.get('body').then(($body) => {
-            if ($body.find('.euiOverlayMask').length > 0) {
-              cy.get('body').type('{esc}');
-              cy.wait(500);
-            }
-          });
           resetPageState();
         }
       });

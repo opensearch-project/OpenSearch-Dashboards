@@ -189,7 +189,8 @@ const getLegacyTopNavLinks = (
               makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
             />
           </OpenSearchDashboardsContextProvider>
-        )
+        ),
+        { 'data-test-subj': 'loadSearchForm' }
       );
     },
     iconType: 'folderOpen',
@@ -341,7 +342,8 @@ export const getTopNavLinks = (
               makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
             />
           </OpenSearchDashboardsContextProvider>
-        )
+        ),
+        { 'data-test-subj': 'loadSearchForm' }
       );
     },
     iconType: 'folderOpen',
