@@ -17,8 +17,8 @@ import {
   VisFieldType,
   TitleOptions,
   ThresholdOptions,
+  StandardAxes,
 } from '../types';
-import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 import { getColors } from '../theme/default_colors';
 
 // Complete area chart style controls interface
@@ -26,6 +26,7 @@ export interface AreaChartStyleOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
@@ -37,8 +38,16 @@ export interface AreaChartStyleOptions {
   thresholdLines?: ThresholdLines;
 
   // Axes configuration
+  /**
+   * @deprecated - use standardAxes instead
+   */
   categoryAxes?: CategoryAxis[];
+  /**
+   * @deprecated - use standardAxes instead
+   */
   valueAxes?: ValueAxis[];
+
+  standardAxes?: StandardAxes[];
 
   titleOptions?: TitleOptions;
 
@@ -47,7 +56,10 @@ export interface AreaChartStyleOptions {
 }
 
 export type AreaChartStyle = Required<
-  Omit<AreaChartStyleOptions, 'areaOpacity' | 'thresholdLines' | 'legendTitle'>
+  Omit<
+    AreaChartStyleOptions,
+    'areaOpacity' | 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'
+  >
 > &
   Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
 
@@ -68,50 +80,7 @@ const defaultAreaChartStyles: AreaChartStyle = {
     thresholdStyle: ThresholdMode.Off,
   },
 
-  // Category axes
-  categoryAxes: [
-    {
-      id: 'CategoryAxis-1',
-      type: 'category',
-      position: Positions.BOTTOM,
-      show: true,
-      labels: {
-        show: true,
-        filter: true,
-        rotate: 0,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      grid: {
-        showLines: true,
-      },
-      title: {
-        text: '',
-      },
-    },
-  ],
-
-  // Value axes
-  valueAxes: [
-    {
-      id: 'ValueAxis-1',
-      name: 'LeftAxis-1',
-      type: 'value',
-      position: Positions.LEFT,
-      show: true,
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      grid: {
-        showLines: true,
-      },
-      title: {
-        text: '',
-      },
-    },
-  ],
+  standardAxes: [],
 
   titleOptions: {
     show: false,

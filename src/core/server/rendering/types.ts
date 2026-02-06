@@ -46,6 +46,7 @@ export interface RenderingMetadata {
   startupScriptUrl: string;
   i18n: typeof i18n.translate;
   locale: string;
+  nonce: string;
   injectedMetadata: {
     version: string;
     buildNumber: number;
@@ -96,6 +97,13 @@ export interface IRenderOptions {
    * `true` by default.
    */
   includeUserSettings?: boolean;
+
+  /**
+   * CSP nonce value to be included in inline styles and the CSP meta tag.
+   * Required for CSP compliance.
+   * @internal
+   */
+  nonce: string;
 
   /**
    * Inject custom vars into the page metadata.

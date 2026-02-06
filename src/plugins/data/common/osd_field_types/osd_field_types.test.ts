@@ -89,6 +89,10 @@ describe('utils/osd_field_types', () => {
       expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.UNSIGNED_LONG)).toBe('number');
     });
 
+    test('returns string for flat_object opensearch type', () => {
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.FLAT_OBJECT)).toBe('string');
+    });
+
     test('returns unknown for unknown opensearch types', () => {
       const castTo = castOpenSearchToOsdFieldTypeName('wrongType' as OPENSEARCH_FIELD_TYPES);
 

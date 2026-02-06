@@ -4,9 +4,10 @@
  */
 
 import { isEqual } from 'lodash';
+import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
@@ -52,6 +53,7 @@ import {
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
+import { mergeStyles } from '../components/visualizations/utils/utils';
 
 export interface SearchProps {
   description?: string;
@@ -62,6 +64,7 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   services: ExploreServices;
+  spec?: any;
   expression?: string;
   sharedItemTitle?: string;
   searchContext?: {
@@ -83,6 +86,7 @@ export interface SearchProps {
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   onExpressionEvent?: (e: ExpressionRendererEvent) => void;
+  onSelectTimeRange?: (range: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -120,6 +124,7 @@ export class ExploreEmbeddable
     timeRange: undefined as TimeRange | undefined,
   };
   private node?: HTMLElement;
+  private root?: Root;
 
   constructor(
     {
@@ -277,6 +282,24 @@ export class ExploreEmbeddable
       }
     };
 
+    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+        embeddable: this,
+        filters: [
+          {
+            range: {
+              '*': {
+                mode: 'absolute',
+                gte: moment(range.from),
+                lte: moment(range.to),
+              },
+            },
+          },
+        ],
+        timeFieldName: '*',
+      });
+    };
+
     this.updateHandler(searchProps);
   }
 
@@ -367,6 +390,7 @@ export class ExploreEmbeddable
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
+    const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
@@ -404,12 +428,15 @@ export class ExploreEmbeddable
           this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
 
-          const styles = adaptLegacyData({
+          let styles = adaptLegacyData({
             type: selectedChartType,
             styles: styleOptions,
             axesMapping: visualization.axesMapping,
           })?.styles;
 
+          if (vis) {
+            styles = mergeStyles(vis.ui.style.defaults, styles);
+          }
           this.searchProps.styleOptions = styles;
 
           const spec = matchedRule.toSpec(
@@ -419,8 +446,10 @@ export class ExploreEmbeddable
             dateColumns,
             styles || styleOptions,
             selectedChartType,
-            axesMapping
+            axesMapping,
+            searchContext.timeRange
           );
+          this.searchProps.spec = spec;
           const exp = toExpression(searchContext, spec);
           this.searchProps.expression = exp;
         }
@@ -435,9 +464,9 @@ export class ExploreEmbeddable
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) return;
+    if (!this.searchProps || !this.root) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {
@@ -456,8 +485,8 @@ export class ExploreEmbeddable
     if (this.searchProps) {
       delete this.searchProps;
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 
@@ -473,11 +502,12 @@ export class ExploreEmbeddable
     if (!this.searchProps) {
       throw new Error('Search scope not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
     this.node.style.height = '100%';
+    this.root = createRoot(node);
   }
 
   public getInspectorAdapters() {

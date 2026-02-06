@@ -114,6 +114,13 @@ export const ExploreLogsChart = ({
   const isSummaryAgentAvailable = useSelector(selectSummaryAgentIsAvailable);
   const isSummaryAvailable = isSummaryAgentAvailable && Boolean(assistantEnabled);
 
+  // Reset to histogram if summary is not available but toggle is set to summary
+  React.useEffect(() => {
+    if (!isSummaryAvailable && toggleIdSelected === 'summary') {
+      updateToggleId('histogram');
+    }
+  }, [isSummaryAvailable, toggleIdSelected, updateToggleId]);
+
   const usageCollection = getUsageCollector();
   const { reportMetric, reportCountMetric } = useMetrics(usageCollection);
 
@@ -217,6 +224,15 @@ export const ExploreLogsChart = ({
                 chartType={'HistogramBar'}
                 timefilterUpdateHandler={timefilterUpdateHandler}
                 services={services}
+                customChartsTheme={{
+                  axes: {
+                    gridLine: {
+                      horizontal: { visible: false },
+                      vertical: { visible: false },
+                    },
+                  },
+                }}
+                useSmartDateFormat
               />
             </div>
           </section>

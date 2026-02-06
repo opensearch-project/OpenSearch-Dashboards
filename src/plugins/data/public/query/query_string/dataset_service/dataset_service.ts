@@ -110,6 +110,7 @@ export class DatasetService {
           : await type?.fetchFields(dataset, services);
         const spec = {
           id: dataset.id,
+          type: dataset.type,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
@@ -124,6 +125,7 @@ export class DatasetService {
                 version: dataset.dataSource.version,
               }
             : undefined,
+          dataSourceMeta: dataset.dataSource ? dataset.dataSource.meta : undefined,
         } as IndexPatternSpec;
 
         if (defaultCache) {
@@ -191,6 +193,7 @@ export class DatasetService {
         const spec = {
           // Generate ID with data source prefix if data source exists, otherwise allow UUID generation
           id: dataset.dataSource?.id ? `${dataset.dataSource.id}::${uuidv4()}` : undefined,
+          type: dataset.type,
           displayName: dataset.displayName,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,

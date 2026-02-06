@@ -114,6 +114,7 @@ describe('createPluginInitializerContext', () => {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),
         pingTimeout: duration(30, 's'),
+        requestCompression: false,
       },
       path: { data: fromRoot('data') },
       savedObjects: {

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { ImportFlyout } from './import_flyout';
 import { ContextValue, ServicesContextProvider } from '../contexts';
 import { serviceContextMock } from '../contexts/services_context.mock';

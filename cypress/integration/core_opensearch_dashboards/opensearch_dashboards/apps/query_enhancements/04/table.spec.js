@@ -9,18 +9,26 @@ import {
   INDEX_WITHOUT_TIME_1,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_PATTERN_WITH_NO_TIME_1,
+  nonTimeBasedFieldsForDatasetCreation,
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   generateAllTestConfigurations,
   generateIndexPatternTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
 import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+  createDatasetWithEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetWithTimeId = getRandomizedDatasetId();
+const datasetWithoutTimeId = getRandomizedDatasetId();
 
 const generateTableTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -38,24 +46,23 @@ const generateTableTestConfiguration = (dataset, datasetType, language) => {
 export const runTableTests = () => {
   describe('discover table tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITHOUT_TIME_1,
-        timefieldName: '',
-        indexPatternHasTimefield: false,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and first dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetWithTimeId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern with time
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
+
+      createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, datasetWithoutTimeId, {
+        title: `${INDEX_WITHOUT_TIME_1}*`,
+        signalType: 'logs',
+        fields: nonTimeBasedFieldsForDatasetCreation,
       });
     });
 

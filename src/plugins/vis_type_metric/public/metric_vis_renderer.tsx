@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { MetricVisRenderValue } from './metric_vis_fn';
@@ -37,23 +37,37 @@ import MetricVisComponent from './components/metric_vis_component';
 
 // @ts-ignore
 
-export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderValue> = () => ({
-  name: 'metric_vis',
-  displayName: 'metric visualization',
-  reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderValue> = () => {
+  // Use WeakMap to store roots per DOM node to support multiple instances
+  const rootsMap = new WeakMap<HTMLElement, Root>();
 
-    render(
-      <MetricVisComponent
-        visData={visData}
-        visParams={visConfig}
-        renderComplete={handlers.done}
-        fireEvent={handlers.event}
-      />,
-      domNode
-    );
-  },
-});
+  return {
+    name: 'metric_vis',
+    displayName: 'metric visualization',
+    reuseDomNode: true,
+    render: async (domNode, { visData, visConfig }, handlers) => {
+      let root = rootsMap.get(domNode);
+      if (!root) {
+        root = createRoot(domNode);
+        rootsMap.set(domNode, root);
+      }
+
+      handlers.onDestroy(() => {
+        const existingRoot = rootsMap.get(domNode);
+        if (existingRoot) {
+          existingRoot.unmount();
+          rootsMap.delete(domNode);
+        }
+      });
+
+      root.render(
+        <MetricVisComponent
+          visData={visData}
+          visParams={visConfig}
+          renderComplete={handlers.done}
+          fireEvent={handlers.event}
+        />
+      );
+    },
+  };
+};

@@ -144,13 +144,13 @@ jest.mock('../style_panel/axes/standard_axes_options', () => ({
     <div data-test-subj="allAxesOptions">
       <button
         data-test-subj="changeAxis"
-        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+        onClick={() => onStandardAxesChange([...standardAxes, { show: true }])}
       >
         Change Axis
       </button>
       <button
         data-test-subj="mockUpdateValueAxes"
-        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+        onClick={() => onStandardAxesChange([...standardAxes, { show: true }])}
       >
         Update Value Axes
       </button>
@@ -172,11 +172,14 @@ jest.mock('./bar_exclusive_vis_options', () => ({
       showBarBorder,
       barBorderWidth,
       barBorderColor,
+      stackMode,
       onBarWidthChange,
       onBarPaddingChange,
       onShowBarBorderChange,
       onBarBorderWidthChange,
       onBarBorderColorChange,
+      onStackModeChange,
+      onUseThresholdColorChange,
     }) => (
       <div data-test-subj="mockBarExclusiveVisOptions">
         <button data-test-subj="mockUpdateBarWidth" onClick={() => onBarWidthChange(0.8)}>
@@ -199,6 +202,15 @@ jest.mock('./bar_exclusive_vis_options', () => ({
           onClick={() => onBarBorderColorChange('#FF0000')}
         >
           Update Bar Border Color
+        </button>
+        <button data-test-subj="mockUpdateStackMode" onClick={() => onStackModeChange('total')}>
+          Update Stack Mode
+        </button>
+        <button
+          data-test-subj="mockUpdateUseThresholdColor"
+          onClick={() => onUseThresholdColorChange && onUseThresholdColorChange(true)}
+        >
+          Update Use Threshold Color
         </button>
       </div>
     )
@@ -438,7 +450,7 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('changeAxis'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
+      standardAxes: [...defaultProps.styleOptions.standardAxes, { show: true }],
     });
   });
 
@@ -476,6 +488,12 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateBarBorderColor'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ barBorderColor: '#FF0000' });
+
+    await userEvent.click(screen.getByTestId('mockUpdateStackMode'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ stackMode: 'total' });
+
+    await userEvent.click(screen.getByTestId('mockUpdateUseThresholdColor'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ useThresholdColor: true });
   });
 
   test('calls onStyleChange with correct parameters for switch axes', async () => {

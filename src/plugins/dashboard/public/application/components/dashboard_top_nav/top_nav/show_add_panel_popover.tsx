@@ -4,7 +4,7 @@
  */
 
 import React, { useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { useAsync } from 'react-use';
@@ -13,11 +13,15 @@ import { buildContextMenuForActions, UiActionsStart } from '../../../../../../ui
 import { dashboardAddPanelTrigger, DASHBOARD_ADD_PANEL_TRIGGER } from '../../../../ui_triggers';
 
 let isMount = false;
+let root: Root | null = null;
 
 const container = document.createElement('div');
 
 const unmount = () => {
-  ReactDOM.unmountComponentAtNode(container);
+  if (root) {
+    root.unmount();
+    root = null;
+  }
   isMount = false;
 };
 const triggerContext = {
@@ -94,13 +98,13 @@ export function showAddPanelPopover({
   isMount = true;
 
   document.body.appendChild(container);
-  ReactDOM.render(
+  root = createRoot(container);
+  root.render(
     <PanelPopover
       onAddExistingPanelFlyout={onAddExistingPanelFlyout}
       button={anchorElement}
       onClose={unmount}
       uiActions={uiActions}
-    />,
-    container
+    />
   );
 }

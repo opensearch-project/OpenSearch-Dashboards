@@ -12,9 +12,10 @@ import {
   VisFieldType,
   VisColumn,
   AxisColumnMappings,
-  AxisSupportedStyles,
   Threshold,
   AxisConfig,
+  ThresholdOptions,
+  ThresholdMode,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -89,7 +90,7 @@ export const applyAxisStyling = ({
 
 export function getAxisByRole(
   axes: StandardAxes[],
-  axisRole: AxisRole.X | AxisRole.Y
+  axisRole: AxisRole.X | AxisRole.Y | AxisRole.Y_SECOND
 ): StandardAxes | undefined {
   return axes.find((axis) => axis.axisRole === axisRole);
 }
@@ -170,22 +171,26 @@ const positionSwapMap: Record<Positions, Positions> = {
 const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
 
 export const getSwappedAxisRole = (
-  styles: Partial<AxisSupportedStyles>,
+  styles: { standardAxes?: StandardAxes[]; switchAxes?: boolean },
   axisColumnMappings?: AxisColumnMappings
 ): {
   xAxis?: VisColumn;
   yAxis?: VisColumn;
+  y2Axis?: VisColumn;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2AxisStyle?: StandardAxes;
 } => {
   const xAxis = axisColumnMappings?.x;
   const yAxis = axisColumnMappings?.y;
+  const y2Axis = axisColumnMappings?.y2;
 
   const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
   const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
 
   if (!styles?.switchAxes) {
-    return { xAxis, xAxisStyle, yAxis, yAxisStyle };
+    return { xAxis, xAxisStyle, yAxis, yAxisStyle, ...(y2Axis && { y2Axis, y2AxisStyle }) };
   }
 
   return {
@@ -203,6 +208,7 @@ export const getSwappedAxisRole = (
           ...(xAxisStyle?.position ? { position: swapPosition(xAxisStyle.position) } : undefined),
         }
       : undefined,
+    ...(y2Axis && { y2Axis, y2AxisStyle }), // switch axes won't apply to y2(line-bar chart)
   };
 };
 
@@ -216,6 +222,19 @@ export const getSchemaByAxis = (
       return 'nominal';
     case VisFieldType.Date:
       return 'temporal';
+    default:
+      return 'unknown';
+  }
+};
+
+export const getAxisType = (axis?: VisColumn) => {
+  switch (axis?.schema) {
+    case VisFieldType.Numerical:
+      return 'value';
+    case VisFieldType.Categorical:
+      return 'category';
+    case VisFieldType.Date:
+      return 'time';
     default:
       return 'unknown';
   }
@@ -408,3 +427,131 @@ export function applyTimeRangeToEncoding(
     };
   }
 }
+
+/**
+ * Parses a date string or timestamp as a Date object
+ *
+ * Behavior:
+ * - Numbers: Treated as Unix timestamps and passed directly to Date constructor
+ * - Strings with timezone info (Z, +HH:MM, -HH:MM): Parsed directly as-is
+ * - Strings without timezone info: Treated as UTC by converting to ISO format and appending 'Z'
+ *
+ * @param input - Date string (with or without timezone) or Unix timestamp (number)
+ * @returns Date object
+ *
+ * @example
+ * parseUTCDate(1704067200000) // Unix timestamp -> Date object
+ * parseUTCDate("2025-12-10 00:00:00") // No timezone -> Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00") // No timezone -> Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00Z") // Already has timezone -> Parses directly
+ * parseUTCDate("2025-12-10T00:00:00+08:00") // Already has timezone -> Parses directly
+ */
+export function parseUTCDate(input: string | number): Date {
+  if (typeof input === 'number') {
+    return new Date(input);
+  }
+  // If already has timezone info (Z, +, or -), parse directly
+  if (input.includes('Z') || /[+-]\d{2}:\d{2}$/.test(input)) {
+    return new Date(input);
+  }
+
+  // Convert space to 'T' for ISO 8601 format and add 'Z' for UTC
+  const isoString = input.replace(' ', 'T') + 'Z';
+  return new Date(isoString);
+}
+
+export const getChartRender = () => {
+  try {
+    const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
+    return chartRender || 'echarts';
+  } catch (e) {
+    return 'echarts';
+  }
+};
+
+export const convertThresholds = (thresholds: Threshold[]) => {
+  return thresholds.map((t, i) => ({
+    min: t.value,
+    max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+
+    color: t.color,
+  }));
+};
+
+export const convertThresholdLineStyle = (style: ThresholdMode | undefined) => {
+  if (style === ThresholdMode.DotDashed) return 'dotted';
+  return style;
+};
+
+export const adjustOppositeSymbol = (switchAxes: boolean, symbol: string) => {
+  if (switchAxes) {
+    return symbol === 'x' ? 'y' : 'x';
+  }
+  return symbol;
+};
+
+export const generateThresholdSteps = (
+  thresholds: Threshold[] | undefined,
+  switchAxes?: boolean
+) => {
+  return thresholds?.map((t) => ({
+    [switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    itemStyle: { color: t.color },
+  }));
+};
+
+export const generateThresholdLines = (
+  thresholdOptions: ThresholdOptions,
+  switchAxes?: boolean
+) => {
+  if (thresholdOptions.thresholdStyle === ThresholdMode.Off) return {};
+
+  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds, switchAxes);
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data: ThresholdSteps,
+    },
+  };
+};
+
+// return a combined markline with threshold lines and time marker
+export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
+  const hasThresholds = thresholdOptions?.thresholdStyle !== ThresholdMode.Off;
+
+  if (!hasThresholds && !addTimeMarker) return {};
+
+  const data = [];
+
+  if (hasThresholds) {
+    const thresholdSteps = generateThresholdSteps(thresholdOptions?.thresholds) ?? [];
+    data.push(...thresholdSteps);
+  }
+
+  if (addTimeMarker) {
+    data.push({
+      xAxis: new Date(),
+      itemStyle: { color: 'red' },
+      lineStyle: { type: 'dashed' },
+      label: { formatter: new Date().toISOString(), align: 'right' },
+    });
+  }
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data,
+    },
+  };
+};

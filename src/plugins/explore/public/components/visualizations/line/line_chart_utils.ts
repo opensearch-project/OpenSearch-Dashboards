@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { LineSeriesOption } from 'echarts';
 import { LineChartStyle } from './line_vis_config';
-import { VisColumn, Positions, VisFieldType } from '../types';
+import { VisColumn, Positions, VisFieldType, StandardAxes } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 import { AreaChartStyle } from '../area/area_vis_config';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { composeMarkLine } from '../utils/utils';
+import { LineMode } from './line_vis_config';
+import { getSeriesDisplayName } from '../utils/series';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -177,28 +182,25 @@ export enum ValueAxisPosition {
  */
 
 // TODO move applyAxisStyling out line folder as it is also used in area
+// TODO: Refactor this function to be more generic
 export const applyAxisStyling = (
   baseAxis: any,
-  styles: LineChartStyle | AreaChartStyle,
+  styles: StandardAxes | undefined,
   axisType: 'category' | 'value',
   numericalColumns?: VisColumn[],
   categoricalColumns?: VisColumn[],
   dateColumns?: VisColumn[],
   axisIndex: ValueAxisPosition = ValueAxisPosition.Left
 ): any => {
-  if (!styles) return baseAxis;
-
   const isRule2 =
     numericalColumns?.length === 2 && dateColumns?.length === 1 && categoricalColumns?.length === 0;
 
   // Initialize the axis configuration
   const axisConfig = { ...baseAxis };
 
-  if (axisType === 'category' && styles.categoryAxes && styles.categoryAxes.length > 0) {
-    const categoryAxis = styles.categoryAxes[0];
-
+  if (axisType === 'category' && styles) {
     // If show is false, hide the entire axis
-    if (categoryAxis.show === false) {
+    if (styles.show === false) {
       return {
         ...axisConfig,
         title: null,
@@ -210,12 +212,12 @@ export const applyAxisStyling = (
     }
 
     // Apply category axis styling
-    axisConfig.title = categoryAxis.title?.text || axisConfig.title;
-    axisConfig.orient = categoryAxis.position || axisConfig.orient;
-    axisConfig.labelAngle = categoryAxis.labels?.rotate || 0;
-    axisConfig.labelLimit = categoryAxis.labels?.truncate || 100;
-    axisConfig.grid = categoryAxis?.grid?.showLines ?? false; // Explicitly check grid object
-    axisConfig.labels = categoryAxis.labels?.show;
+    axisConfig.title = styles.title?.text || axisConfig.title;
+    axisConfig.orient = styles.position || axisConfig.orient;
+    axisConfig.labelAngle = styles.labels?.rotate || 0;
+    axisConfig.labelLimit = styles.labels?.truncate || 100;
+    axisConfig.grid = styles?.grid?.showLines ?? false; // Explicitly check grid object
+    axisConfig.labels = styles.labels?.show;
     axisConfig.labelOverlap = 'greedy';
     axisConfig.labelFlush = false;
 
@@ -232,7 +234,7 @@ export const applyAxisStyling = (
     return axisConfig;
   } else if (axisType === 'value') {
     // Make sure we have the correct number of value axes for Rule 2
-    if (isRule2 && (!styles.valueAxes || styles.valueAxes.length < 2)) {
+    if (isRule2 && !styles) {
       // Return default configuration based on axis index
       if (axisIndex === 0) {
         return {
@@ -247,19 +249,16 @@ export const applyAxisStyling = (
       }
     }
 
-    // Use the value axis at the specified index
-    if (styles.valueAxes && styles.valueAxes.length > axisIndex) {
-      const valueAxis = styles.valueAxes[axisIndex];
-
+    if (styles) {
       // For Rule 2, ensure correct positioning
       const orient = isRule2
         ? axisIndex === 0
           ? Positions.LEFT
           : Positions.RIGHT
-        : valueAxis.position || baseAxis.orient;
+        : styles.position || baseAxis.orient;
 
       // If show is false, hide the entire axis
-      if (valueAxis.show === false) {
+      if (styles.show === false) {
         return {
           ...baseAxis,
           title: null,
@@ -272,16 +271,201 @@ export const applyAxisStyling = (
 
       return {
         ...baseAxis,
-        title: valueAxis.title?.text,
+        title: styles.title?.text,
         orient,
-        labelAngle: valueAxis.labels?.rotate || 0,
-        labelLimit: valueAxis.labels?.truncate || 100,
-        grid: valueAxis?.grid?.showLines ?? false, // Explicitly check grid object
-        labels: valueAxis.labels?.show !== false, // Show labels by default
+        labelAngle: styles.labels?.rotate || 0,
+        labelLimit: styles.labels?.truncate || 100,
+        grid: styles?.grid?.showLines ?? false, // Explicitly check grid object
+        labels: styles.labels?.show !== false, // Show labels by default
         labelOverlap: 'greedy',
       };
     }
   }
 
   return baseAxis;
+};
+
+const getLineInterpolation = (lineMode: LineMode) => {
+  switch (lineMode) {
+    case 'straight':
+      return {};
+    case 'smooth':
+      return {
+        smooth: true,
+      };
+    case 'stepped':
+      return {
+        step: true,
+      };
+  }
+};
+
+const generateLineStyles = (styles: LineChartStyle) => {
+  const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
+  return {
+    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
+    lineStyle: {
+      width: lineWidth,
+    },
+    ...getLineInterpolation(styles.lineMode),
+  };
+};
+
+export const createLineSeries = <T extends BaseChartStyle>({
+  styles,
+  seriesFields,
+  categoryField,
+  addTimeMarker = true,
+}: {
+  styles: LineChartStyle;
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+  categoryField: string;
+  addTimeMarker?: boolean;
+}): PipelineFn<T> => (state) => {
+  const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
+  const newState = { ...state };
+  const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
+
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(transformedData[0]);
+  }
+
+  if (usedTimeMarker) {
+    {
+      // manully extend xAxis range
+      const newxAxisConfig = { ...xAxisConfig };
+      newxAxisConfig.max = new Date();
+      newState.xAxisConfig = newxAxisConfig;
+    }
+  }
+
+  const series = seriesFields?.map((item: string) => {
+    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+
+    return {
+      name,
+      type: 'line',
+      connectNulls: true,
+      encode: {
+        x: categoryField,
+        y: item,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+      ...generateLineStyles(styles),
+      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+    };
+  });
+
+  newState.series = series as LineSeriesOption[];
+
+  return newState;
+};
+
+export const createLineBarSeries = <T extends BaseChartStyle>({
+  styles,
+  valueField,
+  value2Field,
+  categoryField,
+}: {
+  styles: LineChartStyle;
+  valueField: VisColumn;
+  value2Field: VisColumn;
+  categoryField: string;
+}): PipelineFn<T> => (state) => {
+  const { xAxisConfig, yAxisConfig } = state;
+  const newState = { ...state };
+
+  if (styles.addTimeMarker) {
+    {
+      // manully extend xAxis range
+      const newxAxisConfig = { ...xAxisConfig };
+      newxAxisConfig.max = new Date();
+      newState.xAxisConfig = newxAxisConfig;
+    }
+  }
+
+  const series = [
+    {
+      type: 'line',
+      name: valueField?.name,
+      ...generateLineStyles(styles),
+      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+      yAxisIndex: 0,
+      encode: {
+        x: categoryField,
+        y: valueField.column,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+    },
+    {
+      type: 'bar',
+      name: value2Field?.name,
+      yAxisIndex: 1,
+      encode: {
+        x: categoryField,
+        y: value2Field.column,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+    },
+  ];
+
+  newState.series = series as LineSeriesOption[];
+
+  return newState;
+};
+
+export const createFacetLineSeries = <T extends BaseChartStyle>({
+  styles,
+  seriesFields,
+  categoryField,
+}: {
+  styles: LineChartStyle;
+  seriesFields: (headers?: string[]) => string[];
+  categoryField: string;
+}): PipelineFn<T> => (state) => {
+  const { xAxisConfig, transformedData } = state;
+
+  const newState = { ...state };
+
+  if (styles.addTimeMarker) {
+    const newxAxisConfig = [...xAxisConfig];
+    transformedData?.map((_: any[], index: number) => {
+      newxAxisConfig[index].max = new Date();
+    });
+
+    newState.xAxisConfig = newxAxisConfig;
+  }
+
+  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
+    const header = seriesData[0];
+    const cateColumns = seriesFields(header);
+    return cateColumns.map((item: string) => ({
+      name: String(item),
+      type: 'line',
+      connectNulls: true,
+      encode: {
+        x: categoryField,
+        y: item,
+      },
+      datasetIndex: index,
+      gridIndex: index,
+      xAxisIndex: index,
+      yAxisIndex: index,
+      emphasis: {
+        focus: 'self',
+      },
+      ...generateLineStyles(styles),
+      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+    }));
+  });
+
+  newState.series = allSeries?.flat() as LineSeriesOption[];
+
+  return newState;
 };

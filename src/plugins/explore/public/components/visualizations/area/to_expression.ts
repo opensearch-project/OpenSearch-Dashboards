@@ -4,13 +4,48 @@
  */
 
 import { AreaChartStyle } from './area_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import {
+  VisColumn,
+  VEGASCHEMA,
+  AxisColumnMappings,
+  AxisRole,
+  TimeUnit,
+  AggregationType,
+} from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { applyTimeRangeToEncoding, getTooltipFormat } from '../utils/utils';
+import {
+  applyTimeRangeToEncoding,
+  getSwappedAxisRole,
+  getTooltipFormat,
+  getChartRender,
+} from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+  applyTimeRange,
+} from '../utils/echarts_spec';
+import {
+  createAreaSeries,
+  createFacetAreaSeries,
+  createCategoryAreaSeries,
+  createStackAreaSeries,
+  replaceNullWithZero,
+} from './area_chart_utils';
+import {
+  convertTo2DArray,
+  transform,
+  sortByTime,
+  pivot,
+  facetTransform,
+  aggregate,
+} from '../utils/data_transformation';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -28,13 +63,45 @@ export const createSimpleAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const metricField = yAxisColumn?.column;
-  const dateField = xAxisColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !timeField) throw Error('Missing axis config for area chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
+      buildAxisConfigs,
+      applyTimeRange,
+      createAreaSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: [valueField],
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
+
+  // Using getSwappedAxisRole here but area chart doesn't have switchAxes config for now
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
+
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
@@ -56,7 +123,7 @@ export const createSimpleAreaChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           [],
@@ -66,7 +133,14 @@ export const createSimpleAreaChart = (
       y: {
         field: metricField,
         type: 'quantitative',
-        axis: applyAxisStyling({ title: '' }, styles, 'value', numericalColumns, [], dateColumns),
+        axis: applyAxisStyling(
+          { title: '' },
+          yAxisStyle,
+          'value',
+          numericalColumns,
+          [],
+          dateColumns
+        ),
       },
       ...(showTooltip && {
         tooltip: [
@@ -154,15 +228,63 @@ export const createMultiAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    if (!timeField || !valueField || !colorField) {
+      throw Error('Missing axis config or color field for multi area chart');
+    }
+    const result = pipe(
+      transform(
+        sortByTime(timeField),
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+          timeUnit: TimeUnit.SECOND,
+          aggregationType: AggregationType.SUM,
+        }),
+        (data) => replaceNullWithZero(data, [timeField]),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      applyTimeRange,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      createStackAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
+
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
 
-  const metricField = yAxisColumn?.column;
-  const dateField = xAxisColumn?.column;
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
   const categoryField = colorColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
@@ -185,7 +307,7 @@ export const createMultiAreaChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -197,7 +319,7 @@ export const createMultiAreaChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: '' },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,
@@ -291,6 +413,8 @@ export const createMultiAreaChart = (
  * @param dateColumns The date columns
  * @param styles The style options
  * @returns The Vega spec for a faceted multi-area chart
+ *
+ * TODO: Improve chart styling and visual layout for better appearance
  */
 export const createFacetedMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
@@ -301,17 +425,68 @@ export const createFacetedMultiAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
-  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
+    if (!timeField || !valueField || !colorField || !facetColumn) {
+      throw Error('Missing axis config for facet area chart');
+    }
+
+    const result = pipe(
+      facetTransform(
+        facetColumn,
+        sortByTime(timeField),
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+          timeUnit: TimeUnit.SECOND,
+          aggregationType: AggregationType.SUM,
+        }),
+        (data) => replaceNullWithZero(data, [timeField]),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      applyTimeRange,
+      createFacetAreaSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
+
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
 
-  const metricField = yAxisMapping?.column;
-  const dateField = xAxisMapping?.column;
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
@@ -328,7 +503,7 @@ export const createFacetedMultiAreaChart = (
           labelAngle: -45,
           labelSeparation: 8,
         },
-        styles,
+        xAxisStyle,
         'category',
         numericalColumns,
         categoricalColumns,
@@ -340,7 +515,7 @@ export const createFacetedMultiAreaChart = (
       type: 'quantitative',
       axis: applyAxisStyling(
         { title: '' },
-        styles,
+        yAxisStyle,
         'value',
         numericalColumns,
         categoricalColumns,
@@ -475,20 +650,52 @@ export const createCategoryAreaChart = (
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
-    throw new Error(
-      'Category area chart requires at least one numerical column and one categorical column'
-    );
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const categoryField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !categoryField) throw Error('Missing axis config for area chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          aggregationType: AggregationType.SUM,
+        }),
+        convertTo2DArray(allColumns)
+      ),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
+        legend: { show: false },
+      }),
+      buildAxisConfigs,
+      createCategoryAreaSeries({
+        styles,
+        categoryField,
+        valueField,
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
   }
 
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const metricField = yAxisColumn?.column;
-  const categoryField = xAxisColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+  const metricField = yAxis?.column;
+  const categoryField = xAxis?.column;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const categoryName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
@@ -509,7 +716,7 @@ export const createCategoryAreaChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -521,7 +728,7 @@ export const createCategoryAreaChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: '' },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,
@@ -588,15 +795,59 @@ export const createStackedAreaChart = (
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
-  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
-  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+  if (getChartRender() === 'echarts') {
+    // Extract field mappings directly from axisColumnMappings
+    const xAxis = axisColumnMappings?.[AxisRole.X];
+    const yAxis = axisColumnMappings?.[AxisRole.Y];
+    const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorMapping?.column;
 
-  const metricField = yAxisMapping?.column;
-  const categoryField1 = xAxisMapping?.column; // X-axis (categories)
+    if (!xAxis || !yAxis || !colorField) {
+      throw Error('Missing axis config or color field for stacked area chart');
+    }
+
+    const categoryField = xAxis.column;
+    const valueField = yAxis.column;
+
+    const result = pipe(
+      transform(
+        pivot({
+          groupBy: categoryField,
+          pivot: colorField,
+          field: valueField,
+          aggregationType: AggregationType.SUM,
+        }),
+        (data) => replaceNullWithZero(data, [categoryField]),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      }),
+      createStackAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig: { xAxis, yAxis },
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const categoryField1 = xAxis?.column; // X-axis (categories)
   const categoryField2 = colorMapping?.column; // Color (stacking)
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
-  const categoryName1 = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const categoryName1 = xAxisStyle?.title?.text || xAxis?.name;
   const categoryName2 = colorMapping?.name;
   const layers = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
@@ -617,7 +868,7 @@ export const createStackedAreaChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -629,7 +880,7 @@ export const createStackedAreaChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: '' },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,

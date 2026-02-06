@@ -55,6 +55,9 @@ export class ChatService {
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
 
+  // Cache for datasourceId to avoid repeated lookups
+  private cachedDataSourceId?: string;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
@@ -102,7 +105,7 @@ export class ChatService {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  private generateMessageId(): string {
+  public generateMessageId(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
@@ -250,7 +253,7 @@ export class ChatService {
     // If ChatWindow is available, delegate to its sendMessage for proper timeline management
     if (this.chatWindowRef?.current && this.isWindowOpen()) {
       try {
-        await this.chatWindowRef.current.sendMessage({ content });
+        await this.chatWindowRef.current.sendMessage({ content, messages });
 
         // Create a user message for consistency with the return type
         const userMessage: UserMessage = {
@@ -315,6 +318,7 @@ export class ChatService {
 
       const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
       if (pageDataSourceId) {
+        this.cachedDataSourceId = pageDataSourceId;
         return pageDataSourceId;
       }
 
@@ -343,12 +347,21 @@ export class ChatService {
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
 
+      this.cachedDataSourceId = dataSourceId || undefined;
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Failed to determine data source, proceeding without:', error);
       return undefined; // Graceful fallback - undefined means local cluster
     }
+  }
+
+  /**
+   * Get the current cached data source ID
+   * Returns the datasourceId that was last retrieved
+   */
+  public async getCurrentDataSourceId(): Promise<string | undefined> {
+    return this.cachedDataSourceId || (await this.getWorkspaceAwareDataSourceId());
   }
 
   public async sendMessage(
@@ -361,11 +374,31 @@ export class ChatService {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
-    const userMessage: UserMessage = {
-      id: this.generateMessageId(),
-      role: 'user',
-      content: content.trim(),
-    };
+
+    // Check if the last message in the array is a user message with array content
+    // If so, append the text to the existing content array (for multimodal messages)
+    let userMessage: UserMessage;
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+    const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
+
+    if (hasArrayContent && lastMessage) {
+      // Remove the last message from the array since we'll merge it with the new message
+      messages = messages.slice(0, -1);
+
+      // Append text to the existing content array (preserves order from caller)
+      userMessage = {
+        ...lastMessage,
+        id: this.generateMessageId(),
+        content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
+      };
+    } else {
+      // No array content, create a simple text message
+      userMessage = {
+        id: this.generateMessageId(),
+        role: 'user',
+        content: content.trim(),
+      };
+    }
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getWorkspaceAwareDataSourceId();

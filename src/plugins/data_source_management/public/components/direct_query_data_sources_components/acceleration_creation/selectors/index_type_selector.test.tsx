@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { IndexTypeSelector } from './index_type_selector';
 import { EuiSuperSelect, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import {

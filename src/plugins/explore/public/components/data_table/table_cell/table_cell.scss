@@ -10,7 +10,8 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
 }
 
 .explore-table td.exploreDocTableCell__toggleDetails {
-  padding: 4px 0 0 4px;
+  padding: 0 0 0 4px;
+  vertical-align: middle;
   z-index: 3;
 }
 
@@ -21,42 +22,11 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
    */
 
 .exploreDocTableCell {
-  position: relative;
-
   &__filter {
-    position: absolute;
     display: flex;
-    flex-grow: 0;
-
-    // Vertically align the button group with the first line of text
-    // 8px is set by .table and 2em is the line-height
-    top: calc(2em / 2 + $osdDocTableCellPadding);
-    transform: translateY(-50%);
-
-    // Stick it to the right but use the padding of the container to distance it from the edge (below)
-    right: 0;
-
-    // Just to have some distance from the content behind it; larger for left so we can show a gradiant
-    // 8px is set by .table
-    padding: $euiSizeS - 1px, $euiSizeS;
-    margin-top: 1px;
-
-    &::before {
-      content: "";
-      position: absolute;
-      display: block;
-      right: 0;
-      top: 0;
-      height: 100%;
-      width: 100%;
-      background-image: linear-gradient(to right, transparent 0, $euiColorEmptyShade 16px);
-      z-index: 1;
-    }
-
-    & > * {
-      // So they will appear over the background in ::before
-      z-index: 2;
-    }
+    flex-shrink: 0;
+    align-items: center;
+    padding-left: $euiSizeXS;
   }
 
   &__filterButton,
@@ -76,10 +46,6 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
     opacity: 1;
   }
 
-  .exploreDescriptionListFieldTitle {
-    margin: 0 4px 0 0 !important;
-  }
-
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   &.eui-textNoWrap {
     // To make sure the time-series column never stretches
@@ -90,12 +56,13 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
 // nested for specificity
 .explore-table {
   .exploreDocTableCell {
-    padding: $euiSizeS;
+    padding: $ouiSizeXXS;
+    vertical-align: middle;
   }
 }
 
 .exploreDocTableCell__source {
-  .truncate-by-height {
+  .exploreDocTableCell__content {
     margin-top: -1.5px;
     margin-bottom: -3.5px;
   }
@@ -104,14 +71,5 @@ $osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium 
   dl,
   dt {
     font-size: inherit !important;
-  }
-}
-
-.exploreDocTableCell__dataField {
-  white-space: pre-wrap;
-
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .eui-textNoWrap & {
-    white-space: nowrap;
   }
 }

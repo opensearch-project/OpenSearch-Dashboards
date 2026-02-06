@@ -18,16 +18,27 @@ import type {
 } from '../../common/events';
 import type { Message, AssistantMessage, ToolMessage } from '../../common/types';
 
+const mockGetCurrentState = jest.fn().mockReturnValue({
+  actions: new Map(), // Empty map means no actions have requiresConfirmation flag
+});
+
 // Mock dependencies
 const mockAssistantActionService = ({
   updateToolCallState: jest.fn(),
   executeAction: jest.fn(),
   hasAction: jest.fn().mockReturnValue(true),
+  getCurrentState: mockGetCurrentState,
+  isUserConfirmRequired: jest.fn().mockReturnValue(false),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
   sendToolResult: jest.fn(),
+  getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
 } as unknown) as jest.Mocked<ChatService>;
+
+const mockConfirmationService = {
+  requestConfirmation: jest.fn().mockResolvedValue({ approved: true }),
+};
 
 describe('ChatEventHandler', () => {
   let chatEventHandler: ChatEventHandler;
@@ -38,6 +49,12 @@ describe('ChatEventHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Reset hasAction to return true by default
+    mockAssistantActionService.hasAction = jest.fn().mockReturnValue(true);
+
+    // Reset confirmationService to approve by default
+    mockConfirmationService.requestConfirmation = jest.fn().mockResolvedValue({ approved: true });
 
     timeline = [];
     mockOnTimelineUpdate = jest.fn((updater) => {
@@ -51,7 +68,8 @@ describe('ChatEventHandler', () => {
       mockChatService,
       mockOnTimelineUpdate,
       mockOnStreamingStateChange,
-      mockGetTimeline
+      mockGetTimeline,
+      mockConfirmationService
     );
   });
 
@@ -361,6 +379,90 @@ describe('ChatEventHandler', () => {
       const toolMessage = timeline.find((msg) => msg.role === 'tool') as ToolMessage;
       expect(toolMessage.content).toBe('First part\nSecond part');
     });
+
+    it('should attach tool call to last assistant message when it appears after last user message', async () => {
+      const assistantMessageId = 'assistant-msg-123';
+      const toolCallId = 'tool-456';
+
+      // Set up timeline: user message, then assistant message
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: assistantMessageId,
+      } as TextMessageStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_END,
+        messageId: assistantMessageId,
+      } as TextMessageEndEvent);
+
+      // Add a user message to timeline manually
+      timeline.unshift({
+        id: 'user-msg-001',
+        role: 'user',
+        content: 'Hello',
+      });
+
+      // Now trigger tool call without parentMessageId
+      // The last assistant message (assistantMessageId) appears AFTER the user message in timeline
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+        // No parentMessageId - should use selection strategy
+      } as ToolCallStartEvent);
+
+      // Tool call should be attached to the existing assistant message
+      const assistantMessage = timeline.find(
+        (msg) => msg.id === assistantMessageId
+      ) as AssistantMessage;
+      expect(assistantMessage).toBeDefined();
+      expect(assistantMessage.toolCalls).toHaveLength(1);
+      expect(assistantMessage.toolCalls![0].id).toBe(toolCallId);
+    });
+
+    it('should create fake assistant message when user message appears after last assistant message', async () => {
+      const assistantMessageId = 'assistant-msg-123';
+      const toolCallId = 'tool-456';
+
+      // Set up timeline: assistant message, then user message
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: assistantMessageId,
+      } as TextMessageStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_END,
+        messageId: assistantMessageId,
+      } as TextMessageEndEvent);
+
+      // Add a user message AFTER the assistant message
+      timeline.push({
+        id: 'user-msg-002',
+        role: 'user',
+        content: 'Another question',
+      });
+
+      const initialTimelineLength = timeline.length;
+
+      // Trigger tool call without parentMessageId
+      // The last user message appears AFTER the assistant message, so a new fake message should be created
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+        // No parentMessageId - should create fake assistant message
+      } as ToolCallStartEvent);
+
+      // Should have created a new fake assistant message
+      expect(timeline.length).toBe(initialTimelineLength + 1);
+
+      // The new message should be an assistant message with the tool call
+      const fakeAssistantMessage = timeline[timeline.length - 1] as AssistantMessage;
+      expect(fakeAssistantMessage.role).toBe('assistant');
+      expect(fakeAssistantMessage.id).toMatch(/^fake-assistant-message-/);
+      expect(fakeAssistantMessage.toolCalls).toHaveLength(1);
+      expect(fakeAssistantMessage.toolCalls![0].id).toBe(toolCallId);
+    });
   });
 
   describe('run state handling', () => {
@@ -424,6 +526,114 @@ describe('ChatEventHandler', () => {
 
       // The timeline should have been updated twice: once for TEXT_MESSAGE_START and once for TOOL_CALL_START
       expect(mockOnTimelineUpdate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('user confirmation handling', () => {
+    beforeEach(() => {
+      mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(true);
+    });
+
+    it('should handle user rejection of tool execution', async () => {
+      const toolCallId = 'tool-123';
+      const mockRejectedResult = {
+        success: false,
+        error: 'User rejected the tool execution',
+        userRejected: true,
+        data: {
+          message: 'The user chose not to proceed with this action.',
+          toolName: 'test_action',
+          args: { param: 'value' },
+        },
+      };
+
+      mockConfirmationService.requestConfirmation = jest
+        .fn()
+        .mockResolvedValue({ approved: false });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{"param": "value"}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Should update state to failed
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
+        status: 'failed',
+      });
+
+      // Should send rejection back to assistant
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        mockRejectedResult,
+        expect.any(Array)
+      );
+    });
+
+    it('should handle user approval of tool execution', async () => {
+      const toolCallId = 'tool-123';
+      const mockApprovedResult = { success: true, data: 'Action executed successfully' };
+
+      // Mock tool executor to return successful result (no userRejected flag)
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockApprovedResult);
+
+      // Mock sendToolResult
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockApprovedResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{"param": "value"}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Should update state to complete
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
+        status: 'complete',
+        result: mockApprovedResult,
+      });
+
+      // Should send result back to assistant
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        mockApprovedResult,
+        expect.any(Array)
+      );
     });
   });
 

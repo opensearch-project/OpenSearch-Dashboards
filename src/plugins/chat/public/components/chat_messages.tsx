@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useEffect, useMemo } from 'react';
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
@@ -12,8 +12,6 @@ import { ErrorRow } from './error_row';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
-
-type TimelineItem = Message;
 
 /**
  * Determine tool status based on tool call and result
@@ -27,11 +25,42 @@ function getToolStatus(
   return 'completed';
 }
 
+interface SuggestionItem {
+  icon: string;
+  iconColor?: string;
+  text: string;
+  prompt: string;
+}
+
+const STARTER_SUGGESTIONS: SuggestionItem[] = [
+  {
+    icon: 'search',
+    iconColor: 'primary',
+    text: 'Ask questions about your data',
+    prompt: 'What indices do I have?',
+  },
+  {
+    icon: 'notebookApp',
+    iconColor: 'danger',
+    text: '/investigate an issue',
+    prompt: '/investigate ',
+  },
+  {
+    icon: 'help',
+    iconColor: 'warning',
+    text: 'Explain a concept',
+    prompt: 'Explain [concept or feature] in OpenSearch Dashboards',
+  },
+];
+
 interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
   timeline: Message[];
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
+  onApproveConfirmation?: () => void;
+  onRejectConfirmation?: () => void;
+  onFillInput?: (content: string) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -39,8 +68,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   timeline,
   isStreaming,
   onResendMessage,
+  onApproveConfirmation,
+  onRejectConfirmation,
+  onFillInput,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 
@@ -81,10 +114,38 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       <div className={`chatMessages chatMessages--${layoutMode}`}>
         {timeline.length === 0 && !isStreaming && (
           <div className="chatMessages__emptyState">
-            <EuiIcon type="generate" size="xl" />
-            <EuiText color="subdued" size="s">
-              <p>Start a conversation with your AI assistant</p>
-            </EuiText>
+            <div className="chatMessages__emptyStateHeader">
+              <EuiIcon type="generate" size="xxl" />
+              <EuiText>
+                <h2>Hi, I&apos;m your AI Assistant</h2>
+              </EuiText>
+              <EuiText color="subdued" size="s">
+                <p>I can help you explore data, investigate issue, and more.</p>
+                <p>Here are some things I can do:</p>
+              </EuiText>
+            </div>
+            <div className="chatMessages__suggestions">
+              {STARTER_SUGGESTIONS.map((suggestion, index) => (
+                <EuiPanel
+                  key={index}
+                  paddingSize="m"
+                  hasBorder
+                  className="chatMessages__suggestionCard"
+                  onClick={() => onFillInput?.(suggestion.prompt)}
+                >
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={suggestion.icon} color={suggestion.iconColor} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <span>{suggestion.text}</span>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              ))}
+            </div>
           </div>
         )}
 
@@ -96,13 +157,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
+            const isLoadingMessage = message.id.startsWith('loading-');
             const isEmptyAndStreaming =
               !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
 
             return (
               <div key={message.id}>
-                {/* Show thinking indicator for empty streaming messages */}
-                {isEmptyAndStreaming && (
+                {/* Show loading indicator for loading messages or empty streaming messages */}
+                {(isLoadingMessage || isEmptyAndStreaming) && (
                   <div className="messageRow">
                     <div className="messageRow__icon">
                       <EuiIcon type="console" size="m" color="success" />
@@ -114,36 +176,40 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                 )}
 
                 {/* Assistant message content */}
-                {assistantMsg.content && assistantMsg.content.trim() && (
+                {!isLoadingMessage && assistantMsg.content && assistantMsg.content.trim() && (
                   <MessageRow message={assistantMsg} />
                 )}
 
-                {suggestionsEnabled && lastAssistantMessageIndex === index && (
+                {!isLoadingMessage && suggestionsEnabled && lastAssistantMessageIndex === index && (
                   <ChatSuggestions messages={timeline} currentMessage={message} />
                 )}
 
                 {/* Tool calls below the message */}
-                {assistantMsg.toolCalls?.map((toolCall) => {
-                  // Find corresponding tool result
-                  const toolResult = timeline.find(
-                    (m): m is ToolMessage =>
-                      m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
-                  );
+                {!isLoadingMessage &&
+                  assistantMsg.toolCalls?.map((toolCall) => {
+                    // Find corresponding tool result
+                    const toolResult = timeline.find(
+                      (m): m is ToolMessage =>
+                        m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
+                    );
 
-                  return (
-                    <ToolCallRow
-                      key={toolCall.id}
-                      toolCall={{
-                        type: 'tool_call',
-                        id: toolCall.id,
-                        toolName: toolCall.function.name,
-                        status: getToolStatus(toolCall, toolResult),
-                        result: toolResult?.content,
-                        timestamp: Date.now(), // Not used in display
-                      }}
-                    />
-                  );
-                })}
+                    return (
+                      <ToolCallRow
+                        key={toolCall.id}
+                        onApprove={onApproveConfirmation}
+                        onReject={onRejectConfirmation}
+                        toolCall={{
+                          type: 'tool_call',
+                          id: toolCall.id,
+                          toolName: toolCall.function.name,
+                          status: getToolStatus(toolCall, toolResult),
+                          arguments: toolCall.function.arguments,
+                          result: toolResult?.content,
+                          timestamp: Date.now(), // Not used in display
+                        }}
+                      />
+                    );
+                  })}
               </div>
             );
           }

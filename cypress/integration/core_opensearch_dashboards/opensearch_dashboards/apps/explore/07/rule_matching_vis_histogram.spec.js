@@ -3,24 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/apps/explore/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/apps/constants';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/explore/shared';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runCreateVisTests = () => {
   describe('create histogram visualization tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
@@ -43,7 +55,7 @@ export const runCreateVisTests = () => {
         shouldManualSelectChartType: true,
       });
       cy.getElementByTestId('field-x').contains('response_time');
-      cy.get('canvas.marks').should('be.visible');
+      cy.get('.exploreVisContainer canvas').should('be.visible');
     });
 
     it('should change style options and the changes reflect immediately to the histogram visualization', () => {
@@ -53,7 +65,7 @@ export const runCreateVisTests = () => {
       });
 
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -62,7 +74,7 @@ export const runCreateVisTests = () => {
       // Use threshold color to update the histogram
       cy.getElementByTestId('useThresholdColorButton').click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
         beforeCanvasDataUrl = afterCanvasDataUrl;
@@ -71,7 +83,7 @@ export const runCreateVisTests = () => {
       // Change bucket count should update the histogram
       cy.contains('label', 'Bucket Count').click().type('10');
       cy.wait(1000);
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
         beforeCanvasDataUrl = afterCanvasDataUrl;
@@ -80,7 +92,7 @@ export const runCreateVisTests = () => {
       // Change bucket size should update the histogram
       cy.contains('label', 'Bucket Size').click().type('0.2');
       cy.wait(1000);
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
         beforeCanvasDataUrl = afterCanvasDataUrl;

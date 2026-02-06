@@ -1,0 +1,2 @@
+fix:
+- Remove no need global variables ch in mocha ([#11285](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11285))

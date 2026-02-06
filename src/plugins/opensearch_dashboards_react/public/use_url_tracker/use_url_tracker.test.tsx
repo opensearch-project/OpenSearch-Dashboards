@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useUrlTracker } from './use_url_tracker';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createMemoryHistory } from 'history';

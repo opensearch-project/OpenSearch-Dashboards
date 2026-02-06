@@ -29,34 +29,87 @@
  */
 
 import Path from 'path';
-
-import { stringifyRequest } from 'loader-utils';
-import webpack from 'webpack';
-// @ts-expect-error
-import TerserPlugin from 'terser-webpack-plugin';
-// @ts-expect-error
-import webpackMerge from 'webpack-merge';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import { rspack, Configuration } from '@rspack/core';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
+import { getSwcLoaderConfig } from '@osd/utils';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
+import browserslist from 'browserslist';
+import * as sass from 'sass-embedded';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
-import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { STATS_WARNINGS_FILTER } from './webpack_helpers';
+import { BundleDepsCheckPlugin } from './bundle_deps_check_plugin';
 
-const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
+const compilers: sass.AsyncCompiler[] = [];
+let index = 0;
+let initPromise: Promise<void> | undefined;
+
+async function ensureSassCompilers() {
+  if (compilers.length > 0) return;
+  initPromise ??= (async () => {
+    compilers.push(
+      ...(await Promise.all([
+        sass.initAsyncCompiler(),
+        sass.initAsyncCompiler(),
+        sass.initAsyncCompiler(),
+      ]))
+    );
+  })();
+  await initPromise;
+}
+
+export const sassCompiler = {
+  ...sass,
+  compileStringAsync: async (data: string, options: sass.StringOptions<'async'>) => {
+    await ensureSassCompilers();
+    const compiler = compilers[index++ % compilers.length];
+    return compiler.compileStringAsync(data, options);
+  },
+  dispose: () => {
+    // Dispose of all SASS compilers to allow the process to exit cleanly
+    compilers.forEach((compiler) => compiler.dispose());
+    compilers.length = 0;
+    initPromise = undefined;
+  },
+};
 
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+  const targets = browserslist.loadConfig({ path: worker.repoRoot });
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
+  const resolveOptions = {
+    extensions: ['.js', '.ts', '.tsx', '.json'],
+    mainFields: ['browser', 'module', 'main'],
+    alias: {
+      core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+      'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
+    },
+  };
+  const virtualFiles: Record<string, string> = {};
+  const resolver = new rspack.experiments.resolver.ResolverFactory(resolveOptions);
 
-  const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
+  bundleRefs
+    .getRefs()
+    .filter((ref) => ref.bundleId !== bundle.id)
+    .forEach((ref) => {
+      const { path: resolvedPath } = resolver.sync(ref.contextDir, `./${ref.entry}`);
+      if (resolvedPath) {
+        if (!virtualFiles[resolvedPath]) {
+          const contents = `module.exports = __osdBundles__.get('${ref.exportId}')`;
+          virtualFiles[resolvedPath] = contents;
+        }
+      }
+    });
+
+  const commonConfig: Configuration = {
+    mode: worker.dist ? 'production' : 'development',
     context: Path.normalize(bundle.contextDir),
     cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    devtool: worker.dist ? false : 'cheap-module-source-map',
     profile: worker.profileWebpack,
 
     output: {
@@ -68,20 +121,53 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      hashFunction: 'Xxh64',
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
+      hashFunction: 'xxhash64',
+      clean: true,
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      emitOnErrors: false,
+      chunkIds: 'natural',
+      minimizer: [
+        new rspack.SwcJsMinimizerRspackPlugin({
+          extractComments: false,
+          minimizerOptions: {
+            compress: false,
+            mangle: false,
+          },
+        }),
+        new rspack.LightningCssMinimizerRspackPlugin(),
+      ],
     },
 
     externals: [UiSharedDeps.externals],
 
     plugins: [
-      new CleanWebpackPlugin(),
-      new BundleRefsPlugin(bundle, bundleRefs),
-      ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
+      new BundleDepsCheckPlugin(bundle, bundleRefs),
+      new NodePolyfillPlugin({ additionalAliases: ['process'] }),
+      new rspack.DefinePlugin({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'process.env.IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE': JSON.stringify(
+          worker.dist ? 'true' : 'false'
+        ),
+      }),
+      new rspack.experiments.VirtualModulesPlugin(virtualFiles),
+      ...(bundle.banner ? [new rspack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
+      ...(worker.dist
+        ? [
+            new CompressionPlugin({
+              algorithm: 'brotliCompress',
+              filename: '[path][base].br',
+              test: /\.(js|css)$/,
+            }),
+            new CompressionPlugin({
+              algorithm: 'gzip',
+              filename: '[path][base].gz',
+              test: /\.(js|css)$/,
+            }),
+          ]
+        : []),
     ],
 
     module: {
@@ -124,6 +210,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.css$/,
           include: /node_modules/,
+          type: 'javascript/auto',
           use: [
             {
               loader: 'style-loader',
@@ -151,12 +238,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               use: [
                 {
                   loader: 'style-loader',
+                  type: 'javascript/auto',
                 },
                 {
                   loader: 'css-loader',
                   options: {
                     sourceMap: !worker.dist,
                   },
+                  type: 'javascript/auto',
                 },
                 {
                   loader: 'postcss-loader',
@@ -166,6 +255,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                       config: require.resolve('@osd/optimizer/postcss.config.js'),
                     },
                   },
+                  type: 'css',
                 },
                 {
                   loader: 'comment-stripper',
@@ -175,22 +265,27 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 },
                 {
                   loader: 'sass-loader',
+                  type: 'css',
                   options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
-                        )
-                      )};\n${content}`;
+                    additionalData(content: string) {
+                      const additional = `@import '${Path.resolve(
+                        worker.repoRoot,
+                        `src/core/public/core_app/styles/_globals_${theme}.scss`
+                      ).replace(/\\/g, '/')}';`;
+                      return `${additional}\n${content}`;
                     },
+                    api: 'modern',
                     webpackImporter: false,
-                    implementation: require('sass-embedded'),
+                    implementation: sassCompiler,
                     sassOptions: {
-                      outputStyle: 'compressed',
-                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                      sourceMap: !worker.dist,
+                      style: worker.dist ? 'compressed' : 'expanded',
+                      quietDeps: true,
+                      loadPaths: [
+                        Path.resolve(worker.repoRoot, 'node_modules'),
+                        Path.resolve(worker.repoRoot),
+                      ],
+                      silenceDeprecations: ['import', 'global-builtin', 'color-functions'],
                     },
                   },
                 },
@@ -207,64 +302,41 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-          },
+          type: 'asset',
         },
         {
-          test: /\.(js|tsx?)$/,
+          test: /\.(j|t)sx?$/,
           exclude: [
-            /* vega-lite and some of its dependencies don't have es5 builds
+            /* vega-lite, reactflow and some of its dependencies don't have es5 builds
              * so we need to build from source and transpile for webpack v4
+             * kbn-handlebars uses modern syntax (nullish coalescing) that needs transpilation
              */
-            /[\/\\]node_modules[\/\\](?!vega(-lite|-label|-functions|-scenegraph)?[\/\\])/,
+            /[\/\\]node_modules[\/\\](?!(vega(-lite|-label|-functions|-scenegraph)?|kbn-handlebars|@?reactflow)[\/\\])/,
 
             // Don't attempt to look into release artifacts of the plugins
             /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
 
-            // exclude stories
-            /\.stories\.(js|jsx|ts|tsx)$/,
+            // exclude core-js
+            /node_modules[\\/]core-js/,
           ],
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET_PATH],
-            },
-          },
+          use: getSwcLoaderConfig({ syntax: 'typescript', jsx: true, targets }),
         },
         {
-          test: /\.js$/,
-          /* reactflow and some of its dependencies don't have es5 builds
-           * so we need to build from source and transpile for webpack v4
-           */
-          include: /node_modules[\\/]@?reactflow/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET_PATH],
-            },
+          test: /\.m?js$/,
+          resolve: {
+            // This allows Rspack to resolve ES modules without the .js/.mjs extension
+            fullySpecified: false,
           },
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          type: 'asset/source',
         },
         {
           test: /\.cjs$/,
           include: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: [BABEL_PRESET_PATH],
-            },
-          },
+          exclude: [/node_modules[\\/]core-js/],
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
         },
         {
           test: /\.m?js$/,
@@ -274,30 +346,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             /node_modules[\\/]fast-png/,
             /node_modules[\\/]iobuffer/,
           ],
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: [BABEL_PRESET_PATH],
-              plugins: [
-                '@babel/plugin-transform-class-properties',
-                '@babel/plugin-transform-class-static-block',
-                '@babel/plugin-transform-private-methods',
-                '@babel/plugin-transform-private-property-in-object',
-              ],
-            },
-          },
+          exclude: [/node_modules[\\/]core-js/],
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
         },
       ],
     },
 
-    resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
-      alias: {
-        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
-        'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
-      },
-    },
+    resolve: resolveOptions,
 
     performance: {
       // NOTE: we are disabling this as those hints
@@ -305,50 +360,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // and not for the webpack compilations performance itself
       hints: false,
     },
+    ignoreWarnings: [STATS_WARNINGS_FILTER],
   };
 
-  const nonDistributableConfig: webpack.Configuration = {
-    mode: 'development',
-  };
-
-  const distributableConfig: webpack.Configuration = {
-    mode: 'production',
-
-    plugins: [
-      new webpack.DefinePlugin({
-        'process.env': {
-          IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE: `"true"`,
-        },
-      }),
-      new CompressionPlugin({
-        algorithm: 'brotliCompress',
-        filename: '[path].br',
-        test: /\.(js|css)$/,
-        cache: false,
-      }),
-      new CompressionPlugin({
-        algorithm: 'gzip',
-        filename: '[path].gz',
-        test: /\.(js|css)$/,
-        cache: false,
-      }),
-    ],
-
-    optimization: {
-      minimizer: [
-        new TerserPlugin({
-          cache: false,
-          sourceMap: false,
-          extractComments: false,
-          parallel: false,
-          terserOptions: {
-            compress: false,
-            mangle: false,
-          },
-        }),
-      ],
-    },
-  };
-
-  return webpackMerge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
+  return commonConfig;
 }

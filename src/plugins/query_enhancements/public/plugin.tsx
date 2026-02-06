@@ -16,6 +16,7 @@ import {
 } from '../../data/public';
 import { ConfigSchema } from '../common/config';
 import { s3TypeConfig } from './datasets';
+import { prometheusTypeConfig } from './datasets/prometheus_type';
 import { createQueryAssistExtension } from './query_assist';
 import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
@@ -28,6 +29,8 @@ import {
 } from './types';
 import { PPLFilterUtils } from './search/filters';
 import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
+import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
+import { PrometheusResourceClient } from './resources';
 
 export class QueryEnhancementsPlugin
   implements
@@ -229,6 +232,68 @@ export class QueryEnhancementsPlugin
     });
 
     queryString.getDatasetService().registerType(s3TypeConfig);
+
+    const promqlLanguageConfig: LanguageConfig = {
+      id: 'PROMQL',
+      title: 'PromQL',
+      search: new PromQLSearchInterceptor({
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      }),
+      getQueryString: (currentQuery: Query) => '',
+      fields: {
+        sortable: false,
+        filterable: false,
+        visualizable: false,
+        formatter: (value: string, type: OSD_FIELD_TYPES) => {
+          switch (type) {
+            case OSD_FIELD_TYPES.DATE:
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // Date fields need special formatting in order for discover table formatter to render in the correct time zone
+
+            default:
+              return value;
+          }
+        },
+      },
+      docLink: {
+        title: i18n.translate('queryEnhancements.promqlLanguage.docLink', {
+          defaultMessage: 'PromQL documentation',
+        }),
+        url: 'https://prometheus.io/docs/prometheus/latest/querying/basics/',
+      },
+      showDocLinks: false,
+      editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
+      editorSupportedAppNames: ['explore'],
+      supportedAppNames: ['explore'],
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.promqlSampleQuery.upMetric', {
+            defaultMessage: 'Query the up metric',
+          }),
+          query: `up`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.promqlSampleQuery.rateQuery', {
+            defaultMessage: 'Query rate of HTTP requests',
+          }),
+          query: `rate(http_requests_total[5m])`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.promqlSampleQuery.aggregation', {
+            defaultMessage: 'Sum by job',
+          }),
+          query: `sum by (job) (rate(http_requests_total[5m]))`,
+        },
+      ],
+    };
+    queryString.getLanguageService().registerLanguage(promqlLanguageConfig);
+    queryString.getDatasetService().registerType(prometheusTypeConfig);
+
+    // Register prometheus resource client
+    data.resourceClientFactory.register('prometheus', (http) => new PrometheusResourceClient(http));
 
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,

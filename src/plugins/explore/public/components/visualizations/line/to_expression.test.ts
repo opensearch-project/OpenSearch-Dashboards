@@ -23,6 +23,7 @@ import * as lineChartUtils from './line_chart_utils';
 import * as thresholdUtils from '../style_panel/threshold/threshold_utils';
 import * as utils from '../utils/utils'; // Import the utils module
 import { defaultLineChartStyles } from './line_vis_config';
+import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
@@ -43,8 +44,10 @@ jest.mock('../style_panel/threshold/threshold_utils', () => ({
 
 // Mock the utils module
 jest.mock('../utils/utils', () => ({
+  ...jest.requireActual('../utils/utils'),
   applyTimeRangeToEncoding: jest.fn().mockReturnValue(undefined),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
+  getChartRender: jest.fn().mockReturnValue('vega'),
 }));
 
 describe('to_expression', () => {
@@ -96,6 +99,7 @@ describe('to_expression', () => {
   const timeRange = { from: '2023-01-01', to: '2023-01-02' };
   const styleOptions = {
     ...defaultLineChartStyles,
+    standardAxes: [DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG],
     addLegend: true,
     legendPosition: Positions.RIGHT,
     thresholdLines: [],
@@ -813,19 +817,6 @@ describe('to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult.title).toBe('Custom Category Line Chart');
-    });
-
-    it('should throw an error when required columns are missing', () => {
-      expect(() => {
-        createCategoryLineChart(transformedData, [], [categoricalColumn1], [], styleOptions);
-      }).toThrow(
-        'Category line chart requires at least one numerical column and one categorical column'
-      );
-      expect(() => {
-        createCategoryLineChart(transformedData, [numericColumn1], [], [], styleOptions);
-      }).toThrow(
-        'Category line chart requires at least one numerical column and one categorical column'
-      );
     });
   });
 

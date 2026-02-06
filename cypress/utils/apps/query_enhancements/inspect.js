@@ -99,36 +99,36 @@ const flattenObjectAndFormatValues = (obj, parentKey, properties = {}) => {
  * @returns {object} Flattened object with formatted values
  * @example
  * const input = [{
-        "name": "FlightNum",
-        "type": "string",
-        "values": [
-            "9HY9SWR",
-            "X98CCZO"
-        ]
-    },
-    {
-        "name": "personal",
-        "type": "nested",
-        "values": [
-            [
-                {
-                    "address": [
-                        {
-                            "country": "USA",
-                            "coordinates": [
-                                {
-                                    "lon": -87.6298,
-                                    "lat": 41.8781
-                                }
-                            ]
-                        }
-                    ],
-                    "email": "Lula_Bartell65@hotmail.com"
-                }
-            ],
-        ]
-    }
-];
+ "name": "FlightNum",
+ "type": "string",
+ "values": [
+ "9HY9SWR",
+ "X98CCZO"
+ ]
+ },
+ {
+ "name": "personal",
+ "type": "nested",
+ "values": [
+ [
+ {
+ "address": [
+ {
+ "country": "USA",
+ "coordinates": [
+ {
+ "lon": -87.6298,
+ "lat": 41.8781
+ }
+ ]
+ }
+ ],
+ "email": "Lula_Bartell65@hotmail.com"
+ }
+ ],
+ ]
+ }
+ ];
  * flattenObjectAndFormatValues(input)
  * // Returns: {
  * //   FlightNum: "9HY9SWR",
@@ -166,6 +166,13 @@ export const getFlattenedFieldsWithValue = (interceptedRequest, language) => {
 
     return flattenObjectAndFormatValues(responseQueryHits[0]._source);
   } else {
+    // Handle error responses (400, 500, etc.) where body.body might not exist
+    if (!interceptedRequest.response.body.body) {
+      const statusCode = interceptedRequest.response.statusCode;
+      const errorMessage = interceptedRequest.response.body.message || 'Unknown error';
+      throw new Error(`PPL/SQL query failed with status ${statusCode}: ${errorMessage}`);
+    }
+
     const responseQueryHits = interceptedRequest.response.body.body.size;
     // Fail fast if there are no results
     cy.wrap(responseQueryHits).should('be.gt', 0);
@@ -215,7 +222,10 @@ export const verifyVisualizationsWithInspectOption = (visualizationTitlesWithIns
       .findElementByTestId('inspectorViewChooser')
       .should('exist')
       .click();
-    cy.getElementByTestId('inspectorViewChooserRequests').click();
+    cy.wait(500);
+    cy.getElementByTestId('inspectorViewChooserRequests')
+      .should('be.visible')
+      .click({ waitForAnimations: false });
     cy.getElementByTestId('inspectorRequestDetailStatistics').should('exist');
     cy.getElementByTestId('euiFlyoutCloseButton').click();
   });

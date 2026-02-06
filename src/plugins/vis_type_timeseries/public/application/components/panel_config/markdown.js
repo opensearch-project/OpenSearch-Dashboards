@@ -75,13 +75,17 @@ class MarkdownPanelConfigUi extends Component {
     const lessSrc = `#markdown-${model.id} {
   ${value}
 }`;
-    lessC.render(lessSrc, { compress: true, javascriptEnabled: false }, (e, output) => {
-      const parts = { markdown_less: value };
-      if (output) {
-        parts.markdown_css = output.css;
+    lessC.render(
+      lessSrc,
+      { compress: true, javascriptEnabled: false, disablePluginRule: true },
+      (e, output) => {
+        const parts = { markdown_less: value };
+        if (output) {
+          parts.markdown_css = output.css;
+        }
+        this.props.onChange(parts);
       }
-      this.props.onChange(parts);
-    });
+    );
   }
 
   render() {

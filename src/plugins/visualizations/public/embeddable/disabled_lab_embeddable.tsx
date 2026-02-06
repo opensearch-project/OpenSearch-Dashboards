@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Embeddable, EmbeddableOutput } from '../../../embeddable/public';
 
 import { DisabledLabVisualization } from './disabled_lab_visualization';
@@ -38,6 +38,7 @@ import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
   private domNode?: HTMLElement;
+  private root?: Root;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
   constructor(private readonly title: string, initialInput: VisualizeInput) {
@@ -47,14 +48,18 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   public reload() {}
   public render(domNode: HTMLElement) {
     if (this.title) {
+      if (this.root) {
+        this.root.unmount();
+      }
       this.domNode = domNode;
-      ReactDOM.render(<DisabledLabVisualization title={this.title} />, domNode);
+      this.root = createRoot(domNode);
+      this.root.render(<DisabledLabVisualization title={this.title} />);
     }
   }
 
   public destroy() {
-    if (this.domNode) {
-      ReactDOM.unmountComponentAtNode(this.domNode);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

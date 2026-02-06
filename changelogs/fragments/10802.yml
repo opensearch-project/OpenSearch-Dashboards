@@ -1,2 +1,0 @@
-fix:
-- Fallback to v1 Configurator when selected data is non OS data source ([#10802](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10802))

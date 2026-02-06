@@ -4,11 +4,14 @@
  */
 
 import { SavedObject, SavedObjectReference } from '../../../../core/public';
+// Re-export CORRELATION_TYPE_PREFIXES from data plugin for convenience
+export { CORRELATION_TYPE_PREFIXES } from '../../../data/common';
 
 /**
  * Correlation attributes matching the saved object schema
  */
 export interface CorrelationAttributes {
+  title?: string;
   correlationType: string; // 'Traces-Logs-Correlation'
   version: string;
   entities: Array<{
@@ -67,9 +70,11 @@ export interface FindCorrelationsOptions {
  */
 export interface CreateCorrelationData {
   traceDatasetId: string;
+  traceDatasetTitle: string;
   logDatasetIds: string[];
   correlationType?: string;
   version?: string;
+  title?: string;
 }
 
 /**
@@ -79,13 +84,6 @@ export interface UpdateCorrelationData {
   id: string;
   logDatasetIds: string[];
 }
-
-/**
- * Constants for correlation types
- */
-export const CORRELATION_TYPES = {
-  TRACES_LOGS: 'APM-Correlation',
-} as const;
 
 /**
  * Constants for correlation versions

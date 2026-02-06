@@ -4,7 +4,7 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import ReactDOM from 'react-dom';
+import { Root } from 'react-dom/client';
 import { merge, Subscription } from 'rxjs';
 
 import { PLUGIN_ID, VISBUILDER_SAVED_OBJECT } from '../../common';
@@ -80,6 +80,7 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
   private autoRefreshFetchSubscription: Subscription;
   private subscriptions: Subscription[] = [];
   private node?: HTMLElement;
+  private root?: Root;
   private savedVis?: VisBuilderSavedVis;
   private serializedState?: string;
   private uiState: PersistedState;
@@ -243,8 +244,8 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     this.subscriptions.forEach((s) => s.unsubscribe());
     this.uiState.off('change', this.uiStateChangeHandler);
     this.uiState.off('reload', this.reload);
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
 
     if (this.handler) {

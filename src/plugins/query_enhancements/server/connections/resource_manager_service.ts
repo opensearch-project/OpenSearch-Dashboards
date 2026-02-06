@@ -15,7 +15,10 @@ class ResourceManagerService {
   }
 
   register(dataConnectionType: string, manager: BaseConnectionManager) {
-    if (this.managers.get(dataConnectionType) !== undefined) {
+    const existingManager = this.managers.get(dataConnectionType);
+    if (existingManager !== undefined) {
+      if (existingManager === manager) return;
+
       throw new Error(
         `Manager for dataConnectionType ${dataConnectionType} is already registered. Unable to register another manager.`
       );

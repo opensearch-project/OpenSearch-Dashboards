@@ -33,7 +33,7 @@ import { URL } from 'url';
 import { Duration } from 'moment';
 import { ClientOptions, NodeOptions } from '@opensearch-project/opensearch';
 import { OpenSearchConfig } from '../opensearch_config';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { getDefaultHeaders } from '../default_headers';
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client} using the
@@ -53,6 +53,7 @@ export type OpenSearchClientConfig = Pick<
   | 'username'
   | 'password'
   | 'disablePrototypePoisoningProtection'
+  | 'requestCompression'
 > & {
   memoryCircuitBreaker?:
     | OpenSearchConfig['memoryCircuitBreaker']
@@ -75,7 +76,7 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {
-      ...DEFAULT_HEADERS,
+      ...getDefaultHeaders(config.requestCompression),
       ...config.customHeaders,
     },
   };

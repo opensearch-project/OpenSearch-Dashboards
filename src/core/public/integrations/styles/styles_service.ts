@@ -32,6 +32,7 @@ import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from '../../ui_settings';
 import { CoreService } from '../../../types';
+import { getNonce } from '../../utils';
 // @ts-expect-error
 import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
 
@@ -48,6 +49,10 @@ export class StylesService implements CoreService {
   public async start({ uiSettings }: StartDeps) {
     const disableAnimationsStyleTag = document.createElement('style');
     disableAnimationsStyleTag.setAttribute('id', 'disableAnimationsCss');
+    const nonce = getNonce();
+    if (nonce) {
+      disableAnimationsStyleTag.setAttribute('nonce', nonce);
+    }
     document.head.appendChild(disableAnimationsStyleTag);
 
     const setDisableAnimations = (disableAnimations: boolean) => {

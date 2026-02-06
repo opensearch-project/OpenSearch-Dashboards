@@ -11,7 +11,7 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { MountPoint, UnmountCallback } from '../../../types';
 import { HeaderControlsContainer } from './header_controls_container';

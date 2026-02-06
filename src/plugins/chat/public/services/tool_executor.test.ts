@@ -4,219 +4,194 @@
  */
 
 import { ToolExecutor } from './tool_executor';
+import { ConfirmationService } from './confirmation_service';
 import { AssistantActionService } from '../../../context_provider/public';
 
 // Mock AssistantActionService
 const mockAssistantActionService = ({
   executeAction: jest.fn(),
+  isUserConfirmRequired: jest.fn(),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 describe('ToolExecutor', () => {
   let toolExecutor: ToolExecutor;
+  let confirmationService: ConfirmationService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    toolExecutor = new ToolExecutor(mockAssistantActionService);
+    confirmationService = new ConfirmationService();
+    toolExecutor = new ToolExecutor(mockAssistantActionService, confirmationService);
   });
 
-  describe('executeTool', () => {
+  describe('executeTool without confirmation', () => {
     it('should execute registered action successfully', async () => {
-      const mockResult = { success: true, data: 'action result' };
-      mockAssistantActionService.executeAction.mockResolvedValue(mockResult);
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
+      mockAssistantActionService.executeAction.mockResolvedValue({ result: 'success' });
 
-      const result = await toolExecutor.executeTool('test_action', { param: 'value' });
+      const result = await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123');
 
-      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('test_action', {
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ result: 'success' });
+      expect(result.source).toBe('registered_action');
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('testTool', {
         param: 'value',
       });
-      expect(result).toEqual({
-        success: true,
-        data: mockResult,
-        source: 'registered_action',
+    });
+
+    it('should handle agent tool when action not found', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
+      mockAssistantActionService.executeAction.mockRejectedValue(new Error('Action not found'));
+
+      const result = await toolExecutor.executeTool('agentTool', { param: 'value' }, 'call-123');
+
+      expect(result.success).toBe(true);
+      expect(result.source).toBe('agent_tool');
+      expect(result.waitingForAgentResponse).toBe(true);
+    });
+
+    it('should include datasourceId in tool args when provided', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
+      mockAssistantActionService.executeAction.mockResolvedValue({ result: 'success' });
+
+      await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123', 'datasource-1');
+
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('testTool', {
+        param: 'value',
+        datasourceId: 'datasource-1',
+      });
+    });
+  });
+
+  describe('executeTool with confirmation', () => {
+    it('should request confirmation for tools that require it', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      mockAssistantActionService.executeAction.mockResolvedValue({ result: 'confirmed' });
+
+      // Start execution (will wait for confirmation)
+      const executionPromise = toolExecutor.executeTool(
+        'confirmTool',
+        { param: 'value' },
+        'call-123'
+      );
+
+      // Simulate user approval
+      const pending = confirmationService.getPendingConfirmations();
+      expect(pending.length).toBe(1);
+      confirmationService.approve(pending[0].id);
+
+      const result = await executionPromise;
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ result: 'confirmed' });
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('confirmTool', {
+        param: 'value',
+        confirmed: true,
       });
     });
 
-    it('should handle registered action failure', async () => {
-      const error = new Error('Action failed');
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
+    it('should reject execution when user rejects confirmation', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
 
-      const result = await toolExecutor.executeTool('failing_action', {});
+      // Start execution (will wait for confirmation)
+      const executionPromise = toolExecutor.executeTool(
+        'confirmTool',
+        { param: 'value' },
+        'call-123'
+      );
 
-      expect(result).toEqual({
-        success: false,
-        error: 'Action failed',
-        source: 'registered_action',
-      });
+      // Simulate user rejection
+      const pending = confirmationService.getPendingConfirmations();
+      confirmationService.reject(pending[0].id);
+
+      const result = await executionPromise;
+
+      expect(result.success).toBe(false);
+      expect(result.userRejected).toBe(true);
+      expect(result.error).toBe('User rejected the tool execution');
+      expect(mockAssistantActionService.executeAction).not.toHaveBeenCalled();
     });
 
-    it('should handle action not found and fallback to agent tool', async () => {
-      const error = new Error('Action not found');
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
+    it('should include datasourceId even with confirmation', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      mockAssistantActionService.executeAction.mockResolvedValue({ result: 'confirmed' });
 
-      const result = await toolExecutor.executeTool('unknown_action', {});
+      const executionPromise = toolExecutor.executeTool(
+        'confirmTool',
+        { param: 'value' },
+        'call-123',
+        'datasource-1'
+      );
 
-      expect(result).toEqual({
-        success: true,
-        data: { acknowledged: true },
-        source: 'agent_tool',
-        waitingForAgentResponse: true,
-      });
-    });
+      const pending = confirmationService.getPendingConfirmations();
+      confirmationService.approve(pending[0].id);
 
-    it('should handle action not registered and fallback to agent tool', async () => {
-      const error = new Error('Action not registered');
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
+      await executionPromise;
 
-      const result = await toolExecutor.executeTool('unregistered_action', {});
-
-      expect(result).toEqual({
-        success: true,
-        data: { acknowledged: true },
-        source: 'agent_tool',
-        waitingForAgentResponse: true,
-      });
-    });
-
-    it('should handle unexpected errors', async () => {
-      const error = new Error('Unexpected error');
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
-
-      // Mock console.error to avoid noise in tests
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      const result = await toolExecutor.executeTool('error_action', {});
-
-      expect(result).toEqual({
-        success: false,
-        error: 'Unexpected error',
-        source: 'registered_action',
-      });
-
-      consoleSpy.mockRestore();
-    });
-
-    it('should handle errors without message', async () => {
-      const error = {};
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
-
-      const result = await toolExecutor.executeTool('error_action', {});
-
-      expect(result).toEqual({
-        success: false,
-        error: undefined,
-        source: 'registered_action',
+      expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('confirmTool', {
+        param: 'value',
+        confirmed: true,
+        datasourceId: 'datasource-1',
       });
     });
   });
 
   describe('pending tool management', () => {
-    const mockToolCall = {
-      id: 'tool-123',
-      name: 'test_tool',
-      args: { param: 'value' },
-    };
-
     it('should mark tool as pending', () => {
-      expect(toolExecutor.isPendingAgentResponse('tool-123')).toBe(false);
+      const toolCall = { id: 'call-123', name: 'testTool', args: { param: 'value' } };
 
-      toolExecutor.markToolPending('tool-123', mockToolCall);
+      toolExecutor.markToolPending('call-123', toolCall);
 
-      expect(toolExecutor.isPendingAgentResponse('tool-123')).toBe(true);
+      expect(toolExecutor.isPendingAgentResponse('call-123')).toBe(true);
+      expect(toolExecutor.getPendingTool('call-123')).toEqual(toolCall);
     });
 
-    it('should get pending tool information', () => {
-      toolExecutor.markToolPending('tool-123', mockToolCall);
+    it('should clear pending tool', () => {
+      const toolCall = { id: 'call-123', name: 'testTool', args: { param: 'value' } };
 
-      const pendingTool = toolExecutor.getPendingTool('tool-123');
+      toolExecutor.markToolPending('call-123', toolCall);
+      expect(toolExecutor.isPendingAgentResponse('call-123')).toBe(true);
 
-      expect(pendingTool).toEqual(mockToolCall);
-    });
-
-    it('should return undefined for non-existent pending tool', () => {
-      const pendingTool = toolExecutor.getPendingTool('non-existent');
-
-      expect(pendingTool).toBeUndefined();
-    });
-
-    it('should clear specific pending tool', () => {
-      toolExecutor.markToolPending('tool-123', mockToolCall);
-      expect(toolExecutor.isPendingAgentResponse('tool-123')).toBe(true);
-
-      toolExecutor.clearPendingTool('tool-123');
-
-      expect(toolExecutor.isPendingAgentResponse('tool-123')).toBe(false);
-      expect(toolExecutor.getPendingTool('tool-123')).toBeUndefined();
+      toolExecutor.clearPendingTool('call-123');
+      expect(toolExecutor.isPendingAgentResponse('call-123')).toBe(false);
+      expect(toolExecutor.getPendingTool('call-123')).toBeUndefined();
     });
 
     it('should clear all pending tools', () => {
-      const mockToolCall2 = {
-        id: 'tool-456',
-        name: 'another_tool',
-        args: {},
-      };
+      toolExecutor.markToolPending('call-1', { id: 'call-1', name: 'tool1', args: {} });
+      toolExecutor.markToolPending('call-2', { id: 'call-2', name: 'tool2', args: {} });
 
-      toolExecutor.markToolPending('tool-123', mockToolCall);
-      toolExecutor.markToolPending('tool-456', mockToolCall2);
-
-      expect(toolExecutor.isPendingAgentResponse('tool-123')).toBe(true);
-      expect(toolExecutor.isPendingAgentResponse('tool-456')).toBe(true);
+      expect(toolExecutor.isPendingAgentResponse('call-1')).toBe(true);
+      expect(toolExecutor.isPendingAgentResponse('call-2')).toBe(true);
 
       toolExecutor.clearAllPendingTools();
 
-      expect(toolExecutor.isPendingAgentResponse('tool-123')).toBe(false);
-      expect(toolExecutor.isPendingAgentResponse('tool-456')).toBe(false);
+      expect(toolExecutor.isPendingAgentResponse('call-1')).toBe(false);
+      expect(toolExecutor.isPendingAgentResponse('call-2')).toBe(false);
     });
   });
 
-  describe('tryExecuteRegisteredAction', () => {
-    it('should return handled true for successful action', async () => {
-      const mockResult = { data: 'success' };
-      mockAssistantActionService.executeAction.mockResolvedValue(mockResult);
+  describe('error handling', () => {
+    it('should return error for registered action execution failures', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
+      mockAssistantActionService.executeAction.mockRejectedValue(new Error('Execution failed'));
 
-      const result = await (toolExecutor as any).tryExecuteRegisteredAction('test_action', {});
+      const result = await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123');
 
-      expect(result.handled).toBe(true);
-      expect(result.result).toEqual({
-        success: true,
-        data: mockResult,
-        source: 'registered_action',
-      });
+      // When action fails but is not "not found", it returns error from registered action
+      expect(result.success).toBe(false);
+      expect(result.source).toBe('registered_action');
+      expect(result.error).toBe('Execution failed');
     });
 
-    it('should return handled false for not found action', async () => {
-      const error = new Error('Action not found');
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
-
-      const result = await (toolExecutor as any).tryExecuteRegisteredAction('unknown_action', {});
-
-      expect(result.handled).toBe(false);
-    });
-
-    it('should return handled true with error for failed registered action', async () => {
-      const error = new Error('Action execution failed');
-      mockAssistantActionService.executeAction.mockRejectedValue(error);
-
-      const result = await (toolExecutor as any).tryExecuteRegisteredAction('failing_action', {});
-
-      expect(result.handled).toBe(true);
-      expect(result.result).toEqual({
-        success: false,
-        error: 'Action execution failed',
-        source: 'registered_action',
+    it('should handle unexpected errors gracefully', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockImplementation(() => {
+        throw new Error('Unexpected error');
       });
-    });
-  });
 
-  describe('executeAgentTool', () => {
-    it('should return agent tool result', async () => {
-      const result = await (toolExecutor as any).executeAgentTool('agent_tool', { param: 'value' });
+      const result = await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123');
 
-      expect(result).toEqual({
-        success: true,
-        data: { acknowledged: true },
-        source: 'agent_tool',
-        waitingForAgentResponse: true,
-      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Unexpected error');
     });
   });
 });

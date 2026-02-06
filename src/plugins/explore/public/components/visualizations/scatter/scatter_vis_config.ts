@@ -17,7 +17,6 @@ import {
   ThresholdMode,
   ThresholdOptions,
 } from '../types';
-import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveScatterConfig {
@@ -31,7 +30,9 @@ export interface ScatterChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
   legendTitle?: string;
+  // @deprecated - removed this once migrated to echarts
   legendTitleForSize?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];
@@ -73,47 +74,7 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-  // Standard axes
-  standardAxes: [
-    {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: false,
-      },
-      axisRole: AxisRole.X,
-    },
-    {
-      id: 'Axis-2',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: false,
-      },
-      axisRole: AxisRole.Y,
-    },
-  ],
+  standardAxes: [],
   switchAxes: false,
   titleOptions: {
     show: false,

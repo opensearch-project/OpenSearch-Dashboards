@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 import { DataImporterPluginApp } from './data_importer_app';
 import { coreMock } from '../../../../core/public/mocks';
 import { testDataSourceManagementPlugin } from '../../../data_source_management/public/mocks';
 import { PublicConfigSchema } from '../../config';
 import { navigationPluginMock } from '../../../navigation/public/mocks';
-import { shallow } from 'enzyme';
 import { DEFAULT_SUPPORTED_FILE_TYPES_LIST, PLUGIN_ID } from '../../common';
 
 describe('App', () => {
@@ -35,8 +35,7 @@ describe('App', () => {
       getDefaultDataSourceId: jest.fn(),
       getDefaultDataSourceId$: jest.fn(),
     };
-    const container = shallow(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
+    const { container } = render(
       <DataImporterPluginApp
         basename={PLUGIN_ID}
         notifications={notificationsMock}
@@ -45,6 +44,7 @@ describe('App', () => {
         navigation={navigationMock}
         config={mockConfig}
         dataSourceEnabled={false}
+        hideLocalCluster={false}
         dataSourceManagement={dataSourceManagementMock}
       />
     );
@@ -60,8 +60,7 @@ describe('App', () => {
     // @ts-expect-error
     dataSourceManagementMock.ui.getDataSourceMenu = jest.fn(() => <div>DataSourceMenu</div>);
 
-    const container = shallow(
-      // @ts-expect-error TS2741 TODO(ts-error): fixme
+    const { container } = render(
       <DataImporterPluginApp
         basename={PLUGIN_ID}
         notifications={notificationsMock}
@@ -70,7 +69,64 @@ describe('App', () => {
         navigation={navigationMock}
         config={mockConfig}
         dataSourceEnabled={true}
+        hideLocalCluster={false}
         dataSourceManagement={dataSourceManagementMock}
+      />
+    );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should render in embedded mode without Router and page wrappers', () => {
+    const dataSourceManagementMock = {
+      registerAuthenticationMethod: jest.fn(),
+      ui: {
+        DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
+        getDataSourceMenu: jest.fn(),
+      },
+      dataSourceSelection: {} as any,
+      getDefaultDataSourceId: jest.fn(),
+      getDefaultDataSourceId$: jest.fn(),
+    };
+    const { container } = render(
+      <DataImporterPluginApp
+        basename={PLUGIN_ID}
+        notifications={notificationsMock}
+        http={httpMock}
+        savedObjects={savedObjectsMock}
+        navigation={navigationMock}
+        config={mockConfig}
+        dataSourceEnabled={false}
+        hideLocalCluster={false}
+        dataSourceManagement={dataSourceManagementMock}
+        embedded={true}
+      />
+    );
+    expect(container).toMatchSnapshot();
+  });
+
+  it('should render with Router when embedded is false', () => {
+    const dataSourceManagementMock = {
+      registerAuthenticationMethod: jest.fn(),
+      ui: {
+        DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
+        getDataSourceMenu: jest.fn(),
+      },
+      dataSourceSelection: {} as any,
+      getDefaultDataSourceId: jest.fn(),
+      getDefaultDataSourceId$: jest.fn(),
+    };
+    const { container } = render(
+      <DataImporterPluginApp
+        basename={PLUGIN_ID}
+        notifications={notificationsMock}
+        http={httpMock}
+        savedObjects={savedObjectsMock}
+        navigation={navigationMock}
+        config={mockConfig}
+        dataSourceEnabled={false}
+        hideLocalCluster={false}
+        dataSourceManagement={dataSourceManagementMock}
+        embedded={false}
       />
     );
     expect(container).toMatchSnapshot();

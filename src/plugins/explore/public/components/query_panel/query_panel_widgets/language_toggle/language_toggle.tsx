@@ -16,6 +16,7 @@ import {
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { useEditorFocus } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
+import { getServices } from '../../../../services/services';
 import './language_toggle.scss';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
@@ -43,18 +44,22 @@ export const LanguageToggle = () => {
     [closePopover, focusOnEditor, switchEditorMode]
   );
 
-  // TODO: expand this once other languages are supported
-  const badgeLabel = isPromptMode ? promptOptionText : language;
+  const languageTitle = useMemo(() => {
+    const languageService = getServices().data.query.queryString.getLanguageService();
+    return languageService.getLanguage(language)?.title ?? language;
+  }, [language]);
+
+  const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
   const items = useMemo(() => {
     const output = [
       <EuiContextMenuItem
-        key="PPL"
+        key={languageTitle}
         onClick={() => onItemClick(EditorMode.Query)}
         disabled={!isPromptMode}
-        data-test-subj="queryPanelFooterLanguageToggle-PPL"
+        data-test-subj={`queryPanelFooterLanguageToggle-${languageTitle}`}
       >
-        PPL
+        {languageTitle}
       </EuiContextMenuItem>,
     ];
 
@@ -72,7 +77,7 @@ export const LanguageToggle = () => {
     }
 
     return output;
-  }, [isPromptMode, onItemClick, promptModeIsAvailable]);
+  }, [isPromptMode, onItemClick, promptModeIsAvailable, languageTitle]);
 
   return (
     // This div is needed to allow for the gradient styling

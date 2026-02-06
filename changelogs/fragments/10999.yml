@@ -1,2 +1,0 @@
-fix:
-- [BUG][Chat] Unregister tools when component unmount ([#10999](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10999))
