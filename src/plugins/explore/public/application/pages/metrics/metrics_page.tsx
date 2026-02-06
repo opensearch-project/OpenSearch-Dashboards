@@ -16,7 +16,7 @@ import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { useInitializeMetricsDataset } from '../../utils/hooks/use_initialize_metrics_dataset';
-import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
+// import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { BottomRightContainer } from './metrics_bottom_container/bottom_right_container';
@@ -42,7 +42,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
-            <NewExperienceBanner />
+            {/* <NewExperienceBanner /> */}
 
             <div className="dscCanvas__queryPanel">
               <QueryPanel />

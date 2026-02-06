@@ -8,8 +8,13 @@
     margin-right: $ouiSizeXS;
   }
 
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  &>.euiText {
+    margin-right: $euiSizeL;
+  }
+
   // EuiCallOut wraps children within two divs
-  & > div > div {
+  &>div>div {
     display: flex;
     justify-content: space-between;
     align-items: center;
