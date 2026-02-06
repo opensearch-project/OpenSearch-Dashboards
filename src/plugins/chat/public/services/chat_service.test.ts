@@ -23,8 +23,29 @@ describe('ChatService', () => {
   let mockAgent: jest.Mocked<AgUiAgent>;
   let mockCoreChatService: jest.Mocked<ChatServiceStart>;
   let mockThreadId$: BehaviorSubject<string>;
+  let consoleWarnSpy: jest.SpyInstance;
+  let mockUiSettings: any;
 
   beforeEach(() => {
+    // Suppress expected console warnings in tests
+    // These warnings occur when UI settings or workspace services aren't available in test scenarios
+    // This matches the pattern used in other test files (e.g., ag_ui_agent.test.ts, log_action_registry.test.ts)
+    consoleWarnSpy = jest
+      .spyOn(console, 'warn')
+      .mockImplementation((message: string, ...args: any[]) => {
+        // Filter out expected warnings that occur in test scenarios
+        if (
+          typeof message === 'string' &&
+          (message.includes('UI Settings not available') ||
+            message.includes('Workspaces service not available') ||
+            message.includes('Failed to determine data source'))
+        ) {
+          return; // Suppress expected warnings
+        }
+        // For other warnings, we could call the original, but since these are the only warnings
+        // appearing in these tests, we suppress all to match the codebase pattern
+      });
+
     // Clear all mocks
     jest.clearAllMocks();
 
@@ -116,10 +137,17 @@ describe('ChatService', () => {
     // Mock AgUiAgent constructor
     (AgUiAgent as jest.MockedClass<typeof AgUiAgent>).mockImplementation(() => mockAgent);
 
-    chatService = new ChatService(undefined, mockCoreChatService);
+    // Create mock UI settings client
+    mockUiSettings = {
+      get: jest.fn(),
+    };
+
+    chatService = new ChatService(mockUiSettings, mockCoreChatService);
   });
 
   afterEach(() => {
+    // Restore console.warn spy
+    consoleWarnSpy.mockRestore();
     jest.restoreAllMocks();
   });
 
@@ -207,8 +235,8 @@ describe('ChatService', () => {
         getThreadId$: () => mockThreadId2$.asObservable(),
       } as any;
 
-      const service1 = new ChatService(undefined, mockCoreService1);
-      const service2 = new ChatService(undefined, mockCoreService2);
+      const service1 = new ChatService(mockUiSettings, mockCoreService1);
+      const service2 = new ChatService(mockUiSettings, mockCoreService2);
 
       const threadId1 = service1.getThreadId();
       const threadId2 = service2.getThreadId();
@@ -562,7 +590,7 @@ describe('ChatService', () => {
 
     it('should be callable independently of other methods', () => {
       // Test that resetConnection can be called without other method calls
-      const newService = new ChatService(undefined, mockCoreChatService);
+      const newService = new ChatService(mockUiSettings, mockCoreChatService);
       newService.resetConnection();
 
       // Get the mock agent from the new service
@@ -721,9 +749,9 @@ describe('ChatService', () => {
 
     describe('updateCurrentMessages', () => {
       it('should update current messages and save to sessionStorage', () => {
-        const newMessages = [
-          { id: '1', role: 'user', content: 'Test message' },
-          { id: '2', role: 'assistant', content: 'Test response' },
+        const newMessages: Message[] = [
+          { id: '1', role: 'user' as const, content: 'Test message' },
+          { id: '2', role: 'assistant' as const, content: 'Test response' },
         ];
 
         chatService.updateCurrentMessages(newMessages);
@@ -1413,11 +1441,11 @@ describe('ChatService', () => {
   });
 
   describe('getWorkspaceAwareDataSourceId with page context priority', () => {
-    let mockUiSettings: any;
+    let nestedMockUiSettings: any;
     let mockWorkspaces: any;
 
     beforeEach(() => {
-      mockUiSettings = {
+      nestedMockUiSettings = {
         get: jest.fn(),
       };
       mockWorkspaces = {
@@ -1448,7 +1476,7 @@ describe('ChatService', () => {
 
       // Create service with uiSettings and workspaces
       const serviceWithSettings = new (ChatService as any)(
-        mockUiSettings,
+        nestedMockUiSettings,
         mockCoreChatService,
         mockWorkspaces
       );
