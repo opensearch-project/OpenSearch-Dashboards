@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
+import { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
 import { keys } from '@elastic/eui';
 import { PanelContextProvider } from '../context';

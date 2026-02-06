@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { HeaderSearchBarIcon, HeaderSearchBar } from './header_search_bar';
 import { GlobalSearchCommand } from '../../global_search';

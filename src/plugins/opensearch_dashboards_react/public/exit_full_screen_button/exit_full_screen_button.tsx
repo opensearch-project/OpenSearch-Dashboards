@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { Logos } from 'opensearch-dashboards/public';

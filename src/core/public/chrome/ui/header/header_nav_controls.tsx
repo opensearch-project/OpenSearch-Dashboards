@@ -29,7 +29,6 @@
  */
 
 import { EuiHeaderSectionItem } from '@elastic/eui';
-import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeNavControl } from '../../nav_controls';

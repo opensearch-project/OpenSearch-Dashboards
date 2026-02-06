@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import * as React from 'react';
 import { createNotifications } from './create_notifications';
 // eslint-disable-next-lien
 import { notificationServiceMock } from '../../../../core/public/mocks';

@@ -46,8 +46,6 @@ jest.mock('@osd/i18n/react', () => {
   };
 });
 
-import React from 'react';
-
 import { I18nService } from './i18n_service';
 
 afterEach(() => {

@@ -30,7 +30,7 @@
 
 /* eslint-disable react/no-danger */
 
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 
 import { RenderingMetadata } from '../types';
 

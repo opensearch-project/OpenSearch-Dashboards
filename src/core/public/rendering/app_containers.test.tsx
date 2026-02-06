@@ -31,7 +31,6 @@
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react';
 import { mount } from 'enzyme';
-import React from 'react';
 
 import { AppWrapper, AppContainer } from './app_containers';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../overlays';

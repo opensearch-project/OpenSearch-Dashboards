@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiCard } from '@elastic/eui';
 import { formatNumber, Metric } from '../lib';
 

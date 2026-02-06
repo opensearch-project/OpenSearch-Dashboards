@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { RightNavigationButton } from './right_navigation_button';
 import { applicationServiceMock, httpServiceMock } from '../../../../../core/public/mocks';

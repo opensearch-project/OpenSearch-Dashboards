@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { Observable } from 'rxjs';

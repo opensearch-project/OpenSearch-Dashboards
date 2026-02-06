@@ -10,7 +10,6 @@
  */
 
 import { mount, ReactWrapper } from 'enzyme';
-import React from 'react';
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { MountPoint, UnmountCallback } from '../../../types';
