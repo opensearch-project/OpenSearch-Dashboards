@@ -605,7 +605,7 @@ const getSharingData = async ({
     },
     // fields: selectFields,
     metaFields: indexPattern?.metaFields,
-    conflictedTypesFields: indexPattern?.fields
+    conflictedTypesFields: (indexPattern?.fields ?? [])
       .filter((f) => f.type === 'conflict')
       .map((f) => f.name),
     indexPatternId: indexPattern?.id,
