@@ -224,7 +224,6 @@ export const runSharedLinksTests = () => {
           // Before save, export as saved object is disabled
           cy.getElementByTestId('exportAsSavedObject').find('input').should('be.disabled');
           cy.saveSearch(config.saveName);
-          cy.loadSaveSearch(config.saveName);
           cy.osd.waitForLoader(true);
 
           // Wait for saved search to be saved and URL to update
