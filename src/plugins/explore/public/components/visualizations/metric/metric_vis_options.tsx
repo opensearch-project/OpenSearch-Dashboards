@@ -6,8 +6,15 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { defaultMetricChartStyles, MetricChartStyle } from './metric_vis_config';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
+import { defaultMetricChartStyles, MetricChartStyle, LayoutType } from './metric_vis_config';
 import { AxisRole } from '../types';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -41,6 +48,30 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
+
+  // Check if FACET axis is mapped (multi-metric mode)
+  const hasMultiMetric = axisColumnMappings?.[AxisRole.FACET] !== undefined;
+
+  const layoutOptions = [
+    {
+      value: 'auto',
+      text: i18n.translate('explore.vis.metric.layout.auto', {
+        defaultMessage: 'Auto (responsive grid)',
+      }),
+    },
+    {
+      value: 'horizontal',
+      text: i18n.translate('explore.vis.metric.layout.horizontal', {
+        defaultMessage: 'Horizontal (single row)',
+      }),
+    },
+    {
+      value: 'vertical',
+      text: i18n.translate('explore.vis.metric.layout.vertical', {
+        defaultMessage: 'Vertical (single column)',
+      }),
+    },
+  ];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -114,6 +145,57 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               )}
             </StyleAccordion>
           </EuiFlexItem>
+          {hasMultiMetric && (
+            <EuiFlexItem grow={false}>
+              <StyleAccordion
+                id="metricLayoutSection"
+                accordionLabel={i18n.translate('explore.stylePanel.tabs.metricLayout', {
+                  defaultMessage: 'Layout',
+                })}
+                initialIsOpen={true}
+              >
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.metric.layoutType', {
+                    defaultMessage: 'Layout type',
+                  })}
+                >
+                  <EuiSelect
+                    options={layoutOptions}
+                    value={styleOptions.layoutType || 'auto'}
+                    onChange={(e) => updateStyleOption('layoutType', e.target.value as LayoutType)}
+                    data-test-subj="metricLayoutSelect"
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.metric.minItemWidth', {
+                    defaultMessage: 'Minimum item width (px)',
+                  })}
+                >
+                  <DebouncedFieldNumber
+                    value={styleOptions.minItemWidth || defaultMetricChartStyles.minItemWidth}
+                    onChange={(val) => updateStyleOption('minItemWidth', val)}
+                    min={80}
+                    max={800}
+                    data-test-subj="minItemWidthInput"
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.metric.minItemHeight', {
+                    defaultMessage: 'Minimum item height (px)',
+                  })}
+                >
+                  <DebouncedFieldNumber
+                    value={styleOptions.minItemHeight || defaultMetricChartStyles.minItemHeight}
+                    onChange={(val) => updateStyleOption('minItemHeight', val)}
+                    min={60}
+                    max={400}
+                    data-test-subj="minItemHeightInput"
+                  />
+                </EuiFormRow>
+              </StyleAccordion>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <StyleAccordion
               id="metricValueOptions"
