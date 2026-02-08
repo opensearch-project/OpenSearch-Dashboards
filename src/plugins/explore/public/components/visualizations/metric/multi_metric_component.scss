@@ -1,18 +1,33 @@
 .multi-metric-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 8px;
   padding: 16px;
   width: 100%;
   height: 100%;
-  align-content: flex-start;
+
+  /* Auto layout - default responsive grid */
+  &.layout-auto {
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+
+  /* Horizontal layout - single row */
+  &.layout-horizontal {
+    flex-flow: row nowrap;
+    overflow-x: auto;
+    align-items: stretch;
+    min-height: 200px;
+  }
+
+  /* Vertical layout - single column */
+  &.layout-vertical {
+    flex-flow: column nowrap;
+    overflow-y: auto;
+    align-items: stretch;
+  }
 }
 
 .multi-metric-item {
-  flex: 1 1 300px; /* Grow, shrink, minimum width of 300px */
-  min-width: 250px;
-  max-width: 400px;
-  min-height: 160px;
   background: var(--eui-color-empty-shade);
   border: 1px solid var(--eui-color-light-shade);
   border-radius: 6px;
@@ -23,6 +38,30 @@
   &:hover {
     border-color: var(--eui-color-primary);
     box-shadow: var(--eui-shadow-small);
+  }
+
+  /* Auto layout - responsive grid behavior */
+  .layout-auto & {
+    flex: 1 1 300px;
+    min-width: 250px;
+    max-width: 400px;
+    min-height: 160px;
+  }
+
+  /* Horizontal layout - single row behavior */
+  .layout-horizontal & {
+    flex: 1 1 var(--min-item-width, 120px);
+    min-width: var(--min-item-width, 120px);
+    max-width: 400px;
+    min-height: 160px;
+    height: 100%;
+  }
+
+  /* Vertical layout - single column behavior */
+  .layout-vertical & {
+    flex: 1 1 auto;
+    min-height: max(var(--min-item-height, 80px), 160px);
+    width: 100%;
   }
 }
 
@@ -37,28 +76,28 @@
   text-overflow: ellipsis;
 }
 
-/* Responsive layout */
+/* Responsive layout - only for auto layout */
 @media (max-width: 768px) {
-  .multi-metric-item {
+  .layout-auto .multi-metric-item {
     flex: 1 1 100%;
     min-width: 200px;
   }
 }
 
 @media (min-width: 769px) and (max-width: 1200px) {
-  .multi-metric-item {
-    flex: 1 1 calc(50% - 8px);
+  .layout-auto .multi-metric-item {
+    flex: 1 1 calc(50% - 4px);
   }
 }
 
 @media (min-width: 1201px) {
-  .multi-metric-item {
-    flex: 1 1 calc(33.333% - 11px);
+  .layout-auto .multi-metric-item {
+    flex: 1 1 calc(33.333% - 6px);
   }
 }
 
 @media (min-width: 1600px) {
-  .multi-metric-item {
-    flex: 1 1 calc(25% - 12px);
+  .layout-auto .multi-metric-item {
+    flex: 1 1 calc(25% - 6px);
   }
 }

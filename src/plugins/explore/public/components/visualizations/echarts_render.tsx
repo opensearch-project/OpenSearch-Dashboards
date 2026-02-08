@@ -18,6 +18,7 @@ interface MultiMetricSpec {
   categoryNames: string[];
   styles: any;
   metricField: string;
+  timeField?: string;
   numericalColumns: any[];
   categoricalColumns: any[];
   dateColumns: any[];
@@ -259,6 +260,7 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
         categoryNames={spec.categoryNames}
         styles={spec.styles}
         metricField={spec.metricField}
+        timeField={spec.timeField}
         numericalColumns={spec.numericalColumns}
         categoricalColumns={spec.categoricalColumns}
         dateColumns={spec.dateColumns}

@@ -14,6 +14,7 @@ interface SingleMetricProps {
   categoryName: string;
   styles: MetricChartStyle;
   metricField: string;
+  timeField?: string;
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
@@ -25,6 +26,7 @@ interface MultiMetricComponentProps {
   categoryNames: string[];
   styles: MetricChartStyle;
   metricField: string;
+  timeField?: string;
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
@@ -37,6 +39,7 @@ const SingleMetricComponent: React.FC<SingleMetricProps> = ({
   categoryName,
   styles,
   metricField,
+  timeField,
   numericalColumns,
   categoricalColumns,
   dateColumns,
@@ -72,6 +75,7 @@ const SingleMetricComponent: React.FC<SingleMetricProps> = ({
     data,
     styles,
     metricField,
+    timeField,
     numericalColumns,
     categoricalColumns,
     dateColumns,
@@ -81,7 +85,7 @@ const SingleMetricComponent: React.FC<SingleMetricProps> = ({
   return (
     <div className="multi-metric-item">
       <div className="multi-metric-title">{categoryName}</div>
-      <div ref={chartRef} style={{ width: '100%', height: '120px' }} />
+      <div ref={chartRef} style={{ width: '100%', flex: 1 }} />
     </div>
   );
 };
@@ -92,15 +96,27 @@ export const MultiMetricComponent: React.FC<MultiMetricComponentProps> = ({
   categoryNames,
   styles,
   metricField,
+  timeField,
   numericalColumns,
   categoricalColumns,
   dateColumns,
   axisColumnMappings,
 }) => {
+  const layoutClass = `layout-${styles.layoutType || 'auto'}`;
+
+  const minItemWidth =
+    styles.layoutType === 'horizontal'
+      ? Math.max(styles.minItemWidth || 120, 400)
+      : styles.minItemWidth || 120;
+
+  const containerStyle = {
+    '--min-item-width': `${minItemWidth}px`,
+    '--min-item-height': `${styles.minItemHeight || 80}px`,
+  } as React.CSSProperties;
+
   return (
-    <div className="multi-metric-container">
+    <div className={`multi-metric-container ${layoutClass}`} style={containerStyle}>
       {facetedData.map((dataset, index) => {
-        // Convert faceted data back to record format for single metric
         const header = dataset[0];
         const rows = dataset.slice(1);
         const data = rows.map((row) => {
@@ -115,10 +131,10 @@ export const MultiMetricComponent: React.FC<MultiMetricComponentProps> = ({
           <SingleMetricComponent
             key={index}
             data={data}
-            // categoryName={categoryNames[index] || `Category ${index + 1}`}
             categoryName={categoryNames[index]}
             styles={styles}
             metricField={metricField}
+            timeField={timeField}
             numericalColumns={numericalColumns}
             categoricalColumns={categoricalColumns}
             dateColumns={dateColumns}

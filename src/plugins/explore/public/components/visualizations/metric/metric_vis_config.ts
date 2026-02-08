@@ -18,6 +18,7 @@ import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 
 export type TextAlignment = 'auto' | 'center';
+export type LayoutType = 'horizontal' | 'vertical' | 'auto';
 
 export interface MetricChartStyleOptions {
   showTitle?: boolean;
@@ -45,6 +46,9 @@ export interface MetricChartStyleOptions {
   min?: number;
   max?: number;
   useThresholdColor?: boolean;
+  layoutType?: LayoutType;
+  minItemWidth?: number;
+  minItemHeight?: number;
 }
 
 export type MetricChartStyle = Required<
@@ -59,11 +63,22 @@ export type MetricChartStyle = Required<
     | 'useColor'
     | 'min'
     | 'max'
+    | 'layoutType'
+    | 'minItemWidth'
+    | 'minItemHeight'
   >
 > &
   Pick<
     MetricChartStyleOptions,
-    'fontSize' | 'titleSize' | 'percentageSize' | 'unitId' | 'min' | 'max'
+    | 'fontSize'
+    | 'titleSize'
+    | 'percentageSize'
+    | 'unitId'
+    | 'min'
+    | 'max'
+    | 'layoutType'
+    | 'minItemWidth'
+    | 'minItemHeight'
   >;
 
 export const defaultMetricChartStyles: MetricChartStyle = {

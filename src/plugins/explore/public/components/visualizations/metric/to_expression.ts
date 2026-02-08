@@ -291,6 +291,10 @@ export const createMultiMetric = (
   const metricField = valueMapping.column;
   const splitByField = splitByMapping.column;
 
+  // Get time field if present
+  const timeMapping = axisColumnMappings?.[AxisRole.Time];
+  const timeField = timeMapping?.column;
+
   // Group data by the split by field (categorical)
   const groupedData = new Map<string, any[]>();
   transformedData.forEach((row) => {
@@ -303,9 +307,11 @@ export const createMultiMetric = (
 
   // Transform grouped data into separate datasets for each category
   const facetedData = Array.from(groupedData.entries()).map(([categoryValue, rows]) => {
-    // Create a dataset containing the metric field for this category
-    const header = [metricField];
-    const data = rows.map((row) => [row[metricField]]);
+    // Create a dataset containing the metric field and time field (if present) for this category
+    const header = timeField ? [timeField, metricField] : [metricField];
+    const data = rows.map((row) => {
+      return timeField ? [row[timeField], row[metricField]] : [row[metricField]];
+    });
     return [header, ...data];
   });
 
@@ -319,6 +325,7 @@ export const createMultiMetric = (
     categoryNames,
     styles,
     metricField,
+    timeField, // Add time field info
     numericalColumns,
     categoricalColumns,
     dateColumns,
