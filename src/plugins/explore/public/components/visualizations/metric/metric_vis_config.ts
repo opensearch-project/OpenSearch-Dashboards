@@ -99,6 +99,15 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
         [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Time]: { type: VisFieldType.Date, index: 0 },
       },
+      {
+        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Time]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 0 },
+      },
     ],
   },
 });

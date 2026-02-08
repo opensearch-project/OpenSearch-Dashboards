@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationRule } from './types';
+import { VisualizationRule, AxisRole, VisFieldType } from './types';
 import {
   createSimpleLineChart,
   createLineBarChart,
@@ -28,7 +28,7 @@ import {
   createTwoMetricOneCateScatter,
   createThreeMetricOneCateScatter,
 } from './scatter/to_expression';
-import { createSingleMetric } from './metric/to_expression';
+import { createSingleMetric, createMultiMetric } from './metric/to_expression';
 import {
   createBarSpec,
   createStackedBarSpec,
@@ -264,6 +264,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
+    { ...CHART_METADATA.metric, priority: 50 },
     { ...CHART_METADATA.state_timeline, priority: 40 },
   ],
   toSpec: (
@@ -307,6 +308,15 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           styleOptions as BarChartStyle,
           axisColumnMappings,
           timeRange
+        );
+      case 'metric':
+        return createMultiMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as MetricChartStyle,
+          axisColumnMappings
         );
       case 'state_timeline':
         return createNumericalStateTimeline(
@@ -571,6 +581,7 @@ const oneMetricOneCateRule: VisualizationRule = {
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.bar_gauge, priority: 80 },
     { ...CHART_METADATA.pie, priority: 60 },
+    { ...CHART_METADATA.metric, priority: 50 },
     { ...CHART_METADATA.line, priority: 40 },
     { ...CHART_METADATA.area, priority: 20 },
   ],
@@ -627,6 +638,15 @@ const oneMetricOneCateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as AreaChartStyle,
+          axisColumnMappings
+        );
+      case 'metric':
+        return createMultiMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as MetricChartStyle,
           axisColumnMappings
         );
       default:
@@ -699,6 +719,55 @@ const oneMetricRule: VisualizationRule = {
           axisColumnMappings
         );
     }
+  },
+};
+
+const multiMetricRule: VisualizationRule = {
+  id: 'multi-metric',
+  name: 'multiple metrics',
+  description: 'Grid layout for multiple numerical fields as separate metrics',
+  matches: (numerical, categorical, date) => {
+    if (numerical.length >= 2 && categorical.length === 0 && date.length === 0) {
+      return 'COMPATIBLE_MATCH';
+    }
+    return 'NOT_MATCH';
+  },
+  chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
+  toSpec: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'metric',
+    axisColumnMappings
+  ) => {
+    // Check if we have multiple numerical fields mapped to different axis roles
+    const numericalRoles = [AxisRole.Y, AxisRole.COLOR, AxisRole.SIZE];
+    const mappedFields = numericalRoles.filter(
+      (role) => axisColumnMappings?.[role]?.schema === VisFieldType.Numerical
+    );
+
+    if (mappedFields.length >= 2) {
+      return createMultiMetric(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions as MetricChartStyle,
+        axisColumnMappings
+      );
+    }
+
+    // Fallback to single metric
+    return createSingleMetric(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions as MetricChartStyle,
+      axisColumnMappings
+    );
   },
 };
 
@@ -967,6 +1036,7 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   oneMetricTwoCateHighCardRule,
   oneMetricTwoCateLowCardRule,
   oneMetricOneCateRule,
+  multiMetricRule,
   twoMetricRule,
   twoMetricOneCateRule,
   threeMetricOneCateRule,

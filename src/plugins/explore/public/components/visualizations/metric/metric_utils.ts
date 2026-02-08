@@ -199,6 +199,159 @@ export const createMetricChartSeries = ({
   return newState;
 };
 
+export const createFacetMetricSeries = ({
+  styles,
+  seriesFields,
+  categoryNames,
+}: {
+  styles: MetricChartStyle;
+  seriesFields: (headers?: string[]) => string[];
+  categoryNames?: string[];
+}): PipelineFn => (state) => {
+  const { transformedData } = state;
+  const newState = { ...state };
+
+  // Handle single dataset (non-faceted)
+  if (!Array.isArray(transformedData?.[0]?.[0])) {
+    const singleMetric = createMetricChartSeries({
+      styles,
+      seriesFields: seriesFields([]),
+    })(newState);
+    return singleMetric as EChartsSpecState<any>;
+  }
+
+  // Handle faceted data - each metric gets its own grid
+  const allSeries: any[] = [];
+
+  transformedData?.forEach((seriesData: any[], datasetIndex: number) => {
+    const header = seriesData[0];
+    const metricColumns = seriesFields(header);
+
+    metricColumns.forEach((metricColumn: string) => {
+      const numericalValues: number[] = [];
+      const seriesIndex = seriesData[0].indexOf(metricColumn);
+
+      if (seriesIndex < 0) return;
+
+      for (let i = 1; i < seriesData.length; i++) {
+        numericalValues.push(seriesData[i][seriesIndex]);
+      }
+
+      const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
+      const isValidNumber =
+        calculatedValue !== undefined &&
+        typeof calculatedValue === 'number' &&
+        !isNaN(calculatedValue);
+
+      const selectedUnit = getUnitById(styles?.unitId);
+      const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
+
+      const fillColor = targetFillColor(
+        styles.useThresholdColor ?? false,
+        styles.thresholdOptions?.thresholds,
+        styles.thresholdOptions?.baseColor,
+        calculatedValue
+      );
+
+      const colorPalette = getColors();
+      let changeText = '';
+      let changeColor = colorPalette.text;
+
+      if (styles.showPercentage) {
+        const percentage = calculatePercentage(numericalValues);
+        if (percentage === undefined) {
+          changeText = '-';
+        } else {
+          changeText = `${percentage > 0 ? '+' : ''}${(percentage * 100).toFixed(2)}%`;
+        }
+
+        if (percentage !== undefined && percentage > 0) {
+          changeColor =
+            styles.percentageColor === 'inverted'
+              ? colorPalette.statusRed
+              : colorPalette.statusGreen;
+        }
+        if (percentage !== undefined && percentage < 0) {
+          changeColor =
+            styles.percentageColor === 'inverted'
+              ? colorPalette.statusGreen
+              : colorPalette.statusRed;
+        }
+      }
+
+      // Get the display name for this metric (use categoryNames if available)
+      const displayName =
+        categoryNames && categoryNames[datasetIndex] ? categoryNames[datasetIndex] : metricColumn;
+
+      // Create custom series for this metric in this grid
+      allSeries.push({
+        type: 'custom',
+        datasetIndex,
+        gridIndex: datasetIndex,
+        z: 10,
+        renderItem(_params: any, api: any) {
+          const width = api.getWidth();
+          const height = api.getHeight();
+          const textSize = Math.min(width, height) / 20;
+
+          // Dynamic font sizes based on chart dimensions
+          const titleFontSize = styles.titleSize ? styles.titleSize : 1.5 * textSize;
+          const valueFontSize = styles.fontSize
+            ? styles.fontSize
+            : 5 * textSize * (selectedUnit?.fontScale ?? 1);
+          const changeFontSize = styles.percentageSize ? styles.percentageSize : 2 * textSize;
+
+          return {
+            type: 'group',
+            x: width / 2,
+            y: height * 0.1,
+            children: [
+              {
+                type: 'text',
+                style: {
+                  x: 0,
+                  y: 0,
+                  text: styles.showTitle ? styles.title || displayName : '',
+                  fontSize: titleFontSize,
+                  fontWeight: 'normal',
+                  fill: colorPalette.text,
+                  textAlign: 'center',
+                },
+              },
+              {
+                type: 'text',
+                style: {
+                  x: 0,
+                  y: titleFontSize + 5,
+                  text: displayValue,
+                  fontSize: valueFontSize,
+                  fontWeight: 'bold',
+                  fill: fillColor,
+                  textAlign: 'center',
+                },
+              },
+              {
+                type: 'text',
+                style: {
+                  x: 0,
+                  y: titleFontSize + valueFontSize + 10,
+                  text: changeText,
+                  fontSize: changeFontSize,
+                  fill: changeColor,
+                  textAlign: 'center',
+                },
+              },
+            ],
+          };
+        },
+      });
+    });
+  });
+
+  newState.series = allSeries;
+  return newState;
+};
+
 export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecState<T>) => {
   // Metric sparkline doesn't have x/y axis
   const xAxis = Array.isArray(state.spec?.xAxis)
@@ -216,6 +369,33 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
       top: '50%',
       bottom: 0,
     },
+    xAxis,
+    yAxis,
+    tooltip: {
+      ...state.spec?.tooltip,
+      show: false,
+    },
+    legend: {
+      ...state.spec?.legend,
+      show: false,
+    },
+  };
+  return { ...state, spec };
+};
+
+export const assembleForMultiMetric = <T extends BaseChartStyle>(state: EChartsSpecState<T>) => {
+  // For multi-metric, we rely on assembleSpec to create the grid layout
+  // We just need to ensure axes are hidden and other metric-specific styling
+  const xAxis = Array.isArray(state.spec?.xAxis)
+    ? state.spec.xAxis.map((a) => ({ ...a, show: false, silent: true }))
+    : [{ show: false, silent: true }];
+
+  const yAxis = Array.isArray(state.spec?.yAxis)
+    ? state.spec.yAxis.map((a) => ({ ...a, show: false, silent: true }))
+    : [{ show: false, silent: true }];
+
+  const spec = {
+    ...state.spec,
     xAxis,
     yAxis,
     tooltip: {
