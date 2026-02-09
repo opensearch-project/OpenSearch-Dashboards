@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect } from 'react';
-import * as echarts from 'echarts';
+import React from 'react';
 import { MetricChartStyle } from './metric_vis_config';
-import { createSingleMetric } from './to_expression';
+import { MetricComponent } from './metric_component';
 import { AxisColumnMappings, VisColumn } from '../types';
 
 interface SingleMetricProps {
@@ -33,7 +32,7 @@ interface MultiMetricComponentProps {
   axisColumnMappings?: AxisColumnMappings;
 }
 
-// Single Metric component that renders one ECharts instance
+// Single Metric component that renders one metric with HTML text and ECharts sparkline
 const SingleMetricComponent: React.FC<SingleMetricProps> = ({
   data,
   categoryName,
@@ -45,47 +44,21 @@ const SingleMetricComponent: React.FC<SingleMetricProps> = ({
   dateColumns,
   axisColumnMappings,
 }) => {
-  const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
-
-  useEffect(() => {
-    if (!chartRef.current) return;
-
-    // Create ECharts instance
-    const chartInstance = echarts.init(chartRef.current);
-    chartInstanceRef.current = chartInstance;
-
-    // Create spec for single metric
-    const spec = createSingleMetric(
-      data,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styles,
-      axisColumnMappings
-    );
-
-    chartInstance.setOption(spec);
-
-    // Cleanup
-    return () => {
-      chartInstance.dispose();
-    };
-  }, [
-    data,
-    styles,
-    metricField,
-    timeField,
-    numericalColumns,
-    categoricalColumns,
-    dateColumns,
-    axisColumnMappings,
-  ]);
-
   return (
     <div className="multi-metric-item">
       <div className="multi-metric-title">{categoryName}</div>
-      <div ref={chartRef} style={{ width: '100%', flex: 1 }} />
+      <div style={{ width: '100%', flex: 1 }}>
+        <MetricComponent
+          data={data}
+          styles={styles}
+          metricField={metricField}
+          timeField={timeField}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
+          axisColumnMappings={axisColumnMappings}
+        />
+      </div>
     </div>
   );
 };

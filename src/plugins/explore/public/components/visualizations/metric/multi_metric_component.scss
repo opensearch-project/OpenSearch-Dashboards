@@ -101,3 +101,63 @@
     flex: 1 1 calc(25% - 6px);
   }
 }
+
+/* Single Metric Component Styles */
+.metric-component {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-sparkline {
+  position: absolute;
+  top: 70%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 30%;
+  z-index: 1;
+}
+
+.metric-text-overlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.metric-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.metric-value {
+  font-weight: bold;
+  margin: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.metric-change {
+  font-weight: 500;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

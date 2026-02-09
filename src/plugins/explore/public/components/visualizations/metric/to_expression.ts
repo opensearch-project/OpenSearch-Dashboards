@@ -17,20 +17,6 @@ import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import {
-  assembleSpec,
-  buildAxisConfigs,
-  createBaseConfig,
-  pipe,
-  buildVisMap,
-} from '../utils/echarts_spec';
-import { convertTo2DArray, transform, facetTransform } from '../utils/data_transformation';
-import {
-  assembleForMetric,
-  createMetricChartSeries,
-  createFacetMetricSeries,
-  assembleForMultiMetric,
-} from './metric_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -66,25 +52,18 @@ export const createSingleMetric = (
       throw Error('Missing value for metric chart');
     }
 
-    // Echarts implementation here
-    const result = pipe(
-      transform(convertTo2DArray()),
-      createBaseConfig({ title: '' }),
-      buildAxisConfigs,
-      createMetricChartSeries({
-        styles,
-        dateField,
-        seriesFields: [numericField],
-      }),
-      assembleSpec,
-      assembleForMetric
-    )({
+    // Return React component spec for HTML text rendering with ECharts sparkline
+    return {
+      __singleMetricReactComponent: true,
       data: transformedData,
       styles,
-      axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
-      axisColumnMappings: axisColumnMappings ?? {},
-    });
-    return result.spec;
+      metricField: numericField,
+      timeField: dateField,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      axisColumnMappings,
+    };
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
@@ -306,7 +285,7 @@ export const createMultiMetric = (
   });
 
   // Transform grouped data into separate datasets for each category
-  const facetedData = Array.from(groupedData.entries()).map(([categoryValue, rows]) => {
+  const facetedData = Array.from(groupedData.entries()).map(([, rows]) => {
     // Create a dataset containing the metric field and time field (if present) for this category
     const header = timeField ? [timeField, metricField] : [metricField];
     const data = rows.map((row) => {
