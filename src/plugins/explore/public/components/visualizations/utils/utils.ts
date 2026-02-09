@@ -511,9 +511,10 @@ export const generateThresholdLines = (
   return {
     markLine: {
       symbol: 'none',
+      silent: true,
       animation: false,
       lineStyle: {
-        width: 2,
+        width: 1,
         type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
       },
       data: ThresholdSteps,
@@ -554,4 +555,18 @@ export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarke
       data,
     },
   };
+};
+
+export const getValueColorByThreshold = (value: number, thresholdOptions: ThresholdOptions) => {
+  const thresholds = thresholdOptions.thresholds ?? [];
+  let color = thresholdOptions.baseColor;
+  let curr = -Infinity;
+
+  for (const threshold of thresholds) {
+    if (value > curr && value > threshold.value) {
+      color = threshold.color;
+      curr = threshold.value;
+    }
+  }
+  return color;
 };
