@@ -41,3 +41,21 @@
     overflow-y: auto;
   }
 }
+
+.chartCustomTooltip {
+  min-width: 120px;
+
+  p {
+    display: flex;
+    margin-top: 8px;
+
+    span {
+      padding-right: 20px;
+    }
+
+    b {
+      margin-left: auto;
+      font-weight: bolder;
+    }
+  }
+}
