@@ -29,7 +29,7 @@
  */
 
 import moment from 'moment';
-import React from 'react';
+
 import { NewsFeed } from './news_feed';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 

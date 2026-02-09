@@ -76,7 +76,7 @@ export function createGenerateDocRecordsStream({
             });
           }
 
-          for (const hit of resp.body?.hits.hits) {
+          for (const hit of resp.body!.hits.hits) {
             remainingHits -= 1;
             stats.archivedDoc(hit._index);
             this.push({

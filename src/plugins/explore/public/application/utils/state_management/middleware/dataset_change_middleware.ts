@@ -22,6 +22,7 @@ import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/q
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 

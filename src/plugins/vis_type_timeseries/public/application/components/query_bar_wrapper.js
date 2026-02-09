@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { CoreStartContext } from '../contexts/query_input_bar_context';
 import { QueryStringInput } from '../../../../../plugins/data/public';
 

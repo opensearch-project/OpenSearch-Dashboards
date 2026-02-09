@@ -109,6 +109,7 @@ export class DataViewsService {
           const result = { ...obj };
           result.attributes.title = await getDataViewTitle(
             obj.attributes.title,
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             obj.references,
             this.getDataSource
           );
@@ -413,6 +414,7 @@ export class DataViewsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: parsedSchemaMappings,
     };
@@ -748,6 +750,7 @@ export class DataViewsService {
       return await dataView.toDataset();
     }
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     return {
       id: dataView.id || '',
       title: dataView.title,

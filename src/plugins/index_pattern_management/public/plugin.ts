@@ -95,6 +95,7 @@ export class IndexPatternManagementPlugin
   ) {
     const { urlForwarding, management, dataSource, datasetManagement } = dependencies;
     // Check if dataset management plugin is present, which indicates it's enabled
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const isDatasetManagementEnabled = !!datasetManagement;
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;

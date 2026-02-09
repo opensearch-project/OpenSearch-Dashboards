@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiBasicTableColumn, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FieldStatsItem } from './utils/field_stats_types';

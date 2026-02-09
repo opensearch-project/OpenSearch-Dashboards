@@ -36,6 +36,7 @@ import { useFormContext } from '../form_context';
 
 export interface Props<T, FormType = FormData, I = T> {
   path: string;
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   config?: FieldConfig<T, FormType, I>;
   defaultValue?: T;
   component?: FunctionComponent<any>;
@@ -59,15 +60,18 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
     ...rest
   } = props;
 
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   const form = useFormContext<FormType>();
   const ComponentToRender = component ?? 'input';
   const propsToForward = { ...componentProps, ...rest };
 
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   const fieldConfig: FieldConfig<T, FormType, I> & { initialValue?: T } =
     config !== undefined
       ? { ...config }
       : ({
           ...form.__readFieldConfigFromSchema(path),
+          // @ts-expect-error TS2344 TODO(ts-error): fixme
         } as Partial<FieldConfig<T, FormType, I>>);
 
   if (defaultValue !== undefined) {

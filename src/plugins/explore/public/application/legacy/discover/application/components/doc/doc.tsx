@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPage, EuiPageContent } from '@elastic/eui';
 import { IndexPatternsContract } from '../../../../../../../../data/public';

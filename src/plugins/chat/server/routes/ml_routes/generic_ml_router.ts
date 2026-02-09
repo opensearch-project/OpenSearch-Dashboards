@@ -102,6 +102,7 @@ export class GenericMLRouter implements MLAgentRouter {
       });
     }
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const language = request.body.forwardedProps?.queryAssistLanguage;
     const agentId = language ? observabilityAgentId : configuredAgentId;
 

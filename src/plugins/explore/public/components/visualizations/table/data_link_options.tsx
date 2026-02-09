@@ -274,6 +274,7 @@ export const DataLinkOptions: React.FC<TableVisStyleControlsProps> = ({
 
   return (
     <EuiFlexItem grow={false}>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <StyleAccordion
         id="dataLinkSection"
         accordionLabel={i18n.translate('explore.stylePanel.table.dataLinks', {

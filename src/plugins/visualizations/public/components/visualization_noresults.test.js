@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { render } from 'enzyme';
 import { VisualizationNoResults } from './visualization_noresults';
 

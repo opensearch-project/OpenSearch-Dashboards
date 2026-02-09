@@ -72,7 +72,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'notifications:lifetime:error': { type: 'long' },
   'doc_table:highlight': { type: 'boolean' },
   'discover:searchOnPageLoad': { type: 'boolean' },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   'doc_table:hideTimeColumn': { type: 'boolean' },
   'discover:sampleSize': { type: 'long' },
   defaultColumns: { type: 'keyword' }, // it's an array

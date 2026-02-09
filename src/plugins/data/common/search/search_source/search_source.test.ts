@@ -252,6 +252,7 @@ describe('SearchSource', () => {
         index: { title: 'my-index' },
         body: {},
       };
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBe('my-index');
@@ -272,6 +273,7 @@ describe('SearchSource', () => {
         index: 'my-index-string',
         body: {},
       };
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBe('my-index-string');
@@ -292,6 +294,7 @@ describe('SearchSource', () => {
         index: undefined,
         body: {},
       };
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBeUndefined();
@@ -312,6 +315,7 @@ describe('SearchSource', () => {
         index: null,
         body: {},
       };
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const result = await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBeNull();

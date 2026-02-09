@@ -237,6 +237,7 @@ describe('ChatHeaderButton', () => {
       // Start with window open state
       mockChatService.isWindowOpen.mockReturnValue(true);
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const { container } = render(
         <ChatHeaderButton
           core={mockCore}

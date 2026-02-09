@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiSmallButton, EuiSmallButtonEmpty, EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuItem } from '../../components';

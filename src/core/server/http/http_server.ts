@@ -375,6 +375,7 @@ export class HttpServer {
       throw new Error('A cookieSessionStorageFactory was already created');
     }
     this.cookieSessionStorageCreated = true;
+    // @ts-expect-error TS2344 T is not constrained to Record<string, any> here but is at the call site
     const sessionStorageFactory = await createCookieSessionStorageFactory<T>(
       this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,

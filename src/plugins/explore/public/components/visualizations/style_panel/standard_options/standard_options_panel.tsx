@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -32,6 +31,7 @@ export const StandardOptionsPanel = ({
 }: StandardOptionsPanelProps) => {
   return (
     // TODO add unit panel to standardOptions panel
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="standardOptions"
       accordionLabel={i18n.translate('explore.stylePanel.threshold', {

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { findTestSubject } from 'test_utils/helpers';
@@ -73,6 +72,7 @@ describe('Search', () => {
     // Send invalid query
     searchBar.simulate('keyup', { target: { value: '?' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     expect(component.state().isSearchTextValid).toBe(false);
 
     onQueryChangeMock.mockReset();
@@ -80,6 +80,7 @@ describe('Search', () => {
     // Send valid query to ensure component can recover from invalid query
     searchBar.simulate('keyup', { target: { value: 'dateFormat' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     expect(component.state().isSearchTextValid).toBe(true);
   });
 });

@@ -7,7 +7,9 @@ import React from 'react';
 import { IconType } from '@elastic/eui';
 import { QueryWithQueryAsString } from '../../application/utils/languages';
 import { QueryResultStatus } from '../../application/utils/state_management/types';
+// @ts-expect-error TS6133, TS2307 TODO(ts-error): fixme
 import { Dataset } from '../../../../../data/common';
+// @ts-expect-error TS6133, TS2307 TODO(ts-error): fixme
 import { TimeRange } from '../../../../../data/public';
 import { ExploreServices } from '../../types';
 

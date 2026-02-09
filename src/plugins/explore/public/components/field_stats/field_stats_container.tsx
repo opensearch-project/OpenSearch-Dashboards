@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { FieldStatsTable } from './field_stats_table';
 import { FieldStatsItem, FieldDetailsMap } from './utils/field_stats_types';

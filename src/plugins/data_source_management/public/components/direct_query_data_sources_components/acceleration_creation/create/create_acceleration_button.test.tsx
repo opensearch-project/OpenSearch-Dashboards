@@ -123,7 +123,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -135,7 +134,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -148,7 +146,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -171,7 +168,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -198,7 +194,6 @@ describe('CreateAccelerationButton', () => {
       await act(async () => {
         const onClick = wrapper.find(EuiButton).prop('onClick');
         if (onClick) {
-          // @ts-expect-error TS2345 TODO(ts-error): fixme
           onClick({} as React.MouseEvent<HTMLElement>);
         }
       });

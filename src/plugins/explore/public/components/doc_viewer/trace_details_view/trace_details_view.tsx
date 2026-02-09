@@ -61,6 +61,7 @@ const isOnTracesFlavor = (): boolean => {
 export function TraceDetailsView({ hit }: DocViewRenderProps) {
   const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(undefined);
 
   const {

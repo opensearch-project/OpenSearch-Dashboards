@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { IndexDataStructureCreator } from './index_data_structure_creator';
@@ -89,6 +88,7 @@ const defaultProps = {
 const renderComponent = (props = {}) =>
   render(
     <I18nProvider>
+      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
       <IndexDataStructureCreator {...defaultProps} {...props} />
     </I18nProvider>
   );
@@ -201,6 +201,7 @@ describe('IndexDataStructureCreator', () => {
 
   describe('Mixed Selection (Single + Wildcard)', () => {
     it('handles mixed selection of single indices and wildcards', async () => {
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const mockOnSelectionChange = jest.fn();
       const { getByTestId } = renderComponent();
 

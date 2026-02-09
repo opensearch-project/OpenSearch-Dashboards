@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render 1`] = `
-<EuiFlyout
-  data-test-subj="loadSearchForm"
-  onClose={[Function]}
-  ownFocus={true}
->
+<Fragment>
   <EuiFlyoutHeader
     hasBorder={true}
   >
@@ -67,5 +63,5 @@ exports[`render 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
-</EuiFlyout>
+</Fragment>
 `;

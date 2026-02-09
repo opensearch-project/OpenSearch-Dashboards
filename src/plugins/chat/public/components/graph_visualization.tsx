@@ -191,6 +191,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   // State management
   const [isExpanded, setIsExpanded] = useState(false);
   const [seriesVisibility, setSeriesVisibility] = useState<Record<string, boolean>>({});
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const [retryCount, setRetryCount] = useState(0);
 
   // Theme hooks
@@ -404,6 +405,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
 
         {/* Main chart */}
         <div style={{ height: '500px', width: '100%', minWidth: '300px', maxWidth: '100%' }}>
+          {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
           <Chart size={{ width: '100%', height: '500px' }}>
             <Settings
               showLegend={optimizedSettings.showLegend}

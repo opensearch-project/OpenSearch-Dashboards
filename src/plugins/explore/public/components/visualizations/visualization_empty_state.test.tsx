@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+
 import { VisualizationEmptyState } from './visualization_empty_state';
 
 describe('VisualizationEmptyState', () => {

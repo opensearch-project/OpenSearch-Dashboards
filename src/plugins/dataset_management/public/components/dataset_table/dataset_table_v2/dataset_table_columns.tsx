@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiBadge, EuiButtonEmpty, EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { RouteComponentProps } from 'react-router-dom';

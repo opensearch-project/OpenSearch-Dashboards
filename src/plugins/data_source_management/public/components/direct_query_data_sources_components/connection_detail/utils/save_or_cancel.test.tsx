@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { SaveOrCancel } from './save_or_cancel';
 import { EuiBottomBar, EuiButton, EuiButtonEmpty } from '@elastic/eui';

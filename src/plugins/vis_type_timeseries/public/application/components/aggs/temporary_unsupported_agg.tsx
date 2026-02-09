@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { AggRow } from './agg_row';

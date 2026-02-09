@@ -66,28 +66,20 @@ export const verifyShareUrl = (url, config, testData, datasourceName, queryStrin
 };
 
 /**
- * Opens the share menu with retry mechanism to handle potential timing issues
+ * Opens the share menu with retry mechanism to handle potential timing issues.
+ * Retries the click itself (not just the assertion) because EUI popovers can
+ * fail to open if another overlay intercepts the click or focus is lost.
+ * Before retrying, dismisses any partially rendered popover to avoid the toggle
+ * race condition where a retry click closes a menu that just appeared
+ * (more likely with React 18's batched/async rendering).
  * @param {number} maxAttempts Maximum number of attempts to open the menu (default: 3)
- * @throws {Error} If menu fails to open after maximum attempts
- *
- * @example
- * // Open share menu with default 3 retries
- * openShareMenuWithRetry();
- *
- * // Open share menu with custom 5 retries
- * openShareMenuWithRetry(5);
- *
- * TODO:
- * Investigate long-term solutions for share menu flakiness
  */
 export const openShareMenuWithRetry = (maxAttempts = 3) => {
   const attemptToOpenMenu = (attempt = 1) => {
-    // Check if menu is already open
+    // Check if menu is already open (jQuery .find() is the correct Cypress
+    // pattern for conditional testing — it doesn't fail on missing elements)
     cy.get('body').then(($body) => {
-      const menuExists = $body.find('[data-test-subj="shareContextMenu"]').length > 0;
-
-      if (menuExists) {
-        // Menu is already open, no action needed
+      if ($body.find('[data-test-subj="shareContextMenu"]').length > 0) {
         return;
       }
 
@@ -95,30 +87,31 @@ export const openShareMenuWithRetry = (maxAttempts = 3) => {
         throw new Error(`Failed to open share menu after ${maxAttempts} attempts`);
       }
 
-      // Click the share button
-      cy.getElementByTestId('shareTopNavButton').click();
+      // Ensure the button is visible and actionable before clicking
+      cy.getElementByTestId('shareTopNavButton').should('be.visible').click();
 
-      // Wait for animation and verify menu appears
-      cy.wait(1000); // Give time for animation
+      // Wait for React 18 to flush batched state updates and for
+      // EUI popover animation to complete
+      cy.wait(2000);
 
       // Check if menu appeared
       cy.get('body').then(($updatedBody) => {
-        const menuOpened = $updatedBody.find('[data-test-subj="shareContextMenu"]').length > 0;
-
-        if (!menuOpened) {
-          // Menu didn't appear, retry
+        if ($updatedBody.find('[data-test-subj="shareContextMenu"]').length === 0) {
           cy.log(`Share menu didn't appear on attempt ${attempt}, retrying...`);
+          // Dismiss any partially rendered popover before retrying to prevent
+          // the next click from toggling the menu closed
+          cy.get('body').click(0, 0);
+          cy.wait(500);
           attemptToOpenMenu(attempt + 1);
         }
       });
     });
   };
 
-  // Start the retry process
   attemptToOpenMenu();
 
-  // Once menu is open, verify expected elements are present
-  cy.getElementByTestId('shareContextMenu').should('exist');
+  // Final assertion to ensure menu and its elements are present
+  cy.getElementByTestId('shareContextMenu').should('be.visible');
   cy.getElementByTestId('exportAsSnapshot').should('exist');
   cy.getElementByTestId('exportAsSavedObject').should('exist');
 };

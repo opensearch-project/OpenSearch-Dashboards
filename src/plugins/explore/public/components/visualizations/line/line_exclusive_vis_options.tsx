@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { useDebouncedNumber } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -52,6 +52,7 @@ export const LineExclusiveVisOptions = ({
   ];
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="lineSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.line', {

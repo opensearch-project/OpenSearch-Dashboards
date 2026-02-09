@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { Markdown } from '../../opensearch_dashboards_react/public';
 import { MarkdownVisParams } from './types';

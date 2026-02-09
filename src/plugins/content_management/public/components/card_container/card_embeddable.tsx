@@ -22,6 +22,7 @@ export type CardEmbeddableInput = EmbeddableInput & {
 
 export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
   public readonly type = CARD_EMBEDDABLE;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node: HTMLElement | null = null;
   private root: Root | null = null;
 

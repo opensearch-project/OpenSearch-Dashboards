@@ -88,6 +88,7 @@ function MaxBarsParamEditor({
   }, [isValid, setValidity]);
 
   const onChange: EuiFieldNumberProps['onChange'] = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (ev) => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value)),
     [setValue]
   );

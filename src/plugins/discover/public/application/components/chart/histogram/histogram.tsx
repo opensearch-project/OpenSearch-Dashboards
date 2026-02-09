@@ -320,6 +320,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
 
     return (
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <Chart size="100%">
         <Settings
           xDomain={xDomain}

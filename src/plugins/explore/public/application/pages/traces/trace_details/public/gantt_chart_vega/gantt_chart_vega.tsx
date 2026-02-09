@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, parse } from 'vega';
 import { Handler } from 'vega-tooltip';
 import { createGanttSpec } from './gantt_chart_spec';

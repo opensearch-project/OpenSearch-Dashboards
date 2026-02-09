@@ -34,7 +34,8 @@ export function filterColumns(
   // if true, we keep columns that exist in the new index pattern
   // const fieldsName = indexPattern?.fields?.getAll?.()?.map((fld) => fld.name) || [];
   const fieldsName = (fieldCounts
-    ? getIndexPatternFieldList(indexPattern, fieldCounts)
+    ? // @ts-expect-error TS2345 TODO(ts-error): fixme
+      getIndexPatternFieldList(indexPattern, fieldCounts)
     : indexPattern?.fields.getAll() || []
   ).map((fld) => fld.name);
   // combine columns and defaultColumns without duplicates

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { EuiModalBody, EuiCheckbox } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';

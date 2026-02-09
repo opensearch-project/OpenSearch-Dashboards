@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DragHandleProps } from '../../types';

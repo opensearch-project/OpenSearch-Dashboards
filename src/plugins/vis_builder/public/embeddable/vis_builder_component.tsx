@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { SavedObjectEmbeddableInput, withEmbeddableSubscription } from '../../../embeddable/public';
 import { VisBuilderEmbeddable, VisBuilderOutput } from './vis_builder_embeddable';
 import { getReactExpressionRenderer } from '../plugin_services';

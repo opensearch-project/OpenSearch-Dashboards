@@ -7,8 +7,8 @@
     "devOnly": true
   },
   "peerDependencies": {
-    "eslint": "6.8.0",
-    "babel-eslint": "^10.0.3"
+    "eslint": "^8.56.0",
+    "@babel/eslint-parser": "^7.25.0"
   },
   "dependencies": {
     "micromatch": "^4.0.7",

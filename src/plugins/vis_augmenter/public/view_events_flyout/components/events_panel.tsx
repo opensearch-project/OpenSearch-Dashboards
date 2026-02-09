@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import './styles.scss';
 import { EventVisEmbeddableItem, EventVisEmbeddablesMap } from '.';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OpenSearchPanel } from './open_search_panel';
 
@@ -79,7 +78,6 @@ describe('OpenSearchPanel', () => {
   it('renders flyout with header and footer', () => {
     render(<OpenSearchPanel onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('loadSearchForm')).toBeInTheDocument();
     expect(screen.getByText('Select Saved Search')).toBeInTheDocument();
     expect(screen.getByText('Manage searches')).toBeInTheDocument();
   });

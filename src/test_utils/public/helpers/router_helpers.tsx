@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, ComponentType } from 'react';
+import { Component, ComponentType } from 'react';
 import { MemoryRouter, Route, withRouter } from 'react-router-dom';
 import * as H from 'history';
 

@@ -12,7 +12,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { QUERY_ALL, QUERY_RESTRICTED } from '../../../constants';
 import { PermissionsConfigurationProps } from '../../../types';
 

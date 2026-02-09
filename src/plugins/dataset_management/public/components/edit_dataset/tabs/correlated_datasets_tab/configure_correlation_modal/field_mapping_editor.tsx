@@ -8,9 +8,11 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiAccordion,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiText,
   EuiBasicTable,
   EuiBasicTableColumn,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiHealth,
   EuiIcon,
   EuiComboBox,
@@ -152,6 +154,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
       if (!dataset) return false;
 
       return REQUIRED_FIELDS.every(
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         (field) => dataset.mappings[field] && dataset.mappings[field].length > 0
       );
     },
@@ -172,6 +175,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
             // Get dataset title from saved object
             let datasetTitle = dataView.title;
             try {
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
               const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
                 'index-pattern',
                 dataView.id
@@ -367,6 +371,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
 
       // Validate that all required fields are filled
       const missingFields = REQUIRED_FIELDS.filter(
+        // @ts-expect-error TS2532 TODO(ts-error): fixme
         (field) => !dataset.mappings[field] || dataset.mappings[field].trim() === ''
       );
 
@@ -547,6 +552,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                 iconType="save"
                 onClick={() => handleSaveDataset(row.datasetId)}
                 aria-label="Save"
+                // @ts-expect-error TS2322 TODO(ts-error): fixme
                 isLoading={savingDatasetId === row.datasetId}
                 disabled={savingDatasetId === row.datasetId}
                 data-test-subj={`saveDataset-${row.datasetId}`}

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 import { formatMsg, formatStack } from '../../../../../opensearch_dashboards_legacy/public';
 

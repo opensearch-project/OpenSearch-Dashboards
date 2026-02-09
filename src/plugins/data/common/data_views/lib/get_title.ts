@@ -18,6 +18,7 @@ export async function getTitle(
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
   }
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const dataSourceReference = getDataSourceReference(savedObject.references);
 
   if (dataSourceReference) {
@@ -33,5 +34,6 @@ export async function getTitle(
   const getDataSource = async (id: string) =>
     await client.get<DataSourceAttributes>('data-source', id);
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   return getDataViewTitle(savedObject.attributes.title, savedObject.references, getDataSource);
 }

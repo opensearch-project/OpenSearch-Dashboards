@@ -59,6 +59,7 @@ describe('Workspace plugin', () => {
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
     await workspacePlugin.setup(setupMock, {});
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
@@ -153,6 +154,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {});
     expect(collapsibleNavHeaderImplementation()).toEqual(null);
     const startMock = coreMock.createStart();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await workspacePlugin.start(startMock, getMockDependencies());
     expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
     windowSpy.mockRestore();
@@ -294,6 +296,7 @@ describe('Workspace plugin', () => {
 
     const startMock = coreMock.createStart();
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
 
     startMock.workspaces.workspaceError$.next(WorkspaceError.WORKSPACE_IS_STALE);
@@ -330,6 +333,7 @@ describe('Workspace plugin', () => {
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
 
     // Simulate on error page but no errror case
@@ -360,6 +364,7 @@ describe('Workspace plugin', () => {
 
     const startMock = coreMock.createStart();
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
 
     // Simulate the workspace error case
@@ -386,6 +391,7 @@ describe('Workspace plugin', () => {
     const breadcrumbs = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'dashboards' }]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
     expect(startMock.chrome.setBreadcrumbs).toBeCalledWith(
       expect.arrayContaining([
@@ -412,6 +418,7 @@ describe('Workspace plugin', () => {
     ]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
     expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
   });
@@ -421,6 +428,7 @@ describe('Workspace plugin', () => {
     startMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
     const mockDependencies = getMockDependencies();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, mockDependencies);
     expect(mockDependencies.contentManagement.registerContentProvider).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -442,6 +450,7 @@ describe('Workspace plugin', () => {
     jest.spyOn(navGroupUpdater$, 'next');
 
     expect(navGroupUpdater$.next).not.toHaveBeenCalled();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
     coreStart.workspaces.currentWorkspace$.next({
       id: 'foo',
@@ -455,6 +464,7 @@ describe('Workspace plugin', () => {
     const coreStart = coreMock.createStart();
     coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
 
     expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
@@ -486,6 +496,7 @@ describe('Workspace plugin', () => {
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
 
     const appUpdater = await appUpdater$.pipe(first()).toPromise();
@@ -507,6 +518,7 @@ describe('Workspace plugin', () => {
 
     const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
 
     const navGroupUpdater = await navGroupUpdater$.pipe(first()).toPromise();
@@ -531,6 +543,7 @@ describe('Workspace plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
 
     const mockApp = {
@@ -550,6 +563,7 @@ describe('Workspace plugin', () => {
     const coreStart = coreMock.createStart();
     await workspacePlugin.setup(setupMock, {});
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
 
     expect(coreStart.chrome.globalSearch.unregisterSearchCommand).toBeCalledWith('pagesSearch');
@@ -584,6 +598,7 @@ describe('Workspace plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
 
     expect(appUpdaterSpy).toHaveBeenCalled();
@@ -625,6 +640,7 @@ describe('Workspace plugin', () => {
       },
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(startMock, getMockDependencies());
 
     expect(appUpdaterSpy).toHaveBeenCalled();
@@ -683,6 +699,7 @@ describe('Workspace plugin', () => {
     const appUpdaterChangeMock = jest.fn();
     appUpdater$.subscribe(appUpdaterChangeMock);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     workspacePlugin.start(coreStart, getMockDependencies());
 
     // Wait for filterNav been executed

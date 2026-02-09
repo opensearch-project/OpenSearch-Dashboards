@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { ActionBar } from './action_bar/action_bar';
 import { PatternsContainer } from '../patterns_table/patterns_container';
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { EuiSmallButton } from '@elastic/eui';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';

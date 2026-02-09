@@ -29,7 +29,7 @@
  */
 
 import './visualize_editor.scss';
-import React, { RefObject } from 'react';
+import { RefObject } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'opensearch-dashboards/public';

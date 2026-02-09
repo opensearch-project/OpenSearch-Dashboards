@@ -69,6 +69,7 @@ describe('ChatEventHandler', () => {
       mockOnTimelineUpdate,
       mockOnStreamingStateChange,
       mockGetTimeline,
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockConfirmationService
     );
   });

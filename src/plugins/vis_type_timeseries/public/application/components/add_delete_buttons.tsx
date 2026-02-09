@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import { EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { isBoolean } from 'lodash';

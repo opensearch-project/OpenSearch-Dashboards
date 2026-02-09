@@ -5,7 +5,7 @@
 
 import './results_action_bar.scss';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { useObservable } from 'react-use';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -90,6 +90,7 @@ const defaultConfig = {
 
 function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
   const renderInputRow = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (item: FromToModel, index, onChangeValue) => (
       <>
         <EuiFlexItem>

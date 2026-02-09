@@ -173,6 +173,7 @@ export const ChartTypeSelector = <T extends ChartType>({
           data-test-subj="exploreChartTypeSelector"
           compressed
           valueOfSelected={currChartTypeId || ''}
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           placeholder="Select a visualization type"
           options={selectOptions}
           onChange={(value) => {

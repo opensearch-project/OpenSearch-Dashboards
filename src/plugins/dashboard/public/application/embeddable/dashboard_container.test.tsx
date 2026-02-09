@@ -50,7 +50,7 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import React from 'react';
+
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from 'test_utils/helpers';

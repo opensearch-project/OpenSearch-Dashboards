@@ -34,7 +34,6 @@ import {
   mockPersistedLogFactory,
 } from './query_string_input.test.mocks';
 
-import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';

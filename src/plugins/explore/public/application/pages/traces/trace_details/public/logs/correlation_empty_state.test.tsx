@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CorrelationEmptyState, CorrelationEmptyStateProps } from './correlation_empty_state';
 import { Dataset } from '../../../../../../../../data/common';

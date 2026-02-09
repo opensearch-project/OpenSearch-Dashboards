@@ -630,6 +630,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                                   onClick={() => handleInfoIconClick(itemIndex, item)}
                                   className="indexDataStructureCreator__wildcardButton"
                                 >
+                                  {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
                                   <EuiText size="xs" color="primary">
                                     {matchingIndices.length}{' '}
                                     {matchingIndices.length === 1 ? 'index' : 'indices'}

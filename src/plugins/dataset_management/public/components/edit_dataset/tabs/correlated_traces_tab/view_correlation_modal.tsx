@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiBadge,
   EuiDescriptionList,
   EuiDescriptionListTitle,

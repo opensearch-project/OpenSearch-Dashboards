@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { DataSourceHeader } from './data_source_page_header';
 import { EuiText } from '@elastic/eui';

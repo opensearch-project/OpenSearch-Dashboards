@@ -46,8 +46,10 @@ export interface InternalFieldConfig<T> {
 }
 
 export const useField = <T, FormType = FormData, I = T>(
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   form: FormHook<FormType>,
   path: string,
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   config: FieldConfig<T, FormType, I> & InternalFieldConfig<T> = {},
   valueChangeListener?: (value: I) => void
 ) => {
@@ -81,6 +83,7 @@ export const useField = <T, FormType = FormData, I = T>(
       if (typeof rawValue === 'function') {
         return deserializer ? deserializer(rawValue()) : rawValue();
       }
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       return deserializer ? deserializer(rawValue) : rawValue;
     },
     [initialValue, deserializer]
@@ -129,6 +132,7 @@ export const useField = <T, FormType = FormData, I = T>(
   };
 
   const formatInputValue = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     <T>(inputValue: unknown): T => {
       const isEmptyString = typeof inputValue === 'string' && inputValue.trim() === '';
 
@@ -138,6 +142,7 @@ export const useField = <T, FormType = FormData, I = T>(
 
       const formData = getFormData({ unflatten: false });
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       return formatters.reduce((output, formatter) => formatter(output, formData), inputValue) as T;
     },
     [formatters, getFormData]

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DocViewerTab, IDocViewerTabProps } from './doc_viewer_tab';
 import { DocViewRenderProps } from '../../../types/doc_views_types';

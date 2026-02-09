@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LogsDataTable, LogsDataTableProps } from './logs_data_table';
 import { LogHit } from '../../server/ppl_request_logs';

@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { DiscoverViewServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../inspector/public';
@@ -189,7 +189,8 @@ const getLegacyTopNavLinks = (
               makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
             />
           </OpenSearchDashboardsContextProvider>
-        )
+        ),
+        { 'data-test-subj': 'loadSearchForm' }
       );
     },
     iconType: 'folderOpen',
@@ -207,7 +208,6 @@ const getLegacyTopNavLinks = (
     ariaLabel: i18n.translate('discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
     run: async (anchorElement) => {
       const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
       const sharingData = await getSharingData({
@@ -342,7 +342,8 @@ export const getTopNavLinks = (
               makeUrl={(searchId) => `#/view/${encodeURIComponent(searchId)}`}
             />
           </OpenSearchDashboardsContextProvider>
-        )
+        ),
+        { 'data-test-subj': 'loadSearchForm' }
       );
     },
     iconType: 'folderOpen',
@@ -604,7 +605,7 @@ const getSharingData = async ({
     },
     // fields: selectFields,
     metaFields: indexPattern?.metaFields,
-    conflictedTypesFields: indexPattern?.fields
+    conflictedTypesFields: (indexPattern?.fields ?? [])
       .filter((f) => f.type === 'conflict')
       .map((f) => f.name),
     indexPatternId: indexPattern?.id,

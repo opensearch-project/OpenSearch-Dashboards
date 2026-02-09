@@ -33,6 +33,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
           );
 
           if (dataSource) {
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             dataset.dataSource = {
               id: dataSource.id,
               title: dataSource.attributes.title,

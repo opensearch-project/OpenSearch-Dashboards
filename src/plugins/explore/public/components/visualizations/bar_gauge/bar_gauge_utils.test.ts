@@ -13,6 +13,7 @@ import {
 } from './bar_gauge_utils';
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { getColors } from '../theme/default_colors';
 
 describe('bar_gauge_utils', () => {

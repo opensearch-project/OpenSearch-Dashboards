@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Component, Fragment } from 'react';
+import { Component, Fragment } from 'react';
 
 import {
   EuiBadge,
@@ -39,6 +39,7 @@ export class CreateButton extends Component<Props, State> {
   };
 
   public render() {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { options, children } = this.props;
     const { isPopoverOpen } = this.state;
 

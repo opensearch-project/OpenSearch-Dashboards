@@ -120,6 +120,7 @@ describe('redux_persistence', () => {
           savedQuery: undefined,
           lineCount: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         queryEditor: {
           queryStatusMap: {},
           overallQueryStatus: {

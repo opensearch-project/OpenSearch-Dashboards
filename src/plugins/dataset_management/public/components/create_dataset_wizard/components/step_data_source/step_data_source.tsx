@@ -4,7 +4,7 @@
  */
 
 import { EuiPageContent } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DataSourceRef } from 'src/plugins/dataset_management/public/types';
 import { DataSourceTableItem, StepInfo } from '../../types';
 

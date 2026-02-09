@@ -4,7 +4,6 @@
  */
 
 import { fireEvent, render, screen, act } from '@testing-library/react';
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock, httpServiceMock } from '../../../mocks';
 import { SavedObjectWithMetadata } from './recent_items';

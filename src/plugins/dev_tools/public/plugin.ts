@@ -215,6 +215,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
         mount: toMountPoint(
           React.createElement(DevToolsIcon, {
             core,
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             appId: this.id,
             devTools: this.getSortedDevTools(),
             deps: this.setupDeps as DevToolsSetupDependencies,

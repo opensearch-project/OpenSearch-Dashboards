@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { VisualizationContainer } from './visualization_container';
@@ -110,6 +109,7 @@ describe('VisualizationContainer', () => {
 
   it('handles empty results', () => {
     // Override the mock for this test
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(TabResultsHooks, 'useTabResults').mockReturnValueOnce({
       results: null,
     });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { DataImporterPluginApp } from './data_importer_app';
 import { coreMock } from '../../../../core/public/mocks';

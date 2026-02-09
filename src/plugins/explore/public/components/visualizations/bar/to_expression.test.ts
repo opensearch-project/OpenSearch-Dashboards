@@ -611,6 +611,7 @@ describe('bar to_expression', () => {
         to: '2024-01-31T00:00:00.000Z',
       };
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const spec = createTimeBarChart(
         mockData,
         [mockNumericalColumn],
@@ -817,6 +818,7 @@ describe('bar to_expression', () => {
         to: '2024-02-29T00:00:00.000Z',
       };
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const spec = createGroupedTimeBarChart(
         mockData,
         [mockNumericalColumn],
@@ -1027,6 +1029,7 @@ describe('bar to_expression', () => {
         to: '2024-03-31T00:00:00.000Z',
       };
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const spec = createFacetedTimeBarChart(
         mockData,
         [mockNumericalColumn],

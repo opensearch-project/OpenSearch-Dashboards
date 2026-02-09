@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { Route, Router, Switch } from 'react-router-dom';
 import { createMemoryHistory } from 'history';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { MenuItemPosition, TopNavMenu, TopNavMenuItem } from './top_nav_menu';
 import { render } from '@testing-library/react';
 

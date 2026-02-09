@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryPanelEditor } from './use_query_panel_editor';

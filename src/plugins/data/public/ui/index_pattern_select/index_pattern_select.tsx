@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import { Required } from '@osd/utility-types';
 import { EuiCompressedComboBox, EuiComboBoxProps } from '@elastic/eui';
@@ -174,6 +174,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
       const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
       const dataSourceIdSet = new Set();
       savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
         if (
           dataSourceReference &&
@@ -198,6 +199,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
       }
 
       const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
         if (dataSourceReference) {
           const dataSourceTitle =

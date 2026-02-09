@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { getDataViewDescription } from '../index';
 import { DataAdapter } from '../../../../common/adapters/data';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

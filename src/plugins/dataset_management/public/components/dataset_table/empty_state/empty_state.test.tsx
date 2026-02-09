@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EmptyState } from '../empty_state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';

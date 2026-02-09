@@ -4,7 +4,7 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataSourceItem } from '.';
 import { DataSourceOption } from '../data_source_menu/types';

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ import { EuiPageContent } from '@elastic/eui';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   DatasetTableWithRouter,
   EditDatasetContainer,
   CreateEditFieldContainer,

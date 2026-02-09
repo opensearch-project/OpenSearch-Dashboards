@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { topValuesDetailConfig } from './top_values_detail';
 import { executeFieldStatsQuery } from '../field_stats_queries';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCompressedFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 import { AggParamEditorProps } from '../agg_param_props';

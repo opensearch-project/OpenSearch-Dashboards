@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 

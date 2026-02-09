@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpanMetadataTab } from './span_metadata_tab';
 
@@ -524,7 +523,7 @@ describe('SpanMetadataTab', () => {
         spanId: 'mixed-case',
         attributes: {
           'HTTP.METHOD': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           'Http.Status_Code': 200,
           'AWS.REGION': 'us-west-2',
           'Service.Version': '1.0.0',

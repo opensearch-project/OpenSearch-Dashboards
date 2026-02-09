@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -61,6 +61,7 @@ function MetricAggParamEditor({
     [metricAggs, agg.type.name]
   );
   const options = useAvailableOptions(aggFilter, filteredMetrics, DEFAULT_OPTIONS);
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
 
   return (

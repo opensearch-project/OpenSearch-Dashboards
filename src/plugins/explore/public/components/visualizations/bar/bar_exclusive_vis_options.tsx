@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +35,7 @@ interface BarExclusiveVisOptionsProps {
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
-  onStackModeChange: (stackMode: 'none' | 'total') => void;
+  onStackModeChange?: (stackMode: 'none' | 'total') => void;
   shouldDisableUseThresholdColor?: boolean;
 }
 
@@ -99,6 +99,7 @@ export const BarExclusiveVisOptions = ({
         });
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
       {/* {!shouldDisableUseThresholdColor && (
         <EuiFormRow>
@@ -144,7 +145,7 @@ export const BarExclusiveVisOptions = ({
             })}
             options={stackModeOptions}
             idSelected={stackMode}
-            onChange={(id) => onStackModeChange(id as 'none' | 'total')}
+            onChange={(id) => onStackModeChange?.(id as 'none' | 'total')}
             buttonSize="compressed"
             isFullWidth
             data-test-subj="barStackModeButtonGroup"

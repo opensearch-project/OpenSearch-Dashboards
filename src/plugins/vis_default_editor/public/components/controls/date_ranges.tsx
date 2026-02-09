@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import { Fragment, useState, useEffect, useCallback } from 'react';
 import {
   htmlIdGenerator,
   EuiSmallButtonIcon,

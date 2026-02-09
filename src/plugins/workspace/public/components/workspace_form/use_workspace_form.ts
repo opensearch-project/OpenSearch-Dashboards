@@ -149,6 +149,7 @@ export const useWorkspaceForm = ({
     setColor(text);
   }, []);
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const setPrivacyType = useCallback((newPrivacyType) => {
     setPermissionSettings((prevPermissionSettings) => {
       if (convertPermissionsToPrivacyType(prevPermissionSettings) === newPrivacyType) {

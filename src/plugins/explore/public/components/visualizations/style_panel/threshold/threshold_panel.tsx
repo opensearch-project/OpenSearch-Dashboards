@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { ThresholdCustomValues } from './threshold_custom_values';
@@ -37,6 +37,7 @@ export const ThresholdPanel = ({
 
   const options = useMemo(() => getThresholdOptions(), []);
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="thresholdSection"
       accordionLabel={i18n.translate('explore.stylePanel.threshold.title', {

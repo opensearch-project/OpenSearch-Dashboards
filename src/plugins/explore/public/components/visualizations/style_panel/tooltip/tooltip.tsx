@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiSwitch } from '@elastic/eui';
 import { TooltipOptions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
@@ -25,6 +25,7 @@ export const TooltipOptionsPanel = ({
   }
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="tooltipSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.tooltip', {

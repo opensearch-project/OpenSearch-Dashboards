@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
@@ -64,6 +63,7 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
   // to instantiate this kind of embeddable.
   public readonly type = TODO_EMBEDDABLE;
   private subscription: Subscription;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: HTMLElement;
   private root: Root | null = null;
 

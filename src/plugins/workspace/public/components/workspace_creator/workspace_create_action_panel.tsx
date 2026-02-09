@@ -11,7 +11,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { ApplicationStart } from 'opensearch-dashboards/public';
 import { WorkspaceFormDataState, WorkspaceCancelModal } from '../workspace_form';
 import {

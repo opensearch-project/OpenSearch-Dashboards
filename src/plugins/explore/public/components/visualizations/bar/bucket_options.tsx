@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { BarChartStyleOptions } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
 import { getAggregationType, getTimeUnits } from '../utils/collections';
@@ -31,6 +31,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
   const timeUnits = useMemo(() => getTimeUnits(), []);
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="bucketSection"
       accordionLabel={i18n.translate('explore.stylePanel.bar.tabs.bucket', {

@@ -4,7 +4,6 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import React from 'react';
 
 interface AssociatedObjectsTabFailureProps {
   type: string;

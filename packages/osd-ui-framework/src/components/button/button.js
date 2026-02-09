@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import classNames from 'classnames';
 
 import { KuiButtonIcon } from './button_icon/button_icon';

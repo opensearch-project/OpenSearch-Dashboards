@@ -77,6 +77,7 @@ function setupNodeEvents(
   // Fix: Error: Webpack Compilation Error
   // Module not found: Error: Can't resolve 'path'
   webpackOptions!.plugins = webpackOptions!.plugins || [];
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   webpackOptions!.plugins.push(new (require('node-polyfill-webpack-plugin'))());
 
   /**

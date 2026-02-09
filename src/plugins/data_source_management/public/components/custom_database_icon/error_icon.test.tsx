@@ -4,7 +4,7 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import { ErrorIcon } from './error_icon';
 
 describe('Test on empty icon', () => {

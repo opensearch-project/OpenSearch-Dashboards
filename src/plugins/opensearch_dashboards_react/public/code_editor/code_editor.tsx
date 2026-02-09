@@ -122,6 +122,8 @@ export interface Props {
 
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+  _registeredLanguages: Set<string> = new Set();
+  _providerDisposables: monaco.IDisposable[] = [];
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -167,6 +169,9 @@ export class CodeEditor extends React.Component<Props, {}> {
       });
     }
 
+    // Register providers for the initial language
+    this._registerProvidersForLanguage(this.props.languageId);
+
     editor.onMouseDown((e) => {
       if (e.target.position) {
         if (e.event.detail === 1) {
@@ -185,24 +190,6 @@ export class CodeEditor extends React.Component<Props, {}> {
 
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
-
-    monaco.languages.onLanguage(languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
-    });
 
     return (
       <React.Fragment>
@@ -225,6 +212,64 @@ export class CodeEditor extends React.Component<Props, {}> {
   _updateDimensions = () => {
     if (this._editor) {
       this._editor.layout();
+    }
+  };
+
+  componentDidUpdate(prevProps: Props) {
+    // When language changes, register providers for the new language
+    if (prevProps.languageId !== this.props.languageId) {
+      this._registerProvidersForLanguage(this.props.languageId);
+    }
+  }
+
+  componentWillUnmount() {
+    this._providerDisposables.forEach((d) => d.dispose());
+    this._providerDisposables = [];
+  }
+
+  /**
+   * Register language providers for the given language ID.
+   * Tracks which languages have been registered to avoid duplicate registrations.
+   * Skips registration for unregistered languages to avoid errors.
+   */
+  _registerProvidersForLanguage = (languageId: string) => {
+    // Skip if we've already registered providers for this language
+    if (this._registeredLanguages.has(languageId)) {
+      return;
+    }
+
+    // Skip if the language is not registered with Monaco
+    const isLanguageRegistered = monaco.languages
+      .getLanguages()
+      .some((lang) => lang.id === languageId);
+    if (!isLanguageRegistered) {
+      return;
+    }
+
+    this._registeredLanguages.add(languageId);
+
+    if (this.props.suggestionProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+      );
+    }
+
+    if (this.props.signatureProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+      );
+    }
+
+    if (this.props.hoverProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+      );
+    }
+
+    if (this.props.languageConfiguration) {
+      this._providerDisposables.push(
+        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration)
+      );
     }
   };
 }

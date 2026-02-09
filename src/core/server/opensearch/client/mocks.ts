@@ -154,7 +154,7 @@ const createCustomClusterClientMock = () => {
   const mock: CustomClusterClientMock = {
     asInternalUser: createClientMock(),
     asInternalUserWithLongNumeralsSupport: createClientMock(true),
-    asScoped: jest.fn(),
+    asScoped: jest.fn() as any,
     close: jest.fn(),
   };
 
@@ -172,6 +172,7 @@ const createSuccessTransportRequestPromise = <T>(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {}
 ): MockedTransportRequestPromise<ApiResponse<T>> => {
+  // @ts-expect-error TS2322 T is not constrained to Record<string, any> here
   const response = createApiResponse({ body, statusCode });
   const promise = Promise.resolve(response);
   (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();

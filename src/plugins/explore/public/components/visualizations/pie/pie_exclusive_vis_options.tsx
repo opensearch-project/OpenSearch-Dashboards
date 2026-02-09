@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
-import React from 'react';
+
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -26,6 +26,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
   };
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="pieSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.pie', {

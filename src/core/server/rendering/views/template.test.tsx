@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { injectedMetadataServiceMock } from '../../../public/mocks';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { Template } from './template';

@@ -193,6 +193,7 @@ describe('Table', () => {
     // Send invalid query
     searchBar.simulate('keyup', { key: keys.ENTER, target: { value: '?' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     expect(component.state().isSearchTextValid).toBe(false);
 
     onQueryChangeMock.mockReset();
@@ -200,6 +201,7 @@ describe('Table', () => {
     // Send valid query to ensure component can recover from invalid query
     searchBar.simulate('keyup', { key: keys.ENTER, target: { value: 'I am valid' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    // @ts-expect-error TS2571 TODO(ts-error): fixme
     expect(component.state().isSearchTextValid).toBe(true);
   });
 

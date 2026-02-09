@@ -192,6 +192,7 @@ describe('createRegularHeatmap', () => {
       regularAxisMappings
     );
 
+    // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
     const encoding = spec.layer[0].encoding;
     expect(encoding.x.type).toBe('nominal');
     expect(encoding.y.type).toBe('nominal');
@@ -214,6 +215,7 @@ describe('createRegularHeatmap', () => {
       noTitleStyles,
       regularAxisMappings
     );
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(noTitleResult.title).toBeUndefined();
 
     // Case 2: Default title (show = true, titleName = '')
@@ -231,6 +233,7 @@ describe('createRegularHeatmap', () => {
       defaultTitleStyles,
       regularAxisMappings
     );
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(defaultTitleResult.title).toBe('value1 by category1 and category2');
 
     // Case 3: Custom title (show = true, titleName = 'Custom Title')
@@ -248,6 +251,7 @@ describe('createRegularHeatmap', () => {
       customTitleStyles,
       regularAxisMappings
     );
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(customTitleResult.title).toBe('Custom Regular Heatmap');
   });
 
@@ -263,6 +267,7 @@ describe('createRegularHeatmap', () => {
     } as HeatmapChartStyle;
 
     const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);
+    // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
     expect(spec.layer[0].encoding.color.scale).toEqual({
       type: 'log',
       scheme: 'reds',
@@ -281,6 +286,7 @@ describe('createRegularHeatmap', () => {
     };
 
     const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);
+    // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
     expect(spec.layer[0].encoding.color.bin).toBe(false);
   });
 });

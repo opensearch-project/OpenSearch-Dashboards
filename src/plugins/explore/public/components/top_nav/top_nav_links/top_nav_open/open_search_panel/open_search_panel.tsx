@@ -10,7 +10,6 @@ TODO: This file needs to be updated.
 - this file needs unit tests once above has been resolved.
  */
 
-import React from 'react';
 import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -18,7 +17,6 @@ import {
   EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiFlyoutBody,
@@ -66,7 +64,7 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
   } = useOpenSearchDashboards<ExploreServices>();
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiText size="s">
           <h2>
@@ -141,6 +139,6 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

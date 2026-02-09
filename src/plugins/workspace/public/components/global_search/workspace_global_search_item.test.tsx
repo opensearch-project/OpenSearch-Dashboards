@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceGlobalSearchPageItem } from './workspace_global_search_item';

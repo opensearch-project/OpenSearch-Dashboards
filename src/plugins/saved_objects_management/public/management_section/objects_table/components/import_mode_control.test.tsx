@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { shallowWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ImportModeControl, ImportModeControlProps } from './import_mode_control';

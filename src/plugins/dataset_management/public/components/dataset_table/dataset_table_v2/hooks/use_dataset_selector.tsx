@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import React from 'react';
+
 import { i18n } from '@osd/i18n';
 import { OverlayStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../../../../../../opensearch_dashboards_react/public';

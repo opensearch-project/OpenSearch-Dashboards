@@ -5,7 +5,7 @@
 
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiLink } from '@elastic/eui';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_types';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { getLogosMock } from '../../../../common/mocks';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';

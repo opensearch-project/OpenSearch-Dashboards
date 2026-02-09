@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import * as VB from '../../../visualizations/visualization_builder';
@@ -46,6 +45,7 @@ describe('<ResizableVisControlAndTabs />', () => {
   beforeEach(() => {
     mockUseSelector.mockClear();
     jest.spyOn(ReactUse, 'useObservable').mockReturnValue({});
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(new VB.VisualizationBuilder({}));
     mockUseTabError.mockReturnValue(null);
     mockUseOpenSearchDashboards.mockReturnValue({

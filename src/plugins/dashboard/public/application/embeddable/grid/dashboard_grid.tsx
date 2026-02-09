@@ -95,6 +95,7 @@ function ResponsiveGrid({
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <ReactGridLayout
       width={lastValidGridSize}
       className={classes}
@@ -266,9 +267,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
       const classes = classNames({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--expanded': expandPanel,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (

@@ -97,6 +97,7 @@ describe('indexPatternTypeConfig', () => {
       id: 'test-pattern',
       title: 'Test',
       type: 'INDEX_PATTERN',
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       dataSource: { id: 'dataSourceId', title: 'Cluster 1', type: 'OpenSearch' },
     };
     expect(indexPatternTypeConfig.supportedLanguages(mockDataset)).toEqual([

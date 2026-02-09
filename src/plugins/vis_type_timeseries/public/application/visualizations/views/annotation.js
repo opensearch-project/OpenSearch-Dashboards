@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import { EuiToolTip } from '@elastic/eui';

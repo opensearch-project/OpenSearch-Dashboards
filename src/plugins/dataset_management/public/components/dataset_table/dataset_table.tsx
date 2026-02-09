@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useEffectOnce, useObservable } from 'react-use';
 import { of } from 'rxjs';
@@ -201,6 +201,7 @@ export const DatasetTable = ({ canSave, history }: Props) => {
     if (!canSave) return null;
 
     const button = (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <CreateButton options={creationOptions}>
         <FormattedMessage
           id="datasetManagement.datasetTable.createBtn"

@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import _ from 'lodash';
 import { EuiCompressedRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';

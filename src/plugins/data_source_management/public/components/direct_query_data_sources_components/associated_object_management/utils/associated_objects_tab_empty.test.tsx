@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { AssociatedObjectsTabEmpty } from './associated_objects_tab_empty';
 // @ts-expect-error TS6133 TODO(ts-error): fixme

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { createRoot } from 'react-dom/client';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';

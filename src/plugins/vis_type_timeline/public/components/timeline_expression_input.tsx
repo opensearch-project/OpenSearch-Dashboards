@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { monaco } from '@osd/monaco';

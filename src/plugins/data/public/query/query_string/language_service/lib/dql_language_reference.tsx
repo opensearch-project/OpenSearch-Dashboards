@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { FormattedMessage } from 'react-intl';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { IDataPluginServices } from '../../../../types';
@@ -41,5 +41,6 @@ const DqlReference = () => {
 };
 
 export const dqlLanguageReference = () => {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return <LanguageReference body={<DqlReference />} />;
 };

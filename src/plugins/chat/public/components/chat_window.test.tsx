@@ -50,6 +50,7 @@ describe('ChatWindow', () => {
     jest.clearAllMocks();
     mockCore = coreMock.createStart();
     mockContextProvider = {};
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     mockSuggestedActionsService = {
       registerProvider: jest.fn(),
     };
@@ -146,6 +147,7 @@ describe('ChatWindow', () => {
 
   describe('loading message functionality', () => {
     it('should add loading message to timeline when sending a message', async () => {
+      // @ts-expect-error TS6133, TS2741 TODO(ts-error): fixme
       const { container } = renderWithContext(<ChatWindow />);
 
       // Mock the sendMessage to return a controllable observable
@@ -162,6 +164,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS6133, TS2741 TODO(ts-error): fixme
       const { rerender } = renderWithContext(<ChatWindow ref={ref} />);
 
       await act(async () => {
@@ -195,6 +198,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Send a message
@@ -223,6 +227,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Send a message
@@ -251,6 +256,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Send a message
@@ -368,9 +374,11 @@ describe('ChatWindow', () => {
         { id: 'assistant-2', role: 'assistant', content: 'Second response' },
       ];
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockChatService.getCurrentMessages.mockReturnValue(initialTimeline);
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Wait for initial timeline to be set
@@ -419,9 +427,11 @@ describe('ChatWindow', () => {
         { id: 'assistant-1', role: 'assistant', content: 'Assistant message' },
       ];
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockChatService.getCurrentMessages.mockReturnValue(initialTimeline);
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Wait for initial timeline to be set
@@ -459,6 +469,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       await ref.current?.sendMessage({ content: 'test message' });
@@ -473,6 +484,7 @@ describe('ChatWindow', () => {
   describe('streaming state management', () => {
     it('should prevent sending messages while streaming', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Mock a long-running observable that doesn't complete
@@ -497,6 +509,7 @@ describe('ChatWindow', () => {
 
     it('should handle runId updates from events', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       const observableWithRunId = {
@@ -524,6 +537,7 @@ describe('ChatWindow', () => {
 
     it('should clean up subscriptions on unmount', async () => {
       const unsubscribeMock = jest.fn();
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       let subscriptionCallbacks: any;
       const observableWithCleanup = {
         subscribe: jest.fn((callbacks) => {
@@ -538,6 +552,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       const { unmount } = renderWithContext(<ChatWindow ref={ref} />);
 
       // Create subscription by sending a message
@@ -560,6 +575,7 @@ describe('ChatWindow', () => {
   describe('input handling', () => {
     it('should handle empty input gracefully', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       await act(async () => {
@@ -573,6 +589,7 @@ describe('ChatWindow', () => {
 
     it('should handle whitespace-only input', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       await act(async () => {
@@ -587,6 +604,7 @@ describe('ChatWindow', () => {
 
     it('should not trim input when sent via ref sendMessage', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       await act(async () => {
@@ -604,6 +622,7 @@ describe('ChatWindow', () => {
   describe('new chat functionality', () => {
     it('should clear timeline and reset state on new chat', () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       ref.current?.startNewChat();
@@ -613,6 +632,7 @@ describe('ChatWindow', () => {
 
     it('should reset streaming state on new chat', () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       // Start new chat should reset all state
@@ -625,6 +645,7 @@ describe('ChatWindow', () => {
   describe('error handling', () => {
     it('should handle sendMessage promise rejection', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       mockChatService.sendMessage.mockRejectedValue(new Error('Network error'));
@@ -635,6 +656,7 @@ describe('ChatWindow', () => {
 
     it('should reset streaming state on sendMessage error', async () => {
       const ref = React.createRef<ChatWindowInstance>();
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow ref={ref} />);
 
       mockChatService.sendMessage.mockRejectedValue(new Error('Network error'));
@@ -650,6 +672,7 @@ describe('ChatWindow', () => {
     it('should initialize with empty timeline', () => {
       mockChatService.getCurrentMessages.mockReturnValue([]);
 
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       const { container } = renderWithContext(<ChatWindow />);
 
       expect(container).toBeTruthy();
@@ -657,6 +680,7 @@ describe('ChatWindow', () => {
     });
 
     it('should handle component unmount gracefully', () => {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       const { unmount } = renderWithContext(<ChatWindow />);
 
       expect(() => unmount()).not.toThrow();
@@ -676,6 +700,7 @@ describe('ChatWindow', () => {
         .AssistantActionService;
       AssistantActionService.getInstance = jest.fn(() => mockService);
 
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       renderWithContext(<ChatWindow />);
 
       // Verify that getState$ was called during mount

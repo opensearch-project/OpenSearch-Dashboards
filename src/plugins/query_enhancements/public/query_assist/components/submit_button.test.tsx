@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { QueryAssistSubmitButton } from './submit_button';
 
 type SubmitButtonProps = ComponentProps<typeof QueryAssistSubmitButton>;

@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiSwitch, EuiButtonGroup, EuiColorPicker, EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { defaultHeatmapChartStyles, HeatmapChartStyle } from './heatmap_vis_config';
 import { ColorSchemas, ScaleType } from '../types';
 import { getColorSchemas } from '../utils/collections';
@@ -43,6 +43,7 @@ export const HeatmapExclusiveVisOptions = ({
   const colorSchemas = useMemo(() => getColorSchemas(), []);
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="heatmapSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.heatmap', {

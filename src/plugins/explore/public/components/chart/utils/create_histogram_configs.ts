@@ -83,6 +83,7 @@ export function createHistogramConfigs(
         // because the original buckets property is defined as a getter on the prototype,
         // so simple assignment won't work. This allows us to inject custom TimeBuckets
         // with a different barTarget for traces charts (~20 buckets instead of default).
+        // @ts-expect-error TS2790 TODO(ts-error): fixme
         delete dateHistogramAgg.buckets;
 
         Object.defineProperty(dateHistogramAgg, 'buckets', {

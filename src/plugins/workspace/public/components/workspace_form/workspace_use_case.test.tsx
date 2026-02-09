@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 

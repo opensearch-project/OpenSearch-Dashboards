@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -15,6 +15,7 @@ export interface SourceFiltersTableProps {
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   saveDataset: DataPublicPluginStart['datasets']['updateSavedObject'];
   useUpdatedUX: boolean;
 }

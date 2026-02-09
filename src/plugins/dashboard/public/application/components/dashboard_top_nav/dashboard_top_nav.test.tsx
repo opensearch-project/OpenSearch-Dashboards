@@ -27,7 +27,7 @@ jest.mock(
 import { I18nProvider } from '@osd/i18n/react';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { DashboardTopNav } from './dashboard_top_nav';
-import React from 'react';
+
 import { DashboardAppState, DashboardAppStateContainer } from '../../../types';
 import { Dashboard } from '../../../dashboard';
 import { DashboardContainer } from '../../embeddable';

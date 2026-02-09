@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -67,6 +67,7 @@ function ChartOptions({
   );
 
   const setValueAxis = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (paramName, value) => {
       changeValueAxis(index, paramName, value);
     },

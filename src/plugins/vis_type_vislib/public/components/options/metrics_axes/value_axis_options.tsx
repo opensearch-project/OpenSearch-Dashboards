@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 

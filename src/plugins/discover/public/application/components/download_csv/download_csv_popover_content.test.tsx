@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { fireEvent, render, screen } from '@testing-library/react';
 import {
@@ -23,6 +22,7 @@ const mockMaxLabel = `Max available (${mockProps.hitsCount})`;
 
 const TestHarness = (props: Partial<DiscoverDownloadCsvPopoverContentProps>) => {
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <DiscoverDownloadCsvPopoverContent {...mockProps} {...props} />
     </IntlProvider>

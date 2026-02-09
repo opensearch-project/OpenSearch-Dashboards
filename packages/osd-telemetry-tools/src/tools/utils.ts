@@ -173,7 +173,15 @@ export function getResolvedModuleSourceFile(
   program: ts.Program,
   importedModuleName: string
 ) {
-  const resolvedModule = (originalSource as any).resolvedModules.get(importedModuleName);
+  const { resolvedModule } = ts.resolveModuleName(
+    importedModuleName,
+    originalSource.fileName,
+    program.getCompilerOptions(),
+    ts.sys
+  );
+  if (!resolvedModule) {
+    throw new Error(`Unable to resolve module ${importedModuleName}`);
+  }
   const resolvedModuleSourceFile = program.getSourceFile(resolvedModule.resolvedFileName);
   if (!resolvedModuleSourceFile) {
     throw new Error(`Unable to find resolved module ${importedModuleName}`);

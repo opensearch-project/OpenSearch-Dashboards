@@ -50,7 +50,9 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
     setSortingColumns(newSortingColumns);
   }, []);
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   const renderCellValue: EuiDataGridCellProps['renderCellValue'] = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ rowIndex, columnId }) => {
       const hit = rows[rowIndex];
       if (!hit?._source) return '—';

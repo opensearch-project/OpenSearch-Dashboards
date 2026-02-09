@@ -18,7 +18,7 @@ import {
   EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { Color } from './utils';
 import { addIntegrationRequest } from './create_integration_helpers';
@@ -93,7 +93,6 @@ const runQuery = async (
       } else if (poll.status.toLowerCase().startsWith('fail')) {
         return {
           ok: false,
-          // @ts-expect-error TS2739 TODO(ts-error): fixme
           error: new Error(poll.error ?? 'No error information provided', { cause: poll }),
         };
       }

@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from 'opensearch-dashboards/public';
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import React from 'react';
+
 import { IndexPatternTableColumn } from '../../../../index_pattern_management/public';
 import { getApplication, getDataSources } from '../utils';
 import { DataSourceTableItem } from '../../types';

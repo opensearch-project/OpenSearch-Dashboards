@@ -142,6 +142,8 @@ export const runSharedLinksTests = () => {
           cy.getElementByTestId('exportAsSavedObject').find('input').should('be.disabled');
           cy.saveSearch(config.saveName);
           cy.osd.waitForLoader(true);
+          // Give buffer to load fields
+          cy.wait(2000);
           openShareMenuWithRetry();
           cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
           cy.getElementByTestId('exportAsSavedObject').click();

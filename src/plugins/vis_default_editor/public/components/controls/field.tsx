@@ -29,7 +29,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useMount } from 'react-use';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
@@ -111,6 +111,7 @@ function FieldParamEditor({
     }
   });
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
 
   return (

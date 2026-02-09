@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { IntlProvider } from 'react-intl';
 import { WarningBadge } from './warning_badge';
 
@@ -29,6 +29,7 @@ const renderWarningBadge = (overrideProps: Partial<WarningBadgeProps> = {}) => {
     overrideProps
   );
   const component = render(
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <WarningBadge {...props} />
     </IntlProvider>

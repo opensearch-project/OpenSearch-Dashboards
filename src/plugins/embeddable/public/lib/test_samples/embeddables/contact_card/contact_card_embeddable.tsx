@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -63,6 +62,7 @@ export class ContactCardEmbeddable extends Embeddable<
   ContactCardEmbeddableOutput
 > {
   private subscription: Subscription;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private node?: Element;
   private root: Root | null = null;
   public readonly type: string = CONTACT_CARD_EMBEDDABLE;

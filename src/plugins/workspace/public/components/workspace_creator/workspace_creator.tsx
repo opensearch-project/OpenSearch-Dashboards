@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
@@ -183,6 +183,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                   try {
                     const detection = await detectTraceData(
                       savedObjects.client,
+                      // @ts-expect-error TS2345 TODO(ts-error): fixme
                       dataPlugin.dataViews,
                       dataSourceId
                     );

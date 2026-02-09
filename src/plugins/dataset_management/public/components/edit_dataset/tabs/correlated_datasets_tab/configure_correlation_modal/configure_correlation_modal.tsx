@@ -12,7 +12,9 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiFormRow,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiFieldText,
   EuiSpacer,
   EuiLoadingSpinner,
@@ -36,7 +38,9 @@ import { useValidateFieldMappings } from '../../../../../hooks/use_validate_fiel
 import { validateMaxLogDatasets } from '../../../../../utils/correlation_validation';
 import { extractDatasetIdsFromEntities } from '../../../../../utils/correlation_display';
 import { LogsDatasetSelector } from './logs_dataset_selector';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { ValidationCallout } from './validation_callout';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { FieldMappingsAccordion } from './field_mappings_accordion';
 import { FieldMappingEditor } from './field_mapping_editor';
 
@@ -164,6 +168,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
   ]);
 
   const isLoading = creating || updating || validating;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const hasFieldMappingErrors = validationResult && !validationResult.isValid;
 
   // Check if all required field mappings are filled - use useMemo to stabilize reference
@@ -179,6 +184,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
     );
   }, [validationResult]);
 
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const allRequiredMappingsFilled =
     missingMappings.length === 0 ||
     missingMappings.every((missing) => {
@@ -273,6 +279,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
               datasetIds={selectedLogDatasetIds}
               datasets={datasets}
               missingMappings={missingMappings}
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               onMappingsChange={handleFieldMappingsChange}
               notifications={notifications}
               onAllDatasetsReady={setAllDatasetsReady}

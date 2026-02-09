@@ -114,6 +114,7 @@ export class Vis<TVisParams = VisParams> {
     this.id = visState.id;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   private getType<TVisParams>(visType: string) {
     const type = getTypes().get<TVisParams>(visType);
     if (!type) {

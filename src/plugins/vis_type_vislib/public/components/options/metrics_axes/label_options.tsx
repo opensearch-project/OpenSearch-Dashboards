@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -52,6 +52,7 @@ export interface LabelOptionsProps {
 function LabelOptions({ axisLabels, axisFilterCheckboxName, setAxisLabel }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Axis['labels']['rotate']) => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       setAxisLabel(paramName, Number(value));
     },
     [setAxisLabel]

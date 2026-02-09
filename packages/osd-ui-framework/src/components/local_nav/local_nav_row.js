@@ -30,7 +30,6 @@
 
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import React from 'react';
 
 export function KuiLocalNavRow({ className, children, isSecondary, ...rest }) {
   const classes = classnames('kuiLocalNavRow', className, {

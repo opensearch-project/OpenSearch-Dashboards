@@ -41,6 +41,7 @@ function useSubAggParamsHandlers(
   setValue: SetValue
 ) {
   const setAggParamValue = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (aggId, paramName, val) => {
       const parsedParams = subAgg.toJSON();
       const params = {
@@ -57,6 +58,7 @@ function useSubAggParamsHandlers(
   );
 
   const onAggTypeChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (aggId, aggType) => {
       const parsedAgg = subAgg.toJSON();
 

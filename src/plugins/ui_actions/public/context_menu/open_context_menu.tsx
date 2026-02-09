@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { createRoot, Root } from 'react-dom/client';
@@ -197,6 +195,7 @@ export function openContextMenu(
   activeRoot.render(
     <EuiPopover
       className="embPanel__optionsMenuPopover"
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       button={container}
       isOpen={true}
       closePopover={onClose}

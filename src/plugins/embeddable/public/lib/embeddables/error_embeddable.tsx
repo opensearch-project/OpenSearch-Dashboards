@@ -29,7 +29,7 @@
  */
 
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+
 import { createRoot, Root } from 'react-dom/client';
 import { Markdown } from '../../../../opensearch_dashboards_react/public';
 import { Embeddable } from './embeddable';
@@ -47,6 +47,7 @@ export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private dom?: HTMLElement;
   private root?: Root;
 

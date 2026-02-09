@@ -6,7 +6,9 @@
 import React, { useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DataPublicPluginStart, DataView } from '../../../../../../../data/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { MAX_LOG_DATASETS_PER_CORRELATION } from '../../../../../types/correlations';
 
 interface LogsDatasetSelectorProps {

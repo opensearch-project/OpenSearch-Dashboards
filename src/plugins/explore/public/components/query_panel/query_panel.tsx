@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
 import { QueryPanelEditor } from './query_panel_editor';

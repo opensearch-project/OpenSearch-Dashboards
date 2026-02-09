@@ -31,7 +31,7 @@
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { ReactElement, useRef } from 'react';
+import { ReactElement, useRef } from 'react';
 
 import { MountPoint } from '../../../../core/public';
 import {
@@ -178,6 +178,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     return (
       <DatasetSelect
         onSelect={props.datasetSelectProps?.onSelect || (() => {})}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         appName={props.datasetSelectProps?.appName || props.appName || ''}
       />
     );

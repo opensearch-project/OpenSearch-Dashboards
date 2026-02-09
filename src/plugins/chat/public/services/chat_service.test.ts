@@ -116,6 +116,7 @@ describe('ChatService', () => {
     // Mock AgUiAgent constructor
     (AgUiAgent as jest.MockedClass<typeof AgUiAgent>).mockImplementation(() => mockAgent);
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     chatService = new ChatService(undefined, mockCoreChatService);
   });
 
@@ -207,7 +208,9 @@ describe('ChatService', () => {
         getThreadId$: () => mockThreadId2$.asObservable(),
       } as any;
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const service1 = new ChatService(undefined, mockCoreService1);
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const service2 = new ChatService(undefined, mockCoreService2);
 
       const threadId1 = service1.getThreadId();
@@ -562,6 +565,7 @@ describe('ChatService', () => {
 
     it('should be callable independently of other methods', () => {
       // Test that resetConnection can be called without other method calls
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const newService = new ChatService(undefined, mockCoreChatService);
       newService.resetConnection();
 
@@ -726,6 +730,7 @@ describe('ChatService', () => {
           { id: '2', role: 'assistant', content: 'Test response' },
         ];
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         chatService.updateCurrentMessages(newMessages);
 
         expect((chatService as any).currentMessages).toEqual(newMessages);

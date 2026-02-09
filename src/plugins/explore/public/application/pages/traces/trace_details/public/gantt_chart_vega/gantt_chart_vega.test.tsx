@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { GanttChart } from './gantt_chart_vega';
 import { convertToVegaGanttData } from './gantt_data_adapter';

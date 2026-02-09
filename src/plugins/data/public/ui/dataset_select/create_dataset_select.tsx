@@ -4,7 +4,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+
 import { CoreStart } from 'src/core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 
@@ -23,6 +23,7 @@ export function createDatasetSelect({ core, data, storage }: DatasetSelectDeps) 
     return (
       <OpenSearchDashboardsContextProvider
         services={{
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           appName: props.appName,
           data,
           storage,

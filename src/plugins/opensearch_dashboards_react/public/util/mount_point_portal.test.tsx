@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { MountPoint, UnmountCallback } from 'opensearch-dashboards/public';
 import { MountPointPortal } from './mount_point_portal';

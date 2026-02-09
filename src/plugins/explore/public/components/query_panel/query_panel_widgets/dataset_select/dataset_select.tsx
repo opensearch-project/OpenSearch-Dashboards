@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
@@ -247,6 +247,7 @@ export const DatasetSelectWidget = () => {
     <div ref={containerRef} className="exploreDatasetSelectWrapper">
       <DatasetSelect
         onSelect={handleDatasetSelect}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         appName="explore"
         supportedTypes={supportedTypes}
         signalType={flavorId}

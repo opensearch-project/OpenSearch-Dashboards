@@ -82,15 +82,21 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(3); // Main layer + label layer (no value layer) + hover state layer
 
       // Verify the main layer (arc mark)
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'arc');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.innerRadius', 0); // Not a donut
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.tooltip', true);
 
       // Verify the label layer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[2]).toHaveProperty('mark.type', 'text');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[2]).toHaveProperty('encoding.text.field', 'field-2');
 
       // Verify the encoding
@@ -122,6 +128,7 @@ describe('to_expression', () => {
         noTitleStyles,
         mockAxisColumnMappings
       );
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(noTitleResult.title).toBeUndefined();
 
       // Case 2: Default title (show = true, titleName = '')
@@ -141,6 +148,7 @@ describe('to_expression', () => {
         defaultTitleStyles,
         mockAxisColumnMappings
       );
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(defaultTitleResult.title).toBe('value by category');
 
       // Case 3: Custom title (show = true, titleName = 'Custom Title')
@@ -160,6 +168,7 @@ describe('to_expression', () => {
         customTitleStyles,
         mockAxisColumnMappings
       );
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(customTitleResult.title).toBe('Custom Pie Chart');
     });
 
@@ -187,7 +196,9 @@ describe('to_expression', () => {
       );
 
       // Verify the donut configuration
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.innerRadius', { expr: '7*stepSize' });
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.radius', { expr: '9*stepSize' });
     });
 
@@ -215,10 +226,13 @@ describe('to_expression', () => {
       );
 
       // Verify the layer count
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(4); // Main layer + label layer + value layer + hover state layer
 
       // Verify the value layer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[3]).toHaveProperty('mark.type', 'text');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[3]).toHaveProperty('encoding.text.field', 'field-1');
     });
 
@@ -246,9 +260,11 @@ describe('to_expression', () => {
       );
 
       // Verify the layer count
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(2); // main layer + hover state layer
 
       // Verify the main layer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'arc');
     });
 
@@ -275,6 +291,7 @@ describe('to_expression', () => {
       );
 
       // Verify tooltip is disabled
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.tooltip', false);
     });
 
@@ -302,6 +319,7 @@ describe('to_expression', () => {
       );
 
       // Verify the truncate value
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[2]).toHaveProperty('mark.limit', 50);
     });
 
@@ -326,6 +344,7 @@ describe('to_expression', () => {
       );
 
       // Verify legend is null
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.color.legend).toBeNull();
     });
   });
@@ -340,6 +359,7 @@ describe('to_expression', () => {
         defaultStyleOptions,
         { [AxisRole.SIZE]: numericColumn, [AxisRole.COLOR]: categoricalColumn }
       );
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.data.values).toEqual([]);
     });
 
@@ -352,7 +372,9 @@ describe('to_expression', () => {
         defaultStyleOptions,
         { [AxisRole.SIZE]: undefined, [AxisRole.COLOR]: undefined }
       );
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.theta.field).toBeUndefined();
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.color.field).toBeUndefined();
     });
 
@@ -370,6 +392,7 @@ describe('to_expression', () => {
         partialStyleOptions as any,
         { [AxisRole.SIZE]: numericColumn, [AxisRole.COLOR]: categoricalColumn }
       );
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer.length).toBeGreaterThan(0);
     });
 
@@ -382,7 +405,9 @@ describe('to_expression', () => {
         defaultStyleOptions,
         undefined
       );
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.theta.field).toBeUndefined();
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.color.field).toBeUndefined();
     });
 
@@ -395,7 +420,9 @@ describe('to_expression', () => {
         defaultStyleOptions,
         { [AxisRole.SIZE]: numericColumn }
       );
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.theta.field).toBe('field-1');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.encoding.color.field).toBeUndefined();
     });
   });

@@ -109,7 +109,6 @@ describe('IndexSettingOptions', () => {
     );
 
     act(() => {
-      // @ts-expect-error TS2722 TODO(ts-error): fixme
       wrapper.find(EuiFieldNumber).at(0).prop('onChange')({
         target: { value: '20' },
       } as React.ChangeEvent<HTMLInputElement>);

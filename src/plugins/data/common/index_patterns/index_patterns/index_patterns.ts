@@ -132,6 +132,7 @@ export class IndexPatternsService {
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(
             obj.attributes.title,
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             obj.references,
             this.getDataSource
           );
@@ -440,6 +441,7 @@ export class IndexPatternsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: parsedSchemaMappings,
     };

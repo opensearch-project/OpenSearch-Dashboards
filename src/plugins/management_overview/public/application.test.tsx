@@ -5,7 +5,7 @@
 
 import { render } from '@testing-library/react';
 import { ManagementOverviewWrapper } from './application';
-import React from 'react';
+
 import { ApplicationStart, PublicAppInfo } from 'opensearch-dashboards/public';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { deepFreeze } from '@osd/std';

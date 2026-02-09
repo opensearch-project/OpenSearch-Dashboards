@@ -169,6 +169,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
   }, [numericalColumns, localCalculations, updateStyleOption]);
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="tableFooterSection"
       accordionLabel={i18n.translate('explore.stylePanel.table.footerSection', {

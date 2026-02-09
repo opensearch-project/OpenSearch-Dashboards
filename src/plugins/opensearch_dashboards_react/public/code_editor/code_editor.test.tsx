@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { CodeEditor } from './code_editor';
 import { monaco } from '@osd/monaco';
 import { shallow } from 'enzyme';
@@ -91,19 +90,30 @@ test('editor mount setup', () => {
 
   const editorWillMount = jest.fn();
 
-  monaco.languages.onLanguage = jest.fn((languageId, func) => {
-    expect(languageId).toBe('loglang');
-
-    // Call the function immediately so we can see our providers
-    // get setup without a monaco editor setting up completely
-    func();
-  }) as any;
-
-  monaco.languages.registerCompletionItemProvider = jest.fn();
-  monaco.languages.registerSignatureHelpProvider = jest.fn();
-  monaco.languages.registerHoverProvider = jest.fn();
+  const mockDisposable = { dispose: jest.fn() };
+  monaco.languages.getLanguages = jest.fn(() => [{ id: 'loglang' }]) as any;
+  monaco.languages.registerCompletionItemProvider = jest.fn(() => mockDisposable);
+  monaco.languages.registerSignatureHelpProvider = jest.fn(() => mockDisposable);
+  monaco.languages.registerHoverProvider = jest.fn(() => mockDisposable);
 
   monaco.editor.defineTheme = jest.fn();
+
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
 
   const wrapper = shallow(
     <CodeEditor
@@ -126,11 +136,247 @@ test('editor mount setup', () => {
   // Verify our theme will be setup
   expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
 
+  // Call editorDidMount to trigger provider registration
+  instance._editorDidMount(mockEditor, monaco);
+
   // Verify our language features have been registered
-  expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+});
+
+test('registers providers for new language when languageId prop changes', () => {
+  const suggestionProvider = {
+    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+      suggestions: [],
+    }),
+  };
+
+  const mockDisposable = { dispose: jest.fn() };
+  monaco.languages.getLanguages = jest.fn(() => [{ id: 'PPL' }, { id: 'kuery' }]) as any;
+  monaco.languages.registerCompletionItemProvider = jest.fn(() => mockDisposable);
+
+  monaco.editor.defineTheme = jest.fn();
+
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
+
+  const wrapper = shallow(
+    <CodeEditor
+      languageId="PPL"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={suggestionProvider}
+    />
+  );
+
+  const instance = wrapper.instance() as CodeEditor;
+  instance._editorDidMount(mockEditor, monaco);
+
+  // Provider registered for initial language
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls[0][0]).toBe(
+    'PPL'
+  );
+
+  // Change language
+  wrapper.setProps({ languageId: 'kuery' });
+
+  // Provider should now be registered for the new language too
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(2);
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls[1][0]).toBe(
+    'kuery'
+  );
+});
+
+test('does not re-register providers when switching back to a previously used language', () => {
+  const suggestionProvider = {
+    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+      suggestions: [],
+    }),
+  };
+
+  const mockDisposable = { dispose: jest.fn() };
+  monaco.languages.getLanguages = jest.fn(() => [{ id: 'PPL' }, { id: 'kuery' }]) as any;
+  monaco.languages.registerCompletionItemProvider = jest.fn(() => mockDisposable);
+
+  monaco.editor.defineTheme = jest.fn();
+
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
+
+  const wrapper = shallow(
+    <CodeEditor
+      languageId="PPL"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={suggestionProvider}
+    />
+  );
+
+  const instance = wrapper.instance() as CodeEditor;
+  instance._editorDidMount(mockEditor, monaco);
+
+  // Initial registration for PPL
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+
+  // Switch to kuery
+  wrapper.setProps({ languageId: 'kuery' });
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(2);
+
+  // Switch back to PPL - should NOT register again
+  wrapper.setProps({ languageId: 'PPL' });
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(2);
+});
+
+test('skips provider registration for unregistered languages', () => {
+  const suggestionProvider = {
+    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+      suggestions: [],
+    }),
+  };
+
+  const mockDisposable = { dispose: jest.fn() };
+  // Mock getLanguages to return only PPL (lucene is not registered)
+  monaco.languages.getLanguages = jest.fn(() => [{ id: 'PPL' }]) as any;
+  monaco.languages.registerCompletionItemProvider = jest.fn(() => mockDisposable);
+  monaco.languages.setLanguageConfiguration = jest.fn(() => mockDisposable);
+
+  monaco.editor.defineTheme = jest.fn();
+
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
+
+  const wrapper = shallow(
+    <CodeEditor
+      languageId="lucene"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={suggestionProvider}
+    />
+  );
+
+  const instance = wrapper.instance() as CodeEditor;
+  instance._editorDidMount(mockEditor, monaco);
+
+  // No providers should be registered for unregistered language
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(0);
+});
+
+test('disposes providers on unmount so remount does not create duplicates', () => {
+  const suggestionProvider = {
+    provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({
+      suggestions: [],
+    }),
+  };
+
+  const disposeFns = [] as jest.Mock[];
+  monaco.languages.getLanguages = jest.fn(() => [{ id: 'PPL' }]) as any;
+  monaco.languages.registerCompletionItemProvider = jest.fn(() => {
+    const dispose = jest.fn();
+    disposeFns.push(dispose);
+    return { dispose };
+  });
+
+  monaco.editor.defineTheme = jest.fn();
+
+  const mockSuggestController = {
+    widget: {
+      value: {
+        _setDetailsVisible: jest.fn(),
+      },
+    },
+  };
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue(mockSuggestController),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
+
+  // First mount: register PPL provider
+  const wrapper1 = shallow(
+    <CodeEditor
+      languageId="PPL"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={suggestionProvider}
+    />
+  );
+  const instance1 = wrapper1.instance() as CodeEditor;
+  instance1._editorDidMount(mockEditor, monaco);
+
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect(disposeFns.length).toBe(1);
+  expect(disposeFns[0]).not.toHaveBeenCalled();
+
+  // Unmount: disposables should be cleaned up
+  wrapper1.unmount();
+  expect(disposeFns[0]).toHaveBeenCalled();
+
+  // Second mount (simulating switch back to PPL): should re-register without duplicates
+  const wrapper2 = shallow(
+    <CodeEditor
+      languageId="PPL"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={suggestionProvider}
+    />
+  );
+  const instance2 = wrapper2.instance() as CodeEditor;
+  instance2._editorDidMount(mockEditor, monaco);
+
+  // Should register again (old one was disposed), total 2 calls
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(2);
+
+  // Clean up
+  wrapper2.unmount();
+  expect(disposeFns[1]).toHaveBeenCalled();
 });
 
 test('suggest controller details visibility is set on editor mount', () => {

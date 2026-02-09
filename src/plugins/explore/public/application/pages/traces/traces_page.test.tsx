@@ -175,6 +175,7 @@ describe('TracesPage', () => {
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -208,6 +209,7 @@ describe('TracesPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage />
       </TestHarness>
@@ -223,6 +225,7 @@ describe('TracesPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
@@ -235,6 +238,7 @@ describe('TracesPage', () => {
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage />
       </TestHarness>
@@ -247,6 +251,7 @@ describe('TracesPage', () => {
   it('renders data table flyout components', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage />
       </TestHarness>
@@ -260,6 +265,7 @@ describe('TracesPage', () => {
     it('registers all keyboard shortcuts correctly', () => {
       const store = createTestStore();
       render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <TestHarness store={store}>
           <TracesPage />
         </TestHarness>
@@ -291,6 +297,7 @@ describe('TracesPage', () => {
       const dispatchSpy = jest.spyOn(store, 'dispatch');
 
       render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <TestHarness store={store}>
           <TracesPage />
         </TestHarness>
@@ -326,6 +333,7 @@ describe('TracesPage', () => {
     it('keyboard shortcuts have unique IDs for traces page', () => {
       const store = createTestStore();
       render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <TestHarness store={store}>
           <TracesPage />
         </TestHarness>
@@ -340,6 +348,7 @@ describe('TracesPage', () => {
     it('keyboard shortcuts use correct key combinations', () => {
       const store = createTestStore();
       render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <TestHarness store={store}>
           <TracesPage />
         </TestHarness>

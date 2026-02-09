@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { coreMock } from '../../../../core/public/mocks';
@@ -11,12 +10,10 @@ import { PageRender } from './page_render';
 import { Page } from '../services';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
-jest.mock('./section_render', () => {
-  return {
-    ...jest.requireActual('./section_render'),
-    SectionRender: jest.fn().mockReturnValue(<span>MockSectionRender</span>),
-  };
-});
+jest.mock('./section_render', () => ({
+  ...jest.requireActual('./section_render'),
+  SectionRender: () => <span>MockSectionRender</span>,
+}));
 
 test('it should render the sections', () => {
   const page = new Page({ id: 'page1' });

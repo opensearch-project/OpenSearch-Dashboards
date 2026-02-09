@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CreateDatasetButton } from './create_dataset_button';
 import { CORE_SIGNAL_TYPES } from '../../../../data/common';

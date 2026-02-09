@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { WorkspaceUseCaseOverviewApp } from './workspace_use_case_overview_app';
 import { of } from 'rxjs';

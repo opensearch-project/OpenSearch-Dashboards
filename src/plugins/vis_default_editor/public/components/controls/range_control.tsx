@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { AggParamEditorProps } from '../agg_param_props';
 import { RangesParamEditor } from './ranges';
 

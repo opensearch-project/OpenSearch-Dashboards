@@ -161,7 +161,6 @@ describe('DataSourceSelectable', () => {
     const containerInstance = container.instance();
 
     act(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     });
     container.update();
@@ -188,7 +187,6 @@ describe('DataSourceSelectable', () => {
     });
 
     act(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     });
     container.update();
@@ -449,7 +447,6 @@ describe('DataSourceSelectable', () => {
     });
 
     act(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     });
     container.update();

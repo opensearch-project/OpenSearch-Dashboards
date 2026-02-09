@@ -147,6 +147,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
           }
         >
           <ReactMarkdownLazy
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             renderers={{
               root: Fragment,
               link: LinkRenderer,

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';

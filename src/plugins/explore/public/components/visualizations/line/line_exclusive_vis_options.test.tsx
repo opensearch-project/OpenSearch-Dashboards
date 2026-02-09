@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LineExclusiveVisOptions, LineStyle } from './line_exclusive_vis_options';
 

@@ -17,6 +17,7 @@ const mockServices = (overrides: any = {}) => ({
 
 const startSyncingQueryStateWithUrl = jest.fn();
 const searchContext = {} as any;
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 const indexPattern = {} as any;
 const savedExplore = {} as any;
 const clearEditors = jest.fn();

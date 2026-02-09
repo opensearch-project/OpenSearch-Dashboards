@@ -5,7 +5,7 @@
 
 import { I18nProvider } from '@osd/i18n/react';
 import { fireEvent, render } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { QueryAssistBanner } from './query_assist_banner';
 
 jest.mock('../../services', () => ({

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { ResizableButton } from './resizable_button';
 import { mount, shallow } from 'enzyme';
 import { SIDECAR_DOCKED_MODE } from '../sidecar_service';

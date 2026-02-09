@@ -37,6 +37,7 @@ export type SortPair = SortPairArr | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
 export function isSortable(fieldName: string, indexPattern: IndexPattern) {
+  if (!indexPattern || !indexPattern.getFieldByName) return false;
   const field = indexPattern.getFieldByName(fieldName);
   return field && field.sortable;
 }

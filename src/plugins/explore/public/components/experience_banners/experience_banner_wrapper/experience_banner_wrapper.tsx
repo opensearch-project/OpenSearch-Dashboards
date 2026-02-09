@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ClassicExperienceBanner } from '../classic_experience_banner';
 
 export const ExperienceBannerWrapper = ({

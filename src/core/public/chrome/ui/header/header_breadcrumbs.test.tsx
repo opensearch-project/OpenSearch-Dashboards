@@ -29,7 +29,6 @@
  */
 
 import { mount } from 'enzyme';
-import React from 'react';
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';

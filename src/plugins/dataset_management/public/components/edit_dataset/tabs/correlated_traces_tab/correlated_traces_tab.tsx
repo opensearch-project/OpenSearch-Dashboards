@@ -22,6 +22,7 @@ interface CorrelatedTracesTabProps {
 
 export const CorrelatedTracesTab: React.FC<CorrelatedTracesTabProps> = ({ dataset }) => {
   const { savedObjects, application } = useOpenSearchDashboards<DatasetManagmentContext>().services;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const history = useHistory();
   const [viewingCorrelation, setViewingCorrelation] = useState<CorrelationSavedObject | null>(null);
 

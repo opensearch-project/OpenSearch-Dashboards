@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { History, Location } from 'history';
 
 import { i18n } from '@osd/i18n';

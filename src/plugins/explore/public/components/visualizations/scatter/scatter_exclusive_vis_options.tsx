@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiRange, EuiSwitch, EuiFormRow, EuiSelect } from '@elastic/eui';
-import React from 'react';
+
 import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
 import { PointShape } from '../types';
 import { getPointShapes } from '../utils/collections';
@@ -48,6 +48,7 @@ export const ScatterExclusiveVisOptions = ({
 
   const pointShapes = getPointShapes();
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       data-test-subj="scatterExclusivePanel"
       id="scatterSection"

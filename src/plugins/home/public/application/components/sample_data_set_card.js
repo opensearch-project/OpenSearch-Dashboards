@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import PropTypes from 'prop-types';
 import {

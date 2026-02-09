@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
@@ -62,6 +62,7 @@ export const LegendOptionsPanel = ({
   ];
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="legendSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.legend', {

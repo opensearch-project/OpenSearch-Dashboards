@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { ExploreServices } from '../../../../types';
 import {
@@ -31,6 +31,7 @@ export const getOpenButtonRun = (services: ExploreServices): TopNavMenuIconRun =
       <OpenSearchDashboardsContextProvider services={services}>
         <OpenSearchPanel onClose={() => flyoutSession?.close?.().then()} />
       </OpenSearchDashboardsContextProvider>
-    )
+    ),
+    { 'data-test-subj': 'loadSearchForm' }
   );
 };

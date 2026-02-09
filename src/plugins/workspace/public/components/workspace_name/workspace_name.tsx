@@ -5,7 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { getUseCase } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 

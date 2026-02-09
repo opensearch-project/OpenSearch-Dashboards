@@ -8,7 +8,7 @@ import {
   DEFAULT_NAV_GROUPS,
   isNavGroupInFeatureConfigs,
 } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { map, take } from 'rxjs/operators';
 import { QueryEditorExtensionConfig } from '../../../../data/public';
 import { ExplorePluginStart, ExploreStartDependencies } from '../../types';

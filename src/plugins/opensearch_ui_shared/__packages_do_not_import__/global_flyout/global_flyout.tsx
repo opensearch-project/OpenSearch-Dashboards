@@ -61,6 +61,7 @@ const DEFAULT_FLYOUT_PROPS = {
   maxWidth: 500,
 };
 
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 export const GlobalFlyoutProvider: React.FC = ({ children }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [activeContent, setActiveContent] = useState<Content<any> | undefined>(undefined);

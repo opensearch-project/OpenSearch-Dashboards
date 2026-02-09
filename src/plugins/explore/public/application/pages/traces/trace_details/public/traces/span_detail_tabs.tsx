@@ -82,6 +82,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   }, [selectedSpan]);
 
   // Filter logs for the selected span from datasetLogs
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const spanLogs = useMemo(() => {
     if (!selectedSpan?.spanId || Object.keys(datasetLogs).length === 0) return [];
 

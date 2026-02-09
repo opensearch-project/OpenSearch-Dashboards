@@ -26,6 +26,7 @@ describe('newTopNavData', () => {
 
 describe('getNewButtonRun', () => {
   it('should dispatch resetExploreStateActionCreator and navigate to clean URL', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const visBuilder = new VB.VisualizationBuilder({});
     const clearUrlSpy = jest.spyOn(visBuilder, 'clearUrl');
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(visBuilder);
@@ -48,6 +49,7 @@ describe('getNewButtonRun', () => {
   });
 
   it('should handle missing scopedHistory gracefully', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const visBuilder = new VB.VisualizationBuilder({});
     const clearUrlSpy = jest.spyOn(visBuilder, 'clearUrl');
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(visBuilder);

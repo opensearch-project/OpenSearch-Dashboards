@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { WorkspaceCollaboratorsPanel } from './workspace_collaborators_panel';
 

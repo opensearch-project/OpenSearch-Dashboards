@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -58,6 +58,7 @@ export function DevToolsIcon({
   deps.uiActions.addTriggerAction(devToolsTrigger.id, createOpenDevToolAction);
 
   const elementRef = useRef<HTMLDivElement | null>(null);
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const setMountPoint = useCallback((renderFn) => {
     renderFn(elementRef.current);
     return () => {};

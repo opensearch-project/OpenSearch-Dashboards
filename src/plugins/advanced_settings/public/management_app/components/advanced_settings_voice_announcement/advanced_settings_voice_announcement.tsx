@@ -48,7 +48,7 @@
     5: If there is another component call, the timer is dropped (cleared).
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiScreenReaderOnly, EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@osd/i18n';

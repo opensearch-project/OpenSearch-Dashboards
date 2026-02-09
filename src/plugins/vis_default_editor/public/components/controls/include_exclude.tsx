@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
 import { StringParamEditor } from './string';
 import { search } from '../../../../data/public';

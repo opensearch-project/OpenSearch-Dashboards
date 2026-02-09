@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { SlashCommand } from '../services/slash_commands';
 import './slash_command_menu.scss';

@@ -4,7 +4,7 @@
  */
 
 import './map_choice_options.scss';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -113,6 +113,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   );
 
   const setCustomJoinField = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     async (paramName: 'selectedCustomJoinField', value) => {
       if (stateParams.selectedCustomLayer) {
         setValue(

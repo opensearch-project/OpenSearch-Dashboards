@@ -53,9 +53,13 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(spec.$schema).toBe('https://vega.github.io/schema/vega-lite/v5.json');
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(spec.autosize).toEqual({ type: 'fit', contains: 'padding' });
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(spec.params).toBeDefined();
+    // @ts-expect-error TS18048 TODO(ts-error): fixme
     expect(spec.layer).toBeDefined();
   });
 
@@ -75,7 +79,9 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
+    // @ts-expect-error TS18048, TS18046, TS7006 TODO(ts-error): fixme
     expect(spec.params.find((p) => p.name === 'minValue')?.value).toBe(10);
+    // @ts-expect-error TS18048, TS18046, TS7006 TODO(ts-error): fixme
     expect(spec.params.find((p) => p.name === 'maxValue')?.value).toBe(200);
   });
 
@@ -95,6 +101,7 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
+    // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
     const titleLayer = spec.layer.find(
       (l: any) => l.encoding?.text?.value === 'Custom Gauge Title'
     );
@@ -117,6 +124,7 @@ describe('createGauge', () => {
       mockAxisColumnMappings
     );
 
+    // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
     const titleLayer = spec.layer.find(
       (l: any) =>
         l.encoding?.text &&
@@ -129,6 +137,7 @@ describe('createGauge', () => {
   it('uses fallback values when no axis mappings provided', () => {
     const spec = createGauge(mockData, [mockNumericalColumn], [], [], defaultGaugeChartStyles);
 
+    // @ts-expect-error TS18048, TS18046, TS7006 TODO(ts-error): fixme
     expect(spec.params.find((p) => p.name === 'mainValue')?.value).toBe(50);
   });
 });

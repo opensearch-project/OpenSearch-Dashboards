@@ -28,6 +28,7 @@ import { ConfirmationService } from './confirmation_service';
 
 // Timeline is now purely AG-UI Messages
 
+// @ts-expect-error TS6196 TODO(ts-error): fixme
 interface PendingToolCall {
   id: string;
   name: string;
@@ -43,6 +44,7 @@ export class ChatEventHandler {
   private activeAssistantMessages = new Map<string, AssistantMessage>();
   private pendingToolCalls = new Map<string, ToolCall>();
   private lastTextMessageStartId: string | null = null;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
 
@@ -573,6 +575,7 @@ export class ChatEventHandler {
       // Set streaming state and subscribe to the response stream
       this.onStreamingStateChange(true);
 
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const subscription = observable.subscribe({
         next: (event: ChatEvent) => {
           // Handle the assistant's response to the tool result

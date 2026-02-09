@@ -5,7 +5,6 @@
 
 /* eslint no-restricted-syntax: 0 */
 
-// @ts-check
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -25,7 +24,9 @@ const colors = {
 
 const TSC_BIN = path.join(process.cwd(), 'node_modules/.bin/tsc');
 const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.check.json');
+const TSCONFIG_REFS_PATH = path.join(process.cwd(), 'tsconfig.refs.json');
 const TSC_ARGS = ['--project', TSCONFIG_PATH, '--noEmit', '--pretty', 'false', '--skipLibCheck'];
+const TSC_REFS_ARGS = ['-b', TSCONFIG_REFS_PATH, '--pretty', 'false'];
 
 // Helper functions for console output
 function logHeader(text) {
@@ -65,11 +66,6 @@ function parseTypeScriptErrors(output) {
     const match = line.match(/(.+)\((\d+),(\d+)\):\s+error\s+(TS\d+):\s+(.+)/);
     if (match) {
       const filePath = match[1];
-
-      // Skip errors from node_modules
-      if (filePath.includes('node_modules')) {
-        return;
-      }
 
       errors.push({
         file: filePath,
@@ -112,6 +108,35 @@ function runTypeScriptCheck() {
     const errors = parseTypeScriptErrors(output);
     logInfo(
       `Found ${colors.bold}${errors.length}${colors.reset} TypeScript errors in current codebase`
+    );
+    return errors;
+  }
+}
+
+// Run TypeScript build for project references (src/core, src/test_utils, etc.)
+// These are excluded from tsconfig.check.json and checked separately via tsc -b.
+function runRefsCheck() {
+  if (!fs.existsSync(TSCONFIG_REFS_PATH)) {
+    logWarning(`Could not find ${TSCONFIG_REFS_PATH}, skipping project references check`);
+    return [];
+  }
+
+  logStep(`Building project references: ${TSC_BIN} ${TSC_REFS_ARGS.join(' ')}\n`);
+
+  const result = spawnSync(TSC_BIN, TSC_REFS_ARGS, {
+    encoding: 'utf8',
+    shell: true,
+    stdio: 'pipe',
+  });
+
+  if (result.status === 0) {
+    logSuccess(`${colors.bold}No errors in project references!${colors.reset}`);
+    return [];
+  } else {
+    const output = result.stderr || result.stdout || '';
+    const errors = parseTypeScriptErrors(output);
+    logInfo(
+      `Found ${colors.bold}${errors.length}${colors.reset} TypeScript errors in project references`
     );
     return errors;
   }
@@ -261,19 +286,28 @@ function runEslintFix(files) {
 // Main function
 async function main() {
   logHeader('TypeScript Error Checker');
-  logStep('Running TypeScript compiler to check for new errors...');
 
   const args = process.argv.slice(2);
   const shouldAddComments = args.includes('--add-ts-expect-error');
-  const currentErrors = runTypeScriptCheck();
 
-  if (shouldAddComments && currentErrors.length > 0) {
-    await addTsExpectErrorComments(currentErrors);
+  // Phase 1: Check project references (src/core, src/test_utils, etc.)
+  // These directories are excluded from tsconfig.check.json and must be checked separately.
+  logStep('Checking project references (tsc -b tsconfig.refs.json)...');
+  const refsErrors = runRefsCheck();
+
+  // Phase 2: Check the main codebase
+  logStep('Running TypeScript compiler to check for new errors...');
+  const mainErrors = runTypeScriptCheck();
+
+  const allErrors = [...refsErrors, ...mainErrors];
+
+  if (shouldAddComments && allErrors.length > 0) {
+    await addTsExpectErrorComments(allErrors);
     console.log('\nPlease run the TypeScript check again to verify errors are resolved.');
     process.exit(0);
   }
 
-  if (currentErrors.length === 0) {
+  if (allErrors.length === 0) {
     logSuccess(`${colors.bold}SUCCESS:${colors.reset} No TypeScript errors detected!`);
     console.log(
       `${colors.cyan}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
@@ -281,13 +315,13 @@ async function main() {
     process.exit(0); // Success
   } else {
     logError(
-      `${colors.bold}FAILURE:${colors.reset} Found ${currentErrors.length} TypeScript errors:\n`
+      `${colors.bold}FAILURE:${colors.reset} Found ${allErrors.length} TypeScript errors:\n`
     );
 
     // Print errors in a nice format
-    currentErrors.forEach((error, index) => {
+    allErrors.forEach((error, index) => {
       console.error(formatError(error, index));
-      if (index < currentErrors.length - 1) console.error('');
+      if (index < allErrors.length - 1) console.error('');
     });
 
     console.error('\n');

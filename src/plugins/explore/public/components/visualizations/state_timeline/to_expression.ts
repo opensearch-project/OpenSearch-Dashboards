@@ -828,6 +828,7 @@ export const createSingleNumericalStateTimeline = (
     return result.spec;
   }
 
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(
     styleOptions,
     axisColumnMappings

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import { mount } from 'enzyme';
 import { applicationServiceMock } from '../../../../core/public/mocks';
 import { RedirectAppLinks } from './redirect_app_link';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { TimelineRuler } from './timeline_ruler';
 import { useTimelineTicks } from './timeline_ruler_hooks';

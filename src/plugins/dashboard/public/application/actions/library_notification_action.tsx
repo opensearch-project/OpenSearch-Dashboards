@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiBadge } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';

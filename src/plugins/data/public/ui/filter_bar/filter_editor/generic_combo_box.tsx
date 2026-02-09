@@ -29,7 +29,6 @@
  */
 
 import { EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import React from 'react';
 
 export interface GenericComboBoxProps<T> {
   options: T[];

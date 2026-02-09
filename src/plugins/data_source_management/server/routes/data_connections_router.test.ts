@@ -4,6 +4,7 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { httpServerMock, coreMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { registerDataConnectionsRoute } from './data_connections_router';
 import { DataConnectionType } from '../../../data_source/common/data_connections';

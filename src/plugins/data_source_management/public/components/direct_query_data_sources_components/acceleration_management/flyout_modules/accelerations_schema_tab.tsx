@@ -4,7 +4,6 @@
  */
 
 import { EuiInMemoryTable, EuiTableFieldDataColumnType } from '@elastic/eui';
-import React from 'react';
 
 interface AccelerationSchemaTabProps {
   mappings: object;

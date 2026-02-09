@@ -6,8 +6,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiInMemoryTable,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiFlexGroup,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiFlexItem,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   EuiBadge,
   EuiLink,
   EuiToolTip,
@@ -39,6 +42,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
   loading = false,
   message,
 }) => {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const { data, uiSettings, savedObjects } = useOpenSearchDashboards<
     DatasetManagmentContext
   >().services;
@@ -171,6 +175,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
   return (
     <EuiInMemoryTable
       items={correlations}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       columns={columns}
       pagination={{
         pageSizeOptions: [10, 25, 50],

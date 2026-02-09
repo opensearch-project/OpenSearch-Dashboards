@@ -28,7 +28,7 @@
  * under the License.
  */
 
-const babelEslint = require('babel-eslint');
+const babelEslint = require('@babel/eslint-parser');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 
@@ -64,7 +64,7 @@ module.exports = {
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
-            const parsed = babelEslint.parse(license);
+            const parsed = babelEslint.parse(license, { requireConfigFile: false });
             assert(
               !parsed.body.length,
               `"licenses[${i}]" option must only include a single comment`

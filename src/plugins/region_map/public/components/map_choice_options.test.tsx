@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as React from 'react';
 import { MapChoiceOptions } from './map_choice_options';
 import { screen, render } from '@testing-library/react';
 // @ts-expect-error TS6133 TODO(ts-error): fixme

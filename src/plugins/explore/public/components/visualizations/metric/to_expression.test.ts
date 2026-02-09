@@ -69,16 +69,23 @@ describe('to_expression', () => {
       // Verify the result structure
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('layer');
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(2); // Main layer + title layer
 
       // Verify the main layer (text mark)
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'text');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.fontSize', 60);
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('encoding.text.field', 'value');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('encoding.text.type', 'nominal');
 
       // Verify the title layer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[1]).toHaveProperty('mark.type', 'text');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[1]).toHaveProperty('data.values', [{ title: 'Test Metric' }]);
     });
 
@@ -102,6 +109,7 @@ describe('to_expression', () => {
       );
 
       // Verify the title layer uses the column name
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[1].data.values).toEqual([{ title: 'value1' }]);
     });
 
@@ -125,7 +133,9 @@ describe('to_expression', () => {
       );
 
       // Verify only one layer (no title layer)
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(1);
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'text');
     });
 
@@ -152,14 +162,21 @@ describe('to_expression', () => {
       // Verify the result structure
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('layer');
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(3); // sparkLineLayer + main layer + title layer
 
       // Verify the sparkLineLayer (first layer)
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'area');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('encoding.x.field', 'date-field');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('encoding.x.type', 'temporal');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('encoding.y.type', 'quantitative');
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0].encoding.y.scale.range).toEqual([
         { expr: 'height' },
         { expr: '2*height/3' },
@@ -183,7 +200,9 @@ describe('to_expression', () => {
       // Verify the result structure
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('layer');
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(2); // Only main layer + title layer, no sparkLineLayer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'text'); // First layer should be text, not area
     });
 
@@ -208,12 +227,17 @@ describe('to_expression', () => {
       );
 
       // Verify layer order and types
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       expect(result.layer).toHaveLength(3);
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0]).toHaveProperty('mark.type', 'area'); // First layer is sparkLineLayer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[1]).toHaveProperty('mark.type', 'text'); // Second layer is value text
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[2]).toHaveProperty('mark.type', 'text'); // Third layer is title text
 
       // Verify the data is passed correctly to sparkLineLayer
+      // @ts-expect-error TS18048, TS18046 TODO(ts-error): fixme
       expect(result.layer[0].data.values).toEqual(timeSeriesData);
     });
   });

@@ -8,6 +8,7 @@ import {
   PrometheusData,
   NormalizedSeries,
   ChartData,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   ChartError,
   TransformationResult,
   GraphTimeseriesDataArgs,

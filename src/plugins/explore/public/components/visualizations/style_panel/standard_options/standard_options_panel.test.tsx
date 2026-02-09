@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { StandardOptionsPanel, StandardOptionsPanelProps } from './standard_options_panel';
 
@@ -38,6 +37,7 @@ jest.mock('../style_accordion', () => ({
 }));
 
 describe('StandardOptionsPanel', () => {
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   const mockProps: StandardOptionsPanelProps = {
     min: 10,
     max: 100,

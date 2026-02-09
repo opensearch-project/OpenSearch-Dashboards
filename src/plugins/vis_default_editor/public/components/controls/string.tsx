@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { AggParamEditorProps } from '../agg_param_props';
@@ -48,6 +48,7 @@ function StringParamEditor({
     setValidity(isValid);
   }, [isValid, setValidity]);
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
 
   return (

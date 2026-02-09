@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { IndicesList } from '../indices_list';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';

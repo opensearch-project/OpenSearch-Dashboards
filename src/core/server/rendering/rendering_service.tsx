@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@osd/i18n';

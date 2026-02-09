@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TimelineWaterfallBar } from './timeline_waterfall_bar';
 import { useTimelineBarColor, useTimelineBarRange } from './timeline_waterfall_bar_hooks';

@@ -5,7 +5,7 @@
 
 import './_index.scss';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import moment from 'moment';
 import { RecentQueriesTableProps, RecentQueryItem, RecentQueryTableItem } from '../types';

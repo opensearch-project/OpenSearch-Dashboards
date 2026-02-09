@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { CLIEngine } from 'eslint';
+import { ESLint } from 'eslint';
 
 import { ToolingLog } from '@osd/dev-utils';
 import { File } from '../file';
@@ -40,22 +40,25 @@ import { File } from '../file';
  * @param  {Array<File>} files
  * @return {Array<File>}
  */
-export function pickFilesToLint(log: ToolingLog, files: File[]) {
-  const cli = new CLIEngine({});
+export async function pickFilesToLint(log: ToolingLog, files: File[]) {
+  const eslint = new ESLint({});
+  const result: File[] = [];
 
-  return files.filter((file) => {
+  for (const file of files) {
     if (!file.isJs() && !file.isTypescript()) {
-      return;
+      continue;
     }
 
     const path = file.getRelativePath();
 
-    if (cli.isPathIgnored(path)) {
+    if (await eslint.isPathIgnored(path)) {
       log.warning(`[eslint] %j ignored by .eslintignore`, file);
-      return false;
+      continue;
     }
 
     log.debug('[eslint] linting %j', file);
-    return true;
-  });
+    result.push(file);
+  }
+
+  return result;
 }

@@ -30,6 +30,7 @@ const mockServices = {
   appName: 'test-app',
 } as IDataPluginServices;
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 const mockPosition = {
   lineNumber: 1,
   column: 1,
@@ -95,6 +96,7 @@ describe('prompt code_completion', () => {
       const found = suggestions.find((s) => {
         return (
           (!expected.text || s.text === expected.text) &&
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           (!expected.detail || s.detail === expected.detail) &&
           (!expected.type || s.type === expected.type)
         );
@@ -115,6 +117,7 @@ describe('prompt code_completion', () => {
     });
 
     test('should prioritize non-underscore fields', async () => {
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const suggestions = await getPromptSuggestions('find');
 
       expect(utils.formatAvailableFieldsToSuggestions).toHaveBeenCalledWith(

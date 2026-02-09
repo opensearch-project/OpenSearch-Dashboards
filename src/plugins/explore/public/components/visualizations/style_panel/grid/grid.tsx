@@ -44,6 +44,7 @@ export const GridOptionsPanel: React.FC<GridOptionsProps> = ({ grid, onGridChang
   ];
 
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="gridSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.grid', {

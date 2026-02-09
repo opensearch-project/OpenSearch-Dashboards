@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { fireEvent, render, screen, waitFor, act } from '@testing-library/react';
-import React from 'react';
+
 import { IntlProvider } from 'react-intl';
 
 import { DataSourceConnectionType } from '../../../common/types';
@@ -61,6 +61,7 @@ const setupAssociationDataSourceModal = ({
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <AssociationDataSourceModal
         logos={logos}
@@ -103,6 +104,7 @@ const setupAssociationDataSourceModalForCrossClusterSearch = ({
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <AssociationDataSourceModal
         logos={logos}

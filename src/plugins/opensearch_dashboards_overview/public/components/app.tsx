@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@osd/i18n/react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiDataGrid, EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
 import { VegaRuntimeData } from '../vega_adapter';
 
@@ -41,10 +41,12 @@ interface InspectorDataGridProps extends VegaRuntimeData {
 export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: InspectorDataGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
     [setPagination]
   );
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
     setPagination,
   ]);
@@ -89,6 +91,7 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
   }, [data, sortingColumns]);
 
   const renderCellValue = useMemo(() => {
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     return (({ rowIndex, columnId }) => {
       let adjustedRowIndex = rowIndex;
 
@@ -113,6 +116,7 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
 
   const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ columnId, width }) => {
       setColumnWidths({
         ...columnWidths,

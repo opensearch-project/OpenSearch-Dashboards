@@ -10,7 +10,7 @@ import {
   EuiSmallButtonEmpty,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { LanguageConfig } from '../../query';
 import { getQueryService } from '../../services';

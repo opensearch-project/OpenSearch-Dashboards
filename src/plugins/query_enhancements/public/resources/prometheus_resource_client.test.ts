@@ -260,6 +260,7 @@ describe('PrometheusResourceClient', () => {
     });
 
     it('should return only meta when time range parsing fails', async () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       jest.spyOn(dateMath, 'parse').mockReturnValue(null);
 
       await client.getMetrics(testDataConnectionId, testMeta, testTimeRange);

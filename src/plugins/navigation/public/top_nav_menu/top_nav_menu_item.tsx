@@ -29,7 +29,7 @@
  */
 
 import { upperFirst, isFunction } from 'lodash';
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import classNames from 'classnames';
 import {
   EuiToolTip,

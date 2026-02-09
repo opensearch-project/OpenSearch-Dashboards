@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';

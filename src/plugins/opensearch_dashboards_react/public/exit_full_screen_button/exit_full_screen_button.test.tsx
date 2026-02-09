@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { keys } from '@elastic/eui';
 import { shallow } from 'enzyme';

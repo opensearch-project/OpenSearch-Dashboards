@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { OptedInNoticeBanner } from '../../components/opted_in_notice_banner';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';

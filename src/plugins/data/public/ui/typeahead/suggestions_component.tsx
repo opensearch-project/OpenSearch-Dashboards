@@ -29,7 +29,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';

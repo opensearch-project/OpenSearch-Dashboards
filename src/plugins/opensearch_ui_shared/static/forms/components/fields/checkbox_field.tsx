@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCompressedFormRow, EuiCompressedCheckbox } from '@elastic/eui';
 import uuid from 'uuid';
 
@@ -46,6 +45,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
 
   return (
     <EuiCompressedFormRow
+      // @ts-expect-error TS2349 TODO(ts-error): fixme
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
+import { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,

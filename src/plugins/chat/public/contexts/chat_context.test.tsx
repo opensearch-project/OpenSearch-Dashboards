@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatProvider, useChatContext } from './chat_context';
 import { ChatService } from '../services/chat_service';

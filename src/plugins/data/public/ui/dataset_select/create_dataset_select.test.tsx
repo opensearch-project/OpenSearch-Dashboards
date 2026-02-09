@@ -133,6 +133,7 @@ describe('createDatasetSelect', () => {
     expect(() => {
       React.createElement(CreatedDatasetSelect, {
         onSelect: mockOnSelect,
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         appName: mockAppName,
       });
     }).not.toThrow();
@@ -150,6 +151,7 @@ describe('createDatasetSelect', () => {
       React.isValidElement(
         React.createElement(CreatedDatasetSelect, {
           onSelect: mockOnSelect,
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           appName: mockAppName,
         })
       )

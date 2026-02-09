@@ -62,6 +62,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -91,6 +92,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -208,6 +210,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -240,6 +243,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContextWithFalseManage,
@@ -280,6 +284,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -328,6 +333,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -372,6 +378,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -417,6 +424,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -461,6 +469,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -485,6 +494,13 @@ describe('DataSourceTable', () => {
 
   describe('should handle datasources with empty description correctly', () => {
     beforeEach(async () => {
+      // Clear all history mock call history to prevent prior tests from leaking
+      // into the snapshot, which captures the serialized mock state.
+      Object.values(history).forEach((value) => {
+        if (typeof value === 'function' && typeof (value as jest.Mock).mockClear === 'function') {
+          (value as jest.Mock).mockClear();
+        }
+      });
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
       spyOn(utils, 'getDataSources').and.returnValue(
         Promise.resolve(getMappedDataSourcesWithEmptyDescription)
@@ -500,6 +516,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -544,6 +561,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -584,6 +602,7 @@ describe('DataSourceTable', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,

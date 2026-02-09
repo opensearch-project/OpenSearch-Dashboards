@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
+import { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@osd/i18n';
@@ -198,7 +198,6 @@ const VisLegendItemComponent = ({
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
               className={classNames('visLegend__valueColorPickerDot', {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
               })}
               style={{ color }}

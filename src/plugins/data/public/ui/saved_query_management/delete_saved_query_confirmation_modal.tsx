@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedQuery } from '../..';

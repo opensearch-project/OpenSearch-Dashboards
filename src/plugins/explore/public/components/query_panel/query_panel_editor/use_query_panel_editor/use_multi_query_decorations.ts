@@ -7,6 +7,7 @@ import { useCallback, useRef } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   splitMultiQueries,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   ParsedQueryWithPosition,
 } from '../../../../application/utils/multi_query_utils';
 

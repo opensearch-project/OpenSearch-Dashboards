@@ -4,7 +4,7 @@
  */
 
 import { render, waitFor } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { QueryEditorExtension } from './query_editor_extension';
 import QueryEditorExtensions from './query_editor_extensions';
 
@@ -39,6 +39,7 @@ describe('QueryEditorExtensions', () => {
     onSelectLanguage: jest.fn(),
     isCollapsed: false,
     setIsCollapsed: jest.fn(),
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     query: mockQuery,
     bottomPanelContainer: document.createElement('div'),
   };

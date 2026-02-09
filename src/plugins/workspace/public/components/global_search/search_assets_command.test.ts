@@ -7,6 +7,7 @@ import { searchAssets } from './search_assets_command';
 import { HttpStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { AssetType, SUPPORTED_ASSET_TYPES } from './constants';
 
 describe('searchAssets', () => {

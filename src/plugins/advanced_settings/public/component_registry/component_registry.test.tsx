@@ -84,6 +84,7 @@ describe('ComponentRegistry', () => {
   it('should set a displayName for the component if one does not exist', () => {
     const component: React.ComponentType = () => <div />;
     const registry = new ComponentRegistry();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
 
     expect(component.displayName).toEqual(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT);
@@ -94,6 +95,7 @@ describe('ComponentRegistry', () => {
     component.displayName = '<AwesomeComponent>';
     const registry = new ComponentRegistry();
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     registry.setup.register(ComponentRegistry.componentType.PAGE_TITLE_COMPONENT, component);
 
     expect(component.displayName).toEqual('<AwesomeComponent>');

@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import moment from 'moment';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { CONSOLE_PROXY, DATACONNECTIONS_BASE } from '../../../../framework/utils/shared';
@@ -397,7 +397,6 @@ export function IntegrationWorkflowsInputs({
       isInvalid={![...useWorkflows.values()].includes(true)}
       error={['Must select at least one workflow.']}
     >
-      {/* @ts-expect-error TS2786 TODO(ts-error): fixme */}
       <SetupWorkflowSelector
         integration={integration}
         useWorkflows={useWorkflows}

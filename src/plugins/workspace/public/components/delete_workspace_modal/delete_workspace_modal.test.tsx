@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { DeleteWorkspaceModal, DeleteWorkspaceModalProps } from './delete_workspace_modal';
 import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';

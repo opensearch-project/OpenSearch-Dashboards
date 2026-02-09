@@ -22,6 +22,7 @@ export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
   initialIsOpen = false,
 }) => {
   return (
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     <StyleAccordion
       id="titleSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.title', {
