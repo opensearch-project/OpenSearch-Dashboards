@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 import { TimeRange } from '../../../../data/public';
 import { DEFAULT_THEME } from './theme/default';
 import { MultiMetricComponent } from './metric/multi_metric_component';
+import { MetricComponent } from './metric/metric_component';
 import './metric/multi_metric_component.scss';
 
 interface MultiMetricSpec {
@@ -25,8 +26,20 @@ interface MultiMetricSpec {
   axisColumnMappings?: any;
 }
 
+interface SingleMetricSpec {
+  __singleMetricReactComponent: boolean;
+  data: Array<Record<string, any>>;
+  styles: any;
+  metricField: string;
+  timeField?: string;
+  numericalColumns: any[];
+  categoricalColumns: any[];
+  dateColumns: any[];
+  axisColumnMappings?: any;
+}
+
 interface Props {
-  spec: echarts.EChartsOption | MultiMetricSpec;
+  spec: echarts.EChartsOption | MultiMetricSpec | SingleMetricSpec;
   onSelectTimeRange?: (range: TimeRange) => void;
 }
 
@@ -39,9 +52,16 @@ const DEFAULT_GRID = {
 
 // Type guard to check if spec is MultiMetricSpec
 const isMultiMetricSpec = (
-  spec: echarts.EChartsOption | MultiMetricSpec
+  spec: echarts.EChartsOption | MultiMetricSpec | SingleMetricSpec
 ): spec is MultiMetricSpec => {
   return typeof spec === 'object' && spec !== null && '__multiMetricReactComponent' in spec;
+};
+
+// Type guard to check if spec is SingleMetricSpec
+const isSingleMetricSpec = (
+  spec: echarts.EChartsOption | MultiMetricSpec | SingleMetricSpec
+): spec is SingleMetricSpec => {
+  return typeof spec === 'object' && spec !== null && '__singleMetricReactComponent' in spec;
 };
 
 // Separate component for regular ECharts rendering
@@ -250,8 +270,25 @@ const RegularEchartsRender = React.memo(
   }
 );
 
-// Main EchartsRender component that routes between multi-metric and regular rendering
+// Main EchartsRender component that routes between single-metric, multi-metric and regular rendering
 export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => {
+  // Check if this is a single-metric React component
+  if (isSingleMetricSpec(spec)) {
+    return (
+      <MetricComponent
+        key={`${spec.metricField}-${spec.timeField || 'no-time'}`}
+        data={spec.data}
+        styles={spec.styles}
+        metricField={spec.metricField}
+        timeField={spec.timeField}
+        numericalColumns={spec.numericalColumns}
+        categoricalColumns={spec.categoricalColumns}
+        dateColumns={spec.dateColumns}
+        axisColumnMappings={spec.axisColumnMappings}
+      />
+    );
+  }
+
   // Check if this is a multi-metric React component
   if (isMultiMetricSpec(spec)) {
     return (
@@ -269,6 +306,6 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
     );
   }
 
-  // Regular ECharts rendering for non-multi-metric cases
+  // Regular ECharts rendering for non-metric cases
   return <RegularEchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
 });

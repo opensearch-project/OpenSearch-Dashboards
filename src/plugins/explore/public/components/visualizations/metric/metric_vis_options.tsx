@@ -135,9 +135,9 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   })}
                 >
                   <DebouncedFieldText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                    placeholder={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Title',
+                    value={styleOptions.title || ''}
+                    placeholder={i18n.translate('explore.vis.metric.defaultTitle', {
+                      defaultMessage: 'Default title',
                     })}
                     onChange={(text) => updateStyleOption('title', text)}
                   />

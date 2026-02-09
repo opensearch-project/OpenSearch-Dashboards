@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CustomSeriesOption, LineSeriesOption } from 'echarts';
+import { LineSeriesOption } from 'echarts';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 import { MetricChartStyle } from './metric_vis_config';
@@ -40,7 +40,6 @@ function targetFillColor(
 export const createMetricChartSeries = ({
   seriesFields,
   dateField,
-  styles,
 }: {
   seriesFields: string[];
   styles: MetricChartStyle;
@@ -49,9 +48,7 @@ export const createMetricChartSeries = ({
   const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
 
-  const colorPalette = getColors();
-
-  const series: Array<LineSeriesOption | CustomSeriesOption> = [];
+  const series: LineSeriesOption[] = [];
   seriesFields.forEach((item: string) => {
     if (!transformedData.length || !Array.isArray(transformedData[0])) {
       // No dataset/header row available; keep rendering stable.
@@ -60,62 +57,7 @@ export const createMetricChartSeries = ({
 
     const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
 
-    const numericalValues: number[] = [];
-    const seriesIndex = transformedData[0].indexOf(item);
-    if (seriesIndex < 0) return;
-
-    for (let i = 1; i < transformedData.length; i++) {
-      numericalValues.push(transformedData[i][seriesIndex]);
-    }
-
-    const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
-    const isValidNumber =
-      calculatedValue !== undefined &&
-      typeof calculatedValue === 'number' &&
-      !isNaN(calculatedValue);
-
-    const selectedUnit = getUnitById(styles?.unitId);
-
-    const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
-
-    const fillColor = targetFillColor(
-      styles.useThresholdColor ?? false,
-      styles.thresholdOptions?.thresholds,
-      styles.thresholdOptions?.baseColor,
-      calculatedValue
-    );
-
-    let changeText = '';
-    let changeColor = colorPalette.text;
-    if (styles.showPercentage) {
-      const percentage = calculatePercentage(numericalValues);
-      if (percentage === undefined) {
-        changeText = '-';
-      } else {
-        changeText = `${percentage > 0 ? '+' : ''}${(percentage * 100).toFixed(2)}%`;
-      }
-
-      if (percentage !== undefined && percentage > 0) {
-        if (styles.percentageColor === 'standard') {
-          changeColor = colorPalette.statusGreen;
-        } else if (styles.percentageColor === 'inverted') {
-          changeColor = colorPalette.statusRed;
-        } else {
-          changeColor = colorPalette.statusGreen;
-        }
-      }
-      if (percentage !== undefined && percentage < 0) {
-        if (styles.percentageColor === 'standard') {
-          changeColor = colorPalette.statusRed;
-        } else if (styles.percentageColor === 'inverted') {
-          changeColor = colorPalette.statusGreen;
-        } else {
-          changeColor = colorPalette.statusRed;
-        }
-      }
-    }
-
-    // If date field is set, it will display a sparkline
+    // If date field is set, create sparkline series
     if (dateField) {
       series.push({
         name: seriesDisplayName,
@@ -131,68 +73,6 @@ export const createMetricChartSeries = ({
         },
       });
     }
-
-    series.push({
-      type: 'custom',
-      ...(dateField && { encode: { x: dateField } }),
-      z: 10,
-      renderItem(params, api) {
-        const width = api.getWidth();
-        const height = api.getHeight();
-
-        const textSize = Math.min(width, height) / 20;
-
-        // Dynamic font sizes based on chart dimensions
-        const titleFontSize = styles.titleSize ? styles.titleSize : 1.5 * textSize;
-        const valueFontSize = styles.fontSize
-          ? styles.fontSize
-          : 5 * textSize * (selectedUnit?.fontScale ?? 1);
-        const changeFontSize = styles.percentageSize ? styles.percentageSize : 2 * textSize;
-
-        return {
-          type: 'group',
-          x: width / 2,
-          y: height * 0.1,
-          children: [
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: 0,
-                text: styles.showTitle ? styles.title || seriesDisplayName : '',
-                fontSize: titleFontSize,
-                fontWeight: 'normal',
-                fill: colorPalette.text,
-                textAlign: 'center',
-              },
-            },
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: titleFontSize + 5,
-                text: displayValue,
-                fontSize: valueFontSize,
-                fontWeight: 'bold',
-                fill: fillColor,
-                textAlign: 'center',
-              },
-            },
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: titleFontSize + valueFontSize + 10,
-                text: changeText,
-                fontSize: changeFontSize,
-                fill: changeColor,
-                textAlign: 'center',
-              },
-            },
-          ],
-        };
-      },
-    });
   });
 
   newState.series = series;
