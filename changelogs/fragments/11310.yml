@@ -1,0 +1,2 @@
+fix:
+- Fix new discover logs table overflow ([#11310](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11310))
