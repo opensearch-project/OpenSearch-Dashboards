@@ -313,6 +313,12 @@ export const ExploreTracesChart = ({
                     timefilterUpdateHandler={timefilterUpdateHandler}
                     services={services}
                     showYAxisLabel={false}
+                    useSmartDateFormat={true}
+                    customChartsTheme={{
+                      colors: {
+                        vizColors: [euiThemeVars.euiColorVis0],
+                      },
+                    }}
                   />
                 ) : requestError && isFieldMissingError(requestError) ? (
                   <EuiCallOut
@@ -379,9 +385,10 @@ export const ExploreTracesChart = ({
                     timefilterUpdateHandler={timefilterUpdateHandler}
                     services={services}
                     showYAxisLabel={false}
+                    useSmartDateFormat={true}
                     customChartsTheme={{
                       colors: {
-                        vizColors: [euiThemeVars.euiColorDanger],
+                        vizColors: [euiThemeVars.euiColorVis2],
                       },
                     }}
                   />
@@ -450,6 +457,12 @@ export const ExploreTracesChart = ({
                     timefilterUpdateHandler={timefilterUpdateHandler}
                     services={services}
                     showYAxisLabel={false}
+                    useSmartDateFormat={true}
+                    customChartsTheme={{
+                      colors: {
+                        vizColors: [euiThemeVars.euiColorVis1],
+                      },
+                    }}
                   />
                 ) : latencyError && isFieldMissingError(latencyError) ? (
                   <EuiCallOut
