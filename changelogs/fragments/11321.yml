@@ -1,0 +1,2 @@
+feat:
+- Provide a button on Explore data table to toggle cell text wrapping ([#11321](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11321))

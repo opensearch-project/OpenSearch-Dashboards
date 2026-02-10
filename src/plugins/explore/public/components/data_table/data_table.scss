@@ -149,13 +149,15 @@
       max-width: 400px;
     }
 
-    // Cell content truncation: handle nested structure
+    // Cell content layout
     td .exploreDocTableCell__content {
       display: flex;
       align-items: center;
       min-width: 0;
+    }
 
-      // Data field content: truncate with ellipsis
+    // Cell content truncation: only in default (non-wrap) mode
+    &:not(.explore-table--wrap) td .exploreDocTableCell__content {
       > span:first-child,
       .exploreDocTableCell__dataField {
         flex: 0 1 auto;
@@ -192,6 +194,14 @@
       td.field-name {
         font-weight: $euiFontWeightBold;
       }
+    }
+  }
+
+  // Wrap cell text mode: handle long unbroken strings (URLs, hashes, encoded data)
+  .explore-table--wrap {
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    td:not(.eui-textNoWrap) {
+      word-break: break-word;
     }
   }
 
