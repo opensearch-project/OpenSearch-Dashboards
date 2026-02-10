@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationRule, AxisRole, VisFieldType } from './types';
+import { VisualizationRule } from './types';
 import {
   createSimpleLineChart,
   createLineBarChart,
@@ -722,55 +722,6 @@ const oneMetricRule: VisualizationRule = {
   },
 };
 
-const multiMetricRule: VisualizationRule = {
-  id: 'multi-metric',
-  name: 'multiple metrics',
-  description: 'Grid layout for multiple numerical fields as separate metrics',
-  matches: (numerical, categorical, date) => {
-    if (numerical.length >= 2 && categorical.length === 0 && date.length === 0) {
-      return 'COMPATIBLE_MATCH';
-    }
-    return 'NOT_MATCH';
-  },
-  chartTypes: [{ ...CHART_METADATA.metric, priority: 100 }],
-  toSpec: (
-    transformedData,
-    numericalColumns,
-    categoricalColumns,
-    dateColumns,
-    styleOptions,
-    chartType = 'metric',
-    axisColumnMappings
-  ) => {
-    // Check if we have multiple numerical fields mapped to different axis roles
-    const numericalRoles = [AxisRole.Y, AxisRole.COLOR, AxisRole.SIZE];
-    const mappedFields = numericalRoles.filter(
-      (role) => axisColumnMappings?.[role]?.schema === VisFieldType.Numerical
-    );
-
-    if (mappedFields.length >= 2) {
-      return createMultiMetric(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions as MetricChartStyle,
-        axisColumnMappings
-      );
-    }
-
-    // Fallback to single metric
-    return createSingleMetric(
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styleOptions as MetricChartStyle,
-      axisColumnMappings
-    );
-  },
-};
-
 const twoMetricRule: VisualizationRule = {
   id: 'two-metric',
   name: 'two metric',
@@ -1036,7 +987,6 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   oneMetricTwoCateHighCardRule,
   oneMetricTwoCateLowCardRule,
   oneMetricOneCateRule,
-  multiMetricRule,
   twoMetricRule,
   twoMetricOneCateRule,
   threeMetricOneCateRule,

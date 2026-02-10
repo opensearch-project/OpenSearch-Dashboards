@@ -19,6 +19,8 @@ import { getColors } from '../theme/default_colors';
 
 export type TextAlignment = 'auto' | 'center';
 export type LayoutType = 'horizontal' | 'vertical' | 'auto';
+export type TextMode = 'value' | 'name' | 'value_and_name' | 'none';
+export type ColorMode = 'none' | 'value' | 'background_gradient' | 'background_solid';
 
 export interface MetricChartStyleOptions {
   showTitle?: boolean;
@@ -47,8 +49,8 @@ export interface MetricChartStyleOptions {
   max?: number;
   useThresholdColor?: boolean;
   layoutType?: LayoutType;
-  minItemWidth?: number;
-  minItemHeight?: number;
+  textMode?: TextMode;
+  colorMode?: ColorMode;
 }
 
 export type MetricChartStyle = Required<
@@ -64,8 +66,8 @@ export type MetricChartStyle = Required<
     | 'min'
     | 'max'
     | 'layoutType'
-    | 'minItemWidth'
-    | 'minItemHeight'
+    | 'textMode'
+    | 'colorMode'
   >
 > &
   Pick<
@@ -77,8 +79,8 @@ export type MetricChartStyle = Required<
     | 'min'
     | 'max'
     | 'layoutType'
-    | 'minItemWidth'
-    | 'minItemHeight'
+    | 'textMode'
+    | 'colorMode'
   >;
 
 export const defaultMetricChartStyles: MetricChartStyle = {
@@ -96,6 +98,8 @@ export const defaultMetricChartStyles: MetricChartStyle = {
     thresholds: [],
   },
   useThresholdColor: false,
+  textMode: 'value_and_name',
+  colorMode: 'none',
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({
