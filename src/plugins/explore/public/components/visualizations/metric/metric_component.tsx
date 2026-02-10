@@ -17,6 +17,8 @@ interface MetricTextData {
   changeText: string;
   changeColor: string;
   title: string;
+  backgroundColor?: string;
+  backgroundGradient?: string;
 }
 
 interface MetricComponentProps {
@@ -34,7 +36,8 @@ function calculateMetricTextData(
   data: Array<Record<string, any>>,
   styles: MetricChartStyle,
   metricField: string,
-  fieldName?: string
+  fieldName?: string,
+  isMultiMetric: boolean = false
 ): MetricTextData {
   const colorPalette = getColors();
 
@@ -57,14 +60,39 @@ function calculateMetricTextData(
     }
   }
 
-  const fillColor =
-    calculatedValue === undefined
-      ? styles.useThresholdColor
-        ? DEFAULT_GREY
-        : colorPalette.text
-      : styles.useThresholdColor
-      ? textColor
-      : colorPalette.text;
+  // Determine colors based on color mode
+  let fillColor = colorPalette.text;
+  let backgroundColor: string | undefined;
+  let backgroundGradient: string | undefined;
+
+  if (calculatedValue === undefined) {
+    fillColor = styles.useThresholdColor ? DEFAULT_GREY : colorPalette.text;
+  } else {
+    const thresholdColor = styles.useThresholdColor ? textColor : colorPalette.categories[0];
+
+    switch (styles.colorMode) {
+      case 'value':
+        fillColor = thresholdColor;
+        break;
+      case 'background_solid':
+        fillColor = colorPalette.text;
+        backgroundColor = thresholdColor;
+        break;
+      case 'background_gradient':
+        fillColor = colorPalette.text;
+        // Convert 3-digit hex to 6-digit hex before adding alpha
+        const normalizedColor =
+          thresholdColor.length === 4
+            ? thresholdColor.replace(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i, '#$1$1$2$2$3$3')
+            : thresholdColor;
+        backgroundGradient = `linear-gradient(135deg, ${normalizedColor}33, ${normalizedColor})`;
+        break;
+      case 'none':
+      default:
+        fillColor = colorPalette.text;
+        break;
+    }
+  }
 
   // Calculate percentage change
   let changeText = '';
@@ -97,15 +125,33 @@ function calculateMetricTextData(
     }
   }
 
-  // Use custom title if provided, otherwise use field name as default
-  const title = styles.showTitle ? styles.title || fieldName || metricField : '';
+  // Calculate title based on text mode and metric type
+  let title = '';
+  const textMode = styles.textMode || 'value_and_name';
+
+  if (textMode === 'none') {
+    title = '';
+  } else if (textMode === 'name') {
+    // For single metric: show field name; for multi metric: this will be overridden by category name
+    title = styles.title || fieldName || metricField;
+  } else if (textMode === 'value') {
+    title = '';
+  } else if (textMode === 'value_and_name') {
+    // For single metric: show field name; for multi metric: this will be overridden by category name
+    title = styles.title || fieldName || metricField;
+  }
 
   return {
-    displayValue: displayValue ?? '-',
+    displayValue: textMode === 'value' || textMode === 'value_and_name' ? displayValue ?? '-' : '',
     fillColor,
-    changeText,
+    changeText:
+      (textMode === 'value' || textMode === 'value_and_name') && styles.showPercentage
+        ? changeText
+        : '',
     changeColor,
     title,
+    backgroundColor,
+    backgroundGradient,
   };
 }
 
@@ -124,7 +170,7 @@ export const MetricComponent: React.FC<MetricComponentProps> = ({
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
-    return calculateMetricTextData(data, styles, metricField, fieldName);
+    return calculateMetricTextData(data, styles, metricField, fieldName, false);
   }, [data, styles, metricField, fieldName]);
 
   // Create sparkline ECharts option
@@ -135,6 +181,31 @@ export const MetricComponent: React.FC<MetricComponentProps> = ({
     chartInstanceRef.current = chartInstance;
 
     const colorPalette = getColors();
+
+    let sparklineColor: string;
+    if (styles.colorMode === 'background_solid' || styles.colorMode === 'background_gradient') {
+      sparklineColor = 'rgba(255, 255, 255, 0.7)';
+    } else {
+      if (
+        styles.useThresholdColor &&
+        (styles.colorMode === 'value' || styles.colorMode === 'none')
+      ) {
+        const numericalValues: number[] = data.map((d) => d[metricField]);
+        const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
+        const thresholds = styles.thresholdOptions?.thresholds ?? [];
+        let thresholdColor = styles.thresholdOptions?.baseColor ?? colorPalette.statusGreen;
+
+        if (calculatedValue !== undefined) {
+          for (let i = 0; i < thresholds.length; i++) {
+            const { value, color } = thresholds[i];
+            if (calculatedValue >= value) thresholdColor = color;
+          }
+        }
+        sparklineColor = thresholdColor;
+      } else {
+        sparklineColor = colorPalette.categories[0];
+      }
+    }
 
     const option = {
       grid: {
@@ -157,13 +228,18 @@ export const MetricComponent: React.FC<MetricComponentProps> = ({
         {
           name: fieldName || metricField,
           type: 'line',
-          data: data.map((d) => [d[timeField], d[metricField]]),
+          data: data
+            .filter((d) => d[timeField] != null && d[metricField] != null)
+            .sort((a, b) => new Date(a[timeField]).getTime() - new Date(b[timeField]).getTime())
+            .map((d) => [d[timeField], d[metricField]]),
           symbol: 'none',
+          smooth: true,
           areaStyle: {
+            color: sparklineColor,
             opacity: 0.5,
           },
           lineStyle: {
-            color: colorPalette.categories[0],
+            color: sparklineColor,
           },
         },
       ],
@@ -180,7 +256,17 @@ export const MetricComponent: React.FC<MetricComponentProps> = ({
     return () => {
       chartInstance.dispose();
     };
-  }, [data, timeField, metricField, fieldName, axisColumnMappings]);
+  }, [
+    data,
+    timeField,
+    metricField,
+    fieldName,
+    axisColumnMappings,
+    styles.colorMode,
+    styles.useThresholdColor,
+    styles.thresholdOptions,
+    styles.valueCalculation,
+  ]);
 
   const selectedUnit = getUnitById(styles?.unitId);
 
@@ -189,8 +275,21 @@ export const MetricComponent: React.FC<MetricComponentProps> = ({
   const valueFontSize = styles.fontSize || 40 * (selectedUnit?.fontScale ?? 1);
   const changeFontSize = styles.percentageSize || 24;
 
+  // Determine container styles based on color mode
+  const containerStyle: React.CSSProperties = {};
+
+  if (textData.backgroundColor) {
+    containerStyle.backgroundColor = textData.backgroundColor;
+    containerStyle.padding = '16px';
+    containerStyle.borderRadius = '8px';
+  } else if (textData.backgroundGradient) {
+    containerStyle.background = textData.backgroundGradient;
+    containerStyle.padding = '16px';
+    containerStyle.borderRadius = '8px';
+  }
+
   return (
-    <div className="metric-component">
+    <div className="metric-component" style={containerStyle}>
       {/* Sparkline chart - only rendered if timeField exists */}
       {timeField && <div ref={chartRef} className="metric-sparkline" />}
 

@@ -50,9 +50,9 @@
 
   /* Horizontal layout - single row behavior */
   .layout-horizontal & {
-    flex: 1 1 var(--min-item-width, 120px);
-    min-width: var(--min-item-width, 120px);
-    max-width: 400px;
+    flex: 1 1 var(--min-item-width, 280px);
+    min-width: var(--min-item-width, 280px);
+    max-width: 450px;
     min-height: 160px;
     height: 100%;
   }
@@ -93,6 +93,7 @@
 @media (min-width: 1201px) {
   .layout-auto .multi-metric-item {
     flex: 1 1 calc(33.333% - 6px);
+    max-width: calc(100% - 4px);
   }
 }
 
