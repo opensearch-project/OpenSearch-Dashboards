@@ -1,2 +1,0 @@
-feat:
-- Add logs default columns and remove system fields from source column ([#11203](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11203))
