@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
+import { Subscription } from 'rxjs';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -63,6 +64,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
   const isStreamingRef = useRef(false);
+
+  // Track active subscription for abort functionality
+  const activeSubscriptionRef = useRef<Subscription | null>(null);
 
   const timelineRef = React.useRef<Message[]>(timeline);
 
@@ -233,16 +237,21 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           console.error('Subscription error:', error);
           // Remove loading message on error
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          activeSubscriptionRef.current = null;
           isStreamingRef.current = false;
           setIsStreaming(false);
         },
         complete: () => {
           // Remove loading message if still present
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          activeSubscriptionRef.current = null;
           isStreamingRef.current = false;
           setIsStreaming(false);
         },
       });
+
+      // Store subscription for abort functionality
+      activeSubscriptionRef.current = subscription;
 
       return () => subscription.unsubscribe();
     } catch (error) {
@@ -251,6 +260,43 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsStreaming(false);
     }
   }, [chatService, currentRunId, eventHandler]);
+
+  // Handle stopping agent execution
+  const handleStopExecution = useCallback(() => {
+    try {
+      // 1. Unsubscribe from observable if active
+      if (activeSubscriptionRef.current) {
+        activeSubscriptionRef.current.unsubscribe();
+        activeSubscriptionRef.current = null;
+      }
+
+      // 2. Abort fetch request
+      chatService.abort();
+
+      // 3. Reset streaming state
+      setIsStreaming(false);
+      isStreamingRef.current = false;
+
+      // 4. Remove loading message
+      setTimeline((prev) => prev.filter((msg) => !msg.id.startsWith('loading-')));
+
+      // 5. Add cancellation feedback message
+      const cancelMessage: Message = {
+        id: `cancelled-${Date.now()}`,
+        role: 'system',
+        content: 'Execution stopped by user',
+      };
+      setTimeline((prev) => [...prev, cancelMessage]);
+
+      // 6. Clear event handler state
+      eventHandler.clearState();
+    } catch (error) {
+      console.error('Error stopping execution:', error);
+      // Ensure state cleanup even if abort fails
+      setIsStreaming(false);
+      isStreamingRef.current = false;
+    }
+  }, [chatService, eventHandler]);
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
@@ -398,6 +444,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         onInputChange={setInput}
         onSend={handleSend}
         onKeyDown={handleKeyDown}
+        onStopExecution={handleStopExecution}
       />
     </ChatContainer>
   );
