@@ -3,12 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { uiReducer, setActiveTab, setUiState, setShowHistogram, UIState } from './ui_slice';
+import {
+  uiReducer,
+  setActiveTab,
+  setUiState,
+  setShowHistogram,
+  setWrapCellText,
+  UIState,
+} from './ui_slice';
 
 describe('UI Slice', () => {
   const initialState: UIState = {
     activeTabId: '',
     showHistogram: true,
+    wrapCellText: false,
   };
 
   it('should return the initial state', () => {
@@ -47,11 +55,28 @@ describe('UI Slice', () => {
     });
   });
 
+  describe('setWrapCellText', () => {
+    it('should handle setWrapCellText action', () => {
+      const newValue = true;
+      const action = setWrapCellText(newValue);
+
+      expect(action.type).toBe('ui/setWrapCellText');
+      expect(action.payload).toBe(newValue);
+
+      const newState = uiReducer(initialState, action);
+      expect(newState.wrapCellText).toBe(newValue);
+
+      expect(newState.activeTabId).toBe(initialState.activeTabId);
+      expect(newState.showHistogram).toBe(initialState.showHistogram);
+    });
+  });
+
   describe('setUiState', () => {
     it('should handle setUiState action', () => {
       const newState: UIState = {
         activeTabId: 'visualizations',
         showHistogram: false,
+        wrapCellText: true,
       };
       const action = setUiState(newState);
 
@@ -75,11 +100,16 @@ describe('UI Slice', () => {
       state = uiReducer(state, setShowHistogram(true));
       expect(state.showHistogram).toBe(true);
 
+      // Third action: set wrap cell text
+      state = uiReducer(state, setWrapCellText(true));
+      expect(state.wrapCellText).toBe(true);
+
       // Final state should have all changes
       expect(state).toEqual({
         ...initialState,
         activeTabId: 'visualizations',
         showHistogram: true,
+        wrapCellText: true,
       });
     });
   });
