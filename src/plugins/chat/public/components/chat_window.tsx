@@ -314,7 +314,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const additionalMessages = options?.messages ?? [];
 
     // Merge additional messages with current timeline for sending
-    const messagesToSend = [...timeline, ...additionalMessages];
+    // Filter out activity messages - they are UI-only and shouldn't be sent to the agent
+    const messagesToSend = [...timeline, ...additionalMessages].filter(
+      (msg) => msg.role !== 'activity'
+    );
 
     // Check if this is a slash command
     const commandResult = await slashCommandRegistry.execute(messageContent);
@@ -378,7 +381,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Clear any streaming state and input
     setInput('');
 
-    subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
+    // Filter out activity messages - they are UI-only and shouldn't be sent to the agent
+    const messagesToResend = [...truncatedTimeline, ...additionalMessages].filter(
+      (msg) => msg.role !== 'activity'
+    );
+    subscribeToMessageStream(textContent, messagesToResend);
   };
 
   const handleNewChat = useCallback(() => {

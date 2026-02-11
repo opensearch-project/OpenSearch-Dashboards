@@ -446,6 +446,7 @@ export {
   ChatImplementationFunctions,
   Message,
   ChatWindowState,
+  ActivityType,
 } from './chat';
 
 export { debounce, getNonce } from './utils';

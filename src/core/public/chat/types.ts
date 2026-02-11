@@ -105,7 +105,7 @@ export enum ActivityType {
  * Used for non-error system events like user-initiated stops, status updates, etc.
  * See: https://docs.ag-ui.com/concepts/messages#activity-messages
  */
-export interface ActivityMessage extends BaseMessage {
+export interface ActivityMessage extends Omit<BaseMessage, 'content'> {
   role: 'activity';
   activityType: ActivityType;
   content: Record<string, any>;

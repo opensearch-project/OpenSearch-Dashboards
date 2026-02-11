@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { ActivityType } from '../../../core/public/chat';
+import { ActivityType } from '../../../core/public';
 
 // Import interface types from core - these define the structure
 export type {
