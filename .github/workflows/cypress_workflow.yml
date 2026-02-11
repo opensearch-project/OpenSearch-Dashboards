@@ -204,7 +204,7 @@ jobs:
         run: yarn osd bootstrap
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12 --dist
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Checkout FT repo
         if: matrix.test_location == 'ftr'
