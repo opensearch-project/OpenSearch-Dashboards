@@ -25,6 +25,7 @@ on:
         type: number
 
 env:
+  OSD_OPTIMIZER_THEMES: v8light
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
