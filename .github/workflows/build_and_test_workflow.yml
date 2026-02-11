@@ -11,6 +11,7 @@ on:
     branches: ['**']
 
 env:
+  OSD_OPTIMIZER_THEMES: v8light
   TEST_BROWSER_HEADLESS: 1
   CI: 1
   GCS_UPLOAD_PREFIX: fake
