@@ -3,11 +3,10 @@
 .messageRow {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px;
   align-items: start;
 
   &__icon {
-    margin-top: 4px;
+    margin-top: 10px;
   }
 
   &__content {
@@ -59,6 +58,10 @@
     }
   }
 
+  &--user {
+    gap: 12px;
+  }
+
   // For user messages, ensure the actions are visible on a blue background
   &--user &__actions {
     background: transparentize($euiColorEmptyShade, 0.05);
@@ -67,8 +70,12 @@
 
 @keyframes blink {
   0%,
-  50% { opacity: 1; }
+  50% {
+    opacity: 1;
+  }
 
   51%,
-  100% { opacity: 0; }
+  100% {
+    opacity: 0;
+  }
 }

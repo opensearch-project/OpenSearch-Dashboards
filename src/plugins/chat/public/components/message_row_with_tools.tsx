@@ -43,13 +43,11 @@ export const MessageRowWithTools: React.FC<MessageRowWithToolsProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="messageRow__icon">
-        <EuiIcon
-          type={message.role === 'user' ? 'user' : isStreaming ? 'discuss' : 'generate'}
-          size="m"
-          color={message.role === 'user' ? 'primary' : 'success'}
-        />
-      </div>
+      {message.role === 'user' && (
+        <div className="messageRow__icon">
+          <EuiIcon type="user" size="m" color="primary" />
+        </div>
+      )}
       <div className="messageRow__content">
         <EuiPanel paddingSize="s" color={message.role === 'user' ? 'primary' : 'plain'}>
           <div className="messageRow__markdown">
