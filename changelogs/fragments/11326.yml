@@ -1,0 +1,2 @@
+test:
+- Fix S3 tests not navigating to workspace page ([#11326](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11326))
