@@ -1,9 +1,7 @@
 @import "@elastic/eui/src/global_styling/mixins/shadow";
 
 .messageRow {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
+  display: flex;
 
   &__icon {
     margin-top: 10px;
@@ -11,6 +9,7 @@
 
   &__content {
     min-width: 0;
+    flex: 1;
     position: relative;
   }
 
