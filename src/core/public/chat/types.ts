@@ -108,7 +108,7 @@ export enum ActivityType {
 export interface ActivityMessage extends Omit<BaseMessage, 'content'> {
   role: 'activity';
   activityType: ActivityType;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
 }
 
 /**

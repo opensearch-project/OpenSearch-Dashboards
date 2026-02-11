@@ -57,24 +57,9 @@ describe('ActivityRow', () => {
   });
 
   describe('activity type styling', () => {
-    it('should render STOP activity with warning color', () => {
+    it('should render STOP activity with warning color and cross icon', () => {
       const activity: ActivityMessage = {
         id: 'test-4',
-        role: 'activity',
-        activityType: ActivityType.STOP,
-        content: {
-          message: 'Stopped',
-        },
-      };
-
-      const { container } = render(<ActivityRow activity={activity} />);
-      const callout = container.querySelector('.euiCallOut--warning');
-      expect(callout).toBeInTheDocument();
-    });
-
-    it('should render with cross icon for STOP activity', () => {
-      const activity: ActivityMessage = {
-        id: 'test-5',
         role: 'activity',
         activityType: ActivityType.STOP,
         content: {
@@ -89,24 +74,9 @@ describe('ActivityRow', () => {
       // Just verify warning callout is present which includes the icon
     });
 
-    it('should render unknown activity types with default primary color', () => {
+    it('should render unknown activity types with default primary color and iInCircle icon', () => {
       const activity: ActivityMessage = {
         id: 'test-6',
-        role: 'activity',
-        activityType: 'UNKNOWN' as ActivityType,
-        content: {
-          message: 'Unknown activity',
-        },
-      };
-
-      const { container } = render(<ActivityRow activity={activity} />);
-      const callout = container.querySelector('.euiCallOut--primary');
-      expect(callout).toBeInTheDocument();
-    });
-
-    it('should render with iInCircle icon for unknown activity types', () => {
-      const activity: ActivityMessage = {
-        id: 'test-7',
         role: 'activity',
         activityType: 'UNKNOWN' as ActivityType,
         content: {
@@ -138,7 +108,7 @@ describe('ActivityRow', () => {
       expect(callout).toBeInTheDocument();
     });
 
-    it('should apply margin styles', () => {
+    it('should apply CSS class for styling', () => {
       const activity: ActivityMessage = {
         id: 'test-9',
         role: 'activity',
@@ -149,8 +119,9 @@ describe('ActivityRow', () => {
       };
 
       const { container } = render(<ActivityRow activity={activity} />);
-      const callout = container.querySelector('.euiCallOut');
-      expect(callout).toHaveStyle({ marginTop: '8px', marginBottom: '8px' });
+      const callout = container.querySelector('.actCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveClass('actCallout');
     });
   });
 });

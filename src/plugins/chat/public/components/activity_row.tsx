@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { ActivityMessage, ActivityType } from '../../common/types';
+import './activity_row.scss';
 
 interface ActivityRowProps {
   activity: ActivityMessage;
@@ -13,9 +14,9 @@ interface ActivityRowProps {
 
 /**
  * Render activity message content based on AG-UI protocol
- * Content is a structured Record<string, any> payload
+ * Content is a structured Record<string, unknown> payload
  */
-const renderActivityContent = (content: Record<string, any>): React.ReactNode => {
+const renderActivityContent = (content: Record<string, unknown>): React.ReactNode => {
   // Handle common content structure with 'message' field
   if (content.message && typeof content.message === 'string') {
     return content.message;
@@ -46,12 +47,7 @@ export const ActivityRow: React.FC<ActivityRowProps> = ({ activity }) => {
   const { color, iconType } = getActivityStyle(activity.activityType);
 
   return (
-    <EuiCallOut
-      size="s"
-      color={color}
-      iconType={iconType}
-      style={{ marginTop: '8px', marginBottom: '8px' }}
-    >
+    <EuiCallOut size="s" color={color} iconType={iconType} className="actCallout">
       {renderActivityContent(activity.content)}
     </EuiCallOut>
   );

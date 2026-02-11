@@ -91,7 +91,7 @@ export const ToolMessageSchema = z.object({
 export const ActivityMessageSchema = BaseMessageSchema.extend({
   role: z.literal('activity'),
   activityType: z.nativeEnum(ActivityType),
-  content: z.record(z.any()),
+  content: z.record(z.unknown()),
 });
 
 export const MessageSchema = z.discriminatedUnion('role', [

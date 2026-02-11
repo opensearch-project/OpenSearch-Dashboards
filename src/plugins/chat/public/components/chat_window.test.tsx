@@ -60,6 +60,7 @@ describe('ChatWindow', () => {
       getCurrentMessages: jest.fn().mockReturnValue([]),
       updateCurrentMessages: jest.fn(),
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
+      abort: jest.fn(),
     } as any;
     mockSuggestedActionsService = {
       setup: jest.fn(),

@@ -122,6 +122,16 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
+  // Clean up active subscription on component unmount
+  useEffect(() => {
+    return () => {
+      if (activeSubscriptionRef.current) {
+        activeSubscriptionRef.current.unsubscribe();
+        activeSubscriptionRef.current = null;
+      }
+    };
+  }, []);
+
   // Restore timeline from current chat state on component mount
   useEffect(() => {
     const restoreTimeline = async () => {
@@ -264,6 +274,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   // Handle stopping agent execution
   const handleStopExecution = useCallback(() => {
+    // Guard: only stop if actively streaming (prevents spurious stop messages during linger window)
+    if (!isStreamingRef.current) return;
+
     try {
       // 1. Unsubscribe from observable if active
       if (activeSubscriptionRef.current) {
