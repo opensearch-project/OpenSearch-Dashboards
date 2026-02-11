@@ -15,7 +15,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
-import { selectUIState } from '../../application/utils/state_management/selectors';
+import { selectActiveTabId } from '../../application/utils/state_management/selectors';
 import {
   DataView as Dataset,
   IndexPattern,
@@ -88,8 +88,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
   const [showAddToDashboardModal, setShowAddToDashboardModal] = useState(false);
 
-  const uiState = useSelector(selectUIState);
-  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+  const activeTabId = useSelector(selectActiveTabId);
+  const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const savedExploreIdFromUrl = useCurrentExploreId();
   const flavorId = useFlavorId();

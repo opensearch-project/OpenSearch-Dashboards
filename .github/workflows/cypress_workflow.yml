@@ -4,12 +4,6 @@ name: Run cypress tests
 on:
   pull_request:
     branches: ['**']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
       test_repo:

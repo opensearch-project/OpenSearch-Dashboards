@@ -7,7 +7,7 @@ import './results_action_bar.scss';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useObservable } from 'react-use';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
@@ -15,7 +15,12 @@ import { DiscoverDownloadCsv } from '../download_csv';
 import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
-import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
+import {
+  selectActiveTabId,
+  selectWrapCellText,
+} from '../../../../application/utils/state_management/selectors';
+import { setWrapCellText } from '../../../../application/utils/state_management/slices';
+import { EXPLORE_LOGS_TAB_ID } from '../../../../../common';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { SlotItemsForType } from '../../../../services/slot_registry';
@@ -43,7 +48,10 @@ export const DiscoverResultsActionBar = ({
   extraActions,
   rowsCountOverride,
 }: DiscoverResultsActionBarProps) => {
+  const dispatch = useDispatch();
   const currentTab = useSelector(selectActiveTabId);
+  const wrapCellText = useSelector(selectWrapCellText);
+  const isLogsTab = currentTab === EXPLORE_LOGS_TAB_ID;
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
   const shouldShowExportButton = currentTab !== 'explore_patterns_tab';
   const showTabSpecificSettings = currentTab === 'explore_patterns_tab';
@@ -97,6 +105,25 @@ export const DiscoverResultsActionBar = ({
                 gutterSize="none"
                 justifyContent="flexStart"
               >
+                {isLogsTab && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.translate('explore.discover.wrapCellTextTooltip', {
+                        defaultMessage:
+                          'Toggle between truncated and wrapped cell text in the table',
+                      })}
+                    >
+                      <EuiSwitch
+                        label={i18n.translate('explore.discover.wrapCellText', {
+                          defaultMessage: 'Wrap cell text',
+                        })}
+                        checked={wrapCellText}
+                        onChange={(e) => dispatch(setWrapCellText(e.target.checked))}
+                        data-test-subj="exploreWrapCellTextSwitch"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
                 {isNonTableChart && dataset && rows?.length ? (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
