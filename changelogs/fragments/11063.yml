@@ -1,2 +1,0 @@
-fix:
-- Fix RED metric query for Discover:Traces ([#11063](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11063))
