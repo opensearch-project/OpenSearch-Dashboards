@@ -94,6 +94,24 @@ export interface ToolMessage {
 }
 
 /**
+ * Activity type enum for AG-UI activity messages
+ */
+export enum ActivityType {
+  STOP = 'STOP',
+}
+
+/**
+ * Activity message type for system activities (AG-UI standard)
+ * Used for non-error system events like user-initiated stops, status updates, etc.
+ * See: https://docs.ag-ui.com/concepts/messages#activity-messages
+ */
+export interface ActivityMessage extends BaseMessage {
+  role: 'activity';
+  activityType: ActivityType;
+  content: Record<string, any>;
+}
+
+/**
  * Discriminated union of all message types
  */
 export type Message =
@@ -101,12 +119,13 @@ export type Message =
   | SystemMessage
   | AssistantMessage
   | UserMessage
-  | ToolMessage;
+  | ToolMessage
+  | ActivityMessage;
 
 /**
  * Valid message role types
  */
-export type Role = 'developer' | 'system' | 'assistant' | 'user' | 'tool';
+export type Role = 'developer' | 'system' | 'assistant' | 'user' | 'tool' | 'activity';
 
 /**
  * Chat window state

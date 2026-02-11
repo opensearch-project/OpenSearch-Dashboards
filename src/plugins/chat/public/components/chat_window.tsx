@@ -20,6 +20,7 @@ import type {
   Message,
   UserMessage,
 } from '../../common/types';
+import { ActivityType } from '../../common/types';
 import { ChatLayoutMode } from './chat_header_button';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
@@ -29,14 +30,14 @@ import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
 
 export interface ChatWindowInstance {
-  startNewChat: ()=>void;
-  sendMessage: (options:{content: string; messages?: Message[]})=>Promise<unknown>;
+  startNewChat: () => void;
+  sendMessage: (options: {content: string; messages?: Message[]}) => Promise<unknown>;
 }
 
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
   onToggleLayout?: () => void;
-  onClose: ()=>void;
+  onClose: () => void;
 }
 
 /**
@@ -281,10 +282,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setTimeline((prev) => prev.filter((msg) => !msg.id.startsWith('loading-')));
 
       // 5. Add cancellation feedback message
+      // Use 'activity' role (AG-UI standard) for system activities
       const cancelMessage: Message = {
         id: `cancelled-${Date.now()}`,
-        role: 'system',
-        content: 'Execution stopped by user',
+        role: 'activity',
+        activityType: ActivityType.STOP,
+        content: {
+          message: 'Execution stopped by user',
+        },
       };
       setTimeline((prev) => [...prev, cancelMessage]);
 

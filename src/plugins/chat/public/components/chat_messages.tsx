@@ -9,9 +9,10 @@ import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
+import { ActivityRow } from './activity_row';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
-import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
+import './chat_messages.scss';
 
 /**
  * Determine tool status based on tool call and result
@@ -217,6 +218,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           // Don't render tool messages separately (they're shown in ToolCallRow)
           if (message.role === 'tool') {
             return null;
+          }
+
+          // Handle activity messages (AG-UI standard for system activities)
+          if (message.role === 'activity') {
+            return <ActivityRow key={message.id} activity={message} />;
           }
 
           // Handle system messages as errors

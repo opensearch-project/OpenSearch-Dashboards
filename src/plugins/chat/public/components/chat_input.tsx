@@ -83,16 +83,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
         </div>
-        <EuiButtonIcon
-          iconType={isStreaming ? 'generate' : 'sortUp'}
-          onClick={onSend}
-          isDisabled={input.trim().length === 0 || isStreaming}
-          aria-label="Send message"
-          size="m"
-          color="primary"
-          display="fill"
-        />
-        {shouldShowStopButton && onStopExecution && (
+        {shouldShowStopButton && onStopExecution ? (
           <EuiButtonIcon
             iconType="cross"
             onClick={onStopExecution}
@@ -100,6 +91,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             data-test-subj="chatStopExecutionButton"
             size="m"
             color="danger"
+            display="fill"
+          />
+        ) : (
+          <EuiButtonIcon
+            iconType="sortUp"
+            onClick={onSend}
+            isDisabled={input.trim().length === 0 || isStreaming}
+            aria-label="Send message"
+            data-test-subj="chatSendButton"
+            size="m"
+            color="primary"
+            display="fill"
           />
         )}
       </div>
