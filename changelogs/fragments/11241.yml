@@ -1,2 +1,0 @@
-fix:
-- Improve style and overflow behavior for embedded data importers ([#11241](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11241))

@@ -1,2 +1,0 @@
-fix:
-- [Chat] Fix tool call positioning in conversation timeline ([#11115](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11115))

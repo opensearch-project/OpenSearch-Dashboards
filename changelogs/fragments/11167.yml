@@ -1,2 +1,0 @@
-fix:
-- Improve error handling for prometheus APIs in Explore ([#11167](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11167))

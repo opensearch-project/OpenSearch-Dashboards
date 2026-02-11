@@ -1,2 +1,0 @@
-feat:
-- Support _id when insert data into sample dataset index ([#11139](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11139))

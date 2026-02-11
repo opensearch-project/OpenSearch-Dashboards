@@ -1,2 +1,0 @@
-feat:
-- Add `opensearch.requestCompression` flag opensearch requests ([#11205](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11205))

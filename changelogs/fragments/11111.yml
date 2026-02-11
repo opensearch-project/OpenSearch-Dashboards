@@ -1,2 +1,0 @@
-feat:
-- Migrate explore area chart from vega-lite to echarts ([#11111](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11111))
