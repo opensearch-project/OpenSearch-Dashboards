@@ -4,4 +4,3 @@
  */
 
 export { useCommandMenuKeyboard } from './use_command_menu_keyboard';
-export { useStopButtonTiming } from './use_stop_button_timing';

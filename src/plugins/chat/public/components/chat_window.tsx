@@ -279,50 +279,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [chatService, currentRunId, eventHandler]);
 
-  // Handle stopping agent execution
-  const handleStopExecution = useCallback(() => {
-    // Guard: only stop if actively streaming (prevents spurious stop messages during linger window)
-    if (!isStreamingRef.current) return;
-
-    try {
-      // 1. Unsubscribe from observable if active
-      if (activeSubscriptionRef.current) {
-        activeSubscriptionRef.current.unsubscribe();
-        activeSubscriptionRef.current = null;
-      }
-
-      // 2. Abort fetch request
-      chatService.abort();
-
-      // 3. Reset streaming state
-      setIsStreaming(false);
-      isStreamingRef.current = false;
-
-      // 4. Remove loading message
-      setTimeline((prev) => prev.filter((msg) => !msg.id.startsWith('loading-')));
-
-      // 5. Add cancellation feedback message
-      // Use 'activity' role (AG-UI standard) for system activities
-      const cancelMessage: Message = {
-        id: `cancelled-${Date.now()}`,
-        role: 'activity',
-        activityType: ActivityType.STOP,
-        content: {
-          message: 'Execution stopped by user',
-        },
-      };
-      setTimeline((prev) => [...prev, cancelMessage]);
-
-      // 6. Clear event handler state
-      eventHandler.clearState();
-    } catch (error) {
-      console.error('Error stopping execution:', error);
-      // Ensure state cleanup even if abort fails
-      setIsStreaming(false);
-      isStreamingRef.current = false;
-    }
-  }, [chatService, eventHandler]);
-
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     // Use ref for immediate check since React 18 batches state updates
@@ -417,6 +373,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [chatService]);
 
   const handleStop = useCallback(() => {
+    // Guard: only stop if actively streaming (prevents spurious stop messages during linger window)
+    if (!isStreamingRef.current) return;
+
     // Abort the current streaming request
     chatService.abort();
 
@@ -435,7 +394,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
-  }, [chatService]);
+
+    // Add cancellation feedback message
+    // Use 'activity' role (AG-UI standard)
+    const cancelMessage: Message = {
+      id: `cancelled-${Date.now()}`,
+      role: 'activity',
+      activityType: ActivityType.STOP,
+      content: {
+        message: 'Execution stopped by user',
+      },
+    };
+    setTimeline((prev) => [...prev, cancelMessage]);
+
+    // 6. Clear event handler state
+    eventHandler.clearState();
+  }, [chatService, eventHandler]);
 
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {
@@ -498,7 +472,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         onSend={handleSend}
         onStop={handleStop}
         onKeyDown={handleKeyDown}
-        onStopExecution={handleStopExecution}
       />
     </ChatContainer>
   );

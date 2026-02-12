@@ -8,7 +8,7 @@ import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
-import { useCommandMenuKeyboard, useStopButtonTiming } from '../hooks';
+import { useCommandMenuKeyboard } from '../hooks';
 import './chat_input.scss';
 
 interface ChatInputProps {
@@ -19,7 +19,6 @@ interface ChatInputProps {
   onSend: () => void;
   onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  onStopExecution?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -30,12 +29,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   onStop,
   onKeyDown,
-  onStopExecution,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Use custom hook for stop button timing
-  const shouldShowStopButton = useStopButtonTiming(isStreaming);
 
   // Use custom hook for command menu keyboard handling
   const {
