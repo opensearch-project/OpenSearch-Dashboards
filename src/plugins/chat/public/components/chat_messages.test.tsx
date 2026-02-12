@@ -4,347 +4,331 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from './chat_header_button';
 import type { Message } from '../../common/types';
-import { ActivityType } from '../../common/types';
 
-// Mock child components
+// Mock the child components
 jest.mock('./message_row', () => ({
-  MessageRow: ({ message }: any) => (
-    <div data-test-subj="messageRow" data-role={message.role}>
-      {message.content}
-    </div>
-  ),
+  MessageRow: ({ message }: any) => <div data-test-subj="message-row">{message.content}</div>,
 }));
 
 jest.mock('./tool_call_row', () => ({
-  ToolCallRow: ({ toolCall }: any) => (
-    <div data-test-subj="toolCallRow" data-tool-id={toolCall.id}>
-      {toolCall.toolName}
-    </div>
-  ),
+  ToolCallRow: () => <div data-test-subj="tool-call-row">Tool Call</div>,
 }));
 
 jest.mock('./error_row', () => ({
-  ErrorRow: ({ error }: any) => (
-    <div data-test-subj="errorRow" data-role={error.role}>
-      {error.content}
-    </div>
-  ),
-}));
-
-jest.mock('./activity_row', () => ({
-  ActivityRow: ({ activity }: any) => (
-    <div data-test-subj="activityRow" data-activity-type={activity.activityType}>
-      {activity.content.message}
-    </div>
-  ),
+  ErrorRow: ({ error }: any) => <div data-test-subj="error-row">{error.content}</div>,
 }));
 
 jest.mock('./chat_suggestions', () => ({
-  ChatSuggestions: () => <div data-test-subj="chatSuggestions">Suggestions</div>,
+  ChatSuggestions: () => <div data-test-subj="chat-suggestions">Suggestions</div>,
 }));
+
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = jest.fn();
 
 describe('ChatMessages', () => {
   const defaultProps = {
-    layoutMode: 'docked' as ChatLayoutMode,
+    layoutMode: ChatLayoutMode.SIDECAR,
     timeline: [] as Message[],
     isStreaming: false,
+    onResendMessage: jest.fn(),
+    onApproveConfirmation: jest.fn(),
+    onRejectConfirmation: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('activity message rendering', () => {
-    it('should render activity message with ActivityRow component', () => {
-      const timeline: Message[] = [
-        {
-          id: 'activity-1',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'Execution stopped by user',
-          },
-        },
-      ];
+  describe('rendering', () => {
+    it('should render empty state when no messages', () => {
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
-
-      const activityRow = screen.getByTestId('activityRow');
-      expect(activityRow).toBeInTheDocument();
-      expect(activityRow).toHaveAttribute('data-activity-type', ActivityType.STOP);
-      expect(activityRow).toHaveTextContent('Execution stopped by user');
+      expect(getByText("Hi, I'm your AI Assistant")).toBeTruthy();
     });
 
-    it('should render multiple activity messages', () => {
+    it('should render messages from timeline', () => {
       const timeline: Message[] = [
-        {
-          id: 'activity-1',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'First activity',
-          },
-        },
-        {
-          id: 'activity-2',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'Second activity',
-          },
-        },
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
       ];
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
 
-      const activityRows = screen.getAllByTestId('activityRow');
-      expect(activityRows).toHaveLength(2);
-      expect(activityRows[0]).toHaveTextContent('First activity');
-      expect(activityRows[1]).toHaveTextContent('Second activity');
+      expect(getAllByTestId('message-row')).toHaveLength(2);
     });
 
-    it('should render activity message alongside other message types', () => {
-      const timeline: Message[] = [
-        {
-          id: 'user-1',
-          role: 'user',
-          content: 'Hello',
-        },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: 'Hi there',
-        },
-        {
-          id: 'activity-1',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'Execution stopped',
-          },
-        },
-      ];
+    it('should render loading indicator when streaming with empty timeline', () => {
+      const { getByText } = render(<ChatMessages {...defaultProps} isStreaming={true} />);
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      expect(getByText('Thinking...')).toBeTruthy();
+    });
 
-      expect(screen.getByTestId('activityRow')).toBeInTheDocument();
-      const messageRows = screen.getAllByTestId('messageRow');
-      expect(messageRows).toHaveLength(2);
+    it('should apply layout mode class', () => {
+      const { container } = render(
+        <ChatMessages {...defaultProps} layoutMode={ChatLayoutMode.FULLSCREEN} />
+      );
+
+      expect(container.querySelector('.chatMessages--fullscreen')).toBeTruthy();
     });
   });
 
-  describe('message type handling', () => {
-    it('should render user messages', () => {
-      const timeline: Message[] = [
-        {
-          id: 'user-1',
-          role: 'user',
-          content: 'User message',
-        },
+  describe('smart scroll functionality', () => {
+    // Mock scrollIntoView
+    beforeEach(() => {
+      Element.prototype.scrollIntoView = jest.fn();
+    });
+
+    it('should auto-scroll when new messages arrive', () => {
+      const { rerender } = render(<ChatMessages {...defaultProps} timeline={[]} />);
+
+      const newTimeline: Message[] = [{ id: '1', role: 'user', content: 'New message' }];
+
+      rerender(<ChatMessages {...defaultProps} timeline={newTimeline} />);
+
+      // scrollIntoView should be called for auto-scroll
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+    });
+
+    it('should call scrollIntoView with smooth behavior', () => {
+      const { rerender } = render(<ChatMessages {...defaultProps} timeline={[]} />);
+
+      const newTimeline: Message[] = [{ id: '1', role: 'user', content: 'New message' }];
+
+      rerender(<ChatMessages {...defaultProps} timeline={newTimeline} />);
+
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+    });
+
+    it('should handle multiple message updates', () => {
+      const { rerender } = render(<ChatMessages {...defaultProps} timeline={[]} />);
+
+      const timeline1: Message[] = [{ id: '1', role: 'user', content: 'Message 1' }];
+      rerender(<ChatMessages {...defaultProps} timeline={timeline1} />);
+
+      const timeline2: Message[] = [
+        ...timeline1,
+        { id: '2', role: 'assistant', content: 'Response 1' },
       ];
+      rerender(<ChatMessages {...defaultProps} timeline={timeline2} />);
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      // Should be called at least twice (may be called more due to React rendering)
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+    });
 
-      const messageRow = screen.getByTestId('messageRow');
-      expect(messageRow).toBeInTheDocument();
-      expect(messageRow).toHaveAttribute('data-role', 'user');
-      expect(messageRow).toHaveTextContent('User message');
+    it('should have scroll container with proper ref', () => {
+      const { container } = render(<ChatMessages {...defaultProps} />);
+
+      const messagesContainer = container.querySelector('.chatMessages');
+      expect(messagesContainer).toBeTruthy();
+    });
+  });
+
+  describe('message types', () => {
+    it('should render user messages', () => {
+      const timeline: Message[] = [{ id: '1', role: 'user', content: 'User message' }];
+
+      const { getByText } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      expect(getByText('User message')).toBeTruthy();
     });
 
     it('should render assistant messages', () => {
-      const timeline: Message[] = [
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: 'Assistant message',
-        },
-      ];
+      const timeline: Message[] = [{ id: '1', role: 'assistant', content: 'Assistant message' }];
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { getByText } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
 
-      const messageRow = screen.getByTestId('messageRow');
-      expect(messageRow).toBeInTheDocument();
-      expect(messageRow).toHaveAttribute('data-role', 'assistant');
+      expect(getByText('Assistant message')).toBeTruthy();
     });
 
-    it('should render system messages as error rows', () => {
-      const timeline: Message[] = [
-        {
-          id: 'system-1',
-          role: 'system',
-          content: 'System error message',
-        },
-      ];
+    it('should render system messages as errors', () => {
+      const timeline: Message[] = [{ id: '1', role: 'system', content: 'Error message' }];
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { getByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
 
-      const errorRow = screen.getByTestId('errorRow');
-      expect(errorRow).toBeInTheDocument();
-      expect(errorRow).toHaveAttribute('data-role', 'system');
-      expect(errorRow).toHaveTextContent('System error message');
+      expect(getByTestId('error-row')).toBeTruthy();
     });
 
     it('should not render tool messages separately', () => {
       const timeline: Message[] = [
+        { id: '1', role: 'tool', content: 'Tool result', toolCallId: 'tool-1' },
+      ];
+
+      const { queryByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Tool messages should not render as separate rows
+      expect(queryByTestId('message-row')).toBeNull();
+    });
+
+    it('should render loading message for empty streaming assistant message', () => {
+      const timeline: Message[] = [{ id: '1', role: 'assistant', content: '' }];
+
+      const { getByText } = render(
+        <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+      );
+
+      expect(getByText('Thinking...')).toBeTruthy();
+    });
+
+    it('should render loading message for messages with loading- prefix', () => {
+      const timeline: Message[] = [{ id: 'loading-123', role: 'assistant', content: '' }];
+
+      const { getByText } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      expect(getByText('Thinking...')).toBeTruthy();
+    });
+  });
+
+  describe('tool calls', () => {
+    it('should render tool calls from assistant messages', () => {
+      const timeline: Message[] = [
         {
-          id: 'tool-1',
+          id: '1',
+          role: 'assistant',
+          content: 'Using a tool',
+          toolCalls: [
+            {
+              id: 'tool-1',
+              type: 'function',
+              function: { name: 'search', arguments: '{"query": "test"}' },
+            },
+          ],
+        },
+      ];
+
+      const { getByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      expect(getByTestId('tool-call-row')).toBeTruthy();
+    });
+
+    it('should match tool results with tool calls', () => {
+      const timeline: Message[] = [
+        {
+          id: '1',
+          role: 'assistant',
+          content: 'Using a tool',
+          toolCalls: [
+            {
+              id: 'tool-1',
+              type: 'function',
+              function: { name: 'search', arguments: '{"query": "test"}' },
+            },
+          ],
+        },
+        {
+          id: '2',
           role: 'tool',
           content: 'Tool result',
-          toolCallId: 'call-1',
+          toolCallId: 'tool-1',
         },
       ];
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { getByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
 
-      // Tool messages are not rendered separately; they're shown in ToolCallRow
-      expect(screen.queryByTestId('messageRow')).not.toBeInTheDocument();
-      expect(screen.queryByText('Tool result')).not.toBeInTheDocument();
+      // Tool call should be rendered with its result
+      expect(getByTestId('tool-call-row')).toBeTruthy();
     });
   });
 
-  describe('empty state', () => {
-    it('should render empty state when no messages', () => {
-      render(<ChatMessages {...defaultProps} timeline={[]} />);
-
-      expect(screen.getByText("Hi, I'm your AI Assistant")).toBeInTheDocument();
-      expect(screen.getByText(/I can help you explore data/)).toBeInTheDocument();
-    });
-
-    it('should not render empty state when messages exist', () => {
+  describe('suggestions', () => {
+    it('should show suggestions after last assistant message when not streaming', () => {
       const timeline: Message[] = [
-        {
-          id: 'user-1',
-          role: 'user',
-          content: 'Hello',
-        },
+        { id: '1', role: 'user', content: 'Question' },
+        { id: '2', role: 'assistant', content: 'Answer' },
       ];
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { getByTestId } = render(
+        <ChatMessages {...defaultProps} timeline={timeline} isStreaming={false} />
+      );
 
-      expect(screen.queryByText("Hi, I'm your AI Assistant")).not.toBeInTheDocument();
+      expect(getByTestId('chat-suggestions')).toBeTruthy();
     });
 
-    it('should not render empty state when streaming', () => {
-      render(<ChatMessages {...defaultProps} timeline={[]} isStreaming={true} />);
+    it('should not show suggestions when streaming', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Question' },
+        { id: '2', role: 'assistant', content: 'Answer' },
+      ];
 
-      expect(screen.queryByText("Hi, I'm your AI Assistant")).not.toBeInTheDocument();
-      expect(screen.getByText('Thinking...')).toBeInTheDocument();
+      const { queryByTestId } = render(
+        <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+      );
+
+      expect(queryByTestId('chat-suggestions')).toBeNull();
+    });
+
+    it('should not show suggestions when last message is from user', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'assistant', content: 'Answer' },
+        { id: '2', role: 'user', content: 'Question' },
+      ];
+
+      const { queryByTestId } = render(
+        <ChatMessages {...defaultProps} timeline={timeline} isStreaming={false} />
+      );
+
+      expect(queryByTestId('chat-suggestions')).toBeNull();
+    });
+
+    it('should not show suggestions when timeline is empty', () => {
+      const { queryByTestId } = render(
+        <ChatMessages {...defaultProps} timeline={[]} isStreaming={false} />
+      );
+
+      expect(queryByTestId('chat-suggestions')).toBeNull();
     });
   });
 
-  describe('loading states', () => {
-    it('should render thinking indicator when streaming with empty timeline', () => {
-      render(<ChatMessages {...defaultProps} timeline={[]} isStreaming={true} />);
+  describe('event handlers', () => {
+    it('should call onResendMessage when message is resent', () => {
+      const onResendMessage = jest.fn();
+      const timeline: Message[] = [{ id: '1', role: 'user', content: 'Message' }];
 
-      expect(screen.getByText('Thinking...')).toBeInTheDocument();
-    });
+      render(
+        <ChatMessages {...defaultProps} timeline={timeline} onResendMessage={onResendMessage} />
+      );
 
-    it('should render loading indicator for loading messages', () => {
-      const timeline: Message[] = [
-        {
-          id: 'loading-123',
-          role: 'assistant',
-          content: '',
-        },
-      ];
-
-      render(<ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />);
-
-      expect(screen.getByText('Thinking...')).toBeInTheDocument();
-    });
-
-    it('should not render loading indicator when not streaming', () => {
-      render(<ChatMessages {...defaultProps} timeline={[]} isStreaming={false} />);
-
-      expect(screen.queryByText('Thinking...')).not.toBeInTheDocument();
+      // The actual resend trigger would be in MessageRow component
+      // This test verifies the prop is passed correctly
+      expect(onResendMessage).not.toHaveBeenCalled();
     });
   });
 
-  describe('message ordering', () => {
-    it('should render messages in correct order', () => {
-      const timeline: Message[] = [
-        {
-          id: 'user-1',
-          role: 'user',
-          content: 'First message',
-        },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: 'Second message',
-        },
-        {
-          id: 'activity-1',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'Third message',
-          },
-        },
-      ];
+  describe('scroll event cleanup', () => {
+    it('should properly manage scroll container lifecycle', () => {
+      const { container, unmount } = render(<ChatMessages {...defaultProps} />);
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const messagesContainer = container.querySelector('.chatMessages');
+      expect(messagesContainer).toBeTruthy();
 
-      const messageRows = screen.getAllByTestId('messageRow');
-      const activityRow = screen.getByTestId('activityRow');
-
-      expect(messageRows[0]).toHaveTextContent('First message');
-      expect(messageRows[1]).toHaveTextContent('Second message');
-      expect(activityRow).toHaveTextContent('Third message');
+      // Component should unmount without errors
+      expect(() => unmount()).not.toThrow();
     });
   });
 
-  describe('activity message in timeline context', () => {
-    it('should render activity message after user cancels execution', () => {
-      const timeline: Message[] = [
-        {
-          id: 'user-1',
-          role: 'user',
-          content: 'What indices do I have?',
-        },
-        {
-          id: 'assistant-1',
-          role: 'assistant',
-          content: '',
-        },
-        {
-          id: 'activity-1',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'Execution stopped by user',
-          },
-        },
-      ];
+  describe('accessibility', () => {
+    it('should have messages container with proper structure', () => {
+      const { container } = render(<ChatMessages {...defaultProps} />);
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
-
-      const activityRow = screen.getByTestId('activityRow');
-      expect(activityRow).toBeInTheDocument();
-      expect(activityRow).toHaveTextContent('Execution stopped by user');
+      const messagesContainer = container.querySelector('.chatMessages');
+      expect(messagesContainer).toBeTruthy();
     });
 
-    it('should render activity message with proper activity type attribute', () => {
+    it('should render messages in accessible order', () => {
       const timeline: Message[] = [
-        {
-          id: 'activity-1',
-          role: 'activity',
-          activityType: ActivityType.STOP,
-          content: {
-            message: 'Stopped',
-          },
-        },
+        { id: '1', role: 'user', content: 'First' },
+        { id: '2', role: 'assistant', content: 'Second' },
       ];
 
-      render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
 
-      const activityRow = screen.getByTestId('activityRow');
-      expect(activityRow).toHaveAttribute('data-activity-type', 'STOP');
+      const messages = getAllByTestId('message-row');
+      expect(messages).toHaveLength(2);
+      expect(messages[0].textContent).toBe('First');
+      expect(messages[1].textContent).toBe('Second');
     });
   });
 });

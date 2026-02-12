@@ -17,6 +17,7 @@ interface ChatInputProps {
   isStreaming: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
+  onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   onStopExecution?: () => void;
 }
@@ -27,6 +28,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isStreaming,
   onInputChange,
   onSend,
+  onStop,
   onKeyDown,
   onStopExecution,
 }) => {
@@ -64,7 +66,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chatInput__fieldWrapper">
           <EuiTextArea
             inputRef={inputRef}
-            placeholder="Ask anything. Type / for actions"
+            placeholder="How can I help you today?"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -83,28 +85,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
         </div>
-        {shouldShowStopButton && onStopExecution ? (
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={onStopExecution}
-            aria-label="Stop agent execution"
-            data-test-subj="chatStopExecutionButton"
-            size="m"
-            color="danger"
-            display="fill"
-          />
-        ) : (
-          <EuiButtonIcon
-            iconType="sortUp"
-            onClick={onSend}
-            isDisabled={input.trim().length === 0 || isStreaming}
-            aria-label="Send message"
-            data-test-subj="chatSendButton"
-            size="m"
-            color="primary"
-            display="fill"
-          />
-        )}
+        <EuiButtonIcon
+          iconType={isStreaming ? 'stop' : 'sortUp'}
+          onClick={isStreaming ? onStop : onSend}
+          isDisabled={!isStreaming && input.trim().length === 0}
+          aria-label={isStreaming ? 'Stop generating' : 'Send message'}
+          size="m"
+          color={isStreaming ? 'danger' : 'primary'}
+          display="fill"
+        />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
@@ -74,17 +74,88 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   onFillInput,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const userHasScrolledUp = useRef<boolean>(false);
+  const isAutoScrolling = useRef<boolean>(false);
 
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView?.({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      isAutoScrolling.current = true;
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      // Reset flag after animation completes
+      setTimeout(() => {
+        isAutoScrolling.current = false;
+      }, 500);
+    }
+  }, []);
 
+  // Check if user is near the bottom of the scroll area
+  const isNearBottom = useCallback((container: HTMLElement, threshold: number = 100): boolean => {
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    return distanceFromBottom < threshold;
+  }, []);
+
+  // Handle scroll events to detect if user scrolled up
+  const handleScroll = useCallback(() => {
+    // Ignore scroll events triggered by auto-scrolling
+    if (isAutoScrolling.current) {
+      return;
+    }
+
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const nearBottom = isNearBottom(container);
+
+    // If user is near the bottom, enable auto-scroll
+    if (nearBottom) {
+      if (userHasScrolledUp.current) {
+        userHasScrolledUp.current = false;
+      }
+    } else {
+      // User has scrolled up - disable auto-scroll
+      if (!userHasScrolledUp.current) {
+        userHasScrolledUp.current = true;
+      }
+    }
+  }, [isNearBottom]);
+
+  // Auto-scroll only if user hasn't scrolled up
   useEffect(() => {
-    scrollToBottom();
-  }, [timeline]);
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const shouldScroll = !userHasScrolledUp.current || isNearBottom(container);
+
+    // Only auto-scroll if:
+    // 1. User hasn't manually scrolled up, OR
+    // 2. User is already near the bottom
+    if (shouldScroll) {
+      scrollToBottom();
+    }
+  }, [timeline, isNearBottom, scrollToBottom]);
+
+  // Attach scroll listener
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
@@ -112,7 +183,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       </div> */}
 
       {/* Timeline Area */}
-      <div className={`chatMessages chatMessages--${layoutMode}`}>
+      <div className={`chatMessages chatMessages--${layoutMode}`} ref={messagesContainerRef}>
         {timeline.length === 0 && !isStreaming && (
           <div className="chatMessages__emptyState">
             <div className="chatMessages__emptyStateHeader">

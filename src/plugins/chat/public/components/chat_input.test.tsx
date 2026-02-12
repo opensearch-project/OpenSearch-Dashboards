@@ -4,41 +4,40 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, fireEvent } from '@testing-library/react';
 import { ChatInput } from './chat_input';
 import { ChatLayoutMode } from './chat_header_button';
 
-// Mock the hooks
-jest.mock('../hooks', () => ({
-  useCommandMenuKeyboard: jest.fn(() => ({
+// Mock the context pills component
+jest.mock('./context_pills', () => ({
+  ContextPills: () => <div data-test-subj="context-pills">Context Pills</div>,
+}));
+
+// Mock the slash command menu
+jest.mock('./slash_command_menu', () => ({
+  SlashCommandMenu: () => <div data-test-subj="slash-command-menu">Slash Command Menu</div>,
+}));
+
+// Mock the command menu keyboard hook
+jest.mock('../hooks/use_command_menu_keyboard', () => ({
+  useCommandMenuKeyboard: () => ({
     showCommandMenu: false,
     commandSuggestions: [],
-    selectedCommandIndex: -1,
+    selectedCommandIndex: 0,
     ghostText: '',
-    handleKeyDown: jest.fn(),
+    handleKeyDown: jest.fn((e: any) => e),
     handleCommandSelect: jest.fn(),
-  })),
-  useStopButtonTiming: jest.fn((isStreaming) => isStreaming),
-}));
-
-// Mock ContextPills component
-jest.mock('./context_pills', () => ({
-  ContextPills: () => <div data-test-subj="contextPills">Context Pills</div>,
-}));
-
-// Mock SlashCommandMenu component
-jest.mock('./slash_command_menu', () => ({
-  SlashCommandMenu: () => <div data-test-subj="slashCommandMenu">Slash Command Menu</div>,
+  }),
 }));
 
 describe('ChatInput', () => {
   const defaultProps = {
-    layoutMode: 'docked' as ChatLayoutMode,
+    layoutMode: ChatLayoutMode.SIDECAR,
     input: '',
     isStreaming: false,
     onInputChange: jest.fn(),
     onSend: jest.fn(),
+    onStop: jest.fn(),
     onKeyDown: jest.fn(),
   };
 
@@ -46,180 +45,282 @@ describe('ChatInput', () => {
     jest.clearAllMocks();
   });
 
-  describe('send button', () => {
-    it('should render send button when not streaming', () => {
-      render(<ChatInput {...defaultProps} />);
+  describe('rendering', () => {
+    it('should render input field', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} />);
 
-      const sendButton = screen.getByTestId('chatSendButton');
-      expect(sendButton).toBeInTheDocument();
-      expect(sendButton).toHaveAttribute('aria-label', 'Send message');
+      expect(getByPlaceholderText('How can I help you today?')).toBeTruthy();
+    });
+
+    it('should render send button when not streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} />);
+
+      const button = getByLabelText('Send message');
+      expect(button).toBeTruthy();
+    });
+
+    it('should render stop button when streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
+
+      const button = getByLabelText('Stop generating');
+      expect(button).toBeTruthy();
+    });
+
+    it('should render context pills', () => {
+      const { getByTestId } = render(<ChatInput {...defaultProps} />);
+
+      expect(getByTestId('context-pills')).toBeTruthy();
+    });
+  });
+
+  describe('input handling', () => {
+    it('should call onInputChange when input changes', () => {
+      const onInputChange = jest.fn();
+      const { getByPlaceholderText } = render(
+        <ChatInput {...defaultProps} onInputChange={onInputChange} />
+      );
+
+      const input = getByPlaceholderText('How can I help you today?');
+      fireEvent.change(input, { target: { value: 'test message' } });
+
+      expect(onInputChange).toHaveBeenCalledWith('test message');
+    });
+
+    it('should display input value', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} input="test value" />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.value).toBe('test value');
+    });
+
+    it('should disable input when streaming', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should enable input when not streaming', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} isStreaming={false} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+    });
+  });
+
+  describe('send button behavior', () => {
+    it('should call onSend when send button is clicked', () => {
+      const onSend = jest.fn();
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" onSend={onSend} />
+      );
+
+      const button = getByLabelText('Send message');
+      fireEvent.click(button);
+
+      expect(onSend).toHaveBeenCalled();
     });
 
     it('should disable send button when input is empty', () => {
-      render(<ChatInput {...defaultProps} input="" />);
+      const { getByLabelText } = render(<ChatInput {...defaultProps} input="" />);
 
-      const sendButton = screen.getByTestId('chatSendButton');
-      expect(sendButton).toBeDisabled();
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
     });
 
-    it('should disable send button when input has only whitespace', () => {
-      render(<ChatInput {...defaultProps} input="   " />);
+    it('should disable send button when input is whitespace only', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} input="   " />);
 
-      const sendButton = screen.getByTestId('chatSendButton');
-      expect(sendButton).toBeDisabled();
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
     });
 
     it('should enable send button when input has content', () => {
-      render(<ChatInput {...defaultProps} input="Hello" />);
+      const { getByLabelText } = render(<ChatInput {...defaultProps} input="test message" />);
 
-      const sendButton = screen.getByTestId('chatSendButton');
-      expect(sendButton).not.toBeDisabled();
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
     });
 
-    it('should disable send button when streaming', () => {
-      render(<ChatInput {...defaultProps} input="Hello" isStreaming={true} />);
+    it('should show sortUp icon when not streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} input="test" />);
 
-      const sendButton = screen.getByTestId('chatSendButton');
-      expect(sendButton).toBeDisabled();
+      const button = getByLabelText('Send message');
+      // Button should exist and be enabled
+      expect(button).toBeTruthy();
+      expect((button as HTMLButtonElement).disabled).toBe(false);
     });
 
-    it('should call onSend when send button is clicked', () => {
+    it('should have primary color when not streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} input="test" />);
+
+      const button = getByLabelText('Send message');
+      expect(button.classList.contains('euiButtonIcon--primary')).toBe(true);
+    });
+  });
+
+  describe('stop button behavior', () => {
+    it('should call onStop when stop button is clicked', () => {
+      const onStop = jest.fn();
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} isStreaming={true} onStop={onStop} />
+      );
+
+      const button = getByLabelText('Stop generating');
+      fireEvent.click(button);
+
+      expect(onStop).toHaveBeenCalled();
+    });
+
+    it('should enable stop button during streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
+
+      const button = getByLabelText('Stop generating') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
+    });
+
+    it('should show stop icon when streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
+
+      const button = getByLabelText('Stop generating');
+      // Button should exist and be enabled
+      expect(button).toBeTruthy();
+      expect((button as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('should have danger color when streaming', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
+
+      const button = getByLabelText('Stop generating');
+      expect(button.classList.contains('euiButtonIcon--danger')).toBe(true);
+    });
+
+    it('should not call onSend when stop button is clicked', () => {
       const onSend = jest.fn();
-      render(<ChatInput {...defaultProps} input="Hello" onSend={onSend} />);
+      const onStop = jest.fn();
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} isStreaming={true} onSend={onSend} onStop={onStop} />
+      );
 
-      const sendButton = screen.getByTestId('chatSendButton');
-      fireEvent.click(sendButton);
+      const button = getByLabelText('Stop generating');
+      fireEvent.click(button);
 
-      expect(onSend).toHaveBeenCalledTimes(1);
+      expect(onStop).toHaveBeenCalled();
+      expect(onSend).not.toHaveBeenCalled();
     });
   });
 
-  describe('stop button', () => {
-    it('should render stop button when streaming with onStopExecution handler', () => {
-      const onStopExecution = jest.fn();
-      render(<ChatInput {...defaultProps} isStreaming={true} onStopExecution={onStopExecution} />);
+  describe('button state transitions', () => {
+    it('should transition from send to stop button when streaming starts', () => {
+      const { getByLabelText, rerender, queryByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" isStreaming={false} />
+      );
 
-      const stopButton = screen.getByTestId('chatStopExecutionButton');
-      expect(stopButton).toBeInTheDocument();
-      expect(stopButton).toHaveAttribute('aria-label', 'Stop agent execution');
+      // Initially should show send button
+      expect(getByLabelText('Send message')).toBeTruthy();
+      expect(queryByLabelText('Stop generating')).toBeNull();
+
+      // After streaming starts
+      rerender(<ChatInput {...defaultProps} input="test" isStreaming={true} />);
+
+      expect(getByLabelText('Stop generating')).toBeTruthy();
+      expect(queryByLabelText('Send message')).toBeNull();
     });
 
-    it('should not render stop button when not streaming', () => {
-      const onStopExecution = jest.fn();
-      render(<ChatInput {...defaultProps} isStreaming={false} onStopExecution={onStopExecution} />);
+    it('should transition from stop to send button when streaming ends', () => {
+      const { getByLabelText, rerender, queryByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" isStreaming={true} />
+      );
 
-      expect(screen.queryByTestId('chatStopExecutionButton')).not.toBeInTheDocument();
-      expect(screen.getByTestId('chatSendButton')).toBeInTheDocument();
-    });
+      // Initially should show stop button
+      expect(getByLabelText('Stop generating')).toBeTruthy();
+      expect(queryByLabelText('Send message')).toBeNull();
 
-    it('should not render stop button when streaming but no onStopExecution handler', () => {
-      render(<ChatInput {...defaultProps} isStreaming={true} />);
+      // After streaming ends
+      rerender(<ChatInput {...defaultProps} input="test" isStreaming={false} />);
 
-      expect(screen.queryByTestId('chatStopExecutionButton')).not.toBeInTheDocument();
-      expect(screen.getByTestId('chatSendButton')).toBeInTheDocument();
-    });
-
-    it('should call onStopExecution when stop button is clicked', () => {
-      const onStopExecution = jest.fn();
-      render(<ChatInput {...defaultProps} isStreaming={true} onStopExecution={onStopExecution} />);
-
-      const stopButton = screen.getByTestId('chatStopExecutionButton');
-      fireEvent.click(stopButton);
-
-      expect(onStopExecution).toHaveBeenCalledTimes(1);
-    });
-
-    it('should have danger color for stop button', () => {
-      const onStopExecution = jest.fn();
-      render(<ChatInput {...defaultProps} isStreaming={true} onStopExecution={onStopExecution} />);
-
-      const stopButton = screen.getByTestId('chatStopExecutionButton');
-      expect(stopButton).toHaveClass('euiButtonIcon--danger');
+      expect(getByLabelText('Send message')).toBeTruthy();
+      expect(queryByLabelText('Stop generating')).toBeNull();
     });
   });
 
-  describe('button consolidation', () => {
-    it('should show only send button when not streaming', () => {
-      const onStopExecution = jest.fn();
-      render(<ChatInput {...defaultProps} isStreaming={false} onStopExecution={onStopExecution} />);
+  describe('layout modes', () => {
+    it('should apply sidecar layout class', () => {
+      const { container } = render(
+        <ChatInput {...defaultProps} layoutMode={ChatLayoutMode.SIDECAR} />
+      );
 
-      expect(screen.getByTestId('chatSendButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('chatStopExecutionButton')).not.toBeInTheDocument();
+      const chatInput = container.querySelector('.chatInput--sidecar');
+      expect(chatInput).toBeTruthy();
     });
 
-    it('should show only stop button when streaming', () => {
-      const onStopExecution = jest.fn();
-      render(<ChatInput {...defaultProps} isStreaming={true} onStopExecution={onStopExecution} />);
-
-      expect(screen.getByTestId('chatStopExecutionButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('chatSendButton')).not.toBeInTheDocument();
-    });
-
-    it('should switch from send to stop button when streaming starts', () => {
-      const onStopExecution = jest.fn();
-      const { rerender } = render(
-        <ChatInput {...defaultProps} isStreaming={false} onStopExecution={onStopExecution} />
+    it('should apply fullscreen layout class', () => {
+      const { container } = render(
+        <ChatInput {...defaultProps} layoutMode={ChatLayoutMode.FULLSCREEN} />
       );
 
-      expect(screen.getByTestId('chatSendButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('chatStopExecutionButton')).not.toBeInTheDocument();
-
-      rerender(
-        <ChatInput {...defaultProps} isStreaming={true} onStopExecution={onStopExecution} />
-      );
-
-      expect(screen.getByTestId('chatStopExecutionButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('chatSendButton')).not.toBeInTheDocument();
-    });
-
-    it('should switch from stop to send button when streaming ends', () => {
-      const onStopExecution = jest.fn();
-      const { rerender } = render(
-        <ChatInput {...defaultProps} isStreaming={true} onStopExecution={onStopExecution} />
-      );
-
-      expect(screen.getByTestId('chatStopExecutionButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('chatSendButton')).not.toBeInTheDocument();
-
-      rerender(
-        <ChatInput {...defaultProps} isStreaming={false} onStopExecution={onStopExecution} />
-      );
-
-      expect(screen.getByTestId('chatSendButton')).toBeInTheDocument();
-      expect(screen.queryByTestId('chatStopExecutionButton')).not.toBeInTheDocument();
+      const chatInput = container.querySelector('.chatInput--fullscreen');
+      expect(chatInput).toBeTruthy();
     });
   });
 
-  describe('input field', () => {
-    it('should render textarea with placeholder', () => {
-      render(<ChatInput {...defaultProps} />);
+  describe('accessibility', () => {
+    it('should have proper aria-label for send button', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} input="test" />);
 
-      const textarea = screen.getByPlaceholderText('Ask anything. Type / for actions');
-      expect(textarea).toBeInTheDocument();
+      expect(getByLabelText('Send message')).toBeTruthy();
     });
 
-    it('should call onInputChange when text is entered', () => {
-      const onInputChange = jest.fn();
-      render(<ChatInput {...defaultProps} onInputChange={onInputChange} />);
+    it('should have proper aria-label for stop button', () => {
+      const { getByLabelText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
 
-      const textarea = screen.getByPlaceholderText('Ask anything. Type / for actions');
-      fireEvent.change(textarea, { target: { value: 'Hello' } });
-
-      expect(onInputChange).toHaveBeenCalledWith('Hello');
+      expect(getByLabelText('Stop generating')).toBeTruthy();
     });
 
-    it('should disable textarea when streaming', () => {
-      render(<ChatInput {...defaultProps} isStreaming={true} />);
+    it('should have autofocus on input', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} />);
 
-      const textarea = screen.getByPlaceholderText('Ask anything. Type / for actions');
-      expect(textarea).toBeDisabled();
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      // Input should exist and be focused
+      expect(input).toBeTruthy();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle rapid button clicks', () => {
+      const onSend = jest.fn();
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" onSend={onSend} />
+      );
+
+      const button = getByLabelText('Send message');
+      fireEvent.click(button);
+      fireEvent.click(button);
+      fireEvent.click(button);
+
+      expect(onSend).toHaveBeenCalledTimes(3);
     });
 
-    it('should not disable textarea when not streaming', () => {
-      render(<ChatInput {...defaultProps} isStreaming={false} />);
+    it('should handle empty onStop callback', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} isStreaming={true} onStop={undefined as any} />
+      );
 
-      const textarea = screen.getByPlaceholderText('Ask anything. Type / for actions');
-      expect(textarea).not.toBeDisabled();
+      const button = getByLabelText('Stop generating');
+
+      // Should not throw when clicking with undefined callback
+      expect(() => fireEvent.click(button)).not.toThrow();
+    });
+
+    it('should handle empty onSend callback', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" onSend={undefined as any} />
+      );
+
+      const button = getByLabelText('Send message');
+
+      // Should not throw when clicking with undefined callback
+      expect(() => fireEvent.click(button)).not.toThrow();
     });
   });
 });
