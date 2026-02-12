@@ -19,7 +19,7 @@ export const TimeRangeToolRegistration: React.FC<TimeRangeToolRegistrationProps>
   useAssistantActionHook({
     name: 'update_time_range',
     description:
-      'ONLY use when user explicitly requests to change, update, or set a different time range. Do NOT use for general queries about data.',
+      'Updates the global time range filter. Use this tool once when the user requests to change, update, or set the time range (e.g., "last week", "last 24 hours", "today"). Do not call this tool multiple times for the same request or after the time range has already been updated.',
     parameters: {
       type: 'object',
       properties: {
