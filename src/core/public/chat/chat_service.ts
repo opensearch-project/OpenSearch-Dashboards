@@ -19,6 +19,7 @@ import {
 export class ChatService implements CoreService<ChatServiceSetup, ChatServiceStart> {
   private implementation?: ChatImplementationFunctions;
   private suggestedActionsService?: { registerProvider(provider: any): void };
+  private screenshotPageContainerElement?: HTMLElement;
 
   // Core-managed infrastructure state
   private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
@@ -27,6 +28,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
     windowMode: 'sidecar',
     paddingSize: 400,
   });
+  private screenshotFeatureEnabled$ = new BehaviorSubject<boolean>(false);
   private windowOpenCallbacks = new Set<() => void>();
   private windowCloseCallbacks = new Set<() => void>();
 
@@ -47,6 +49,10 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       },
 
       suggestedActionsService: this.suggestedActionsService,
+
+      setScreenshotPageContainerElement: (element: HTMLElement) => {
+        this.screenshotPageContainerElement = element;
+      },
     };
   }
 
@@ -108,6 +114,19 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         return () => this.windowCloseCallbacks.delete(callback);
       },
 
+      // Screenshot feature management (core-managed)
+      isScreenshotFeatureEnabled: () => {
+        return this.screenshotFeatureEnabled$.getValue();
+      },
+
+      getScreenshotFeatureEnabled$: () => {
+        return this.screenshotFeatureEnabled$.asObservable();
+      },
+
+      setScreenshotFeatureEnabled: (enabled: boolean) => {
+        this.screenshotFeatureEnabled$.next(enabled);
+      },
+
       // Operations (delegated to plugin - throw if unavailable)
       openWindow: async () => {
         if (!this.implementation) {
@@ -157,6 +176,9 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       get suggestedActionsService() {
         return chatServiceInstance.suggestedActionsService;
       },
+
+      // Screenshot page container element
+      screenshotPageContainerElement: this.screenshotPageContainerElement,
     };
   }
 

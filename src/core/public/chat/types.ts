@@ -145,6 +145,13 @@ export interface ChatServiceInterface {
   onWindowClose(callback: () => void): () => void;
 
   /**
+   * Screenshot feature management - managed by core
+   */
+  isScreenshotFeatureEnabled(): boolean;
+  getScreenshotFeatureEnabled$(): Observable<boolean>;
+  setScreenshotFeatureEnabled(enabled: boolean): void;
+
+  /**
    * Operations - delegated to plugin (throws error if unavailable)
    */
   openWindow(): Promise<void>;
@@ -204,6 +211,12 @@ export interface ChatServiceSetup {
   suggestedActionsService?: {
     registerProvider(provider: any): void;
   };
+
+  /**
+   * Set the DOM element for screenshot page container
+   * This will be called by CoreSystem with the rootDomElement
+   */
+  setScreenshotPageContainerElement(element: HTMLElement): void;
 }
 
 /**
@@ -217,4 +230,10 @@ export interface ChatServiceStart extends ChatServiceInterface {
   suggestedActionsService?: {
     registerProvider(provider: any): void;
   };
+
+  /**
+   * DOM element for screenshot page container
+   * This element can be used to capture screenshots of the page
+   */
+  screenshotPageContainerElement?: HTMLElement;
 }

@@ -6,11 +6,14 @@
 import { BehaviorSubject } from 'rxjs';
 import { ChatServiceSetup, ChatServiceStart } from './types';
 
-const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => ({
-  setImplementation: jest.fn(),
-  setSuggestedActionsService: jest.fn(),
-  suggestedActionsService: undefined,
-});
+const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => {
+  return {
+    setImplementation: jest.fn(),
+    setSuggestedActionsService: jest.fn(),
+    suggestedActionsService: undefined,
+    setScreenshotPageContainerElement: jest.fn(),
+  };
+};
 
 const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   isAvailable: jest.fn().mockReturnValue(false),
@@ -44,7 +47,11 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   ),
   onWindowOpen: jest.fn().mockReturnValue(() => {}),
   onWindowClose: jest.fn().mockReturnValue(() => {}),
+  isScreenshotFeatureEnabled: jest.fn().mockReturnValue(false),
+  getScreenshotFeatureEnabled$: jest.fn().mockReturnValue(new BehaviorSubject<boolean>(false)),
+  setScreenshotFeatureEnabled: jest.fn(),
   suggestedActionsService: undefined,
+  screenshotPageContainerElement: undefined,
 });
 
 export const coreChatServiceMock = {

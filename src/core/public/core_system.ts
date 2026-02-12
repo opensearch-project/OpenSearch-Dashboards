@@ -178,6 +178,7 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const workspaces = this.workspaces.setup();
       const chat = this.chat.setup();
+      chat.setScreenshotPageContainerElement(this.rootDomElement);
       const telemetry = this.telemetry.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();

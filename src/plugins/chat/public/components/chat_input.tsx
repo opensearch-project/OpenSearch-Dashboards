@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
-import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
 import { ChatContextPopover } from './chat_context_popover';
 
 import './chat_input.scss';
@@ -16,21 +17,27 @@ import './chat_input.scss';
 interface ChatInputProps {
   layoutMode: ChatLayoutMode;
   input: string;
+  isCapturing: boolean;
   isStreaming: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  includeScreenShotEnabled: boolean;
+  onCaptureScreenshot: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   layoutMode,
   input,
+  isCapturing,
   isStreaming,
   onInputChange,
   onSend,
   onStop,
   onKeyDown,
+  includeScreenShotEnabled,
+  onCaptureScreenshot,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +55,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     onKeyDown,
     inputRef,
   });
+
+  const chatContextPopoverOptions = useMemo(() => {
+    return [
+      {
+        title: i18n.translate('chat.chatInput.addDashboardScreenshot', {
+          defaultMessage: 'Add dashboard screenshot',
+        }),
+        iconType: 'image',
+        onClick: onCaptureScreenshot,
+      },
+    ];
+  }, [onCaptureScreenshot]);
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
@@ -83,12 +102,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       </div>
       <div className="chatInput__bottomRow">
-        <ChatContextPopover enabled={false} />
+        <ChatContextPopover
+          enabled={includeScreenShotEnabled}
+          options={chatContextPopoverOptions}
+        />
         <ContextPills category="chat" />
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={!isStreaming && input.trim().length === 0}
+          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing}
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}
