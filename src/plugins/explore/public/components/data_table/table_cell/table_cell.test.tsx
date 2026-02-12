@@ -145,6 +145,23 @@ describe('TableCell', () => {
     expect(cell).not.toHaveClass('eui-textNoWrap');
   });
 
+  it('omits eui-textTruncate when wrapCellText is true', () => {
+    render(<TableCell {...defaultProps} isTimeField={false} wrapCellText={true} />);
+
+    const cell = screen.getByTestId('docTableField');
+    expect(cell).toHaveClass('exploreDocTableCell');
+    expect(cell).not.toHaveClass('eui-textTruncate');
+    expect(cell).not.toHaveClass('eui-textNoWrap');
+  });
+
+  it('keeps eui-textNoWrap on time field even when wrapCellText is true', () => {
+    render(<TableCell {...defaultProps} isTimeField={true} wrapCellText={true} />);
+
+    const cell = screen.getByTestId('docTableField');
+    expect(cell).toHaveClass('exploreDocTableCell', 'eui-textNoWrap');
+    expect(cell).not.toHaveClass('eui-textTruncate');
+  });
+
   it('renders content wrapper for all fields', () => {
     render(<TableCell {...defaultProps} isTimeField={false} />);
     expect(document.querySelector('.exploreDocTableCell__content')).toBeInTheDocument();

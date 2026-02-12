@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CoreStart } from 'src/core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 
@@ -19,16 +18,17 @@ interface DatasetSelectDeps {
 }
 
 export function createDatasetSelect({ core, data, storage }: DatasetSelectDeps) {
+  // Pre-compute the stable parts of the services object once in the closure.
+  // This prevents creating a new object reference on every render, which would
+  // cause OpenSearchDashboardsContextProvider to produce a new context value
+  // and trigger unnecessary re-renders and API calls in descendant components.
+  const baseServices = { data, storage, ...core };
+
   return (props: DatasetSelectProps) => {
+    const services = useMemo(() => ({ ...baseServices, appName: props.appName }), [props.appName]);
+
     return (
-      <OpenSearchDashboardsContextProvider
-        services={{
-          appName: props.appName,
-          data,
-          storage,
-          ...core,
-        }}
-      >
+      <OpenSearchDashboardsContextProvider services={services}>
         <DatasetSelect {...props} />
       </OpenSearchDashboardsContextProvider>
     );
