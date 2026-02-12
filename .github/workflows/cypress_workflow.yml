@@ -117,7 +117,7 @@ jobs:
           - group: 15
             config: query_enhanced
             test_location: source
-          # Explore tests - group 1
+          # Explore tests - group 1 (includes both discover and explore specs)
           - group: 10Explore
             config: explore
             test_location: source
@@ -244,7 +244,28 @@ jobs:
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
-          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
+          if [[ "${{ matrix.config }}" == "explore" ]]; then
+            # For explore config, run both discover and explore specs together
+            # since both features are enabled in the same workspace
+            BASE_GROUP=$(echo "${{ matrix.group }}" | sed 's/Explore$//')
+            DISCOVER_SPEC="$(yarn --silent osd:ciGroup${BASE_GROUP} 2>/dev/null || echo '')"
+            EXPLORE_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }} 2>/dev/null || echo '')"
+
+            # Combine both specs with comma separation
+            if [[ -n "$DISCOVER_SPEC" && -n "$EXPLORE_SPEC" ]]; then
+              DASHBOARDS_SPEC="${DISCOVER_SPEC},${EXPLORE_SPEC}"
+            elif [[ -n "$EXPLORE_SPEC" ]]; then
+              DASHBOARDS_SPEC="$EXPLORE_SPEC"
+            elif [[ -n "$DISCOVER_SPEC" ]]; then
+              DASHBOARDS_SPEC="$DISCOVER_SPEC"
+            else
+              DASHBOARDS_SPEC=""
+            fi
+          else
+            # For other configs, use the standard approach
+            DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
+          fi
+
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 

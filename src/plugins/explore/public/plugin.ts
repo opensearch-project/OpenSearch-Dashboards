@@ -460,6 +460,7 @@ export class ExplorePlugin
     ];
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -721,7 +722,9 @@ export class ExplorePlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }
