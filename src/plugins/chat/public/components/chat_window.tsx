@@ -353,20 +353,21 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleStop = useCallback(() => {
     // Abort the current streaming request
     chatService.abort();
-    
+
     // Remove loading message if it exists
     if (loadingMessageIdRef.current) {
       setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageIdRef.current));
       loadingMessageIdRef.current = null;
     }
-    
+
     // Unsubscribe from current observable if exists
     if (currentSubscriptionRef.current) {
       currentSubscriptionRef.current.unsubscribe();
       currentSubscriptionRef.current = null;
     }
-    
-    // Update streaming state
+
+    // Update streaming state (both ref and state for React 18 compatibility)
+    isStreamingRef.current = false;
     setIsStreaming(false);
   }, [chatService]);
 

@@ -47,7 +47,7 @@ describe('ChatMessages', () => {
     it('should render empty state when no messages', () => {
       const { getByText } = render(<ChatMessages {...defaultProps} />);
 
-      expect(getByText('Start a conversation')).toBeTruthy();
+      expect(getByText("Hi, I'm your AI Assistant")).toBeTruthy();
     });
 
     it('should render messages from timeline', () => {
