@@ -7,7 +7,7 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px;
-    align-items: center;
+    align-items: flex-end;
   }
 
   &__fieldWrapper {
@@ -30,7 +30,7 @@
     padding: 12px;
     pointer-events: none;
     color: transparent;
-    white-space: nowrap;
+    white-space: pre-wrap;
     overflow: hidden;
     line-height: 1.5;
 

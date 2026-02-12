@@ -17,6 +17,7 @@ interface ChatInputProps {
   isStreaming: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
+  onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
 }
 
@@ -26,6 +27,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isStreaming,
   onInputChange,
   onSend,
+  onStop,
   onKeyDown,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -59,7 +61,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chatInput__fieldWrapper">
           <EuiTextArea
             inputRef={inputRef}
-            placeholder="Ask anything. Type / for actions"
+            placeholder="How can I help you today?"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -79,12 +81,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           )}
         </div>
         <EuiButtonIcon
-          iconType={isStreaming ? 'generate' : 'sortUp'}
-          onClick={onSend}
-          isDisabled={input.trim().length === 0 || isStreaming}
-          aria-label="Send message"
+          iconType={isStreaming ? 'stop' : 'sortUp'}
+          onClick={isStreaming ? onStop : onSend}
+          isDisabled={!isStreaming && input.trim().length === 0}
+          aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
-          color="primary"
+          color={isStreaming ? 'danger' : 'primary'}
           display="fill"
         />
       </div>
