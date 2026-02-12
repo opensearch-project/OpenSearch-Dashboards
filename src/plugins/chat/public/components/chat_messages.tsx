@@ -291,7 +291,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             return null;
           }
 
-          // Handle activity messages (AG-UI standard for system activities)
+          // Handle activity messages
           if (message.role === 'activity') {
             return <ActivityRow key={message.id} activity={message} />;
           }

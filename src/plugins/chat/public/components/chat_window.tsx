@@ -6,7 +6,6 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
-import { Subscription } from 'rxjs';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -68,9 +67,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   // React 18 batches state updates, so we need a ref for immediate checks
   const isStreamingRef = useRef(false);
 
-  // Track active subscription for abort functionality
-  const activeSubscriptionRef = useRef<Subscription | null>(null);
-
   const timelineRef = React.useRef<Message[]>(timeline);
 
   React.useEffect(() => {
@@ -123,16 +119,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       eventHandler.clearState();
     };
   }, [eventHandler]);
-
-  // Clean up active subscription on component unmount
-  useEffect(() => {
-    return () => {
-      if (activeSubscriptionRef.current) {
-        activeSubscriptionRef.current.unsubscribe();
-        activeSubscriptionRef.current = null;
-      }
-    };
-  }, []);
 
   // Restore timeline from current chat state on component mount
   useEffect(() => {
