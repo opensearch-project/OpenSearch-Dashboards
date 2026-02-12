@@ -1,0 +1,2 @@
+feat:
+- Add setting `explore:useClassicDiscover` to replace new experience banner ([#11339](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11339))
