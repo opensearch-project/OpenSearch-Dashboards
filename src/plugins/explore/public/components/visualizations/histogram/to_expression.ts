@@ -12,20 +12,11 @@ import {
   getChartRender,
 } from '../utils/utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import {
-  adjustBucketBins,
-  buildThresholdColorEncoding,
-  createBarSeries,
-} from '../bar/bar_chart_utils';
-import {
-  assembleSpec,
-  buildAxisConfigs,
-  buildVisMap,
-  createBaseConfig,
-  pipe,
-} from '../utils/echarts_spec';
+import { adjustBucketBins, buildThresholdColorEncoding } from '../bar/bar_chart_utils';
+import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 import { bin } from '../utils/data_transformation/bin';
+import { createHistogramSeries } from './histogram_chart_utils';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: HistogramChartStyle) => {
@@ -63,13 +54,10 @@ export const createNumericalHistogramChart = (
       ),
       createBaseConfig({ legend: { show: false } }),
       buildAxisConfigs,
-      buildVisMap({
-        seriesFields: () => ['value'],
-      }),
-      createBarSeries({
-        kind: 'histogram',
+      createHistogramSeries({
         styles,
-        categoryField: 'bucket',
+        binStartField: 'start',
+        binEndField: 'end',
         seriesFields: ['value'],
       }),
       assembleSpec
@@ -81,7 +69,7 @@ export const createNumericalHistogramChart = (
         xAxis: {
           name: 'bucket',
           column: 'bucket',
-          schema: VisFieldType.Categorical,
+          schema: VisFieldType.Numerical,
         },
         yAxis: {
           name: 'value',
@@ -193,13 +181,10 @@ export const createSingleHistogramChart = (
       ),
       createBaseConfig({ legend: { show: false } }),
       buildAxisConfigs,
-      buildVisMap({
-        seriesFields: () => ['value'],
-      }),
-      createBarSeries({
-        kind: 'histogram',
+      createHistogramSeries({
         styles,
-        categoryField: 'bucket',
+        binStartField: 'start',
+        binEndField: 'end',
         seriesFields: ['value'],
       }),
       assembleSpec
@@ -211,7 +196,7 @@ export const createSingleHistogramChart = (
         xAxis: {
           name: 'bucket',
           column: 'bucket',
-          schema: VisFieldType.Categorical,
+          schema: VisFieldType.Numerical,
         },
         yAxis: {
           name: 'value',

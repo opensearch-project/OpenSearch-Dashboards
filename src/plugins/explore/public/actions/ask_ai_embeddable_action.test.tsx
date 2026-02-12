@@ -4,13 +4,13 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { AskAIEmbeddableAction } from './ask_ai_embeddable_action';
 import { ExploreEmbeddable } from '../embeddable/explore_embeddable';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 
 // Mock html2canvas
-jest.mock('html2canvas');
+jest.mock('html2canvas-pro');
 
 // Mock the loading overlay component
 jest.mock('./ask_ai_embeddable_action', () => {

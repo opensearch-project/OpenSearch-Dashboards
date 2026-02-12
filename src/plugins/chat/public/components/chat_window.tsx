@@ -34,7 +34,6 @@ export interface ChatWindowInstance {
 
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
-  onToggleLayout?: () => void;
   onClose: ()=>void;
 }
 
@@ -47,7 +46,6 @@ export const ChatWindow = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
 const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(({
   layoutMode = ChatLayoutMode.SIDECAR,
-  onToggleLayout,
   onClose,
 }, ref) => {
 
@@ -59,6 +57,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
+  const currentSubscriptionRef = useRef<any>(null);
+  const loadingMessageIdRef = useRef<string | null>(null);
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -202,6 +202,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Add loading assistant message
       const loadingMessageId = `loading-${Date.now()}`;
+      loadingMessageIdRef.current = loadingMessageId;
       const loadingMessage: Message = {
         id: loadingMessageId,
         role: 'assistant',
@@ -224,6 +225,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           if (!firstResponseReceived) {
             firstResponseReceived = true;
             setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+            loadingMessageIdRef.current = null;
           }
 
           // Handle all events through the event handler service
@@ -233,22 +235,30 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           console.error('Subscription error:', error);
           // Remove loading message on error
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          loadingMessageIdRef.current = null;
           isStreamingRef.current = false;
           setIsStreaming(false);
+          currentSubscriptionRef.current = null;
         },
         complete: () => {
           // Remove loading message if still present
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          loadingMessageIdRef.current = null;
           isStreamingRef.current = false;
           setIsStreaming(false);
+          currentSubscriptionRef.current = null;
         },
       });
+
+      // Store subscription for potential cancellation
+      currentSubscriptionRef.current = subscription;
 
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to send message:', error);
       isStreamingRef.current = false;
       setIsStreaming(false);
+      currentSubscriptionRef.current = null;
     }
   }, [chatService, currentRunId, eventHandler]);
 
@@ -338,6 +348,27 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setPendingConfirmation(null);
   }, [chatService]);
 
+  const handleStop = useCallback(() => {
+    // Abort the current streaming request
+    chatService.abort();
+
+    // Remove loading message if it exists
+    if (loadingMessageIdRef.current) {
+      setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageIdRef.current));
+      loadingMessageIdRef.current = null;
+    }
+
+    // Unsubscribe from current observable if exists
+    if (currentSubscriptionRef.current) {
+      currentSubscriptionRef.current.unsubscribe();
+      currentSubscriptionRef.current = null;
+    }
+
+    // Update streaming state (both ref and state for React 18 compatibility)
+    isStreamingRef.current = false;
+    setIsStreaming(false);
+  }, [chatService]);
+
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {
       confirmationService.approve(pendingConfirmation.id);
@@ -356,6 +387,29 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     getActionRenderer: service.getActionRenderer,
   };
 
+  // Get conversation name from first user message with text content
+  const conversationName = useMemo(() => {
+    // Find first user message that has text content
+    for (const msg of timeline) {
+      if (msg.role !== 'user') continue;
+
+      // Handle string content
+      if (typeof msg.content === 'string' && msg.content.trim()) {
+        return msg.content;
+      }
+
+      // Handle array content - look for text content
+      if (Array.isArray(msg.content)) {
+        const textContent = msg.content.find((item) => item.type === 'text');
+        if (textContent?.text && textContent.text.trim()) {
+          return textContent.text;
+        }
+      }
+    }
+
+    return '';
+  }, [timeline]);
+
   useImperativeHandle(ref, ()=>({
     startNewChat: ()=>handleNewChat(),
     sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
@@ -364,9 +418,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   return (
     <ChatContainer layoutMode={layoutMode}>
       <ChatHeader
-        layoutMode={layoutMode}
+        conversationName={conversationName}
         isStreaming={isStreaming}
-        onToggleLayout={onToggleLayout}
         onNewChat={handleNewChat}
         onClose={onClose}
       />
@@ -397,6 +450,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         isStreaming={isStreaming}
         onInputChange={setInput}
         onSend={handleSend}
+        onStop={handleStop}
         onKeyDown={handleKeyDown}
       />
     </ChatContainer>
