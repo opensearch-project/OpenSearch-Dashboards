@@ -97,9 +97,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
           hasBorder={false}
           hasShadow={false}
           style={
-            message.role === 'user'
-              ? { marginInlineStart: 24, backgroundColor: euiThemeVars.euiColorLightestShade }
-              : {}
+            message.role === 'user' ? { backgroundColor: euiThemeVars.euiColorLightestShade } : {}
           }
         >
           <div className="messageRow__markdown">

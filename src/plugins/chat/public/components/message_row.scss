@@ -57,8 +57,15 @@
     }
   }
 
-  &--user {
-    gap: 12px;
+  &--user &__content {
+    display: flex;
+    justify-content: flex-end;
+    margin-inline-start: 24px;
+
+    > * {
+      flex: none;
+      max-width: 100%;
+    }
   }
 
   // For user messages, ensure the actions are visible on a blue background
