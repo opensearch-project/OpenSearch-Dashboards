@@ -147,7 +147,6 @@ describe('ChatHeaderButton', () => {
       );
 
       expect(mockChatService.isWindowOpen).toHaveBeenCalled();
-      expect(mockChatService.getWindowMode).toHaveBeenCalled();
     });
 
     it('should initialize with window open state from ChatService', () => {

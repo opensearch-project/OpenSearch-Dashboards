@@ -4,61 +4,57 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonIcon, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ChatLayoutMode } from './chat_header_button';
+import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import './chat_header.scss';
 
 interface ChatHeaderProps {
-  layoutMode: ChatLayoutMode;
+  conversationName?: string;
   isStreaming: boolean;
-  onToggleLayout?: () => void;
   onNewChat: () => void;
   onClose: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  layoutMode,
+  conversationName = '',
   isStreaming,
-  onToggleLayout,
   onNewChat,
   onClose,
 }) => {
   return (
     <div className="chatHeader">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+        className="chatHeader__titleGroup"
+      >
         <EuiFlexItem grow={false}>
-          <EuiText size="m">
-            <h3>Ask AI</h3>
-          </EuiText>
+          <EuiIcon type="chatLeft" size="m" className="chatHeader__chatIcon" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning" className="chatHeader__experimentalBadge">
-            Experimental
-          </EuiBadge>
-        </EuiFlexItem>
+        {conversationName && (
+          <EuiFlexItem grow={true} className="chatHeader__titleContainer">
+            <EuiText size="m">
+              <h3 className="chatHeader__title">{conversationName}</h3>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <div className="chatHeader__buttons">
-        {onToggleLayout && (
-          <EuiButtonIcon
-            iconType={layoutMode === ChatLayoutMode.FULLSCREEN ? 'minimize' : 'fullScreen'}
-            onClick={onToggleLayout}
-            disabled={isStreaming}
-            aria-label={
-              layoutMode === ChatLayoutMode.FULLSCREEN
-                ? 'Switch to sidecar'
-                : 'Switch to fullscreen'
-            }
-            size="m"
-          />
-        )}
         <EuiButtonIcon
-          iconType="plus"
+          iconType="documentEdit"
           onClick={onNewChat}
           disabled={isStreaming}
           aria-label="New chat"
           size="m"
+          color="text"
         />
-        <EuiButtonIcon iconType="cross" onClick={onClose} aria-label="Close chatbot" size="m" />
+        <EuiButtonIcon
+          iconType="cross"
+          onClick={onClose}
+          aria-label="Close chatbot"
+          size="m"
+          color="text"
+        />
       </div>
     </div>
   );

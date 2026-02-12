@@ -34,7 +34,6 @@ export interface ChatWindowInstance {
 
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
-  onToggleLayout?: () => void;
   onClose: ()=>void;
 }
 
@@ -47,7 +46,6 @@ export const ChatWindow = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
 const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(({
   layoutMode = ChatLayoutMode.SIDECAR,
-  onToggleLayout,
   onClose,
 }, ref) => {
 
@@ -389,6 +387,29 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     getActionRenderer: service.getActionRenderer,
   };
 
+  // Get conversation name from first user message with text content
+  const conversationName = useMemo(() => {
+    // Find first user message that has text content
+    for (const msg of timeline) {
+      if (msg.role !== 'user') continue;
+
+      // Handle string content
+      if (typeof msg.content === 'string' && msg.content.trim()) {
+        return msg.content;
+      }
+
+      // Handle array content - look for text content
+      if (Array.isArray(msg.content)) {
+        const textContent = msg.content.find((item) => item.type === 'text');
+        if (textContent?.text && textContent.text.trim()) {
+          return textContent.text;
+        }
+      }
+    }
+
+    return '';
+  }, [timeline]);
+
   useImperativeHandle(ref, ()=>({
     startNewChat: ()=>handleNewChat(),
     sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
@@ -397,9 +418,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   return (
     <ChatContainer layoutMode={layoutMode}>
       <ChatHeader
-        layoutMode={layoutMode}
+        conversationName={conversationName}
         isStreaming={isStreaming}
-        onToggleLayout={onToggleLayout}
         onNewChat={handleNewChat}
         onClose={onClose}
       />
