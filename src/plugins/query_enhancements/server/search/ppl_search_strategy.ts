@@ -60,6 +60,10 @@ export const pplSearchStrategyProvider = (
 
         dataFrame.size = rawResponse.data.datarows.length;
 
+        if (rawResponse.data.highlights) {
+          dataFrame.meta = { ...dataFrame.meta, highlights: rawResponse.data.highlights };
+        }
+
         if (usage) usage.trackSuccess(rawResponse.took);
 
         if (aggConfig) {
