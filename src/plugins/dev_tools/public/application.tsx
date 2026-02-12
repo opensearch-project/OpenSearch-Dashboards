@@ -29,7 +29,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
@@ -332,7 +332,8 @@ export function renderApp(
   setBreadcrumbs(chrome);
   setTitle(chrome);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     // @ts-expect-error TS2741 TODO(ts-error): fixme
     <MainApp
       devTools={devTools}
@@ -340,8 +341,7 @@ export function renderApp(
       savedObjects={savedObjects}
       notifications={notifications}
       dataSourceManagement={dataSourceManagement}
-    />,
-    element
+    />
   );
 
   // dispatch synthetic hash change event to update hash history objects
@@ -352,7 +352,7 @@ export function renderApp(
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
   };
 }

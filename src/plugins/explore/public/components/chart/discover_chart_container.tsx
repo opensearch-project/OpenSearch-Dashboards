@@ -18,7 +18,6 @@ import {
 import { prepareTraceCacheKeys } from '../../application/utils/state_management/actions/trace_query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
-import { CanvasPanel } from '../panel/canvas_panel';
 import { Chart, createHistogramConfigs } from './utils';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { processTraceAggregationResults } from '../../application/utils/state_management/actions/processors/trace_aggregation_processor';
@@ -164,41 +163,37 @@ export const DiscoverChartContainer = () => {
   }
 
   return (
-    <CanvasPanel className="explore-chart-panel">
-      <div className="dscCanvas__chart">
-        {flavorId === ExploreFlavor.Logs && (
-          <ExploreLogsChart
-            bucketInterval={processedResults.bucketInterval}
-            chartData={(processedResults as ProcessedSearchResults).chartData as Chart}
-            config={uiSettings}
-            data={data}
-            services={services}
-            showHistogram={showHistogram}
-          />
-        )}
-        {flavorId === ExploreFlavor.Traces && (
-          <ExploreTracesChart
-            bucketInterval={processedResults.bucketInterval}
-            requestChartData={
-              (processedResults as TracesChartProcessedResults).requestChartData as Chart
-            }
-            errorChartData={
-              (processedResults as TracesChartProcessedResults).errorChartData as Chart
-            }
-            latencyChartData={
-              (processedResults as TracesChartProcessedResults).latencyChartData as Chart
-            }
-            requestError={requestError}
-            errorQueryError={errorQueryError}
-            latencyError={latencyError}
-            timeFieldName={dataset?.timeFieldName || 'endTime'}
-            config={uiSettings}
-            data={data}
-            services={services}
-            showHistogram={showHistogram}
-          />
-        )}
-      </div>
-    </CanvasPanel>
+    <div className="dscCanvas__chart">
+      {flavorId === ExploreFlavor.Logs && (
+        <ExploreLogsChart
+          bucketInterval={processedResults.bucketInterval}
+          chartData={(processedResults as ProcessedSearchResults).chartData as Chart}
+          config={uiSettings}
+          data={data}
+          services={services}
+          showHistogram={showHistogram}
+        />
+      )}
+      {flavorId === ExploreFlavor.Traces && (
+        <ExploreTracesChart
+          bucketInterval={processedResults.bucketInterval}
+          requestChartData={
+            (processedResults as TracesChartProcessedResults).requestChartData as Chart
+          }
+          errorChartData={(processedResults as TracesChartProcessedResults).errorChartData as Chart}
+          latencyChartData={
+            (processedResults as TracesChartProcessedResults).latencyChartData as Chart
+          }
+          requestError={requestError}
+          errorQueryError={errorQueryError}
+          latencyError={latencyError}
+          timeFieldName={dataset?.timeFieldName || 'endTime'}
+          config={uiSettings}
+          data={data}
+          services={services}
+          showHistogram={showHistogram}
+        />
+      )}
+    </div>
   );
 };

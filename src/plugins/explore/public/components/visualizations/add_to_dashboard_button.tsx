@@ -13,10 +13,9 @@ import {
   toMountPoint,
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
-import { selectUIState } from '../../application/utils/state_management/selectors';
+import { selectActiveTabId } from '../../application/utils/state_management/selectors';
 import {
   DataView as Dataset,
   IndexPattern,
@@ -80,23 +79,17 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     execute: handleAddToDashboard,
   });
 
-  // Create osdUrlStateStorage from storage
-  const osdUrlStateStorage = useMemo(() => {
-    return createOsdUrlStateStorage({
-      useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: scopedHistory,
-    });
-  }, [uiSettings, scopedHistory]);
-
+  // Use the shared osdUrlStateStorage instance from services to avoid
+  // multiple instances competing to update the same URL.
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
-    osdUrlStateStorage
+    services.osdUrlStateStorage!
   );
 
   const [showAddToDashboardModal, setShowAddToDashboardModal] = useState(false);
 
-  const uiState = useSelector(selectUIState);
-  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+  const activeTabId = useSelector(selectActiveTabId);
+  const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const savedExploreIdFromUrl = useCurrentExploreId();
   const flavorId = useFlavorId();

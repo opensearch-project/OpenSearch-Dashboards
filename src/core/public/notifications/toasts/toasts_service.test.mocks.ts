@@ -30,7 +30,13 @@
 
 export const mockReactDomRender = jest.fn();
 export const mockReactDomUnmount = jest.fn();
-jest.mock('react-dom', () => ({
+
+const mockRoot = {
   render: mockReactDomRender,
-  unmountComponentAtNode: mockReactDomUnmount,
+  unmount: mockReactDomUnmount,
+};
+export const mockCreateRoot = jest.fn().mockReturnValue(mockRoot);
+
+jest.mock('react-dom/client', () => ({
+  createRoot: mockCreateRoot,
 }));

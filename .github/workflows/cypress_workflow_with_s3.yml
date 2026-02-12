@@ -26,6 +26,7 @@ on:
         type: number
 
 env:
+  OSD_OPTIMIZER_THEMES: v8light
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
   CYPRESS_BROWSER: 'chromium'

@@ -62,6 +62,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const currentSubscriptionRef = useRef<any>(null);
   const loadingMessageIdRef = useRef<string | null>(null);
 
+  // Use ref to track streaming state synchronously for React 18 compatibility
+  // React 18 batches state updates, so we need a ref for immediate checks
+  const isStreamingRef = useRef(false);
+
   const timelineRef = React.useRef<Message[]>(timeline);
 
   React.useEffect(() => {
@@ -182,6 +186,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     messages: Message[],
     rawMessage?: string
   ) => {
+    isStreamingRef.current = true;
     setIsStreaming(true);
 
     try {
@@ -233,6 +238,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           // Remove loading message on error
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           loadingMessageIdRef.current = null;
+          isStreamingRef.current = false;
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
         },
@@ -240,6 +246,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           // Remove loading message if still present
           setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           loadingMessageIdRef.current = null;
+          isStreamingRef.current = false;
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
         },
@@ -251,6 +258,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to send message:', error);
+      isStreamingRef.current = false;
       setIsStreaming(false);
       currentSubscriptionRef.current = null;
     }
@@ -258,7 +266,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
-    if (!messageContent || isStreaming) return;
+    // Use ref for immediate check since React 18 batches state updates
+    if (!messageContent || isStreamingRef.current) return;
 
     setInput('');
 
@@ -292,7 +301,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   };
 
   const handleResendMessage = async (message: Message) => {
-    if (isStreaming) return;
+    // Use ref for immediate check since React 18 batches state updates
+    if (isStreamingRef.current) return;
 
     // Only user messages can be resent
     if (message.role !== 'user') return;

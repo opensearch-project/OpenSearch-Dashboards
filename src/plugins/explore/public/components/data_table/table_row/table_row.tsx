@@ -37,6 +37,7 @@ export interface TableRowProps {
   isShortDots: boolean;
   docViewsRegistry: DocViewsRegistry;
   expandedTableHeader?: string;
+  wrapCellText?: boolean;
 }
 
 export const TableRowUI = ({
@@ -51,6 +52,7 @@ export const TableRowUI = ({
   isShortDots,
   docViewsRegistry,
   expandedTableHeader,
+  wrapCellText,
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -92,6 +94,7 @@ export const TableRowUI = ({
         isExpanded={isExpanded}
         onToggleExpand={handleExpanding}
         isOnTracesPage={onTracesPage}
+        wrapCellText={wrapCellText}
       />
       {isExpanded && (
         <ExpandedTableRow

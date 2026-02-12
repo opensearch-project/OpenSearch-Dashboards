@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { PluginStoreProvider } from '../context/plugin_store_context';
 import { useAction } from './use_actions';
 import { useSelector } from './use_selector';

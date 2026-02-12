@@ -27,55 +27,74 @@ export class PrometheusResourceClient extends BaseResourceClient {
   /**
    * Converts a TimeRange to content object with Unix timestamps for Prometheus API
    */
-  private toContent(timeRange?: TimeRange): Record<string, unknown> | undefined {
-    if (!timeRange) return undefined;
+  private toContent(
+    meta?: Record<string, unknown>,
+    timeRange?: TimeRange
+  ): Record<string, unknown> | undefined {
+    if (!timeRange) return meta;
 
     const parsedFrom = dateMath.parse(timeRange.from);
     const parsedTo = dateMath.parse(timeRange.to, { roundUp: true });
 
     if (!parsedFrom || !parsedTo) {
-      return undefined;
+      return meta;
     }
 
     return {
+      ...meta,
       start: parsedFrom.unix(),
       end: parsedTo.unix(),
     };
   }
 
-  getLabels(dataConnectionId: string, metric?: string, timeRange?: TimeRange) {
+  getLabels(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    metric?: string,
+    timeRange?: TimeRange
+  ) {
     return this.get<string[]>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.LABELS,
       metric,
-      this.toContent(timeRange)
+      this.toContent(meta, timeRange)
     );
   }
 
-  getLabelValues(dataConnectionId: string, label: string, timeRange?: TimeRange) {
+  getLabelValues(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    label?: string,
+    timeRange?: TimeRange
+  ) {
     return this.get<string[]>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES,
       label,
-      this.toContent(timeRange)
+      this.toContent(meta, timeRange)
     );
   }
 
-  getMetrics(dataConnectionId: string, timeRange?: TimeRange) {
+  getMetrics(dataConnectionId: string, meta?: Record<string, unknown>, timeRange?: TimeRange) {
     return this.get<string[]>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.METRICS,
       undefined,
-      this.toContent(timeRange)
+      this.toContent(meta, timeRange)
     );
   }
 
-  getMetricMetadata(dataConnectionId: string, metric?: string, timeRange?: TimeRange) {
+  getMetricMetadata(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    metric?: string,
+    timeRange?: TimeRange
+  ) {
     return this.get<PrometheusMetricMetadata>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
       metric,
-      this.toContent(timeRange)
+      this.toContent(meta, timeRange)
     );
   }
 
@@ -89,13 +108,14 @@ export class PrometheusResourceClient extends BaseResourceClient {
   getSeries(
     dataConnectionId: string,
     match: string,
+    meta?: Record<string, unknown>,
     timeRange?: TimeRange
   ): Promise<Array<Record<string, string>>> {
     return this.get<Array<Record<string, string>>>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.SERIES,
       match,
-      this.toContent(timeRange)
+      this.toContent(meta, timeRange)
     );
   }
 }

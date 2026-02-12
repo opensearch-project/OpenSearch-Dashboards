@@ -22,7 +22,6 @@ import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
-import { HistogramChartStyle } from '../histogram/histogram_vis_config';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -196,19 +195,11 @@ export const buildThresholdColorEncoding = (
   return colorLayer;
 };
 
-type Options =
-  | {
-      kind: 'bar';
-      styles: BarChartStyle;
-      categoryField: string;
-      seriesFields: string[] | ((headers?: string[]) => string[]);
-    }
-  | {
-      kind: 'histogram';
-      styles: HistogramChartStyle;
-      categoryField: string;
-      seriesFields: string[] | ((headers?: string[]) => string[]);
-    };
+interface Options {
+  styles: BarChartStyle;
+  categoryField: string;
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+}
 
 /**
  * Create bar series configuration
@@ -226,30 +217,23 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
     seriesFields = seriesFields(transformedData[0]);
   }
 
-  const thresholdLines =
-    options.kind === 'bar'
-      ? generateThresholdLines(options.styles?.thresholdOptions, options.styles?.switchAxes)
-      : generateThresholdLines(options.styles?.thresholdOptions);
+  const thresholdLines = generateThresholdLines(
+    options.styles?.thresholdOptions,
+    options.styles?.switchAxes
+  );
 
-  const encodeX =
-    options.kind === 'bar' ? adjustOppositeSymbol(options.styles?.switchAxes, 'x') : 'x';
-  const encodeY =
-    options.kind === 'bar' ? adjustOppositeSymbol(options.styles?.switchAxes, 'y') : 'y';
+  const encodeX = adjustOppositeSymbol(options.styles?.switchAxes, 'x');
+  const encodeY = adjustOppositeSymbol(options.styles?.switchAxes, 'y');
 
   let barWidth: string | undefined;
   if (styles.barSizeMode === 'manual') {
     barWidth = `${(styles.barWidth || 0.7) * 100}%`;
-  } else {
-    if (options.kind === 'histogram') {
-      barWidth = '99%';
-    }
   }
 
   const series = seriesFields.map((seriesField, index) => {
     const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
-    return {
+    const seriesConfig = {
       type: 'bar',
-      stack: 'total',
       emphasis: {
         focus: 'self',
       },
@@ -269,7 +253,13 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
           borderColor: styles.barBorderColor,
         },
       }),
+      // Apply stack configuration based on stackMode
+      ...(options.kind === 'bar' &&
+        'stackMode' in styles &&
+        styles.stackMode === 'total' && { stack: 'total' }),
     };
+
+    return seriesConfig as BarSeriesOption;
   }) as BarSeriesOption[];
   newState.series = series;
 
@@ -293,7 +283,6 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
   // facet into one chart
   if (!Array.isArray(transformedData?.[0]?.[0])) {
     const simpleBar = createBarSeries({
-      kind: 'bar',
       styles,
       categoryField,
       seriesFields,
@@ -304,32 +293,37 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
     const header = seriesData[0];
     const cateColumns = seriesFields(header);
 
-    return cateColumns.map((item: string, i: number) => ({
-      name: String(item),
-      type: 'bar',
-      stack: `stack_${index}`, // each grid should have a exclusive stack key
-      encode: {
-        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
-        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
-      },
-      datasetIndex: index,
-      gridIndex: index,
-      xAxisIndex: index,
-      yAxisIndex: index,
-      emphasis: {
-        focus: 'self',
-      },
-      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-      barCategoryGap:
-        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-      ...(styles.showBarBorder && {
-        itemStyle: {
-          borderWidth: styles.barBorderWidth,
-          borderColor: styles.barBorderColor,
+    return cateColumns.map((item: string, i: number) => {
+      const seriesConfig = {
+        name: String(item),
+        type: 'bar',
+        encode: {
+          [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
+          [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
         },
-      }),
-      ...(i === 0 && thresholdLines),
-    }));
+        datasetIndex: index,
+        gridIndex: index,
+        xAxisIndex: index,
+        yAxisIndex: index,
+        emphasis: {
+          focus: 'self',
+        },
+        barWidth:
+          styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+        barCategoryGap:
+          styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+        ...(styles.showBarBorder && {
+          itemStyle: {
+            borderWidth: styles.barBorderWidth,
+            borderColor: styles.barBorderColor,
+          },
+        }),
+        ...(i === 0 && thresholdLines),
+        ...(styles.stackMode === 'total' && { stack: `stack_${index}` }),
+      };
+
+      return seriesConfig as BarSeriesOption;
+    });
   });
 
   newState.series = allSeries?.flat() as BarSeriesOption[];

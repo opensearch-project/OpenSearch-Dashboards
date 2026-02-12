@@ -106,12 +106,10 @@ export const BottomRightContainer = () => {
     status === QueryExecutionStatus.ERROR
   ) {
     return (
-      <>
+      <CanvasPanel>
         <DiscoverChartContainer />
-        <CanvasPanel>
-          <ResizableVisControlAndTabs />
-        </CanvasPanel>
-      </>
+        <ResizableVisControlAndTabs />
+      </CanvasPanel>
     );
   }
 

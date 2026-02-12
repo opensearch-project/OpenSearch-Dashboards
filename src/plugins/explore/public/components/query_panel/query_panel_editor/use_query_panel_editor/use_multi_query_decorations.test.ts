@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { monaco } from '@osd/monaco';
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
 

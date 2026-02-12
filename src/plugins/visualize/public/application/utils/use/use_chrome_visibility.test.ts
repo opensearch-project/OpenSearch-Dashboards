@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { chromeServiceMock } from '../../../../../../core/public/mocks';
 import { useChromeVisibility } from './use_chrome_visibility';

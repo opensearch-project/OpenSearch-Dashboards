@@ -23,7 +23,7 @@ import { connectStorageToQueryState } from './connect_to_query_state';
 import { createBrowserHistory, History } from 'history';
 import { QueryStringContract } from '../query_string';
 import { ISearchInterceptor } from '../../search';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useConnectStorageToQueryState } from './use_connect_to_query_state';
 
 jest.mock('./connect_to_query_state');
