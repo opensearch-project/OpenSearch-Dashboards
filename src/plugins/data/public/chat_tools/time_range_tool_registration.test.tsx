@@ -30,7 +30,7 @@ describe('TimeRangeToolRegistration', () => {
     expect(mockUseAssistantAction).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'update_time_range',
-        description: expect.stringContaining('ONLY use when user explicitly'),
+        description: expect.stringContaining('Updates the global time range filter'),
         parameters: expect.objectContaining({
           type: 'object',
           required: ['from', 'to'],
