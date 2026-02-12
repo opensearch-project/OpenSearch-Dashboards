@@ -66,12 +66,6 @@ jest.mock('../../../components/container/bottom_container', () => ({
   ),
 }));
 
-jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
-  NewExperienceBanner: () => (
-    <div data-test-subj="new-experience-banner">New Experience Banner</div>
-  ),
-}));
-
 jest.mock('../../../components/top_nav/top_nav', () => ({
   TopNav: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
     <div data-test-subj="top-nav">
