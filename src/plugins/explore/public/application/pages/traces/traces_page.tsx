@@ -17,7 +17,7 @@ import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_ex
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
-import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
+
 import { BottomContainer } from '../../../components/container/bottom_container';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
@@ -75,8 +75,6 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
           <EuiPage className="explore-layout" paddingSize="none" grow={false}>
             <EuiPageBody className="explore-layout__page-body">
               <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
-              <NewExperienceBanner />
-
               <div className="dscCanvas__queryPanel">
                 <QueryPanel />
               </div>
