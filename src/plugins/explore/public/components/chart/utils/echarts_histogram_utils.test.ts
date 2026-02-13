@@ -251,7 +251,7 @@ describe('echarts_histogram_utils', () => {
         },
       ];
       const result = (formatter as Function)(params);
-      expect(result).toContain('partial data');
+      expect(result).toContain('Partial bucket');
     });
 
     it('applies text color to tooltip content', () => {
@@ -426,6 +426,12 @@ describe('echarts_histogram_utils', () => {
       const series = createBarSeries('test-id', 'Test', testData, '#54B399');
 
       expect(series.stack).toBeUndefined();
+    });
+
+    it('caps bar max width at 50 pixels', () => {
+      const series = createBarSeries('test-id', 'Test', testData, '#54B399');
+
+      expect(series.barMaxWidth).toBe(50);
     });
 
     it('includes emphasis.focus set to series for legend hover highlighting', () => {

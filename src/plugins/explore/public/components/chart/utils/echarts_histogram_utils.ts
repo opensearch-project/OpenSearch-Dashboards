@@ -240,13 +240,11 @@ export function createTooltipFormatter(
       const partialDataText = i18n.translate(
         'explore.discover.histogram.partialData.bucketTooltipText',
         {
-          defaultMessage:
-            'The selected time range does not include this entire bucket, it may contain partial data.',
+          defaultMessage: 'Partial bucket',
         }
       );
-      tooltipContent += `<div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px; color: ${euiThemeVars.euiColorWarningText};">`;
-      tooltipContent += `<span style="font-size: 12px;">ⓘ</span>`;
-      tooltipContent += `<span style="font-size: 11px;">${partialDataText}</span>`;
+      tooltipContent += `<div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px; color: ${euiThemeVars.euiColorWarningText}; font-size: 11px;">`;
+      tooltipContent += `<span>${partialDataText}</span>`;
       tooltipContent += `</div>`;
     }
 
@@ -321,7 +319,7 @@ export function createBarSeries(
     id,
     name,
     data: data.map((d) => [d.x, d.y]),
-    barMaxWidth: '90%',
+    barMaxWidth: 50,
     itemStyle: {
       color,
     },
