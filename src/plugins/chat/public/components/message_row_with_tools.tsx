@@ -4,7 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPanel, EuiIcon, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
 import { ToolCallRenderer } from './tool_call_renderer';
 import './message_row.scss';
@@ -43,15 +44,16 @@ export const MessageRowWithTools: React.FC<MessageRowWithToolsProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="messageRow__icon">
-        <EuiIcon
-          type={message.role === 'user' ? 'user' : isStreaming ? 'discuss' : 'generate'}
-          size="m"
-          color={message.role === 'user' ? 'primary' : 'success'}
-        />
-      </div>
       <div className="messageRow__content">
-        <EuiPanel paddingSize="s" color={message.role === 'user' ? 'primary' : 'plain'}>
+        <EuiPanel
+          paddingSize="s"
+          color={message.role === 'user' ? 'subdued' : 'plain'}
+          hasBorder={false}
+          hasShadow={false}
+          style={
+            message.role === 'user' ? { backgroundColor: euiThemeVars.euiColorLightestShade } : {}
+          }
+        >
           <div className="messageRow__markdown">
             <Markdown markdown={message.content} openLinksInNewTab={true} />
             {isStreaming && <span className="messageRow__cursor">|</span>}
