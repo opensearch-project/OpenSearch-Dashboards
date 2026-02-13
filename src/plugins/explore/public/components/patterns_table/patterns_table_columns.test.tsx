@@ -60,14 +60,14 @@ describe('patternsTableColumns', () => {
 
     expect(columns[0].field).toBe('flyout');
     expect(columns[1].field).toBe('ratio');
-    expect(columns[2].field).toBe('sample');
-    expect(columns[3].field).toBe('count');
+    expect(columns[2].field).toBe('count');
+    expect(columns[3].field).toBe('sample');
   });
 
   it('should use correct column headers', () => {
     expect(columns[1].name).toBe('Event ratio');
-    expect(columns[2].name).toBe('Pattern');
-    expect(columns[3].name).toBe('Event count');
+    expect(columns[2].name).toBe('Event count');
+    expect(columns[3].name).toBe('Pattern');
   });
 
   describe('ratio column', () => {
@@ -95,7 +95,7 @@ describe('patternsTableColumns', () => {
     let sampleColumn: ColumnWithRender<PatternItem>;
 
     beforeEach(() => {
-      sampleColumn = columns[2];
+      sampleColumn = columns[3];
     });
 
     it('should sanitize and render sample values', () => {
@@ -131,7 +131,7 @@ describe('patternsTableColumns', () => {
     let countColumn: ColumnWithRender<PatternItem>;
 
     beforeEach(() => {
-      countColumn = columns[3];
+      countColumn = columns[2];
     });
 
     it('should render valid count values directly', () => {
@@ -191,13 +191,13 @@ describe('patternsTableColumns', () => {
     const ratioResult = ratioColumn.render?.(mockItem.ratio);
     expect(ratioResult).toBe('35.00%');
 
-    const sampleColumn = columns[2];
+    const countColumn = columns[2];
+    const countResult = countColumn.render?.(mockItem.count);
+    expect(countResult).toBe(mockItem.count);
+
+    const sampleColumn = columns[3];
     const sampleResult = sampleColumn.render?.(mockItem.sample);
     const { container: sampleContainer } = render(<>{sampleResult}</>);
     expect(sampleContainer.textContent).toBe(mockItem.sample);
-
-    const countColumn = columns[3];
-    const countResult = countColumn.render?.(mockItem.count);
-    expect(countResult).toBe(mockItem.count);
   });
 });

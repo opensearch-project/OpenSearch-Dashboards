@@ -13,8 +13,8 @@ export const DELIM_START = '<';
 export const DELIM_END = '*>';
 export const CALCITE_DELIM_CONTENT = 'token';
 export const CALCITE_DELIM_END = '>';
-export const MARK_START = '<mark>';
-export const MARK_END = '</mark>';
+export const MARK_START = '<span class="patternsHighlight">';
+export const MARK_END = '</span>';
 
 export const BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX =
   'Failed to parse query due to offending symbol [method] at';

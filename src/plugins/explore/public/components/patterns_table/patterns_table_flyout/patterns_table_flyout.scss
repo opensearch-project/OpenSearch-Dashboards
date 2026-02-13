@@ -3,3 +3,29 @@
     font-weight: 600;
   }
 }
+
+.patternsTableFlyout__bodyContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.patternsTableFlyout__detailsPanel {
+  flex: 0 0 auto;
+  word-break: break-word;
+}
+
+.patternsTableFlyout__eventsPanel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.patternsTableFlyout__eventsTableWrapper {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}

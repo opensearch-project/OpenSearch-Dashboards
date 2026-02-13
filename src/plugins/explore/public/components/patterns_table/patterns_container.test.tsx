@@ -92,7 +92,7 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
 }));
 
 jest.mock('./utils/utils', () => ({
-  highlightLogUsingPattern: jest.fn((log) => `<mark>${log}</mark>`),
+  highlightLogUsingPattern: jest.fn((log) => `<span class="patternsHighlight">${log}</span>`),
   isValidFiniteNumber: jest.fn((val) => !isNaN(val) && isFinite(val)),
 }));
 

@@ -71,7 +71,9 @@ describe('utils', () => {
           '[Log] Gecko GET/something 172.198.1.1',
           '[Log] <*> GET/<*> 172.198.1.1'
         )
-      ).toStrictEqual('[Log] <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1');
+      ).toStrictEqual(
+        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+      );
     });
 
     it('dynamic element in front', () => {
@@ -81,7 +83,7 @@ describe('utils', () => {
           '<*> <*> GET/<*> 172.198.1.1'
         )
       ).toStrictEqual(
-        '<mark>[Log]</mark> <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1'
+        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
       );
     });
 
@@ -92,7 +94,7 @@ describe('utils', () => {
           '<*MSG*> <*> GET/<*> 172.198.1.1'
         )
       ).toStrictEqual(
-        '<mark>[Log]</mark> <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1'
+        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
       );
     });
 
@@ -103,7 +105,7 @@ describe('utils', () => {
           '[Log] <*> GET/<*> 172.198.<*>'
         )
       ).toStrictEqual(
-        '[Log] <mark>Gecko</mark> GET/<mark>something</mark> 172.198.<mark>1.1</mark>'
+        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.<span class="patternsHighlight">1.1</span>'
       );
     });
 
@@ -114,7 +116,7 @@ describe('utils', () => {
           '[Log] <*> GET/<*> <*IP*>'
         )
       ).toStrictEqual(
-        '[Log] <mark>Gecko</mark> GET/<mark>something</mark> <mark>172.198.1.1</mark>'
+        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> <span class="patternsHighlight">172.198.1.1</span>'
       );
     });
 
@@ -125,7 +127,7 @@ describe('utils', () => {
           '<*IP*> - - [<*DATETIME*>] "GET <*> HTTP/<*><*>" 200 <*> "-" "Mozilla/<*><*> (<*>; Linux <*>_<*>; rv:<*><*><*>) Gecko/<*> Firefox/<*><*><*>"'
         )
       ).toStrictEqual(
-        '<mark>223.87.60.27</mark> - - [<mark>2018-07-22T00:39:02.912Z</mark>] "GET <mark>/opensearch/opensearch-1.0.0.deb_1</mark> HTTP/<mark>1.1</mark>" 200 <mark>6219</mark> "-" "Mozilla/<mark>5.0</mark> (<mark>X11</mark>; Linux <mark>x86</mark>_<mark>64</mark>; rv:<mark>6.0a1</mark>) Gecko/<mark>20110421</mark> Firefox/<mark>6.0a1</mark>"'
+        '<span class="patternsHighlight">223.87.60.27</span> - - [<span class="patternsHighlight">2018-07-22T00:39:02.912Z</span>] "GET <span class="patternsHighlight">/opensearch/opensearch-1.0.0.deb_1</span> HTTP/<span class="patternsHighlight">1.1</span>" 200 <span class="patternsHighlight">6219</span> "-" "Mozilla/<span class="patternsHighlight">5.0</span> (<span class="patternsHighlight">X11</span>; Linux <span class="patternsHighlight">x86</span>_<span class="patternsHighlight">64</span>; rv:<span class="patternsHighlight">6.0a1</span>) Gecko/<span class="patternsHighlight">20110421</span> Firefox/<span class="patternsHighlight">6.0a1</span>"'
       );
     });
   });
@@ -137,7 +139,9 @@ describe('utils', () => {
           '[Log] Gecko GET/something 172.198.1.1',
           '[Log] <token1> GET/<token2> 172.198.1.1'
         )
-      ).toStrictEqual('[Log] <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1');
+      ).toStrictEqual(
+        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+      );
     });
 
     it('dynamic element in front', () => {
@@ -147,7 +151,7 @@ describe('utils', () => {
           '<token1> <token2> GET/<token3> 172.198.1.1'
         )
       ).toStrictEqual(
-        '<mark>[Log]</mark> <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1'
+        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
       );
     });
 
@@ -158,7 +162,7 @@ describe('utils', () => {
           '<token1> <token2> GET/<token3> 172.198.1.1'
         )
       ).toStrictEqual(
-        '<mark>[Log]</mark> <mark>Gecko</mark> GET/<mark>something</mark> 172.198.1.1'
+        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
       );
     });
 
@@ -169,7 +173,7 @@ describe('utils', () => {
           '[Log] <token1> GET/<token2> 172.198.<token3>'
         )
       ).toStrictEqual(
-        '[Log] <mark>Gecko</mark> GET/<mark>something</mark> 172.198.<mark>1.1</mark>'
+        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.<span class="patternsHighlight">1.1</span>'
       );
     });
 
@@ -180,7 +184,7 @@ describe('utils', () => {
           '[Log] <token1> GET/<token2> <token3>'
         )
       ).toStrictEqual(
-        '[Log] <mark>Gecko</mark> GET/<mark>something</mark> <mark>172.198.1.1</mark>'
+        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> <span class="patternsHighlight">172.198.1.1</span>'
       );
     });
 
@@ -191,7 +195,7 @@ describe('utils', () => {
           '<token1> - - [<token2>] "GET <token3> HTTP/<token4><token5>" 200 <token6> "-" "Mozilla/<token7><token8> (<token9>; Linux <token10>_<token11>; rv:<token12><token13><token14>) Gecko/<token15> Firefox/<token16><token17><token18>"'
         )
       ).toStrictEqual(
-        '<mark>223.87.60.27</mark> - - [<mark>2018-07-22T00:39:02.912Z</mark>] "GET <mark>/opensearch/opensearch-1.0.0.deb_1</mark> HTTP/<mark>1.1</mark>" 200 <mark>6219</mark> "-" "Mozilla/<mark>5.0</mark> (<mark>X11</mark>; Linux <mark>x86</mark>_<mark>64</mark>; rv:<mark>6.0a1</mark>) Gecko/<mark>20110421</mark> Firefox/<mark>6.0a1</mark>"'
+        '<span class="patternsHighlight">223.87.60.27</span> - - [<span class="patternsHighlight">2018-07-22T00:39:02.912Z</span>] "GET <span class="patternsHighlight">/opensearch/opensearch-1.0.0.deb_1</span> HTTP/<span class="patternsHighlight">1.1</span>" 200 <span class="patternsHighlight">6219</span> "-" "Mozilla/<span class="patternsHighlight">5.0</span> (<span class="patternsHighlight">X11</span>; Linux <span class="patternsHighlight">x86</span>_<span class="patternsHighlight">64</span>; rv:<span class="patternsHighlight">6.0a1</span>) Gecko/<span class="patternsHighlight">20110421</span> Firefox/<span class="patternsHighlight">6.0a1</span>"'
       );
     });
   });

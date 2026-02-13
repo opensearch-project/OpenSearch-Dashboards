@@ -95,7 +95,7 @@ export const isValidFiniteNumber = (val: number) => {
  *
  * This function takes a log string and a pattern string containing delimiters (e.g., <*>) that mark
  * where dynamic content appears. It identifies the dynamic parts of the log by comparing it with the pattern,
- * and wraps those dynamic elements with <mark> tags for visual highlighting in the UI.
+ * and wraps those dynamic elements with highlighted span tags for visual highlighting in the UI.
  *
  * The strategy uses a two-pointer approach that traverses both the log and pattern strings simultaneously.
  * It identifies static text in the pattern, locates that same text in the log using a sliding window, and
