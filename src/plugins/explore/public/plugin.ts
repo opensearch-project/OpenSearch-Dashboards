@@ -283,7 +283,7 @@ export class ExplorePlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         updater$: appStateUpdater.asObservable(),
-        order: 1000,
+        order: 500,
         workspaceAvailability: WorkspaceAvailability.insideWorkspace,
         euiIconType: 'inputOutput',
         defaultPath: '#/',
@@ -437,24 +437,24 @@ export class ExplorePlugin
       {
         id: PLUGIN_ID,
         category: undefined,
-        order: 300,
+        order: 500,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
     ];
