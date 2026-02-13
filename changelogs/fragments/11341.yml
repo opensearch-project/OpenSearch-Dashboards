@@ -1,2 +1,2 @@
 feat:
-- [Explore] Migrate histogram charts from elastic-charts to ECharts ([#11341](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11341))
+- Migrate histogram charts from elastic-charts to ECharts ([#11341](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11341))

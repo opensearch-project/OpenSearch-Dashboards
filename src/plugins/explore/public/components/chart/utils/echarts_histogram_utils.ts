@@ -201,6 +201,18 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
+ * Escapes HTML special characters to prevent XSS attacks
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
  * Creates a tooltip formatter that handles partial data warnings
  * and highlights the currently hovered series
  */
@@ -209,7 +221,8 @@ export function createTooltipFormatter(
   domainStart: number,
   domainEnd: number,
   dateFormat: string,
-  textColor: string
+  textColor: string,
+  timeZone: string
 ): echarts.TooltipComponentOption['formatter'] {
   return (params: any) => {
     const paramsArray = Array.isArray(params) ? params : [params];
@@ -217,7 +230,7 @@ export function createTooltipFormatter(
 
     const firstParam = paramsArray[0];
     const timestamp = firstParam.value?.[0] ?? firstParam.axisValue;
-    const formattedDate = moment(timestamp).format(dateFormat);
+    const formattedDate = moment.tz(timestamp, timeZone).format(dateFormat);
 
     const isPartialData = timestamp < domainStart || timestamp + xInterval > domainEnd;
 
@@ -241,14 +254,16 @@ export function createTooltipFormatter(
 
     paramsArray.forEach((param: any) => {
       const seriesName = param.seriesName || '';
-      const truncatedName = truncateText(seriesName, 30);
+      const truncatedName = escapeHtml(truncateText(seriesName, 30));
       const value = param.value?.[1] ?? param.value;
       const color = param.color || '';
 
       tooltipContent += `<div style="display: flex; align-items: center; gap: 8px; color: ${textColor}; padding: 2px 0; line-height: 1.4;">`;
       tooltipContent += `<span style="display: inline-block; width: ${COLOR_INDICATOR_WIDTH}px; height: ${COLOR_INDICATOR_HEIGHT}px; background-color: ${color}; border: 1px solid rgba(0,0,0,0.1); border-radius: 1px; flex-shrink: 0;"></span>`;
       tooltipContent += `<span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${truncatedName}</span>`;
-      tooltipContent += `<span style="font-weight: 600; margin-left: 8px;">${value}</span>`;
+      tooltipContent += `<span style="font-weight: 600; margin-left: 8px;">${escapeHtml(
+        String(value)
+      )}</span>`;
       tooltipContent += `</div>`;
     });
 
@@ -377,6 +392,11 @@ export function createHistogramSpec(
   const palette = colorPalette || colors.categories;
 
   const data = chartData.values;
+
+  // Guard against empty data to prevent undefined domain values
+  if (!data || data.length === 0 || !chartData.xAxisOrderedValues?.length) {
+    return { xAxis: { type: 'time' }, yAxis: { type: 'value' }, series: [] };
+  }
   const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
   const xInterval = interval.asMilliseconds();
 
@@ -470,7 +490,7 @@ export function createHistogramSpec(
       min: domainMin,
       max: domainMax + xInterval, // Extend to show the last bar fully
       axisLabel: {
-        formatter: (value: number) => moment(value).format(dateFormat),
+        formatter: (value: number) => moment.tz(value, timeZone).format(dateFormat),
         hideOverlap: true, // Automatically hide overlapping labels
         rotate: 0, // Keep labels horizontal
       },
@@ -519,7 +539,14 @@ export function createHistogramSpec(
       textStyle: {
         color: colors.text,
       },
-      formatter: createTooltipFormatter(xInterval, domainStart, domainEnd, dateFormat, colors.text),
+      formatter: createTooltipFormatter(
+        xInterval,
+        domainStart,
+        domainEnd,
+        dateFormat,
+        colors.text,
+        timeZone
+      ),
     },
     legend: hasMultipleSeries
       ? {

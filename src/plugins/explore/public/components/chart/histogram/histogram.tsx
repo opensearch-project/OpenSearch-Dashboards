@@ -58,13 +58,6 @@ export interface DiscoverHistogramProps {
 // Re-export for backwards compatibility
 export { findMinInterval };
 
-const DEFAULT_GRID = {
-  top: 20,
-  right: 20,
-  bottom: 40,
-  left: 50,
-};
-
 export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
   chartData,
   chartType,
@@ -94,7 +87,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
   // Initialize ECharts instance
   useEffect(() => {
     if (containerRef.current && !instanceRef.current) {
-      const echartsInstance = echarts.init(containerRef.current);
+      const echartsInstance = echarts.init(containerRef.current, DEFAULT_THEME);
       instanceRef.current = echartsInstance;
       setInstance(echartsInstance);
 
@@ -235,21 +228,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
       };
     }
 
-    // Apply grid configuration
-    const hasMultipleSeries = chartData?.series && chartData.series.length > 0;
-    option.grid = {
-      ...DEFAULT_GRID,
-      right: hasMultipleSeries ? 200 : 20,
-    };
-
     instance.setOption(option, { notMerge: true });
-
-    // Apply theme
-    try {
-      instance.setTheme(DEFAULT_THEME);
-    } catch {
-      // Theme may not be registered yet, ignore
-    }
 
     // Enable brush mode
     if (xAxis?.type === 'time') {
