@@ -1,17 +1,15 @@
 @import "@elastic/eui/src/global_styling/mixins/shadow";
 
 .messageRow {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 12px;
-  align-items: start;
+  display: flex;
 
   &__icon {
-    margin-top: 4px;
+    margin-top: 10px;
   }
 
   &__content {
     min-width: 0;
+    flex: 1;
     position: relative;
   }
 
@@ -59,6 +57,17 @@
     }
   }
 
+  &--user &__content {
+    display: flex;
+    justify-content: flex-end;
+    margin-inline-start: 24px;
+
+    > * {
+      flex: none;
+      max-width: 100%;
+    }
+  }
+
   // For user messages, ensure the actions are visible on a blue background
   &--user &__actions {
     background: transparentize($euiColorEmptyShade, 0.05);
@@ -67,8 +76,12 @@
 
 @keyframes blink {
   0%,
-  50% { opacity: 1; }
+  50% {
+    opacity: 1;
+  }
 
   51%,
-  100% { opacity: 0; }
+  100% {
+    opacity: 0;
+  }
 }
