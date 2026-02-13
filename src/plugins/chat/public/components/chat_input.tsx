@@ -9,6 +9,8 @@ import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
 import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
+import { ChatContextPopover } from './chat_context_popover';
+
 import './chat_input.scss';
 
 interface ChatInputProps {
@@ -49,7 +51,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
-      <ContextPills category="chat" />
       <div className="chatInput__inputRow" style={{ position: 'relative' }}>
         {showCommandMenu && (
           <SlashCommandMenu
@@ -69,7 +70,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             autoFocus={true}
             fullWidth
             resize="none"
-            rows={1}
+            rows={2}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -80,6 +81,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
         </div>
+      </div>
+      <div className="chatInput__bottomRow">
+        <ChatContextPopover enabled={false} />
+        <ContextPills category="chat" />
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
@@ -88,6 +93,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           size="m"
           color={isStreaming ? 'danger' : 'primary'}
           display="fill"
+          className="chatInput__sendButton"
         />
       </div>
     </div>
