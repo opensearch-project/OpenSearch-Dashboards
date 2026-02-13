@@ -9,6 +9,8 @@ import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
 import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
+import { ChatContextPopover } from './chat_context_popover';
+
 import './chat_input.scss';
 
 interface ChatInputProps {
@@ -17,6 +19,7 @@ interface ChatInputProps {
   isStreaming: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
+  onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
 }
 
@@ -26,6 +29,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isStreaming,
   onInputChange,
   onSend,
+  onStop,
   onKeyDown,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -47,7 +51,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
-      <ContextPills category="chat" />
       <div className="chatInput__inputRow" style={{ position: 'relative' }}>
         {showCommandMenu && (
           <SlashCommandMenu
@@ -59,7 +62,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chatInput__fieldWrapper">
           <EuiTextArea
             inputRef={inputRef}
-            placeholder="Ask anything. Type / for actions"
+            placeholder="How can I help you today?"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -67,7 +70,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             autoFocus={true}
             fullWidth
             resize="none"
-            rows={1}
+            rows={2}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -78,14 +81,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
         </div>
+      </div>
+      <div className="chatInput__bottomRow">
+        <ChatContextPopover enabled={false} />
+        <ContextPills category="chat" />
         <EuiButtonIcon
-          iconType={isStreaming ? 'generate' : 'sortUp'}
-          onClick={onSend}
-          isDisabled={input.trim().length === 0 || isStreaming}
-          aria-label="Send message"
+          iconType={isStreaming ? 'stop' : 'sortUp'}
+          onClick={isStreaming ? onStop : onSend}
+          isDisabled={!isStreaming && input.trim().length === 0}
+          aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
-          color="primary"
+          color={isStreaming ? 'danger' : 'primary'}
           display="fill"
+          className="chatInput__sendButton"
         />
       </div>
     </div>

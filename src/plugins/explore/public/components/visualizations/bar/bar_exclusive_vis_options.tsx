@@ -27,6 +27,7 @@ interface BarExclusiveVisOptionsProps {
   barBorderWidth: number;
   barBorderColor: string;
   useThresholdColor?: boolean;
+  stackMode?: 'none' | 'total';
   onBarSizeModeChange: (barSizeMode: 'auto' | 'manual') => void;
   onBarWidthChange: (barWidth: number) => void;
   onBarPaddingChange: (barPadding: number) => void;
@@ -34,6 +35,7 @@ interface BarExclusiveVisOptionsProps {
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  onStackModeChange: (stackMode: 'none' | 'total') => void;
   shouldDisableUseThresholdColor?: boolean;
 }
 
@@ -46,6 +48,7 @@ export const BarExclusiveVisOptions = ({
   barBorderWidth,
   barBorderColor,
   useThresholdColor,
+  stackMode = 'none',
   onBarSizeModeChange,
   onBarWidthChange,
   onBarPaddingChange,
@@ -53,6 +56,7 @@ export const BarExclusiveVisOptions = ({
   onBarBorderWidthChange,
   onBarBorderColorChange,
   onUseThresholdColorChange,
+  onStackModeChange,
   shouldDisableUseThresholdColor = false,
 }: BarExclusiveVisOptionsProps) => {
   const sizeModeOptions = [
@@ -66,6 +70,21 @@ export const BarExclusiveVisOptions = ({
       id: 'manual',
       label: i18n.translate('explore.stylePanel.bar.sizeModeManual', {
         defaultMessage: 'Manual',
+      }),
+    },
+  ];
+
+  const stackModeOptions = [
+    {
+      id: 'none',
+      label: i18n.translate('explore.stylePanel.bar.stackModeNone', {
+        defaultMessage: 'None',
+      }),
+    },
+    {
+      id: 'total',
+      label: i18n.translate('explore.stylePanel.bar.stackModeStacked', {
+        defaultMessage: 'Stacked',
       }),
     },
   ];
@@ -112,6 +131,26 @@ export const BarExclusiveVisOptions = ({
           data-test-subj="barSizeModeButtonGroup"
         />
       </EuiFormRow>
+
+      {type === 'bar' && (
+        <EuiFormRow
+          label={i18n.translate('explore.stylePanel.bar.stackMode', {
+            defaultMessage: 'Stack',
+          })}
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('explore.stylePanel.bar.stackMode', {
+              defaultMessage: 'Stack',
+            })}
+            options={stackModeOptions}
+            idSelected={stackMode}
+            onChange={(id) => onStackModeChange(id as 'none' | 'total')}
+            buttonSize="compressed"
+            isFullWidth
+            data-test-subj="barStackModeButtonGroup"
+          />
+        </EuiFormRow>
+      )}
 
       <EuiFormRow>
         <EuiSwitch

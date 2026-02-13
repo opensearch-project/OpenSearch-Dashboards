@@ -1,13 +1,25 @@
 .chatInput {
+  @include ouiFormControlStyle;
+
   grid-area: input;
   display: flex;
   flex-direction: column;
+  padding: $ouiSizeS;
+  height: unset !important;
+  max-width: unset !important;
 
   &__inputRow {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px;
+    align-items: flex-end;
+    position: relative;
+  }
+
+  &__bottomRow {
+    display: flex;
     align-items: center;
+    gap: $ouiSizeXS;
   }
 
   &__fieldWrapper {
@@ -18,7 +30,22 @@
       position: relative;
       z-index: 1;
       background: transparent !important;
+      border: unset !important;
+      box-shadow: unset !important;
+      padding: unset !important;
     }
+  }
+
+  &__addButton,
+  &__sendButton {
+    width: $ouiSizeL;
+    height: $ouiSizeL;
+    flex-shrink: 0;
+    align-self: flex-end;
+  }
+
+  &__sendButton {
+    margin-left: auto;
   }
 
   &__ghostText {
@@ -27,10 +54,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 12px;
     pointer-events: none;
     color: transparent;
-    white-space: nowrap;
+    white-space: pre-wrap;
     overflow: hidden;
     line-height: 1.5;
 

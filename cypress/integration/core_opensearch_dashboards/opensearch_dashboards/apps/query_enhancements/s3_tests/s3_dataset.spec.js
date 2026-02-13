@@ -72,9 +72,19 @@ const s3DatasetTestSuite = () => {
             });
           }
         });
+
+        // Create workspace
+        cy.deleteWorkspaceByName(workspace);
+        cy.osd.deleteAllOldWorkspaces();
+        cy.visit('/app/home');
+        cy.osd.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
+        cy.get('@WORKSPACE_ID').then((workspaceId) => {
+          Cypress.env(`${workspace}:WORKSPACE_ID`, workspaceId);
+        });
       });
 
       after(() => {
+        cy.deleteWorkspaceByName(workspace);
         cy.request({
           method: 'DELETE',
           url: `${DS_API.DELETE_DATA_SOURCE}${dataSourceId}`,
@@ -87,21 +97,13 @@ const s3DatasetTestSuite = () => {
 
       describe('Run S3 Query', () => {
         beforeEach(() => {
-          // Create workspace
-          cy.deleteWorkspaceByName(workspace);
           cy.clearLocalStorage();
           cy.clearAllSessionStorage();
-          cy.osd.deleteAllOldWorkspaces();
-          cy.visit('/app/home');
-          cy.osd.createInitialWorkspaceWithDataSource(S3_CLUSTER.name, workspace);
           cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspace,
-            page: 'discover',
+            page: 'data-explorer/discover',
             isEnhancement: true,
           });
-        });
-        afterEach(() => {
-          cy.deleteWorkspaceByName(workspace);
         });
 
         it('with SQL', function () {
