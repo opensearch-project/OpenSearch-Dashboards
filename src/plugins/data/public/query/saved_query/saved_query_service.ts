@@ -50,7 +50,7 @@ export const createSavedQueryService = (
 
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
-       // title is required extra check against circumventing the front end
+      // title is required extra check against circumventing the front end
       throw new Error('Cannot create saved query without a title');
     }
 
