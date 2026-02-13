@@ -17,6 +17,8 @@ import { getColors } from '../../visualizations/theme/default_colors';
 export const COLOR_INDICATOR_WIDTH = 4;
 export const COLOR_INDICATOR_HEIGHT = 14;
 
+const ONE_MINUTE_MS = 60 * 1000;
+
 export interface HistogramOptions {
   chartType: 'HistogramBar' | 'Line';
   timeZone: string;
@@ -123,11 +125,12 @@ export function findMinInterval(
  */
 export function createNowMarkLine(domainEnd: number): echarts.MarkLineComponentOption | undefined {
   const now = moment();
-  const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
+  const isAnnotationAtEdge =
+    moment(domainEnd).add(ONE_MINUTE_MS).isAfter(now) && now.isAfter(domainEnd);
   const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now.valueOf();
 
   // Only show the line if it's within or near the visible domain
-  if (lineAnnotationValue < domainEnd - 60000) {
+  if (lineAnnotationValue < domainEnd - ONE_MINUTE_MS) {
     return undefined;
   }
 
@@ -212,6 +215,14 @@ export function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+interface EChartsTooltipFormatterParams {
+  value?: [number, number] | number;
+  axisValue?: number;
+  seriesName?: string;
+  color?: string;
+  componentType?: string;
+}
+
 /**
  * Creates a tooltip formatter that handles partial data warnings
  * and highlights the currently hovered series
@@ -223,8 +234,8 @@ export function createTooltipFormatter(
   dateFormat: string,
   textColor: string,
   timeZone: string
-): echarts.TooltipComponentOption['formatter'] {
-  return (params: any) => {
+): (params: EChartsTooltipFormatterParams | EChartsTooltipFormatterParams[]) => string {
+  return (params: EChartsTooltipFormatterParams | EChartsTooltipFormatterParams[]) => {
     const paramsArray = Array.isArray(params) ? params : [params];
     if (paramsArray.length === 0) return '';
 
@@ -250,7 +261,7 @@ export function createTooltipFormatter(
 
     tooltipContent += `<div style="font-weight: 600; margin-bottom: 8px; color: ${textColor};">${formattedDate}</div>`;
 
-    paramsArray.forEach((param: any) => {
+    paramsArray.forEach((param: EChartsTooltipFormatterParams) => {
       const seriesName = param.seriesName || '';
       const truncatedName = escapeHtml(truncateText(seriesName, 30));
       const value = param.value?.[1] ?? param.value;

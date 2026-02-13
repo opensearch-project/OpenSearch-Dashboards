@@ -50,6 +50,10 @@ describe('ChatWindow - Conversation Name', () => {
     jest.clearAllMocks();
     mockCore = coreMock.createStart();
     mockContextProvider = {};
+
+    // Mock scrollIntoView which is not available in jsdom
+    Element.prototype.scrollIntoView = jest.fn();
+
     mockChatService = {
       sendMessage: jest.fn().mockResolvedValue({
         observable: of({ type: 'message', content: 'test' }),

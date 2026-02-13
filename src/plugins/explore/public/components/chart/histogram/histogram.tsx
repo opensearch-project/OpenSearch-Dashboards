@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo, useRef, useEffect, useState } from 'react';
+import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
 import * as echarts from 'echarts';
 
 import { Chart as IChart } from '../utils/point_series';
@@ -40,6 +40,17 @@ import {
 } from '../utils/echarts_histogram_utils';
 import { getColors } from '../../visualizations/theme/default_colors';
 import { DEFAULT_THEME } from '../../visualizations/theme/default';
+
+interface EChartsBrushEndEvent {
+  areas?: Array<{
+    coordRange: [number, number];
+  }>;
+}
+
+interface EChartsClickEvent {
+  componentType?: string;
+  value?: [number, number];
+}
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
@@ -69,7 +80,8 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const instanceRef = useRef<echarts.ECharts | null>(null);
-  const [instance, setInstance] = useState<echarts.ECharts | null>(null);
+  const isMountedRef = useRef(true);
+  const [ready, setReady] = useState(false);
 
   const { uiSettings } = services;
   const timeZone = getTimezone(uiSettings);
@@ -85,23 +97,24 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
   }, [customChartsTheme]);
 
   // Initialize ECharts instance
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (containerRef.current && !instanceRef.current) {
+      containerRef.current.style.opacity = '0';
       const echartsInstance = echarts.init(containerRef.current, DEFAULT_THEME);
       instanceRef.current = echartsInstance;
-      setInstance(echartsInstance);
 
       // Set up resize observer
       const resizeObserver = new ResizeObserver(() => {
-        if (instanceRef.current) {
+        if (instanceRef.current && !instanceRef.current.isDisposed()) {
           instanceRef.current.resize();
         }
       });
       resizeObserver.observe(containerRef.current);
 
       return () => {
+        isMountedRef.current = false;
         resizeObserver.disconnect();
-        if (instanceRef.current) {
+        if (instanceRef.current && !instanceRef.current.isDisposed()) {
           instanceRef.current.dispose();
           instanceRef.current = null;
         }
@@ -109,33 +122,42 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     }
   }, []);
 
+  // Signal readiness after first paint so the spec effect can fire
+  useEffect(() => {
+    if (instanceRef.current && isMountedRef.current) {
+      setReady(true);
+    }
+  }, []);
+
   // Handle brush selection for time range filtering
   useEffect(() => {
-    if (!instance) return;
+    const inst = instanceRef.current;
+    if (!inst) return;
 
-    const onBrushEnd = (params: any) => {
+    const onBrushEnd = (params: EChartsBrushEndEvent) => {
       const [from, to] = params.areas?.[0]?.coordRange ?? [];
       if (from !== undefined && to !== undefined) {
         timefilterUpdateHandler({ from, to });
       }
     };
 
-    instance.on('brushEnd', onBrushEnd);
+    inst.on('brushEnd', onBrushEnd);
 
     return () => {
-      if (instance && !instance.isDisposed()) {
-        instance.off('brushEnd', onBrushEnd);
+      if (!inst.isDisposed()) {
+        inst.off('brushEnd', onBrushEnd);
       }
     };
-  }, [instance, timefilterUpdateHandler]);
+  }, [timefilterUpdateHandler]);
 
   // Handle click on bars/points for zoom
   useEffect(() => {
-    if (!instance || !chartData) return;
+    const inst = instanceRef.current;
+    if (!inst || !chartData) return;
 
     const xInterval = chartData.ordered.interval.asMilliseconds();
 
-    const onClick = (params: any) => {
+    const onClick = (params: EChartsClickEvent) => {
       if (params.componentType === 'series' && params.value) {
         const startRange = params.value[0];
         timefilterUpdateHandler({
@@ -145,30 +167,31 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
       }
     };
 
-    instance.on('click', onClick);
+    inst.on('click', onClick);
 
     return () => {
-      if (instance && !instance.isDisposed()) {
-        instance.off('click', onClick);
+      if (!inst.isDisposed()) {
+        inst.off('click', onClick);
       }
     };
-  }, [instance, chartData, timefilterUpdateHandler]);
+  }, [chartData, timefilterUpdateHandler]);
 
   // Show/hide grid lines on hover
   useEffect(() => {
-    if (!instance || !containerRef.current) return;
+    const inst = instanceRef.current;
+    if (!inst || !containerRef.current) return;
 
     const container = containerRef.current;
 
     const showGridLines = () => {
-      if (instance && !instance.isDisposed()) {
-        instance.setOption({ yAxis: { splitLine: { show: true } } });
+      if (inst && !inst.isDisposed()) {
+        inst.setOption({ yAxis: { splitLine: { show: true } } });
       }
     };
 
     const hideGridLines = () => {
-      if (instance && !instance.isDisposed()) {
-        instance.setOption({ yAxis: { splitLine: { show: false } } });
+      if (inst && !inst.isDisposed()) {
+        inst.setOption({ yAxis: { splitLine: { show: false } } });
       }
     };
 
@@ -179,7 +202,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
       container.removeEventListener('mouseenter', showGridLines);
       container.removeEventListener('mouseleave', hideGridLines);
     };
-  }, [instance]);
+  }, []);
 
   // Build and update the chart spec
   const spec = useMemo(() => {
@@ -206,15 +229,18 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     colors.categories,
   ]);
 
-  // Apply spec to chart instance
+  // Apply spec to chart instance.
+  // Gated on `ready` so that at least one browser paint occurs between
+  // echarts.init() (useLayoutEffect) and setOption() — this preserves
+  // the 300ms bar-growth animation. The container starts at opacity 0
+  // (set in the init effect) and is revealed here in the same synchronous
+  // block as setOption(), preventing Firefox jitter.
   useEffect(() => {
-    if (!instance || !spec) return;
+    if (!ready || !instanceRef.current || !spec) return;
 
-    // Determine if we need brush based on x-axis type
     const xAxis = Array.isArray(spec.xAxis) ? spec.xAxis[0] : spec.xAxis;
     let option = { ...spec };
 
-    // Enable time range selection brush for time-based x-axis
     if (xAxis?.type === 'time') {
       option = {
         ...option,
@@ -228,11 +254,10 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
       };
     }
 
-    instance.setOption(option, { notMerge: true });
+    instanceRef.current.setOption(option, { notMerge: true });
 
-    // Enable brush mode
     if (xAxis?.type === 'time') {
-      instance.dispatchAction({
+      instanceRef.current.dispatchAction({
         type: 'takeGlobalCursor',
         key: 'brush',
         brushOption: {
@@ -241,7 +266,13 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
         },
       });
     }
-  }, [instance, spec, chartData?.series]);
+
+    // Reveal chart now that data is applied — same sync block as setOption
+    // so the next browser paint shows the chart with data + animation starting.
+    if (containerRef.current) {
+      containerRef.current.style.opacity = '1';
+    }
+  }, [ready, spec, chartData?.series]);
 
   if (!chartData) {
     return null;
@@ -251,6 +282,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     <div
       ref={containerRef}
       data-test-subj="discoverHistogramEcharts"
+      aria-label={`Histogram chart showing ${chartData.yAxisLabel || 'data'} over time`}
       style={{
         width: '100%',
         height: '100%',
