@@ -5,6 +5,29 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ChatServiceSetup, ChatServiceStart } from './types';
+import { ChatScreenshotServiceInterface } from './screenshot_service';
+
+const createScreenshotServiceMock = (): jest.Mocked<ChatScreenshotServiceInterface> => ({
+  isEnabled: jest.fn().mockReturnValue(false),
+  getEnabled$: jest.fn().mockReturnValue(new BehaviorSubject<boolean>(false)),
+  setEnabled: jest.fn(),
+  setPageContainerElement: jest.fn(),
+  getPageContainerElement: jest.fn().mockReturnValue(undefined),
+  setScreenshotButton: jest.fn(),
+  getScreenshotButton: jest.fn().mockReturnValue({
+    title: 'Add dashboard screenshot',
+    iconType: 'image',
+    enabled: true,
+  }),
+  getScreenshotButton$: jest.fn().mockReturnValue(
+    new BehaviorSubject({
+      title: 'Add dashboard screenshot',
+      iconType: 'image',
+      enabled: true,
+    })
+  ),
+  configure: jest.fn(),
+});
 
 const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => {
   return {
@@ -12,6 +35,7 @@ const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => {
     setSuggestedActionsService: jest.fn(),
     suggestedActionsService: undefined,
     setScreenshotPageContainerElement: jest.fn(),
+    screenshot: createScreenshotServiceMock(),
   };
 };
 
@@ -47,14 +71,13 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   ),
   onWindowOpen: jest.fn().mockReturnValue(() => {}),
   onWindowClose: jest.fn().mockReturnValue(() => {}),
-  isScreenshotFeatureEnabled: jest.fn().mockReturnValue(false),
-  getScreenshotFeatureEnabled$: jest.fn().mockReturnValue(new BehaviorSubject<boolean>(false)),
-  setScreenshotFeatureEnabled: jest.fn(),
   suggestedActionsService: undefined,
   screenshotPageContainerElement: undefined,
+  screenshot: createScreenshotServiceMock(),
 });
 
 export const coreChatServiceMock = {
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
+  createScreenshotService: createScreenshotServiceMock,
 };

@@ -23,8 +23,8 @@ export const usePageContainerCapture = () => {
     },
   } = useOpenSearchDashboards<{ core: CoreStart }>();
   const chatScreenshotObservable$ = useMemo(() => {
-    if (chat?.getScreenshotFeatureEnabled$) {
-      return chat.getScreenshotFeatureEnabled$();
+    if (chat?.screenshot?.getEnabled$) {
+      return chat.screenshot.getEnabled$();
     }
     return of(false);
   }, [chat]);
@@ -60,9 +60,9 @@ export const usePageContainerCapture = () => {
     }
     let canceled = false;
     const rafId = window.requestAnimationFrame(async () => {
-      const screenshotPageContainerElement = chat.screenshotPageContainerElement;
+      const screenshotPageContainerElement = chat.screenshot?.getPageContainerElement();
       if (!screenshotPageContainerElement) {
-        rejecterRef.current?.(new Error('chat.screenshotPageContainerElement not set'));
+        rejecterRef.current?.(new Error('chat.screenshot.getPageContainerElement() returned null'));
         return;
       }
       // Access child nodes to get the latest changes
@@ -102,7 +102,7 @@ export const usePageContainerCapture = () => {
       canceled = true;
       window.cancelAnimationFrame(rafId);
     };
-  }, [isCapturing, chat.screenshotPageContainerElement]);
+  }, [isCapturing, chat]);
 
   return {
     screenshotFeatureEnabled,

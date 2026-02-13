@@ -57,9 +57,14 @@ export const DashboardEditor = () => {
   }, [setHeaderVariant, showActionsInGroup]);
 
   useEffect(() => {
-    chat?.setScreenshotFeatureEnabled(true);
+    chat?.screenshot?.configure({
+      enabled: true,
+      title: i18n.translate('dashboard.editor.chat.addScreenshot', {
+        defaultMessage: 'Add dashboard screenshot',
+      }),
+    });
     return () => {
-      chat?.setScreenshotFeatureEnabled(false);
+      chat?.screenshot.configure({ enabled: false });
     };
   }, [chat]);
 

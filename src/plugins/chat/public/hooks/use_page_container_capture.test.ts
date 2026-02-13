@@ -58,8 +58,11 @@ describe('usePageContainerCapture', () => {
     div.appendChild(childElement);
 
     mockChat = {
-      getScreenshotFeatureEnabled$: jest.fn(() => of(true)),
-      screenshotPageContainerElement: div,
+      screenshot: {
+        getEnabled$: jest.fn(() => of(true)),
+        getPageContainerElement: jest.fn(() => div),
+      },
+      screenshotPageContainerElement: div, // Keep for backward compatibility
     };
 
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
@@ -138,18 +141,16 @@ describe('usePageContainerCapture', () => {
 
     await capturePromise;
 
-    expect(mockHtml2canvas).toHaveBeenCalledWith(
-      mockChat.screenshotPageContainerElement.childNodes[0],
-      {
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-      }
-    );
+    const containerElement = mockChat.screenshot.getPageContainerElement();
+    expect(mockHtml2canvas).toHaveBeenCalledWith(containerElement.childNodes[0], {
+      backgroundColor: '#ffffff',
+      logging: false,
+      useCORS: true,
+    });
   });
 
   it('should handle errors gracefully and return null', async () => {
-    mockChat.screenshotPageContainerElement = null;
+    mockChat.screenshot.getPageContainerElement = jest.fn(() => null);
 
     const { result } = renderHook(() => usePageContainerCapture());
 

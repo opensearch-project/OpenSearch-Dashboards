@@ -4,6 +4,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { ChatScreenshotServiceInterface } from './screenshot_service';
 
 interface TextInputContent {
   type: 'text';
@@ -145,13 +146,6 @@ export interface ChatServiceInterface {
   onWindowClose(callback: () => void): () => void;
 
   /**
-   * Screenshot feature management - managed by core
-   */
-  isScreenshotFeatureEnabled(): boolean;
-  getScreenshotFeatureEnabled$(): Observable<boolean>;
-  setScreenshotFeatureEnabled(enabled: boolean): void;
-
-  /**
    * Operations - delegated to plugin (throws error if unavailable)
    */
   openWindow(): Promise<void>;
@@ -217,6 +211,11 @@ export interface ChatServiceSetup {
    * This will be called by CoreSystem with the rootDomElement
    */
   setScreenshotPageContainerElement(element: HTMLElement): void;
+
+  /**
+   * Screenshot service for managing screenshot capture functionality
+   */
+  screenshot: ChatScreenshotServiceInterface;
 }
 
 /**
@@ -234,6 +233,12 @@ export interface ChatServiceStart extends ChatServiceInterface {
   /**
    * DOM element for screenshot page container
    * This element can be used to capture screenshots of the page
+   * @deprecated Use screenshot.getPageContainerElement() instead
    */
   screenshotPageContainerElement?: HTMLElement;
+
+  /**
+   * Screenshot service for managing screenshot capture functionality
+   */
+  screenshot: ChatScreenshotServiceInterface;
 }

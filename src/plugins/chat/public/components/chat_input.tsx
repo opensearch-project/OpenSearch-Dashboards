@@ -6,11 +6,15 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
 import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CoreStart } from '../../../../core/public';
 
 import './chat_input.scss';
 
@@ -41,6 +45,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const {
+    services: {
+      core: { chat },
+    },
+  } = useOpenSearchDashboards<{ core: CoreStart }>();
+
+  // Get screenshot button configuration from the screenshot service
+  const screenshotButtonObservable$ = useMemo(() => {
+    if (chat?.screenshot?.getScreenshotButton$) {
+      return chat.screenshot.getScreenshotButton$();
+    }
+    return of(null);
+  }, [chat]);
+
+  const screenshotButton = useObservable(screenshotButtonObservable$, null);
+
   // Use custom hook for command menu keyboard handling
   const {
     showCommandMenu,
@@ -58,15 +78,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const chatContextPopoverOptions = useMemo(() => {
     return [
-      {
-        title: i18n.translate('chat.chatInput.addDashboardScreenshot', {
-          defaultMessage: 'Add dashboard screenshot',
-        }),
-        iconType: 'image',
-        onClick: onCaptureScreenshot,
-      },
+      ...(screenshotButton
+        ? [
+            {
+              title: screenshotButton.title,
+              iconType: screenshotButton.iconType || 'image',
+              onClick: onCaptureScreenshot,
+            },
+          ]
+        : []),
     ];
-  }, [onCaptureScreenshot]);
+  }, [screenshotButton, onCaptureScreenshot]);
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>

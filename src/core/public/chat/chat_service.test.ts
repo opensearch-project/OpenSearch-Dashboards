@@ -83,14 +83,12 @@ describe('ChatService', () => {
       expect(startContract).toHaveProperty('setWindowState');
       expect(startContract).toHaveProperty('onWindowOpen');
       expect(startContract).toHaveProperty('onWindowClose');
-      expect(startContract).toHaveProperty('isScreenshotFeatureEnabled');
-      expect(startContract).toHaveProperty('getScreenshotFeatureEnabled$');
-      expect(startContract).toHaveProperty('setScreenshotFeatureEnabled');
       expect(startContract).toHaveProperty('openWindow');
       expect(startContract).toHaveProperty('closeWindow');
       expect(startContract).toHaveProperty('sendMessage');
       expect(startContract).toHaveProperty('sendMessageWithWindow');
       expect(startContract).toHaveProperty('screenshotPageContainerElement');
+      expect(startContract).toHaveProperty('screenshot');
     });
 
     it('should return undefined for screenshotPageContainerElement if not set', () => {
@@ -202,26 +200,31 @@ describe('ChatService', () => {
       );
     });
 
-    it('should manage screenshot feature enabled state in core', () => {
+    it('should provide screenshot service', () => {
+      const setupContract = service.setup();
       const startContract = service.start();
 
+      // Screenshot service should be available
+      expect(startContract.screenshot).toBeDefined();
+      expect(setupContract.screenshot).toBeDefined();
+
       // Initial state
-      expect(startContract.isScreenshotFeatureEnabled()).toBe(false);
+      expect(startContract.screenshot.isEnabled()).toBe(false);
 
       // Test observable
       let emittedValue: boolean | undefined;
-      startContract.getScreenshotFeatureEnabled$().subscribe((value) => (emittedValue = value));
+      startContract.screenshot.getEnabled$().subscribe((value) => (emittedValue = value));
       expect(emittedValue).toBe(false);
 
       // Enable screenshot feature
-      startContract.setScreenshotFeatureEnabled(true);
-      expect(startContract.isScreenshotFeatureEnabled()).toBe(true);
+      startContract.screenshot.setEnabled(true);
+      expect(startContract.screenshot.isEnabled()).toBe(true);
       expect(emittedValue).toBe(true);
 
-      // Disable screenshot feature
-      startContract.setScreenshotFeatureEnabled(false);
-      expect(startContract.isScreenshotFeatureEnabled()).toBe(false);
-      expect(emittedValue).toBe(false);
+      // Test configure method
+      startContract.screenshot.configure({ enabled: false, title: 'Custom Title' });
+      expect(startContract.screenshot.isEnabled()).toBe(false);
+      expect(startContract.screenshot.getScreenshotButton().title).toBe('Custom Title');
     });
 
     it('should delegate to implementation when available', async () => {

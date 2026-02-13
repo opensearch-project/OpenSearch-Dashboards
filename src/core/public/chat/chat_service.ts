@@ -12,6 +12,7 @@ import {
   Message,
   ChatWindowState,
 } from './types';
+import { ChatScreenshotService } from './screenshot_service';
 
 /**
  * Core chat service - manages infrastructure state
@@ -19,7 +20,7 @@ import {
 export class ChatService implements CoreService<ChatServiceSetup, ChatServiceStart> {
   private implementation?: ChatImplementationFunctions;
   private suggestedActionsService?: { registerProvider(provider: any): void };
-  private screenshotPageContainerElement?: HTMLElement;
+  private screenshotService: ChatScreenshotService;
 
   // Core-managed infrastructure state
   private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
@@ -28,9 +29,12 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
     windowMode: 'sidecar',
     paddingSize: 400,
   });
-  private screenshotFeatureEnabled$ = new BehaviorSubject<boolean>(false);
   private windowOpenCallbacks = new Set<() => void>();
   private windowCloseCallbacks = new Set<() => void>();
+
+  constructor() {
+    this.screenshotService = new ChatScreenshotService();
+  }
 
   private generateThreadId(): string {
     const timestamp = Date.now();
@@ -51,8 +55,10 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       suggestedActionsService: this.suggestedActionsService,
 
       setScreenshotPageContainerElement: (element: HTMLElement) => {
-        this.screenshotPageContainerElement = element;
+        this.screenshotService.setPageContainerElement(element);
       },
+
+      screenshot: this.screenshotService,
     };
   }
 
@@ -114,19 +120,6 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         return () => this.windowCloseCallbacks.delete(callback);
       },
 
-      // Screenshot feature management (core-managed)
-      isScreenshotFeatureEnabled: () => {
-        return this.screenshotFeatureEnabled$.getValue();
-      },
-
-      getScreenshotFeatureEnabled$: () => {
-        return this.screenshotFeatureEnabled$.asObservable();
-      },
-
-      setScreenshotFeatureEnabled: (enabled: boolean) => {
-        this.screenshotFeatureEnabled$.next(enabled);
-      },
-
       // Operations (delegated to plugin - throw if unavailable)
       openWindow: async () => {
         if (!this.implementation) {
@@ -177,8 +170,13 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         return chatServiceInstance.suggestedActionsService;
       },
 
-      // Screenshot page container element
-      screenshotPageContainerElement: this.screenshotPageContainerElement,
+      // Screenshot page container element (deprecated)
+      get screenshotPageContainerElement() {
+        return chatServiceInstance.screenshotService.getPageContainerElement();
+      },
+
+      // Screenshot service
+      screenshot: this.screenshotService,
     };
   }
 
@@ -187,5 +185,6 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
     this.suggestedActionsService = undefined;
     this.windowOpenCallbacks.clear();
     this.windowCloseCallbacks.clear();
+    this.screenshotService.stop();
   }
 }

@@ -30,6 +30,30 @@ jest.mock('../hooks/use_command_menu_keyboard', () => ({
   }),
 }));
 
+// Mock useOpenSearchDashboards hook
+jest.mock('../../../opensearch_dashboards_react/public', () => {
+  const { BehaviorSubject } = jest.requireActual('rxjs');
+  const mockScreenshotButton$ = new BehaviorSubject({
+    title: 'Add dashboard screenshot',
+    iconType: 'image',
+    enabled: true,
+  });
+
+  return {
+    useOpenSearchDashboards: () => ({
+      services: {
+        core: {
+          chat: {
+            screenshot: {
+              getScreenshotButton$: () => mockScreenshotButton$,
+            },
+          },
+        },
+      },
+    }),
+  };
+});
+
 describe('ChatInput', () => {
   const defaultProps = {
     layoutMode: ChatLayoutMode.SIDECAR,
