@@ -55,14 +55,6 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
       flyoutMountPoint.current = mountPoint;
     }, []);
 
-    // Register ChatWindow ref with ChatService for external access
-    useEffect(() => {
-      chatService.setChatWindowRef(chatWindowRef);
-      return () => {
-        chatService.clearChatWindowRef();
-      };
-    }, [chatService]);
-
     const openSidecar = useCallback(() => {
       if (!flyoutMountPoint.current) {
         return;
