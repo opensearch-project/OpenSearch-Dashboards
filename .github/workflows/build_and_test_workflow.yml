@@ -7,22 +7,11 @@ name: Build and test
 on:
   push:
     branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
 
 env:
+  OSD_OPTIMIZER_THEMES: v8light
   TEST_BROWSER_HEADLESS: 1
   CI: 1
   GCS_UPLOAD_PREFIX: fake

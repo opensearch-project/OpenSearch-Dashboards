@@ -29,6 +29,7 @@ export interface ITableCellProps {
   rowData?: OpenSearchSearchHit<Record<string, unknown>>;
   isOnTracesPage: boolean;
   setIsRowSelected: (isRowSelected: boolean) => void;
+  wrapCellText?: boolean;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -42,6 +43,7 @@ export const TableCellUI = ({
   rowData,
   isOnTracesPage,
   setIsRowSelected,
+  wrapCellText,
 }: ITableCellProps) => {
   const { dataset } = useDatasetContext();
 
@@ -120,7 +122,9 @@ export const TableCellUI = ({
   return (
     <td
       data-test-subj="docTableField"
-      className={`exploreDocTableCell ${isTimeField ? 'eui-textNoWrap' : 'eui-textTruncate'}`}
+      className={`exploreDocTableCell ${
+        isTimeField ? 'eui-textNoWrap' : wrapCellText ? '' : 'eui-textTruncate'
+      }`}
     >
       <div className="exploreDocTableCell__content">{content}</div>
     </td>

@@ -82,6 +82,7 @@ export interface DatasetSelectProps {
   supportedTypes?: string[];
   signalType: string | null;
   showNonTimeFieldDatasets?: boolean;
+  appName?: string;
 }
 
 interface ViewDatasetsModalProps {
