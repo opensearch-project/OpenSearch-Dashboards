@@ -24,7 +24,7 @@ export const config = {
         `style-src-elem 'self'`,
         `style-src-attr 'self' 'unsafe-inline'`,
         `child-src 'none'`,
-        `worker-src 'self'`,
+        `worker-src blob: 'self'`,
         `frame-src 'none'`,
         `object-src 'none'`,
         `manifest-src 'self'`,
