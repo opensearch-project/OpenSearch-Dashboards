@@ -204,15 +204,15 @@ export const ExploreTracesChart = ({
 
   // Individual chart titles for when expanded
   const requestChartTitle = i18n.translate('explore.traces.requestChart.title', {
-    defaultMessage: 'Request Count',
+    defaultMessage: 'Request count',
   });
 
   const errorChartTitle = i18n.translate('explore.traces.errorChart.title', {
-    defaultMessage: 'Error Count',
+    defaultMessage: 'Error count',
   });
 
   const latencyChartTitle = i18n.translate('explore.traces.latencyChart.title', {
-    defaultMessage: 'Latency (ms)',
+    defaultMessage: 'Avg latency (ms)',
   });
 
   const timeChartHeader = showHistogram ? (

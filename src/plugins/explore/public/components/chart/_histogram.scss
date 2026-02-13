@@ -67,12 +67,12 @@
 // Traces charts container styles
 .exploreTracesChart {
   &__container {
-    min-height: clamp(200px, 20vh, 400px);
-    max-height: clamp(200px, 20vh, 400px);
+    min-height: 120px;
+    max-height: 120px;
   }
 
   &__section {
-    height: clamp(200px, 20vh, 400px);
+    height: 120px;
   }
 
   &__histogram {

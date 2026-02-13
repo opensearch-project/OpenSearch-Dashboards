@@ -10,10 +10,14 @@ import {
   findMinInterval,
   createNowMarkLine,
   createPartialDataMarkArea,
+  truncateText,
   createTooltipFormatter,
+  normalizeSeriesData,
   createBarSeries,
   createLineSeries,
   createHistogramSpec,
+  COLOR_INDICATOR_WIDTH,
+  COLOR_INDICATOR_HEIGHT,
 } from './echarts_histogram_utils';
 
 // Mock getColors
@@ -181,20 +185,44 @@ describe('echarts_histogram_utils', () => {
     });
   });
 
+  describe('truncateText', () => {
+    it('returns original text if shorter than max length', () => {
+      expect(truncateText('short', 10)).toBe('short');
+    });
+
+    it('returns original text if equal to max length', () => {
+      expect(truncateText('exactly10!', 10)).toBe('exactly10!');
+    });
+
+    it('truncates text and adds ellipsis if longer than max length', () => {
+      expect(truncateText('this is a very long text', 10)).toBe('this is...');
+    });
+
+    it('handles empty string', () => {
+      expect(truncateText('', 10)).toBe('');
+    });
+  });
+
   describe('createTooltipFormatter', () => {
     it('creates a formatter function', () => {
-      const formatter = createTooltipFormatter(3600000, 1000, 5000, 'YYYY-MM-DD');
+      const formatter = createTooltipFormatter(3600000, 1000, 5000, 'YYYY-MM-DD', '#333');
       expect(typeof formatter).toBe('function');
     });
 
     it('returns empty string for empty params array', () => {
-      const formatter = createTooltipFormatter(3600000, 1000, 5000, 'YYYY-MM-DD');
+      const formatter = createTooltipFormatter(3600000, 1000, 5000, 'YYYY-MM-DD', '#333');
       const result = (formatter as Function)([]);
       expect(result).toBe('');
     });
 
     it('formats single series tooltip', () => {
-      const formatter = createTooltipFormatter(3600000, 1609459200000, 1609466400000, 'HH:mm');
+      const formatter = createTooltipFormatter(
+        3600000,
+        1609459200000,
+        1609466400000,
+        'HH:mm',
+        '#333'
+      );
       const params = [
         {
           value: [1609462800000, 100],
@@ -208,7 +236,13 @@ describe('echarts_histogram_utils', () => {
     });
 
     it('includes partial data warning when timestamp is outside domain', () => {
-      const formatter = createTooltipFormatter(3600000, 1609459200000, 1609466400000, 'HH:mm');
+      const formatter = createTooltipFormatter(
+        3600000,
+        1609459200000,
+        1609466400000,
+        'HH:mm',
+        '#333'
+      );
       const params = [
         {
           value: [1609455600000, 100], // Before domain start
@@ -218,6 +252,119 @@ describe('echarts_histogram_utils', () => {
       ];
       const result = (formatter as Function)(params);
       expect(result).toContain('partial data');
+    });
+
+    it('applies text color to tooltip content', () => {
+      const textColor = '#FF0000';
+      const formatter = createTooltipFormatter(
+        3600000,
+        1609459200000,
+        1609466400000,
+        'HH:mm',
+        textColor
+      );
+      const params = [
+        {
+          value: [1609462800000, 100],
+          seriesName: 'Count',
+          color: '#54B399',
+        },
+      ];
+      const result = (formatter as Function)(params);
+      expect(result).toContain(`color: ${textColor}`);
+    });
+
+    it('renders color indicator with dimensions matching legend icon', () => {
+      const formatter = createTooltipFormatter(
+        3600000,
+        1609459200000,
+        1609466400000,
+        'HH:mm',
+        '#333'
+      );
+      const params = [
+        {
+          value: [1609462800000, 100],
+          seriesName: 'Count',
+          color: '#54B399',
+        },
+      ];
+      const result = (formatter as Function)(params);
+      // Verify color indicator dimensions match legend icon constants
+      expect(result).toContain(`width: ${COLOR_INDICATOR_WIDTH}px`);
+      expect(result).toContain(`height: ${COLOR_INDICATOR_HEIGHT}px`);
+      // Verify subtle border for accessibility
+      expect(result).toContain('border: 1px solid rgba(0,0,0,0.1)');
+    });
+  });
+
+  describe('normalizeSeriesData', () => {
+    it('returns empty array for empty input', () => {
+      const result = normalizeSeriesData([]);
+      expect(result).toEqual([]);
+    });
+
+    it('returns unchanged series when single series', () => {
+      const series = [
+        {
+          id: 's1',
+          name: 'Series 1',
+          data: [
+            { x: 1000, y: 10 },
+            { x: 2000, y: 20 },
+          ],
+        },
+      ];
+      const result = normalizeSeriesData(series);
+      expect(result).toHaveLength(1);
+      expect(result[0].data).toHaveLength(2);
+    });
+
+    it('fills missing x values with 0 for multiple series', () => {
+      const series = [
+        {
+          id: 's1',
+          name: 'Series 1',
+          data: [
+            { x: 1000, y: 10 },
+            { x: 3000, y: 30 },
+          ],
+        },
+        {
+          id: 's2',
+          name: 'Series 2',
+          data: [
+            { x: 2000, y: 20 },
+            { x: 3000, y: 35 },
+          ],
+        },
+      ];
+      const result = normalizeSeriesData(series);
+
+      // Both series should have all 3 x values
+      expect(result[0].data).toHaveLength(3);
+      expect(result[1].data).toHaveLength(3);
+
+      // Series 1 should have 0 at x=2000
+      expect(result[0].data).toEqual([
+        { x: 1000, y: 10 },
+        { x: 2000, y: 0 },
+        { x: 3000, y: 30 },
+      ]);
+
+      // Series 2 should have 0 at x=1000
+      expect(result[1].data).toEqual([
+        { x: 1000, y: 0 },
+        { x: 2000, y: 20 },
+        { x: 3000, y: 35 },
+      ]);
+    });
+
+    it('preserves series id and name', () => {
+      const series = [{ id: 'test-id', name: 'Test Name', data: [{ x: 1000, y: 10 }] }];
+      const result = normalizeSeriesData(series);
+      expect(result[0].id).toBe('test-id');
+      expect(result[0].name).toBe('Test Name');
     });
   });
 
@@ -259,6 +406,32 @@ describe('echarts_histogram_utils', () => {
       );
 
       expect(series.markArea).toBeDefined();
+    });
+
+    it('includes stack when provided', () => {
+      const series = createBarSeries(
+        'test-id',
+        'Test',
+        testData,
+        '#54B399',
+        undefined,
+        undefined,
+        'total'
+      );
+
+      expect(series.stack).toBe('total');
+    });
+
+    it('does not include stack when not provided', () => {
+      const series = createBarSeries('test-id', 'Test', testData, '#54B399');
+
+      expect(series.stack).toBeUndefined();
+    });
+
+    it('includes emphasis.focus set to series for legend hover highlighting', () => {
+      const series = createBarSeries('test-id', 'Test', testData, '#54B399');
+
+      expect(series.emphasis?.focus).toBe('series');
     });
   });
 
@@ -402,6 +575,178 @@ describe('echarts_histogram_utils', () => {
 
       expect((spec.series as any[])[0].itemStyle.color).toBe('#FF0000');
       expect((spec.series as any[])[1].itemStyle.color).toBe('#00FF00');
+    });
+
+    it('applies legend textStyle color for theme support', () => {
+      const chartDataWithSeries = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609459200000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithSeries as any, defaultOptions);
+
+      expect((spec.legend as any).textStyle?.color).toBe('#333');
+    });
+
+    it('applies legend formatter to truncate long names', () => {
+      const chartDataWithSeries = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609459200000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithSeries as any, defaultOptions);
+
+      expect(typeof (spec.legend as any).formatter).toBe('function');
+      // Test that formatter truncates long names
+      const formatter = (spec.legend as any).formatter;
+      expect(formatter('short')).toBe('short');
+      expect(formatter('this-is-a-very-long-series-name')).toBe('this-is-a-very-lo...');
+    });
+
+    it('enables legend tooltip for full name on hover', () => {
+      const chartDataWithSeries = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609459200000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithSeries as any, defaultOptions);
+
+      expect((spec.legend as any).tooltip?.show).toBe(true);
+    });
+
+    it('applies legend rectangular icon style', () => {
+      const chartDataWithSeries = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609459200000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithSeries as any, defaultOptions);
+
+      expect((spec.legend as any).icon).toBe('roundRect');
+      expect((spec.legend as any).itemWidth).toBe(COLOR_INDICATOR_WIDTH);
+      expect((spec.legend as any).itemHeight).toBe(COLOR_INDICATOR_HEIGHT);
+    });
+
+    it('applies yAxis splitNumber to reduce grid lines', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect((spec.yAxis as any).splitNumber).toBe(3);
+    });
+
+    it('applies stack to bar series for breakdowns', () => {
+      const chartDataWithSeries = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609459200000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithSeries as any, defaultOptions);
+
+      expect((spec.series as any[])[0].stack).toBe('total');
+      expect((spec.series as any[])[1].stack).toBe('total');
+    });
+
+    it('does not apply stack to line series for breakdowns', () => {
+      const chartDataWithSeries = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609459200000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithSeries as any, {
+        ...defaultOptions,
+        chartType: 'Line',
+      });
+
+      expect((spec.series as any[])[0].stack).toBeUndefined();
+      expect((spec.series as any[])[1].stack).toBeUndefined();
+    });
+
+    it('applies tooltip confine and appendToBody to prevent cutoff', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect((spec.tooltip as any).confine).toBe(true);
+      expect((spec.tooltip as any).appendToBody).toBe(true);
+    });
+
+    it('applies tooltip position function for fixed y-axis position', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect(typeof (spec.tooltip as any).position).toBe('function');
+      const positionFn = (spec.tooltip as any).position;
+
+      // Test that y position is fixed at 10
+      const result = positionFn([100, 50], {}, null, null, {
+        contentSize: [200, 100],
+        viewSize: [800, 400],
+      });
+      expect(result[1]).toBe(10);
+
+      // Test tooltip appears to the right of the bar (with 15px offset)
+      expect(result[0]).toBe(115); // 100 + 15 offset
+
+      // Test tooltip flips to left when near right edge
+      const resultNearEdge = positionFn([700, 50], {}, null, null, {
+        contentSize: [200, 100],
+        viewSize: [800, 400],
+      });
+      expect(resultNearEdge[0]).toBe(485); // 700 - 200 - 15
+    });
+
+    it('applies tooltip backgroundColor for theming', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect((spec.tooltip as any).backgroundColor).toBeDefined();
+    });
+
+    it('applies tooltip borderColor for theming', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect((spec.tooltip as any).borderColor).toBeDefined();
+    });
+
+    it('applies tooltip textStyle color for theming', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect((spec.tooltip as any).textStyle?.color).toBe('#333');
+    });
+
+    it('normalizes series data to prevent gaps in stacked bar charts', () => {
+      const chartDataWithGaps = {
+        ...mockChartData,
+        series: [
+          { id: 's1', name: 'Series 1', data: [{ x: 1609459200000, y: 5 }] },
+          { id: 's2', name: 'Series 2', data: [{ x: 1609462800000, y: 10 }] },
+        ],
+      };
+
+      const spec = createHistogramSpec(chartDataWithGaps as any, defaultOptions);
+
+      // Both series should have 2 data points after normalization
+      expect((spec.series as any[])[0].data).toHaveLength(2);
+      expect((spec.series as any[])[1].data).toHaveLength(2);
+    });
+
+    it('hides grid lines by default', () => {
+      const spec = createHistogramSpec(mockChartData as any, defaultOptions);
+
+      expect((spec.yAxis as any).splitLine.show).toBe(false);
     });
   });
 });

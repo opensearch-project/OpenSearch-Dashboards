@@ -13,6 +13,10 @@ import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { Chart as IChart, HistogramDataPoint, HistogramSeries } from './point_series';
 import { getColors } from '../../visualizations/theme/default_colors';
 
+// Color indicator dimensions used in both legend and tooltip for visual consistency
+export const COLOR_INDICATOR_WIDTH = 4;
+export const COLOR_INDICATOR_HEIGHT = 14;
+
 export interface HistogramOptions {
   chartType: 'HistogramBar' | 'Line';
   timeZone: string;
@@ -189,13 +193,23 @@ export function createPartialDataMarkArea(
 }
 
 /**
+ * Truncates text to a maximum length and adds ellipsis
+ */
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
+}
+
+/**
  * Creates a tooltip formatter that handles partial data warnings
+ * and highlights the currently hovered series
  */
 export function createTooltipFormatter(
   xInterval: number,
   domainStart: number,
   domainEnd: number,
-  dateFormat: string
+  dateFormat: string,
+  textColor: string
 ): echarts.TooltipComponentOption['formatter'] {
   return (params: any) => {
     const paramsArray = Array.isArray(params) ? params : [params];
@@ -223,20 +237,56 @@ export function createTooltipFormatter(
       tooltipContent += `</div>`;
     }
 
-    tooltipContent += `<div style="font-weight: 600; margin-bottom: 4px;">${formattedDate}</div>`;
+    tooltipContent += `<div style="font-weight: 600; margin-bottom: 8px; color: ${textColor};">${formattedDate}</div>`;
 
     paramsArray.forEach((param: any) => {
       const seriesName = param.seriesName || '';
+      const truncatedName = truncateText(seriesName, 30);
       const value = param.value?.[1] ?? param.value;
       const color = param.color || '';
-      tooltipContent += `<div style="display: flex; align-items: center; gap: 4px;">`;
-      tooltipContent += `<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: ${color};"></span>`;
-      tooltipContent += `<span>${seriesName}: <strong>${value}</strong></span>`;
+
+      tooltipContent += `<div style="display: flex; align-items: center; gap: 8px; color: ${textColor}; padding: 2px 0; line-height: 1.4;">`;
+      tooltipContent += `<span style="display: inline-block; width: ${COLOR_INDICATOR_WIDTH}px; height: ${COLOR_INDICATOR_HEIGHT}px; background-color: ${color}; border: 1px solid rgba(0,0,0,0.1); border-radius: 1px; flex-shrink: 0;"></span>`;
+      tooltipContent += `<span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${truncatedName}</span>`;
+      tooltipContent += `<span style="font-weight: 600; margin-left: 8px;">${value}</span>`;
       tooltipContent += `</div>`;
     });
 
     return tooltipContent;
   };
+}
+
+/**
+ * Normalizes multiple series data so all series have entries for all x values.
+ * Missing values are filled with 0 to prevent gaps in stacked bar charts.
+ */
+export function normalizeSeriesData(seriesList: HistogramSeries[]): HistogramSeries[] {
+  if (seriesList.length === 0) return seriesList;
+
+  // Collect all unique x values across all series
+  const allXValues = new Set<number>();
+  seriesList.forEach((s) => {
+    s.data.forEach((d) => allXValues.add(d.x));
+  });
+
+  // Sort x values
+  const sortedXValues = Array.from(allXValues).sort((a, b) => a - b);
+
+  // Normalize each series to have all x values
+  return seriesList.map((s) => {
+    const dataMap = new Map<number, number>();
+    s.data.forEach((d) => dataMap.set(d.x, d.y));
+
+    const normalizedData: HistogramDataPoint[] = sortedXValues.map((x) => ({
+      x,
+      y: dataMap.get(x) ?? 0,
+    }));
+
+    return {
+      ...s,
+      data: normalizedData,
+    };
+  });
 }
 
 /**
@@ -248,7 +298,8 @@ export function createBarSeries(
   data: HistogramDataPoint[],
   color: string,
   markLine?: echarts.MarkLineComponentOption,
-  markArea?: echarts.MarkAreaComponentOption
+  markArea?: echarts.MarkAreaComponentOption,
+  stack?: string
 ): echarts.BarSeriesOption {
   return {
     type: 'bar',
@@ -260,10 +311,12 @@ export function createBarSeries(
       color,
     },
     emphasis: {
+      focus: 'series',
       itemStyle: {
         color,
       },
     },
+    ...(stack && { stack }),
     ...(markLine && { markLine }),
     ...(markArea && { markArea }),
   };
@@ -361,7 +414,10 @@ export function createHistogramSpec(
   const hasMultipleSeries = chartData.series && chartData.series.length > 0;
 
   if (hasMultipleSeries && chartData.series) {
-    chartData.series.forEach((s: HistogramSeries, index: number) => {
+    // Normalize series data to prevent gaps in stacked bar charts
+    const normalizedSeries = normalizeSeriesData(chartData.series);
+
+    normalizedSeries.forEach((s: HistogramSeries, index: number) => {
       const seriesColor = palette[index % palette.length];
       const isFirstSeries = index === 0;
 
@@ -373,7 +429,8 @@ export function createHistogramSpec(
             s.data,
             seriesColor,
             isFirstSeries ? markLine : undefined,
-            isFirstSeries ? markArea : undefined
+            isFirstSeries ? markArea : undefined,
+            'total'
           )
         );
       } else {
@@ -426,8 +483,9 @@ export function createHistogramSpec(
       name: showYAxisLabel ? yAxisLabel || chartData.yAxisLabel : undefined,
       nameLocation: 'middle',
       nameGap: 30,
+      splitNumber: 3,
       splitLine: {
-        show: true,
+        show: false,
       },
       axisLabel: {
         formatter: (value: number) => {
@@ -440,22 +498,51 @@ export function createHistogramSpec(
     series,
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'shadow',
+      confine: true,
+      appendToBody: true,
+      position: (point, params, dom, rect, size) => {
+        // Position tooltip to the right of the hovered bar, or left if near edge
+        const tooltipWidth = size.contentSize[0];
+        const viewWidth = size.viewSize[0];
+        const offset = 15; // Gap between bar and tooltip
+
+        // If tooltip would go off the right edge, show it on the left side
+        const x =
+          point[0] + offset + tooltipWidth > viewWidth
+            ? point[0] - tooltipWidth - offset
+            : point[0] + offset;
+
+        return [x, 10];
       },
-      formatter: createTooltipFormatter(xInterval, domainStart, domainEnd, dateFormat),
+      backgroundColor: euiThemeVars.euiColorEmptyShade,
+      borderColor: euiThemeVars.euiColorLightShade,
+      textStyle: {
+        color: colors.text,
+      },
+      formatter: createTooltipFormatter(xInterval, domainStart, domainEnd, dateFormat, colors.text),
     },
     legend: hasMultipleSeries
       ? {
           show: true,
           type: 'scroll',
           right: 10,
+          top: 'middle',
           orient: 'vertical',
+          icon: 'roundRect',
+          itemWidth: COLOR_INDICATOR_WIDTH,
+          itemHeight: COLOR_INDICATOR_HEIGHT,
+          textStyle: {
+            color: colors.text,
+          },
+          formatter: (name: string) => truncateText(name, 20),
+          tooltip: {
+            show: true,
+          },
         }
       : { show: false },
     grid: {
       top: 20,
-      right: hasMultipleSeries ? 150 : 20,
+      right: hasMultipleSeries ? 180 : 20,
       bottom: 40,
       left: 50,
       containLabel: false,

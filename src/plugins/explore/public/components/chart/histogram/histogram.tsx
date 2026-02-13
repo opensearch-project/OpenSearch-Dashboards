@@ -161,6 +161,33 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     };
   }, [instance, chartData, timefilterUpdateHandler]);
 
+  // Show/hide grid lines on hover
+  useEffect(() => {
+    if (!instance || !containerRef.current) return;
+
+    const container = containerRef.current;
+
+    const showGridLines = () => {
+      if (instance && !instance.isDisposed()) {
+        instance.setOption({ yAxis: { splitLine: { show: true } } });
+      }
+    };
+
+    const hideGridLines = () => {
+      if (instance && !instance.isDisposed()) {
+        instance.setOption({ yAxis: { splitLine: { show: false } } });
+      }
+    };
+
+    container.addEventListener('mouseenter', showGridLines);
+    container.addEventListener('mouseleave', hideGridLines);
+
+    return () => {
+      container.removeEventListener('mouseenter', showGridLines);
+      container.removeEventListener('mouseleave', hideGridLines);
+    };
+  }, [instance]);
+
   // Build and update the chart spec
   const spec = useMemo(() => {
     if (!chartData) return null;
@@ -212,7 +239,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     const hasMultipleSeries = chartData?.series && chartData.series.length > 0;
     option.grid = {
       ...DEFAULT_GRID,
-      right: hasMultipleSeries ? 150 : 20,
+      right: hasMultipleSeries ? 200 : 20,
     };
 
     instance.setOption(option, { notMerge: true });
