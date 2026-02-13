@@ -4,6 +4,12 @@ name: Run cypress tests
 on:
   pull_request:
     branches: ['**']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
       test_repo:
@@ -25,7 +31,6 @@ on:
         type: number
 
 env:
-  OSD_OPTIMIZER_THEMES: v8light
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
@@ -112,7 +117,7 @@ jobs:
           - group: 15
             config: query_enhanced
             test_location: source
-          # Explore tests - group 1 (includes both discover and explore specs)
+          # Explore tests - group 1
           - group: 10Explore
             config: explore
             test_location: source
@@ -144,7 +149,7 @@ jobs:
       options: '--user 1001 --shm-size=4g'
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --datasetManagement.enabled=true --home.disableExperienceModal=true' ||
         matrix.config == 'explore' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
         matrix.config == 'dashboard' &&
@@ -204,7 +209,7 @@ jobs:
         run: yarn osd bootstrap
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12 --dist
 
       - name: Checkout FT repo
         if: matrix.test_location == 'ftr'
@@ -239,28 +244,7 @@ jobs:
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
-          if [[ "${{ matrix.config }}" == "explore" ]]; then
-            # For explore config, run both discover and explore specs together
-            # since both features are enabled in the same workspace
-            BASE_GROUP=$(echo "${{ matrix.group }}" | sed 's/Explore$//')
-            DISCOVER_SPEC="$(yarn --silent osd:ciGroup${BASE_GROUP} 2>/dev/null || echo '')"
-            EXPLORE_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }} 2>/dev/null || echo '')"
-
-            # Combine both specs with comma separation
-            if [[ -n "$DISCOVER_SPEC" && -n "$EXPLORE_SPEC" ]]; then
-              DASHBOARDS_SPEC="${DISCOVER_SPEC},${EXPLORE_SPEC}"
-            elif [[ -n "$EXPLORE_SPEC" ]]; then
-              DASHBOARDS_SPEC="$EXPLORE_SPEC"
-            elif [[ -n "$DISCOVER_SPEC" ]]; then
-              DASHBOARDS_SPEC="$DISCOVER_SPEC"
-            else
-              DASHBOARDS_SPEC=""
-            fi
-          else
-            # For other configs, use the standard approach
-            DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
-          fi
-
+          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
