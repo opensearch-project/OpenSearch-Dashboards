@@ -48,6 +48,10 @@ describe('ChatWindow - Conversation Name', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock scrollIntoView which is not implemented in JSDOM
+    Element.prototype.scrollIntoView = jest.fn();
+
     mockCore = coreMock.createStart();
     mockContextProvider = {};
     mockChatService = {
