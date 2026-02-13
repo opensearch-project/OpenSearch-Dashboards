@@ -272,7 +272,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
                     const queryValue = sq.attributes.query.query;
                     const queryStr =
                       typeof queryValue === 'string' ? queryValue : JSON.stringify(queryValue);
-                    return buildSampleQueryBlock(sq.attributes.title || sq.id, queryStr);
+                    return buildSampleQueryBlock(sq.id, queryStr);
                   })}
                 </Fragment>
               ),
