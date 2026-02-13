@@ -50,8 +50,11 @@ export const createSavedQueryService = (
 
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
-      // title is required extra check against circumventing the front end
       throw new Error('Cannot create saved query without a title');
+    }
+
+    if (!attributes.query?.query) {
+      throw new Error('Cannot create saved query without a valid query');
     }
 
     const query: SerializedSavedQueryAttributes['query'] = {
@@ -182,6 +185,10 @@ export const createSavedQueryService = (
       parsedQuery = isObject(parsedQuery) ? parsedQuery : queryString;
     } catch (error) {
       parsedQuery = queryString;
+    }
+
+    if (parsedQuery === null || parsedQuery === undefined) {
+      parsedQuery = '';
     }
 
     const savedQueryItem: SavedQueryAttributes = {
