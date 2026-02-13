@@ -289,7 +289,7 @@ describe('ExplorePlugin', () => {
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'explore',
-          title: 'Explore',
+          title: 'Observability',
         })
       );
     });
