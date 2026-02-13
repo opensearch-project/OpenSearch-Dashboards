@@ -4,7 +4,7 @@
  */
 
 export const PLUGIN_ID = 'explore';
-export const PLUGIN_NAME = 'Explore';
+export const PLUGIN_NAME = 'Observability';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
