@@ -1,0 +1,2 @@
+fix:
+- [Chat] Fix failed unit tests in chat header ([#11349](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11349))
