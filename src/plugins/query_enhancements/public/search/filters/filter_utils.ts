@@ -12,7 +12,6 @@ import {
   isFilterDisabled,
   TimeRange,
 } from '../../../../data/common';
-import { formatDate } from '../../../common';
 
 export class FilterUtils {
   /**
@@ -23,9 +22,7 @@ export class FilterUtils {
    */
   public static getTimeFilterWhereClause(timeFieldName: string, timeRange: TimeRange): string {
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-    return `WHERE \`${timeFieldName}\` >= '${formatDate(
-      fromDate
-    )}' AND \`${timeFieldName}\` <= '${formatDate(toDate)}'`;
+    return `WHERE \`${timeFieldName}\` >= '${fromDate}' AND \`${timeFieldName}\` <= '${toDate}'`;
   }
 
   /**
