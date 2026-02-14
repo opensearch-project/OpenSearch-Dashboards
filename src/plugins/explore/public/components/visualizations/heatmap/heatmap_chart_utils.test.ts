@@ -2,10 +2,17 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
+import {
+  createLabelLayer,
+  getDataBound,
+  addTransform,
+  enhanceStyle,
+  createHeatmapSeries,
+} from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 import { DEFAULT_GREY } from '../theme/default_colors';
 import { defaultHeatmapChartStyles, HeatmapLabels, HeatmapChartStyle } from './heatmap_vis_config';
+import { EChartsSpecState } from '../utils/echarts_spec';
 
 describe('createLabelLayer', () => {
   const xAxis: VisColumn = {
@@ -326,5 +333,187 @@ describe('enhanceStyle', () => {
     enhanceStyle(markLayer, ({} as unknown) as HeatmapChartStyle, transformedData, colorField);
 
     expect(markLayer).toEqual(baseMarkLayer);
+  });
+});
+
+describe('createHeatmapSeries', () => {
+  const mockTransformedData = [
+    ['category', 'product', 'value'],
+    ['A', 'X', 10],
+    ['A', 'Y', 100],
+    ['B', 'X', 36],
+    ['B', 'Y', 70],
+  ];
+
+  const mockAxisColumnMappings = {
+    x: {
+      id: 1,
+      name: 'category',
+      schema: VisFieldType.Categorical,
+      column: 'category',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
+    y: {
+      id: 2,
+      name: 'product',
+      schema: VisFieldType.Categorical,
+      column: 'product',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
+    color: {
+      id: 3,
+      name: 'value',
+      schema: VisFieldType.Numerical,
+      column: 'value',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    },
+  };
+
+  const mockState = {
+    transformedData: mockTransformedData,
+    axisColumnMappings: mockAxisColumnMappings,
+    visualMap: {},
+  } as EChartsSpecState;
+
+  const defaultStyles = {
+    ...defaultHeatmapChartStyles,
+    exclusive: {
+      ...defaultHeatmapChartStyles.exclusive,
+      colorScaleType: ScaleType.LINEAR,
+      percentageMode: false,
+      scaleToDataBounds: false,
+      label: {
+        show: false,
+        overwriteColor: false,
+        color: 'white',
+        rotate: false,
+      },
+    },
+  } as HeatmapChartStyle;
+
+  it('should create heatmap series with correct structure', () => {
+    const result = createHeatmapSeries({
+      styles: defaultStyles,
+      categoryFields: ['category', 'product'],
+      seriesField: 'value',
+    })(mockState);
+
+    expect(result.series).toHaveLength(1);
+    expect(result.series[0].type).toBe('heatmap');
+    expect(result.series[0].encode.x).toBe('category');
+    expect(result.series[0].encode.y).toBe('product');
+    expect(result.series[0].encode.tooltip).toEqual(['category', 'product', 'value']);
+  });
+
+  it('should apply logarithmic scale when colorScaleType is LOG', () => {
+    const logStyles = {
+      ...defaultStyles,
+      exclusive: {
+        ...defaultStyles.exclusive,
+        colorScaleType: ScaleType.LOG,
+      },
+    } as HeatmapChartStyle;
+
+    const result = createHeatmapSeries({
+      styles: logStyles,
+      categoryFields: ['category', 'product'],
+      seriesField: 'value',
+    })(mockState);
+
+    // The transformed data should have log10 values
+    expect(result.transformedData).toBeDefined();
+    expect(result.transformedData[1][2]).toBe(1); // log10(10) = 1
+    expect(result.transformedData[2][2]).toBe(2); // log10(100) = 2
+  });
+
+  it('should apply square root scale when colorScaleType is SQRT', () => {
+    const sqrtStyles = {
+      ...defaultStyles,
+      exclusive: {
+        ...defaultStyles.exclusive,
+        colorScaleType: ScaleType.SQRT,
+      },
+    } as HeatmapChartStyle;
+
+    const result = createHeatmapSeries({
+      styles: sqrtStyles,
+      categoryFields: ['category', 'product'],
+      seriesField: 'value',
+    })(mockState);
+
+    // The transformed data should have sqrt values
+    expect(result.transformedData).toBeDefined();
+    expect(result.transformedData[3][2]).toBe(6); // sqrt(36)=6
+    expect(result.transformedData[2][2]).toBe(10); // sqrt(100)=10
+  });
+
+  it('should convert values to percentages when percentageMode is true', () => {
+    const percentageStyles = {
+      ...defaultStyles,
+      exclusive: {
+        ...defaultStyles.exclusive,
+        percentageMode: true,
+      },
+    } as HeatmapChartStyle;
+
+    const result = createHeatmapSeries({
+      styles: percentageStyles,
+      categoryFields: ['category', 'product'],
+      seriesField: 'value',
+    })(mockState);
+
+    // The maximum value is 40, so all values should be normalized against it
+    expect(result.transformedData[1][2]).toBe(0.1); // 10/100 = 0.25
+    expect(result.transformedData[2][2]).toBe(1); // 100/100 = 1
+
+    expect(result.visualMap.max).toBe(1);
+    expect(result.visualMap.min).toBe(0);
+  });
+
+  it('should reflect the max and min in visualMap when scaleToDataBounds is true', () => {
+    const percentageStyles = {
+      ...defaultStyles,
+      exclusive: {
+        ...defaultStyles.exclusive,
+        scaleToDataBounds: true,
+      },
+    } as HeatmapChartStyle;
+
+    const result = createHeatmapSeries({
+      styles: percentageStyles,
+      categoryFields: ['category', 'product'],
+      seriesField: 'value',
+    })(mockState);
+
+    expect(result.visualMap.max).toBe(100);
+    expect(result.visualMap.min).toBe(10);
+  });
+
+  it('should show labels when label.show is true', () => {
+    const labelStyles = {
+      ...defaultStyles,
+      exclusive: {
+        ...defaultStyles.exclusive,
+        label: {
+          show: true,
+          overwriteColor: true,
+          color: 'red',
+          rotate: true,
+        },
+      },
+    } as HeatmapChartStyle;
+
+    const result = createHeatmapSeries({
+      styles: labelStyles,
+      categoryFields: ['category', 'product'],
+      seriesField: 'value',
+    })(mockState);
+
+    expect(result.series[0].label.show).toBe(true);
+    expect(result.series[0].label.color).toBe('red');
+    expect(result.series[0].label.rotate).toBe(45);
   });
 });
