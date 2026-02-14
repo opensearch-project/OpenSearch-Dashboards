@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useEffectOnce, useUnmount } from 'react-use';
 import { EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart, SIDECAR_DOCKED_MODE } from '../../../../core/public';
-import { ChatWindow, ChatWindowInstance } from './chat_window';
+import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
@@ -48,7 +48,6 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     // Use ChatService as source of truth for window state
     const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
     const sideCarRef = useRef<{ close: () => void }>();
-    const chatWindowRef = useRef<ChatWindowInstance>(null);
     const flyoutMountPoint = useRef(null);
 
     const setMountPoint = useCallback((mountPoint) => {
@@ -93,17 +92,6 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
         openSidecar();
       }
     }, [isOpen, openSidecar, closeSidecar]);
-
-    const startNewConversation = useCallback<ChatHeaderButtonInstance['startNewConversation']>(
-      async ({ content }) => {
-        openSidecar();
-        chatWindowRef.current?.startNewChat();
-        chatWindowRef.current?.sendMessage({ content });
-      },
-      [openSidecar]
-    );
-
-    useImperativeHandle(ref, () => ({ startNewConversation }), [startNewConversation]);
 
     // Listen to ChatService window state changes and sync local state
     useEffect(() => {
@@ -204,11 +192,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
                     suggestedActionsService={suggestedActionsService}
                     confirmationService={confirmationService}
                   >
-                    <ChatWindow
-                      layoutMode={ChatLayoutMode.SIDECAR}
-                      ref={chatWindowRef}
-                      onClose={closeSidecar}
-                    />
+                    <ChatWindow layoutMode={ChatLayoutMode.SIDECAR} onClose={closeSidecar} />
                   </ChatProvider>
                 </GlobalAssistantProvider>
               </OpenSearchDashboardsContextProvider>
