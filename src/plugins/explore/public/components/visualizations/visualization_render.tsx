@@ -7,6 +7,8 @@ import React, { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
+import { EuiTitle } from '@elastic/eui';
+
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
@@ -75,6 +77,13 @@ export const VisualizationRender = ({
     };
   }, [from, to]);
 
+  const panelTitle = useMemo(() => {
+    const styles = visConfig?.styles;
+    if (styles && 'titleOptions' in styles) {
+      return styles.titleOptions.titleName;
+    }
+  }, [visConfig?.styles]);
+
   if (!visualizationData || columns.length === 0) {
     return null;
   }
@@ -109,14 +118,21 @@ export const VisualizationRender = ({
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
     return (
-      <ChartRender
-        data={visualizationData}
-        config={visConfig}
-        timeRange={timeRange}
-        ExpressionRenderer={ExpressionRenderer}
-        searchContext={searchContext}
-        onSelectTimeRange={onSelectTimeRange}
-      />
+      <>
+        {panelTitle && (
+          <EuiTitle size="xxs">
+            <h3 style={{ paddingTop: 12, paddingLeft: 8 }}>{panelTitle}</h3>
+          </EuiTitle>
+        )}
+        <ChartRender
+          data={visualizationData}
+          config={visConfig}
+          timeRange={timeRange}
+          ExpressionRenderer={ExpressionRenderer}
+          searchContext={searchContext}
+          onSelectTimeRange={onSelectTimeRange}
+        />
+      </>
     );
   }
 

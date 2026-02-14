@@ -16,6 +16,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyle>;
 
@@ -26,6 +27,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   categoricalColumns = [],
   dateColumns = [],
   axisColumnMappings,
+  selectedChartType,
   updateVisualization,
 }) => {
   const updateStyleOption = <K extends keyof LineChartStyleOptions>(
@@ -34,6 +36,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   // Determine if the legend should be shown based on the selected mappings
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
@@ -106,6 +111,7 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

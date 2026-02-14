@@ -29,10 +29,6 @@ export const createPieSpec = (
       throw Error('Missing color or theta config for pie chart');
     }
 
-    const defaultTitle = `${axisColumnMappings?.[AxisRole.SIZE]?.name} by ${
-      axisColumnMappings?.[AxisRole.COLOR]?.name
-    }`;
-
     const result = pipe(
       transform(
         aggregate({
@@ -42,7 +38,7 @@ export const createPieSpec = (
         }),
         convertTo2DArray(allColumns)
       ),
-      createBaseConfig({ title: defaultTitle, legend: { show: styleOptions.addLegend } }),
+      createBaseConfig({ legend: { show: styleOptions.addLegend } }),
       createPieSeries({ styles: styleOptions, cateField: colorColumn, valueField: thetaColumn }),
       assembleSpec
     )({

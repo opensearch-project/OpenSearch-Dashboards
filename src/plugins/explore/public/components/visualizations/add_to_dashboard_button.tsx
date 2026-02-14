@@ -37,9 +37,9 @@ export type DashboardInterface = SimpleSavedObject<DashboardAttributes>;
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
-  newTitle: string;
+  newTitle?: string;
   isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
+  onTitleDuplicate?: () => void;
   mode: 'existing' | 'new';
   selectDashboard: DashboardInterface | null;
   newDashboardName: string;
@@ -96,11 +96,16 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
   const saveObjectsClient = savedObjects.client;
 
+  const newTitle = useMemo(() => {
+    if (chartConfig?.styles && 'titleOptions' in chartConfig.styles) {
+      return chartConfig.styles.titleOptions?.titleName || 'Untitled';
+    }
+    return 'Untitled';
+  }, [chartConfig?.styles]);
+
   const handleSave = async ({
     savedExplore,
-    newTitle,
     isTitleDuplicateConfirmed,
-    onTitleDuplicate,
     mode,
     selectDashboard,
     newDashboardName,
@@ -119,7 +124,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
     const saveOptions = {
       isTitleDuplicateConfirmed,
-      onTitleDuplicate,
     };
     try {
       // by passing newCopyOnSave as true, to ensure every time add to dashboard will create a new explore

@@ -67,7 +67,7 @@ export const createSimpleLineChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
+      createBaseConfig({ legend: { show: false } }),
       buildAxisConfigs,
       applyTimeRange,
       createLineSeries({
@@ -239,7 +239,6 @@ export const createLineBarChart = (
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig({
-        title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
@@ -461,9 +460,6 @@ export const createMultiLineChart = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} Over Time by ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        }`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
@@ -651,9 +647,6 @@ export const createFacetedMultiLineChart = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} Over Time by ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
@@ -861,7 +854,6 @@ export const createCategoryLineChart = (
     const result = pipe(
       transform(convertTo2DArray(allColumns)),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
         legend: { show: false },
       }),
       buildAxisConfigs,
@@ -995,9 +987,6 @@ export const createCategoryMultiLineChart = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        }`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,

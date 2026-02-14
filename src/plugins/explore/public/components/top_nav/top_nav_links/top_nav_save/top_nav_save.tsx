@@ -57,14 +57,20 @@ export const getSaveButtonRun = (
 ): TopNavMenuIconRun => () => {
   if (!savedExplore) return;
 
+  const visualizationBuilder = getVisualizationBuilder();
+  const visConfig = visualizationBuilder.visConfig$.value;
+
+  let defaultTitle = 'Untitled';
+  if (visConfig?.styles && 'titleOptions' in visConfig.styles) {
+    defaultTitle = visConfig.styles.titleOptions?.titleName || 'Untitled';
+  }
+
   const onSave = async ({
     newTitle,
     newCopyOnSave,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: OnSaveProps): Promise<SaveResult | undefined> => {
-    const visualizationBuilder = getVisualizationBuilder();
-    const visConfig = visualizationBuilder.visConfig$.value;
     const axesMapping = visConfig?.axesMapping;
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
@@ -91,7 +97,7 @@ export const getSaveButtonRun = (
     <SavedObjectSaveModal
       onSave={onSave}
       onClose={() => {}}
-      title={savedExplore.title ?? ''}
+      title={defaultTitle}
       showCopyOnSave={!!savedExplore.id}
       // TODO: Does this need to be type "explore"?
       objectType="discover"

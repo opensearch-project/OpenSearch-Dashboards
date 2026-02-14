@@ -15,11 +15,9 @@ import {
   EuiModalFooter,
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiCallOut,
   EuiModalHeader,
   EuiRadio,
 } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState, useEffect } from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DebouncedFieldText } from './style_panel/utils';
@@ -44,13 +42,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] = useState<boolean>(
-    false
-  );
-
   const { savedExplore } = useSavedExplore(savedExploreId);
-
-  const [title, setTitle] = useState<string>('');
 
   // Dashboard-related state managed by custom hook
   const {
@@ -70,9 +62,8 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   }, [selectedOption, loadAllDashboards]);
 
   const enableButton =
-    title &&
-    ((selectedOption === 'existing' && selectedDashboard) ||
-      (selectedOption === 'new' && newDashboardName));
+    (selectedOption === 'existing' && selectedDashboard) ||
+    (selectedOption === 'new' && newDashboardName);
 
   const handleSave = async () => {
     if (isLoading) return;
@@ -80,50 +71,12 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
     if (savedExplore) {
       await onConfirm({
         savedExplore,
-        newTitle: title,
-        isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
-        onTitleDuplicate: handleTitleDuplicate,
+        isTitleDuplicateConfirmed: true,
         mode: selectedOption,
         selectDashboard: selectedDashboard,
         newDashboardName,
       });
     }
-  };
-
-  const handleTitleDuplicate = () => {
-    setIsLoading(false);
-    setIsTitleOrDashboardTitleDuplicate(true);
-  };
-
-  const renderDuplicateTitleCallout = () => {
-    if (!isTitleOrDashboardTitleDuplicate) {
-      return null;
-    }
-
-    return (
-      <EuiFlexItem style={{ width: '100%' }}>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="explore.addtoDashboardModal.duplicateTitleLabel"
-              defaultMessage="This object already exists"
-            />
-          }
-          color="warning"
-          data-test-subj="titleDupicateWarnMsg"
-        >
-          <p>
-            <FormattedMessage
-              id="explore.addtoDashboardModal.duplicateTitleDescription"
-              defaultMessage="Saving '{title}' creates a duplicate title."
-              values={{
-                title,
-              }}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiFlexItem>
-    );
   };
 
   return (
@@ -234,24 +187,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
           )}
-          {renderDuplicateTitleCallout()}
-
-          <EuiFlexItem grow={true} style={{ width: '100%' }}>
-            <EuiFormRow
-              label={i18n.translate('explore.addtoDashboardModal.saveExploreName', {
-                defaultMessage: 'Save search',
-              })}
-            >
-              <DebouncedFieldText
-                value={title}
-                placeholder="Enter save search name"
-                onChange={(text) => {
-                  setIsTitleOrDashboardTitleDuplicate(false);
-                  setTitle(text);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
 

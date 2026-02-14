@@ -58,9 +58,6 @@ describe('AddToDashboardModal', () => {
       );
     });
 
-    const titleInput = await screen.findByPlaceholderText('Enter save search name');
-    fireEvent.change(titleInput, { target: { value: 'My Saved Explore' } });
-
     // Wait for dashboards to load
     await waitFor(() => {
       expect(screen.getByTestId('selectExistingDashboard')).toBeInTheDocument();
@@ -89,7 +86,6 @@ describe('AddToDashboardModal', () => {
     await waitFor(() =>
       expect(mockOnConfirm).toHaveBeenCalledWith(
         expect.objectContaining({
-          newTitle: 'My Saved Explore',
           mode: 'existing',
           selectDashboard: expect.objectContaining({ id: 'dash-2' }),
         })
@@ -115,9 +111,6 @@ describe('AddToDashboardModal', () => {
     const newDashboardInput = await screen.findByPlaceholderText('Enter dashboard name');
     fireEvent.change(newDashboardInput, { target: { value: 'New Dashboard' } });
 
-    const titleInput = await screen.findByPlaceholderText('Enter save search name');
-    fireEvent.change(titleInput, { target: { value: 'Explore Title' } });
-
     const addButton = screen.getByRole('button', { name: 'Add' });
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Add' })).toBeEnabled();
@@ -129,27 +122,10 @@ describe('AddToDashboardModal', () => {
       expect(mockOnConfirm).toHaveBeenCalledWith(
         expect.objectContaining({
           newDashboardName: 'New Dashboard',
-          newTitle: 'Explore Title',
           mode: 'new',
         })
       )
     );
-  });
-
-  it('disables "Add" button when title is empty', async () => {
-    await act(async () => {
-      render(
-        <AddToDashboardModal
-          savedObjectsClient={mockSavedObjectsClient}
-          onConfirm={mockOnConfirm}
-          onCancel={mockOnCancel}
-          savedExploreId="explore-1"
-        />
-      );
-    });
-
-    const addButton = await screen.findByRole('button', { name: 'Add' });
-    expect(addButton).toBeDisabled();
   });
 
   it('calls onCancel when cancel button is clicked', async () => {
@@ -164,7 +140,7 @@ describe('AddToDashboardModal', () => {
       );
     });
 
-    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    const cancelButton = screen.getByTestId('saveToDashboardCancelButton');
     fireEvent.click(cancelButton);
 
     expect(mockOnCancel).toHaveBeenCalled();
@@ -334,59 +310,6 @@ describe('AddToDashboardModal', () => {
         searchFields: ['title'],
         perPage: 100,
       });
-    });
-  });
-
-  it('shows duplicate title warning when title already exists', async () => {
-    // Mock the onConfirm to call handleTitleDuplicate immediately
-    mockOnConfirm.mockImplementation((props) => {
-      props.onTitleDuplicate();
-    });
-
-    await act(async () => {
-      render(
-        <AddToDashboardModal
-          savedObjectsClient={mockSavedObjectsClient}
-          onConfirm={mockOnConfirm}
-          onCancel={mockOnCancel}
-          savedExploreId="explore-1"
-        />
-      );
-    });
-
-    const titleInput = await screen.findByPlaceholderText('Enter save search name');
-    fireEvent.change(titleInput, { target: { value: 'Test Title' } });
-
-    // Wait for dashboard selection
-    await waitFor(() => {
-      expect(screen.getByTestId('selectExistingDashboard')).toBeInTheDocument();
-    });
-
-    const comboBoxInput = screen.getByTestId('selectExistingDashboard').querySelector('input');
-    fireEvent.click(comboBoxInput!);
-
-    // Select Dashboard One from the dropdown
-    await waitFor(() => {
-      const option = screen.getByText('Dashboard One');
-      fireEvent.click(option);
-    });
-
-    const addButton = screen.getByRole('button', { name: 'Add' });
-
-    await waitFor(() => {
-      expect(addButton).toBeEnabled();
-    });
-
-    fireEvent.click(addButton);
-
-    await waitFor(() => {
-      expect(mockOnConfirm).toHaveBeenCalled();
-    });
-
-    // Check for duplicate warning callout
-    await waitFor(() => {
-      expect(screen.getByTestId('titleDupicateWarnMsg')).toBeInTheDocument();
-      expect(screen.getByText('This object already exists')).toBeInTheDocument();
     });
   });
 });

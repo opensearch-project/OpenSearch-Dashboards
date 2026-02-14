@@ -16,6 +16,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 import { StateTimeLineExclusiveVisOptions } from './state_timeline_exclusive_vis_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type StateTimeLineVisStyleControlsProps = StyleControlsProps<StateTimeLineChartStyle>;
 
@@ -36,6 +37,9 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -96,6 +100,7 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

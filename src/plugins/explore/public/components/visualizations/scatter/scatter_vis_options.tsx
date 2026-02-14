@@ -17,6 +17,7 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyle>;
 
@@ -37,6 +38,9 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -98,6 +102,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

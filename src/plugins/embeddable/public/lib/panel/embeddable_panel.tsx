@@ -356,7 +356,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ),
     ];
 
-    const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
+    const sortedActions = [...regularActions, ...extraActions]
+      .sort(sortByOrderField)
+      .filter(removeById(disabledActions ?? []));
 
     return await buildContextMenuForActions({
       actions: sortedActions.map((action) => ({

@@ -12,14 +12,15 @@ export interface StyleAccordionProps {
   id: string;
   accordionLabel: React.ReactNode;
   initialIsOpen: boolean;
+  children?: React.ReactNode;
 }
 
-export const StyleAccordion: React.FC<StyleAccordionProps> = ({
+export const StyleAccordion = ({
   id,
   accordionLabel,
   initialIsOpen,
   children,
-}) => {
+}: StyleAccordionProps) => {
   return (
     <EuiPanel
       paddingSize="none"

@@ -122,7 +122,6 @@ export const createRegularHeatmap = (
     const yAxis = axisConfig.yAxis;
 
     const valueField = axisColumnMappings?.color?.column;
-    const valueName = axisColumnMappings?.color?.name;
 
     if (!xAxis || !yAxis || !valueField) {
       throw Error('Missing axis config for heatmap chart');
@@ -138,7 +137,6 @@ export const createRegularHeatmap = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${valueName} by ${xAxis?.name} and ${yAxis?.name}`,
         addTrigger: false,
         legend: { show: styles.addLegend },
       }),

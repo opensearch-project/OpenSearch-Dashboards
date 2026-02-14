@@ -75,7 +75,7 @@ export const createSimpleAreaChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
+      createBaseConfig({ legend: { show: false } }),
       buildAxisConfigs,
       applyTimeRange,
       createAreaSeries({
@@ -252,9 +252,6 @@ export const createMultiAreaChart = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} Over Time by ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        }`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
@@ -452,9 +449,6 @@ export const createFacetedMultiAreaChart = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} Over Time by ${
-          axisColumnMappings?.[AxisRole.COLOR]?.name
-        } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
@@ -670,7 +664,6 @@ export const createCategoryAreaChart = (
         convertTo2DArray(allColumns)
       ),
       createBaseConfig({
-        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
         legend: { show: false },
       }),
       buildAxisConfigs,
@@ -821,7 +814,6 @@ export const createStackedAreaChart = (
         convertTo2DArray()
       ),
       createBaseConfig({
-        title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
         legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,

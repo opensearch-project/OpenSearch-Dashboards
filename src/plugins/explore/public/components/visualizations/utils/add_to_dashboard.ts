@@ -30,7 +30,7 @@ export const addToDashboard = async (
     newDashboardName?: string;
     createDashboardOptions?: {
       isTitleDuplicateConfirmed: boolean;
-      onTitleDuplicate: () => void;
+      onTitleDuplicate?: () => void;
     };
     existingDashboardId?: string;
   }

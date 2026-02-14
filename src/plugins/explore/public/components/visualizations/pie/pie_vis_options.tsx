@@ -13,6 +13,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type PieVisStyleControlsProps = StyleControlsProps<PieChartStyle>;
 
@@ -33,6 +34,9 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -65,6 +69,7 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
           />
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

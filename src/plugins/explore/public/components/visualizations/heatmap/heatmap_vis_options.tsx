@@ -16,6 +16,7 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyle>;
 
@@ -36,6 +37,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   // Determine if the legend should be shown based on the registration of a COLOR field
   const shouldShowLegend = !!axisColumnMappings?.[AxisRole.COLOR];
@@ -96,6 +100,7 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

@@ -26,7 +26,7 @@ export async function saveSavedExplore({
 }: {
   savedExplore: SavedExplore;
   newTitle: string;
-  saveOptions: { isTitleDuplicateConfirmed: boolean; onTitleDuplicate: () => void };
+  saveOptions: { isTitleDuplicateConfirmed: boolean; onTitleDuplicate?: () => void };
   searchContext: ExecutionContextSearch;
   services: Partial<CoreStart> & ExploreServices;
   startSyncingQueryStateWithUrl: () => void;
