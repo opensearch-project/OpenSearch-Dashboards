@@ -23,7 +23,7 @@ export const ToolCallGroup = ({ toolCalls }: { toolCalls: TimelineToolCall[] }) 
             <EuiIcon size="m" type="checkInCircleEmpty" color="success" />
           </EuiFlexItem>
           <EuiFlexItem>
-            {i18n.translate('chat.tooCallGroup.buttonLabel', {
+            {i18n.translate('chat.toolCallGroup.buttonLabel', {
               defaultMessage: '{toolCount} tasks performed',
               values: {
                 toolCount: toolCalls.length,
