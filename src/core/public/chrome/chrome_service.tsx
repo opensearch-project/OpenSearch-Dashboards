@@ -326,6 +326,7 @@ export class ChromeService {
                 opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
+                keyboardShortcutService={keyboardShortcut}
               />
             </I18nProvider>
           );
