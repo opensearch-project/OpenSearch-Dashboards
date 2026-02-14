@@ -298,7 +298,7 @@ const getCustomizedRenderOptions = ({
       result = toolCall.result;
     }
   }
-  // Also try to parse arguments from toolCall.arguuments
+  // Also try to parse arguments from toolCall.arguments
   if (!args && toolCall.arguments) {
     try {
       args = JSON.parse(toolCall.arguments);

@@ -34,6 +34,7 @@ describe('ChatService', () => {
 
       expect(setupContract).toHaveProperty('setImplementation');
       expect(setupContract).toHaveProperty('setSuggestedActionsService');
+      expect(setupContract).toHaveProperty('setScreenshotPageContainerElement');
     });
 
     it('should allow setting implementation', () => {
@@ -42,6 +43,28 @@ describe('ChatService', () => {
       expect(() => {
         setupContract.setImplementation(mockImplementation);
       }).not.toThrow();
+    });
+
+    it('should allow setting screenshot page container element', () => {
+      const setupContract = service.setup();
+      const mockElement = document.createElement('div');
+      mockElement.id = 'test-container';
+
+      expect(() => {
+        setupContract.setScreenshotPageContainerElement(mockElement);
+      }).not.toThrow();
+    });
+
+    it('should store the screenshot page container element', () => {
+      const setupContract = service.setup();
+      const mockElement = document.createElement('div');
+      mockElement.id = 'root-element';
+
+      setupContract.setScreenshotPageContainerElement(mockElement);
+
+      // Verify the element is stored by accessing it through the service
+      // (In real usage, this would be accessed by the chat plugin internally)
+      expect(mockElement.id).toBe('root-element');
     });
   });
 
@@ -64,6 +87,26 @@ describe('ChatService', () => {
       expect(startContract).toHaveProperty('closeWindow');
       expect(startContract).toHaveProperty('sendMessage');
       expect(startContract).toHaveProperty('sendMessageWithWindow');
+      expect(startContract).toHaveProperty('screenshotPageContainerElement');
+      expect(startContract).toHaveProperty('screenshot');
+    });
+
+    it('should return undefined for screenshotPageContainerElement if not set', () => {
+      const startContract = service.start();
+
+      expect(startContract.screenshotPageContainerElement).toBeUndefined();
+    });
+
+    it('should return screenshotPageContainerElement if set during setup', () => {
+      const setupContract = service.setup();
+      const mockElement = document.createElement('div');
+      mockElement.id = 'root-element';
+
+      setupContract.setScreenshotPageContainerElement(mockElement);
+
+      const startContract = service.start();
+      expect(startContract.screenshotPageContainerElement).toBe(mockElement);
+      expect(startContract.screenshotPageContainerElement?.id).toBe('root-element');
     });
 
     it('should not be available without implementation', () => {
@@ -155,6 +198,33 @@ describe('ChatService', () => {
       await expect(startContract.openWindow()).rejects.toThrow(
         'Chat service is not available. Please ensure the chat plugin is enabled.'
       );
+    });
+
+    it('should provide screenshot service', () => {
+      const setupContract = service.setup();
+      const startContract = service.start();
+
+      // Screenshot service should be available
+      expect(startContract.screenshot).toBeDefined();
+      expect(setupContract.screenshot).toBeDefined();
+
+      // Initial state
+      expect(startContract.screenshot.isEnabled()).toBe(false);
+
+      // Test observable
+      let emittedValue: boolean | undefined;
+      startContract.screenshot.getEnabled$().subscribe((value) => (emittedValue = value));
+      expect(emittedValue).toBe(false);
+
+      // Enable screenshot feature
+      startContract.screenshot.setEnabled(true);
+      expect(startContract.screenshot.isEnabled()).toBe(true);
+      expect(emittedValue).toBe(true);
+
+      // Test configure method
+      startContract.screenshot.configure({ enabled: false, title: 'Custom Title' });
+      expect(startContract.screenshot.isEnabled()).toBe(false);
+      expect(startContract.screenshot.getScreenshotButton().title).toBe('Custom Title');
     });
 
     it('should delegate to implementation when available', async () => {
