@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import src from '!!raw-loader!./worker.js';
+import src from './worker.js?raw';
 
 export const workerModule = {
   id: 'sense_editor/mode/worker',

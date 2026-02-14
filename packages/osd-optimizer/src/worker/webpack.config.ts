@@ -208,6 +208,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           ],
         },
         {
+          resourceQuery: /raw/,
+          type: 'asset/source',
+        },
+        {
           test: /\.css$/,
           include: /node_modules/,
           type: 'javascript/auto',
@@ -306,6 +310,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(j|t)sx?$/,
+          resourceQuery: { not: /raw/ },
           exclude: [
             /* vega-lite, reactflow and some of its dependencies don't have es5 builds
              * so we need to build from source and transpile for webpack v4

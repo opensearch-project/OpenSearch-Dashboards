@@ -29,6 +29,6 @@
  */
 
 // @ts-ignore
-import defaultSpec from '!!raw-loader!./default.spec.hjson';
+import defaultSpec from './default.spec.hjson?raw';
 
 export const getDefaultSpec = () => defaultSpec;
