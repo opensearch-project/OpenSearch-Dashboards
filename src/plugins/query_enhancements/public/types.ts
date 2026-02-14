@@ -12,6 +12,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public'
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface QueryEnhancementsPluginSetup {
+  registerStrategySemaphore: (strategy: string, limit: number) => void;
   isQuerySummaryCollapsed$: BehaviorSubject<boolean>;
   resultSummaryEnabled$: BehaviorSubject<boolean>;
   isSummaryAgentAvailable$: BehaviorSubject<boolean>;
