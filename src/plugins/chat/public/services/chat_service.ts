@@ -16,8 +16,11 @@ import {
   ChatServiceStart,
   ChatWindowState,
   WorkspacesStart,
+  Event,
+  EventType,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
+import { ConversationHistoryService } from './conversation_history_service';
 
 export interface ChatState {
   messages: Message[];
@@ -58,6 +61,9 @@ export class ChatService {
   // Cache for datasourceId to avoid repeated lookups
   private cachedDataSourceId?: string;
 
+  // Conversation history service
+  public conversationHistoryService: ConversationHistoryService;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
@@ -68,6 +74,12 @@ export class ChatService {
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
+
+    // Initialize conversation history service
+    if (!coreChatService) {
+      throw new Error('Core chat service is required for conversation history');
+    }
+    this.conversationHistoryService = new ConversationHistoryService(coreChatService);
 
     // Try to restore existing state first
     const currentChatState = this.loadCurrentChatState();
@@ -416,7 +428,9 @@ export class ChatService {
     const runInput: RunAgentInput = {
       threadId: this.getThreadId(),
       runId: this.generateRunId(),
-      messages: [...messages, userMessage],
+      messages: this.conversationHistoryService.getMemoryProvider().includeFullHistory
+        ? [...messages, userMessage]
+        : [userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
       context, // All contexts (static + dynamic) with stringified values
       state: {}, // Empty for agent internal use only
@@ -596,6 +610,15 @@ export class ChatService {
   public updateCurrentMessages(messages: Message[]): void {
     this.currentMessages = messages;
     this.saveCurrentChatState();
+
+    // Save to conversation history (async but don't await to avoid blocking)
+    if (messages.length > 0) {
+      const threadId = this.getThreadId();
+      this.conversationHistoryService.saveConversation(threadId, messages).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to save conversation to history:', error);
+      });
+    }
   }
 
   private clearDynamicContextFromStore(): void {
@@ -630,6 +653,31 @@ export class ChatService {
 
     // Reset AgUiAgent connection state to clear any aborted controllers
     this.resetConnection();
+  }
+
+  /**
+   * Load a conversation from history
+   * Returns AG-UI event array for proper state restoration
+   */
+  public async loadConversation(threadId: string): Promise<Event[] | null> {
+    const events = await this.conversationHistoryService.getConversation(threadId);
+    if (!events) {
+      return null;
+    }
+
+    // Set the thread ID in core service
+    if (this.coreChatService) {
+      this.coreChatService.setThreadId(threadId);
+    }
+
+    // Extract messages from MESSAGES_SNAPSHOT event for current state management
+    const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
+    if (snapshotEvent && 'messages' in snapshotEvent) {
+      this.currentMessages = snapshotEvent.messages;
+      this.saveCurrentChatState();
+    }
+
+    return events;
   }
 
   /**

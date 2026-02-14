@@ -36,6 +36,8 @@ const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => {
     suggestedActionsService: undefined,
     setScreenshotPageContainerElement: jest.fn(),
     screenshot: createScreenshotServiceMock(),
+    setMemoryProvider: jest.fn(),
+    getMemoryProvider: jest.fn(),
   };
 };
 
@@ -74,6 +76,7 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   suggestedActionsService: undefined,
   screenshotPageContainerElement: undefined,
   screenshot: createScreenshotServiceMock(),
+  getMemoryProvider: jest.fn(),
 });
 
 export const coreChatServiceMock = {

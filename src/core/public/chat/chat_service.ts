@@ -11,8 +11,10 @@ import {
   ChatImplementationFunctions,
   Message,
   ChatWindowState,
+  ConversationMemoryProvider,
 } from './types';
 import { ChatScreenshotService } from './screenshot_service';
+import { LocalStorageMemoryProvider } from './local_storage_memory_provider';
 
 /**
  * Core chat service - manages infrastructure state
@@ -21,6 +23,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   private implementation?: ChatImplementationFunctions;
   private suggestedActionsService?: { registerProvider(provider: any): void };
   private screenshotService: ChatScreenshotService;
+  private memoryProvider: ConversationMemoryProvider;
 
   // Core-managed infrastructure state
   private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
@@ -34,6 +37,8 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
 
   constructor() {
     this.screenshotService = new ChatScreenshotService();
+    // Initialize with default LocalStorage provider
+    this.memoryProvider = new LocalStorageMemoryProvider();
   }
 
   private generateThreadId(): string {
@@ -59,6 +64,14 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       },
 
       screenshot: this.screenshotService,
+
+      setMemoryProvider: (provider: ConversationMemoryProvider) => {
+        this.memoryProvider = provider;
+      },
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
     };
   }
 
@@ -177,6 +190,10 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
 
       // Screenshot service
       screenshot: this.screenshotService,
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
     };
   }
 
