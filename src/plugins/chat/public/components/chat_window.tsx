@@ -6,6 +6,8 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
+import moment from "moment";
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -26,6 +28,8 @@ import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
 import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
+import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
+import "./chat_window.scss"
 
 export interface ChatWindowInstance {
   startNewChat: ()=>void;
@@ -59,6 +63,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
   const loadingMessageIdRef = useRef<string | null>(null);
+  const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
+  const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -197,7 +203,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         id: userMessage.id,
         role: 'user',
         content: userMessage.content,
-        rawMessage: rawMessage || messageContent,  // For regular messages, raw and content are the same
+        rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,  // For regular messages, raw and content are the same
       };
 
       // Add loading assistant message
@@ -247,6 +253,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           isStreamingRef.current = false;
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
+          setScreenshotData(undefined);
         },
       });
 
@@ -267,10 +274,26 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Use ref for immediate check since React 18 batches state updates
     if (!messageContent || isStreamingRef.current) return;
 
-    setInput('');
-
     // Prepare additional messages for sending (but don't add to timeline yet)
-    const additionalMessages = options?.messages ?? [];
+    let additionalMessages = options?.messages ?? [];
+
+    // Only add screenshot data if messages not provided
+    if (!options?.messages && screenshotData) {
+        additionalMessages = [
+          {
+            role: 'user' as const,
+            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            content: [
+              {
+                type: 'binary' as const,
+                mimeType: screenshotData.mimeType,
+                data: screenshotData.base64,
+              },
+            ],
+        }]
+    }
+
+    setInput('');
 
     // Merge additional messages with current timeline for sending
     const messagesToSend = [...timeline, ...additionalMessages];
@@ -381,6 +404,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [pendingConfirmation, confirmationService]);
 
+  const handleCaptureScreenshot = useCallback(async ()=>{
+    setScreenshotData(undefined);
+    const imageData = await capturePageContainer();
+    if(imageData){
+      setScreenshotData({...imageData, pageTitle: document.title, createdAt: moment()});
+    }
+
+  }, [capturePageContainer]);
+
   const currentState = service.getCurrentState();
   const enhancedProps = {
     toolCallStates: currentState.toolCallStates,
@@ -457,14 +489,48 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         />
       )}
 
+      {
+        (isCapturing || screenshotData) && (
+          <div className={`chatWindow__screenshotRow ${!screenshotData && isCapturing ? 'capturing' : ''}`}>
+            {
+              screenshotData && (
+                <>
+                  <img src={`data:${screenshotData.mimeType || 'image/jpeg'};base64,${screenshotData.base64}`} alt={`Screenshot of ${screenshotData.pageTitle}`} />
+                  <div className='chatWindow__screenshotRow__right'>
+                    <div className='chatWindow__screenshotRow__right__pageTitle'>
+                      <EuiText size='xs'>{screenshotData.pageTitle}</EuiText>
+                    </div>
+                    <div className='chatWindow__screenshotRow__right__timeAndButtons'>
+                      <div />
+                      <div>
+                        <EuiButtonIcon disabled={isStreaming} color='text' onClick={handleCaptureScreenshot} iconType="refresh" size='xs' aria-label='Recapture' />
+                        <EuiButtonIcon disabled={isStreaming} color='text' onClick={()=>{setScreenshotData(undefined)}} iconType="cross" size='xs' aria-label='Remove screenshot' />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )
+            }
+            {
+              isCapturing && !screenshotData && (
+                <EuiLoadingSpinner size='m' />
+              )
+            }
+          </div>
+        )
+      }
+
       <ChatInput
         layoutMode={layoutMode}
         input={input}
+        isCapturing={isCapturing}
         isStreaming={isStreaming}
         onInputChange={setInput}
         onSend={handleSend}
-        onStop={handleStop}
         onKeyDown={handleKeyDown}
+        onStop={handleStop}
+        includeScreenShotEnabled={screenshotFeatureEnabled}
+        onCaptureScreenshot={handleCaptureScreenshot}
       />
     </ChatContainer>
   );
