@@ -7,7 +7,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from './chat_header_button';
-import type { Message } from '../../common/types';
+import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
+import { convertTimelineToMessageRows } from './chat_messages';
 
 // Mock the child components
 jest.mock('./message_row', () => ({
@@ -329,6 +330,282 @@ describe('ChatMessages', () => {
       expect(messages).toHaveLength(2);
       expect(messages[0].textContent).toBe('First');
       expect(messages[1].textContent).toBe('Second');
+    });
+  });
+});
+
+describe('convertTimelineToMessageRows', () => {
+  it('should handle empty timeline and simple messages without tool calls', () => {
+    // Empty timeline
+    expect(convertTimelineToMessageRows([])).toEqual([]);
+
+    // Simple user and assistant messages
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Hello' } as UserMessage,
+      { id: 'msg-2', role: 'assistant', content: 'Hi there!' } as AssistantMessage,
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual(timeline[0]);
+    expect(result[1]).toEqual(timeline[1]);
+  });
+
+  it('should group completed tool calls from consecutive assistant messages', () => {
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Do tasks' } as UserMessage,
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'Starting',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'task1', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      { id: 'tool-result-1', role: 'tool', content: 'Done 1', toolCallId: 'tool-1' } as ToolMessage,
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'tool-2',
+            type: 'function',
+            function: { name: 'task2', arguments: '{}' },
+          },
+          {
+            id: 'tool-3',
+            type: 'function',
+            function: { name: 'task3', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      { id: 'tool-result-2', role: 'tool', content: 'Done 2', toolCallId: 'tool-2' } as ToolMessage,
+      { id: 'tool-result-3', role: 'tool', content: 'Done 3', toolCallId: 'tool-3' } as ToolMessage,
+      { id: 'msg-4', role: 'assistant', content: 'All complete' } as AssistantMessage,
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+
+    expect(result).toHaveLength(4);
+    expect(result[0]).toMatchObject({ role: 'user' });
+    expect(result[1]).toMatchObject({ role: 'assistant', id: 'msg-2' });
+
+    // All three tool calls grouped together
+    expect(result[2]).toMatchObject({ role: 'toolCallGroup' });
+    const toolCallGroup = result[2] as { role: 'toolCallGroup'; toolCalls: any[] };
+    expect(toolCallGroup.toolCalls).toHaveLength(3);
+    expect(toolCallGroup.toolCalls[0]).toMatchObject({
+      id: 'tool-1',
+      toolName: 'task1',
+      status: 'completed',
+      result: 'Done 1',
+    });
+    expect(toolCallGroup.toolCalls[1]).toMatchObject({
+      id: 'tool-2',
+      toolName: 'task2',
+      status: 'completed',
+    });
+    expect(toolCallGroup.toolCalls[2]).toMatchObject({
+      id: 'tool-3',
+      toolName: 'task3',
+      status: 'completed',
+    });
+
+    expect(result[3]).toMatchObject({ role: 'assistant', id: 'msg-4' });
+  });
+
+  it('should display running tool calls individually without grouping', () => {
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Search' } as UserMessage,
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'Searching...',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'search', arguments: '{"query": "test"}' },
+          },
+        ],
+      } as AssistantMessage,
+      // No tool result - tool is running
+      { id: 'msg-3', role: 'assistant', content: 'Processing continues' } as AssistantMessage,
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+
+    // Should continue processing and show all messages
+    expect(result).toHaveLength(4);
+    expect(result[0]).toMatchObject({ role: 'user' });
+    expect(result[1]).toMatchObject({ role: 'assistant', id: 'msg-2' });
+
+    // Running tool shown individually
+    expect(result[2]).toMatchObject({ role: 'toolCall' });
+    const toolCallRow = result[2] as { role: 'toolCall'; toolCall: any };
+    expect(toolCallRow.toolCall).toMatchObject({
+      id: 'tool-1',
+      toolName: 'search',
+      status: 'running',
+    });
+
+    // Subsequent message is included
+    expect(result[3]).toMatchObject({ role: 'assistant', id: 'msg-3' });
+  });
+
+  it('should not group tool calls when batch is incomplete (no closing message)', () => {
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Do tasks' } as UserMessage,
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'task1', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      { id: 'tool-result-1', role: 'tool', content: 'Done 1', toolCallId: 'tool-1' } as ToolMessage,
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'tool-2',
+            type: 'function',
+            function: { name: 'task2', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      { id: 'tool-result-2', role: 'tool', content: 'Done 2', toolCallId: 'tool-2' } as ToolMessage,
+      // No closing assistant message with content - batch incomplete
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+
+    // Should not group - display individually since batch is incomplete, continue processing
+    expect(result).toHaveLength(5);
+    expect(result[0]).toMatchObject({ role: 'user' });
+    expect(result[1]).toMatchObject({ role: 'assistant', id: 'msg-2' });
+    expect(result[2]).toMatchObject({ role: 'toolCall' });
+
+    const toolCallRow1 = result[2] as { role: 'toolCall'; toolCall: any };
+    expect(toolCallRow1.toolCall).toMatchObject({
+      id: 'tool-1',
+      toolName: 'task1',
+      status: 'completed',
+    });
+
+    // Continue processing - next assistant message and its tool call
+    expect(result[3]).toMatchObject({ role: 'assistant', id: 'msg-3' });
+    expect(result[4]).toMatchObject({ role: 'toolCall' });
+
+    const toolCallRow2 = result[4] as { role: 'toolCall'; toolCall: any };
+    expect(toolCallRow2.toolCall).toMatchObject({
+      id: 'tool-2',
+      toolName: 'task2',
+      status: 'completed',
+    });
+  });
+
+  it('should not group when continuation messages have running tools', () => {
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Do tasks' } as UserMessage,
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'task1', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      { id: 'tool-result-1', role: 'tool', content: 'Done 1', toolCallId: 'tool-1' } as ToolMessage,
+      {
+        id: 'msg-3',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'tool-2',
+            type: 'function',
+            function: { name: 'task2', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      // No result for tool-2 - it's running
+      { id: 'msg-4', role: 'assistant', content: 'Still processing' } as AssistantMessage,
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+
+    // Should not group when continuation has running tools, continue processing
+    expect(result).toHaveLength(6);
+    expect(result[0]).toMatchObject({ role: 'user' });
+    expect(result[1]).toMatchObject({ role: 'assistant', id: 'msg-2' });
+    expect(result[2]).toMatchObject({ role: 'toolCall' });
+
+    const toolCallRow1 = result[2] as { role: 'toolCall'; toolCall: any };
+    expect(toolCallRow1.toolCall).toMatchObject({
+      id: 'tool-1',
+      toolName: 'task1',
+      status: 'completed',
+    });
+
+    // Continue processing - next assistant message with running tool
+    expect(result[3]).toMatchObject({ role: 'assistant', id: 'msg-3' });
+    expect(result[4]).toMatchObject({ role: 'toolCall' });
+
+    const toolCallRow2 = result[4] as { role: 'toolCall'; toolCall: any };
+    expect(toolCallRow2.toolCall).toMatchObject({
+      id: 'tool-2',
+      toolName: 'task2',
+      status: 'running',
+    });
+
+    // Subsequent message is included
+    expect(result[5]).toMatchObject({ role: 'assistant', id: 'msg-4' });
+  });
+
+  it('should preserve error status for failed tool calls', () => {
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Do something' } as UserMessage,
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'failing_tool', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+      {
+        id: 'tool-result-1',
+        role: 'tool',
+        content: 'Error occurred',
+        toolCallId: 'tool-1',
+        error: 'Tool execution failed',
+      } as ToolMessage,
+      { id: 'msg-3', role: 'assistant', content: 'Sorry, error' } as AssistantMessage,
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+
+    expect(result).toHaveLength(4);
+    const toolCallGroup = result[2] as { role: 'toolCallGroup'; toolCalls: any[] };
+    expect(toolCallGroup.toolCalls[0]).toMatchObject({
+      id: 'tool-1',
+      status: 'error',
+      result: 'Error occurred',
     });
   });
 });
