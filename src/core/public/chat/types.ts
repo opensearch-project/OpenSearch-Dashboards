@@ -4,6 +4,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { ChatScreenshotServiceInterface } from './screenshot_service';
 
 interface TextInputContent {
   type: 'text';
@@ -223,6 +224,17 @@ export interface ChatServiceSetup {
   suggestedActionsService?: {
     registerProvider(provider: any): void;
   };
+
+  /**
+   * Set the DOM element for screenshot page container
+   * This will be called by CoreSystem with the rootDomElement
+   */
+  setScreenshotPageContainerElement(element: HTMLElement): void;
+
+  /**
+   * Screenshot service for managing screenshot capture functionality
+   */
+  screenshot: ChatScreenshotServiceInterface;
 }
 
 /**
@@ -236,4 +248,16 @@ export interface ChatServiceStart extends ChatServiceInterface {
   suggestedActionsService?: {
     registerProvider(provider: any): void;
   };
+
+  /**
+   * DOM element for screenshot page container
+   * This element can be used to capture screenshots of the page
+   * @deprecated Use screenshot.getPageContainerElement() instead
+   */
+  screenshotPageContainerElement?: HTMLElement;
+
+  /**
+   * Screenshot service for managing screenshot capture functionality
+   */
+  screenshot: ChatScreenshotServiceInterface;
 }

@@ -5,12 +5,39 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ChatServiceSetup, ChatServiceStart } from './types';
+import { ChatScreenshotServiceInterface } from './screenshot_service';
 
-const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => ({
-  setImplementation: jest.fn(),
-  setSuggestedActionsService: jest.fn(),
-  suggestedActionsService: undefined,
+const createScreenshotServiceMock = (): jest.Mocked<ChatScreenshotServiceInterface> => ({
+  isEnabled: jest.fn().mockReturnValue(false),
+  getEnabled$: jest.fn().mockReturnValue(new BehaviorSubject<boolean>(false)),
+  setEnabled: jest.fn(),
+  setPageContainerElement: jest.fn(),
+  getPageContainerElement: jest.fn().mockReturnValue(undefined),
+  setScreenshotButton: jest.fn(),
+  getScreenshotButton: jest.fn().mockReturnValue({
+    title: 'Add dashboard screenshot',
+    iconType: 'image',
+    enabled: true,
+  }),
+  getScreenshotButton$: jest.fn().mockReturnValue(
+    new BehaviorSubject({
+      title: 'Add dashboard screenshot',
+      iconType: 'image',
+      enabled: true,
+    })
+  ),
+  configure: jest.fn(),
 });
+
+const createSetupContractMock = (): jest.Mocked<ChatServiceSetup> => {
+  return {
+    setImplementation: jest.fn(),
+    setSuggestedActionsService: jest.fn(),
+    suggestedActionsService: undefined,
+    setScreenshotPageContainerElement: jest.fn(),
+    screenshot: createScreenshotServiceMock(),
+  };
+};
 
 const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   isAvailable: jest.fn().mockReturnValue(false),
@@ -45,9 +72,12 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   onWindowOpen: jest.fn().mockReturnValue(() => {}),
   onWindowClose: jest.fn().mockReturnValue(() => {}),
   suggestedActionsService: undefined,
+  screenshotPageContainerElement: undefined,
+  screenshot: createScreenshotServiceMock(),
 });
 
 export const coreChatServiceMock = {
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
+  createScreenshotService: createScreenshotServiceMock,
 };

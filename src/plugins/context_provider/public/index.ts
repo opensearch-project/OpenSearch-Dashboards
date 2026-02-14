@@ -32,6 +32,7 @@ export { AssistantActionService } from './services/assistant_action_service';
 export {
   AssistantActionProvider,
   AssistantActionContext,
+  AssistantActionContextValue,
 } from './contexts/assistant_action_context';
 export { GlobalAssistantProvider } from './providers/global_assistant_provider';
 export type { AssistantAction, RenderProps, ToolStatus } from './hooks/use_assistant_action';

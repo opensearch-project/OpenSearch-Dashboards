@@ -446,6 +446,8 @@ export {
   ChatImplementationFunctions,
   Message,
   ChatWindowState,
+  ChatScreenshotServiceInterface,
+  ChatScreenshotButton,
   ActivityType,
 } from './chat';
 
