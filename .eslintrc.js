@@ -175,6 +175,16 @@ module.exports = {
     },
 
     /**
+     * Disallow mathjs usage
+     */
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@osd/eslint/no-mathjs': 'error',
+      },
+    },
+
+    /**
      * New Platform client-side
      */
     {
