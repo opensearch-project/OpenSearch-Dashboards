@@ -104,6 +104,7 @@ describe('ChatService', () => {
       sendMessage: jest.fn(),
       sendMessageWithWindow: jest.fn(),
       suggestedActionsService: undefined,
+      getMemoryProvider: jest.fn().mockReturnValue({ includeFullHistory: false }),
     } as any;
 
     // Create mock agent

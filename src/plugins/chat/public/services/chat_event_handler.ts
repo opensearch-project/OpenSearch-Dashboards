@@ -13,6 +13,7 @@ import type {
   ToolCallArgsEvent,
   ToolCallEndEvent,
   ToolCallResultEvent,
+  MessagesSnapshotEvent,
 } from '../../common/events';
 import type {
   Message,
@@ -25,15 +26,6 @@ import { AssistantActionService } from '../../../context_provider/public';
 import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
 import { ConfirmationService } from './confirmation_service';
-
-// Timeline is now purely AG-UI Messages
-
-interface PendingToolCall {
-  id: string;
-  name: string;
-  args: string;
-  messageId?: string;
-}
 
 /**
  * Handles all chat event processing logic
@@ -96,6 +88,10 @@ export class ChatEventHandler {
 
       case EventType.TOOL_CALL_RESULT:
         this.handleToolCallResult(event as ToolCallResultEvent);
+        break;
+
+      case EventType.MESSAGES_SNAPSHOT:
+        await this.handleMessagesSnapshot(event as MessagesSnapshotEvent);
         break;
 
       case EventType.RUN_ERROR:
@@ -595,6 +591,18 @@ export class ChatEventHandler {
   }
 
   // timelineToMessages method removed - timeline is now directly AG-UI compatible
+
+  /**
+   * Handle messages snapshot - restore conversation state from saved messages
+   * Simply sets the timeline to the saved messages
+   */
+  private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
+    // Set timeline to snapshot messages
+    this.onTimelineUpdate(() => event.messages || []);
+
+    // Reset streaming state
+    this.onStreamingStateChange(false);
+  }
 
   /**
    * Clear all state (useful for resetting)
