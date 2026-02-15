@@ -123,7 +123,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [queryLanguage]);
 
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_query_bar',
+    id: 'focus_explore_query_bar',
     pluginId: 'explore',
     name: i18n.translate('explore.queryPanelEditor.focusQueryBarShortcut', {
       defaultMessage: 'Focus query bar',
