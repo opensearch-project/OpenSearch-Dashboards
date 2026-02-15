@@ -442,10 +442,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     return '';
   }, [timeline]);
 
-  useImperativeHandle(ref, ()=>({
-    startNewChat: ()=>handleNewChat(),
-    sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
+  // Build window instance object
+  const windowInstance = useMemo<ChatWindowInstance>(() => ({
+    startNewChat: () => handleNewChat(),
+    sendMessage: async ({content, messages}) => (await handleSendRef.current?.({input:content, messages}))
   }), [handleNewChat]);
+
+  // Expose instance methods via ref
+  useImperativeHandle(ref, () => windowInstance, [windowInstance]);
+
+  // Register with chatService and clean up on unmount
+  useEffect(() => {
+    chatService.setChatWindowInstance(windowInstance);
+
+    return () => {
+      chatService.clearChatWindowInstance();
+    };
+  }, [chatService, windowInstance]);
 
   return (
     <ChatContainer layoutMode={layoutMode}>
