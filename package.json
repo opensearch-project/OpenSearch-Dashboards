@@ -455,7 +455,7 @@
     "chromedriver": "^121.0.1",
     "classnames": "^2.3.1",
     "compare-versions": "3.5.1",
-    "cypress": "^13.6.0",
+    "cypress": "^14.0.0",
     "d3": "3.5.17",
     "d3-cloud": "1.2.5",
     "dedent": "^0.7.0",
