@@ -463,7 +463,7 @@
     "enzyme": "^3.11.0",
     "@cfaester/enzyme-adapter-react-18": "^0.8.0",
     "enzyme-to-json": "^3.5.0",
-    "eslint": "^6.8.0",
+    "eslint": "^9.0.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-ban": "^1.4.0",
