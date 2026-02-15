@@ -283,7 +283,7 @@ export class ExplorePlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         updater$: appStateUpdater.asObservable(),
-        order: 1000,
+        order: 500,
         workspaceAvailability: WorkspaceAvailability.insideWorkspace,
         euiIconType: 'inputOutput',
         defaultPath: '#/',
@@ -437,29 +437,30 @@ export class ExplorePlugin
       {
         id: PLUGIN_ID,
         category: undefined,
-        order: 300,
+        order: 500,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
     ];
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -721,7 +722,9 @@ export class ExplorePlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }
