@@ -11,6 +11,7 @@ import {
   DEFAULT_TRACE_COLUMNS_SETTING,
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
+  USE_CLASSIC_DISCOVER_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -53,6 +54,18 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('explore.advancedSettings.enableExperimentalText', {
       defaultMessage:
         'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
+    }),
+    category: ['explore'],
+    schema: schema.boolean(),
+  },
+  [USE_CLASSIC_DISCOVER_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.useClassicDiscoverTitle', {
+      defaultMessage: 'Use classic Discover',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.useClassicDiscoverText', {
+      defaultMessage:
+        'Switch back to the classic Discover experience instead of the new Explore experience in observability workspaces.',
     }),
     category: ['explore'],
     schema: schema.boolean(),
