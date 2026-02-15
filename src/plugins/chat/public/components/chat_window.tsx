@@ -21,6 +21,7 @@ import type {
   Message,
   UserMessage,
 } from '../../common/types';
+import { ActivityType } from '../../common/types';
 import { ChatLayoutMode } from './chat_header_button';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
@@ -32,13 +33,13 @@ import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_pa
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
-  startNewChat: ()=>void;
-  sendMessage: (options:{content: string; messages?: Message[]})=>Promise<unknown>;
+  startNewChat: () => void;
+  sendMessage: (options: {content: string; messages?: Message[]}) => Promise<unknown>;
 }
 
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
-  onClose: ()=>void;
+  onClose: () => void;
 }
 
 /**
@@ -296,7 +297,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setInput('');
 
     // Merge additional messages with current timeline for sending
-    const messagesToSend = [...timeline, ...additionalMessages];
+    // Filter out activity messages - they are UI-only and shouldn't be sent to the agent
+    const messagesToSend = [...timeline, ...additionalMessages].filter(
+      (msg) => msg.role !== 'activity'
+    );
 
     // Check if this is a slash command
     const commandResult = await slashCommandRegistry.execute(messageContent);
@@ -360,7 +364,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Clear any streaming state and input
     setInput('');
 
-    subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
+    // Filter out activity messages - they are UI-only and shouldn't be sent to the agent
+    const messagesToResend = [...truncatedTimeline, ...additionalMessages].filter(
+      (msg) => msg.role !== 'activity'
+    );
+    subscribeToMessageStream(textContent, messagesToResend);
   };
 
   const handleNewChat = useCallback(() => {
@@ -372,6 +380,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [chatService]);
 
   const handleStop = useCallback(() => {
+    // Guard: only stop if actively streaming (prevents spurious stop messages during linger window)
+    if (!isStreamingRef.current) return;
+
     // Abort the current streaming request
     chatService.abort();
 
@@ -390,7 +401,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
-  }, [chatService]);
+
+    // Add cancellation feedback message
+    // Use 'activity' role (AG-UI standard)
+    const cancelMessage: Message = {
+      id: `cancelled-${Date.now()}`,
+      role: 'activity',
+      activityType: ActivityType.STOP,
+      content: {
+        message: 'Execution stopped by user',
+      },
+    };
+    setTimeline((prev) => [...prev, cancelMessage]);
+
+    // 6. Clear event handler state
+    eventHandler.clearState();
+  }, [chatService, eventHandler]);
 
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {

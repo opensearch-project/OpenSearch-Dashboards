@@ -448,6 +448,7 @@ export {
   ChatWindowState,
   ChatScreenshotServiceInterface,
   ChatScreenshotButton,
+  ActivityType,
 } from './chat';
 
 export { debounce, getNonce } from './utils';

@@ -14,6 +14,8 @@ export {
   AssistantMessage,
   UserMessage,
   ToolMessage,
+  ActivityMessage,
+  ActivityType,
   ToolCall,
   FunctionCall,
   Role,

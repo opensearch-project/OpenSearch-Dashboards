@@ -451,6 +451,10 @@ export class ReactGraphNodes {
     // Keep all messages with valid content
     const prepared = messages
       .filter((msg) => {
+        // Filter out 'activity' role messages (AG-UI standard) - these are for UI display only
+        if (msg.role === 'activity') {
+          return false;
+        }
         // Keep all messages that have content (including empty arrays for assistant)
         // Bedrock needs to see the full conversation flow including tool use/result pairs
         if (msg.content === undefined || msg.content === null) {
