@@ -43,4 +43,21 @@ describe('DataExplorerApp', () => {
 
     expect(container).toMatchSnapshot();
   });
+
+  it('should render with deLayout--embed class when in embed mode', () => {
+    const view = createView();
+    const embedParams = {
+      ...params,
+      history: {
+        ...params.history,
+        location: {
+          ...params.history.location,
+          search: '?embed=true',
+        },
+      },
+    };
+    const { container } = render(<AppContainer view={view} params={embedParams as any} />);
+
+    expect(container.querySelector('.deLayout--embed')).toBeInTheDocument();
+  });
 });
