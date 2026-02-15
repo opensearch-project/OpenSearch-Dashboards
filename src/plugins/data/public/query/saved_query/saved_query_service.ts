@@ -54,6 +54,10 @@ export const createSavedQueryService = (
       throw new Error('Cannot create saved query without a title');
     }
 
+    if (!attributes.query?.query) {
+      throw new Error('Cannot create saved query without a valid query');
+    }
+
     const query: SerializedSavedQueryAttributes['query'] = {
       query:
         typeof attributes.query.query === 'string'
@@ -182,6 +186,10 @@ export const createSavedQueryService = (
       parsedQuery = isObject(parsedQuery) ? parsedQuery : queryString;
     } catch (error) {
       parsedQuery = queryString;
+    }
+
+    if (parsedQuery === null || parsedQuery === undefined) {
+      parsedQuery = '';
     }
 
     const savedQueryItem: SavedQueryAttributes = {
