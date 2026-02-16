@@ -49,8 +49,12 @@ export class ChatService {
   private readonly STORAGE_KEY = 'chat.currentState';
   private currentMessages: Message[] = [];
 
-  // ChatWindow ref for delegating sendMessage calls to proper timeline management
-  private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
+  // ChatWindow instance for delegating sendMessage calls to proper timeline management
+  private chatWindowInstance: ChatWindowInstance | null = null;
+
+  // Promise to track when window instance becomes available
+  private windowInstancePromise: Promise<ChatWindowInstance> | null = null;
+  private windowInstanceResolver: ((instance: ChatWindowInstance) => void) | null = null;
 
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
@@ -206,20 +210,51 @@ export class ChatService {
     return this.coreChatService.onWindowClose(callback);
   }
 
-  // ChatWindow ref management for proper timeline handling
-  public setChatWindowRef(ref: React.RefObject<ChatWindowInstance>): void {
-    this.chatWindowRef = ref;
+  // ChatWindow instance management for proper timeline handling
+  public setChatWindowInstance(instance: ChatWindowInstance): void {
+    this.chatWindowInstance = instance;
+
+    // Resolve the promise if someone is waiting for the instance
+    if (this.windowInstanceResolver) {
+      this.windowInstanceResolver(instance);
+      this.windowInstanceResolver = null;
+      this.windowInstancePromise = null;
+    }
   }
 
-  public clearChatWindowRef(): void {
-    this.chatWindowRef = null;
+  public clearChatWindowInstance(): void {
+    this.chatWindowInstance = null;
+    // Reset promise when instance is cleared
+    this.windowInstancePromise = null;
+    this.windowInstanceResolver = null;
   }
 
-  public async openWindow(): Promise<void> {
+  public async openWindow(): Promise<ChatWindowInstance> {
     if (!this.coreChatService) {
       throw new Error('Core chat service not available');
     }
+
+    // If window is already open and instance is available, return it immediately
+    if (this.isWindowOpen() && this.chatWindowInstance) {
+      return this.chatWindowInstance;
+    }
+
+    // Create a promise that will resolve when the window instance becomes available
+    const windowInstancePromise =
+      this.windowInstancePromise ||
+      new Promise<ChatWindowInstance>((resolve) => {
+        this.windowInstanceResolver = resolve;
+      });
+    if (!this.windowInstancePromise) {
+      this.windowInstancePromise = windowInstancePromise;
+    }
+
+    // Trigger window opening
     await this.coreChatService.openWindow();
+
+    // Wait for the window instance to be set (by setChatWindowInstance)
+    const instance = await windowInstancePromise;
+    return instance;
   }
 
   public async closeWindow(): Promise<void> {
@@ -237,45 +272,34 @@ export class ChatService {
     observable: any;
     userMessage: UserMessage;
   }> {
-    // Ensure window is open
-    await this.openWindow();
+    // Ensure window is open and get the window instance
+    const chatWindowInstance = await this.openWindow();
 
     // Clear conversation if requested (create new thread)
     if (options?.clearConversation) {
       this.newThread();
 
-      // If we have ChatWindow ref, also clear its conversation
-      if (this.chatWindowRef?.current) {
-        this.chatWindowRef.current.startNewChat();
+      // If we have ChatWindow instance, also clear its conversation
+      if (chatWindowInstance) {
+        chatWindowInstance.startNewChat();
       }
     }
 
-    // If ChatWindow is available, delegate to its sendMessage for proper timeline management
-    if (this.chatWindowRef?.current && this.isWindowOpen()) {
-      try {
-        await this.chatWindowRef.current.sendMessage({ content, messages });
+    await chatWindowInstance.sendMessage({ content, messages });
 
-        // Create a user message for consistency with the return type
-        const userMessage: UserMessage = {
-          id: this.generateMessageId(),
-          role: 'user',
-          content: content.trim(),
-        };
+    // Create a user message for consistency with the return type
+    const userMessage: UserMessage = {
+      id: this.generateMessageId(),
+      role: 'user',
+      content: content.trim(),
+    };
 
-        // Return a dummy observable since ChatWindow handles everything internally
-        const dummyObservable = new Observable((subscriber) => {
-          subscriber.complete();
-        });
+    // Return a dummy observable since ChatWindow handles everything internally
+    const dummyObservable = new Observable((subscriber) => {
+      subscriber.complete();
+    });
 
-        return { observable: dummyObservable, userMessage };
-      } catch (error) {
-        // Fall back to direct service call if delegation fails
-      }
-    }
-
-    // Fallback to direct service call
-    const result = await this.sendMessage(content, messages);
-    return result;
+    return { observable: dummyObservable, userMessage };
   }
 
   /**
