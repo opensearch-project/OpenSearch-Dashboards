@@ -439,6 +439,50 @@ describe('echarts_histogram_utils', () => {
 
       expect(series.emphasis?.focus).toBe('series');
     });
+
+    it('includes shadow properties in emphasis for hover glow effect (light mode)', () => {
+      const series = createBarSeries(
+        'test-id',
+        'Test',
+        testData,
+        '#54B399',
+        undefined,
+        undefined,
+        undefined,
+        false
+      );
+
+      expect(series.emphasis?.itemStyle?.opacity).toBe(0.85);
+      expect(series.emphasis?.itemStyle?.shadowBlur).toBe(4);
+      expect(series.emphasis?.itemStyle?.shadowColor).toBe('rgba(0, 0, 0, 0.15)');
+      expect(series.emphasis?.itemStyle?.shadowOffsetX).toBe(0);
+      expect(series.emphasis?.itemStyle?.shadowOffsetY).toBe(1);
+    });
+
+    it('includes shadow properties in emphasis for hover glow effect (dark mode)', () => {
+      const series = createBarSeries(
+        'test-id',
+        'Test',
+        testData,
+        '#54B399',
+        undefined,
+        undefined,
+        undefined,
+        true
+      );
+
+      expect(series.emphasis?.itemStyle?.opacity).toBe(0.85);
+      expect(series.emphasis?.itemStyle?.shadowBlur).toBe(4);
+      expect(series.emphasis?.itemStyle?.shadowColor).toBe('rgba(255, 255, 255, 0.5)');
+      expect(series.emphasis?.itemStyle?.shadowOffsetX).toBe(0);
+      expect(series.emphasis?.itemStyle?.shadowOffsetY).toBe(1);
+    });
+
+    it('does not override color in emphasis to allow ECharts default brightness shift', () => {
+      const series = createBarSeries('test-id', 'Test', testData, '#54B399');
+
+      expect(series.emphasis?.itemStyle?.color).toBeUndefined();
+    });
   });
 
   describe('createLineSeries', () => {
@@ -749,10 +793,11 @@ describe('echarts_histogram_utils', () => {
       expect((spec.series as any[])[1].data).toHaveLength(2);
     });
 
-    it('hides grid lines by default', () => {
+    it('configures dashed style on y-axis grid lines', () => {
       const spec = createHistogramSpec(mockChartData as any, defaultOptions);
 
       expect((spec.yAxis as any).splitLine.show).toBe(false);
+      expect((spec.yAxis as any).splitLine.lineStyle.type).toBe('dashed');
     });
   });
 });

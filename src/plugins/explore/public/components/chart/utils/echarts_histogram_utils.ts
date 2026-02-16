@@ -323,8 +323,11 @@ export function createBarSeries(
   color: string,
   markLine?: echarts.MarkLineComponentOption,
   markArea?: echarts.MarkAreaComponentOption,
-  stack?: string
+  stack?: string,
+  isDarkMode?: boolean
 ): echarts.BarSeriesOption {
+  const shadowColor = isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.15)';
+
   return {
     type: 'bar',
     id,
@@ -337,7 +340,11 @@ export function createBarSeries(
     emphasis: {
       focus: 'series',
       itemStyle: {
-        color,
+        opacity: 0.85,
+        shadowBlur: 4,
+        shadowColor,
+        shadowOffsetX: 0,
+        shadowOffsetY: 1,
       },
     },
     ...(stack && { stack }),
@@ -459,7 +466,8 @@ export function createHistogramSpec(
             seriesColor,
             isFirstSeries ? markLine : undefined,
             isFirstSeries ? markArea : undefined,
-            'total'
+            'total',
+            isDarkMode
           )
         );
       } else {
@@ -482,7 +490,16 @@ export function createHistogramSpec(
 
     if (chartType === 'HistogramBar') {
       series.push(
-        createBarSeries('discover-histogram', seriesName, data, seriesColor, markLine, markArea)
+        createBarSeries(
+          'discover-histogram',
+          seriesName,
+          data,
+          seriesColor,
+          markLine,
+          markArea,
+          undefined,
+          isDarkMode
+        )
       );
     } else {
       series.push(
@@ -515,6 +532,9 @@ export function createHistogramSpec(
       splitNumber: 3,
       splitLine: {
         show: false,
+        lineStyle: {
+          type: 'dashed',
+        },
       },
       axisLabel: {
         formatter: (value: number) => {
