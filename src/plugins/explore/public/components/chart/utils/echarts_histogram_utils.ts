@@ -6,6 +6,8 @@
 import * as echarts from 'echarts';
 import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
+import { escape } from 'lodash';
+import dompurify from 'dompurify';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
@@ -203,18 +205,6 @@ export function truncateText(text: string, maxLength: number): string {
   return text.substring(0, maxLength - 3) + '...';
 }
 
-/**
- * Escapes HTML special characters to prevent XSS attacks
- */
-export function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
 interface EChartsTooltipFormatterParams {
   value?: [number, number] | number;
   axisValue?: number;
@@ -263,20 +253,20 @@ export function createTooltipFormatter(
 
     paramsArray.forEach((param: EChartsTooltipFormatterParams) => {
       const seriesName = param.seriesName || '';
-      const truncatedName = escapeHtml(truncateText(seriesName, 30));
+      const truncatedName = escape(truncateText(seriesName, 30));
       const value = param.value?.[1] ?? param.value;
       const color = param.color || '';
 
       tooltipContent += `<div style="display: flex; align-items: center; gap: 8px; color: ${textColor}; padding: 2px 0; line-height: 1.4;">`;
       tooltipContent += `<span style="display: inline-block; width: ${COLOR_INDICATOR_WIDTH}px; height: ${COLOR_INDICATOR_HEIGHT}px; background-color: ${color}; border: 1px solid rgba(0,0,0,0.1); border-radius: 1px; flex-shrink: 0;"></span>`;
       tooltipContent += `<span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${truncatedName}</span>`;
-      tooltipContent += `<span style="font-weight: 600; margin-left: 8px;">${escapeHtml(
+      tooltipContent += `<span style="font-weight: 600; margin-left: 8px;">${escape(
         String(value)
       )}</span>`;
       tooltipContent += `</div>`;
     });
 
-    return tooltipContent;
+    return dompurify.sanitize(tooltipContent);
   };
 }
 
