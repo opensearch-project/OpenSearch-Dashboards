@@ -3,34 +3,63 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
+import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
-import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
+import { ChatContextPopover } from './chat_context_popover';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CoreStart } from '../../../../core/public';
+
 import './chat_input.scss';
 
 interface ChatInputProps {
   layoutMode: ChatLayoutMode;
   input: string;
+  isCapturing: boolean;
   isStreaming: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  includeScreenShotEnabled: boolean;
+  onCaptureScreenshot: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   layoutMode,
   input,
+  isCapturing,
   isStreaming,
   onInputChange,
   onSend,
   onStop,
   onKeyDown,
+  includeScreenShotEnabled,
+  onCaptureScreenshot,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const {
+    services: {
+      core: { chat },
+    },
+  } = useOpenSearchDashboards<{ core: CoreStart }>();
+
+  // Get screenshot button configuration from the screenshot service
+  const screenshotButtonObservable$ = useMemo(() => {
+    if (chat?.screenshot?.getScreenshotButton$) {
+      return chat.screenshot.getScreenshotButton$();
+    }
+    return of(null);
+  }, [chat]);
+
+  const screenshotButton = useObservable(screenshotButtonObservable$, null);
 
   // Use custom hook for command menu keyboard handling
   const {
@@ -47,9 +76,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     inputRef,
   });
 
+  const chatContextPopoverOptions = useMemo(() => {
+    return [
+      ...(screenshotButton
+        ? [
+            {
+              title: screenshotButton.title,
+              iconType: screenshotButton.iconType || 'image',
+              onClick: onCaptureScreenshot,
+            },
+          ]
+        : []),
+    ];
+  }, [screenshotButton, onCaptureScreenshot]);
+
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
-      <ContextPills category="chat" />
       <div className="chatInput__inputRow" style={{ position: 'relative' }}>
         {showCommandMenu && (
           <SlashCommandMenu
@@ -69,7 +111,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             autoFocus={true}
             fullWidth
             resize="none"
-            rows={1}
+            rows={2}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -80,14 +122,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
         </div>
+      </div>
+      <div className="chatInput__bottomRow">
+        <ChatContextPopover
+          enabled={includeScreenShotEnabled}
+          options={chatContextPopoverOptions}
+        />
+        <ContextPills category="chat" />
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={!isStreaming && input.trim().length === 0}
+          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing}
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}
           display="fill"
+          className="chatInput__sendButton"
         />
       </div>
     </div>
