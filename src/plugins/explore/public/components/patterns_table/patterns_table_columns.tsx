@@ -17,12 +17,16 @@ export const patternsTableColumns = (
   onFilterOutPattern: (pattern: string) => void
 ): Array<EuiBasicTableColumn<PatternItem>> => [
   {
-    field: 'flyout',
     width: '100px',
     name: i18n.translate('explore.patterns.table.column.actions', {
       defaultMessage: 'Actions',
     }),
-    render: (record: PatternsFlyoutRecord, item: PatternItem) => {
+    render: (item: PatternItem) => {
+      const record: PatternsFlyoutRecord = {
+        pattern: item.pattern,
+        count: item.count,
+        sample: [item.sample],
+      };
       return (
         <>
           <EuiToolTip

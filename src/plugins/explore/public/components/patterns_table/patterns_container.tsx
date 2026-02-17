@@ -147,11 +147,6 @@ const PatternsContainerContent = ({
               isDarkMode
             ),
         pattern: row._source[PATTERNS_FIELD],
-        flyout: {
-          pattern: row._source[PATTERNS_FIELD],
-          count: row._source[COUNT_FIELD],
-          sample: row._source[SAMPLE_FIELD],
-        },
       })),
     [hits, logsTotal, usingRegexPatterns, isDarkMode]
   );

@@ -63,7 +63,7 @@ describe('patternsTableColumns', () => {
   it('should have the correct structure with four columns', () => {
     expect(columns).toHaveLength(4);
 
-    expect(columns[0].field).toBe('flyout');
+    expect(columns[0].field).toBeUndefined();
     expect(columns[1].field).toBe('ratio');
     expect(columns[2].field).toBe('count');
     expect(columns[3].field).toBe('sample');
@@ -169,7 +169,7 @@ describe('patternsTableColumns', () => {
 
     it('should render three EuiButtonIcons (inspect, magnifyWithPlus, magnifyWithMinus)', () => {
       const mockItem = mockPatternItems[0];
-      const result = actionsColumn.render?.(mockItem, mockItem);
+      const result = actionsColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
       const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
@@ -182,19 +182,23 @@ describe('patternsTableColumns', () => {
 
     it('should call openPatternsTableFlyout with the record when inspect is clicked', () => {
       const mockItem = mockPatternItems[0];
-      const result = actionsColumn.render?.(mockItem, mockItem);
+      const result = actionsColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
       const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
 
       (buttons[0] as HTMLButtonElement)?.click();
       expect(mockOpenPatternsTableFlyout).toHaveBeenCalledTimes(1);
-      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith(mockItem);
+      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith({
+        pattern: mockItem.pattern,
+        count: mockItem.count,
+        sample: [mockItem.sample],
+      });
     });
 
     it('should call onFilterForPattern when magnifyWithPlus is clicked', () => {
       const mockItem = mockPatternItems[0];
-      const result = actionsColumn.render?.(mockItem, mockItem);
+      const result = actionsColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
       const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
@@ -206,7 +210,7 @@ describe('patternsTableColumns', () => {
 
     it('should call onFilterOutPattern when magnifyWithMinus is clicked', () => {
       const mockItem = mockPatternItems[0];
-      const result = actionsColumn.render?.(mockItem, mockItem);
+      const result = actionsColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
       const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');

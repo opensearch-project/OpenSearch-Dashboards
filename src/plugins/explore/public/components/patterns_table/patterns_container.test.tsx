@@ -247,12 +247,10 @@ describe('PatternsContainer', () => {
     expect(items).toHaveLength(2);
 
     // Verify the filtered items contain only valid data
-    expect(items[0].flyout.pattern).toBe('Linux');
+    expect(items[0].pattern).toBe('Linux');
     expect(items[0].count).toBe(20);
-    expect(items[0].flyout.sample).toEqual(['Linux']);
 
-    expect(items[1].flyout.pattern).toBe('Debian GNU/Linux');
+    expect(items[1].pattern).toBe('Debian GNU/Linux');
     expect(items[1].count).toBe(18);
-    expect(items[1].flyout.sample).toEqual(['Debian GNU/Linux']);
   });
 });
