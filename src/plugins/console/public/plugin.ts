@@ -33,12 +33,14 @@ import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
 import { AppSetupUIPluginDependencies } from './types';
+import { workerUrl } from './application/models/legacy_core_editor/mode/worker';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   public setup(
     { notifications, getStartServices, http }: CoreSetup,
     { devTools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
+    URL.createObjectURL = () => workerUrl;
     if (home) {
       home.featureCatalogue.register({
         id: 'console',

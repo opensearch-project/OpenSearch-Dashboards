@@ -28,9 +28,11 @@
  * under the License.
  */
 
-import src from '!!raw-loader!./worker.js';
+import workerPath from '!!file-loader!./worker.js';
+
+export const workerUrl = workerPath;
 
 export const workerModule = {
   id: 'sense_editor/mode/worker',
-  src,
+  src: '', 
 };
