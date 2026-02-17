@@ -102,7 +102,7 @@ export const patternsTableColumns = (
     render: (sample: string) => {
       const sanitizedSampleLog = dompurify.sanitize(sample);
       return (
-        <EuiToolTip content={sanitizedSampleLog || '—'}>
+        <EuiToolTip content={sanitizedSampleLog || '—'} position="top">
           <span
             style={{
               display: '-webkit-box',
