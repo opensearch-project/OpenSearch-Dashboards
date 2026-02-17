@@ -34,7 +34,7 @@ import MonacoEditor from 'react-monaco-editor';
 
 import { monaco } from '@osd/monaco';
 
-import { LIGHT_THEME, DARK_THEME, DEFAULT_DARK_THEME, DEAFULT_LIGHT_THEME } from './editor_theme';
+import { LIGHT_THEME, DARK_THEME, DEFAULT_DARK_THEME, DEFAULT_LIGHT_THEME } from './editor_theme';
 
 import './editor.scss';
 
@@ -122,6 +122,7 @@ export interface Props {
 
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+  _providerDisposables: monaco.IDisposable[] = [];
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -146,7 +147,7 @@ export class CodeEditor extends React.Component<Props, {}> {
           : LIGHT_THEME
         : this.props.useDarkTheme
         ? DEFAULT_DARK_THEME
-        : DEAFULT_LIGHT_THEME
+        : DEFAULT_LIGHT_THEME
     );
   };
 
@@ -156,6 +157,9 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
 
     this._editor = editor;
+
+    // Register language providers once, after the editor has mounted
+    this._registerProviders();
 
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
@@ -183,26 +187,58 @@ export class CodeEditor extends React.Component<Props, {}> {
     suggestController.widget.value._setDetailsVisible(true);
   };
 
+  _registerProviders = () => {
+    const { languageId } = this.props;
+
+    // Dispose any previous registrations
+    this._disposeProviders();
+
+    if (this.props.suggestionProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+      );
+    }
+
+    if (this.props.signatureProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+      );
+    }
+
+    if (this.props.hoverProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+      );
+    }
+
+    if (this.props.languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+    }
+  };
+
+  _disposeProviders = () => {
+    this._providerDisposables.forEach((d) => d.dispose());
+    this._providerDisposables = [];
+  };
+
+  componentDidUpdate(prevProps: Props) {
+    if (
+      prevProps.suggestionProvider !== this.props.suggestionProvider ||
+      prevProps.signatureProvider !== this.props.signatureProvider ||
+      prevProps.hoverProvider !== this.props.hoverProvider ||
+      prevProps.languageConfiguration !== this.props.languageConfiguration ||
+      prevProps.languageId !== this.props.languageId
+    ) {
+      this._registerProviders();
+    }
+  }
+
+  componentWillUnmount() {
+    this._disposeProviders();
+  }
+
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
-
-    monaco.languages.onLanguage(languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
-    });
 
     return (
       <React.Fragment>
