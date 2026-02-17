@@ -27,7 +27,7 @@ jest.mock('./patterns_flyout_event_table', () => ({
     patternString: string;
     totalItemCount: number;
   }) => (
-    <table data-testid="mock-event-table">
+    <table data-test-subj="mock-event-table">
       <tbody>
         <tr>
           <td>Event</td>

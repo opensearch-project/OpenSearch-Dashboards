@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
 import { patternsTableColumns } from './patterns_table_columns';
 import { usePatternsFlyoutContext } from './patterns_table_flyout/patterns_flyout_context';
@@ -29,6 +29,10 @@ const PatternsTableComponent = ({
   const { openPatternsTableFlyout } = usePatternsFlyoutContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [items.length]);
 
   // Slice the items array based on pageIndex and pageSize
   const paginatedItems = items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
