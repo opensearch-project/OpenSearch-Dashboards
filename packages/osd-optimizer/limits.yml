@@ -4,57 +4,57 @@ pageLoadAssetSize:
   banner: 36204
   bfetch: 20195
   charts: 68574
-  chat: 363035
+  chat: 451496
   console: 39723
-  contentManagement: 41596
-  contextProvider: 31278
-  core: 1176853
-  dashboard: 588910
-  data: 4769791
+  contentManagement: 41879
+  contextProvider: 31956
+  core: 1235428
+  dashboard: 589036
+  data: 4834037
   dataExplorer: 139538
-  dataImporter: 28576
-  datasetManagement: 94760
+  dataImporter: 92527
+  datasetManagement: 95433
   dataSource: 13559
-  dataSourceManagement: 586908
-  devTools: 59629
-  discover: 757129
-  embeddable: 130779
-  explore: 1214421
-  expressions: 142997
+  dataSourceManagement: 586995
+  devTools: 59646
+  discover: 757135
+  embeddable: 130857
+  explore: 3462268
+  expressions: 146071
   home: 73420
-  indexPatternManagement: 95159
-  inputControlVis: 100777
+  indexPatternManagement: 95851
+  inputControlVis: 100996
   inspector: 136972
-  management: 40907
+  management: 41262
   managementOverview: 14026
   mapsLegacy: 104443
   navigation: 52422
   opensearchDashboardsLegacy: 14825
   opensearchDashboardsOverview: 60635
-  opensearchDashboardsReact: 125466
-  opensearchDashboardsUtils: 244864
-  opensearchUiShared: 288797
-  queryEnhancements: 332480
+  opensearchDashboardsReact: 126279
+  opensearchDashboardsUtils: 286194
+  opensearchUiShared: 289150
+  queryEnhancements: 337453
   regionMap: 76679
-  savedObjects: 115916
-  savedObjectsManagement: 252054
-  share: 56135
+  savedObjects: 115947
+  savedObjectsManagement: 252548
+  share: 56232
   tileMap: 35949
-  uiActions: 56753
+  uiActions: 56834
   urlForwarding: 25059
   usageCollection: 23518
   visAugmenter: 120299
   visBuilder: 596038
-  visDefaultEditor: 199255
-  visTypeMarkdown: 17446
-  visTypeMetric: 52407
-  visTypeTable: 123327
-  visTypeTagcloud: 23900
-  visTypeTimeline: 35034
-  visTypeTimeseries: 1052005
+  visDefaultEditor: 199481
+  visTypeMarkdown: 17733
+  visTypeMetric: 52703
+  visTypeTable: 123627
+  visTypeTagcloud: 24159
+  visTypeTimeline: 35320
+  visTypeTimeseries: 1052158
   visTypeVega: 163185
   visTypeVislib: 204812
   visTypeXy: 6079
-  visualizations: 240717
+  visualizations: 240998
   visualize: 48920
-  workspace: 351569
+  workspace: 352801
