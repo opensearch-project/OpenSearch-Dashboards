@@ -26,6 +26,7 @@ import {
   defaultPrepareQueryString,
   executeQueries,
 } from '../../../application/utils/state_management/actions/query_actions';
+import { clearQueryStatusMapByKey } from '../../../application/utils/state_management/slices';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import { selectPatternsField } from '../../../application/utils/state_management/selectors';
 import { useDatasetContext } from '../../../application/context/dataset_context/dataset_context';
@@ -111,8 +112,11 @@ export const PatternsErrorGuard = ({ registryTab }: PatternsErrorGuardProps) => 
             <EuiFlexItem grow={false}>
               <EuiSelect
                 options={options}
-                defaultValue={patternsField}
+                value={patternsField}
                 onChange={(e) => {
+                  // Clear the error for the current (old) cache key so the error guard
+                  // re-evaluates once the new query completes
+                  dispatch(clearQueryStatusMapByKey(patternsQuery));
                   dispatch(setPatternsField(e.target.value));
                   Promise.resolve().then(() => {
                     // Trigger query execution to reload the patterns tab

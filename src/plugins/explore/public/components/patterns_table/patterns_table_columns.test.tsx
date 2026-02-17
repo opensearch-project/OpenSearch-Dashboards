@@ -40,19 +40,24 @@ jest.mock('@elastic/eui', () => {
         />
       );
     }),
+    EuiToolTip: jest.fn().mockImplementation(({ children }) => <>{children}</>),
   };
 });
 
 const mockOpenPatternsTableFlyout = jest.fn();
+const mockOnFilterForPattern = jest.fn();
+const mockOnFilterOutPattern = jest.fn();
 
 describe('patternsTableColumns', () => {
   let columns: Array<ColumnWithRender<PatternItem>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    columns = patternsTableColumns(mockOpenPatternsTableFlyout) as Array<
-      ColumnWithRender<PatternItem>
-    >;
+    columns = patternsTableColumns(
+      mockOpenPatternsTableFlyout,
+      mockOnFilterForPattern,
+      mockOnFilterOutPattern
+    ) as Array<ColumnWithRender<PatternItem>>;
   });
 
   it('should have the correct structure with four columns', () => {
@@ -147,40 +152,72 @@ describe('patternsTableColumns', () => {
     });
   });
 
-  describe('flyout column', () => {
-    let flyoutColumn: ColumnWithRender<PatternItem>;
+  describe('actions column', () => {
+    let actionsColumn: ColumnWithRender<PatternItem>;
 
     beforeEach(() => {
-      flyoutColumn = columns[0];
+      actionsColumn = columns[0];
     });
 
     it('should have the correct width', () => {
-      expect(flyoutColumn.width).toBe('40px');
+      expect(actionsColumn.width).toBe('100px');
     });
 
-    it('should render an EuiButtonIcon with inspect icon', () => {
-      const mockRecord = mockPatternItems[0];
-      const result = flyoutColumn.render?.(mockRecord);
-
-      const { container } = render(<>{result}</>);
-      const buttonElement = container.querySelector('[data-test-subj="euiButtonIcon"]');
-
-      expect(buttonElement).toBeInTheDocument();
-      expect(buttonElement?.getAttribute('data-icon-type')).toBe('inspect');
+    it('should have the name Actions', () => {
+      expect(actionsColumn.name).toBe('Actions');
     });
 
-    it('should call openPatternsTableFlyout with the record when clicked', () => {
+    it('should render three EuiButtonIcons (inspect, magnifyWithPlus, magnifyWithMinus)', () => {
       const mockRecord = mockPatternItems[0];
-      const result = flyoutColumn.render?.(mockRecord);
+      const mockItem = { ...mockPatternItems[0], pattern: 'test-pattern' } as PatternItem;
+      const result = actionsColumn.render?.(mockRecord, mockItem);
 
       const { container } = render(<>{result}</>);
-      const buttonElement = container.querySelector(
-        '[data-test-subj="euiButtonIcon"]'
-      ) as HTMLButtonElement;
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
 
-      buttonElement?.click();
+      expect(buttons).toHaveLength(3);
+      expect(buttons[0]?.getAttribute('data-icon-type')).toBe('inspect');
+      expect(buttons[1]?.getAttribute('data-icon-type')).toBe('magnifyWithPlus');
+      expect(buttons[2]?.getAttribute('data-icon-type')).toBe('magnifyWithMinus');
+    });
+
+    it('should call openPatternsTableFlyout with the record when inspect is clicked', () => {
+      const mockRecord = mockPatternItems[0];
+      const mockItem = { ...mockPatternItems[0], pattern: 'test-pattern' } as PatternItem;
+      const result = actionsColumn.render?.(mockRecord, mockItem);
+
+      const { container } = render(<>{result}</>);
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
+
+      (buttons[0] as HTMLButtonElement)?.click();
       expect(mockOpenPatternsTableFlyout).toHaveBeenCalledTimes(1);
       expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith(mockRecord);
+    });
+
+    it('should call onFilterForPattern when magnifyWithPlus is clicked', () => {
+      const mockRecord = mockPatternItems[0];
+      const mockItem = { ...mockPatternItems[0], pattern: 'test-pattern' } as PatternItem;
+      const result = actionsColumn.render?.(mockRecord, mockItem);
+
+      const { container } = render(<>{result}</>);
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
+
+      (buttons[1] as HTMLButtonElement)?.click();
+      expect(mockOnFilterForPattern).toHaveBeenCalledTimes(1);
+      expect(mockOnFilterForPattern).toHaveBeenCalledWith('test-pattern');
+    });
+
+    it('should call onFilterOutPattern when magnifyWithMinus is clicked', () => {
+      const mockRecord = mockPatternItems[0];
+      const mockItem = { ...mockPatternItems[0], pattern: 'test-pattern' } as PatternItem;
+      const result = actionsColumn.render?.(mockRecord, mockItem);
+
+      const { container } = render(<>{result}</>);
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
+
+      (buttons[2] as HTMLButtonElement)?.click();
+      expect(mockOnFilterOutPattern).toHaveBeenCalledTimes(1);
+      expect(mockOnFilterOutPattern).toHaveBeenCalledWith('test-pattern');
     });
   });
 

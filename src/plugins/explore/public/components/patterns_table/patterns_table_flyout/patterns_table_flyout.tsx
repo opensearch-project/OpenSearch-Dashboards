@@ -45,7 +45,7 @@ export const PatternsTableFlyout = () => {
             </EuiTitle>
           </EuiFlexItem>
           {record && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ marginRight: 24 }}>
               <PatternsFlyoutUpdateSearch patternString={record.pattern} />
             </EuiFlexItem>
           )}

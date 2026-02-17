@@ -3,9 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { findDefaultPatternsField, highlightLogUsingPattern, isValidFiniteNumber } from './utils';
+import {
+  brainExcludeSearchPatternQuery,
+  brainUpdateSearchPatternQuery,
+  createExcludeSearchPatternQuery,
+  createSearchPatternQuery,
+  escapePplString,
+  findDefaultPatternsField,
+  highlightLogUsingPattern,
+  isValidFiniteNumber,
+  regexExcludeSearchPatternQuery,
+  regexUpdateSearchPatternQuery,
+} from './utils';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import * as queryActions from '../../../application/utils/state_management/actions/query_actions';
+
+jest.mock('@osd/ui-shared-deps/theme', () => ({
+  euiThemeVars: {
+    ouiColorVis13: '#40D',
+  },
+}));
 
 jest.mock('../../../application/utils/state_management/slices/tab/tab_slice', () => ({
   setPatternsField: jest
@@ -64,15 +81,145 @@ describe('utils', () => {
     });
   });
 
+  describe('escapePplString', () => {
+    it('should escape single quotes by doubling them', () => {
+      expect(escapePplString("it's a pattern")).toBe("it''s a pattern");
+    });
+
+    it('should handle multiple single quotes', () => {
+      expect(escapePplString("it's a 'test' pattern")).toBe("it''s a ''test'' pattern");
+    });
+
+    it('should return string unchanged when no single quotes', () => {
+      expect(escapePplString('no quotes here')).toBe('no quotes here');
+    });
+
+    it('should handle empty string', () => {
+      expect(escapePplString('')).toBe('');
+    });
+  });
+
+  describe('pattern query builders', () => {
+    const queryBase = 'source = my_index';
+    const patternsField = 'message';
+    const patternString = 'Error in <*>';
+
+    describe('regexUpdateSearchPatternQuery', () => {
+      it('should build a regex include pattern query', () => {
+        expect(regexUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "source = my_index | patterns `message` | where patterns_field = 'Error in <*>'"
+        );
+      });
+
+      it('should escape single quotes in patternString', () => {
+        expect(regexUpdateSearchPatternQuery(queryBase, patternsField, "it's")).toBe(
+          "source = my_index | patterns `message` | where patterns_field = 'it''s'"
+        );
+      });
+    });
+
+    describe('brainUpdateSearchPatternQuery', () => {
+      it('should build a brain include pattern query', () => {
+        expect(brainUpdateSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "source = my_index | patterns `message` method=brain mode=label | where patterns_field = 'Error in <*>'"
+        );
+      });
+
+      it('should escape single quotes in patternString', () => {
+        expect(brainUpdateSearchPatternQuery(queryBase, patternsField, "it's")).toBe(
+          "source = my_index | patterns `message` method=brain mode=label | where patterns_field = 'it''s'"
+        );
+      });
+    });
+
+    describe('regexExcludeSearchPatternQuery', () => {
+      it('should build a regex exclude pattern query', () => {
+        expect(regexExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "source = my_index | patterns `message` | where patterns_field != 'Error in <*>'"
+        );
+      });
+
+      it('should escape single quotes in patternString', () => {
+        expect(regexExcludeSearchPatternQuery(queryBase, patternsField, "it's")).toBe(
+          "source = my_index | patterns `message` | where patterns_field != 'it''s'"
+        );
+      });
+    });
+
+    describe('brainExcludeSearchPatternQuery', () => {
+      it('should build a brain exclude pattern query', () => {
+        expect(brainExcludeSearchPatternQuery(queryBase, patternsField, patternString)).toBe(
+          "source = my_index | patterns `message` method=brain mode=label | where patterns_field != 'Error in <*>'"
+        );
+      });
+
+      it('should escape single quotes in patternString', () => {
+        expect(brainExcludeSearchPatternQuery(queryBase, patternsField, "it's")).toBe(
+          "source = my_index | patterns `message` method=brain mode=label | where patterns_field != 'it''s'"
+        );
+      });
+    });
+  });
+
+  describe('createSearchPatternQuery', () => {
+    const patternsField = 'message';
+    const patternString = 'Error <*>';
+
+    it('should use raw query.query (no prepareQueryForLanguage) with brain method', () => {
+      const query = { query: 'my raw query', language: 'PPL' };
+      const result = createSearchPatternQuery(query, patternsField, false, patternString);
+      expect(result).toBe(
+        "my raw query | patterns `message` method=brain mode=label | where patterns_field = 'Error <*>'"
+      );
+    });
+
+    it('should use raw query.query with regex method', () => {
+      const query = { query: 'my raw query', language: 'PPL' };
+      const result = createSearchPatternQuery(query, patternsField, true, patternString);
+      expect(result).toBe("my raw query | patterns `message` | where patterns_field = 'Error <*>'");
+    });
+
+    it('should handle non-string query.query by defaulting to empty string', () => {
+      const query = { query: 123, language: 'PPL' } as any;
+      const result = createSearchPatternQuery(query, patternsField, false, patternString);
+      expect(result).toContain(
+        " | patterns `message` method=brain mode=label | where patterns_field = 'Error <*>'"
+      );
+      expect(result.startsWith(' |')).toBe(true);
+    });
+  });
+
+  describe('createExcludeSearchPatternQuery', () => {
+    const patternsField = 'message';
+    const patternString = 'Error <*>';
+
+    it('should use raw query.query with brain method and != operator', () => {
+      const query = { query: 'my raw query', language: 'PPL' };
+      const result = createExcludeSearchPatternQuery(query, patternsField, false, patternString);
+      expect(result).toBe(
+        "my raw query | patterns `message` method=brain mode=label | where patterns_field != 'Error <*>'"
+      );
+    });
+
+    it('should use raw query.query with regex method and != operator', () => {
+      const query = { query: 'my raw query', language: 'PPL' };
+      const result = createExcludeSearchPatternQuery(query, patternsField, true, patternString);
+      expect(result).toBe(
+        "my raw query | patterns `message` | where patterns_field != 'Error <*>'"
+      );
+    });
+  });
+
   describe('highlightLogUsingPattern - with V2', () => {
     it('dynamic element inside', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '[Log] <*> GET/<*> 172.198.1.1'
+          '[Log] <*> GET/<*> 172.198.1.1',
+          false
         )
       ).toStrictEqual(
-        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+        '[Log] <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.1.1'
       );
     });
 
@@ -80,10 +227,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '<*> <*> GET/<*> 172.198.1.1'
+          '<*> <*> GET/<*> 172.198.1.1',
+          false
         )
       ).toStrictEqual(
-        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+        '<span style="color:#40D">[Log]</span> <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.1.1'
       );
     });
 
@@ -91,10 +239,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '<*MSG*> <*> GET/<*> 172.198.1.1'
+          '<*MSG*> <*> GET/<*> 172.198.1.1',
+          false
         )
       ).toStrictEqual(
-        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+        '<span style="color:#40D">[Log]</span> <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.1.1'
       );
     });
 
@@ -102,10 +251,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '[Log] <*> GET/<*> 172.198.<*>'
+          '[Log] <*> GET/<*> 172.198.<*>',
+          false
         )
       ).toStrictEqual(
-        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.<span class="patternsHighlight">1.1</span>'
+        '[Log] <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.<span style="color:#40D">1.1</span>'
       );
     });
 
@@ -113,10 +263,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '[Log] <*> GET/<*> <*IP*>'
+          '[Log] <*> GET/<*> <*IP*>',
+          false
         )
       ).toStrictEqual(
-        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> <span class="patternsHighlight">172.198.1.1</span>'
+        '[Log] <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> <span style="color:#40D">172.198.1.1</span>'
       );
     });
 
@@ -124,10 +275,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /opensearch/opensearch-1.0.0.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-          '<*IP*> - - [<*DATETIME*>] "GET <*> HTTP/<*><*>" 200 <*> "-" "Mozilla/<*><*> (<*>; Linux <*>_<*>; rv:<*><*><*>) Gecko/<*> Firefox/<*><*><*>"'
+          '<*IP*> - - [<*DATETIME*>] "GET <*> HTTP/<*><*>" 200 <*> "-" "Mozilla/<*><*> (<*>; Linux <*>_<*>; rv:<*><*><*>) Gecko/<*> Firefox/<*><*><*>"',
+          false
         )
       ).toStrictEqual(
-        '<span class="patternsHighlight">223.87.60.27</span> - - [<span class="patternsHighlight">2018-07-22T00:39:02.912Z</span>] "GET <span class="patternsHighlight">/opensearch/opensearch-1.0.0.deb_1</span> HTTP/<span class="patternsHighlight">1.1</span>" 200 <span class="patternsHighlight">6219</span> "-" "Mozilla/<span class="patternsHighlight">5.0</span> (<span class="patternsHighlight">X11</span>; Linux <span class="patternsHighlight">x86</span>_<span class="patternsHighlight">64</span>; rv:<span class="patternsHighlight">6.0a1</span>) Gecko/<span class="patternsHighlight">20110421</span> Firefox/<span class="patternsHighlight">6.0a1</span>"'
+        '<span style="color:#40D">223.87.60.27</span> - - [<span style="color:#40D">2018-07-22T00:39:02.912Z</span>] "GET <span style="color:#40D">/opensearch/opensearch-1.0.0.deb_1</span> HTTP/<span style="color:#40D">1.1</span>" 200 <span style="color:#40D">6219</span> "-" "Mozilla/<span style="color:#40D">5.0</span> (<span style="color:#40D">X11</span>; Linux <span style="color:#40D">x86</span>_<span style="color:#40D">64</span>; rv:<span style="color:#40D">6.0a1</span>) Gecko/<span style="color:#40D">20110421</span> Firefox/<span style="color:#40D">6.0a1</span>"'
       );
     });
   });
@@ -137,10 +289,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '[Log] <token1> GET/<token2> 172.198.1.1'
+          '[Log] <token1> GET/<token2> 172.198.1.1',
+          false
         )
       ).toStrictEqual(
-        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+        '[Log] <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.1.1'
       );
     });
 
@@ -148,10 +301,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '<token1> <token2> GET/<token3> 172.198.1.1'
+          '<token1> <token2> GET/<token3> 172.198.1.1',
+          false
         )
       ).toStrictEqual(
-        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+        '<span style="color:#40D">[Log]</span> <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.1.1'
       );
     });
 
@@ -159,10 +313,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '<token1> <token2> GET/<token3> 172.198.1.1'
+          '<token1> <token2> GET/<token3> 172.198.1.1',
+          false
         )
       ).toStrictEqual(
-        '<span class="patternsHighlight">[Log]</span> <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.1.1'
+        '<span style="color:#40D">[Log]</span> <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.1.1'
       );
     });
 
@@ -170,10 +325,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '[Log] <token1> GET/<token2> 172.198.<token3>'
+          '[Log] <token1> GET/<token2> 172.198.<token3>',
+          false
         )
       ).toStrictEqual(
-        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> 172.198.<span class="patternsHighlight">1.1</span>'
+        '[Log] <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> 172.198.<span style="color:#40D">1.1</span>'
       );
     });
 
@@ -181,10 +337,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '[Log] Gecko GET/something 172.198.1.1',
-          '[Log] <token1> GET/<token2> <token3>'
+          '[Log] <token1> GET/<token2> <token3>',
+          false
         )
       ).toStrictEqual(
-        '[Log] <span class="patternsHighlight">Gecko</span> GET/<span class="patternsHighlight">something</span> <span class="patternsHighlight">172.198.1.1</span>'
+        '[Log] <span style="color:#40D">Gecko</span> GET/<span style="color:#40D">something</span> <span style="color:#40D">172.198.1.1</span>'
       );
     });
 
@@ -192,10 +349,11 @@ describe('utils', () => {
       expect(
         highlightLogUsingPattern(
           '223.87.60.27 - - [2018-07-22T00:39:02.912Z] "GET /opensearch/opensearch-1.0.0.deb_1 HTTP/1.1" 200 6219 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1"',
-          '<token1> - - [<token2>] "GET <token3> HTTP/<token4><token5>" 200 <token6> "-" "Mozilla/<token7><token8> (<token9>; Linux <token10>_<token11>; rv:<token12><token13><token14>) Gecko/<token15> Firefox/<token16><token17><token18>"'
+          '<token1> - - [<token2>] "GET <token3> HTTP/<token4><token5>" 200 <token6> "-" "Mozilla/<token7><token8> (<token9>; Linux <token10>_<token11>; rv:<token12><token13><token14>) Gecko/<token15> Firefox/<token16><token17><token18>"',
+          false
         )
       ).toStrictEqual(
-        '<span class="patternsHighlight">223.87.60.27</span> - - [<span class="patternsHighlight">2018-07-22T00:39:02.912Z</span>] "GET <span class="patternsHighlight">/opensearch/opensearch-1.0.0.deb_1</span> HTTP/<span class="patternsHighlight">1.1</span>" 200 <span class="patternsHighlight">6219</span> "-" "Mozilla/<span class="patternsHighlight">5.0</span> (<span class="patternsHighlight">X11</span>; Linux <span class="patternsHighlight">x86</span>_<span class="patternsHighlight">64</span>; rv:<span class="patternsHighlight">6.0a1</span>) Gecko/<span class="patternsHighlight">20110421</span> Firefox/<span class="patternsHighlight">6.0a1</span>"'
+        '<span style="color:#40D">223.87.60.27</span> - - [<span style="color:#40D">2018-07-22T00:39:02.912Z</span>] "GET <span style="color:#40D">/opensearch/opensearch-1.0.0.deb_1</span> HTTP/<span style="color:#40D">1.1</span>" 200 <span style="color:#40D">6219</span> "-" "Mozilla/<span style="color:#40D">5.0</span> (<span style="color:#40D">X11</span>; Linux <span style="color:#40D">x86</span>_<span style="color:#40D">64</span>; rv:<span style="color:#40D">6.0a1</span>) Gecko/<span style="color:#40D">20110421</span> Firefox/<span style="color:#40D">6.0a1</span>"'
       );
     });
   });

@@ -5,8 +5,10 @@
 
 import { CriteriaWithPagination, EuiBasicTable, EuiCallOut } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
+import { UI_SETTINGS } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import {
   selectDataset,
@@ -40,16 +42,16 @@ const PatternsFlyoutEventTableComponent = ({
   const patternsField = useSelector(selectPatternsField);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const dateFormat = services.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
   const timeFieldName = dataset?.timeFieldName;
 
-  const [fetchError, setFetchError] = useState<unknown | null>(null);
-
-  if (!dataset || !patternsField)
-    throw new Error('Dataset or patterns field is not appearing for event table');
-
+  const [fetchError, setFetchError] = useState<unknown>(null);
   const [fetchedItems, setFetchedItems] = useState<EventTableItem[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [tableLoading, setTableLoading] = useState(false);
+
+  if (!dataset || !patternsField)
+    throw new Error('Dataset or patterns field is not appearing for event table');
 
   const eventResults = async (page: number) => {
     /**
@@ -129,6 +131,8 @@ const PatternsFlyoutEventTableComponent = ({
           values: { timeFieldName },
         }),
         sortable: false,
+        width: '220px',
+        render: (val: string) => moment(val).format(dateFormat),
       });
     }
 
@@ -142,7 +146,7 @@ const PatternsFlyoutEventTableComponent = ({
     });
 
     return columns;
-  }, [timeFieldName, patternsField]);
+  }, [timeFieldName, patternsField, dateFormat]);
 
   return fetchError ? (
     <EuiCallOut title="Error fetching events" color="danger" iconType="alert">

@@ -10,15 +10,22 @@ import { usePatternsFlyoutContext } from './patterns_table_flyout/patterns_flyou
 
 export interface PatternsTableProps {
   items: PatternItem[];
+  onFilterForPattern: (pattern: string) => void;
+  onFilterOutPattern: (pattern: string) => void;
 }
 
 export interface PatternItem {
   sample: string;
   ratio: number;
   count: number;
+  pattern: string;
 }
 
-const PatternsTableComponent = ({ items }: PatternsTableProps) => {
+const PatternsTableComponent = ({
+  items,
+  onFilterForPattern,
+  onFilterOutPattern,
+}: PatternsTableProps) => {
   const { openPatternsTableFlyout } = usePatternsFlyoutContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -30,7 +37,11 @@ const PatternsTableComponent = ({ items }: PatternsTableProps) => {
   return (
     <EuiBasicTable<PatternItem>
       items={paginatedItems}
-      columns={patternsTableColumns(openPatternsTableFlyout)}
+      columns={patternsTableColumns(
+        openPatternsTableFlyout,
+        onFilterForPattern,
+        onFilterOutPattern
+      )}
       pagination={{ pageIndex, pageSize, totalItemCount: items.length }}
       onChange={({ page: { index, size } }: CriteriaWithPagination<PatternItem>) => {
         setPageIndex(index);

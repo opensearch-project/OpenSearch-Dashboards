@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './patterns_table.scss';
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import dompurify from 'dompurify';
@@ -13,21 +12,59 @@ import { isValidFiniteNumber } from './utils/utils';
 import { PatternsFlyoutRecord } from './patterns_table_flyout/patterns_table_flyout';
 
 export const patternsTableColumns = (
-  openPatternsTableFlyout: (record: PatternsFlyoutRecord) => void
+  openPatternsTableFlyout: (record: PatternsFlyoutRecord) => void,
+  onFilterForPattern: (pattern: string) => void,
+  onFilterOutPattern: (pattern: string) => void
 ): Array<EuiBasicTableColumn<PatternItem>> => [
   {
     field: 'flyout',
-    width: '40px', // roughly size of the EuiButtonIcon
-    name: <></>, // intentionally empty
-    render: (record: PatternsFlyoutRecord) => {
+    width: '100px',
+    name: i18n.translate('explore.patterns.table.column.actions', {
+      defaultMessage: 'Actions',
+    }),
+    render: (record: PatternsFlyoutRecord, item: PatternItem) => {
       return (
-        <EuiButtonIcon
-          aria-label={i18n.translate('explore.patterns.table.column.openPatternTableFlyout', {
-            defaultMessage: 'Open pattern table flyout',
-          })}
-          iconType={'inspect'}
-          onClick={() => openPatternsTableFlyout(record)}
-        />
+        <>
+          <EuiToolTip
+            content={i18n.translate('explore.patterns.table.column.inspectPatternTooltip', {
+              defaultMessage: 'Inspect pattern',
+            })}
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('explore.patterns.table.column.openPatternTableFlyout', {
+                defaultMessage: 'Open pattern table flyout',
+              })}
+              iconType={'inspect'}
+              onClick={() => openPatternsTableFlyout(record)}
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            content={i18n.translate('explore.patterns.table.column.filterForPatternTooltip', {
+              defaultMessage: 'Filter for pattern',
+            })}
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('explore.patterns.table.column.filterForPattern', {
+                defaultMessage: 'Filter for pattern',
+              })}
+              iconType={'magnifyWithPlus'}
+              onClick={() => onFilterForPattern(item.pattern)}
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            content={i18n.translate('explore.patterns.table.column.filterOutPatternTooltip', {
+              defaultMessage: 'Filter out pattern',
+            })}
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate('explore.patterns.table.column.filterOutPattern', {
+                defaultMessage: 'Filter out pattern',
+              })}
+              iconType={'magnifyWithMinus'}
+              onClick={() => onFilterOutPattern(item.pattern)}
+            />
+          </EuiToolTip>
+        </>
       );
     },
   },
@@ -55,7 +92,6 @@ export const patternsTableColumns = (
       }
       return val;
     },
-    align: 'right',
     width: '10%',
   },
   {

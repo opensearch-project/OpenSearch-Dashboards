@@ -20,6 +20,12 @@ import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
 
+/**
+ * Escapes single quotes in a string for safe interpolation into PPL query string literals.
+ * Replaces each `'` with `''` (PPL's escape sequence for a literal single quote).
+ */
+export const escapePplString = (value: string): string => value.replace(/'/g, "''");
+
 // Small functions returning the two pattern queries
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
@@ -34,7 +40,9 @@ export const regexUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = '${patternString}'`;
+  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = '${escapePplString(
+    patternString
+  )}'`;
 };
 
 export const brainUpdateSearchPatternQuery = (
@@ -42,7 +50,29 @@ export const brainUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field = '${patternString}'`;
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field = '${escapePplString(
+    patternString
+  )}'`;
+};
+
+export const regexExcludeSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field != '${escapePplString(
+    patternString
+  )}'`;
+};
+
+export const brainExcludeSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field != '${escapePplString(
+    patternString
+  )}'`;
 };
 
 export const createSearchPatternQuery = (
@@ -51,10 +81,22 @@ export const createSearchPatternQuery = (
   usingRegexPatterns: boolean,
   patternString: string
 ) => {
-  const preparedQuery = prepareQueryForLanguage(query);
+  const queryString = typeof query.query === 'string' ? query.query : '';
   return usingRegexPatterns
-    ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
-    : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
+    ? regexUpdateSearchPatternQuery(queryString, patternsField, patternString)
+    : brainUpdateSearchPatternQuery(queryString, patternsField, patternString);
+};
+
+export const createExcludeSearchPatternQuery = (
+  query: Query,
+  patternsField: string,
+  usingRegexPatterns: boolean,
+  patternString: string
+) => {
+  const queryString = typeof query.query === 'string' ? query.query : '';
+  return usingRegexPatterns
+    ? regexExcludeSearchPatternQuery(queryString, patternsField, patternString)
+    : brainExcludeSearchPatternQuery(queryString, patternsField, patternString);
 };
 
 export const createSearchPatternQueryWithSlice = (
@@ -82,7 +124,9 @@ export const createSearchPatternQueryWithSlice = (
         preparedQuery.query
       } | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field${
         timeField ? `, ${timeField}` : ''
-      }, ${patternsField} | where patterns_field = '${patternString}'${sortClause} | head ${pageSize} from ${pageOffset}`;
+      }, ${patternsField} | where patterns_field = '${escapePplString(
+        patternString
+      )}'${sortClause} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table
@@ -102,12 +146,14 @@ export const isValidFiniteNumber = (val: number) => {
  * marks everything in between as dynamic content. The algorithm handles both standard delimiters (<*>)
  * and specialized delimiters (e.g., <*IP*>, <*DATETIME*>) to accommodate different types of dynamic content.
  */
-export const highlightLogUsingPattern = (log: string, pattern: string) => {
+export const highlightLogUsingPattern = (log: string, pattern: string, isDarkMode: boolean) => {
   // continue those last few steps until we reach the end.
 
   // two pointers for the sample log string and the pattern string
   let currSampleLogPos = 0;
   let currPatternPos = 0;
+
+  const markStart = MARK_START(isDarkMode);
 
   // an accumulator: string that we're building w/ <mark>
   let markedPattern = '';
@@ -169,7 +215,9 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       // move samplePos up past preDelimWindow
       currSampleLogPos += preDelimWindow.length;
 
-      if (dynamicElement.length !== 0) markedPattern += MARK_START + dynamicElement + MARK_END;
+      if (dynamicElement.length !== 0) {
+        markedPattern += markStart + dynamicElement + MARK_END;
+      }
       markedPattern += preDelimWindow;
     }
 
@@ -178,7 +226,7 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
     // otherwise, there must be another delimiter at the end of the log.
     // simply mark the last section.
     if (currSampleLogPos !== log.length) {
-      markedPattern += MARK_START + log.slice(currSampleLogPos) + MARK_END;
+      markedPattern += markStart + log.slice(currSampleLogPos) + MARK_END;
     }
 
     return markedPattern;

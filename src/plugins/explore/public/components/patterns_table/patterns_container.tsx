@@ -3,15 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { EXPLORE_LOGS_TAB_ID } from '../../../common';
 import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
-import { highlightLogUsingPattern } from './utils/utils';
-import { selectUsingRegexPatterns } from '../../application/utils/state_management/selectors';
+import {
+  createExcludeSearchPatternQuery,
+  createSearchPatternQuery,
+  highlightLogUsingPattern,
+} from './utils/utils';
+import {
+  selectPatternsField,
+  selectQuery,
+  selectUsingRegexPatterns,
+} from '../../application/utils/state_management/selectors';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
 import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
 import {
   PatternsFlyoutProvider,
@@ -19,6 +30,12 @@ import {
 } from './patterns_table_flyout/patterns_flyout_context';
 import { useHistogramResults } from '../../application/utils/hooks/use_histogram_results';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
+import {
+  setActiveTab,
+  setQueryStringWithHistory,
+} from '../../application/utils/state_management/slices';
+import { useSetEditorText } from '../../application/hooks';
+import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
 interface PatternsContainerContentProps {
   onFilteredCountChange?: (count: number) => void;
@@ -28,6 +45,13 @@ const PatternsContainerContent = ({
   onFilteredCountChange,
 }: PatternsContainerContentProps = {}) => {
   const { isFlyoutOpen } = usePatternsFlyoutContext();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const isDarkMode = services.uiSettings.get('theme:darkMode');
+
+  const dispatch = useDispatch();
+  const setEditorText = useSetEditorText();
+  const originalQuery = useSelector(selectQuery);
+  const selectedPatternsField = useSelector(selectPatternsField);
 
   /**
    * Fetching the hits from the patterns query, and processing them for the table
@@ -36,6 +60,44 @@ const PatternsContainerContent = ({
   const { results: histogramResults } = useHistogramResults();
 
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
+
+  const redirectToLogsWithQuery = useCallback(
+    (query: string) => {
+      dispatch(setQueryStringWithHistory(query));
+      setEditorText(query);
+      dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID));
+      dispatch(executeQueries({ services }));
+    },
+    [dispatch, setEditorText, services]
+  );
+
+  const filterForPattern = useCallback(
+    (patternString: string) => {
+      if (!selectedPatternsField) return;
+      const newQuery = createSearchPatternQuery(
+        originalQuery,
+        selectedPatternsField,
+        usingRegexPatterns,
+        patternString
+      );
+      redirectToLogsWithQuery(newQuery);
+    },
+    [originalQuery, selectedPatternsField, usingRegexPatterns, redirectToLogsWithQuery]
+  );
+
+  const filterOutPattern = useCallback(
+    (patternString: string) => {
+      if (!selectedPatternsField) return;
+      const newQuery = createExcludeSearchPatternQuery(
+        originalQuery,
+        selectedPatternsField,
+        usingRegexPatterns,
+        patternString
+      );
+      redirectToLogsWithQuery(newQuery);
+    },
+    [originalQuery, selectedPatternsField, usingRegexPatterns, redirectToLogsWithQuery]
+  );
 
   const logsTotal = histogramResults?.hits.total || 0;
   const hits = useMemo(() => {
@@ -79,14 +141,19 @@ const PatternsContainerContent = ({
         // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
         sample: usingRegexPatterns
           ? row._source[SAMPLE_FIELD][0]
-          : highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
+          : highlightLogUsingPattern(
+              row._source[SAMPLE_FIELD][0],
+              row._source[PATTERNS_FIELD],
+              isDarkMode
+            ),
+        pattern: row._source[PATTERNS_FIELD],
         flyout: {
           pattern: row._source[PATTERNS_FIELD],
           count: row._source[COUNT_FIELD],
           sample: row._source[SAMPLE_FIELD],
         },
       })),
-    [hits, logsTotal, usingRegexPatterns]
+    [hits, logsTotal, usingRegexPatterns, isDarkMode]
   );
 
   // Notify parent of filtered count change (optional callback)
@@ -142,7 +209,11 @@ const PatternsContainerContent = ({
   return (
     <>
       {isFlyoutOpen && <PatternsTableFlyout />}
-      <PatternsTable items={items} />
+      <PatternsTable
+        items={items}
+        onFilterForPattern={filterForPattern}
+        onFilterOutPattern={filterOutPattern}
+      />
     </>
   );
 };

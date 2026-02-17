@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,27 +40,21 @@ export const PatternsSettingsPopoverButton = () => {
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {i18n.translate('explore.discover.patterns.settings.fieldLabel', {
-            defaultMessage: 'Patterns field:',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 200 }}>
-        <EuiComboBox
-          compressed
-          singleSelection={{ asPlainText: true }}
-          options={comboBoxOptions}
-          selectedOptions={selectedOptions}
-          onChange={handleChange}
-          data-test-subj="patternsFieldComboBox"
-          aria-label={i18n.translate('explore.discover.patterns.settings.fieldComboBoxAriaLabel', {
-            defaultMessage: 'Select patterns field',
-          })}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiComboBox
+      compressed
+      singleSelection={{ asPlainText: true }}
+      options={comboBoxOptions}
+      selectedOptions={selectedOptions}
+      isClearable={false}
+      onChange={handleChange}
+      data-test-subj="patternsFieldComboBox"
+      style={{ minWidth: 300 }}
+      prepend={i18n.translate('explore.discover.patterns.settings.fieldLabel', {
+        defaultMessage: 'Patterns field',
+      })}
+      aria-label={i18n.translate('explore.discover.patterns.settings.fieldComboBoxAriaLabel', {
+        defaultMessage: 'Select patterns field',
+      })}
+    />
   );
 };
