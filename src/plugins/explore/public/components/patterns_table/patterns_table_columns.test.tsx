@@ -7,7 +7,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { patternsTableColumns } from './patterns_table_columns';
 import { mockPatternItems } from './utils/patterns_table.stubs';
-import dompurify from 'dompurify';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { PatternItem } from './patterns_table';
 
@@ -20,10 +19,6 @@ jest.mock('@osd/i18n', () => ({
   i18n: {
     translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
   },
-}));
-
-jest.mock('dompurify', () => ({
-  sanitize: jest.fn().mockImplementation((content) => content),
 }));
 
 jest.mock('@elastic/eui', () => {
@@ -66,7 +61,7 @@ describe('patternsTableColumns', () => {
     expect(columns[0].field).toBeUndefined();
     expect(columns[1].field).toBe('ratio');
     expect(columns[2].field).toBe('count');
-    expect(columns[3].field).toBe('sample');
+    expect(columns[3].field).toBeUndefined();
   });
 
   it('should use correct column headers', () => {
@@ -103,32 +98,60 @@ describe('patternsTableColumns', () => {
       sampleColumn = columns[3];
     });
 
-    it('should sanitize and render sample values', () => {
-      const sampleValue = 'INFO [main] Starting application';
-      const result = sampleColumn.render?.(sampleValue);
-
-      expect(dompurify.sanitize).toHaveBeenCalledWith(sampleValue);
+    it('should render sample values', () => {
+      const mockItem: PatternItem = {
+        sample: 'INFO [main] Starting application',
+        ratio: 0.5,
+        count: 100,
+        pattern: 'INFO [main] <*>',
+      };
+      const result = sampleColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
-      expect(container.textContent).toBe(sampleValue);
+      expect(container.textContent).toBe('INFO [main] Starting application');
+    });
+
+    it('should render highlightedSample when present', () => {
+      const mockItem: PatternItem = {
+        sample: 'INFO [main] Starting application',
+        highlightedSample: React.createElement(
+          React.Fragment,
+          null,
+          'INFO [main] ',
+          React.createElement('span', { style: { color: '#40D' } }, 'Starting application')
+        ),
+        ratio: 0.5,
+        count: 100,
+        pattern: 'INFO [main] <*>',
+      };
+      const result = sampleColumn.render?.(mockItem);
+
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('INFO [main] Starting application');
+      expect(container.querySelector('span[style]')).toBeTruthy();
     });
 
     it('should handle empty sample values', () => {
-      const result = sampleColumn.render?.('');
+      const mockItem: PatternItem = {
+        sample: '',
+        ratio: 0.5,
+        count: 100,
+        pattern: '',
+      };
+      const result = sampleColumn.render?.(mockItem);
       const { container } = render(<>{result}</>);
       expect(container.textContent).toBe('—');
     });
 
-    it('should handle null or undefined sample values', () => {
-      // @ts-ignore - Testing edge case with null
-      const resultNull = sampleColumn.render?.(null);
-      const { container: containerNull } = render(<>{resultNull}</>);
-      expect(containerNull.textContent).toBe('—');
-
-      // @ts-ignore - Testing edge case with undefined
-      const resultUndefined = sampleColumn.render?.(undefined);
-      const { container: containerUndefined } = render(<>{resultUndefined}</>);
-      expect(containerUndefined.textContent).toBe('—');
+    it('should handle missing sample values', () => {
+      const mockItem = {
+        ratio: 0.5,
+        count: 100,
+        pattern: '',
+      } as PatternItem;
+      const result = sampleColumn.render?.(mockItem);
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('—');
     });
   });
 
@@ -233,7 +256,7 @@ describe('patternsTableColumns', () => {
     expect(countResult).toBe(mockItem.count);
 
     const sampleColumn = columns[3];
-    const sampleResult = sampleColumn.render?.(mockItem.sample);
+    const sampleResult = sampleColumn.render?.(mockItem);
     const { container: sampleContainer } = render(<>{sampleResult}</>);
     expect(sampleContainer.textContent).toBe(mockItem.sample);
   });

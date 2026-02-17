@@ -139,8 +139,9 @@ const PatternsContainerContent = ({
         ratio: row._source[COUNT_FIELD] / logsTotal,
         count: row._source[COUNT_FIELD],
         // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
-        sample: usingRegexPatterns
-          ? row._source[SAMPLE_FIELD][0]
+        sample: row._source[SAMPLE_FIELD][0],
+        highlightedSample: usingRegexPatterns
+          ? undefined
           : highlightLogUsingPattern(
               row._source[SAMPLE_FIELD][0],
               row._source[PATTERNS_FIELD],

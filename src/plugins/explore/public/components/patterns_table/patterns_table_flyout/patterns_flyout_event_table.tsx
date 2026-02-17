@@ -50,10 +50,8 @@ const PatternsFlyoutEventTableComponent = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [tableLoading, setTableLoading] = useState(false);
 
-  if (!dataset || !patternsField)
-    throw new Error('Dataset or patterns field is not appearing for event table');
-
   const eventResults = async (page: number) => {
+    if (!dataset || !patternsField) return;
     /**
      * Below logic queries similar to how its done in query_actions
      */
@@ -147,6 +145,9 @@ const PatternsFlyoutEventTableComponent = ({
 
     return columns;
   }, [timeFieldName, patternsField, dateFormat]);
+
+  if (!dataset || !patternsField)
+    return <EuiCallOut title="Missing dataset or patterns field" color="danger" iconType="alert" />;
 
   return fetchError ? (
     <EuiCallOut title="Error fetching events" color="danger" iconType="alert">

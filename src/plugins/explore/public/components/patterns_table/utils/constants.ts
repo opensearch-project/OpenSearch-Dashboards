@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-
 // used in the patterns table
 export const PATTERNS_FIELD = 'patterns_field';
 export const COUNT_FIELD = 'pattern_count';
@@ -15,9 +13,6 @@ export const DELIM_START = '<';
 export const DELIM_END = '*>';
 export const CALCITE_DELIM_CONTENT = 'token';
 export const CALCITE_DELIM_END = '>';
-export const MARK_START = (isDarkMode: boolean) =>
-  `<span style="color:${isDarkMode ? euiThemeVars.ouiColorVis0 : euiThemeVars.ouiColorVis13}">`;
-export const MARK_END = '</span>';
 
 export const BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX =
   'Failed to parse query due to offending symbol [method] at';

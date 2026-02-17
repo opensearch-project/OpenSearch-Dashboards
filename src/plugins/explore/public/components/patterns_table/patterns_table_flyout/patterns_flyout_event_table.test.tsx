@@ -197,21 +197,17 @@ describe('PatternsFlyoutEventTable', () => {
     expect(lastSetFieldsCall.query.query).toContain(mockPatternString);
   });
 
-  it('throws an error when dataset or patterns field is missing', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
+  it('renders error callout when dataset or patterns field is missing', () => {
     (useSelector as jest.Mock).mockImplementation(() => undefined);
 
-    expect(() => {
-      render(
-        <PatternsFlyoutEventTable
-          patternString={mockPatternString}
-          totalItemCount={mockTotalItemCount}
-        />
-      );
-    }).toThrow('Dataset or patterns field is not appearing for event table');
+    render(
+      <PatternsFlyoutEventTable
+        patternString={mockPatternString}
+        totalItemCount={mockTotalItemCount}
+      />
+    );
 
-    consoleErrorSpy.mockRestore();
+    expect(screen.getByText('Missing dataset or patterns field')).toBeInTheDocument();
   });
 
   it('renders error callout when fetch fails', async () => {

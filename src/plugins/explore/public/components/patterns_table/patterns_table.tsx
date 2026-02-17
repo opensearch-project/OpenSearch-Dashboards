@@ -16,6 +16,7 @@ export interface PatternsTableProps {
 
 export interface PatternItem {
   sample: string;
+  highlightedSample?: React.ReactNode;
   ratio: number;
   count: number;
   pattern: string;

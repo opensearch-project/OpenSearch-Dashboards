@@ -6,10 +6,10 @@
 import { EuiBasicTableColumn, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import dompurify from 'dompurify';
 import { PatternItem } from './patterns_table';
 import { isValidFiniteNumber } from './utils/utils';
 import { PatternsFlyoutRecord } from './patterns_table_flyout/patterns_table_flyout';
+import './patterns_table_columns.scss';
 
 export const patternsTableColumns = (
   openPatternsTableFlyout: (record: PatternsFlyoutRecord) => void,
@@ -99,24 +99,14 @@ export const patternsTableColumns = (
     width: '10%',
   },
   {
-    field: 'sample',
     name: i18n.translate('explore.patterns.table.column.sampleLog', {
       defaultMessage: 'Pattern',
     }),
-    render: (sample: string) => {
-      const sanitizedSampleLog = dompurify.sanitize(sample);
+    render: (item: PatternItem) => {
+      const display = item.highlightedSample || item.sample || '—';
       return (
-        <EuiToolTip content={sanitizedSampleLog || '—'} position="top">
-          <span
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: sanitizedSampleLog || '—' }}
-          />
+        <EuiToolTip content={item.sample || '—'} position="top">
+          <span className="ptnSampleColumn">{display}</span>
         </EuiToolTip>
       );
     },
