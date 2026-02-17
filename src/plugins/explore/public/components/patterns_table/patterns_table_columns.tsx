@@ -101,8 +101,20 @@ export const patternsTableColumns = (
     }),
     render: (sample: string) => {
       const sanitizedSampleLog = dompurify.sanitize(sample);
-      // eslint-disable-next-line react/no-danger
-      return <span dangerouslySetInnerHTML={{ __html: sanitizedSampleLog || '—' }} />;
+      return (
+        <EuiToolTip content={sanitizedSampleLog || '—'}>
+          <span
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: sanitizedSampleLog || '—' }}
+          />
+        </EuiToolTip>
+      );
     },
   },
 ];
