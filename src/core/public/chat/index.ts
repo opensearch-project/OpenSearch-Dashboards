@@ -22,3 +22,9 @@ export {
 
 export { ChatService } from './chat_service';
 export { coreChatServiceMock } from './chat_service.mock';
+
+export {
+  ChatScreenshotService,
+  ChatScreenshotServiceInterface,
+  ChatScreenshotButton,
+} from './screenshot_service';

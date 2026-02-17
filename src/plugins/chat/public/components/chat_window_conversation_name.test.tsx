@@ -48,8 +48,16 @@ describe('ChatWindow - Conversation Name', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock scrollIntoView which is not implemented in JSDOM
+    Element.prototype.scrollIntoView = jest.fn();
+
     mockCore = coreMock.createStart();
     mockContextProvider = {};
+
+    // Mock scrollIntoView which is not available in jsdom
+    Element.prototype.scrollIntoView = jest.fn();
+
     mockChatService = {
       sendMessage: jest.fn().mockResolvedValue({
         observable: of({ type: 'message', content: 'test' }),
@@ -59,6 +67,8 @@ describe('ChatWindow - Conversation Name', () => {
       getCurrentMessages: jest.fn().mockReturnValue([]),
       updateCurrentMessages: jest.fn(),
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
+      setChatWindowInstance: jest.fn(),
+      clearChatWindowInstance: jest.fn(),
     } as any;
     mockSuggestedActionsService = {} as any;
     mockConfirmationService = {
