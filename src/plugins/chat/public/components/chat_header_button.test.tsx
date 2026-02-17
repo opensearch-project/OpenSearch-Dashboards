@@ -52,8 +52,6 @@ describe('ChatHeaderButton', () => {
       getWindowMode: jest.fn().mockReturnValue('sidecar'),
       getPaddingSize: jest.fn().mockReturnValue(400),
       setWindowState: jest.fn(),
-      setChatWindowRef: jest.fn(),
-      clearChatWindowRef: jest.fn(),
       onWindowStateChange: jest.fn().mockReturnValue(() => {}),
       onWindowOpenRequest: jest.fn().mockReturnValue(() => {}),
       onWindowCloseRequest: jest.fn().mockReturnValue(() => {}),
@@ -88,50 +86,6 @@ describe('ChatHeaderButton', () => {
     } as any;
   });
 
-  describe('ref functionality', () => {
-    it('should expose startNewConversation method via ref', async () => {
-      const ref = React.createRef<ChatHeaderButtonInstance>();
-
-      render(
-        <ChatHeaderButton
-          core={mockCore}
-          chatService={mockChatService}
-          contextProvider={mockContextProvider}
-          suggestedActionsService={mockSuggestedActionsService}
-          confirmationService={mockConfirmationService}
-          ref={ref}
-        />
-      );
-
-      expect(ref.current).toBeDefined();
-      expect(ref.current?.startNewConversation).toBeDefined();
-      expect(typeof ref.current?.startNewConversation).toBe('function');
-    });
-
-    it('should call startNewChat and sendMessage when startNewConversation is invoked', async () => {
-      const ref = React.createRef<ChatHeaderButtonInstance>();
-
-      render(
-        <ChatHeaderButton
-          core={mockCore}
-          chatService={mockChatService}
-          contextProvider={mockContextProvider}
-          suggestedActionsService={mockSuggestedActionsService}
-          confirmationService={mockConfirmationService}
-          ref={ref}
-        />
-      );
-
-      // Call startNewConversation
-      await ref.current?.startNewConversation({ content: 'test message' });
-
-      // Verify sidecar was opened
-      await waitFor(() => {
-        expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
-      });
-    });
-  });
-
   describe('initialization', () => {
     it('should initialize with window closed state from ChatService', () => {
       mockChatService.isWindowOpen.mockReturnValue(false);
@@ -163,20 +117,6 @@ describe('ChatHeaderButton', () => {
       );
 
       expect(mockChatService.isWindowOpen).toHaveBeenCalled();
-    });
-
-    it('should register ChatWindow ref with ChatService', () => {
-      render(
-        <ChatHeaderButton
-          core={mockCore}
-          chatService={mockChatService}
-          contextProvider={mockContextProvider}
-          suggestedActionsService={mockSuggestedActionsService}
-          confirmationService={mockConfirmationService}
-        />
-      );
-
-      expect(mockChatService.setChatWindowRef).toHaveBeenCalled();
     });
 
     it('should subscribe to ChatService state changes', () => {
@@ -286,22 +226,6 @@ describe('ChatHeaderButton', () => {
   });
 
   describe('cleanup', () => {
-    it('should clear ChatWindow ref on unmount', () => {
-      const { unmount } = render(
-        <ChatHeaderButton
-          core={mockCore}
-          chatService={mockChatService}
-          contextProvider={mockContextProvider}
-          suggestedActionsService={mockSuggestedActionsService}
-          confirmationService={mockConfirmationService}
-        />
-      );
-
-      unmount();
-
-      expect(mockChatService.clearChatWindowRef).toHaveBeenCalled();
-    });
-
     it('should close sidecar on unmount if open', () => {
       const mockClose = jest.fn();
       mockCore.overlays.sidecar.open.mockReturnValue({
@@ -429,7 +353,6 @@ describe('ChatHeaderButton', () => {
     });
 
     it('should still call hooks but return null when chat is not available', () => {
-      // This test ensures that all React hooks are called even when chat is not available
       mockCore.chat.isAvailable.mockReturnValue(false);
 
       const { container } = render(
@@ -443,7 +366,6 @@ describe('ChatHeaderButton', () => {
       );
 
       // Hooks should still be called (like setChatWindowRef, onWindowStateChange, etc.)
-      expect(mockChatService.setChatWindowRef).toHaveBeenCalled();
       expect(mockChatService.onWindowStateChange).toHaveBeenCalled();
       expect(mockChatService.onWindowOpenRequest).toHaveBeenCalled();
       expect(mockChatService.onWindowCloseRequest).toHaveBeenCalled();
