@@ -64,7 +64,7 @@ describe('PatternsSettingsPopoverButton', () => {
 
     render(<PatternsSettingsPopoverButton />);
 
-    expect(screen.getByText('Patterns field:')).toBeInTheDocument();
+    expect(screen.getByText('Patterns field')).toBeInTheDocument();
   });
 
   it('renders with no selected field when patternsField is null', () => {
@@ -73,7 +73,7 @@ describe('PatternsSettingsPopoverButton', () => {
 
     render(<PatternsSettingsPopoverButton />);
 
-    expect(screen.getByText('Patterns field:')).toBeInTheDocument();
+    expect(screen.getByText('Patterns field')).toBeInTheDocument();
   });
 
   it('renders with empty options when gatherOptions returns empty', () => {
@@ -82,7 +82,7 @@ describe('PatternsSettingsPopoverButton', () => {
 
     render(<PatternsSettingsPopoverButton />);
 
-    expect(screen.getByText('Patterns field:')).toBeInTheDocument();
+    expect(screen.getByText('Patterns field')).toBeInTheDocument();
   });
 
   it('shows the selected field value in the combobox', () => {
