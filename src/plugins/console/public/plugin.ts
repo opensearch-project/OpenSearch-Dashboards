@@ -36,11 +36,19 @@ import { AppSetupUIPluginDependencies } from './types';
 import { workerUrl } from './application/models/legacy_core_editor/mode/worker';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+  private originalCreateObjectURL?: typeof URL.createObjectURL;
+
   public setup(
     { notifications, getStartServices, http }: CoreSetup,
     { devTools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
-    URL.createObjectURL = () => workerUrl;
+    this.originalCreateObjectURL = URL.createObjectURL;
+    URL.createObjectURL = (obj: Blob | MediaSource) => {
+      if (obj instanceof Blob && obj.type === 'application/javascript') {
+        return workerUrl;
+      }
+      return this.originalCreateObjectURL!(obj);
+    };
     if (home) {
       home.featureCatalogue.register({
         id: 'console',
