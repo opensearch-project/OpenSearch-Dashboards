@@ -16,7 +16,7 @@ import {
 } from '../../../data/common';
 import { getFields, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
-import { QueryAggConfig } from '../../common';
+import { QueryAggConfig, PPL_DEFAULT_FETCH_SIZE } from '../../common';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -38,6 +38,9 @@ export const pplSearchStrategyProvider = (
       try {
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
+
+        request.body = { ...request.body, fetchSize: PPL_DEFAULT_FETCH_SIZE };
+
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) throwFacetError(rawResponse);

@@ -15,6 +15,7 @@ import { SearchUsage } from '../../../data/server';
 import * as utils from '../../common/utils';
 import * as facet from '../utils/facet';
 import { pplSearchStrategyProvider } from './ppl_search_strategy';
+import { PPL_DEFAULT_FETCH_SIZE } from '../../common';
 
 jest.mock('../../common/utils', () => ({
   ...jest.requireActual('../../common/utils'),
@@ -161,6 +162,35 @@ describe('pplSearchStrategyProvider', () => {
     ).rejects.toThrowError();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(mockError.message));
     expect(usage.trackError).toHaveBeenCalled();
+  });
+
+  it('should set fetchSize on request body with default value', async () => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = ({
+      describeQuery: mockDescribeQuery,
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      emptyRequestHandlerContext,
+      ({
+        body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBe(PPL_DEFAULT_FETCH_SIZE);
   });
 
   it('should handle empty search response', async () => {
