@@ -113,7 +113,7 @@ describe('PatternsTable', () => {
       expect(rows[0].querySelectorAll('td')[1].textContent).toContain('—');
 
       // Second row: NaN count should be displayed as '—'
-      expect(rows[1].querySelectorAll('td')[3].textContent).toContain('—');
+      expect(rows[1].querySelectorAll('td')[2].textContent).toContain('—');
     });
 
     it('should handle Infinity values correctly', () => {
@@ -141,7 +141,7 @@ describe('PatternsTable', () => {
       expect(rows[0].querySelectorAll('td')[1].textContent).toContain('—');
 
       // Second row: Infinity count should be displayed as '—'
-      expect(rows[1].querySelectorAll('td')[3].textContent).toContain('—');
+      expect(rows[1].querySelectorAll('td')[2].textContent).toContain('—');
     });
 
     it('should handle empty pattern strings correctly', () => {
@@ -171,13 +171,13 @@ describe('PatternsTable', () => {
 
       // Check if empty patterns are displayed as '—'
       // Empty string pattern should be displayed as '—'
-      expect(rows[0].querySelectorAll('td')[2].querySelector('span')?.textContent).toContain('—');
+      expect(rows[0].querySelectorAll('td')[3].querySelector('span')?.textContent).toContain('—');
 
       // Null pattern should be displayed as '—'
-      expect(rows[1].querySelectorAll('td')[2].querySelector('span')?.textContent).toContain('—');
+      expect(rows[1].querySelectorAll('td')[3].querySelector('span')?.textContent).toContain('—');
 
       // Undefined pattern should be displayed as '—'
-      expect(rows[2].querySelectorAll('td')[2].querySelector('span')?.textContent).toContain('—');
+      expect(rows[2].querySelectorAll('td')[3].querySelector('span')?.textContent).toContain('—');
     });
 
     it('should handle extremely long pattern strings correctly', () => {
@@ -198,7 +198,7 @@ describe('PatternsTable', () => {
       expect(rows.length).toBe(1);
 
       // Check if long pattern is displayed (not truncated by the test)
-      const patternCell = rows[0].querySelectorAll('td')[2];
+      const patternCell = rows[0].querySelectorAll('td')[3];
       expect(patternCell.textContent).toContain('INFO [main]');
       expect(patternCell.textContent).toContain('Very long log message');
     });

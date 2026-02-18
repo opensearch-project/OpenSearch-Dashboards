@@ -63,10 +63,11 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
 
   return (
     <EuiButton
+      size="s"
       aria-label={i18n.translate('explore.patterns.flyout.updateSearchWithPattern', {
         defaultMessage: 'Update search with pattern',
       })}
-      iconType={'continuityBelow'}
+      iconType={'magnifyWithPlus'}
       onClick={updateSearchClick}
     >
       {i18n.translate('explore.patterns.flyout.updateSearch', {

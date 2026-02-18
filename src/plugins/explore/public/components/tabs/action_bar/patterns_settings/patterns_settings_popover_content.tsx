@@ -21,7 +21,7 @@ export interface PatternsSettingsPopoverContentProps {
   fieldChange?: () => void;
 }
 
-const gatherOptions = (dataset?: DataView) => {
+export const gatherOptions = (dataset?: DataView) => {
   if (!dataset || !dataset.fields) {
     return [];
   }
