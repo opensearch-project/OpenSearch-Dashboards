@@ -125,18 +125,60 @@ export interface Chart {
   series?: HistogramSeries[];
 }
 
+/**
+ * Fills gaps in time-bucketed data by inserting zero-count entries for missing buckets.
+ * This prevents gaps in the histogram when a time bucket has zero documents.
+ *
+ * Uses the earliest data point as an alignment anchor so generated buckets match
+ * the source's bucket boundaries (e.g., PPL span(timestamp, 1w) aligns weeks to
+ * Mondays, which differs from epoch-aligned Thursdays).
+ */
+export function fillTimeBucketGaps(
+  values: HistogramDataPoint[],
+  intervalMs: number,
+  boundsMin: number,
+  boundsMax: number
+): HistogramDataPoint[] {
+  if (intervalMs <= 0 || boundsMin >= boundsMax) return values;
+
+  const dataMap = new Map<number, number>();
+  values.forEach((p) => dataMap.set(p.x, p.y));
+
+  // Use the earliest data point as alignment anchor so generated bucket timestamps
+  // match the query engine's boundaries. Fall back to epoch alignment when no data.
+  const anchor =
+    values.length > 0
+      ? values.reduce((min, p) => Math.min(min, p.x), Infinity)
+      : Math.floor(boundsMin / intervalMs) * intervalMs;
+
+  const startBucket = anchor + Math.floor((boundsMin - anchor) / intervalMs) * intervalMs;
+  const endBucket = anchor + Math.floor((boundsMax - 1 - anchor) / intervalMs) * intervalMs;
+
+  const filled: HistogramDataPoint[] = [];
+  for (let bucket = startBucket; bucket <= endBucket; bucket += intervalMs) {
+    filled.push({ x: bucket, y: dataMap.get(bucket) ?? 0 });
+  }
+  return filled;
+}
+
 export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
   const { x, y } = dimensions;
   const xAccessor = table.columns[x.accessor].id;
   const yAccessor = table.columns[y.accessor].id;
 
   // Build values array
-  const values = table.rows
+  const rawValues = table.rows
     .filter((row) => row && row[yAccessor] !== 'NaN')
     .map((row) => ({
       x: row[xAccessor] as number,
       y: row[yAccessor] as number,
     }));
+
+  // Fill gaps in time-bucketed data so empty buckets render as zero-height bars
+  const intervalMs = x.params.interval.asMilliseconds();
+  const boundsMin = x.params.bounds.min.valueOf();
+  const boundsMax = x.params.bounds.max.valueOf();
+  const values = fillTimeBucketGaps(rawValues, intervalMs, boundsMin, boundsMax);
 
   // Use helper to build base chart properties
   const baseProperties = buildBaseChartProperties(table.columns[x.accessor].name, x, values);
@@ -161,15 +203,25 @@ export const buildChartFromBreakdownSeries = (
 ): Chart => {
   const { x } = dimensions;
 
-  // Transform server series to HistogramSeries with x/y accessors
+  // Fill gaps in each individual series so empty buckets render as zero-height bars
+  const intervalMs = x.params.interval.asMilliseconds();
+  const boundsMin = x.params.bounds.min.valueOf();
+  const boundsMax = x.params.bounds.max.valueOf();
+
+  // Transform server series to HistogramSeries with x/y accessors and fill gaps
   const series: HistogramSeries[] = breakdownSeries.series.map(
     ({ breakdownValue, dataPoints }) => ({
       id: breakdownValue,
       name: breakdownValue,
-      data: dataPoints.map(([timestamp, count]) => ({
-        x: timestamp,
-        y: count,
-      })),
+      data: fillTimeBucketGaps(
+        dataPoints.map(([timestamp, count]) => ({
+          x: timestamp,
+          y: count,
+        })),
+        intervalMs,
+        boundsMin,
+        boundsMax
+      ),
     })
   );
 
