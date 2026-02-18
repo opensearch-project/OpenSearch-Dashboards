@@ -16,7 +16,9 @@ import {
 } from '../../../data/common';
 import { getFields, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
-import { QueryAggConfig, PPL_DEFAULT_FETCH_SIZE } from '../../common';
+import { QueryAggConfig } from '../../common';
+
+const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -39,7 +41,8 @@ export const pplSearchStrategyProvider = (
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
 
-        request.body = { ...request.body, fetchSize: PPL_DEFAULT_FETCH_SIZE };
+        const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+        request.body = { ...request.body, fetchSize };
 
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 

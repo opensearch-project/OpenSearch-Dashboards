@@ -70,8 +70,6 @@ export const UI_SETTINGS = {
   STATE_STORE_IN_SESSION_STORAGE: 'state:storeInSessionStorage',
 };
 
-export const PPL_DEFAULT_FETCH_SIZE = 500;
-
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
 
 export const S3_PARTITION_INFO_COLUMN = '# Partition Information';
