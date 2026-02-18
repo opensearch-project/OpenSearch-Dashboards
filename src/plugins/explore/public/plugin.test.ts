@@ -371,6 +371,21 @@ describe('ExplorePlugin', () => {
         expect.any(Function)
       );
     });
+
+    it('should setup data plugin enhancements with query editor extension', () => {
+      plugin.setup(coreSetup, setupDeps);
+
+      expect(setupDeps.data.__enhance).toHaveBeenCalledWith({
+        editor: {
+          queryEditorExtension: expect.objectContaining({
+            id: 'explore-plugin-extension',
+            order: 1,
+            isEnabled$: expect.any(Function),
+            getBanner: expect.any(Function),
+          }),
+        },
+      });
+    });
   });
 
   describe('start', () => {

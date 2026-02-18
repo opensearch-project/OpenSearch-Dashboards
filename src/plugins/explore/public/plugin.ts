@@ -47,10 +47,7 @@ import { buildServices } from './build_services';
 import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
 import { TraceDetailsView } from './components/doc_viewer/trace_details_view/trace_details_view';
-import {
-  createQueryEditorExtensionConfig,
-  SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
-} from './components/experience_banners';
+import { createQueryEditorExtensionConfig } from './components/experience_banners';
 import { createSavedExploreLoader } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { setUsageCollector } from './services/usage_collector';
@@ -298,12 +295,8 @@ export class ExplorePlugin
           const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
           // We want to limit explore UI to only show up under the explore-enabled
           // workspaces. If user lands in the explore plugin URL in a different
-          // workspace, we will redirect them to classic discover. We will also redirect if
-          // they have manually selected classic discover
-          if (
-            !isExploreEnabledWorkspace ||
-            !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
-          ) {
+          // workspace, we will redirect them to classic discover.
+          if (!isExploreEnabledWorkspace) {
             coreStart.application.navigateToApp('discover', { replace: true });
             return () => {};
           }
