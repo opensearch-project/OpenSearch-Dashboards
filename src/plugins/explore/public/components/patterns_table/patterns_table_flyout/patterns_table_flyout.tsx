@@ -34,81 +34,70 @@ export const PatternsTableFlyout = () => {
   return (
     <EuiFlyout onClose={closePatternsTableFlyout}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
-            {i18n.translate('explore.patterns.flyout.headerTitle', {
-              defaultMessage: 'Inspect pattern',
-            })}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h2>
+                {i18n.translate('explore.patterns.flyout.headerTitle', {
+                  defaultMessage: 'Inspect pattern',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {record && (
+            <EuiFlexItem grow={false} style={{ marginRight: 24 }}>
+              <PatternsFlyoutUpdateSearch patternString={record.pattern} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {!record ? (
-          <EuiCallOut
-            title={i18n.translate('explore.patterns.flyout.noDataTitle', {
-              defaultMessage: 'No pattern data available for this row',
-            })}
-            color="danger"
-            iconType="alert"
-          />
-        ) : (
-          <>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <PatternsFlyoutUpdateSearch patternString={record.pattern} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiPanel>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="column" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" className="patternsTableFlyout__detailsPanelItem__title">
-                        {i18n.translate('explore.patterns.flyout.patternLabel', {
-                          defaultMessage: 'Pattern',
-                        })}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">{record.pattern}</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="column" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" className="patternsTableFlyout__detailsPanelItem__title">
-                        {i18n.translate('explore.patterns.flyout.countLabel', {
-                          defaultMessage: 'Event count',
-                        })}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">{record.count}</EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-            <EuiSpacer size="m" />
-            <EuiPanel>
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('explore.patterns.flyout.eventsPanelTitle', {
-                    defaultMessage: 'Events ({count})',
-                    values: { count: record.count },
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <PatternsFlyoutEventTable
-                patternString={record.pattern}
-                totalItemCount={record.count}
-              />
-            </EuiPanel>
-          </>
-        )}
+        <div className="patternsTableFlyout__bodyContent">
+          {!record ? (
+            <EuiCallOut
+              title={i18n.translate('explore.patterns.flyout.noDataTitle', {
+                defaultMessage: 'No pattern data available for this row',
+              })}
+              color="danger"
+              iconType="alert"
+            />
+          ) : (
+            <>
+              <EuiPanel className="patternsTableFlyout__detailsPanel">
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiText size="s" className="patternsTableFlyout__detailsPanelItem__title">
+                      {i18n.translate('explore.patterns.flyout.patternLabel', {
+                        defaultMessage: 'Pattern',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">{record.pattern}</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+              <EuiSpacer size="m" />
+              <EuiPanel className="patternsTableFlyout__eventsPanel">
+                <EuiTitle size="s">
+                  <h3>
+                    {i18n.translate('explore.patterns.flyout.eventsPanelTitle', {
+                      defaultMessage: 'Events ({count})',
+                      values: { count: record.count },
+                    })}
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <div className="patternsTableFlyout__eventsTableWrapper">
+                  <PatternsFlyoutEventTable
+                    patternString={record.pattern}
+                    totalItemCount={record.count}
+                  />
+                </div>
+              </EuiPanel>
+            </>
+          )}
+        </div>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
