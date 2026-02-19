@@ -18,6 +18,8 @@ import { getFields, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
+const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
+
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
@@ -38,6 +40,10 @@ export const pplSearchStrategyProvider = (
       try {
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
+
+        const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+        request.body = { ...request.body, fetchSize };
+
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) throwFacetError(rawResponse);
