@@ -1,10 +1,9 @@
-@use '@elastic/eui' as eui;
+@use '@elastic/eui/src/theme_light' as eui;
 
 :root {
-  --midnight-primary: #172430; !default
-  --midnight-surface: #FCFEFF; !default
-  --midnight-bg: #B9D9EB;
-  --midnight-danger: #EF4444;
+  --midnight-primary: #172430;
+  --midnight-surface: #fcfeff;
+  --midnight-bg: #b9d9eb;
   --midnight-border: #3a4148;
 
   --midnight-radius: 6px;
@@ -175,6 +174,10 @@ main {
 /* Form Controls */
 
 .euiFormControlLayout--group {
-  box-shadow: 0 0 12px rgba(23, 36, 48, 0.25) !important;
-  border: 1px solid var(--midnight-border);
+  box-shadow: 0 0 12px rgba(23, 36, 48, 25%) !important;
+  border: 1px solid var(--midnight-border) ;
+}
+
+.euiFormControlLayout {
+  box-shadow: 0 0 12px rgba(23, 36, 48, 25%) !important;
 }
