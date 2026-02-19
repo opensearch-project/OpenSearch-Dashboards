@@ -1,10 +1,13 @@
 ## INSTALATION 
 
-1. install yarn
-2. ###### Install dependencies
+1. git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
+   cd OpenSearch-Dashboards
+2. git checkout -b midnight_theme
+3. install yarn
+4. ###### Install dependencies
    yarn osd bootstrap
    ###### Ensure your Node.js version is compatible (14.20.x – 22.x).
-3. ###### Create OpenSearch Container
+5. ###### Create OpenSearch Container
    docker run -d \
    --name opensearch-node \
    -p 9200:9200 \
@@ -13,7 +16,7 @@
    -e "plugins.security.disabled=true" \
    -e "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" \
    opensearchproject/opensearch:2.11.1
-4. ###### Run locally
+6. ###### Run locally
    yarn start
 
 ## Design Rationale ##
