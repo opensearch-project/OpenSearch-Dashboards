@@ -44,6 +44,7 @@ import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import classnames from 'classnames';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
@@ -52,7 +53,6 @@ import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import { getIsCategoryOpen, setIsCategoryOpen } from '../../utils';
-import classnames from 'classnames';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;

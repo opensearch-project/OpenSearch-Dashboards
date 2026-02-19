@@ -117,7 +117,9 @@ describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
   it('renders the default nav', () => {
     const onLock = sinon.spy();
-    const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
+    const component = mount(
+      <CollapsibleNav isNavClose={false} {...mockProps()} onIsLockedUpdate={onLock} />
+    );
     expect(component).toMatchSnapshot();
 
     component.setProps({ isOpen: true });
@@ -150,6 +152,7 @@ describe('CollapsibleNav', () => {
     const customNavLink = mockLink({ title: 'Custom link' });
     const component = mount(
       <CollapsibleNav
+        isNavClose={false}
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
@@ -168,6 +171,7 @@ describe('CollapsibleNav', () => {
     const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
       <CollapsibleNav
+        isNavClose={false}
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
@@ -193,6 +197,7 @@ describe('CollapsibleNav', () => {
     const recentNavLinks = [mockRecentNavLink({})];
     const component = mount(
       <CollapsibleNav
+        isNavClose={false}
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
@@ -230,6 +235,7 @@ describe('CollapsibleNav', () => {
       const recentNavLinks = [mockRecentNavLink({})];
       const component = mount(
         <CollapsibleNav
+          isNavClose={false}
           {...mockProps(mockBranding)}
           isNavOpen={true}
           navLinks$={new BehaviorSubject(navLinks)}
@@ -248,6 +254,7 @@ describe('CollapsibleNav', () => {
       const recentNavLinks = [mockRecentNavLink({})];
       const component = mount(
         <CollapsibleNav
+          isNavClose={false}
           {...mockProps({ ...mockBranding, darkMode: true })}
           isNavOpen={true}
           navLinks$={new BehaviorSubject(navLinks)}
@@ -268,6 +275,7 @@ describe('CollapsibleNav', () => {
       const recentNavLinks = [mockRecentNavLink({})];
       const component = mount(
         <CollapsibleNav
+          isNavClose={false}
           {...mockProps()}
           isNavOpen={true}
           navLinks$={new BehaviorSubject(navLinks)}
@@ -286,6 +294,7 @@ describe('CollapsibleNav', () => {
       const recentNavLinks = [mockRecentNavLink({})];
       const component = mount(
         <CollapsibleNav
+          isNavClose={false}
           {...mockProps({ darkMode: true })}
           isNavOpen={true}
           navLinks$={new BehaviorSubject(navLinks)}
