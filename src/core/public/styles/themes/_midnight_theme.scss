@@ -128,9 +128,6 @@
     font-weight: bold;
   }
 
-  //.euiButtonEmpty,
-  //.euiButtonEmpty__text,
-
   .euiSuperDatePicker__prettyFormatLink {
     color: var(--midnight-primary);
   }
@@ -152,6 +149,10 @@
 
   .euiTab:focus {
     text-decoration: none;
+  }
+
+  .euiPanel {
+    padding: 10px;
   }
 
   /* Button Icons */

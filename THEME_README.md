@@ -21,7 +21,7 @@
    yarn start
    ###### Ensure no other docker container is running for the same.
    ###### Try docker rm -f opensearch-node if so.
-   ###### Wait for 2-3 mins and the server shall be ready for example: ([OpenSearchDashboards][http] http server running at http://localhost:5603/dtx)
+   ###### Wait for 2-3 mins and the server shall be ready for example: ([success][@osd/optimizer] 59 bundles compiled successfully after 375.7 sec, watching for changes)
 
 ## Design Rationale ##
 
