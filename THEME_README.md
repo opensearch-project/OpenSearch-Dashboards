@@ -3,6 +3,7 @@
 1. git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
    cd OpenSearch-Dashboards
 2. git checkout -b midnight_theme
+   git pull origin midnight_theme
 3. install yarn
 4. ###### Install dependencies
    yarn osd bootstrap
@@ -18,6 +19,9 @@
    opensearchproject/opensearch:2.11.1
 6. ###### Run locally
    yarn start
+   ###### Ensure no other docker container is running for the same.
+   ###### Try docker rm -f opensearch-node if so.
+   ###### Wait for 2-3 mins and the server shall be ready for example: ([OpenSearchDashboards][http] http server running at http://localhost:5603/dtx)
 
 ## Design Rationale ##
 
