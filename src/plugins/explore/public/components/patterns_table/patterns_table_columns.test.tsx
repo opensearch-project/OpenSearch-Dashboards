@@ -7,23 +7,18 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { patternsTableColumns } from './patterns_table_columns';
 import { mockPatternItems } from './utils/patterns_table.stubs';
-import dompurify from 'dompurify';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { PatternItem } from './patterns_table';
 
 type ColumnWithRender<T> = EuiBasicTableColumn<T> & {
   field?: string;
-  render?: (val: any, item?: T | undefined) => React.ReactNode;
+  render?: (val: unknown, item?: T | undefined) => React.ReactNode;
 };
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
     translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
   },
-}));
-
-jest.mock('dompurify', () => ({
-  sanitize: jest.fn().mockImplementation((content) => content),
 }));
 
 jest.mock('@elastic/eui', () => {
@@ -40,34 +35,39 @@ jest.mock('@elastic/eui', () => {
         />
       );
     }),
+    EuiToolTip: jest.fn().mockImplementation(({ children }) => <>{children}</>),
   };
 });
 
 const mockOpenPatternsTableFlyout = jest.fn();
+const mockOnFilterForPattern = jest.fn();
+const mockOnFilterOutPattern = jest.fn();
 
 describe('patternsTableColumns', () => {
   let columns: Array<ColumnWithRender<PatternItem>>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    columns = patternsTableColumns(mockOpenPatternsTableFlyout) as Array<
-      ColumnWithRender<PatternItem>
-    >;
+    columns = patternsTableColumns(
+      mockOpenPatternsTableFlyout,
+      mockOnFilterForPattern,
+      mockOnFilterOutPattern
+    ) as Array<ColumnWithRender<PatternItem>>;
   });
 
   it('should have the correct structure with four columns', () => {
     expect(columns).toHaveLength(4);
 
-    expect(columns[0].field).toBe('flyout');
+    expect(columns[0].field).toBeUndefined();
     expect(columns[1].field).toBe('ratio');
-    expect(columns[2].field).toBe('sample');
-    expect(columns[3].field).toBe('count');
+    expect(columns[2].field).toBe('count');
+    expect(columns[3].field).toBeUndefined();
   });
 
   it('should use correct column headers', () => {
     expect(columns[1].name).toBe('Event ratio');
-    expect(columns[2].name).toBe('Pattern');
-    expect(columns[3].name).toBe('Event count');
+    expect(columns[2].name).toBe('Event count');
+    expect(columns[3].name).toBe('Pattern');
   });
 
   describe('ratio column', () => {
@@ -95,35 +95,63 @@ describe('patternsTableColumns', () => {
     let sampleColumn: ColumnWithRender<PatternItem>;
 
     beforeEach(() => {
-      sampleColumn = columns[2];
+      sampleColumn = columns[3];
     });
 
-    it('should sanitize and render sample values', () => {
-      const sampleValue = 'INFO [main] Starting application';
-      const result = sampleColumn.render?.(sampleValue);
-
-      expect(dompurify.sanitize).toHaveBeenCalledWith(sampleValue);
+    it('should render sample values', () => {
+      const mockItem: PatternItem = {
+        sample: 'INFO [main] Starting application',
+        ratio: 0.5,
+        count: 100,
+        pattern: 'INFO [main] <*>',
+      };
+      const result = sampleColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
-      expect(container.textContent).toBe(sampleValue);
+      expect(container.textContent).toBe('INFO [main] Starting application');
+    });
+
+    it('should render highlightedSample when present', () => {
+      const mockItem: PatternItem = {
+        sample: 'INFO [main] Starting application',
+        highlightedSample: React.createElement(
+          React.Fragment,
+          null,
+          'INFO [main] ',
+          React.createElement('span', { style: { color: '#40D' } }, 'Starting application')
+        ),
+        ratio: 0.5,
+        count: 100,
+        pattern: 'INFO [main] <*>',
+      };
+      const result = sampleColumn.render?.(mockItem);
+
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('INFO [main] Starting application');
+      expect(container.querySelector('span[style]')).toBeTruthy();
     });
 
     it('should handle empty sample values', () => {
-      const result = sampleColumn.render?.('');
+      const mockItem: PatternItem = {
+        sample: '',
+        ratio: 0.5,
+        count: 100,
+        pattern: '',
+      };
+      const result = sampleColumn.render?.(mockItem);
       const { container } = render(<>{result}</>);
       expect(container.textContent).toBe('—');
     });
 
-    it('should handle null or undefined sample values', () => {
-      // @ts-ignore - Testing edge case with null
-      const resultNull = sampleColumn.render?.(null);
-      const { container: containerNull } = render(<>{resultNull}</>);
-      expect(containerNull.textContent).toBe('—');
-
-      // @ts-ignore - Testing edge case with undefined
-      const resultUndefined = sampleColumn.render?.(undefined);
-      const { container: containerUndefined } = render(<>{resultUndefined}</>);
-      expect(containerUndefined.textContent).toBe('—');
+    it('should handle missing sample values', () => {
+      const mockItem = {
+        ratio: 0.5,
+        count: 100,
+        pattern: '',
+      } as PatternItem;
+      const result = sampleColumn.render?.(mockItem);
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('—');
     });
   });
 
@@ -131,7 +159,7 @@ describe('patternsTableColumns', () => {
     let countColumn: ColumnWithRender<PatternItem>;
 
     beforeEach(() => {
-      countColumn = columns[3];
+      countColumn = columns[2];
     });
 
     it('should render valid count values directly', () => {
@@ -147,40 +175,72 @@ describe('patternsTableColumns', () => {
     });
   });
 
-  describe('flyout column', () => {
-    let flyoutColumn: ColumnWithRender<PatternItem>;
+  describe('actions column', () => {
+    let actionsColumn: ColumnWithRender<PatternItem>;
 
     beforeEach(() => {
-      flyoutColumn = columns[0];
+      actionsColumn = columns[0];
     });
 
     it('should have the correct width', () => {
-      expect(flyoutColumn.width).toBe('40px');
+      expect(actionsColumn.width).toBe('100px');
     });
 
-    it('should render an EuiButtonIcon with inspect icon', () => {
-      const mockRecord = mockPatternItems[0];
-      const result = flyoutColumn.render?.(mockRecord);
-
-      const { container } = render(<>{result}</>);
-      const buttonElement = container.querySelector('[data-test-subj="euiButtonIcon"]');
-
-      expect(buttonElement).toBeInTheDocument();
-      expect(buttonElement?.getAttribute('data-icon-type')).toBe('inspect');
+    it('should have the name Actions', () => {
+      expect(actionsColumn.name).toBe('Actions');
     });
 
-    it('should call openPatternsTableFlyout with the record when clicked', () => {
-      const mockRecord = mockPatternItems[0];
-      const result = flyoutColumn.render?.(mockRecord);
+    it('should render three EuiButtonIcons (inspect, magnifyWithPlus, magnifyWithMinus)', () => {
+      const mockItem = mockPatternItems[0];
+      const result = actionsColumn.render?.(mockItem);
 
       const { container } = render(<>{result}</>);
-      const buttonElement = container.querySelector(
-        '[data-test-subj="euiButtonIcon"]'
-      ) as HTMLButtonElement;
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
 
-      buttonElement?.click();
+      expect(buttons).toHaveLength(3);
+      expect(buttons[0]?.getAttribute('data-icon-type')).toBe('inspect');
+      expect(buttons[1]?.getAttribute('data-icon-type')).toBe('magnifyWithPlus');
+      expect(buttons[2]?.getAttribute('data-icon-type')).toBe('magnifyWithMinus');
+    });
+
+    it('should call openPatternsTableFlyout with the record when inspect is clicked', () => {
+      const mockItem = mockPatternItems[0];
+      const result = actionsColumn.render?.(mockItem);
+
+      const { container } = render(<>{result}</>);
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
+
+      (buttons[0] as HTMLButtonElement)?.click();
       expect(mockOpenPatternsTableFlyout).toHaveBeenCalledTimes(1);
-      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith(mockRecord);
+      expect(mockOpenPatternsTableFlyout).toHaveBeenCalledWith({
+        pattern: mockItem.pattern,
+        count: mockItem.count,
+        sample: [mockItem.sample],
+      });
+    });
+
+    it('should call onFilterForPattern when magnifyWithPlus is clicked', () => {
+      const mockItem = mockPatternItems[0];
+      const result = actionsColumn.render?.(mockItem);
+
+      const { container } = render(<>{result}</>);
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
+
+      (buttons[1] as HTMLButtonElement)?.click();
+      expect(mockOnFilterForPattern).toHaveBeenCalledTimes(1);
+      expect(mockOnFilterForPattern).toHaveBeenCalledWith(mockItem.pattern);
+    });
+
+    it('should call onFilterOutPattern when magnifyWithMinus is clicked', () => {
+      const mockItem = mockPatternItems[0];
+      const result = actionsColumn.render?.(mockItem);
+
+      const { container } = render(<>{result}</>);
+      const buttons = container.querySelectorAll('[data-test-subj="euiButtonIcon"]');
+
+      (buttons[2] as HTMLButtonElement)?.click();
+      expect(mockOnFilterOutPattern).toHaveBeenCalledTimes(1);
+      expect(mockOnFilterOutPattern).toHaveBeenCalledWith(mockItem.pattern);
     });
   });
 
@@ -191,13 +251,13 @@ describe('patternsTableColumns', () => {
     const ratioResult = ratioColumn.render?.(mockItem.ratio);
     expect(ratioResult).toBe('35.00%');
 
-    const sampleColumn = columns[2];
-    const sampleResult = sampleColumn.render?.(mockItem.sample);
-    const { container: sampleContainer } = render(<>{sampleResult}</>);
-    expect(sampleContainer.textContent).toBe(mockItem.sample);
-
-    const countColumn = columns[3];
+    const countColumn = columns[2];
     const countResult = countColumn.render?.(mockItem.count);
     expect(countResult).toBe(mockItem.count);
+
+    const sampleColumn = columns[3];
+    const sampleResult = sampleColumn.render?.(mockItem);
+    const { container: sampleContainer } = render(<>{sampleResult}</>);
+    expect(sampleContainer.textContent).toBe(mockItem.sample);
   });
 });

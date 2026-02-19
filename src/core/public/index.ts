@@ -446,6 +446,8 @@ export {
   ChatImplementationFunctions,
   Message,
   ChatWindowState,
+  ChatScreenshotServiceInterface,
+  ChatScreenshotButton,
 } from './chat';
 
 export { debounce, getNonce } from './utils';

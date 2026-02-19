@@ -78,6 +78,34 @@ describe('Facet', () => {
       });
     });
 
+    it('should include fetch_size in params when fetchSize is provided', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+      mockRequest.body.fetchSize = 500;
+
+      const result = await facet.describeQuery(mockContext, mockRequest);
+
+      expect(result).toEqual({ success: true, data: { result: 'success' } });
+      expect(mockClient).toHaveBeenCalledWith('test-endpoint', {
+        body: {
+          query: 'test query',
+          fetch_size: 500,
+          datasource: 'test-name',
+          sessionId: 'test-session',
+          lang: 'sql',
+        },
+      });
+    });
+
+    it('should not include fetch_size when fetchSize is not provided', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      const result = await facet.describeQuery(mockContext, mockRequest);
+
+      expect(result).toEqual({ success: true, data: { result: 'success' } });
+      const callArgs = mockClient.mock.calls[0][1];
+      expect(callArgs.body.fetch_size).toBeUndefined();
+    });
+
     it('should handle request with missing dataSource', async () => {
       mockRequest.body.query.dataset.dataSource = undefined;
       mockClient.mockResolvedValue({ result: 'success' });
