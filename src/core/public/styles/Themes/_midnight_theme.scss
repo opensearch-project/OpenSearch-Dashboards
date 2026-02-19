@@ -1,0 +1,180 @@
+@use '@elastic/eui' as eui;
+
+:root {
+  --midnight-primary: #172430; !default
+  --midnight-surface: #FCFEFF; !default
+  --midnight-bg: #B9D9EB;
+  --midnight-danger: #EF4444;
+  --midnight-border: #3a4148;
+
+  --midnight-radius: 6px;
+  --midnight-spacing: 8px;
+
+  --midnight-font: 'Inter', sans-serif;
+}
+
+/* Global */
+
+* {
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.application,
+.euiPage,
+.osdOverviewPageHeader,
+#app-wrapper,
+.osdOverviewContent,
+main {
+  background-color: var(--midnight-bg) !important;
+  font-family: var(--midnight-font), serif;
+}
+
+/* Header */
+
+.euiHeader {
+  box-shadow: 0 4px 12px rgba(23, 36, 48, 15%);
+}
+
+.osdOverviewPageHeader {
+  border-bottom: none !important;
+}
+
+/* Layout */
+
+.dshAppContainer {
+  padding: 0 5px;
+}
+
+.deLayout,
+.euiPage--paddingLarge {
+  padding: 12px 10px !important;
+}
+
+/* Typography */
+
+.euiText h1 {
+  color: var(--midnight-primary);
+  font-weight: bold;
+}
+
+.euiBreadcrumb {
+  font-weight: bold !important;
+}
+
+/* Panels / Cards */
+
+.euiPanel.euiPanel--borderRadiusMedium {
+  border-radius: var(--midnight-radius);
+  border-color: var(--midnight-primary);
+  border-width: 3px;
+}
+
+.euiCard__betaBadge.euiBetaBadge--hollow {
+  background-color: var(--midnight-primary);
+  border-color: var(--midnight-primary);
+  color: var(--midnight-surface);
+}
+
+/* Buttons */
+
+.euiButton,
+.euiButton__content {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    transform 0.2s ease;
+  box-shadow: none !important;
+  border-width: 3px;
+  font-weight: bold;
+}
+
+.euiButton {
+  border-color: var(--midnight-primary);
+  color: var(--midnight-primary);
+  background-color: var(--midnight-surface);
+  transform: scale(1);
+}
+
+.euiButton:hover {
+  transform: scale(1.07);
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.euiButton__content:hover {
+  background-color: var(--midnight-primary) !important;
+  color: var(--midnight-surface);
+  text-decoration: none !important;
+}
+
+.euiButton:hover svg {
+  fill: var(--midnight-surface) !important;
+  transition: fill 0.25s ease;
+}
+
+.euiButton svg {
+  transition: fill 0.25s ease;
+}
+
+.euiButton--primary {
+  background-color: var(--midnight-primary) !important;
+  color: var(--midnight-surface);
+  border: none;
+}
+
+.euiButton--primary svg {
+  fill: var(--midnight-surface);
+}
+
+/* Button Empty / Links */
+
+.euiButtonEmpty,
+.euiButtonEmpty__text,
+.euiSuperDatePicker__prettyFormatLink {
+  color: var(--midnight-primary);
+}
+
+/* Icons */
+
+.euiIcon {
+  fill: var(--midnight-primary);
+}
+
+/* Tabs */
+
+.euiTab-isSelected {
+  color: var(--midnight-primary) !important;
+  font-weight: bold;
+}
+
+.euiTab.euiTab-isSelected::after {
+  background-color: var(--midnight-primary);
+}
+
+.euiTab:focus {
+  text-decoration: none;
+}
+
+/* Button Icons */
+
+.euiButtonIcon--text.euiButtonIcon--fill {
+  background-color: var(--midnight-primary) !important;
+  border-color: var(--midnight-primary) !important;
+  color: var(--midnight-surface) !important;
+}
+
+.euiButtonIcon--text.euiButtonIcon--fill svg {
+  fill: var(--midnight-surface) !important;
+}
+
+/* Form Controls */
+
+.euiFormControlLayout--group {
+  box-shadow: 0 0 12px rgba(23, 36, 48, 0.25) !important;
+  border: 1px solid var(--midnight-border);
+}
