@@ -4,6 +4,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### 📈 Features/Enhancements
+
+ - [Data] Support all range field types (integer_range, float_range, long_range, double_range, date_range, ip_range) in index patterns and Discover
+
 ## [3.5.0-2026-02-10](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.5.0)
 
 ### 💥 Breaking Changes
