@@ -93,6 +93,15 @@ describe('utils/osd_field_types', () => {
       expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.FLAT_OBJECT)).toBe('string');
     });
 
+    test('returns range for all range opensearch types', () => {
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.INTEGER_RANGE)).toBe('range');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.FLOAT_RANGE)).toBe('range');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.LONG_RANGE)).toBe('range');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.DOUBLE_RANGE)).toBe('range');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.DATE_RANGE)).toBe('range');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.IP_RANGE)).toBe('range');
+    });
+
     test('returns unknown for unknown opensearch types', () => {
       const castTo = castOpenSearchToOsdFieldTypeName('wrongType' as OPENSEARCH_FIELD_TYPES);
 
@@ -118,6 +127,7 @@ describe('utils/osd_field_types', () => {
         OSD_FIELD_TYPES.NESTED,
         OSD_FIELD_TYPES.NUMBER,
         OSD_FIELD_TYPES.OBJECT,
+        OSD_FIELD_TYPES.RANGE,
         OSD_FIELD_TYPES.STRING,
         OSD_FIELD_TYPES.UNKNOWN,
       ]);

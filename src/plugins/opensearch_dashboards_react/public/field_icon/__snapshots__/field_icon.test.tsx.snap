@@ -114,6 +114,16 @@ exports[`FieldIcon renders known field types nested is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types range is rendered 1`] = `
+<EuiToken
+  aria-label="range"
+  className="osdFieldIcon"
+  iconType="tokenRange"
+  size="s"
+  title="range"
+/>
+`;
+
 exports[`FieldIcon renders known field types number is rendered 1`] = `
 <EuiToken
   aria-label="number"
