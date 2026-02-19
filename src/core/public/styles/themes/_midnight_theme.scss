@@ -1,183 +1,197 @@
-@use '@elastic/eui/src/theme_light' as eui;
-
-:root {
+.midnightTheme {
+  /* Theme variables scoped to this theme */
   --midnight-primary: #172430;
   --midnight-surface: #fcfeff;
   --midnight-bg: #b9d9eb;
   --midnight-border: #3a4148;
+  --midnight-danger: #b90e0a;
 
   --midnight-radius: 6px;
   --midnight-spacing: 8px;
 
   --midnight-font: 'Inter', sans-serif;
-}
 
-/* Global */
+  /* Global transitions */
+  * {
+    transition:
+      background-color 0.5s ease,
+      color 0.5s ease,
+      border-color 0.3s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
 
-* {
-  transition:
-    background-color 0.5s ease,
-    color 0.5s ease,
-    border-color 0.3s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
+  /* Base layout */
+  .application,
+  .euiPage,
+  .osdOverviewPageHeader,
+  #app-wrapper,
+  .osdOverviewContent,
+  main {
+    background-color: var(--midnight-bg);
+    font-family: var(--midnight-font), serif;
+  }
 
-.application,
-.euiPage,
-.osdOverviewPageHeader,
-#app-wrapper,
-.osdOverviewContent,
-main {
-  background-color: var(--midnight-bg) !important;
-  font-family: var(--midnight-font), serif;
-}
+  /* Header */
+  .euiHeader {
+    box-shadow: 0 4px 12px rgba(23, 36, 48, 0.15);
+  }
 
-/* Header */
+  .osdOverviewPageHeader {
+    border-bottom: none;
+  }
 
-.euiHeader {
-  box-shadow: 0 4px 12px rgba(23, 36, 48, 15%);
-}
+  /* Layout */
+  .dshAppContainer {
+    padding: 0 5px;
+  }
 
-.osdOverviewPageHeader {
-  border-bottom: none !important;
-}
+  .deLayout,
+  .euiPage--paddingLarge {
+    padding: 12px 10px;
+  }
 
-/* Layout */
+  /* Typography */
+  .euiText h1 {
+    color: var(--midnight-primary);
+    font-weight: bold;
+  }
 
-.dshAppContainer {
-  padding: 0 5px;
-}
+  .euiBreadcrumb {
+    font-weight: bold !important;
+  }
 
-.deLayout,
-.euiPage--paddingLarge {
-  padding: 12px 10px !important;
-}
+  /* Panels / Cards */
+  .euiPanel.euiPanel--borderRadiusMedium {
+    border-radius: var(--midnight-radius);
+    border-color: var(--midnight-primary);
+    border-width: 3px;
+  }
 
-/* Typography */
+  .euiCard__betaBadge.euiBetaBadge--hollow {
+    background-color: var(--midnight-primary);
+    border-color: var(--midnight-primary);
+    color: var(--midnight-surface);
+  }
 
-.euiText h1 {
-  color: var(--midnight-primary);
-  font-weight: bold;
-}
+  /* Buttons */
+  .euiButton,
+  .euiButton__content {
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease,
+      transform 0.2s ease;
+    box-shadow: none;
+    border-width: 3px;
+    font-weight: bold;
+  }
 
-.euiBreadcrumb {
-  font-weight: bold !important;
-}
+  .euiButton {
+    border-color: var(--midnight-primary);
+    color: var(--midnight-primary);
+    background-color: var(--midnight-surface);
+    transform: scale(1);
+  }
 
-/* Panels / Cards */
+  .euiButton:hover {
+    transform: scale(1.07);
+    text-decoration: none;
+  }
 
-.euiPanel.euiPanel--borderRadiusMedium {
-  border-radius: var(--midnight-radius);
-  border-color: var(--midnight-primary);
-  border-width: 3px;
-}
+  .euiButton__content:hover {
+    background-color: var(--midnight-primary);
+    color: var(--midnight-surface);
+    text-decoration: none;
+  }
 
-.euiCard__betaBadge.euiBetaBadge--hollow {
-  background-color: var(--midnight-primary);
-  border-color: var(--midnight-primary);
-  color: var(--midnight-surface);
-}
+  .euiButton svg {
+    transition: fill 0.25s ease;
+  }
 
-/* Buttons */
+  .euiButton:hover svg {
+    fill: var(--midnight-surface);
+  }
 
-.euiButton,
-.euiButton__content {
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease,
-    transform 0.2s ease;
-  box-shadow: none !important;
-  border-width: 3px;
-  font-weight: bold;
-}
+  .euiButton--primary {
+    background-color: var(--midnight-primary);
+    color: var(--midnight-surface);
+    border: none;
+  }
 
-.euiButton {
-  border-color: var(--midnight-primary);
-  color: var(--midnight-primary);
-  background-color: var(--midnight-surface);
-  transform: scale(1);
-}
+  .euiButton--primary svg {
+    fill: var(--midnight-surface);
+  }
 
-.euiButton:hover {
-  transform: scale(1.07);
-  box-shadow: none !important;
-  text-decoration: none !important;
-}
+  /* Button Empty / Links */
+  .euiButtonEmpty--danger {
+    color: var(--midnight-danger);
+    font-weight: bold;
+  }
 
-.euiButton__content:hover {
-  background-color: var(--midnight-primary) !important;
-  color: var(--midnight-surface);
-  text-decoration: none !important;
-}
+  //.euiButtonEmpty,
+  //.euiButtonEmpty__text,
 
-.euiButton:hover svg {
-  fill: var(--midnight-surface) !important;
-  transition: fill 0.25s ease;
-}
+  .euiSuperDatePicker__prettyFormatLink {
+    color: var(--midnight-primary);
+  }
 
-.euiButton svg {
-  transition: fill 0.25s ease;
-}
+  /* Icons */
+  .euiIcon {
+    fill: var(--midnight-primary);
+  }
 
-.euiButton--primary {
-  background-color: var(--midnight-primary) !important;
-  color: var(--midnight-surface);
-  border: none;
-}
+  /* Tabs */
+  .euiTab-isSelected {
+    color: var(--midnight-primary);
+    font-weight: bold;
+  }
 
-.euiButton--primary svg {
-  fill: var(--midnight-surface);
-}
+  .euiTab.euiTab-isSelected::after {
+    background-color: var(--midnight-primary);
+  }
 
-/* Button Empty / Links */
+  .euiTab:focus {
+    text-decoration: none;
+  }
 
-.euiButtonEmpty,
-.euiButtonEmpty__text,
-.euiSuperDatePicker__prettyFormatLink {
-  color: var(--midnight-primary);
-}
+  /* Button Icons */
+  .euiButtonIcon--text.euiButtonIcon--fill {
+    background-color: var(--midnight-primary);
+    border-color: var(--midnight-primary);
+    color: var(--midnight-surface);
+  }
 
-/* Icons */
+  .euiButtonIcon--text.euiButtonIcon--fill svg {
+    fill: var(--midnight-surface);
+  }
 
-.euiIcon {
-  fill: var(--midnight-primary);
-}
+  /* Form Controls */
+  .euiFormControlLayout--group,
+  .euiFormControlLayout {
+    box-shadow: 0 0 12px rgba(23, 36, 48, 0.25);
+    border: 1px solid var(--midnight-border);
+  }
 
-/* Tabs */
+  /* Collapsible Nav */
+  .osdCollapsibleNav {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    background: #fff;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: transform 400ms ease, opacity 400ms ease;
+    z-index: 1001;
+  }
 
-.euiTab-isSelected {
-  color: var(--midnight-primary) !important;
-  font-weight: bold;
-}
+  .osdCollapsibleNav.osdCollapsibleNav--open {
+    transform: translateX(0);
+    opacity: 1;
+  }
 
-.euiTab.euiTab-isSelected::after {
-  background-color: var(--midnight-primary);
-}
-
-.euiTab:focus {
-  text-decoration: none;
-}
-
-/* Button Icons */
-
-.euiButtonIcon--text.euiButtonIcon--fill {
-  background-color: var(--midnight-primary) !important;
-  border-color: var(--midnight-primary) !important;
-  color: var(--midnight-surface) !important;
-}
-
-.euiButtonIcon--text.euiButtonIcon--fill svg {
-  fill: var(--midnight-surface) !important;
-}
-
-/* Form Controls */
-
-.euiFormControlLayout--group {
-  box-shadow: 0 0 12px rgba(23, 36, 48, 25%) !important;
-  border: 1px solid var(--midnight-border) ;
-}
-
-.euiFormControlLayout {
-  box-shadow: 0 0 12px rgba(23, 36, 48, 25%) !important;
+  .osdCollapsibleNav.osdCollapsibleNav--closing {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 }

@@ -41,7 +41,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -52,6 +52,7 @@ import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import { getIsCategoryOpen, setIsCategoryOpen } from '../../utils';
+import classnames from 'classnames';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -80,6 +81,7 @@ interface Props {
   id: string;
   isLocked: boolean;
   isNavOpen: boolean;
+  isNavClose: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -99,6 +101,7 @@ export function CollapsibleNav({
   id,
   isLocked,
   isNavOpen,
+  isNavClose,
   homeHref,
   storage = window.localStorage,
   onIsLockedUpdate,
@@ -118,6 +121,21 @@ export function CollapsibleNav({
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const [isClosing, setIsClosing] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(isNavOpen);
+  useEffect(() => {
+    if (!isNavOpen && internalOpen) {
+      setIsClosing(true);
+      const timeout = setTimeout(() => {
+        setIsClosing(false);
+        setInternalOpen(false);
+      }, 400); // match SCSS duration
+      return () => clearTimeout(timeout);
+    } else if (isNavOpen) {
+      setInternalOpen(true);
+      setIsClosing(false);
+    }
+  }, [isNavOpen, internalOpen]);
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
@@ -136,7 +154,11 @@ export function CollapsibleNav({
       aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
         defaultMessage: 'Primary',
       })}
-      isOpen={isNavOpen}
+      isOpen={internalOpen}
+      className={classnames('osdCollapsibleNav', {
+        'osdCollapsibleNav--open': internalOpen && !isClosing,
+        'osdCollapsibleNav--closing': isClosing,
+      })}
       isDocked={isLocked}
       onClose={closeNav}
       outsideClickCloses={false}

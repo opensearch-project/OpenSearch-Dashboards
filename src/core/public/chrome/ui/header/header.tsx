@@ -166,6 +166,7 @@ export function Header({
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpenState, setIsNavOpenState] = useState(false);
+  const [isNavCloseState, setIsNavCloseState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
   const globalBanner = useObservable(observables.globalBanner$ || of(undefined), undefined);
@@ -195,6 +196,7 @@ export function Header({
   }, [sidecarConfig]);
 
   const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+  const isNavClose = useUpdatedHeader ? isLocked : isNavCloseState;
 
   const setIsNavOpen = useCallback(
     (value: boolean) => {
@@ -701,11 +703,26 @@ export function Header({
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
+            // closeNav={() => {
+            //   setIsNavOpen(false);
+            //   if (toggleCollapsibleNavRef.current) {
+            //     toggleCollapsibleNavRef.current.focus();
+            //   }
+            // }}
             closeNav={() => {
-              setIsNavOpen(false);
-              if (toggleCollapsibleNavRef.current) {
-                toggleCollapsibleNavRef.current.focus();
-              }
+              // Trigger CSS closing animation
+              setIsNavCloseState(true);
+
+              // Wait for CSS transition to finish (match your CSS duration)
+              setTimeout(() => {
+                setIsNavOpenState(false);
+                setIsNavCloseState(false);
+
+                // Return focus to toggle button
+                if (toggleCollapsibleNavRef.current) {
+                  toggleCollapsibleNavRef.current.focus();
+                }
+              }, 400); // match transition duration in ms
             }}
             customNavLink$={observables.customNavLink$}
             logos={logos}
@@ -726,6 +743,7 @@ export function Header({
             navLinks$={observables.navLinks$}
             recentlyAccessed$={observables.recentlyAccessed$}
             isNavOpen={isNavOpen}
+            isNavClose = {isNavClose}
             homeHref={homeHref}
             basePath={basePath}
             navigateToApp={application.navigateToApp}

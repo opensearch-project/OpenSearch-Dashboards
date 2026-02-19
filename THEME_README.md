@@ -1,6 +1,6 @@
 ## INSTALATION 
 
-1. git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git
+1. git clone https://github.com/opensearch-project/OpenSearch-Dashboards.git 
    cd OpenSearch-Dashboards
 2. git checkout -b midnight_theme
    git pull origin midnight_theme
@@ -38,6 +38,7 @@
   - --midnight-surface: `#fcfeff` [clean background for cards and panels]
   - --midnight-bg: `#b9d9eb` [subtle blue-gray to reduce eye strain]
   - --midnight-border: `#3a4148` [gray bold border to enhance form inputs]
+  - --midnight-danger: `#b90e0a` [bold red color to go with alert texts]
 
 ### - Typography:
 
@@ -58,3 +59,4 @@
   - Cards: Rounded edges, beta badges styled for high contrast
   - Form Inputs: Soft shadows to indicate focus and grouping
   - Tabs & Headers: Highlighting active tabs and subtle bottom shadows
+  - Sidebar/Navbar : Smoother navbar collapse added for better transition.
