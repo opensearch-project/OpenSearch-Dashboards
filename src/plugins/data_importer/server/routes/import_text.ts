@@ -9,7 +9,7 @@ import { FileProcessorService } from '../processors/file_processor_service';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 import { IRouter } from '../../../../core/server';
 import { configSchema } from '../../config';
-import { decideClient } from '../utils/util';
+import { decideClient, ALPHANUMERIC_REGEX_STRING, LOOKUP_FIELD } from '../utils/util';
 
 export function importTextRoute(
   router: IRouter,
@@ -44,7 +44,7 @@ export function importTextRoute(
           importIdentifier: schema.maybe(
             schema.string({
               validate(value: string) {
-                if (!/^[a-z][a-z0-9_-]*$/i.test(value)) {
+                if (!ALPHANUMERIC_REGEX_STRING.test(value)) {
                   return `must be alphanumeric with hyphens/underscores`;
                 }
               },
@@ -96,7 +96,6 @@ export function importTextRoute(
 
       // Generate lookup ID if import identifier is provided
       const lookupId = request.query.importIdentifier ? uuidv4() : undefined;
-      const lookupField = '__lookup';
 
       if (request.query.createMode) {
         const mapping = request.body.mapping;
@@ -115,7 +114,7 @@ export function importTextRoute(
         // Add __lookup field to mapping if using import identifier
         if (request.query.importIdentifier) {
           mappingObj.properties = mappingObj.properties || {};
-          mappingObj.properties[lookupField] = {
+          mappingObj.properties[LOOKUP_FIELD] = {
             type: 'keyword',
           };
         }
@@ -156,7 +155,7 @@ export function importTextRoute(
           delimiter: request.query.delimiter,
           dataSourceId: request.query.dataSource,
           lookupId,
-          lookupField,
+          lookupField: LOOKUP_FIELD,
         });
 
         // Create filtered alias if import identifier is provided
@@ -171,7 +170,7 @@ export function importTextRoute(
                       alias: request.query.importIdentifier,
                       filter: {
                         term: {
-                          [lookupField]: lookupId,
+                          [LOOKUP_FIELD]: lookupId,
                         },
                       },
                     },

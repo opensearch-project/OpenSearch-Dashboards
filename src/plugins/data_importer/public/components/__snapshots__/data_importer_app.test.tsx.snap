@@ -195,7 +195,7 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
             class="euiFormHelpText euiFormRow__text"
             id="generated-id-help-0"
           >
-            Create a filtered alias for this dataset, to easily reference it later.
+            Create a filtered alias for this dataset to easily reference it later.
           </div>
         </div>
       </div>
@@ -665,7 +665,7 @@ exports[`App should render with MDS 1`] = `
                   class="euiFormHelpText euiFormRow__text"
                   id="generated-id-help-0"
                 >
-                  Create a filtered alias for this dataset, to easily reference it later.
+                  Create a filtered alias for this dataset to easily reference it later.
                 </div>
               </div>
             </div>
@@ -1067,7 +1067,7 @@ exports[`App should render with Router when embedded is false 1`] = `
                   class="euiFormHelpText euiFormRow__text"
                   id="generated-id-help-0"
                 >
-                  Create a filtered alias for this dataset, to easily reference it later.
+                  Create a filtered alias for this dataset to easily reference it later.
                 </div>
               </div>
             </div>
@@ -1469,7 +1469,7 @@ exports[`App should render without MDS 1`] = `
                   class="euiFormHelpText euiFormRow__text"
                   id="generated-id-help-0"
                 >
-                  Create a filtered alias for this dataset, to easily reference it later.
+                  Create a filtered alias for this dataset to easily reference it later.
                 </div>
               </div>
             </div>

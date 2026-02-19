@@ -230,7 +230,7 @@ export const DataImporterPluginApp = ({
           delimiter,
           selectedDataSourceId: dataSourceId,
           mapping: filePreviewData.predictedMapping,
-          importIdentifier: importIdentifier || undefined,
+          importIdentifier,
         });
       } else if (importType === IMPORT_CHOICE_TEXT) {
         response = await importText({
@@ -242,7 +242,7 @@ export const DataImporterPluginApp = ({
           delimiter,
           selectedDataSourceId: dataSourceId,
           mapping: filePreviewData.predictedMapping,
-          importIdentifier: importIdentifier || undefined,
+          importIdentifier,
         });
       }
     } catch (error) {
@@ -425,7 +425,7 @@ export const DataImporterPluginApp = ({
         <EuiFormRow
           helpText={i18n.translate('dataImporter.importIdentifierHelp', {
             defaultMessage:
-              'Create a filtered alias for this dataset, to easily reference it later.',
+              'Create a filtered alias for this dataset to easily reference it later.',
           })}
         >
           <EuiFieldText

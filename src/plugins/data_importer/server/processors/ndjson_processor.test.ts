@@ -92,10 +92,10 @@ describe('NDJSONProcessor', () => {
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
 
         // Verify each indexed document includes the lookup field
-        for (let i = 0; i < expected.length; i++) {
-          const callArgs = clientMock.index.mock.calls[i][0];
+        clientMock.index.mock.calls.forEach((call) => {
+          const callArgs = call[0];
           expect(callArgs.body).toHaveProperty(lookupField, lookupId);
-        }
+        });
       }
     );
   });
@@ -163,10 +163,10 @@ describe('NDJSONProcessor', () => {
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
 
         // Verify each indexed document includes the lookup field
-        for (let i = 0; i < expected.length; i++) {
-          const callArgs = clientMock.index.mock.calls[i][0];
+        clientMock.index.mock.calls.forEach((call) => {
+          const callArgs = call[0];
           expect(callArgs.body).toHaveProperty(lookupField, lookupId);
-        }
+        });
       }
     );
 
