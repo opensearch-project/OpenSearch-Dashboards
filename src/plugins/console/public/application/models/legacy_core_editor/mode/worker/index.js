@@ -34,5 +34,5 @@ export const workerUrl = workerPath;
 
 export const workerModule = {
   id: 'sense_editor/mode/worker',
-  src: '', 
+  src: '',
 };
