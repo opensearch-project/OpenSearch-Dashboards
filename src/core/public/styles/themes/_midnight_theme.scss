@@ -151,7 +151,7 @@
     text-decoration: none;
   }
 
-  .euiPanel {
+  .euiCard--hasIcon {
     padding: 10px;
   }
 
@@ -170,7 +170,6 @@
   .euiFormControlLayout--group,
   .euiFormControlLayout {
     box-shadow: 0 0 12px rgba(23, 36, 48, 0.25);
-    border: 1px solid var(--midnight-border);
   }
 
   /* Collapsible Nav */
