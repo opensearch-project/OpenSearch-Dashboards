@@ -1,0 +1,8 @@
+.ptnSampleColumn {
+  /* stylelint-disable value-no-vendor-prefix, property-no-vendor-prefix */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  /* stylelint-enable value-no-vendor-prefix, property-no-vendor-prefix */
+  overflow: hidden;
+}
