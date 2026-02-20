@@ -150,6 +150,7 @@ export default {
     '\\.ace\\.worker.js$': '<rootDir>/src/dev/jest/mocks/worker_module_mock.js',
     '\\.editor\\.worker.js$': '<rootDir>/src/dev/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/src/dev/jest/mocks/file_mock.js',
+    '\\?raw$': 'jest-raw-loader',
   },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',

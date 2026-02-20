@@ -11,8 +11,7 @@
   },
   "devDependencies": {
     "@osd/dev-utils": "1.0.0",
-    "@osd/babel-preset": "1.0.0",
-    "raw-loader": "^4.0.2"
+    "@osd/babel-preset": "1.0.0"
   },
   "@osd/pm": {
     "web": true
