@@ -1,0 +1,2 @@
+feat:
+- Add default fetch_size=500 for PPL queries in Discover ([#11359](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11359))
