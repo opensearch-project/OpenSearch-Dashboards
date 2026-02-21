@@ -284,7 +284,7 @@
     "lucene": "^2.1.1",
     "mathjs": "^11.8.2",
     "mime": "^3.0.0",
-    "minimatch": "^3.0.4",
+    "minimatch": "^10.2.1",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "mustache": "^2.3.2",
