@@ -192,9 +192,9 @@
   "dependencies": {
     "@aws-crypto/client-node": "^4.2.1",
     "@aws-crypto/sha256-js": "^5.2.0",
-    "@aws-sdk/client-bedrock-runtime": "^3.982.0",
-    "@aws-sdk/client-sts": "^3.982.0",
-    "@aws-sdk/credential-provider-node": "^3.972.5",
+    "@aws-sdk/client-bedrock-runtime": "^3.995.0",
+    "@aws-sdk/client-sts": "^3.995.0",
+    "@aws-sdk/credential-provider-node": "^3.972.10",
     "@dagrejs/dagre": "^1.1.5",
     "@elastic/datemath": "5.0.3",
     "@elastic/eui": "npm:@opensearch-project/oui@1.22.1",
