@@ -162,6 +162,46 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
       <div
         class="euiSpacer euiSpacer--s"
       />
+      <span
+        class="euiTitle euiTitle--xsmall"
+      >
+        Upload alias (optional)
+      </span>
+      <div
+        class="euiFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help-0"
+                class="euiFieldText"
+                data-test-subj="importIdentifierInput"
+                id="generated-id"
+                placeholder="Alias name"
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help-0"
+          >
+            Create a filtered alias for this dataset to easily reference it later.
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
       <div
         class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
       >
@@ -592,6 +632,46 @@ exports[`App should render with MDS 1`] = `
             <div
               class="euiSpacer euiSpacer--s"
             />
+            <span
+              class="euiTitle euiTitle--xsmall"
+            >
+              Upload alias (optional)
+            </span>
+            <div
+              class="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <div
+                  class="euiFormControlLayout"
+                >
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      aria-describedby="generated-id-help-0"
+                      class="euiFieldText"
+                      data-test-subj="importIdentifierInput"
+                      id="generated-id"
+                      placeholder="Alias name"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  Create a filtered alias for this dataset to easily reference it later.
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
             <div
               class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
             >
@@ -954,6 +1034,46 @@ exports[`App should render with Router when embedded is false 1`] = `
             <div
               class="euiSpacer euiSpacer--s"
             />
+            <span
+              class="euiTitle euiTitle--xsmall"
+            >
+              Upload alias (optional)
+            </span>
+            <div
+              class="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <div
+                  class="euiFormControlLayout"
+                >
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      aria-describedby="generated-id-help-0"
+                      class="euiFieldText"
+                      data-test-subj="importIdentifierInput"
+                      id="generated-id"
+                      placeholder="Alias name"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  Create a filtered alias for this dataset to easily reference it later.
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
             <div
               class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
             >
@@ -1310,6 +1430,46 @@ exports[`App should render without MDS 1`] = `
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <span
+              class="euiTitle euiTitle--xsmall"
+            >
+              Upload alias (optional)
+            </span>
+            <div
+              class="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                class="euiFormRow__fieldWrapper"
+              >
+                <div
+                  class="euiFormControlLayout"
+                >
+                  <div
+                    class="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      aria-describedby="generated-id-help-0"
+                      class="euiFieldText"
+                      data-test-subj="importIdentifierInput"
+                      id="generated-id"
+                      placeholder="Alias name"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  Create a filtered alias for this dataset to easily reference it later.
                 </div>
               </div>
             </div>
