@@ -1,0 +1,2 @@
+fix:
+- Remove meta field for prometheus data-connection ([#11280](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11280))
