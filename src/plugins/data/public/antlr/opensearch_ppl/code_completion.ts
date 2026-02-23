@@ -10,7 +10,11 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
+import {
+  SimplifiedOpenSearchPPLLexer,
+  SimplifiedOpenSearchPPLParser,
+  OpenSearchPPLParser,
+} from '@osd/antlr-grammar';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
 import {
   fetchColumnValues,
@@ -32,6 +36,58 @@ import {
 } from './constants';
 import { Documentation } from './ppl_documentation';
 import { getPPLQuerySnippetForSuggestions } from '../../query_snippet_suggestions/ppl/suggestions';
+import { pplGrammarCache, createRemappedEnrichment } from './ppl_grammar_cache';
+
+/**
+ * Try runtime grammar suggestions using cached backend grammar.
+ * Returns null if grammar not cached or version unsupported — caller falls through to compiled.
+ */
+function tryRuntimeGrammarSuggestions(
+  query: string,
+  cursor: CursorPosition,
+  services: any,
+  indexPattern: any,
+  autocompleteData: typeof simplifiedPplAutocompleteData | typeof defaultPplAutocompleteData,
+  compiledParserClass: any,
+  skipSymbolicKeywords: boolean
+): OpenSearchPplAutocompleteResult | null {
+  try {
+    const dataSourceId = indexPattern?.dataSourceRef?.id;
+    const version =
+      indexPattern?.dataSourceRef?.version ||
+      services?.data?.query?.queryString?.getQuery()?.dataset?.dataSource?.version ||
+      pplGrammarCache.getCachedVersion(dataSourceId);
+    console.log('version: ', version);
+    if (!version || !pplGrammarCache.shouldFetchFromBackend(version)) return null;
+
+    const grammar = pplGrammarCache.getCachedGrammar(dataSourceId);
+    if (!grammar) return null;
+    console.log('grammar: ', grammar);
+
+    const { Lexer, Parser } = pplGrammarCache.getWrappedConstructors(grammar);
+    const { ruleRemap, tokenRemap } = pplGrammarCache.buildRemaps(grammar, compiledParserClass);
+    const remappedEnrich = createRemappedEnrichment(
+      autocompleteData.enrichAutocompleteResult,
+      ruleRemap,
+      tokenRemap
+    );
+
+    return parseQuery({
+      Lexer,
+      Parser,
+      tokenDictionary: grammar.tokenDictionary,
+      ignoredTokens: grammar.ignoredTokens,
+      rulesToVisit: grammar.rulesToVisit,
+      getParseTree: (parser: any) => parser.parse(grammar.startRuleIndex),
+      enrichAutocompleteResult: remappedEnrich,
+      query,
+      cursor,
+      skipSymbolicKeywords,
+    });
+  } catch {
+    return null;
+  }
+}
 
 // Utility function to extract query text up to cursor position
 const extractQueryTillCursor = (
@@ -103,13 +159,25 @@ export const getDefaultSuggestions = async ({
   services,
 }: QuerySuggestionGetFnArgs) => {
   if (!services || !services.appName || !indexPattern) return [];
+
+
   try {
     const { lineNumber, column } = position || {};
-
-    const suggestions = getDefaultOpenSearchPplAutoCompleteSuggestions(query, {
+    const cursor: CursorPosition = {
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
-    });
+    };
+
+    const suggestions =
+      tryRuntimeGrammarSuggestions(
+        query,
+        cursor,
+        services,
+        indexPattern,
+        defaultPplAutocompleteData,
+        OpenSearchPPLParser,
+        true
+      ) || getDefaultOpenSearchPplAutoCompleteSuggestions(query, cursor);
 
     const finalSuggestions: QuerySuggestion[] = [];
 
@@ -192,13 +260,26 @@ export const getSimplifiedPPLSuggestions = async ({
   services,
 }: QuerySuggestionGetFnArgs) => {
   if (!services || !services.appName || !indexPattern) return [];
+
+
   try {
     const { lineNumber, column } = position || {};
-
-    const suggestions = getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, {
+    const cursor: CursorPosition = {
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
-    });
+    };
+
+    const suggestions =
+      tryRuntimeGrammarSuggestions(
+        query,
+        cursor,
+        services,
+        indexPattern,
+        simplifiedPplAutocompleteData,
+        SimplifiedOpenSearchPPLParser,
+        false
+      ) || getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
+    console.log('getSimplifiedPPLSuggestions: ', suggestions);
     const finalSuggestions: QuerySuggestion[] = [];
     const isInQuotes = suggestions.isInQuote || false;
     const isInBackQuote = suggestions.isInBackQuote || false;
