@@ -107,6 +107,7 @@ import {
   getDefaultSuggestions as getPPLSuggestions,
   getSimplifiedPPLSuggestions,
 } from './antlr/opensearch_ppl/code_completion';
+import { pplGrammarCache } from './antlr/opensearch_ppl/ppl_grammar_cache';
 import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
 import { promqlTriggerCharacters } from './antlr/promql/constants';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
@@ -310,6 +311,29 @@ export class DataPublicPlugin
       notifications,
     });
     setQueryService(query);
+
+    // Subscribe to dataset changes to pre-fetch PPL grammar for supported backends.
+    // This runs at app startup so grammar is fetched on dataset change, not on keystroke.
+    let lastGrammarDatasourceId: string | undefined;
+    query.queryString.getUpdates$().subscribe((q) => {
+      console.log('[PPL Grammar] queryString update', { language: q.language, dsId: q.dataset?.dataSource?.id, dsVersion: q.dataset?.dataSource?.version });
+      if (q.language !== 'PPL') return;
+      const dsId = q.dataset?.dataSource?.id;
+      if (dsId === lastGrammarDatasourceId) {
+        console.log('[PPL Grammar] same datasource, skip');
+        return;
+      }
+      const dsVersion = q.dataset?.dataSource?.version;
+      if (dsVersion && !pplGrammarCache.shouldFetchFromBackend(dsVersion)) {
+        console.log('[PPL Grammar] version too old, skip', dsVersion);
+        lastGrammarDatasourceId = dsId;
+        return;
+      }
+      console.log('[PPL Grammar] fetching grammar for', dsId, dsVersion);
+      lastGrammarDatasourceId = dsId;
+      pplGrammarCache.invalidate(dsId);
+      pplGrammarCache.warmUp(http, savedObjects.client, dsId);
+    });
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);

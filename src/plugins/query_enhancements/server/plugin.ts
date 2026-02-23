@@ -36,6 +36,7 @@ import { resourceManagerService } from './connections/resource_manager_service';
 import { queryManagerService } from './connections/query_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
+import { pplSuggestStrategyProvider } from './search/ppl_suggest_strategy';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -77,6 +78,7 @@ export class QueryEnhancementsPlugin
       this.logger,
       client
     );
+    const pplSuggestStrategy = pplSuggestStrategyProvider(this.config$, this.logger, client);
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_RAW, pplRawSearchStrategy);

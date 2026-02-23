@@ -114,6 +114,105 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
 }
 
 /**
+ * Defines route for PPL artifact endpoint
+ * Forwards requests to OpenSearch /_plugins/_ppl/_grammar
+ */
+export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: any) {
+  router.get(
+    {
+      path: '/api/enhancements/ppl/grammar',
+      validate: {
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        logger.debug('PPL artifact route called');
+
+        // Get the OpenSearch client - use data source if provided
+        const { dataSourceId } = req.query;
+        let opensearchClient = client.asScoped(req);
+
+        // Call OpenSearch artifact endpoint
+        // Note: We don't forward If-None-Match header because OSD framework
+        // can't properly handle 304 responses (treats them as redirects).
+        // Caching is handled entirely on the frontend via localStorage.
+        const result = await opensearchClient.callAsCurrentUser('enhancements.pplArtifact');
+
+        // The result is the artifact bundle JSON
+        // Forward headers from OpenSearch if available
+        const responseHeaders: Record<string, string> = {
+          'content-type': 'application/json',
+        };
+
+        // Note: OpenSearch client might not expose response headers directly
+        // The artifact bundle itself should contain grammarHash for client-side caching
+        if (result && result.grammarHash) {
+          responseHeaders.etag = `"${result.grammarHash}"`;
+          responseHeaders['cache-control'] = 'public, max-age=3600';
+        }
+
+        return res.ok({
+          body: result,
+          headers: responseHeaders,
+        });
+      } catch (err: any) {
+        // Don't try to return 304 - let frontend handle caching from localStorage
+        // The OSD framework treats 304 as a redirect which requires a location header
+        logger.debug(`PPL artifact fetch error: ${err.message || err}`);
+
+        return res.custom({
+          statusCode: coerceStatusCode(err.status || err.statusCode),
+          body: err.message || 'Failed to fetch PPL artifact',
+        });
+      }
+    }
+  );
+}
+
+/**
+ * Defines route for PPL suggest endpoint
+ */
+export function definePPLSuggestRoute(logger: Logger, router: IRouter, client: any) {
+  router.post(
+    {
+      path: '/api/enhancements/ppl/suggest',
+      validate: {
+        body: schema.object({
+          query: schema.string(),
+          cursor: schema.object({
+            line: schema.number(),
+            column: schema.number(),
+          }),
+          index: schema.string(),
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        logger.debug('PPL suggest route called');
+        const { query, cursor, index } = req.body;
+
+        const result = await client.asScoped(req).callAsCurrentUser('enhancements.pplSuggest', {
+          body: { query, cursor, index },
+        });
+
+        return res.ok({ body: result });
+      } catch (err: any) {
+        logger.error(`PPL suggest error: ${err.message}`);
+        return res.custom({
+          statusCode: coerceStatusCode(err.status || err.statusCode),
+          body: err.message,
+        });
+      }
+    }
+  );
+}
+
+/**
  * Defines routes for various search strategies and registers additional routes.
  *
  * @experimental This function is experimental and might change in future releases.
@@ -139,4 +238,7 @@ export function defineRoutes(
   registerDataSourceConnectionsRoutes(router, client);
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
+
+  definePPLArtifactRoute(logger, router, client);
+  definePPLSuggestRoute(logger, router, client);
 }
