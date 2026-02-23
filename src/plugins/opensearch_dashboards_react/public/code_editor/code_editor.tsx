@@ -122,6 +122,8 @@ export interface Props {
 
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+  _providerDisposables: monaco.IDisposable[] = [];
+  _providersRegistered = false;
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -157,6 +159,9 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
+    // Register language providers once per mount (not per render)
+    this._registerProviders();
+
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
     }
@@ -183,26 +188,47 @@ export class CodeEditor extends React.Component<Props, {}> {
     suggestController.widget.value._setDetailsVisible(true);
   };
 
+  _registerProviders = () => {
+    if (this._providersRegistered) return;
+    this._providersRegistered = true;
+
+    const { languageId } = this.props;
+
+    // Register providers directly — by the time editorDidMount fires,
+    // the language is already active so onLanguage would never trigger.
+    if (this.props.suggestionProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+      );
+    }
+
+    if (this.props.signatureProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+      );
+    }
+
+    if (this.props.hoverProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+      );
+    }
+
+    if (this.props.languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+    }
+  };
+
+  componentWillUnmount() {
+    for (const disposable of this._providerDisposables) {
+      disposable.dispose();
+    }
+    this._providerDisposables = [];
+    this._providersRegistered = false;
+  }
+
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
-
-    monaco.languages.onLanguage(languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
-    });
 
     return (
       <React.Fragment>
