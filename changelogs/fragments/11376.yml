@@ -1,0 +1,2 @@
+fix:
+- Fix strip stats not correctly apply to multi-line queries ([#11376](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11376))
