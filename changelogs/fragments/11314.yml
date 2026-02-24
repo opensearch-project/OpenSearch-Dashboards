@@ -1,2 +1,2 @@
 feat:
-- Enable both discover and explore in observability and analytics workspace ([#11314](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11314))
+- Enable both old discover and new discover in analytics workspace and remove banners ([#11314](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11314))
