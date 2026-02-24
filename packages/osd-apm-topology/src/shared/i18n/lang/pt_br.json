@@ -1,0 +1,56 @@
+{
+  "breadcrumbs": {
+    "world": "World"
+  },
+  "buttons": {
+    "viewInsights": "View insights"
+  },
+  "contextMenu": {
+    "collapseDependencies": "Collapse dependencies",
+    "expandDependencies": "Expand dependencies"
+  },
+  "controls": {
+    "expandAll": "Expand all nodes",
+    "fitView": "Fit view",
+    "layout": "Update layout",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  },
+  "healthDonut": {
+    "legend": {
+      "errors": "{value}% errors (4xx)",
+      "faults": "{value}% faults (5xx)",
+      "noIssue": "No issues",
+      "ok": "{value}% requests ok",
+      "sliBreach": "{value} SLI breaches",
+      "sliRecovered": "{value} SLI recovered"
+    }
+  },
+  "legend": {
+    "activeSLIBreach": "Active SLI breach",
+    "errors": "Error percentage (4xx)",
+    "faults": "Fault percentage (5xx)",
+    "ok": "Requests Ok percentage",
+    "recoveredSLI": "Recovered SLI",
+    "title": "Legend",
+    "toggle": "Toggle legend",
+    "uninstrumentedResource": "Uninstrumented resource"
+  },
+  "matchForFilter": "match",
+  "matchesForFilter": "matches",
+  "node": {
+    "labels": {
+      "platform": "Platform",
+      "requests": "Requests",
+      "services": "Services"
+    },
+    "percentOfUninstrumentedServices": "{value}% uninstrumented",
+    "service": "Service",
+    "showNodeActions": "Show node actions",
+    "sliStatus": {
+      "breached": "SLI breach",
+      "recovered": "Recovered"
+    }
+  },
+  "sliStatus": "Sli status"
+}
