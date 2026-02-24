@@ -1,0 +1,133 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+
+.agentTracesFlyout {
+  &__timeline {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__timelineRows {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  &__timelineRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 72px;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+
+    &:hover {
+      background-color: var(--agent-traces-row-hover-bg, $ouiColorLightestShade);
+    }
+
+    &--selected {
+      background-color: var(--agent-traces-row-selected-bg);
+    }
+  }
+
+  &__timelineLabel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+    border-right: 1px solid $ouiColorLightShade;
+    height: 100%;
+    min-width: 0;
+  }
+
+  &__timelineLabelExpand {
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  &__timelineLabelText {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    font-size: $ouiFontSizeXS;
+    line-height: 1.2;
+  }
+
+  &__timelineLabelName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__timelineErrorIcon {
+    flex-shrink: 0;
+    margin-left: $ouiSizeXS;
+  }
+
+  &__timelineBarArea {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+  }
+
+  &__timelineBar {
+    position: absolute;
+    top: 15%;
+    height: 70%;
+    border-radius: 3px;
+    min-width: 3px;
+    opacity: 0.9;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &--selected {
+      box-shadow: 0 0 0 2px $ouiColorEmptyShade, 0 0 0 3px $ouiColorPrimary;
+      opacity: 1;
+    }
+  }
+
+  &__timelineLatencyCol {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: $ouiSizeS;
+    border-left: 1px solid $ouiColorLightShade;
+    height: 100%;
+  }
+
+  &__timelineLatency {
+    font-size: $ouiFontSizeXS;
+    white-space: nowrap;
+    color: $ouiTextSubduedColor;
+  }
+
+  &__timelineWrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__timelineEmpty {
+    padding: $ouiSize;
+  }
+
+  &__timelineRowHeight {
+    height: 28px;
+  }
+
+  &__timelineSpacer {
+    display: inline-block;
+    width: $ouiFontSizeXS;
+  }
+}
+
+/* stylelint-enable @osd/stylelint/no_modifying_global_selectors */

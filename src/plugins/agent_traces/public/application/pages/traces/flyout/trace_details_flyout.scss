@@ -1,0 +1,211 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+
+.agentTracesFlyout {
+  // Header metadata row: inline items separated by vertical bars
+  &__metaRow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: $ouiSizeXS;
+  }
+
+  &__metaItem {
+    display: flex;
+    align-items: center;
+    gap: $ouiSizeS;
+    padding: 0 $ouiSize;
+    border-right: 1px solid $ouiColorLightShade;
+    line-height: 1;
+    font-size: $ouiFontSizeXS;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+
+  &__metaLabel {
+    color: $ouiTextSubduedColor;
+    font-weight: 700;
+  }
+
+  &__flyoutResizer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+    z-index: 1001;
+    background: transparent;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: $ouiColorPrimary;
+    }
+
+    &:active {
+      background: $ouiColorPrimary;
+    }
+
+    &--active {
+      background: $ouiColorPrimary;
+      transition: none;
+    }
+  }
+
+  &__tabbedContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__loadingPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  &__tabContent {
+    padding: $ouiSize;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  &__field {
+    margin-bottom: $ouiSize;
+  }
+
+  &__parentSpanLink {
+    color: $ouiColorPrimary;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  // KIND badge in tree rows — hollow outline with OUI colors (shared by tree and timeline)
+  &__kindBadge {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 3px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: 1px solid;
+  }
+
+  // Latency color modifiers (shared by tree and timeline)
+  &__latency--warning {
+    color: $ouiColorWarning;
+  }
+
+  &__latency--danger {
+    color: $ouiColorDanger;
+  }
+
+  &__detailPanel {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: $ouiSize;
+  }
+}
+
+// Make the flyout body responsive to height
+.agentTracesFlyout .euiFlyoutBody {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .euiFlyoutBody__overflow {
+    flex: 1;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    padding: 0 0 0 $ouiSizeM;
+  }
+}
+
+// Ensure the resizable container fills height properly
+.agentTracesFlyout .euiFlyoutBody__overflowContent > .euiResizableContainer {
+  flex: 1;
+  min-height: 0;
+}
+
+// All resizable panels: flex column layout with min-height constraint
+.agentTracesFlyout .euiResizablePanel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+
+  > .euiResizablePanel__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+
+    > div {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+  }
+
+  [role="tabpanel"] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+
+    > div {
+      flex: 1;
+      min-height: 0;
+    }
+  }
+}
+
+// Right panel (detail): allow content to scroll
+.agentTracesFlyout .euiResizablePanel:last-of-type {
+  > .euiResizablePanel__content > div {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
