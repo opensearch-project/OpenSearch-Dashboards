@@ -6,6 +6,68 @@
 import { z } from 'zod';
 import { MessageSchema, StateSchema } from './types';
 
+// Import and re-export core event types
+import {
+  EventType,
+  BaseEvent,
+  Event,
+  RunStartedEvent,
+  RunFinishedEvent,
+  RunErrorEvent,
+  MessagesSnapshotEvent,
+  TextMessageStartEvent,
+  TextMessageContentEvent,
+  TextMessageEndEvent,
+  TextMessageChunkEvent,
+  ThinkingTextMessageStartEvent,
+  ThinkingTextMessageContentEvent,
+  ThinkingTextMessageEndEvent,
+  ThinkingStartEvent,
+  ThinkingEndEvent,
+  ToolCallStartEvent,
+  ToolCallArgsEvent,
+  ToolCallEndEvent,
+  ToolCallResultEvent,
+  ToolCallChunkEvent,
+  StateSnapshotEvent,
+  StateDeltaEvent,
+  StepStartedEvent,
+  StepFinishedEvent,
+  RawEvent,
+  CustomEvent,
+} from '../../../core/public';
+
+// Re-export for backward compatibility
+export {
+  EventType,
+  BaseEvent,
+  Event,
+  RunStartedEvent,
+  RunFinishedEvent,
+  RunErrorEvent,
+  MessagesSnapshotEvent,
+  TextMessageStartEvent,
+  TextMessageContentEvent,
+  TextMessageEndEvent,
+  TextMessageChunkEvent,
+  ThinkingTextMessageStartEvent,
+  ThinkingTextMessageContentEvent,
+  ThinkingTextMessageEndEvent,
+  ThinkingStartEvent,
+  ThinkingEndEvent,
+  ToolCallStartEvent,
+  ToolCallArgsEvent,
+  ToolCallEndEvent,
+  ToolCallResultEvent,
+  ToolCallChunkEvent,
+  StateSnapshotEvent,
+  StateDeltaEvent,
+  StepStartedEvent,
+  StepFinishedEvent,
+  RawEvent,
+  CustomEvent,
+};
+
 // Text messages can have any role except "tool"
 const TextMessageRoleSchema = z.union([
   z.literal('developer'),
@@ -13,33 +75,6 @@ const TextMessageRoleSchema = z.union([
   z.literal('assistant'),
   z.literal('user'),
 ]);
-
-export enum EventType {
-  TEXT_MESSAGE_START = 'TEXT_MESSAGE_START',
-  TEXT_MESSAGE_CONTENT = 'TEXT_MESSAGE_CONTENT',
-  TEXT_MESSAGE_END = 'TEXT_MESSAGE_END',
-  TEXT_MESSAGE_CHUNK = 'TEXT_MESSAGE_CHUNK',
-  THINKING_TEXT_MESSAGE_START = 'THINKING_TEXT_MESSAGE_START',
-  THINKING_TEXT_MESSAGE_CONTENT = 'THINKING_TEXT_MESSAGE_CONTENT',
-  THINKING_TEXT_MESSAGE_END = 'THINKING_TEXT_MESSAGE_END',
-  TOOL_CALL_START = 'TOOL_CALL_START',
-  TOOL_CALL_ARGS = 'TOOL_CALL_ARGS',
-  TOOL_CALL_END = 'TOOL_CALL_END',
-  TOOL_CALL_CHUNK = 'TOOL_CALL_CHUNK',
-  TOOL_CALL_RESULT = 'TOOL_CALL_RESULT',
-  THINKING_START = 'THINKING_START',
-  THINKING_END = 'THINKING_END',
-  STATE_SNAPSHOT = 'STATE_SNAPSHOT',
-  STATE_DELTA = 'STATE_DELTA',
-  MESSAGES_SNAPSHOT = 'MESSAGES_SNAPSHOT',
-  RAW = 'RAW',
-  CUSTOM = 'CUSTOM',
-  RUN_STARTED = 'RUN_STARTED',
-  RUN_FINISHED = 'RUN_FINISHED',
-  RUN_ERROR = 'RUN_ERROR',
-  STEP_STARTED = 'STEP_STARTED',
-  STEP_FINISHED = 'STEP_FINISHED',
-}
 
 export const BaseEventSchema = z.object({
   type: z.nativeEnum(EventType),
@@ -212,54 +247,5 @@ export const EventSchemas = z.discriminatedUnion('type', [
   StepFinishedEventSchema,
 ]);
 
-export type BaseEvent = z.infer<typeof BaseEventSchema>;
-export type TextMessageStartEvent = z.infer<typeof TextMessageStartEventSchema>;
-export type TextMessageContentEvent = z.infer<typeof TextMessageContentEventSchema>;
-export type TextMessageEndEvent = z.infer<typeof TextMessageEndEventSchema>;
-export type TextMessageChunkEvent = z.infer<typeof TextMessageChunkEventSchema>;
-export type ThinkingTextMessageStartEvent = z.infer<typeof ThinkingTextMessageStartEventSchema>;
-export type ThinkingTextMessageContentEvent = z.infer<typeof ThinkingTextMessageContentEventSchema>;
-export type ThinkingTextMessageEndEvent = z.infer<typeof ThinkingTextMessageEndEventSchema>;
-export type ToolCallStartEvent = z.infer<typeof ToolCallStartEventSchema>;
-export type ToolCallArgsEvent = z.infer<typeof ToolCallArgsEventSchema>;
-export type ToolCallEndEvent = z.infer<typeof ToolCallEndEventSchema>;
-export type ToolCallChunkEvent = z.infer<typeof ToolCallChunkEventSchema>;
-export type ToolCallResultEvent = z.infer<typeof ToolCallResultEventSchema>;
-export type ThinkingStartEvent = z.infer<typeof ThinkingStartEventSchema>;
-export type ThinkingEndEvent = z.infer<typeof ThinkingEndEventSchema>;
-export type StateSnapshotEvent = z.infer<typeof StateSnapshotEventSchema>;
-export type StateDeltaEvent = z.infer<typeof StateDeltaEventSchema>;
-export type MessagesSnapshotEvent = z.infer<typeof MessagesSnapshotEventSchema>;
-export type RawEvent = z.infer<typeof RawEventSchema>;
-export type CustomEvent = z.infer<typeof CustomEventSchema>;
-export type RunStartedEvent = z.infer<typeof RunStartedEventSchema>;
-export type RunFinishedEvent = z.infer<typeof RunFinishedEventSchema>;
-export type RunErrorEvent = z.infer<typeof RunErrorEventSchema>;
-export type StepStartedEvent = z.infer<typeof StepStartedEventSchema>;
-export type StepFinishedEvent = z.infer<typeof StepFinishedEventSchema>;
-
-export type Event =
-  | TextMessageStartEvent
-  | TextMessageContentEvent
-  | TextMessageEndEvent
-  | TextMessageChunkEvent
-  | ThinkingTextMessageStartEvent
-  | ThinkingTextMessageContentEvent
-  | ThinkingTextMessageEndEvent
-  | ToolCallStartEvent
-  | ToolCallArgsEvent
-  | ToolCallEndEvent
-  | ToolCallChunkEvent
-  | ToolCallResultEvent
-  | ThinkingStartEvent
-  | ThinkingEndEvent
-  | StateSnapshotEvent
-  | StateDeltaEvent
-  | MessagesSnapshotEvent
-  | RawEvent
-  | CustomEvent
-  | RunStartedEvent
-  | RunFinishedEvent
-  | RunErrorEvent
-  | StepStartedEvent
-  | StepFinishedEvent;
+// Note: Event type interfaces are now imported from core and re-exported above.
+// Zod schemas below are kept for runtime validation only.
