@@ -15,6 +15,8 @@ jest.mock('./patterns_table', () => ({
       data-test-subj="mocked-patterns-table"
       data-testid="mocked-patterns-table"
       data-items={JSON.stringify(props.items)}
+      data-has-filter-for={typeof props.onFilterForPattern === 'function' ? 'true' : 'false'}
+      data-has-filter-out={typeof props.onFilterOutPattern === 'function' ? 'true' : 'false'}
     />
   ),
 }));
@@ -80,6 +82,18 @@ jest.mock('react-redux', () => ({
     if (selector.toString().includes('state.ui.activeTabId')) {
       return 'patterns';
     }
+    if (
+      selector.toString().includes('selectPatternsField') ||
+      selector.toString().includes('patternsField')
+    ) {
+      return 'message';
+    }
+    if (
+      selector.toString().includes('selectUsingRegexPatterns') ||
+      selector.toString().includes('usingRegexPatterns')
+    ) {
+      return false;
+    }
     return {};
   }),
   useDispatch: jest.fn(() => jest.fn()),
@@ -92,8 +106,36 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
 }));
 
 jest.mock('./utils/utils', () => ({
-  highlightLogUsingPattern: jest.fn((log) => `<mark>${log}</mark>`),
+  highlightLogUsingPattern: jest.fn((log) => `<span style="color:#40D">${log}</span>`),
   isValidFiniteNumber: jest.fn((val) => !isNaN(val) && isFinite(val)),
+  createSearchPatternQuery: jest.fn(() => 'mock-search-pattern-query'),
+  createExcludeSearchPatternQuery: jest.fn(() => 'mock-exclude-pattern-query'),
+}));
+
+jest.mock('../../application/utils/state_management/slices', () => ({
+  setActiveTab: jest.fn((tab) => ({ type: 'mock/setActiveTab', payload: tab })),
+  setQueryStringWithHistory: jest.fn((q) => ({
+    type: 'mock/setQueryStringWithHistory',
+    payload: q,
+  })),
+}));
+
+jest.mock('../../application/hooks', () => ({
+  useSetEditorText: jest.fn(() => jest.fn()),
+}));
+
+jest.mock('../../../../opensearch_dashboards_react/public', () => ({
+  ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
+  useOpenSearchDashboards: jest.fn(() => ({
+    services: {
+      uiSettings: {
+        get: jest.fn((key: string) => {
+          if (key === 'theme:darkMode') return false;
+          return undefined;
+        }),
+      },
+    },
+  })),
 }));
 
 jest.mock('./patterns_table_flyout/patterns_flyout_context', () => ({
@@ -205,12 +247,10 @@ describe('PatternsContainer', () => {
     expect(items).toHaveLength(2);
 
     // Verify the filtered items contain only valid data
-    expect(items[0].flyout.pattern).toBe('Linux');
+    expect(items[0].pattern).toBe('Linux');
     expect(items[0].count).toBe(20);
-    expect(items[0].flyout.sample).toEqual(['Linux']);
 
-    expect(items[1].flyout.pattern).toBe('Debian GNU/Linux');
+    expect(items[1].pattern).toBe('Debian GNU/Linux');
     expect(items[1].count).toBe(18);
-    expect(items[1].flyout.sample).toEqual(['Debian GNU/Linux']);
   });
 });
