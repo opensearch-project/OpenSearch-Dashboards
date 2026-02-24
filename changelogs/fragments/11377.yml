@@ -1,0 +1,2 @@
+feat:
+- Add isSaving guard to source filters table ([#11377](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11377))
