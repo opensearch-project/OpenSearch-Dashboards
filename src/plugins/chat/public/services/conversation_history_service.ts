@@ -71,6 +71,11 @@ export class ConversationHistoryService {
       return;
     }
 
+    if (!this.getMemoryProvider().includeFullHistory) {
+      // Don't need to manual save conversations
+      return;
+    }
+
     const provider = this.getMemoryProvider();
     // Get existing conversation events to preserve createdAt timestamp
     const existingEvents = await provider.getConversation(threadId);

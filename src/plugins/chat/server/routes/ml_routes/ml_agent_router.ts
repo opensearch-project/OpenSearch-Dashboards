@@ -39,6 +39,20 @@ export interface MLAgentRouter {
   ): Promise<IOpenSearchDashboardsResponse<any>>;
 
   /**
+   * Proxy request to ML Commons API
+   * This method tries to find an ML client first, then falls back to OpenSearch client
+   * @param options Request options
+   * @returns Response body from the API call
+   */
+  proxyRequest(options: {
+    context: RequestHandlerContext;
+    method: string;
+    path: string;
+    body?: any;
+    dataSourceId?: string;
+  }): Promise<any>;
+
+  /**
    * Get a descriptive name for this router (for logging)
    */
   getRouterName(): string;
