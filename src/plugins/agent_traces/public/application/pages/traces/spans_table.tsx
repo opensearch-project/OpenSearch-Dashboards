@@ -186,17 +186,13 @@ export const SpansTable = () => {
   return (
     <>
       <div className="agentTracesTable__container">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="agentTraces.spansTable.showingCount"
-                defaultMessage="Showing {count} spans"
-                values={{ count: metrics?.totalSpans ?? spans.length }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="agentTraces.spansTable.showingCount"
+            defaultMessage="Showing {count} spans"
+            values={{ count: metrics?.totalSpans ?? spans.length }}
+          />
+        </EuiText>
         <EuiBasicTable
           items={spans}
           columns={columns}

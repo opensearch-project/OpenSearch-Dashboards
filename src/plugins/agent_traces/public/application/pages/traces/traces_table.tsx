@@ -277,17 +277,13 @@ export const TracesTable = () => {
 
   return (
     <div className="agentTracesTable__container">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="agentTraces.tracesTable.showingCount"
-              defaultMessage="Showing {count} traces"
-              values={{ count: metrics?.totalTraces ?? traces.length }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="agentTraces.tracesTable.showingCount"
+          defaultMessage="Showing {count} traces"
+          values={{ count: metrics?.totalTraces ?? traces.length }}
+        />
+      </EuiText>
       <EuiBasicTable
         items={getVisibleRows}
         columns={columns}
