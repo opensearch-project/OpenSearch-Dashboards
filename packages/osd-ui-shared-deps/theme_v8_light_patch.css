@@ -1,0 +1,34 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * Patch for the v8light (eui-next) pre-built CSS bundle.
+ *
+ * The pre-built bundle (@elastic/eui/dist/eui_theme_next_light.css) is compiled
+ * with eui-next's native primary color (teal, ~#07827E). Our AWS color overrides
+ * live in _globals_v8light.scss and affect plugin SCSS files, but have no effect
+ * on the pre-built bundle.
+ *
+ * Color values below are computed from the AWS primary palette:
+ *   $ouiColorPrimary: #006CE0  →  makeHighContrastColor(...)  →  rgb(0.5, 103.5, 214.1)
+ *
+ * This file is appended to the v8light webpack entry so its rules come after the
+ * pre-built bundle in the cascade and win.
+ */
+
+/*
+ * Override font family for the pre-built EUI bundle (unaffected by SCSS variable overrides).
+ * Both --oui-font-family and --eui-font-family must be overridden since EUI components may
+ * reference either. The body rule uses a literal value (not a CSS variable) so it wins even
+ * if the variable declarations are later overridden by another stylesheet.
+ */
+:root {
+  --oui-font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --eui-font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}
+
+body {
+  font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+}

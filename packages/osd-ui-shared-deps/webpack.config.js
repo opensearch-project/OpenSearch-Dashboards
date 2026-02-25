@@ -49,7 +49,10 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     'osd-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
     'osd-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
     'osd-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_next_dark.css'],
-    'osd-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_next_light.css'],
+    'osd-ui-shared-deps.v8.light': [
+      '@elastic/eui/dist/eui_theme_next_light.css',
+      './theme_v8_light_patch.css',
+    ],
     'osd-ui-shared-deps.v9.dark': ['@elastic/eui/dist/eui_theme_v9_dark.css'],
     'osd-ui-shared-deps.v9.light': ['@elastic/eui/dist/eui_theme_v9_light.css'],
   },
@@ -132,10 +135,15 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             options: {
               api: 'modern-compiler',
               implementation: require.resolve('sass-embedded'),
+              sassOptions: {
+                // Suppress deprecation warnings from EUI source SCSS (legacy @import,
+                // color functions, etc.) that we cannot change upstream.
+                quietDeps: true,
+              },
             },
           },
         ],
-        type: 'css',
+        type: 'javascript/auto',
       },
       {
         include: [require.resolve('./theme.ts')],
