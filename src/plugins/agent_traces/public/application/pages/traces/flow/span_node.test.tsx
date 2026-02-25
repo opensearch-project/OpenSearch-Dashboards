@@ -19,7 +19,12 @@ jest.mock('@osd/ui-shared-deps/theme', () => ({
 
 jest.mock('../../../../services/span_categorization', () => ({
   getCategoryBadgeStyle: jest.fn(() => ({ backgroundColor: '#eee', color: '#333' })),
-  getCategoryMeta: jest.fn(() => ({ color: '#006BB4', bgColor: '#006BB4', icon: 'user', label: 'Agent' })),
+  getCategoryMeta: jest.fn(() => ({
+    color: '#006BB4',
+    bgColor: '#006BB4',
+    icon: 'user',
+    label: 'Agent',
+  })),
   hexToRgba: jest.fn(() => 'rgba(0,107,180,0.1)'),
 }));
 

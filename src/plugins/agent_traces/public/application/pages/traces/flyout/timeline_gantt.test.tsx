@@ -53,7 +53,11 @@ describe('TimelineGantt', () => {
 
   it('renders empty state when no spans', () => {
     render(
-      <TimelineGantt {...defaultProps} timelineVisibleSpans={[]} timelineRange={{ minMs: 0, maxMs: 0, durationMs: 0 }} />
+      <TimelineGantt
+        {...defaultProps}
+        timelineVisibleSpans={[]}
+        timelineRange={{ minMs: 0, maxMs: 0, durationMs: 0 }}
+      />
     );
     expect(screen.getByText('No timing data available for timeline.')).toBeInTheDocument();
   });
@@ -75,7 +79,11 @@ describe('TimelineGantt', () => {
     const onToggleExpanded = jest.fn();
     const span = makeSpan({ hasChildren: true });
     render(
-      <TimelineGantt {...defaultProps} timelineVisibleSpans={[span]} onToggleExpanded={onToggleExpanded} />
+      <TimelineGantt
+        {...defaultProps}
+        timelineVisibleSpans={[span]}
+        onToggleExpanded={onToggleExpanded}
+      />
     );
     const expandIcon = document.querySelector('.agentTracesFlyout__timelineLabelExpand');
     if (expandIcon) fireEvent.click(expandIcon);
