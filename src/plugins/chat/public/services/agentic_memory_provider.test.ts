@@ -6,6 +6,11 @@
 import { AgenticMemoryProvider } from './agentic_memory_provider';
 import { HttpSetup } from '../../../../core/public';
 import { EventType } from '../../../../core/public';
+import { AgUiAgent } from './ag_ui_agent';
+import { of, throwError } from 'rxjs';
+
+// Mock AgUiAgent
+jest.mock('./ag_ui_agent');
 
 describe('AgenticMemoryProvider', () => {
   let provider: AgenticMemoryProvider;
@@ -123,64 +128,38 @@ describe('AgenticMemoryProvider', () => {
   });
 
   describe('getConversation', () => {
-    let originalFetch: typeof global.fetch;
-
-    beforeEach(() => {
-      originalFetch = global.fetch;
-    });
-
-    afterEach(() => {
-      global.fetch = originalFetch;
-    });
-
-    const createMockStreamingResponse = (content: string) => {
-      const encoder = new TextEncoder();
-      const bytes = encoder.encode(content);
-
-      let readCalled = false;
-
-      return {
-        ok: true,
-        status: 200,
-        body: {
-          getReader: () => ({
-            read: async () => {
-              if (readCalled) {
-                return { done: true, value: undefined };
-              }
-              readCalled = true;
-              return { done: false, value: bytes };
-            },
-            releaseLock: () => {},
-          }),
+    it('should use AgUiAgent to load and parse streaming response with messages', async () => {
+      const mockEvents = [
+        {
+          type: 'RUN_STARTED',
+          threadId: 'thread-123',
+          runId: 'run-456',
+          timestamp: 1640000000000,
         },
-      } as Response;
-    };
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [
+            { id: 'msg-1', role: 'user', content: 'Hello' },
+            { role: 'assistant', content: 'Hi there!' },
+          ],
+        },
+        {
+          type: 'RUN_FINISHED',
+          threadId: 'thread-123',
+          runId: 'run-456',
+          timestamp: 1640001000000,
+        },
+      ];
 
-    it('should load and parse streaming response with messages', async () => {
-      const streamingResponse = `data: {"type":"RUN_STARTED","threadId":"thread-123","runId":"run-456","timestamp":1640000000000}
-data: {"type":"MESSAGES_SNAPSHOT","messages":[{"id":"msg-1","role":"user","content":"Hello"},{"role":"assistant","content":"Hi there!"}]}
-data: {"type":"RUN_FINISHED","threadId":"thread-123","runId":"run-456","timestamp":1640001000000}
-`;
-
-      global.fetch = jest.fn().mockResolvedValue(createMockStreamingResponse(streamingResponse));
+      const mockRunAgent = jest.fn().mockReturnValue(of(...mockEvents));
+      (AgUiAgent as jest.Mock).mockImplementation(() => ({
+        runAgent: mockRunAgent,
+      }));
 
       const result = await provider.getConversation('thread-123');
 
-      expect(global.fetch).toHaveBeenCalledWith('/api/chat/proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'text/event-stream',
-          'osd-xsrf': 'true',
-        },
-        body: expect.stringContaining('"threadId":"thread-123"'),
-      });
-
-      // Verify the body contains all required fields
-      const callArgs = (global.fetch as jest.Mock).mock.calls[0];
-      const bodyData = JSON.parse(callArgs[1].body);
-      expect(bodyData).toMatchObject({
+      expect(AgUiAgent).toHaveBeenCalledWith();
+      expect(mockRunAgent).toHaveBeenCalledWith({
         threadId: 'thread-123',
         runId: expect.stringMatching(/^restore-\d+$/),
         messages: [],
@@ -198,52 +177,26 @@ data: {"type":"RUN_FINISHED","threadId":"thread-123","runId":"run-456","timestam
       expect(result![2].type).toBe(EventType.RUN_FINISHED);
     });
 
-    it('should return null on error or empty response', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    it('should return null on empty events', async () => {
+      const mockRunAgent = jest.fn().mockReturnValue(of());
+      (AgUiAgent as jest.Mock).mockImplementation(() => ({
+        runAgent: mockRunAgent,
+      }));
 
-      // Test empty response
-      global.fetch = jest.fn().mockResolvedValue(createMockStreamingResponse(''));
-      let result = await provider.getConversation('thread-123');
+      const result = await provider.getConversation('thread-123');
       expect(result).toBeNull();
-
-      // Test network error
-      global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
-      result = await provider.getConversation('thread-456');
-      expect(result).toBeNull();
-
-      consoleErrorSpy.mockRestore();
     });
 
-    it('should handle HTTP errors properly', async () => {
+    it('should return null on error', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-      } as Response);
+      const mockRunAgent = jest.fn().mockReturnValue(throwError(() => new Error('Network error')));
+      (AgUiAgent as jest.Mock).mockImplementation(() => ({
+        runAgent: mockRunAgent,
+      }));
 
-      const result = await provider.getConversation('thread-789');
-
+      const result = await provider.getConversation('thread-456');
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      consoleErrorSpy.mockRestore();
-    });
-
-    it('should handle missing response body reader', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        body: null,
-      } as Response);
-
-      const result = await provider.getConversation('thread-999');
-
-      expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
     });
@@ -257,14 +210,20 @@ data: {"type":"RUN_FINISHED","threadId":"thread-123","runId":"run-456","timestam
     });
   });
 
-  describe('parseStreamingResponse', () => {
-    it('should parse complete event sequence correctly', () => {
-      const response = `data: {"type":"RUN_STARTED","threadId":"thread-123","runId":"run-456","timestamp":1640000000000}
-data: {"type":"MESSAGES_SNAPSHOT","messages":[{"id":"msg-1","role":"user","content":"Hello"}]}
-data: {"type":"RUN_FINISHED","threadId":"thread-123","runId":"run-456","timestamp":1640001000000}
-`;
+  describe('convertEventsToAgUiFormat', () => {
+    it('should convert complete event sequence correctly', () => {
+      const collectedEvents = [
+        { type: 'RUN_STARTED', threadId: 'thread-123', runId: 'run-456', timestamp: 1640000000000 },
+        { type: 'MESSAGES_SNAPSHOT', messages: [{ id: 'msg-1', role: 'user', content: 'Hello' }] },
+        {
+          type: 'RUN_FINISHED',
+          threadId: 'thread-123',
+          runId: 'run-456',
+          timestamp: 1640001000000,
+        },
+      ];
 
-      const events = (provider as any).parseStreamingResponse(response);
+      const events = (provider as any).convertEventsToAgUiFormat(collectedEvents);
 
       expect(events.length).toBe(3);
       expect(events[0].type).toBe(EventType.RUN_STARTED);
@@ -273,10 +232,11 @@ data: {"type":"RUN_FINISHED","threadId":"thread-123","runId":"run-456","timestam
     });
 
     it('should create run events when only MESSAGES_SNAPSHOT exists', () => {
-      const response = `data: {"type":"MESSAGES_SNAPSHOT","messages":[{"id":"msg-1","role":"user","content":"Hello"}]}
-`;
+      const collectedEvents = [
+        { type: 'MESSAGES_SNAPSHOT', messages: [{ id: 'msg-1', role: 'user', content: 'Hello' }] },
+      ];
 
-      const events = (provider as any).parseStreamingResponse(response);
+      const events = (provider as any).convertEventsToAgUiFormat(collectedEvents);
 
       expect(events.length).toBe(3);
       expect(events[0].type).toBe(EventType.RUN_STARTED);
@@ -286,12 +246,22 @@ data: {"type":"RUN_FINISHED","threadId":"thread-123","runId":"run-456","timestam
     });
 
     it('should generate IDs for messages without them and aggregate snapshots', () => {
-      const response = `data: {"type":"RUN_STARTED","threadId":"t1","runId":"r1","timestamp":1}
-data: {"type":"MESSAGES_SNAPSHOT","messages":[{"role":"user","content":"Test1"},{"id":"existing","role":"user","content":"Test2"}]}
-data: {"type":"MESSAGES_SNAPSHOT","messages":[{"id":"msg-3","role":"assistant","content":"Test3"}]}
-`;
+      const collectedEvents = [
+        { type: 'RUN_STARTED', threadId: 't1', runId: 'r1', timestamp: 1 },
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [
+            { role: 'user', content: 'Test1' },
+            { id: 'existing', role: 'user', content: 'Test2' },
+          ],
+        },
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'msg-3', role: 'assistant', content: 'Test3' }],
+        },
+      ];
 
-      const events = (provider as any).parseStreamingResponse(response);
+      const events = (provider as any).convertEventsToAgUiFormat(collectedEvents);
 
       const messagesSnapshot = events.find(
         (e: any) => e.type === EventType.MESSAGES_SNAPSHOT
@@ -301,66 +271,40 @@ data: {"type":"MESSAGES_SNAPSHOT","messages":[{"id":"msg-3","role":"assistant","
       expect(messagesSnapshot.messages[1].id).toBe('existing'); // preserved
       expect(messagesSnapshot.messages[2].id).toBe('msg-3'); // preserved
     });
-
-    it('should handle malformed JSON and invalid lines gracefully', () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      const response = `invalid line
-data: {"type":"RUN_STARTED","incomplete
-data: {"type":"RUN_FINISHED","threadId":"t1","runId":"r1","timestamp":1}
-`;
-
-      const events = (provider as any).parseStreamingResponse(response);
-
-      expect(events.length).toBe(1);
-      expect(events[0].type).toBe(EventType.RUN_FINISHED);
-      expect(consoleWarnSpy).toHaveBeenCalled();
-
-      consoleWarnSpy.mockRestore();
-    });
   });
 
   describe('integration scenarios', () => {
-    let originalFetch: typeof global.fetch;
-
-    beforeEach(() => {
-      originalFetch = global.fetch;
-    });
-
-    afterEach(() => {
-      global.fetch = originalFetch;
-    });
-
-    const createMockStreamingResponse = (content: string) => {
-      const encoder = new TextEncoder();
-      const bytes = encoder.encode(content);
-
-      let readCalled = false;
-
-      return {
-        ok: true,
-        status: 200,
-        body: {
-          getReader: () => ({
-            read: async () => {
-              if (readCalled) {
-                return { done: true, value: undefined };
-              }
-              readCalled = true;
-              return { done: false, value: bytes };
-            },
-            releaseLock: () => {},
-          }),
-        },
-      } as Response;
-    };
-
     it('should handle complete conversation workflow', async () => {
-      const streamingResponse = `data: {"type":"RUN_STARTED","threadId":"conv-123","runId":"run-789","timestamp":1640000000000}
-data: {"type":"MESSAGES_SNAPSHOT","messages":[{"id":"msg-1","role":"user","content":"What is OpenSearch?"},{"id":"msg-2","role":"assistant","content":"OpenSearch is an open-source search and analytics suite."}]}
-data: {"type":"RUN_FINISHED","threadId":"conv-123","runId":"run-789","timestamp":1640002000000}
-`;
+      const mockEvents = [
+        {
+          type: 'RUN_STARTED',
+          threadId: 'conv-123',
+          runId: 'run-789',
+          timestamp: 1640000000000,
+        },
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [
+            { id: 'msg-1', role: 'user', content: 'What is OpenSearch?' },
+            {
+              id: 'msg-2',
+              role: 'assistant',
+              content: 'OpenSearch is an open-source search and analytics suite.',
+            },
+          ],
+        },
+        {
+          type: 'RUN_FINISHED',
+          threadId: 'conv-123',
+          runId: 'run-789',
+          timestamp: 1640002000000,
+        },
+      ];
 
-      global.fetch = jest.fn().mockResolvedValue(createMockStreamingResponse(streamingResponse));
+      const mockRunAgent = jest.fn().mockReturnValue(of(...mockEvents));
+      (AgUiAgent as jest.Mock).mockImplementation(() => ({
+        runAgent: mockRunAgent,
+      }));
 
       const events = await provider.getConversation('conv-123');
 

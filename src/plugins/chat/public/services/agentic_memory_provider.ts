@@ -13,6 +13,7 @@ import {
   EventType,
   HttpSetup,
 } from '../../../../core/public';
+import { AgUiAgent } from './ag_ui_agent';
 
 /**
  * Generate a unique message ID
@@ -126,61 +127,34 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
    */
   public async getConversation(threadId: string) {
     try {
-      // Call the agent with empty messages to retrieve conversation history via /api/chat/proxy
-      // Use native fetch like AgUiAgent does for proper streaming support
-      const response = await fetch('/api/chat/proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'text/event-stream',
-          'osd-xsrf': 'true',
-        },
-        body: JSON.stringify({
-          threadId,
-          runId: `restore-${Date.now()}`,
-          messages: [],
-          tools: [],
-          context: [],
-          state: {},
-          forwardedProps: {},
-        }),
+      // Use AgUiAgent to handle SSE streaming consistently
+      const agent = new AgUiAgent();
+      const collectedEvents: any[] = [];
+
+      // Collect all events from the agent run
+      await new Promise<void>((resolve, reject) => {
+        agent
+          .runAgent({
+            threadId,
+            runId: `restore-${Date.now()}`,
+            messages: [],
+            tools: [],
+            context: [],
+            state: {},
+            forwardedProps: {},
+          })
+          .subscribe({
+            next: (event) => {
+              // Collect all events as they arrive
+              collectedEvents.push(event);
+            },
+            complete: () => resolve(),
+            error: (error) => reject(error),
+          });
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
-      }
-
-      let sseBuffer = '';
-      let responseText = '';
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          // Parse Server-Sent Events with proper buffering (same as AgUiAgent)
-          const chunk = new TextDecoder().decode(value);
-          const allData = sseBuffer + chunk;
-          const lines = allData.split('\n');
-
-          // Keep the last incomplete line in buffer
-          sseBuffer = lines[lines.length - 1];
-          const completeLines = lines.slice(0, -1);
-
-          // Accumulate all complete lines for parsing
-          responseText += completeLines.join('\n') + '\n';
-        }
-      } finally {
-        reader.releaseLock();
-      }
-
-      // Parse the streaming response to extract messages
-      const events = this.parseStreamingResponse(responseText);
+      // Convert collected events to proper AG-UI event format
+      const events = this.convertEventsToAgUiFormat(collectedEvents);
 
       if (events.length === 0) {
         return null;
@@ -205,46 +179,35 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
   }
 
   /**
-   * Parse streaming SSE response into AG-UI events
+   * Convert events from AgUiAgent into AG-UI event format
    */
-  private parseStreamingResponse(responseText: string): Event[] {
-    const lines = responseText.split('\n');
+  private convertEventsToAgUiFormat(collectedEvents: any[]): Event[] {
     const events: Event[] = [];
     const messages: Message[] = [];
 
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) {
-        continue;
-      }
-
-      try {
-        const data = JSON.parse(line.substring(6)); // Remove 'data: ' prefix
-
-        if (data.type === 'RUN_STARTED') {
-          events.push({
-            type: EventType.RUN_STARTED,
-            threadId: data.threadId,
-            runId: data.runId,
-            timestamp: data.timestamp,
-          });
-        } else if (data.type === 'MESSAGES_SNAPSHOT') {
-          // Store messages for later use, ensuring each has an ID
-          const messagesWithIds = data.messages.map((msg: Message) => ({
-            ...msg,
-            id: msg.id || generateMessageId(),
-          }));
-          messages.push(...messagesWithIds);
-        } else if (data.type === 'RUN_FINISHED') {
-          events.push({
-            type: EventType.RUN_FINISHED,
-            threadId: data.threadId,
-            runId: data.runId,
-            timestamp: data.timestamp,
-          });
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to parse event line:', line, error);
+    // Process collected events
+    for (const data of collectedEvents) {
+      if (data.type === 'RUN_STARTED') {
+        events.push({
+          type: EventType.RUN_STARTED,
+          threadId: data.threadId,
+          runId: data.runId,
+          timestamp: data.timestamp,
+        });
+      } else if (data.type === 'MESSAGES_SNAPSHOT') {
+        // Store messages for later use, ensuring each has an ID
+        const messagesWithIds = data.messages.map((msg: Message) => ({
+          ...msg,
+          id: msg.id || generateMessageId(),
+        }));
+        messages.push(...messagesWithIds);
+      } else if (data.type === 'RUN_FINISHED') {
+        events.push({
+          type: EventType.RUN_FINISHED,
+          threadId: data.threadId,
+          runId: data.runId,
+          timestamp: data.timestamp,
+        });
       }
     }
 
