@@ -1,0 +1,2 @@
+fix:
+- Onboard code diff analyzer and reviewer (OSD) ([#11388](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11388))
