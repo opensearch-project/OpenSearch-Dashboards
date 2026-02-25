@@ -760,6 +760,14 @@ export class DataViewsService {
             type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
             version: dataSource.attributes?.dataSourceVersion || '',
           };
+        } else {
+          // If dataSource is null/undefined, fall back to using the reference ID as title
+          dataSourceInfo = {
+            id: dataView.dataSourceRef.id,
+            title: dataView.dataSourceRef.id,
+            type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+            version: '',
+          };
         }
       } catch (error) {
         // If fetching fails, fall back to using the reference ID as title

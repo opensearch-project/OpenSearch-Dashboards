@@ -423,6 +423,30 @@ describe('DataViews', () => {
       expect(dataset.dataSource?.version).toBe('');
     });
 
+    test('falls back to data source ID when fetch returns null', async () => {
+      const mockDataView = {
+        id: 'test-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        dataSourceRef: {
+          id: 'datasource-789',
+          name: 'dataSource',
+          type: 'data-source',
+        },
+      } as DataView;
+
+      // Mock getDataSource to return null
+      jest.spyOn(dataViews, 'getDataSource').mockResolvedValue(null as any);
+
+      const dataset = await dataViews.convertToDataset(mockDataView);
+
+      // Should fall back to using the ID as title
+      expect(dataset.dataSource?.title).toBe('datasource-789');
+      expect(dataset.dataSource?.id).toBe('datasource-789');
+      expect(dataset.dataSource?.version).toBe('');
+      expect(dataset.dataSource?.type).toBe('data-source');
+    });
+
     test('handles data view without data source', async () => {
       const mockDataView = {
         id: 'test-id',
