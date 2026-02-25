@@ -134,7 +134,25 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
         defaultMessage: 'PARENT SPAN',
       }),
       value: row?.parentSpanId ? (
-        <EuiLink onClick={() => onSelectNode(row.parentSpanId!)}>{row.parentSpanId}</EuiLink>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiLink onClick={() => onSelectNode(row.parentSpanId!)}>{row.parentSpanId}</EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={row.parentSpanId}>
+              {(copy) => (
+                <EuiButtonIcon
+                  size="xs"
+                  iconType="copy"
+                  onClick={copy}
+                  aria-label={i18n.translate('agentTraces.detailPanel.copyParentSpanId', {
+                    defaultMessage: 'Copy parent span ID',
+                  })}
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         i18n.translate('agentTraces.detailPanel.rootSpan', {
           defaultMessage: '(root span)',
