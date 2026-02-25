@@ -280,6 +280,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
   const previousSignalType = useRef(signalType);
+  // Cache displayNames we've seen from URL state so they persist when switching datasets
+  const displayNameCache = useRef<Map<string, { displayName?: string; description?: string }>>(
+    new Map()
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<DetailedDataset[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<DetailedDataset | undefined>();
@@ -324,7 +328,22 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         const isCompatible = isDatasetCompatibleWithSignalType(matchingDataset, signalType);
 
         if (isCompatible) {
-          setSelectedDataset(matchingDataset);
+          // Preserve displayName and description from currentDataset (URL state) if available
+          // This ensures that display names from URL state are not overwritten by fetched datasets
+          const mergedDataset = {
+            ...matchingDataset,
+            displayName: currentDataset.displayName || matchingDataset.displayName,
+            description: currentDataset.description || matchingDataset.description,
+          };
+          setSelectedDataset(mergedDataset);
+
+          // Cache displayName/description from URL so it persists when switching to other datasets
+          if (currentDataset.displayName || currentDataset.description) {
+            displayNameCache.current.set(currentDataset.id, {
+              displayName: currentDataset.displayName,
+              description: currentDataset.description,
+            });
+          }
         } else {
           // Don't clear incompatible dataset - just ignore it
           // This handles cases where flyouts temporarily change the query dataset
@@ -342,10 +361,12 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         return;
       }
 
+      // Merge currentDataset with dataView, preferring currentDataset for displayName/description
+      // This preserves display names from URL state over potentially stale cached data
       const detailedDataset = {
         ...currentDataset,
-        description: dataView.description,
-        displayName: dataView.displayName,
+        description: currentDataset.description || dataView.description,
+        displayName: currentDataset.displayName || dataView.displayName,
         signalType: dataView.signalType,
       } as DetailedDataset;
 
@@ -353,6 +374,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
       if (isCompatible) {
         setSelectedDataset(detailedDataset);
+
+        // Cache displayName/description from URL so it persists when switching to other datasets
+        if (currentDataset.displayName || currentDataset.description) {
+          displayNameCache.current.set(currentDataset.id, {
+            displayName: currentDataset.displayName,
+            description: currentDataset.description,
+          });
+        }
       } else {
         // Don't clear incompatible dataset - just ignore it
         // This handles cases where flyouts temporarily change the query dataset
@@ -390,11 +419,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         const dataView = await dataViews.get(id);
         const dataset = await dataViews.convertToDataset(dataView);
 
+        // convertToDataset already includes description, displayName from the saved object
+        // Just ensure signalType is set from dataView if not already present
         fetchedDatasets.push({
           ...dataset,
-          description: dataView.description,
-          displayName: dataView.displayName,
-          signalType: dataView.signalType,
+          signalType: dataset.signalType || dataView.signalType,
         });
       }
 
@@ -525,7 +554,19 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     const isDefault = id === defaultDatasetId;
     const typeConfig = datasetService.getType(type);
     const iconType = typeConfig?.meta?.icon?.type || 'database';
-    const label = displayName || title;
+
+    // Check displayName cache first (for datasets we've seen in URL state)
+    // Then check if this is selected dataset with displayName from URL
+    // Finally fall back to displayName from fetched dataset
+    const cached = displayNameCache.current.get(id);
+    const effectiveDisplayName =
+      cached?.displayName ||
+      (isSelected && selectedDataset?.displayName ? selectedDataset.displayName : displayName);
+    const effectiveDescription =
+      cached?.description ||
+      (isSelected && selectedDataset?.description ? selectedDataset.description : description);
+
+    const label = effectiveDisplayName || title;
 
     // Build subtitle with data source and time field
     const subtitleParts = [];
@@ -552,8 +593,16 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     // Prepending the label to the searchable label to allow for better search, render will strip it out
     // Adding a separator before subtitle if it exists so renderOption can parse it correctly
     const searchableLabel = subtitle
-      ? `${label} ${subtitle}${description && description.trim() !== '' ? ` - ${description}` : ''}`
-      : `${label}${description && description.trim() !== '' ? ` - ${description}` : ''}`;
+      ? `${label} ${subtitle}${
+          effectiveDescription && effectiveDescription.trim() !== ''
+            ? ` - ${effectiveDescription}`
+            : ''
+        }`
+      : `${label}${
+          effectiveDescription && effectiveDescription.trim() !== ''
+            ? ` - ${effectiveDescription}`
+            : ''
+        }`;
 
     return {
       label,

@@ -75,6 +75,9 @@ describe('DatasetSelect', () => {
         id: dataView.id,
         title: dataView.title,
         type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        displayName: dataView.displayName,
+        description: dataView.description,
+        timeFieldName: dataView.timeFieldName,
       });
     }),
     clearCache: jest.fn(),
@@ -246,6 +249,7 @@ describe('DatasetSelect', () => {
     mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
       id: 'restricted-id',
       title: 'Restricted Dataset',
+      displayName: 'Restricted Dataset',
       type: 'restricted-type',
     });
 
@@ -293,6 +297,7 @@ describe('DatasetSelect', () => {
     mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
       id: 'all-apps-id',
       title: 'all-apps-dataset',
+      displayName: 'All Apps Dataset',
       type: 'all-apps-type',
     });
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
@@ -359,6 +364,7 @@ describe('DatasetSelect', () => {
       return Promise.resolve({
         id: dataView.id,
         title: dataView.title,
+        displayName: dataView.displayName,
         type: 'metrics-type',
         signalType: dataView.signalType,
       });
@@ -442,6 +448,7 @@ describe('DatasetSelect', () => {
       return Promise.resolve({
         id: dataView.id,
         title: dataView.title,
+        displayName: dataView.displayName,
         type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         signalType: dataView.signalType,
       });
@@ -855,9 +862,9 @@ describe('DatasetSelect', () => {
         return Promise.resolve({
           id: dataView.id,
           title: dataView.title,
+          displayName: dataView.displayName,
           type: dataView.type,
           timeFieldName: dataView.timeFieldName,
-          displayName: dataView.displayName,
         });
       });
       mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
@@ -932,9 +939,9 @@ describe('DatasetSelect', () => {
         return Promise.resolve({
           id: dataView.id,
           title: dataView.title,
+          displayName: dataView.displayName,
           type: dataView.type,
           timeFieldName: dataView.timeFieldName,
-          displayName: dataView.displayName,
         });
       });
       mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
@@ -977,6 +984,7 @@ describe('DatasetSelect', () => {
       mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
         id: 'no-time-id',
         title: 'no-time-dataset',
+        displayName: 'Dataset Without Time Field',
         type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         timeFieldName: undefined,
       });
@@ -1008,6 +1016,59 @@ describe('DatasetSelect', () => {
       // Dataset without time field should be visible (default is true)
       const withoutTimeElements = screen.queryAllByText('Dataset Without Time Field');
       expect(withoutTimeElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('displayName from URL state', () => {
+    it('uses displayName from URL state for selected dataset in dropdown', async () => {
+      // Setup dataset without displayName in saved object
+      const datasetWithoutDisplayName = {
+        id: 'dataset-1',
+        title: 'logs_otel_v1_explore',
+        displayName: undefined,
+        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        timeFieldName: '@timestamp',
+      };
+
+      mockDataViews.getIds = jest.fn().mockResolvedValue(['dataset-1']);
+      mockDataViews.get = jest.fn().mockResolvedValue(datasetWithoutDisplayName);
+      mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
+        id: 'dataset-1',
+        title: 'logs_otel_v1_explore',
+        displayName: undefined,
+        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      });
+
+      // URL state has displayName
+      const datasetWithDisplayName = {
+        ...datasetWithoutDisplayName,
+        displayName: 'LogsExplore',
+      };
+
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
+        dataset: datasetWithDisplayName,
+      });
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+      });
+
+      // Button should show displayName from URL
+      expect(screen.getByText('LogsExplore')).toBeInTheDocument();
+
+      // Open dropdown
+      const button = screen.getByTestId('datasetSelectButton');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+      });
+
+      // Dropdown should also show displayName from URL, not the title
+      const logsExploreElements = screen.getAllByText('LogsExplore');
+      expect(logsExploreElements.length).toBeGreaterThan(0);
     });
   });
 

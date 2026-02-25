@@ -892,6 +892,135 @@ describe('redux_persistence', () => {
     });
   });
 
+  describe('loadReduxState with displayName and description preservation', () => {
+    it('should preserve displayName when loading dataset from URL', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'test-dataset',
+          title: 'logs_otel_v1_explore',
+          type: 'INDEX_PATTERN',
+          displayName: 'LogsExplore',
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should preserve displayName from URL state
+      expect(result.query.dataset?.displayName).toBe('LogsExplore');
+      expect(result.query.dataset?.title).toBe('logs_otel_v1_explore');
+    });
+
+    it('should preserve description when loading dataset from URL', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'test-dataset',
+          title: 'logs-*',
+          type: 'INDEX_PATTERN',
+          description: 'Production logs dataset',
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should preserve description from URL state
+      expect(result.query.dataset?.description).toBe('Production logs dataset');
+    });
+
+    it('should preserve both displayName and description when loading from URL', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'test-dataset',
+          title: 'logs_otel_v1_explore',
+          type: 'INDEX_PATTERN',
+          displayName: 'LogsExplore',
+          description: 'OpenTelemetry logs for exploration',
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should preserve both fields from URL state
+      expect(result.query.dataset?.displayName).toBe('LogsExplore');
+      expect(result.query.dataset?.description).toBe('OpenTelemetry logs for exploration');
+      expect(result.query.dataset?.title).toBe('logs_otel_v1_explore');
+    });
+
+    it('should preserve displayName, description, and dataSource when loading from URL', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'test-dataset',
+          title: 'logs_otel_v1_explore',
+          type: 'INDEX_PATTERN',
+          displayName: 'LogsExplore',
+          description: 'Prometheus logs dataset',
+          dataSource: {
+            id: 'datasource-123',
+            title: 'PromTest',
+            type: 'data-source',
+            version: '2.0.0',
+          },
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should preserve all dataset metadata from URL state
+      expect(result.query.dataset?.displayName).toBe('LogsExplore');
+      expect(result.query.dataset?.description).toBe('Prometheus logs dataset');
+      expect(result.query.dataset?.dataSource?.title).toBe('PromTest');
+      expect(result.query.dataset?.dataSource?.id).toBe('datasource-123');
+      expect(result.query.dataset?.dataSource?.version).toBe('2.0.0');
+    });
+
+    it('should handle dataset without displayName or description gracefully', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'test-dataset',
+          title: 'logs-*',
+          type: 'INDEX_PATTERN',
+          // No displayName or description
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should handle missing fields gracefully
+      expect(result.query.dataset?.displayName).toBeUndefined();
+      expect(result.query.dataset?.description).toBeUndefined();
+      expect(result.query.dataset?.title).toBe('logs-*');
+    });
+  });
+
   describe('Metrics flavor SignalType handling', () => {
     it('should accept Metrics datasets for Metrics flavor', async () => {
       const metricsServices = {
