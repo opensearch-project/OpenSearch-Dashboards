@@ -100,20 +100,6 @@
     }
   }
 
-  // KIND badge in tree rows — hollow outline with OUI colors (shared by tree and timeline)
-  &__kindBadge {
-    display: inline-block;
-    font-size: 8px;
-    font-weight: 700;
-    line-height: 1;
-    padding: 3px 6px;
-    border-radius: 3px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    flex-shrink: 0;
-    border: 1px solid;
-  }
-
   // Latency color modifiers (shared by tree and timeline)
   &__latency--warning {
     color: $ouiColorWarning;
@@ -206,6 +192,11 @@
     overflow-y: auto;
     overflow-x: hidden;
   }
+}
+
+// Force white text on category badges regardless of EUI's auto-contrast logic
+.agentTraces__categoryBadge .euiBadge__text {
+  color: $ouiColorGhost !important;
 }
 
 /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */

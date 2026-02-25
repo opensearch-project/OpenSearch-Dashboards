@@ -18,10 +18,10 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import {
   getSpanCategory,
-  getCategoryBadgeStyle,
+  getCategoryMeta,
   hexToRgba,
 } from '../../../../services/span_categorization';
-import { TreeNode, CATEGORY_BADGE_CLASS } from './tree_helpers';
+import { TreeNode } from './tree_helpers';
 import './trace_tree_view.scss';
 
 export interface TraceTreeViewProps {
@@ -77,14 +77,11 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
                 <EuiFlexItem grow={false}>
                   {(() => {
                     const category = node.traceRow ? getSpanCategory(node.traceRow) : 'OTHER';
-                    const modifier = CATEGORY_BADGE_CLASS[category];
+                    const meta = getCategoryMeta(category);
                     return (
-                      <span
-                        className={`agentTracesFlyout__kindBadge agentTracesFlyout__kindBadge--${modifier}`}
-                        style={getCategoryBadgeStyle(category)}
-                      >
-                        {category}
-                      </span>
+                      <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+                        {meta.label}
+                      </EuiBadge>
                     );
                   })()}
                 </EuiFlexItem>

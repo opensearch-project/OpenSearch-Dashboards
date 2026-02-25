@@ -33,13 +33,6 @@ export interface TimelineSpan {
 
 export const TIMELINE_ROW_HEIGHT = 28;
 
-export const CATEGORY_BADGE_CLASS: Record<SpanCategory, string> = {
-  AGENT: 'agent',
-  LLM: 'llm',
-  TOOL: 'tool',
-  OTHER: 'other',
-};
-
 export const buildTreeFromTraceRow = (row: TraceRow): TreeNode => {
   const node: TreeNode = {
     label: row.name,

@@ -11,6 +11,9 @@ export const nodeTypes: NodeTypes = {
   agent: SpanNode,
   llm: SpanNode,
   tool: SpanNode,
+  content: SpanNode,
+  embeddings: SpanNode,
+  retrieval: SpanNode,
   error: SpanNode,
   other: SpanNode,
 };

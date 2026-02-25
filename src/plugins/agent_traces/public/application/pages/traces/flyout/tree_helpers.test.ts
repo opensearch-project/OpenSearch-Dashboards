@@ -15,7 +15,6 @@ import {
   flattenVisibleNodes,
   calculateTimelineRange,
   TIMELINE_ROW_HEIGHT,
-  CATEGORY_BADGE_CLASS,
 } from './tree_helpers';
 import { TraceRow } from '../hooks/use_agent_traces';
 
@@ -53,15 +52,6 @@ describe('tree_helpers', () => {
   describe('constants', () => {
     it('exports TIMELINE_ROW_HEIGHT', () => {
       expect(TIMELINE_ROW_HEIGHT).toBe(28);
-    });
-
-    it('exports CATEGORY_BADGE_CLASS', () => {
-      expect(CATEGORY_BADGE_CLASS).toEqual({
-        AGENT: 'agent',
-        LLM: 'llm',
-        TOOL: 'tool',
-        OTHER: 'other',
-      });
     });
   });
 

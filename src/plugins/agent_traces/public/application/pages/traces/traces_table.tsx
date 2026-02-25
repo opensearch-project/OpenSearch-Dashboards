@@ -6,20 +6,18 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiBadge,
   EuiButtonIcon,
   EuiText,
   EuiLink,
   EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useTraceFlyout } from './flyout/trace_flyout_context';
 import { useAgentTraces, TraceRow, getChildrenFromFullTree } from './hooks/use_agent_traces';
 import { useTraceMetricsContext } from './hooks/use_trace_metrics';
-import { getSpanCategory, getCategoryBadgeStyle } from '../../../services/span_categorization';
-import { CATEGORY_BADGE_CLASS } from './flyout/tree_helpers';
+import { getSpanCategory, getCategoryMeta } from '../../../services/span_categorization';
 import {
   useTablePagination,
   renderStatus,
@@ -27,7 +25,6 @@ import {
   TableEmptyState,
 } from './table_shared';
 import './traces_table.scss';
-import './flyout/trace_details_flyout.scss';
 
 export const TracesTable = () => {
   const { pageIndex, pageSize, pagination: basePagination, onTableChange } = useTablePagination(0);
@@ -180,14 +177,11 @@ export const TracesTable = () => {
             {!item.isExpandable && <span className="agentTracesTable__expandSpacer" />}
             {(() => {
               const category = getSpanCategory(item);
-              const modifier = CATEGORY_BADGE_CLASS[category];
+              const meta = getCategoryMeta(category);
               return (
-                <span
-                  className={`agentTracesFlyout__kindBadge agentTracesFlyout__kindBadge--${modifier}`}
-                  style={getCategoryBadgeStyle(category)}
-                >
-                  {category}
-                </span>
+                <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+                  {meta.label}
+                </EuiBadge>
               );
             })()}
           </div>

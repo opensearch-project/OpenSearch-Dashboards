@@ -9,13 +9,11 @@ import { EuiBadge, EuiIcon, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import {
   CategorizedSpan,
-  getCategoryBadgeStyle,
   getCategoryMeta,
   hexToRgba,
   SpanCategory,
 } from '../../../../services/span_categorization';
-import { CATEGORY_BADGE_CLASS, parseLatencyMs } from '../flyout/tree_helpers';
-import '../flyout/trace_details_flyout.scss';
+import { parseLatencyMs } from '../flyout/tree_helpers';
 import './span_node.scss';
 
 interface SpanNodeProps {
@@ -30,6 +28,9 @@ const CATEGORY_ICON: Record<SpanCategory, string> = {
   AGENT: 'user',
   LLM: 'bolt',
   TOOL: 'wrench',
+  CONTENT: 'document',
+  EMBEDDINGS: 'aggregate',
+  RETRIEVAL: 'search',
   OTHER: 'dot',
 };
 
@@ -69,14 +70,9 @@ function SpanNodeComponent({ data, selected }: SpanNodeProps) {
       {/* Header: Icon + Category Badge */}
       <div className="agentTracesFlow__header">
         <EuiIcon type={iconType} size="s" color={color} />
-        <span
-          className={`agentTracesFlyout__kindBadge agentTracesFlyout__kindBadge--${
-            CATEGORY_BADGE_CLASS[span.category]
-          }`}
-          style={getCategoryBadgeStyle(span.category)}
-        >
-          {span.category}
-        </span>
+        <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+          {meta.label}
+        </EuiBadge>
         {span.status === 'error' && (
           <EuiBadge color="danger" className="agentTracesFlow__errorBadge">
             ERR

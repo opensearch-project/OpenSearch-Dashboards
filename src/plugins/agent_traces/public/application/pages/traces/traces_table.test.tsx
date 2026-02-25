@@ -31,7 +31,12 @@ jest.mock('react-redux', () => ({
 
 jest.mock('../../../services/span_categorization', () => ({
   getSpanCategory: jest.fn(() => 'AGENT'),
-  getCategoryBadgeStyle: jest.fn(() => ({ backgroundColor: '#eee', color: '#333' })),
+  getCategoryMeta: jest.fn(() => ({
+    color: '#54B399',
+    bgColor: '#54B399',
+    icon: 'Bot',
+    label: 'Agent',
+  })),
 }));
 
 const mockOpenFlyout = jest.fn();

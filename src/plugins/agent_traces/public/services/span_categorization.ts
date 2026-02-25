@@ -73,21 +73,6 @@ export function hexToRgba(hex: string, alpha: number): string {
 }
 
 /**
- * Returns inline style for a category badge (kind badge).
- * Uses runtime theme colors so it adapts to light/dark mode.
- */
-export function getCategoryBadgeStyle(
-  category: SpanCategory
-): { color: string; borderColor: string; backgroundColor: string } {
-  const color = getCategoryColor(category);
-  return {
-    color,
-    borderColor: color,
-    backgroundColor: hexToRgba(color, 0.1),
-  };
-}
-
-/**
  * Well-known gen_ai.operation.name values mapped to categories.
  * See: https://opentelemetry.io/docs/specs/semconv/attributes-registry/gen-ai/
  */
