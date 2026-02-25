@@ -5,17 +5,19 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiIcon,
   EuiText,
   EuiSpacer,
   EuiPanel,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { getCategoryBadgeStyle, hexToRgba } from '../../../../services/span_categorization';
-import { TimelineSpan, CATEGORY_BADGE_CLASS } from './tree_helpers';
+import { getCategoryMeta, hexToRgba } from '../../../../services/span_categorization';
+import { TimelineSpan } from './tree_helpers';
 import './timeline_gantt.scss';
 
 export interface TimelineGanttProps {
@@ -28,6 +30,11 @@ export interface TimelineGanttProps {
   onSelectNode: (nodeId: string) => void;
   onToggleExpanded: (nodeId: string) => void;
 }
+
+const formatRelativeMs = (ms: number): string => {
+  if (ms >= 1000) return `${(ms / 1000).toFixed(2)} s`;
+  return `${ms.toFixed(2)} ms`;
+};
 
 export const TimelineGantt: React.FC<TimelineGanttProps> = ({
   timelineVisibleSpans,
@@ -125,14 +132,14 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                     ) : (
                       <span className="agentTracesFlyout__timelineSpacer" />
                     )}
-                    <span
-                      className={`agentTracesFlyout__kindBadge agentTracesFlyout__kindBadge--${
-                        CATEGORY_BADGE_CLASS[span.category]
-                      }`}
-                      style={getCategoryBadgeStyle(span.category)}
-                    >
-                      {span.category}
-                    </span>
+                    {(() => {
+                      const meta = getCategoryMeta(span.category);
+                      return (
+                        <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+                          {meta.label}
+                        </EuiBadge>
+                      );
+                    })()}
                     <span className="agentTracesFlyout__timelineLabelText" title={span.node.label}>
                       <span className="agentTracesFlyout__timelineLabelName">
                         {span.node.label}
@@ -148,19 +155,45 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                     </span>
                   </div>
 
-                  <div className="agentTracesFlyout__timelineBarArea">
+                  <div
+                    className="agentTracesFlyout__timelineBarArea"
+                    style={
+                      hasValidTiming
+                        ? ({
+                            '--bar-offset': `${offsetPct}%`,
+                            '--bar-width': `${Math.max(widthPct, 0.3)}%`,
+                          } as React.CSSProperties)
+                        : undefined
+                    }
+                  >
                     {hasValidTiming && (
-                      <div
-                        className={`agentTracesFlyout__timelineBar${
-                          isTimelineSelected ? ' agentTracesFlyout__timelineBar--selected' : ''
-                        }`}
-                        style={{
-                          left: `${offsetPct}%`,
-                          width: `${Math.max(widthPct, 0.3)}%`,
-                          backgroundColor: span.categoryColor,
-                        }}
-                        title={`${span.node.label} — ${span.node.latency || ''}`}
-                      />
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          <div style={{ lineHeight: 1.6 }}>
+                            <div>
+                              <strong>Duration:</strong>{' '}
+                              {span.node.latency || formatRelativeMs(span.durationMs)}
+                            </div>
+                            <div>
+                              <strong>Start:</strong>{' '}
+                              {formatRelativeMs(span.startMs - timelineRange.minMs)}
+                            </div>
+                            <div>
+                              <strong>End:</strong>{' '}
+                              {formatRelativeMs(span.endMs - timelineRange.minMs)}
+                            </div>
+                          </div>
+                        }
+                        anchorClassName="agentTracesFlyout__timelineBarAnchor"
+                      >
+                        <div
+                          className={`agentTracesFlyout__timelineBar${
+                            isTimelineSelected ? ' agentTracesFlyout__timelineBar--selected' : ''
+                          }`}
+                          style={{ backgroundColor: span.categoryColor }}
+                        />
+                      </EuiToolTip>
                     )}
                   </div>
 

@@ -112,18 +112,15 @@ export const extractTimestamps = (node: TreeNode): { startMs: number; endMs: num
   const raw = node.traceRow?.rawDocument;
   if (raw) {
     const rawStart = raw.startTime;
-    const rawEnd = raw.endTime;
-    if (rawStart && rawEnd) {
-      const s = parseRawTimestampMs(rawStart);
-      const e = parseRawTimestampMs(rawEnd);
-      if (s > 0 && e > 0) return { startMs: s, endMs: e };
-    }
-    if (rawStart) {
+    const s = parseRawTimestampMs(rawStart);
+    if (s > 0) {
+      // Prefer durationInNanos for sub-ms precision; fall back to endTime.
       const durationNanos = (raw.durationInNanos as number) || 0;
-      const s = parseRawTimestampMs(rawStart);
-      if (s > 0 && durationNanos > 0) {
+      if (durationNanos > 0) {
         return { startMs: s, endMs: s + durationNanos / 1_000_000 };
       }
+      const e = parseRawTimestampMs(raw.endTime);
+      if (e > 0) return { startMs: s, endMs: e };
     }
   }
   return { startMs: 0, endMs: 0 };

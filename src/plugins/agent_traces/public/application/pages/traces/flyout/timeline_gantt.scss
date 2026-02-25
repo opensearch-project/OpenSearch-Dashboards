@@ -71,6 +71,14 @@
     margin-left: $ouiSizeXS;
   }
 
+  &__timelineBarAnchor {
+    position: absolute;
+    top: 15%;
+    height: 70%;
+    left: var(--bar-offset);
+    width: var(--bar-width);
+  }
+
   &__timelineBarArea {
     position: relative;
     height: 100%;
@@ -78,9 +86,8 @@
   }
 
   &__timelineBar {
-    position: absolute;
-    top: 15%;
-    height: 70%;
+    width: 100%;
+    height: 100%;
     border-radius: 3px;
     min-width: 3px;
     opacity: 0.9;
