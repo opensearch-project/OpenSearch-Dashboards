@@ -1,0 +1,2 @@
+fix:
+- Bump less to 4.1.3 to use disablePluginRule when in Markdown panel ([#11389](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11389))
