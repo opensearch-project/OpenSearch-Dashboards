@@ -46,6 +46,7 @@ export interface MLAgentRouter {
    */
   proxyRequest(options: {
     context: RequestHandlerContext;
+    request: OpenSearchDashboardsRequest;
     method: string;
     path: string;
     body?: any;

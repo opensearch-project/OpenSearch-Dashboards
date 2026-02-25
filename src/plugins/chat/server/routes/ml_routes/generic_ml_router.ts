@@ -93,12 +93,13 @@ export class GenericMLRouter implements MLAgentRouter {
         };
       };
     };
+    request: OpenSearchDashboardsRequest;
     method: string;
     path: string;
     body?: any;
     dataSourceId?: string;
   }): Promise<any> {
-    const { context, method, path, body, dataSourceId } = options;
+    const { context, request, method, path, body, dataSourceId } = options;
 
     // Try to find ML client first
     const mlClient = findMLClient(context);
@@ -113,7 +114,7 @@ export class GenericMLRouter implements MLAgentRouter {
           datasourceId: dataSourceId,
           stream: false,
         },
-        {} as OpenSearchDashboardsRequest,
+        request,
         context
       );
 

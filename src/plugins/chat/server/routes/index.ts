@@ -14,6 +14,7 @@ import {
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
+import { getMemoryContainerId } from './utils/get_memory_container_id';
 
 /**
  * Forward request to external AG-UI server
@@ -141,32 +142,19 @@ export function defineRoutes(
           });
         }
 
-        // Fetch memoryContainerId from agent detail API using router's proxy method
-        // Use a fallback fake memory container ID if the API call fails
-        let memoryContainerId: string | undefined;
-
-        try {
-          const agentDetail = await mlRouter.proxyRequest({
-            context,
-            method: 'GET',
-            path: `/_plugins/_ml/agents/${mlCommonsAgentId}`,
-            dataSourceId,
-          });
-
-          memoryContainerId = agentDetail?.memory?.memory_container_id;
-        } catch (error) {
-          logger.warn(`Failed to fetch agent detail, using fallback memory container ID: ${error}`);
-        }
-
-        // Use fallback fake memory container ID if not found
-        if (!memoryContainerId) {
-          memoryContainerId = 'fake-memory-container-id';
-          logger.info('Using fallback fake memory container ID');
-        }
+        const memoryContainerId = await getMemoryContainerId(
+          mlRouter,
+          context,
+          request,
+          mlCommonsAgentId,
+          dataSourceId,
+          logger
+        );
 
         // Search memory sessions using router's proxy method
         const searchResponse = await mlRouter.proxyRequest({
           context,
+          request,
           method: 'POST',
           path: `/_plugins/_ml/memory_containers/${memoryContainerId}/memories/sessions/_search`,
           body: {
@@ -183,8 +171,10 @@ export function defineRoutes(
         });
       } catch (error) {
         logger.error(`Failed to search memory sessions: ${error}`);
+        const statusCode = typeof error?.statusCode === 'number' ? error.statusCode : 500;
+
         return response.customError({
-          statusCode: error.statusCode || 500,
+          statusCode,
           body: {
             message: error instanceof Error ? error.message : 'Failed to search memory sessions',
           },
