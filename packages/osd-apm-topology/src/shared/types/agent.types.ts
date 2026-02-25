@@ -13,7 +13,7 @@ import type { BaseNodeData } from '../../types';
  * - `create_agent`, `execute_agent`, `invoke_agent` → `'agent'`
  * - `embeddings` → `'embeddings'`
  * - `execute_tool` → `'tool'`
- * - `retrieval` → `'retriever'`
+ * - `retrieval` → `'retrieval'`
  * - `content`, document/knowledge-base nodes → `'content'`
  * - Unknown operations → `'other'`
  */
@@ -21,7 +21,7 @@ export type AgentNodeKind =
   | 'agent'
   | 'llm'
   | 'tool'
-  | 'retriever'
+  | 'retrieval'
   | 'embeddings'
   | 'content'
   | 'other';

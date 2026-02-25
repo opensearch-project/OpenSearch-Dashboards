@@ -16,7 +16,7 @@ import {
   S3Icon,
   SyntheticsIcon,
 } from '../shared/resources/services';
-import type { CelestialCardProps } from '../components/CelestialCard';
+import type { CelestialCardProps } from '../components/celestial_card';
 
 interface NodeMapItem {
   nodes: Array<Node<CelestialCardProps>>;

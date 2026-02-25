@@ -29,7 +29,7 @@ import {
   AGENT_NODE_KINDS,
 } from '@osd/apm-topology';
 import type { CelestialMapProps, CelestialEdge, CelestialCardProps } from '@osd/apm-topology';
-import { agentTraceNodes, agentTraceEdges } from './agent-mock-data';
+import { agentTraceNodes, agentTraceEdges } from './agent_mock_data';
 import './app.scss';
 
 type MapTab = 'apmCards' | 'apmCircles' | 'agentCards' | 'features';
@@ -246,7 +246,7 @@ const TAB_DESCRIPTIONS: Record<MapTab, { title: string; description: string }> =
   agentCards: {
     title: 'Agent Trace Map — GenAI Nodes',
     description:
-      'Agent/LLM/Tool/Retriever/Embeddings/Other trace visualization. Nodes show SVG type icons, provider icons next to model names, hover glow in type color, and selection glow rings. Edges demonstrate flow animation, pulse animation, dotted styles, and arrowhead markers.',
+      'Agent/LLM/Tool/Retrieval/Embeddings/Other trace visualization. Nodes show SVG type icons, provider icons next to model names, hover glow in type color, and selection glow rings. Edges demonstrate flow animation, pulse animation, dotted styles, and arrowhead markers.',
   },
   features: {
     title: 'Features — Edge Styles, Animations & Glow Effects',

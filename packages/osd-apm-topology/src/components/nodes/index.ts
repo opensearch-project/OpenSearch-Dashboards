@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { NodeShell } from './NodeShell';
-export type { NodeShellProps } from './NodeShell';
-export { TypeBadge } from './TypeBadge';
-export type { TypeBadgeProps } from './TypeBadge';
-export { MetricBar, MetricBarGroup } from './MetricBar';
-export type { MetricBarProps, MetricBarGroupProps, MetricBarGroupItem } from './MetricBar';
-export { StatusIndicator } from './StatusIndicator';
-export type { StatusIndicatorProps, StatusLevel } from './StatusIndicator';
-export { AgentCardNode } from './AgentCardNode';
-export { ServiceCardNode } from './ServiceCardNode';
-export { ServiceCircleNode } from './ServiceCircleNode';
-export { HealthArc } from './HealthArc';
-export type { HealthArcProps, HealthArcSegment } from './HealthArc';
+export { NodeShell } from './node_shell';
+export type { NodeShellProps } from './node_shell';
+export { TypeBadge } from './type_badge';
+export type { TypeBadgeProps } from './type_badge';
+export { MetricBar, MetricBarGroup } from './metric_bar';
+export type { MetricBarProps, MetricBarGroupProps, MetricBarGroupItem } from './metric_bar';
+export { StatusIndicator } from './status_indicator';
+export type { StatusIndicatorProps, StatusLevel } from './status_indicator';
+export { AgentCardNode } from './agent_card_node';
+export { ServiceCardNode } from './service_card_node';
+export { ServiceCircleNode } from './service_circle_node';
+export { HealthArc } from './health_arc';
+export type { HealthArcProps, HealthArcSegment } from './health_arc';

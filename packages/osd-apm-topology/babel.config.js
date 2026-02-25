@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const isTest = process.env.NODE_ENV === 'test';
+
 module.exports = {
   plugins: [
     ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }],
@@ -16,5 +18,5 @@ module.exports = {
       presets: ['@osd/babel-preset/node_preset'],
     },
   },
-  ignore: ['**/*.test.ts', '**/*.test.tsx', '**/test-utils/**', '**/__fixtures__/**'],
+  ignore: isTest ? [] : ['**/*.test.ts', '**/*.test.tsx', '**/test_utils/**', '**/__fixtures__/**'],
 };

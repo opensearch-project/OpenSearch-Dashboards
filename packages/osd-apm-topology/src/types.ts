@@ -5,8 +5,8 @@
 
 import type { Edge, EdgeProps, Node, NodeProps } from '@xyflow/react';
 import { ReactNode } from 'react';
-import type { CelestialCardProps } from './components/CelestialCard';
-import type { LayoutOptions } from './shared/hooks/use-celestial-layout.hook';
+import type { CelestialCardProps } from './components/celestial_card';
+import type { LayoutOptions } from './shared/hooks/use_celestial_layout.hook';
 import { Breadcrumb } from './components';
 
 export type CelestialNode = Node<CelestialCardProps>;

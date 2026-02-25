@@ -10,13 +10,13 @@ module.exports = {
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.{ts,tsx}'],
   moduleNameMapper: {
-    '\\.svg$': '<rootDir>/src/test-utils/__mocks__/svg.ts',
+    '\\.svg$': '<rootDir>/src/test_utils/__mocks__/svg.ts',
     '\\.module\\.css$': 'identity-obj-proxy',
-    '\\.s?css$': '<rootDir>/src/test-utils/__mocks__/styles.ts',
+    '\\.s?css$': '<rootDir>/src/test_utils/__mocks__/styles.ts',
     '^src/(.*)$': '<rootDir>/src/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
-    '^vitest$': '<rootDir>/src/test-utils/vitest-compat.ts',
-    '^@testing-library/jest-dom/vitest$': '<rootDir>/src/test-utils/__mocks__/empty.ts',
+    '^vitest$': '<rootDir>/src/test_utils/vitest_compat.ts',
+    '^@testing-library/jest-dom/vitest$': '<rootDir>/src/test_utils/__mocks__/empty.ts',
   },
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': path.resolve(__dirname, '../../src/dev/jest/babel_transform.js'),
@@ -26,7 +26,7 @@ module.exports = {
   ],
   testEnvironment: 'jest-environment-jsdom',
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
-  setupFilesAfterEnv: ['<rootDir>/src/test-utils/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/test_utils/jest.setup.ts'],
   globals: {
     Uint8Array: Uint8Array,
   },

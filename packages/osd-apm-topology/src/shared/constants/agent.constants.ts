@@ -8,7 +8,7 @@ import {
   AgentIcon,
   LlmIcon,
   ToolIcon,
-  RetrieverIcon,
+  RetrievalIcon,
   EmbeddingsIcon,
   ContentIcon,
   OtherIcon,
@@ -26,24 +26,23 @@ export interface AgentNodeKindConfig {
 export const AGENT_NODE_KINDS: Record<AgentNodeKind, AgentNodeKindConfig> = {
   agent: {
     label: 'Agent',
-    color: 'var(--osd-color-type-agent, #0D70CA)',
+    color: 'var(--osd-color-type-agent, #54B399)',
     icon: AgentIcon,
   },
   llm: {
     label: 'LLM',
-    color: 'var(--osd-color-type-llm, #D74987)',
+    color: 'var(--osd-color-type-llm, #DD0A73)',
     icon: LlmIcon,
   },
   tool: {
     label: 'Tool',
-    color: 'var(--osd-color-type-tool, #D6BF57)',
+    color: 'var(--osd-color-type-tool, #E7664C)',
     icon: ToolIcon,
-    textColor: '#1A1A1A',
   },
-  retriever: {
-    label: 'Retriever',
-    color: 'var(--osd-color-type-retriever, #54B399)',
-    icon: RetrieverIcon,
+  retrieval: {
+    label: 'Retrieval',
+    color: 'var(--osd-color-type-retrieval, #B9A888)',
+    icon: RetrievalIcon,
   },
   embeddings: {
     label: 'Embeddings',
@@ -52,12 +51,13 @@ export const AGENT_NODE_KINDS: Record<AgentNodeKind, AgentNodeKindConfig> = {
   },
   content: {
     label: 'Content',
-    color: 'var(--osd-color-type-content, #9170B8)',
+    color: 'var(--osd-color-type-content, #D6BF57)',
     icon: ContentIcon,
+    textColor: '#1A1A1A',
   },
   other: {
     label: 'Other',
-    color: 'var(--osd-color-type-other, #9C9DA0)',
+    color: 'var(--osd-color-type-other, #98A2B3)',
     icon: OtherIcon,
   },
 };

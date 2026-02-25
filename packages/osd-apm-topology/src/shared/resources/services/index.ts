@@ -34,7 +34,7 @@ export { default as KinesisFirehoseIcon } from './kinesisfirehose.svg';
 export { default as KinesisIcon } from './kinesis.svg';
 export { default as KmsIcon } from './kms.svg';
 export { default as LambdaIcon } from './lambda.svg';
-export { default as LoadBalancerIcon } from './load-balancer.svg';
+export { default as LoadBalancerIcon } from './load_balancer.svg';
 export { default as MacieIcon } from './macie.svg';
 export { default as NamespaceIcon } from './namespace.svg';
 export { default as PodIcon } from './pod.svg';

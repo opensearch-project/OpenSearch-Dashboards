@@ -7,8 +7,8 @@ import React from 'react';
 import { Node } from '@xyflow/react';
 import type { Metrics } from '../shared/types/common.types';
 import { getIcon } from '../shared/utils/icons.utils';
-import type { CelestialCardProps } from '../components/CelestialCard/types';
-import { DEFAULT_GRID_CONFIG, calculatePosition } from '../shared/utils/celestial-node.utils';
+import type { CelestialCardProps } from '../components/celestial_card/types';
+import { DEFAULT_GRID_CONFIG, calculatePosition } from '../shared/utils/celestial_node.utils';
 
 interface GridConfig {
   nodesPerRow: number;

@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './BreadcrumbTrail';
-export * from './CelestialNode';
+export * from './breadcrumb_trail';
+export * from './celestial_node';

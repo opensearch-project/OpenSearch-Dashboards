@@ -5,7 +5,7 @@
 
 export { default as AnthropicIcon } from './anthropic.svg';
 export { default as OpenAiIcon } from './openai.svg';
-export { default as AwsBedrockIcon } from './aws-bedrock.svg';
+export { default as AwsBedrockIcon } from './aws_bedrock.svg';
 export { default as AzureIcon } from './azure.svg';
 export { default as GoogleIcon } from './google.svg';
 export { default as CohereIcon } from './cohere.svg';

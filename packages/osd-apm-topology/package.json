@@ -6,11 +6,11 @@
   "main": "./target/node/index.js",
   "browser": "./target/web/index.js",
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i src/Celestial.css -o src/_celestial.generated.scss --minify && node scripts/strip-layers.js",
+    "build:css": "npx @tailwindcss/cli -i src/celestial.css -o src/_celestial.generated.scss --minify && node scripts/strip-layers.js",
     "build:babel:node": "BABEL_ENV=node babel src --out-dir target/node --extensions '.ts,.tsx' --copy-files --quiet",
     "build:babel:web": "BABEL_ENV=web babel src --out-dir target/web --extensions '.ts,.tsx' --copy-files --quiet",
     "build:babel": "yarn build:babel:node && yarn build:babel:web",
-    "build:clean": "rm -f target/node/Celestial.css target/web/Celestial.css",
+    "build:clean": "rm -f target/node/celestial.css target/web/celestial.css",
     "build": "yarn build:css && yarn build:babel && yarn build:clean",
     "osd:bootstrap": "yarn build",
     "osd:watch": "BABEL_ENV=node babel src --out-dir target/node --extensions '.ts,.tsx' --copy-files --watch"

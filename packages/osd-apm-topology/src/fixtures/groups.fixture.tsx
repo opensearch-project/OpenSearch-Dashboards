@@ -15,7 +15,7 @@ import {
   RdsIcon,
   S3Icon,
 } from '../shared/resources/services';
-import type { CelestialCardProps } from '../components/CelestialCard/types';
+import type { CelestialCardProps } from '../components/celestial_card/types';
 
 interface NodeMapItem {
   nodes: Array<Node<CelestialCardProps>>;
