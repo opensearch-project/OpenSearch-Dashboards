@@ -4,6 +4,13 @@
  */
 
 import React, { createContext, useContext, PropsWithChildren, useState } from 'react';
+import { useViewInteractionLock } from '../hooks/use-view-interaction-lock.hook';
+import type { LayoutOptions } from '../hooks/use-celestial-layout.hook';
+
+interface ViewLock {
+  lock: () => void;
+  isLocked: () => boolean;
+}
 
 interface CelestialStateContextType {
   selectedNodeId?: string;
@@ -12,6 +19,8 @@ interface CelestialStateContextType {
   setUnstackedAggregateNodeIds: (ids: string[]) => void;
   activeMenuNodeId: string | null;
   setActiveMenuNodeId: React.Dispatch<React.SetStateAction<string | null>>;
+  viewLock: ViewLock;
+  layoutOptions?: LayoutOptions;
 }
 
 // Initialize with undefined instead of a default object
@@ -20,15 +29,18 @@ const CelestialStateContext = createContext<CelestialStateContextType | undefine
 export interface CelestialStateProviderProps {
   // Make mocks optional since it's used for testing only
   mocks?: CelestialStateContextType;
+  layoutOptions?: LayoutOptions;
 }
 
 export const CelestialStateProvider: React.FC<PropsWithChildren<CelestialStateProviderProps>> = ({
   children,
   mocks,
+  layoutOptions,
 }) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(undefined);
   const [activeMenuNodeId, setActiveMenuNodeId] = useState<string | null>(null);
   const [unstackedAggregateNodeIds, setUnstackedAggregateNodeIds] = useState<string[]>([]);
+  const viewLock = useViewInteractionLock();
 
   return (
     <CelestialStateContext.Provider
@@ -40,6 +52,8 @@ export const CelestialStateProvider: React.FC<PropsWithChildren<CelestialStatePr
           setUnstackedAggregateNodeIds,
           activeMenuNodeId,
           setActiveMenuNodeId,
+          viewLock,
+          layoutOptions,
         }
       }
     >

@@ -51,6 +51,7 @@ describe('CelestialStateContext', () => {
       setUnstackedAggregateNodeIds: jest.fn(),
       activeMenuNodeId: 'mock-menu',
       setActiveMenuNodeId: jest.fn(),
+      viewLock: { lock: jest.fn(), isLocked: jest.fn().mockReturnValue(false) },
     };
     const mockWrapper = ({ children }: { children: React.ReactNode }) => (
       <CelestialStateProvider mocks={mockState}>{children}</CelestialStateProvider>

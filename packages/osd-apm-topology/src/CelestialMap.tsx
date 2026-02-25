@@ -12,7 +12,7 @@ import { CelestialStateProvider } from './shared/contexts/CelestialStateContext'
 
 export const CelestialMap = (props: CelestialMapProps) => (
   <ReactFlowProvider>
-    <CelestialStateProvider>
+    <CelestialStateProvider layoutOptions={props.layoutOptions}>
       <Celestial {...props} />
     </CelestialStateProvider>
   </ReactFlowProvider>

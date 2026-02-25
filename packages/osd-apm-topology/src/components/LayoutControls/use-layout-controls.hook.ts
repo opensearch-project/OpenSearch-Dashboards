@@ -7,6 +7,7 @@ import { useReactFlow } from '@xyflow/react';
 import { useCallback } from 'react';
 import { CelestialNodes } from 'src/types';
 import { useCelestialLayout } from '../../shared/hooks/use-celestial-layout.hook';
+import { useCelestialStateContext } from '../../shared/contexts/CelestialStateContext';
 
 export interface LayoutControlsActions {
   onLayoutChange: (e: React.MouseEvent) => void;
@@ -14,7 +15,8 @@ export interface LayoutControlsActions {
 }
 
 export const useLayoutControls = (): LayoutControlsActions => {
-  const { getLaidOutElements } = useCelestialLayout();
+  const { layoutOptions } = useCelestialStateContext();
+  const { getLaidOutElements } = useCelestialLayout(layoutOptions);
   const { getNodes, setNodes, getEdges, setEdges, fitView } = useReactFlow();
 
   /**

@@ -26,6 +26,7 @@ import {
   AgentCardNode,
   ServiceCardNode,
   ServiceCircleNode,
+  AGENT_NODE_KINDS,
 } from '@osd/apm-topology';
 import type { CelestialMapProps, CelestialEdge, CelestialCardProps } from '@osd/apm-topology';
 import { agentTraceNodes, agentTraceEdges } from './agent-mock-data';
@@ -165,48 +166,21 @@ const AgentLegend = () => (
   <div className="osd:w-52 osd:p-3 osd:bg-container-default osd:rounded-xl osd:shadow-md osd:text-xs osd:text-body-secondary">
     <div className="osd:font-bold osd:text-sm osd:mb-2">Agent Trace Legend</div>
     <ul className="osd:grid osd:gap-1.5">
-      <li className="osd:flex osd:items-center osd:gap-2">
-        <span
-          className="osd:w-3 osd:h-3 osd:rounded-full osd:inline-block"
-          style={{ backgroundColor: '#006BB4' }}
-        />
-        Agent
-      </li>
-      <li className="osd:flex osd:items-center osd:gap-2">
-        <span
-          className="osd:w-3 osd:h-3 osd:rounded-full osd:inline-block"
-          style={{ backgroundColor: '#DD0A73' }}
-        />
-        LLM
-      </li>
-      <li className="osd:flex osd:items-center osd:gap-2">
-        <span
-          className="osd:w-3 osd:h-3 osd:rounded-full osd:inline-block"
-          style={{ backgroundColor: '#F5A700' }}
-        />
-        Tool
-      </li>
-      <li className="osd:flex osd:items-center osd:gap-2">
-        <span
-          className="osd:w-3 osd:h-3 osd:rounded-full osd:inline-block"
-          style={{ backgroundColor: '#54B399' }}
-        />
-        Retriever
-      </li>
-      <li className="osd:flex osd:items-center osd:gap-2">
-        <span
-          className="osd:w-3 osd:h-3 osd:rounded-full osd:inline-block"
-          style={{ backgroundColor: '#6092C0' }}
-        />
-        Embeddings
-      </li>
-      <li className="osd:flex osd:items-center osd:gap-2">
-        <span
-          className="osd:w-3 osd:h-3 osd:rounded-full osd:inline-block"
-          style={{ backgroundColor: '#98A2B3' }}
-        />
-        Other
-      </li>
+      {Object.entries(AGENT_NODE_KINDS).map(([kind, config]) => (
+        <li key={kind} className="osd:flex osd:items-center osd:gap-2">
+          <span
+            className="osd:w-4 osd:h-4 osd:inline-block osd:rounded-sm osd:flex-shrink-0"
+            style={{ backgroundColor: config.color, padding: 2 }}
+          >
+            <img
+              src={config.icon}
+              alt={config.label}
+              style={{ width: '100%', height: '100%', filter: 'brightness(0) invert(1)' }}
+            />
+          </span>
+          {config.label}
+        </li>
+      ))}
     </ul>
     <div className="osd:mt-2 osd:border-t osd:border-divider-default osd:pt-2">
       <div className="osd:font-bold osd:mb-1">Edges</div>

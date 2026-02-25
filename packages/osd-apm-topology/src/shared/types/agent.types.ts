@@ -14,9 +14,17 @@ import type { BaseNodeData } from '../../types';
  * - `embeddings` → `'embeddings'`
  * - `execute_tool` → `'tool'`
  * - `retrieval` → `'retriever'`
+ * - `content`, document/knowledge-base nodes → `'content'`
  * - Unknown operations → `'other'`
  */
-export type AgentNodeKind = 'agent' | 'llm' | 'tool' | 'retriever' | 'embeddings' | 'other';
+export type AgentNodeKind =
+  | 'agent'
+  | 'llm'
+  | 'tool'
+  | 'retriever'
+  | 'embeddings'
+  | 'content'
+  | 'other';
 
 export interface AgentNodeData extends BaseNodeData {
   nodeKind: AgentNodeKind;

@@ -97,4 +97,7 @@ export interface CelestialMapProps {
 
   /** Show SLI/SLO entries in the default legend. Default: false */
   showSliSlo?: boolean;
+
+  /** Show layout control buttons (Expand all / Update layout). Default: false */
+  showLayoutControls?: boolean;
 }

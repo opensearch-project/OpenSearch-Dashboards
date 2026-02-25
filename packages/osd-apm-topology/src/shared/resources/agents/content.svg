@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+  <!-- Page body -->
+  <rect x="11" y="8" width="28" height="36" rx="3" fill="none" stroke="#111" stroke-width="2"/>
+  <!-- Folded corner fill -->
+  <path d="M31 8 L39 16 L31 16 Z" fill="#e8e8e4"/>
+  <!-- Folded corner crease -->
+  <path d="M31 8 L39 16 L31 16 Z" fill="none" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Dog-ear fold line -->
+  <line x1="31" y1="8" x2="31" y2="16" stroke="#111" stroke-width="1.5"/>
+  <!-- Text lines -->
+  <line x1="17" y1="23" x2="33" y2="23" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17" y1="28" x2="33" y2="28" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="17" y1="33" x2="27" y2="33" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Stacked page shadow -->
+  <rect x="14" y="42" width="28" height="3" rx="1.5" fill="#111" opacity="0.12"/>
+  <!-- Small page peek behind -->
+  <rect x="14" y="6" width="26" height="34" rx="3" fill="none" stroke="#111" stroke-width="1" opacity="0.2"/>
+</svg>

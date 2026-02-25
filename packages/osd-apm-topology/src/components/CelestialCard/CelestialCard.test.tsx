@@ -51,6 +51,7 @@ describe('CelestialCard', () => {
           setUnstackedAggregateNodeIds: mockSetUnstackedAggregateNodeIds,
           activeMenuNodeId: null,
           setActiveMenuNodeId: mockSetActiveMenuNodeId,
+          viewLock: { lock: jest.fn(), isLocked: jest.fn().mockReturnValue(false) },
         }}
       >
         <CelestialNodeActionsProvider onDataFetch={onDataFetch} addBreadcrumb={addBreadcrumb}>

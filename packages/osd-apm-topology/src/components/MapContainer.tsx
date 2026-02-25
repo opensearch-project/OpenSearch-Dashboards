@@ -16,6 +16,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import React, { ReactNode, useCallback, useMemo } from 'react';
+import { useCelestialStateContext } from '../shared/contexts/CelestialStateContext';
 import type { CelestialEdge, CelestialEdgeStyleData } from '../types';
 import { Breadcrumb, BreadcrumbTrail } from './BreadcrumbTrail';
 import type { CelestialCardProps } from './CelestialCard/types';
@@ -84,6 +85,8 @@ interface MapContainerProps {
   showSliSlo?: boolean;
   /** Whether the host page is in dark mode */
   isDarkMode?: boolean;
+  /** Show layout control buttons (Expand all / Update layout). Default: false */
+  showLayoutControls?: boolean;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
@@ -104,7 +107,9 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   showMinimap,
   showSliSlo,
   isDarkMode,
+  showLayoutControls,
 }) => {
+  const { viewLock } = useCelestialStateContext();
   const reactFlowInstance = useReactFlow();
   const mergedNodeTypes = useMemo(() => ({ ...defaultNodeTypes, ...consumerNodeTypes }), [
     consumerNodeTypes,
@@ -125,6 +130,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   /** Focus camera on a clicked node */
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
+      viewLock.lock();
       const width = node.measured?.width ?? node.width ?? 272;
       const height = node.measured?.height ?? node.height ?? 156;
       const padding = 50;
@@ -138,12 +144,13 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         { padding: 0.3, duration: 400 }
       );
     },
-    [reactFlowInstance]
+    [reactFlowInstance, viewLock]
   );
 
   /** Focus camera on the midpoint between an edge's source and target nodes */
   const handleEdgeClickWithFocus = useCallback(
     (event: any, edge: CelestialEdge) => {
+      viewLock.lock();
       // Fire the consumer callback first
       onEdgeClick(event, edge);
 
@@ -172,7 +179,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         );
       }
     },
-    [reactFlowInstance, onEdgeClick]
+    [reactFlowInstance, onEdgeClick, viewLock]
   );
 
   return (
@@ -208,7 +215,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         <div className="osd:absolute osd:top-15 osd:right-4 osd:flex osd:flex-col osd:items-center osd:gap-4 osd:z-50">
           {renderLegend()}
           <CelestialControls />
-          <LayoutControls />
+          {showLayoutControls && <LayoutControls />}
         </div>
         <ReactFlow
           nodes={nodes}
@@ -218,7 +225,6 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           onNodeClick={handleNodeClick}
           onEdgeClick={handleEdgeClickWithFocus}
           minZoom={0}
-          fitView
           nodeTypes={mergedNodeTypes}
           edgeTypes={mergedEdgeTypes}
           proOptions={{ hideAttribution: true }}

@@ -31,6 +31,13 @@ jest.mock('../../shared/hooks/use-celestial-layout.hook', () => ({
   }),
 }));
 
+// Mock CelestialStateContext
+jest.mock('../../shared/contexts/CelestialStateContext', () => ({
+  useCelestialStateContext: () => ({
+    layoutOptions: undefined,
+  }),
+}));
+
 describe('useLayoutControls', () => {
   const mockNodes = [
     { id: '1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },

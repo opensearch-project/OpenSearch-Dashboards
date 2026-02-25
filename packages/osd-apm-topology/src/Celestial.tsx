@@ -57,6 +57,7 @@ export const Celestial = (props: CelestialMapProps) => {
   const isDarkMode = useIsDarkMode();
   const fitViewWithDelay = useFitViewWithDelay();
   const { focusOnNodes } = useFocusOnNodes();
+  const { viewLock } = useCelestialStateContext();
 
   // Pass the layout options from props to the hook
   const { getLaidOutElements } = useCelestialLayout(props.layoutOptions);
@@ -103,7 +104,7 @@ export const Celestial = (props: CelestialMapProps) => {
       setEdges(layoutResult.edges);
       if (props.nodesInFocus?.length) {
         focusOnNodes(props.nodesInFocus, layoutResult.nodes);
-      } else {
+      } else if (!viewLock.isLocked()) {
         fitViewWithDelay();
       }
     }
@@ -151,6 +152,7 @@ export const Celestial = (props: CelestialMapProps) => {
             legend={props.legend}
             showMinimap={props.showMinimap}
             showSliSlo={props.showSliSlo}
+            showLayoutControls={props.showLayoutControls}
           />
         </div>
       </div>

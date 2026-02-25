@@ -149,6 +149,19 @@ export const agentTraceNodes: AgentMockNode[] = [
       status: 'ok',
     },
   },
+  {
+    id: 'a9',
+    type: 'agentCard',
+    position: { x: 0, y: 0 },
+    data: {
+      id: 'a9',
+      nodeKind: 'content',
+      title: 'KnowledgeBase',
+      duration: 80,
+      latency: '80ms',
+      status: 'ok',
+    },
+  },
 ];
 
 export const agentTraceEdges: AgentMockEdge[] = [
@@ -181,6 +194,13 @@ export const agentTraceEdges: AgentMockEdge[] = [
     source: 'a1',
     target: 'a8',
     type: 'celestialEdge',
-    data: { style: { marker: 'none', color: '#98A2B3', strokeWidth: 1 } },
+    data: { style: { marker: 'none', color: '#9C9DA0', strokeWidth: 1 } },
+  },
+  {
+    id: 'ae8',
+    source: 'a6',
+    target: 'a9',
+    type: 'celestialEdge',
+    data: { style: { type: 'dotted', label: 'retrieve', marker: 'arrow' } },
   },
 ];
