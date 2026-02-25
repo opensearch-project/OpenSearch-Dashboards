@@ -1,0 +1,2 @@
+feat:
+- Create agent_traces plugin in observability workspace ([#11387](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11387))
