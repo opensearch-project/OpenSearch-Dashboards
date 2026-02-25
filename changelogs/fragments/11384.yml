@@ -1,0 +1,2 @@
+fix:
+- You can now copy and paste fields from the field list in the Discover UI. ([#11384](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11384))
