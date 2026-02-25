@@ -8,20 +8,10 @@ import {
   ConversationMemoryProvider,
   ConversationPaginationParams,
   PaginatedConversations,
-  Message,
-  Event,
-  EventType,
   HttpSetup,
+  Event,
 } from '../../../../core/public';
 import { AgUiAgent } from './ag_ui_agent';
-
-/**
- * Generate a unique message ID
- * Used when messages from agent memory don't have IDs
- */
-function generateMessageId(): string {
-  return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-}
 
 /**
  * Agentic Memory Provider
@@ -129,7 +119,7 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
     try {
       // Use AgUiAgent to handle SSE streaming consistently
       const agent = new AgUiAgent();
-      const collectedEvents: any[] = [];
+      const collectedEvents: Event[] = [];
 
       // Collect all events from the agent run
       await new Promise<void>((resolve, reject) => {
@@ -146,21 +136,18 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
           .subscribe({
             next: (event) => {
               // Collect all events as they arrive
-              collectedEvents.push(event);
+              collectedEvents.push(event as Event);
             },
             complete: () => resolve(),
             error: (error) => reject(error),
           });
       });
 
-      // Convert collected events to proper AG-UI event format
-      const events = this.convertEventsToAgUiFormat(collectedEvents);
-
-      if (events.length === 0) {
+      if (collectedEvents.length === 0) {
         return null;
       }
 
-      return events;
+      return collectedEvents;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to load conversation from agent memory:', error);
@@ -176,77 +163,5 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
     // Deletion is not supported for agentic memory at this time
     // The agent manages its own memory lifecycle
     throw new Error('Conversation deletion is not supported for agentic memory');
-  }
-
-  /**
-   * Convert events from AgUiAgent into AG-UI event format
-   */
-  private convertEventsToAgUiFormat(collectedEvents: any[]): Event[] {
-    const events: Event[] = [];
-    const messages: Message[] = [];
-
-    // Process collected events
-    for (const data of collectedEvents) {
-      if (data.type === 'RUN_STARTED') {
-        events.push({
-          type: EventType.RUN_STARTED,
-          threadId: data.threadId,
-          runId: data.runId,
-          timestamp: data.timestamp,
-        });
-      } else if (data.type === 'MESSAGES_SNAPSHOT') {
-        // Store messages for later use, ensuring each has an ID
-        const messagesWithIds = data.messages.map((msg: Message) => ({
-          ...msg,
-          id: msg.id || generateMessageId(),
-        }));
-        messages.push(...messagesWithIds);
-      } else if (data.type === 'RUN_FINISHED') {
-        events.push({
-          type: EventType.RUN_FINISHED,
-          threadId: data.threadId,
-          runId: data.runId,
-          timestamp: data.timestamp,
-        });
-      }
-    }
-
-    // If we collected messages, add a MESSAGES_SNAPSHOT event
-    if (messages.length > 0) {
-      // Insert MESSAGES_SNAPSHOT between RUN_STARTED and RUN_FINISHED
-      const runStartedIndex = events.findIndex((e) => e.type === EventType.RUN_STARTED);
-      if (runStartedIndex >= 0) {
-        events.splice(runStartedIndex + 1, 0, {
-          type: EventType.MESSAGES_SNAPSHOT,
-          messages,
-          timestamp: Date.now(),
-        });
-      } else {
-        // If no RUN_STARTED, add all required events
-        const runId = `restore-${Date.now()}`;
-        const timestamp = Date.now();
-        events.unshift(
-          {
-            type: EventType.RUN_STARTED,
-            threadId: 'restored',
-            runId,
-            timestamp,
-          },
-          {
-            type: EventType.MESSAGES_SNAPSHOT,
-            messages,
-            timestamp,
-          },
-          {
-            type: EventType.RUN_FINISHED,
-            threadId: 'restored',
-            runId,
-            timestamp,
-          }
-        );
-      }
-    }
-
-    return events;
   }
 }

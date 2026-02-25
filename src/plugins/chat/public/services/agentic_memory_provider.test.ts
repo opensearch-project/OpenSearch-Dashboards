@@ -5,7 +5,6 @@
 
 import { AgenticMemoryProvider } from './agentic_memory_provider';
 import { HttpSetup } from '../../../../core/public';
-import { EventType } from '../../../../core/public';
 import { AgUiAgent } from './ag_ui_agent';
 import { of, throwError } from 'rxjs';
 
@@ -128,7 +127,7 @@ describe('AgenticMemoryProvider', () => {
   });
 
   describe('getConversation', () => {
-    it('should use AgUiAgent to load and parse streaming response with messages', async () => {
+    it('should use AgUiAgent to load and return raw streaming events', async () => {
       const mockEvents = [
         {
           type: 'RUN_STARTED',
@@ -170,11 +169,10 @@ describe('AgenticMemoryProvider', () => {
       });
 
       expect(result).toHaveLength(3);
-      expect(result![0].type).toBe(EventType.RUN_STARTED);
-      expect(result![1].type).toBe(EventType.MESSAGES_SNAPSHOT);
+      expect(result![0].type).toBe('RUN_STARTED');
+      expect(result![1].type).toBe('MESSAGES_SNAPSHOT');
       expect((result![1] as any).messages[0].id).toBe('msg-1');
-      expect((result![1] as any).messages[1].id).toMatch(/^msg_\d+_[a-z0-9]+$/); // auto-generated ID
-      expect(result![2].type).toBe(EventType.RUN_FINISHED);
+      expect(result![2].type).toBe('RUN_FINISHED');
     });
 
     it('should return null on empty events', async () => {
@@ -207,69 +205,6 @@ describe('AgenticMemoryProvider', () => {
       await expect(provider.deleteConversation('thread-123')).rejects.toThrow(
         'Conversation deletion is not supported for agentic memory'
       );
-    });
-  });
-
-  describe('convertEventsToAgUiFormat', () => {
-    it('should convert complete event sequence correctly', () => {
-      const collectedEvents = [
-        { type: 'RUN_STARTED', threadId: 'thread-123', runId: 'run-456', timestamp: 1640000000000 },
-        { type: 'MESSAGES_SNAPSHOT', messages: [{ id: 'msg-1', role: 'user', content: 'Hello' }] },
-        {
-          type: 'RUN_FINISHED',
-          threadId: 'thread-123',
-          runId: 'run-456',
-          timestamp: 1640001000000,
-        },
-      ];
-
-      const events = (provider as any).convertEventsToAgUiFormat(collectedEvents);
-
-      expect(events.length).toBe(3);
-      expect(events[0].type).toBe(EventType.RUN_STARTED);
-      expect(events[1].type).toBe(EventType.MESSAGES_SNAPSHOT);
-      expect(events[2].type).toBe(EventType.RUN_FINISHED);
-    });
-
-    it('should create run events when only MESSAGES_SNAPSHOT exists', () => {
-      const collectedEvents = [
-        { type: 'MESSAGES_SNAPSHOT', messages: [{ id: 'msg-1', role: 'user', content: 'Hello' }] },
-      ];
-
-      const events = (provider as any).convertEventsToAgUiFormat(collectedEvents);
-
-      expect(events.length).toBe(3);
-      expect(events[0].type).toBe(EventType.RUN_STARTED);
-      expect(events[0].threadId).toBe('restored');
-      expect(events[1].type).toBe(EventType.MESSAGES_SNAPSHOT);
-      expect(events[2].type).toBe(EventType.RUN_FINISHED);
-    });
-
-    it('should generate IDs for messages without them and aggregate snapshots', () => {
-      const collectedEvents = [
-        { type: 'RUN_STARTED', threadId: 't1', runId: 'r1', timestamp: 1 },
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: [
-            { role: 'user', content: 'Test1' },
-            { id: 'existing', role: 'user', content: 'Test2' },
-          ],
-        },
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: [{ id: 'msg-3', role: 'assistant', content: 'Test3' }],
-        },
-      ];
-
-      const events = (provider as any).convertEventsToAgUiFormat(collectedEvents);
-
-      const messagesSnapshot = events.find(
-        (e: any) => e.type === EventType.MESSAGES_SNAPSHOT
-      ) as any;
-      expect(messagesSnapshot.messages).toHaveLength(3);
-      expect(messagesSnapshot.messages[0].id).toMatch(/^msg_\d+_[a-z0-9]+$/); // auto-generated
-      expect(messagesSnapshot.messages[1].id).toBe('existing'); // preserved
-      expect(messagesSnapshot.messages[2].id).toBe('msg-3'); // preserved
     });
   });
 
@@ -310,6 +245,7 @@ describe('AgenticMemoryProvider', () => {
 
       expect(events).toBeDefined();
       expect(events!.length).toBe(3);
+      expect(events![0].type).toBe('RUN_STARTED');
       expect((events![1] as any).messages.length).toBe(2);
       expect((events![1] as any).messages[0].content).toBe('What is OpenSearch?');
     });
