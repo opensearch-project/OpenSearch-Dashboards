@@ -65,15 +65,25 @@ export const configurePreloadedStore = (
   return configureStore({
     reducer: rootReducer,
     preloadedState,
-    middleware: (getDefaultMiddleware) =>
-      services
-        ? getDefaultMiddleware()
+    middleware: (getDefaultMiddleware) => {
+      // Exclude results from dev-mode checks: the results slice holds raw OpenSearch hits which
+      // can be very large. ImmutableStateInvariantMiddleware walks the entire state tree on every
+      // dispatch — including stored results — making every user interaction slow when results are
+      // loaded. Results are always fully replaced, never partially mutated, so these checks add
+      // no safety value there.
+      const middlewareOptions = {
+        immutableCheck: { ignoredPaths: ['results'] },
+        serializableCheck: { ignoredPaths: ['results'] },
+      };
+      return services
+        ? getDefaultMiddleware(middlewareOptions)
             .concat(createPersistenceMiddleware(services))
             .concat(createQuerySyncMiddleware(services))
             .concat(createTimefilterSyncMiddleware(services))
             .concat(createDatasetChangeMiddleware(services))
             .concat(createOverallStatusMiddleware())
-        : getDefaultMiddleware(),
+        : getDefaultMiddleware(middlewareOptions);
+    },
   });
 };
 
