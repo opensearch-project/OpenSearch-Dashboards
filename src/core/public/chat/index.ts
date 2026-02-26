@@ -18,7 +18,41 @@ export {
   FunctionCall,
   Role,
   ChatWindowState,
+  SavedConversation,
+  ConversationMemoryProvider,
+  ConversationPaginationParams,
+  PaginatedConversations,
 } from './types';
+
+export {
+  EventType,
+  BaseEvent,
+  Event,
+  RunStartedEvent,
+  RunFinishedEvent,
+  RunErrorEvent,
+  MessagesSnapshotEvent,
+  TextMessageStartEvent,
+  TextMessageContentEvent,
+  TextMessageEndEvent,
+  TextMessageChunkEvent,
+  ThinkingTextMessageStartEvent,
+  ThinkingTextMessageContentEvent,
+  ThinkingTextMessageEndEvent,
+  ThinkingStartEvent,
+  ThinkingEndEvent,
+  ToolCallStartEvent,
+  ToolCallArgsEvent,
+  ToolCallEndEvent,
+  ToolCallResultEvent,
+  ToolCallChunkEvent,
+  StateSnapshotEvent,
+  StateDeltaEvent,
+  StepStartedEvent,
+  StepFinishedEvent,
+  RawEvent,
+  CustomEvent,
+} from './events';
 
 export { ChatService } from './chat_service';
 export { coreChatServiceMock } from './chat_service.mock';

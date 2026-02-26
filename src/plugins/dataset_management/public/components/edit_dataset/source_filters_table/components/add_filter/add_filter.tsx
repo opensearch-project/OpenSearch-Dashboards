@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiCompressedFieldText, EuiSmallButton } fro
 interface AddFilterProps {
   onAddFilter: (filter: string) => void;
   useUpdatedUX: boolean;
+  isSaving: boolean;
 }
 
 const sourcePlaceholder = i18n.translate('datasetManagement.editDataset.sourcePlaceholder', {
@@ -18,7 +19,7 @@ const sourcePlaceholder = i18n.translate('datasetManagement.editDataset.sourcePl
     "source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')",
 });
 
-export const AddFilter = ({ onAddFilter, useUpdatedUX }: AddFilterProps) => {
+export const AddFilter = ({ onAddFilter, useUpdatedUX, isSaving }: AddFilterProps) => {
   const [filter, setFilter] = useState<string>('');
 
   const onAddButtonClick = useCallback(() => {
@@ -37,7 +38,7 @@ export const AddFilter = ({ onAddFilter, useUpdatedUX }: AddFilterProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiSmallButton isDisabled={filter.length === 0} onClick={onAddButtonClick}>
+        <EuiSmallButton isDisabled={filter.length === 0 || isSaving} onClick={onAddButtonClick}>
           <FormattedMessage
             id="datasetManagement.editDataset.source.addButtonLabel"
             defaultMessage="Add"
