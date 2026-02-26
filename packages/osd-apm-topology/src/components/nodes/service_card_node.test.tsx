@@ -8,6 +8,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ServiceCardNode } from './service_card_node';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
+
 jest.mock('../../shared/contexts/node_actions_context', () => ({
   useCelestialNodeActionsContext: jest.fn(),
 }));
@@ -101,7 +103,7 @@ describe('ServiceCardNode', () => {
         {...createNodeProps({ metrics: { requests: 5000, faults5xx: 0, errors4xx: 0 } })}
       />
     );
-    expect(screen.getByText(/5\.0k/)).toBeInTheDocument();
+    expect(screen.getByText(/5\.0K/)).toBeInTheDocument();
   });
 
   it('renders "View insights" button', () => {

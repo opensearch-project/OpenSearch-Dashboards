@@ -8,6 +8,7 @@ import type { Node, NodeProps } from '@xyflow/react';
 import type { CelestialCardProps } from '../celestial_card/types';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { DEFAULT_METRICS } from '../../shared/constants/common.constants';
+import { formatCount } from '../../shared/utils/format_count';
 import { HealthDonut } from '../health_donut';
 import { NodeShell } from './node_shell';
 import { TypeBadge } from './type_badge';
@@ -32,11 +33,7 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
   const isSelected = data.id === selectedNodeId;
   const isBreach = !!data.health?.breached;
 
-  const totalRequests: string = !data.metrics?.requests
-    ? '0'
-    : data.metrics.requests < 1000
-    ? `${data.metrics.requests}`
-    : `${(data.metrics.requests / 1000).toFixed(1)}k`;
+  const totalRequests = formatCount(data.metrics?.requests);
 
   const errorRate = data.metrics?.requests
     ? ((data.metrics.errors4xx ?? 0) / data.metrics.requests) * 100

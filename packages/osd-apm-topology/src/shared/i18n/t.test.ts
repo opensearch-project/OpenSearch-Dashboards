@@ -40,9 +40,8 @@ describe('t', () => {
     expect(t('breadcrumbs.world')).toBe('World');
   });
 
-  it('returns localized string for non-default locale', () => {
-    const result = t('breadcrumbs.world', {}, Locale.de);
-    expect(typeof result).toBe('string');
-    expect(result).toBeDefined();
+  it('falls back to English for unknown locale', () => {
+    const result = t('breadcrumbs.world', {}, 'unknown' as Locale);
+    expect(result).toBe('World');
   });
 });

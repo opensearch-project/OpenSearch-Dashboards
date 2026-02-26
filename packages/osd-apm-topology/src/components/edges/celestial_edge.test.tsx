@@ -5,8 +5,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Position } from '@xyflow/react';
 import { CelestialEdge } from './celestial_edge';
+
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { Position } = require('@xyflow/react');
 
 const baseProps = {
   id: 'edge-1',

@@ -8,6 +8,7 @@ import { ActionsIcon } from '../../shared/resources';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { t } from '../../shared/i18n/t';
 import { DEFAULT_METRICS } from '../../shared/constants/common.constants';
+import { formatCount } from '../../shared/utils/format_count';
 import { Description } from '../description';
 import { HealthDonut } from '../health_donut';
 import { CelestialCardProps } from './types';
@@ -33,11 +34,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
 
   const { onGroupToggle, onDashboardClick, selectedNodeId } = useCelestialNodeActionsContext();
 
-  const totalRequests: string = !metrics?.requests
-    ? '0'
-    : metrics.requests < 1000
-    ? `${metrics.requests}`
-    : `${Math.round(metrics.requests / 1000).toFixed(1)}k`;
+  const totalRequests = formatCount(metrics?.requests);
 
   const isSliStatusDisplayed = health?.status && ['breached', 'recovered'].includes(health?.status);
 

@@ -7,6 +7,8 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs.hook';
 
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
+
 describe('useBreadcrumbs', () => {
   beforeEach(() => {
     jest.clearAllMocks();

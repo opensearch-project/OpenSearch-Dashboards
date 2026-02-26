@@ -8,6 +8,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AgentCardNode } from './agent_card_node';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
+
 jest.mock('../../shared/contexts/node_actions_context', () => ({
   useCelestialNodeActionsContext: jest.fn(),
 }));

@@ -7,6 +7,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ServiceCircleNode } from './service_circle_node';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
+
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
 import { useElementHover } from '../../shared/hooks/use_element_hover.hook';
 
 jest.mock('../../shared/contexts/node_actions_context', () => ({
@@ -63,13 +65,13 @@ describe('ServiceCircleNode', () => {
     expect(screen.getByText('us-east-1')).toBeInTheDocument();
   });
 
-  it('renders total requests formatted as "5.0k" for 5000', () => {
+  it('renders total requests formatted as "5.0K" for 5000', () => {
     render(
       <ServiceCircleNode
         {...createNodeProps({ metrics: { requests: 5000, faults5xx: 0, errors4xx: 0 } })}
       />
     );
-    expect(screen.getByText('5.0k')).toBeInTheDocument();
+    expect(screen.getByText('5.0K')).toBeInTheDocument();
   });
 
   it('renders total requests as raw number for values under 1000', () => {

@@ -7,6 +7,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NodeShell } from './node_shell';
 
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
+
 describe('NodeShell', () => {
   beforeEach(() => {
     jest.clearAllMocks();

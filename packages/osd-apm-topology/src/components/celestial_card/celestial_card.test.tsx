@@ -6,6 +6,8 @@ import React from 'react';
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CelestialNodeActionsProvider } from '../../shared/contexts/node_actions_context';
+
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
 import { PropsWithChildren } from 'react';
 import { CelestialStateProvider } from '../../shared/contexts/celestial_state_context';
 import { CelestialCard } from './celestial_card';

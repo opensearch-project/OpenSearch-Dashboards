@@ -4,9 +4,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { MarkerType } from '@xyflow/react';
 import type { GetServiceMapOutput } from '../types/sdk.types';
 import { useCelestialNodes } from './use_celestial_nodes.hook';
+
+jest.mock('@xyflow/react', () => require('../../test_utils/xyflow_mock'));
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { MarkerType } = require('@xyflow/react');
 
 describe('useCelestialNodes', () => {
   const mockFixtureData: GetServiceMapOutput = {

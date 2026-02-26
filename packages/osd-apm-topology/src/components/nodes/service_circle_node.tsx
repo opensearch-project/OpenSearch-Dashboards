@@ -8,6 +8,7 @@ import type { Node, NodeProps } from '@xyflow/react';
 import type { CelestialCardProps } from '../celestial_card/types';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { useElementHover } from '../../shared/hooks/use_element_hover.hook';
+import { formatCount } from '../../shared/utils/format_count';
 import { Legend } from '../health_donut/components/legend';
 import { NodeShell } from './node_shell';
 import { HealthArc } from './health_arc';
@@ -33,11 +34,7 @@ export const ServiceCircleNode = ({ data }: NodeProps<ServiceCircleCustomNode>) 
   const hasMetrics = !!data.metrics?.requests;
   const glowColor = data.color ?? 'var(--osd-color-type-service)';
 
-  const totalRequests: string = !data.metrics?.requests
-    ? '0'
-    : data.metrics.requests < 1000
-    ? `${data.metrics.requests}`
-    : `${(data.metrics.requests / 1000).toFixed(1)}k`;
+  const totalRequests = formatCount(data.metrics?.requests);
 
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
