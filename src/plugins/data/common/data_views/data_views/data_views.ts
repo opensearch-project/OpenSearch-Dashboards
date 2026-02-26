@@ -751,32 +751,30 @@ export class DataViewsService {
     // Fetch actual data source to get its title and version
     let dataSourceInfo;
     if (dataView.dataSourceRef?.id) {
+      // Default dataSourceInfo with common fields
+      const defaultDataSourceInfo = {
+        id: dataView.dataSourceRef.id,
+        title: dataView.dataSourceRef.id,
+        type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        version: '',
+      };
+
       try {
         const dataSource = await this.getDataSource(dataView.dataSourceRef.id);
         if (dataSource) {
+          // Override with actual data source title and version if available
           dataSourceInfo = {
-            id: dataView.dataSourceRef.id,
-            title: dataSource.attributes?.title || dataView.dataSourceRef.id,
-            type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+            ...defaultDataSourceInfo,
+            title: dataSource.attributes?.title || defaultDataSourceInfo.title,
             version: dataSource.attributes?.dataSourceVersion || '',
           };
         } else {
-          // If dataSource is null/undefined, fall back to using the reference ID as title
-          dataSourceInfo = {
-            id: dataView.dataSourceRef.id,
-            title: dataView.dataSourceRef.id,
-            type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-            version: '',
-          };
+          // If dataSource is null/undefined, use default
+          dataSourceInfo = defaultDataSourceInfo;
         }
       } catch (error) {
-        // If fetching fails, fall back to using the reference ID as title
-        dataSourceInfo = {
-          id: dataView.dataSourceRef.id,
-          title: dataView.dataSourceRef.id,
-          type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-          version: '',
-        };
+        // If fetching fails, use default
+        dataSourceInfo = defaultDataSourceInfo;
       }
     }
 
