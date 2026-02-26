@@ -4,6 +4,7 @@ exports[`SourceFiltersTable should add a filter 1`] = `
 <Fragment>
   <header />
   <AddFilter
+    isSaving={false}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
@@ -47,6 +48,7 @@ exports[`SourceFiltersTable should filter based on the query bar 1`] = `
 <Fragment>
   <header />
   <AddFilter
+    isSaving={false}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
@@ -89,6 +91,7 @@ exports[`SourceFiltersTable should remove a filter 1`] = `
 <Fragment>
   <header />
   <AddFilter
+    isSaving={false}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
@@ -126,6 +129,7 @@ exports[`SourceFiltersTable should render normally 1`] = `
 <Fragment>
   <header />
   <AddFilter
+    isSaving={false}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
@@ -176,6 +180,7 @@ exports[`SourceFiltersTable should should a loading indicator when saving 1`] = 
 <Fragment>
   <header />
   <AddFilter
+    isSaving={true}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
@@ -212,6 +217,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
 <Fragment>
   <header />
   <AddFilter
+    isSaving={false}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
@@ -243,6 +249,7 @@ exports[`SourceFiltersTable should show a delete modal 1`] = `
   />
   <DeleteFilterConfirmationModal
     filterToDeleteValue="tim*"
+    isSaving={false}
     onCancelConfirmationModal={[Function]}
     onDeleteFilter={[Function]}
   />
@@ -253,6 +260,7 @@ exports[`SourceFiltersTable should update a filter 1`] = `
 <Fragment>
   <header />
   <AddFilter
+    isSaving={false}
     onAddFilter={[Function]}
     useUpdatedUX={false}
   />
