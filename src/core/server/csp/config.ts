@@ -45,6 +45,7 @@ export const config = {
         `script-src 'unsafe-eval' 'self'`,
         `worker-src blob: 'self'`,
         `style-src 'unsafe-inline' 'self'`,
+        `connect-src 'self' https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org`,
       ],
     }),
     strict: schema.boolean({ defaultValue: false }),
