@@ -5,6 +5,7 @@
 
 import { Observable } from 'rxjs';
 import type { ChatScreenshotServiceInterface } from './screenshot_service';
+import type { Event } from './events';
 
 interface TextInputContent {
   type: 'text';
@@ -226,6 +227,17 @@ export interface ChatServiceSetup {
   };
 
   /**
+   * Set a custom conversation memory provider
+   * This allows plugins to provide their own storage implementation
+   */
+  setMemoryProvider(provider: ConversationMemoryProvider): void;
+
+  /**
+   * Get the conversation memory provider
+   */
+  getMemoryProvider(): ConversationMemoryProvider;
+
+  /**
    * Set the DOM element for screenshot page container
    * This will be called by CoreSystem with the rootDomElement
    */
@@ -260,4 +272,57 @@ export interface ChatServiceStart extends ChatServiceInterface {
    * Screenshot service for managing screenshot capture functionality
    */
   screenshot: ChatScreenshotServiceInterface;
+
+  /**
+   * Get the conversation memory provider
+   */
+  getMemoryProvider(): ConversationMemoryProvider;
+}
+
+/**
+ * Saved conversation interface
+ */
+export interface SavedConversation {
+  id: string;
+  threadId: string;
+  name: string;
+  messages: Message[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * Pagination parameters for conversation queries
+ */
+export interface ConversationPaginationParams {
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Paginated conversation result
+ */
+export interface PaginatedConversations {
+  conversations: SavedConversation[];
+  hasMore: boolean;
+  total: number;
+}
+
+/**
+ * Conversation memory provider interface
+ * Defines the contract for storing and retrieving conversation history
+ * getConversation returns AG-UI events for proper state restoration
+ */
+export interface ConversationMemoryProvider {
+  /**
+   * If true, sends all messages to agent. If false, sends only the latest user message.
+   * Defaults to true. Set to false when messages are already in agent memory and
+   * only the latest user input is needed for the next request.
+   */
+  includeFullHistory: boolean;
+
+  saveConversation(conversation: SavedConversation): Promise<void>;
+  getConversations(params: ConversationPaginationParams): Promise<PaginatedConversations>;
+  getConversation(threadId: string): Promise<Event[] | null>;
+  deleteConversation(threadId: string): Promise<void>;
 }

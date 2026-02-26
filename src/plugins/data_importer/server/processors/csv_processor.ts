@@ -26,7 +26,7 @@ export class CSVProcessor implements IFileProcessor {
   }
 
   public async ingestText(text: string, options: IngestOptions) {
-    const { client, indexName, delimiter } = options;
+    const { client, indexName, delimiter, lookupId, lookupField } = options;
 
     const failedRows: number[] = [];
     const numDocuments = await new Promise<number>((resolve, reject) => {
@@ -38,9 +38,12 @@ export class CSVProcessor implements IFileProcessor {
           const task = (async () => {
             const curRow = ++totalRows;
             try {
+              // Inject lookup field if provided
+              const document = lookupId && lookupField ? { ...row, [lookupField]: lookupId } : row;
+
               await client.index({
                 index: indexName,
-                body: row,
+                body: document,
               });
             } catch (_) {
               failedRows.push(curRow);
@@ -65,7 +68,7 @@ export class CSVProcessor implements IFileProcessor {
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
-    const { client, indexName, delimiter } = options;
+    const { client, indexName, delimiter, lookupId, lookupField } = options;
 
     if (!!!options.delimiter) {
       throw new Error('Delimiter is required');
@@ -82,9 +85,12 @@ export class CSVProcessor implements IFileProcessor {
           const task = (async () => {
             const curRow = ++totalRows;
             try {
+              // Inject lookup field if provided
+              const document = lookupId && lookupField ? { ...row, [lookupField]: lookupId } : row;
+
               await client.index({
                 index: indexName,
-                body: row,
+                body: document,
               });
             } catch (_) {
               failedRows.push(curRow);

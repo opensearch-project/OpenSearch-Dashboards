@@ -10,6 +10,7 @@ exports[`Header should render normally 1`] = `
       values={Object {}}
     />
   }
+  confirmButtonDisabled={false}
   confirmButtonText={
     <FormattedMessage
       defaultMessage="Delete"

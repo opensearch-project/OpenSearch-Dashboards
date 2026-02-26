@@ -107,7 +107,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isStreaming}
             autoFocus={true}
             fullWidth
             resize="none"

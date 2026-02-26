@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -30,6 +30,8 @@ import { ChatInput } from './chat_input';
 import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
+import { ConversationHistoryPanel } from './conversation_history_panel';
+import type { SavedConversation } from '../services/conversation_history_service';
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
@@ -61,6 +63,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
   const loadingMessageIdRef = useRef<string | null>(null);
@@ -377,6 +380,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setCurrentRunId(null);
     setIsStreaming(false);
     setPendingConfirmation(null);
+    setShowHistory(false);
   }, [chatService]);
 
   const handleStop = useCallback(() => {
@@ -467,11 +471,49 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     return '';
   }, [timeline]);
+  
+  const handleShowHistory = useCallback(() => {
+    setShowHistory(true);
+  }, []);
 
-  useImperativeHandle(ref, ()=>({
-    startNewChat: ()=>handleNewChat(),
-    sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
+  const handleCloseHistory = useCallback(() => {
+    setShowHistory(false);
+  }, []);
+
+  const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
+    // Load the conversation and get AG-UI event array
+    const events = await chatService.loadConversation(conversation.threadId);
+    if (events) {
+      // Process each event through the event handler for proper state restoration
+      for (const event of events) {
+        await eventHandler.handleEvent(event);
+      }
+
+      // Reset UI state
+      setCurrentRunId(null);
+      setIsStreaming(false);
+      setPendingConfirmation(null);
+      setShowHistory(false);
+    }
+  }, [chatService, eventHandler]);
+
+  // Build window instance object
+  const windowInstance = useMemo<ChatWindowInstance>(() => ({
+    startNewChat: () => handleNewChat(),
+    sendMessage: async ({content, messages}) => (await handleSendRef.current?.({input:content, messages}))
   }), [handleNewChat]);
+
+  // Expose instance methods via ref
+  useImperativeHandle(ref, () => windowInstance, [windowInstance]);
+
+  // Register with chatService and clean up on unmount
+  useEffect(() => {
+    chatService.setChatWindowInstance(windowInstance);
+
+    return () => {
+      chatService.clearChatWindowInstance();
+    };
+  }, [chatService, windowInstance]);
 
   return (
     <ChatContainer layoutMode={layoutMode}>
@@ -480,71 +522,84 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         isStreaming={isStreaming}
         onNewChat={handleNewChat}
         onClose={onClose}
+        onShowHistory={showHistory ? undefined : handleShowHistory}
+        showBackButton={showHistory}
+        onBack={showHistory ? handleCloseHistory : undefined}
+        title={showHistory ? 'All conversations' : undefined}
       />
 
-      <ChatMessages
-        layoutMode={layoutMode}
-        timeline={timeline}
-        isStreaming={isStreaming}
-        onResendMessage={handleResendMessage}
-        onApproveConfirmation={handleApproveConfirmation}
-        onRejectConfirmation={handleRejectConfirmation}
-        onFillInput={setInput}
-        {...enhancedProps}
-      />
-
-      {/* Sticky confirmation message - positioned above chat input */}
-      {pendingConfirmation && (
-        <ConfirmationMessage
-          request={pendingConfirmation}
-          onApprove={handleApproveConfirmation}
-          onReject={handleRejectConfirmation}
+      {showHistory ? (
+        <ConversationHistoryPanel
+          conversationHistoryService={chatService.conversationHistoryService}
+          onSelectConversation={handleSelectConversation}
         />
-      )}
+      ) : (
+        <>
+          <ChatMessages
+            layoutMode={layoutMode}
+            timeline={timeline}
+            isStreaming={isStreaming}
+            onResendMessage={handleResendMessage}
+            onApproveConfirmation={handleApproveConfirmation}
+            onRejectConfirmation={handleRejectConfirmation}
+            onFillInput={setInput}
+            {...enhancedProps}
+          />
 
-      {
-        (isCapturing || screenshotData) && (
-          <div className={`chatWindow__screenshotRow ${!screenshotData && isCapturing ? 'capturing' : ''}`}>
-            {
-              screenshotData && (
-                <>
-                  <img src={`data:${screenshotData.mimeType || 'image/jpeg'};base64,${screenshotData.base64}`} alt={`Screenshot of ${screenshotData.pageTitle}`} />
-                  <div className='chatWindow__screenshotRow__right'>
-                    <div className='chatWindow__screenshotRow__right__pageTitle'>
-                      <EuiText size='xs'>{screenshotData.pageTitle}</EuiText>
-                    </div>
-                    <div className='chatWindow__screenshotRow__right__timeAndButtons'>
-                      <div />
-                      <div>
-                        <EuiButtonIcon disabled={isStreaming} color='text' onClick={handleCaptureScreenshot} iconType="refresh" size='xs' aria-label='Recapture' />
-                        <EuiButtonIcon disabled={isStreaming} color='text' onClick={()=>{setScreenshotData(undefined)}} iconType="cross" size='xs' aria-label='Remove screenshot' />
+          {/* Sticky confirmation message - positioned above chat input */}
+          {pendingConfirmation && (
+            <ConfirmationMessage
+              request={pendingConfirmation}
+              onApprove={handleApproveConfirmation}
+              onReject={handleRejectConfirmation}
+            />
+          )}
+
+          {
+            (isCapturing || screenshotData) && (
+              <div className={`chatWindow__screenshotRow ${!screenshotData && isCapturing ? 'capturing' : ''}`}>
+                {
+                  screenshotData && (
+                    <>
+                      <img src={`data:${screenshotData.mimeType || 'image/jpeg'};base64,${screenshotData.base64}`} alt={`Screenshot of ${screenshotData.pageTitle}`} />
+                      <div className='chatWindow__screenshotRow__right'>
+                        <div className='chatWindow__screenshotRow__right__pageTitle'>
+                          <EuiText size='xs'>{screenshotData.pageTitle}</EuiText>
+                        </div>
+                        <div className='chatWindow__screenshotRow__right__timeAndButtons'>
+                          <div />
+                          <div>
+                            <EuiButtonIcon disabled={isStreaming} color='text' onClick={handleCaptureScreenshot} iconType="refresh" size='xs' aria-label='Recapture' />
+                            <EuiButtonIcon disabled={isStreaming} color='text' onClick={()=>{setScreenshotData(undefined)}} iconType="cross" size='xs' aria-label='Remove screenshot' />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </>
-              )
-            }
-            {
-              isCapturing && !screenshotData && (
-                <EuiLoadingSpinner size='m' />
-              )
-            }
-          </div>
-        )
-      }
+                    </>
+                  )
+                }
+                {
+                  isCapturing && !screenshotData && (
+                    <EuiLoadingSpinner size='m' />
+                  )
+                }
+              </div>
+            )
+          }
 
-      <ChatInput
-        layoutMode={layoutMode}
-        input={input}
-        isCapturing={isCapturing}
-        isStreaming={isStreaming}
-        onInputChange={setInput}
-        onSend={handleSend}
-        onKeyDown={handleKeyDown}
-        onStop={handleStop}
-        includeScreenShotEnabled={screenshotFeatureEnabled}
-        onCaptureScreenshot={handleCaptureScreenshot}
-      />
+          <ChatInput
+            layoutMode={layoutMode}
+            input={input}
+            isCapturing={isCapturing}
+            isStreaming={isStreaming}
+            onInputChange={setInput}
+            onSend={handleSend}
+            onStop={handleStop}
+            onKeyDown={handleKeyDown}
+            includeScreenShotEnabled={screenshotFeatureEnabled}
+            onCaptureScreenshot={handleCaptureScreenshot}
+          />
+        </>
+      )}
     </ChatContainer>
   );
 });
