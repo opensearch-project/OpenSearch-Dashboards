@@ -390,11 +390,15 @@ export const useSearch = (services: DiscoverViewServices) => {
 
   // Get savedSearch if it exists
   useEffect(() => {
-    (async () => {
+    const loadSavedSearch = async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      const dataQuery = data.query.queryString.getQuery();
+      const defaultQuery = data.query.queryString.getDefaultQuery();
+      const isDataQueryDefault = dataQuery.query === defaultQuery.query;
+      const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      const query =
-        savedSearchInstance.searchSource.getField('query') || data.query.queryString.getQuery();
+      // Use existing query, if existing query match default, use the query from saved search
+      const query = isDataQueryDefault ? savedSearchQuery ?? dataQuery : dataQuery;
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {
@@ -421,10 +425,11 @@ export const useSearch = (services: DiscoverViewServices) => {
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
 
-      let actualFilters: any[] = [];
+      // merge filters in saved search with existing filters in filterManager
+      const actualFilters = cloneDeep(filterManager.getAppFilters());
 
       if (savedQuery) {
-        actualFilters = data.query.filterManager.getFilters();
+        actualFilters.push.apply(actualFilters, data.query.filterManager.getFilters());
       } else if (filters !== undefined) {
         const result = typeof filters === 'function' ? filters() : filters;
         if (result !== undefined) {
@@ -446,7 +451,9 @@ export const useSearch = (services: DiscoverViewServices) => {
           }
         );
       }
-    })();
+    };
+
+    loadSavedSearch();
     // This effect will only run when getSavedSearchById is called, which is
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
