@@ -24,6 +24,7 @@
       - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
+    - [Saved_object_references](saved_objects/saved_object_references.md)
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry
     - [Telemetry](telemetry/telemetry.md)
