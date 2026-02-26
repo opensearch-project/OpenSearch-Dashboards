@@ -66,6 +66,11 @@ $ouiTextColor: #16191f;
 $ouiShadowColor: #000716;
 $ouiShadowColorLarge: #000716;
 
+// Spacing — compact scale (14px base vs EUI default 16px).
+// All derived tokens ($ouiSizeXXS … $ouiSizeXXL) recalculate automatically
+// because they are declared with !default in EUI's _size.scss.
+$ouiSize: 20px;
+
 @import "@elastic/eui/src/themes/eui-next/eui_next_colors_light";
 @import "@elastic/eui/src/themes/eui-next/eui_next_globals";
 @import "./mixins";
