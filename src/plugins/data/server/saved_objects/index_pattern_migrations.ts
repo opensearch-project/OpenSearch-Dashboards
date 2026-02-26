@@ -65,7 +65,23 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
   };
 };
 
+const migrateInitializeDisplayName: SavedObjectMigrationFn<any, any> = (doc) => {
+  // If displayName doesn't exist, initialize it with title for backwards compatibility
+  // This ensures existing index patterns still work and display their title
+  if (!doc.attributes.displayName && doc.attributes.title) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        displayName: undefined, // Keep it undefined to use title as fallback
+      },
+    };
+  }
+  return doc;
+};
+
 export const indexPatternSavedObjectTypeMigrations = {
   '6.5.0': flow(migrateAttributeTypeAndAttributeTypeMeta),
   '7.6.0': flow(migrateSubTypeAndParentFieldProperties),
+  '3.2.0': flow(migrateInitializeDisplayName),
 };

@@ -190,34 +190,45 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const columns = [
     {
       field: 'title',
-      name: 'Pattern',
+      name: 'Name',
       render: (
         name: string,
         index: {
           id: string;
+          displayName?: string;
           tags?: Array<{
             key: string;
             name: string;
           }>;
         }
-      ) => (
-        <>
-          <EuiButtonEmpty
-            size="xs"
-            {...reactRouterNavigate(history, `patterns/${index.id}`)}
-            {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
-          >
-            {name}
-          </EuiButtonEmpty>
-          &emsp;
-          <EuiBadgeGroup gutterSize="s">
-            {index.tags &&
-              index.tags.map(({ key: tagKey, name: tagName }) => (
-                <EuiBadge key={tagKey}>{tagName}</EuiBadge>
-              ))}
-          </EuiBadgeGroup>
-        </>
-      ),
+      ) => {
+        const displayName = index.displayName || name;
+        const showPattern = index.displayName && index.displayName !== name;
+
+        return (
+          <>
+            <EuiButtonEmpty
+              size="xs"
+              {...reactRouterNavigate(history, `patterns/${index.id}`)}
+              {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
+            >
+              {displayName}
+            </EuiButtonEmpty>
+            {showPattern && (
+              <EuiText size="xs" color="subdued" style={{ marginLeft: '8px', display: 'inline' }}>
+                ({name})
+              </EuiText>
+            )}
+            &emsp;
+            <EuiBadgeGroup gutterSize="s">
+              {index.tags &&
+                index.tags.map(({ key: tagKey, name: tagName }) => (
+                  <EuiBadge key={tagKey}>{tagName}</EuiBadge>
+                ))}
+            </EuiBadgeGroup>
+          </>
+        );
+      },
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
     },

@@ -43,7 +43,8 @@ const mapToOption = (
     return {
       ...baseOption,
       // @ts-expect-error TS2339 TODO(ts-error): fixme
-      label: dataSet.title as string,
+      // Use displayName if available, otherwise fall back to title
+      label: ((dataSet as any).displayName || dataSet.title) as string,
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       value: dataSet.id as string,
       // @ts-expect-error TS2339 TODO(ts-error): fixme

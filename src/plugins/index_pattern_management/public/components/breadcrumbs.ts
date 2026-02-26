@@ -62,7 +62,7 @@ export function getEditBreadcrumbs(indexPattern: IndexPattern) {
   return [
     ...getListBreadcrumbs(),
     {
-      text: indexPattern.title,
+      text: indexPattern.getDisplayName(),
       href: `/patterns/${indexPattern.id}`,
     },
   ];

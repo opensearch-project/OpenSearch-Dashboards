@@ -42,7 +42,7 @@ export async function getIndexPatterns(
     savedObjectsClient
       .find<IIndexPattern>({
         type: 'index-pattern',
-        fields: ['title', 'type'],
+        fields: ['title', 'type', 'displayName'],
         perPage: 10000,
       })
       .then((response) =>
@@ -50,6 +50,7 @@ export async function getIndexPatterns(
           .map((pattern) => {
             const id = pattern.id;
             const title = pattern.get('title');
+            const displayName = pattern.get('displayName');
             const references = pattern.references;
             const isDefault = defaultIndex === id;
 
@@ -60,16 +61,20 @@ export async function getIndexPatterns(
             const reference = Array.isArray(references) ? references[0] : undefined;
             const referenceId = reference?.id;
 
+            // Use displayName for sorting if available, otherwise fall back to title
+            const sortName = displayName || title;
+
             return {
               id,
               title,
+              displayName,
               default: isDefault,
               tags,
               referenceId,
               // the prepending of 0 at the default pattern takes care of prioritization
               // so the sorting will but the default index on top
               // or on bottom of a the table
-              sort: `${isDefault ? '0' : '1'}${title}`,
+              sort: `${isDefault ? '0' : '1'}${sortName}`,
             };
           })
           .sort((a, b) => {

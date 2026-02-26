@@ -19,8 +19,8 @@ function indexPatternEquality(A?: SearchableDropdownOption, B?: SearchableDropdo
 function toSearchableDropdownOption(indexPattern: IndexPattern): SearchableDropdownOption {
   return {
     id: indexPattern.id || '',
-    label: indexPattern.title,
-    searchableLabel: indexPattern.title,
+    label: indexPattern.getDisplayName(),
+    searchableLabel: indexPattern.displayName || indexPattern.title,
     prepend: <EuiIcon type="indexPatternApp" />,
   };
 }

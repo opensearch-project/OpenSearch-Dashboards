@@ -33,6 +33,63 @@ import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migration
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
+describe('index_pattern displayName migration', () => {
+  describe('3.2.0', () => {
+    const migration = indexPatternSavedObjectTypeMigrations['3.2.0'];
+
+    it('should keep displayName undefined when it does not exist', () => {
+      const doc = {
+        id: '123',
+        type: 'index-pattern',
+        attributes: {
+          title: 'test-*',
+        },
+      };
+      const migrated = migration(doc, savedObjectMigrationContext);
+      expect(migrated.attributes.displayName).toBeUndefined();
+    });
+
+    it('should preserve existing displayName', () => {
+      const doc = {
+        id: '123',
+        type: 'index-pattern',
+        attributes: {
+          title: 'test-*',
+          displayName: 'My Custom Name',
+        },
+      };
+      const migrated = migration(doc, savedObjectMigrationContext);
+      expect(migrated.attributes.displayName).toBe('My Custom Name');
+    });
+
+    it('should handle missing title gracefully', () => {
+      const doc = {
+        id: '123',
+        type: 'index-pattern',
+        attributes: {},
+      };
+      const migrated = migration(doc, savedObjectMigrationContext);
+      expect(migrated).toEqual(doc);
+    });
+
+    it('should handle index patterns with other attributes', () => {
+      const doc = {
+        id: '123',
+        type: 'index-pattern',
+        attributes: {
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+          fields: '[]',
+        },
+      };
+      const migrated = migration(doc, savedObjectMigrationContext);
+      expect(migrated.attributes.title).toBe('logs-*');
+      expect(migrated.attributes.timeFieldName).toBe('@timestamp');
+      expect(migrated.attributes.displayName).toBeUndefined();
+    });
+  });
+});
+
 describe('migration index-pattern', () => {
   describe('6.5.0', () => {
     const migrationFn = indexPatternSavedObjectTypeMigrations['6.5.0'];

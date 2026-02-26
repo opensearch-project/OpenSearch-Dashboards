@@ -245,7 +245,7 @@ class FilterEditorUI extends Component<Props, State> {
               })}
               options={this.props.indexPatterns}
               selectedOptions={selectedIndexPattern ? [selectedIndexPattern] : []}
-              getLabel={(indexPattern) => indexPattern.title}
+              getLabel={(indexPattern) => indexPattern.getDisplayName()}
               onChange={this.onIndexPatternChange}
               singleSelection={{ asPlainText: true }}
               isClearable={false}
