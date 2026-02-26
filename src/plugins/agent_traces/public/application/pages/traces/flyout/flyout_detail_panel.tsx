@@ -179,7 +179,7 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
       label: i18n.translate('agentTraces.detailPanel.tokensUsed', {
         defaultMessage: 'TOKENS USED',
       }),
-      value: row?.totalTokens && row.totalTokens !== '—' ? String(row.totalTokens) : '—',
+      value: row?.totalTokens != null && row.totalTokens !== '—' ? String(row.totalTokens) : '—',
     },
     {
       label: i18n.translate('agentTraces.detailPanel.startTime', {

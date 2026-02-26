@@ -75,8 +75,8 @@ export const spanToRow = (
   latency: formatDuration(span.durationNanos),
   totalTokens:
     span.genAiTotalTokens ??
-    (span.genAiInputTokens != null && span.genAiOutputTokens != null
-      ? span.genAiInputTokens + span.genAiOutputTokens
+    (span.genAiInputTokens != null || span.genAiOutputTokens != null
+      ? (span.genAiInputTokens ?? 0) + (span.genAiOutputTokens ?? 0)
       : '—'),
   totalCost: '—',
   level: 0,

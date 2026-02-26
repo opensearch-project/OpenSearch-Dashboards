@@ -90,6 +90,36 @@ describe('tree_utils', () => {
       const row = spanToRow(span, 0, (ts) => ts);
       expect(row.totalTokens).toBe(8);
     });
+
+    it('computes totalTokens from input tokens alone when output is null', () => {
+      const span = makeSpan({
+        genAiTotalTokens: null,
+        genAiInputTokens: 5,
+        genAiOutputTokens: null,
+      });
+      const row = spanToRow(span, 0, (ts) => ts);
+      expect(row.totalTokens).toBe(5);
+    });
+
+    it('computes totalTokens from output tokens alone when input is null', () => {
+      const span = makeSpan({
+        genAiTotalTokens: null,
+        genAiInputTokens: null,
+        genAiOutputTokens: 7,
+      });
+      const row = spanToRow(span, 0, (ts) => ts);
+      expect(row.totalTokens).toBe(7);
+    });
+
+    it('returns dash when all token fields are null', () => {
+      const span = makeSpan({
+        genAiTotalTokens: null,
+        genAiInputTokens: null,
+        genAiOutputTokens: null,
+      });
+      const row = spanToRow(span, 0, (ts) => ts);
+      expect(row.totalTokens).toBe('—');
+    });
   });
 
   describe('buildFullSpanTree', () => {
