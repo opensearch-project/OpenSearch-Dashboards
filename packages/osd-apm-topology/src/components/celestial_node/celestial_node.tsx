@@ -156,7 +156,7 @@ export const CelestialNode = ({ data, id }: NodeProps<CelestialCustomNode>) => {
    */
   const buttonElement = isActionButtonVisible(id) ? (
     <button
-      className="osd:w-8 osd:h-8 osd:rounded-full osd:border osd:border-blue-400 osd:bg-blue-100 osd:flex osd:items-center osd:justify-center osd:text-sm osd:font-bold osd:cursor-pointer osd:z-10 osd:shadow-sm osd:hover:border-blue-600 osd:transition-colors osd:text-blue-800"
+      className="osd-resetFocusState osd:w-8 osd:h-8 osd:rounded-full osd:border osd:border-blue-400 osd:bg-blue-100 osd:flex osd:items-center osd:justify-center osd:text-sm osd:font-bold osd:cursor-pointer osd:z-10 osd:shadow-sm osd:hover:border-blue-600 osd:transition-colors osd:text-blue-800"
       onClick={getActionButtonHandler(id)}
       title={t('node.showNodeActions')}
     >

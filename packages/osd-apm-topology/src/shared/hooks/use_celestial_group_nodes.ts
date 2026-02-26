@@ -43,7 +43,6 @@ export const useCelestialGroupNodes = (data: ListServiceGroupingsOutput): Celest
         type: 'celestialNode',
         position,
         data: new TopologyNodeTransformer(model).toCelestialCard(),
-        draggable: true,
         selectable: true,
         deletable: false,
       };

@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { Ec2Icon } from '../../shared/resources/services';
 import { HealthDonut, HEALTH_DONUT_TEST_ID } from './health_donut';
 import { SLI_STATUS_ICON_TEST_ID } from '../sli_status_icon/sli_status_icon';

@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen, fireEvent } from '../../test_utils/vitest.utilities';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { BreadcrumbTrail } from './breadcrumb_trail';
 
 describe('BreadcrumbTrail', () => {

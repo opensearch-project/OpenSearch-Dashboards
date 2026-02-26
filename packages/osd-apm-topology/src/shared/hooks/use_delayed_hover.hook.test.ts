@@ -4,7 +4,6 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import {} from '../../test_utils/vitest.utilities';
 import { useDelayedHover } from './use_delayed_hover.hook';
 
 describe('useDelayedHover', () => {

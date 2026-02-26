@@ -32,3 +32,13 @@
 :root.celestial--dark .celIcon {
   filter: brightness(0) invert(1);
 }
+
+/* Suppress the global EUI focus-ring animation inside the topology map.
+   OSD's _base.scss applies `animation: focusRingAnimate !important` to every
+   :focus element that lacks an "eui" class prefix or `osd-resetFocusState`.
+   ReactFlow generates internal wrapper divs (react-flow__node, react-flow__pane,
+   etc.) that are focusable but cannot be decorated with `osd-resetFocusState`,
+   so we suppress the animation for the entire container. */
+.celContainer :focus {
+  animation: none !important;
+}

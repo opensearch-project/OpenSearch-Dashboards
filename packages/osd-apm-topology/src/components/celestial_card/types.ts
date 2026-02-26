@@ -26,6 +26,8 @@ export interface CelestialCardProps {
   applications?: AttributeMaps;
   statisticReferences?: StatisticReferences;
   isFaded?: boolean; // Add this property to control opacity
+  /** Custom node border & glow color. Overridden by breach state. */
+  color?: string;
   dependencyTypes?: string[];
   stackedNodeIds?: string[];
   isStacked?: boolean;
@@ -33,4 +35,13 @@ export interface CelestialCardProps {
   isCollapsable?: boolean;
   isCollapsed?: boolean;
   isDirectService?: boolean;
+  /** Configurable type badge. `false` hides it (default). Provide an object to show it. */
+  typeBadge?:
+    | {
+        label: string;
+        color: string;
+        icon?: React.ReactNode;
+        textColor?: string;
+      }
+    | false;
 }

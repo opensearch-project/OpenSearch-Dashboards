@@ -19,6 +19,8 @@ export interface NodeShellProps {
   style?: React.CSSProperties;
   /** Glow color for hover/selection effects. Defaults to blue. */
   glowColor?: string;
+  /** When true, omit built-in hover/selected shadow classes (caller handles glow). */
+  disableGlow?: boolean;
   /** Test subject attribute for Cypress/FTR selectors */
   'data-test-subj'?: string;
   /** Accessible label for the node */
@@ -42,6 +44,7 @@ export const NodeShell: React.FC<NodeShellProps> = ({
   className = '',
   style,
   glowColor,
+  disableGlow = false,
   ...rest
 }) => {
   const borderStyle = borderColor ? { borderColor } : {};
@@ -63,16 +66,23 @@ export const NodeShell: React.FC<NodeShellProps> = ({
 
   return (
     <div
-      className={`osd:rounded-xl osd:border-2 osd:box-border osd:transition-all osd:duration-200
+      className={`osd-resetFocusState osd:rounded-xl osd:border-2 osd:box-border osd:transition-all osd:duration-200
                 ${
-                  isSelected
+                  disableGlow
+                    ? 'osd:outline-none osd:shadow-none osd:focus:outline-none osd:focus:shadow-none osd:hover:shadow-none'
+                    : isSelected
                     ? 'osd:shadow-node-selected osd:outline-0'
                     : 'osd:hover:shadow-node-hover'
                 }
                 ${isFaded ? 'osd:opacity-30' : 'osd:opacity-100'}
                 ${isInteractive ? 'osd:cursor-pointer' : ''}
                 ${className}`}
-      style={{ ...borderStyle, ...bgStyle, ...glowStyle, ...style }}
+      style={{
+        ...borderStyle,
+        ...bgStyle,
+        ...glowStyle,
+        ...style,
+      }}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       onKeyDown={isInteractive ? handleKeyDown : undefined}

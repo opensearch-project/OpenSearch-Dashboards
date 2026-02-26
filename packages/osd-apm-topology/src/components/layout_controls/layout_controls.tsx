@@ -19,7 +19,7 @@ export const LayoutControls = () => {
       <button
         type="button"
         onClick={onLayoutChange}
-        className="osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
+        className="osd-resetFocusState osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
         title={t('controls.layout')}
         aria-label={t('controls.layout')}
       >
@@ -28,7 +28,7 @@ export const LayoutControls = () => {
       <button
         type="button"
         onClick={onExpandAll}
-        className="osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
+        className="osd-resetFocusState osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
         title={t('controls.expandAll')}
         aria-label={t('controls.expandAll')}
       >

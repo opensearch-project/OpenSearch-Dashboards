@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '../../../test_utils/vitest.utilities';
+import { renderHook } from '@testing-library/react';
 import { INVERSE_GOLDEN_RATIO } from '../../../shared/constants/visual.constants';
 import { useIconSizing } from './use_icon_sizing.hook';
 

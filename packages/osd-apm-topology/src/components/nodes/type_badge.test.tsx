@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { TypeBadge } from './type_badge';
 
 describe('TypeBadge', () => {
@@ -19,7 +19,7 @@ describe('TypeBadge', () => {
     expect(badge.style.backgroundColor).toBe('rgb(0, 107, 180)');
   });
 
-  it('defaults text color to #FFFFFF', () => {
+  it('defaults text color to white (#FFFFFF)', () => {
     const { container } = render(<TypeBadge label="Service" color="#006CE0" />);
     const badge = container.firstChild as HTMLElement;
     expect(badge.style.color).toBe('rgb(255, 255, 255)');

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '../../../../test_utils/vitest.utilities';
+import { renderHook } from '@testing-library/react';
 import { useCircleDimensions } from './use_circle_dimensions.hook';
 
 describe('useCircleDimensions', () => {

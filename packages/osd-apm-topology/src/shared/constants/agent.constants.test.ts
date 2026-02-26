@@ -39,16 +39,9 @@ describe('AGENT_NODE_KINDS', () => {
     expect(AGENT_NODE_KINDS.other.label).toBe('Other');
   });
 
-  it('content kind has textColor', () => {
-    expect(AGENT_NODE_KINDS.content.textColor).toBe('#1A1A1A');
-  });
-
-  it('other kinds do not have textColor', () => {
-    expect(AGENT_NODE_KINDS.agent.textColor).toBeUndefined();
-    expect(AGENT_NODE_KINDS.llm.textColor).toBeUndefined();
-    expect(AGENT_NODE_KINDS.tool.textColor).toBeUndefined();
-    expect(AGENT_NODE_KINDS.retrieval.textColor).toBeUndefined();
-    expect(AGENT_NODE_KINDS.embeddings.textColor).toBeUndefined();
-    expect(AGENT_NODE_KINDS.other.textColor).toBeUndefined();
+  it('no kind has textColor override (all use default dark text)', () => {
+    ALL_KINDS.forEach((kind) => {
+      expect(AGENT_NODE_KINDS[kind].textColor).toBeUndefined();
+    });
   });
 });

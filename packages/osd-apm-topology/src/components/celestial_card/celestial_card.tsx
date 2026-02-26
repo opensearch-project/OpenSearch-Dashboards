@@ -26,6 +26,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
     numberOfServices,
     metrics,
     isFaded,
+    color,
     stackedNodeIds,
   } = props;
   const nodeRef = useRef<HTMLDivElement | null>(null);
@@ -59,21 +60,29 @@ export const CelestialCard = (props: CelestialCardProps) => {
     [onGroupToggle, isGroup, props]
   );
 
+  const customColorStyle: React.CSSProperties =
+    !health?.breached && color
+      ? ({ borderColor: color, '--osd-node-glow-color': color } as React.CSSProperties)
+      : {};
+
   const isAggregated = (stackedNodeIds?.length ?? 0) > 0;
   return (
     <div
       ref={nodeRef}
+      style={customColorStyle}
       className={`osd:w-68 osd:min-h-24 osd:rounded-xl osd:p-3 osd:flex osd:justify-center osd:items-center osd:border-2 osd:box-border 'border-solid'
                 ${
                   health?.breached
                     ? 'osd:bg-container-breached osd:border-status-breached'
                     : 'osd:bg-container-default osd:border-status-default'
-                } 
+                }
                 ${
                   health?.breached
                     ? 'osd:hover:border-status-breached-hover'
+                    : color
+                    ? ''
                     : 'osd:hover:border-status-default-hover'
-                } 
+                }
                 ${
                   isSelected
                     ? 'osd:outline-2 osd:outline-blue-500 osd:outline-offset-4 osd:shadow-node-selected'
@@ -114,7 +123,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
                 onClick={(e) => onGroupToggle?.(e, props)}
               >
                 <button
-                  className="osd:text-group-caret osd:transition-colors osd:mr-0 osd:bg-transparent osd:border-0 osd:p-0"
+                  className="osd-resetFocusState osd:text-group-caret osd:transition-colors osd:mr-0 osd:bg-transparent osd:border-0 osd:p-0"
                   aria-expanded={false}
                 >
                   <img
@@ -123,7 +132,7 @@ export const CelestialCard = (props: CelestialCardProps) => {
                     alt=""
                   />
                 </button>
-                <a className="osd:font-bold osd:text-sm osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:truncate">
+                <a className="osd-resetFocusState osd:font-bold osd:text-sm osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:truncate">
                   {title}
                 </a>
               </div>

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { MetricBar, MetricBarGroup } from './metric_bar';
 
 describe('MetricBar', () => {

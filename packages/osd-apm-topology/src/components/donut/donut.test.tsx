@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '../../test_utils/vitest.utilities';
+import { render } from '@testing-library/react';
 import { Donut, DONUT_TEST_ID, DONUT_ICON_TEST_ID, DONUT_TORUS_TEST_ID } from './donut';
 
 // Ensure React is available globally for source files using automatic JSX transform

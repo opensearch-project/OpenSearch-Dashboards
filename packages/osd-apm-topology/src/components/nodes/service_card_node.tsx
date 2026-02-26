@@ -61,9 +61,9 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
 
   return (
     <NodeShell
-      borderColor={isBreach ? 'var(--osd-color-status-breached)' : undefined}
+      borderColor={isBreach ? 'var(--osd-color-status-breached)' : data.color}
       backgroundColor={isBreach ? 'var(--osd-color-container-breached)' : undefined}
-      glowColor={isBreach ? 'var(--osd-color-status-breached)' : undefined}
+      glowColor={isBreach ? 'var(--osd-color-status-breached)' : data.color}
       isSelected={isSelected}
       isFaded={!!data.isFaded}
       className="osd:bg-container-default osd:w-68 osd:min-h-24 osd:p-3"
@@ -72,11 +72,14 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
       <div className="osd:flex osd:flex-col osd:gap-2">
         {/* Header: Type badge + Status */}
         <div className="osd:flex osd:items-center osd:justify-between">
-          <TypeBadge
-            label="Service"
-            color="var(--osd-color-type-service, #006CE0)"
-            icon={<span className="osd:text-xs">{'\uD83D\uDD17'}</span>}
-          />
+          {data.typeBadge && data.typeBadge !== false && (
+            <TypeBadge
+              label={data.typeBadge.label}
+              color={data.typeBadge.color}
+              icon={data.typeBadge.icon}
+              textColor={data.typeBadge.textColor}
+            />
+          )}
           {sliStatus && (
             <StatusIndicator
               status={sliStatus}
@@ -85,13 +88,27 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
           )}
         </div>
 
-        {/* Title + Subtitle */}
-        <div>
-          <div className="osd:font-bold osd:text-sm osd:text-body-default osd:truncate">
-            {data.title}
+        {/* Title + Action button */}
+        <div className="osd:flex osd:items-start osd:justify-between osd:gap-2">
+          <div className="osd:min-w-0">
+            <div className="osd:font-bold osd:text-sm osd:text-body-default osd:truncate">
+              {data.title}
+            </div>
+            {data.subtitle && (
+              <div className="osd:text-xs osd:text-body-secondary osd:truncate">
+                {data.subtitle}
+              </div>
+            )}
           </div>
-          {data.subtitle && (
-            <div className="osd:text-xs osd:text-body-secondary osd:truncate">{data.subtitle}</div>
+          {actionButton !== false && (
+            <button
+              className="osd-resetFocusState osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:cursor-pointer osd:bg-transparent osd:border-0 osd:p-0 osd:text-xs osd:whitespace-nowrap osd:flex-shrink-0"
+              onClick={actionButton?.onClick ?? onViewDashboardClick}
+              aria-label={`${actionButton?.label ?? 'View insights'} for ${data.title}`}
+              data-test-subj={`serviceCardNode-viewInsights-${data.id}`}
+            >
+              {actionButton?.label ?? 'View insights'}
+            </button>
           )}
         </div>
 
@@ -112,25 +129,11 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
             <MetricBar
               value={errorRate}
               max={100}
-              color="var(--osd-color-errors)"
+              color="var(--osd-color-ok)"
               label={`${errorRate.toFixed(1)}%`}
             />
           </div>
         </div>
-
-        {/* Action button */}
-        {actionButton !== false && (
-          <div className="osd:flex osd:flex-row-reverse osd:text-xs">
-            <button
-              className="osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:cursor-pointer osd:bg-transparent osd:border-0 osd:p-0 osd:text-xs"
-              onClick={actionButton?.onClick ?? onViewDashboardClick}
-              aria-label={`${actionButton?.label ?? 'View insights'} for ${data.title}`}
-              data-test-subj={`serviceCardNode-viewInsights-${data.id}`}
-            >
-              {actionButton?.label ?? 'View insights'}
-            </button>
-          </div>
-        )}
       </div>
     </NodeShell>
   );

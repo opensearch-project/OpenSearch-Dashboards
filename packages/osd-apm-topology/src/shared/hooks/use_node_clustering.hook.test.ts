@@ -4,7 +4,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { it, mockUseReactFlow } from '../../test_utils/vitest.utilities';
+import { mockUseReactFlow } from '../../test_utils/jest.setup';
 import { useNodeClustering } from './use_node_clustering.hook';
 
 const mockHasOutgoingEdges = jest.fn();

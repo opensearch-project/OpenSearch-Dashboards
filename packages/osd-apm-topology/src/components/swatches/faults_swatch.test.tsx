@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { FaultsSwatch } from './faults_swatch';
 import { COLOR_SWATCH_TEST_ID } from './color_swatch';
 

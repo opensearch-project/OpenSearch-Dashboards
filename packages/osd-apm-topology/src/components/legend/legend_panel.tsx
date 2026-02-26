@@ -26,7 +26,10 @@ export const LegendPanel: React.FC<LegendPanelProps> = ({ onClose, showSliSlo = 
       <div className="osd:p-4 osd:grid osd:gap-3 osd:text-body-secondary">
         <div className="osd:flex osd:justify-between osd:items-center">
           <h3 className="osd:font-bold osd:text-sm">{t('legend.title')}</h3>
-          <button onClick={onClose} className="osd:hover:text-interactive osd:cursor-pointer">
+          <button
+            onClick={onClose}
+            className="osd-resetFocusState osd:hover:text-interactive osd:cursor-pointer"
+          >
             <img src={CloseIcon} className="celIcon" alt="" />
           </button>
         </div>

@@ -25,7 +25,7 @@ export const Legend: React.FC<{ showSliSlo?: boolean; children?: ReactNode }> = 
       <button
         ref={ref}
         onClick={onToggle}
-        className="osd:flex osd:items-center osd:justify-center osd:w-10 osd:h-10 osd:rounded-full osd:bg-container-default osd:shadow-md osd:hover:shadow-xl osd:text-body-secondary osd:hover:text-interactive osd:transition-all osd:duration-300 osd:cursor-pointer"
+        className="osd-resetFocusState osd:flex osd:items-center osd:justify-center osd:w-10 osd:h-10 osd:rounded-full osd:bg-container-default osd:shadow-md osd:hover:shadow-xl osd:text-body-secondary osd:hover:text-interactive osd:transition-all osd:duration-300 osd:cursor-pointer"
         aria-label={t(`legend.toggle`)}
       >
         <img src={LegendIcon} className="celIcon" alt="" />

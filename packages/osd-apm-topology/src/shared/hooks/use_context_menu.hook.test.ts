@@ -4,7 +4,6 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { it } from '../../test_utils/vitest.utilities';
 import { useContextMenu } from './use_context_menu.hook';
 
 describe('useContextMenu', () => {

@@ -19,7 +19,7 @@ export const CelestialControls = () => {
       <button
         type="button"
         onClick={onZoomIn}
-        className="osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
+        className="osd-resetFocusState osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
         title={t('controls.zoomIn')}
         aria-label={t('controls.zoomIn')}
       >
@@ -28,7 +28,7 @@ export const CelestialControls = () => {
       <button
         type="button"
         onClick={onFitView}
-        className="osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
+        className="osd-resetFocusState osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
         title={t('controls.fitView')}
         aria-label={t('controls.fitView')}
       >
@@ -37,7 +37,7 @@ export const CelestialControls = () => {
       <button
         type="button"
         onClick={onZoomOut}
-        className="osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
+        className="osd-resetFocusState osd:w-6 osd:h-6 osd:flex osd:items-center osd:justify-center osd:hover:text-interactive osd:transition-all osd:cursor-pointer"
         title={t('controls.zoomOut')}
         aria-label={t('controls.zoomOut')}
       >

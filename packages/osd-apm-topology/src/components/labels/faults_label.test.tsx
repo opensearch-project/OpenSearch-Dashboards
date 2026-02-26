@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { FaultsLabel } from './faults_label';
 // Mock the FaultsSwatch component
 jest.mock('../swatches/faults_swatch', () => ({

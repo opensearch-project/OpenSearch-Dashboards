@@ -30,6 +30,8 @@ export const ServiceCircleNode = ({ data }: NodeProps<ServiceCircleCustomNode>) 
   const { isHovered, ...hoverHandlers } = useElementHover();
   const isSelected = data.id === selectedNodeId;
   const diameter = (data as any).circleDiameter ?? 80;
+  const hasMetrics = !!data.metrics?.requests;
+  const glowColor = data.color ?? 'var(--osd-color-type-service)';
 
   const totalRequests: string = !data.metrics?.requests
     ? '0'
@@ -61,33 +63,49 @@ export const ServiceCircleNode = ({ data }: NodeProps<ServiceCircleCustomNode>) 
       isSelected={isSelected}
       isFaded={!!data.isFaded}
       onClick={handleClick}
-      glowColor="var(--osd-color-type-service)"
+      glowColor={glowColor}
+      disableGlow
       className="osd:bg-transparent osd:border-0 osd:rounded-full"
       style={{ border: 'none', borderRadius: '50%', background: 'transparent' }}
       data-test-subj={`serviceCircleNode-${data.id}`}
     >
       <div className="celServiceCircle">
         <div
-          className="celServiceCircle__container"
+          className={`celServiceCircle__container${
+            isSelected ? ' celServiceCircle__container--selected' : ''
+          }${!hasMetrics ? ' celServiceCircle__container--no-metrics' : ''}`}
           {...hoverHandlers}
-          style={{ width: diameter, height: diameter }}
+          style={
+            {
+              width: diameter,
+              height: diameter,
+              '--osd-node-glow-color': glowColor,
+              ...(data.color && !hasMetrics ? { borderColor: data.color } : {}),
+            } as React.CSSProperties
+          }
         >
-          <HealthArc
-            segments={arcSegments}
-            diameter={diameter}
-            strokeWidth={6}
-            aria-label={`Health: ${totalRequests} requests`}
-          />
+          {hasMetrics && (
+            <HealthArc
+              segments={arcSegments}
+              diameter={diameter}
+              strokeWidth={6}
+              aria-label={`Health: ${totalRequests} requests`}
+            />
+          )}
           <div className="celServiceCircle__interior">
             {data.icon && (
               <div className="osd:flex osd:items-center osd:justify-center osd:w-6 osd:h-6 osd:text-icon">
                 {data.icon}
               </div>
             )}
-            <span className="osd:text-xs osd:font-bold osd:text-body-default">{totalRequests}</span>
+            {hasMetrics && (
+              <span className="osd:text-xs osd:font-bold osd:text-body-default">
+                {totalRequests}
+              </span>
+            )}
           </div>
         </div>
-        {isHovered && (
+        {isHovered && hasMetrics && (
           <Legend metrics={data.metrics} health={data.health} trianglePosition="left" />
         )}
         <div className="celServiceCircle__label">

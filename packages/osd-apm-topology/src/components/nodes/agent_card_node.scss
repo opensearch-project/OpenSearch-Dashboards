@@ -47,12 +47,6 @@
   }
 }
 
-/* Dark mode: invert monochrome kind icons (agent, other) to white on dark backgrounds.
-   The colored SVGs use currentColor so they inherit the badge text color automatically. */
-:root.celestial--dark .celAgentCard__kind-icon {
-  filter: brightness(0) invert(1);
-}
-
 /* Dark mode: invert monochrome provider icons to white */
 :root.celestial--dark .celAgentCard__provider-icon {
   filter: brightness(0) invert(1);

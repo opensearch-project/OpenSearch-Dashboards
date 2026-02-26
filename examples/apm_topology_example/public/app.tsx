@@ -52,6 +52,7 @@ const buildApmNodes = (nodeType: string) => [
       isInstrumented: true,
       health: { breached: 0, recovered: 0, total: 0, status: 'ok' },
       metrics: { requests: 5000, faults5xx: 25, errors4xx: 100 },
+      color: '#6366F1', // indigo — custom node color demo
     },
   },
   {
@@ -84,6 +85,7 @@ const buildApmNodes = (nodeType: string) => [
       isInstrumented: true,
       health: { breached: 5, recovered: 0, total: 8, status: 'breached' },
       metrics: { requests: 2000, faults5xx: 300, errors4xx: 150 },
+      color: '#10B981', // emerald — overridden by breach state
     },
   },
   {
@@ -310,6 +312,8 @@ const ApmTopologyExampleApp = () => {
         layoutOptions: { direction },
         showMinimap,
         showSliSlo,
+        onNodeClickZoom: 'zoomToNode',
+        onEdgeClickZoom: 'zoomToEdge',
         ...sharedCallbacks,
       },
       apmCircles: {
@@ -318,6 +322,8 @@ const ApmTopologyExampleApp = () => {
         layoutOptions: { direction },
         showMinimap,
         showSliSlo,
+        onNodeClickZoom: 'zoomToNeighborhood',
+        onEdgeClickZoom: 'zoomToEdge',
         ...sharedCallbacks,
       },
       agentCards: {
@@ -334,6 +340,9 @@ const ApmTopologyExampleApp = () => {
         legend: hideLegend ? false : <EdgeStylesLegend />,
         layoutOptions: { direction },
         showMinimap,
+        nodesDraggable: true,
+        onNodeClickZoom: 'zoomToNode',
+        onEdgeClickZoom: 'zoomToEdge',
         ...sharedCallbacks,
       },
     }),

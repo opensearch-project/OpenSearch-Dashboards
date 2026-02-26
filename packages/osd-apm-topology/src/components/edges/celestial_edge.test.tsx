@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '../../test_utils/vitest.utilities';
+import { render } from '@testing-library/react';
 import { Position } from '@xyflow/react';
 import { CelestialEdge } from './celestial_edge';
 

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, fireEvent } from '../../test_utils/vitest.utilities';
-import type { Mock } from '../../test_utils/vitest.utilities';
+import { renderHook, fireEvent } from '@testing-library/react';
+import type { Mock } from 'jest-mock';
 import { useOnClickOutside } from './use_on_click_outside.hook';
 
 describe('useOnClickOutside', () => {

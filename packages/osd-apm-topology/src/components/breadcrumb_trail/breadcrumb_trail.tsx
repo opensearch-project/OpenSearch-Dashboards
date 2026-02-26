@@ -22,6 +22,7 @@ export const BreadcrumbTrail = ({
   breadcrumbs,
   onBreadcrumbClick,
   hotspot,
+  rootIcon,
 }: BreadcrumbTrailProps) => (
   <div className="osd:flex osd:items-center osd:px-4 osd:py-3">
     {breadcrumbs.map((breadcrumb, index) => (
@@ -33,7 +34,11 @@ export const BreadcrumbTrail = ({
         }
       >
         {index === 0 ? (
-          <img src={GlobeIcon} className="celIcon osd:w-5 osd:h-5 osd:text-body-secondary" alt="" />
+          <img
+            src={rootIcon ?? GlobeIcon}
+            className="celIcon osd:w-5 osd:h-5 osd:text-body-secondary"
+            alt=""
+          />
         ) : (
           <HealthDonut
             metrics={breadcrumb.node?.metrics || { ...DEFAULT_METRICS }}

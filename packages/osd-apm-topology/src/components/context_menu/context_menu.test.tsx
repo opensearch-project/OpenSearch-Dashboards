@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import ContextMenu from './context_menu';
 
 // Ensure React is available globally for source files using automatic JSX transform

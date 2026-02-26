@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { it, mockFitView, mockUseReactFlow } from '../../test_utils/vitest.utilities';
+import { mockFitView, mockUseReactFlow } from '../../test_utils/jest.setup';
 import { useFitViewWithDelay } from './use_fit_view_with_delay.hook';
 
 describe('useFitViewWithDelay', () => {

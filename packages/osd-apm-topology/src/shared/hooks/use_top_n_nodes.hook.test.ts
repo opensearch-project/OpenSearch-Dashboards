@@ -4,7 +4,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { expect } from '../../test_utils/vitest.utilities';
 import { useTopNNodes } from './use_top_n_nodes.hook';
 import type { CelestialNode, CelestialEdge } from '../../types';
 

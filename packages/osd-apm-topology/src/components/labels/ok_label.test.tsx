@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { OkLabel } from './ok_label';
 // Mock the OkSwatch component
 jest.mock('../swatches/ok_swatch', () => ({

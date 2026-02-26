@@ -1,20 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
   <!-- Spanner body -->
-  <rect x="10" y="25.5" width="36" height="5" rx="2.5" fill="#111"/>
+  <rect x="10" y="25.5" width="36" height="5" rx="2.5" fill="#fff"/>
   <!-- Left head outer ring -->
-  <circle cx="14" cy="28" r="8" fill="none" stroke="#111" stroke-width="2.5"/>
+  <circle cx="14" cy="28" r="8" fill="none" stroke="#fff" stroke-width="2.5"/>
   <!-- Left head cutouts -->
   <rect x="9" y="22" width="10" height="5.5" rx="1" fill="white"/>
   <rect x="9" y="28.5" width="10" height="5.5" rx="1" fill="white"/>
   <!-- Left centre dot -->
-  <circle cx="14" cy="28" r="2.5" fill="#111"/>
+  <circle cx="14" cy="28" r="2.5" fill="#fff"/>
   <!-- Right head outer ring -->
-  <circle cx="42" cy="28" r="8" fill="none" stroke="#111" stroke-width="2.5"/>
+  <circle cx="42" cy="28" r="8" fill="none" stroke="#fff" stroke-width="2.5"/>
   <!-- Right head cutouts -->
   <rect x="37" y="22" width="10" height="5.5" rx="1" fill="white"/>
   <rect x="37" y="28.5" width="10" height="5.5" rx="1" fill="white"/>
   <!-- Right centre dot -->
-  <circle cx="42" cy="28" r="2.5" fill="#111"/>
+  <circle cx="42" cy="28" r="2.5" fill="#fff"/>
   <!-- Highlight line -->
   <line x1="22" y1="26.5" x2="34" y2="26.5" stroke="white" stroke-width="1" opacity="0.5"/>
 </svg>

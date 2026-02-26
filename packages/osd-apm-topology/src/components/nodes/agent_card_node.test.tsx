@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '../../test_utils/vitest.utilities';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AgentCardNode } from './agent_card_node';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 

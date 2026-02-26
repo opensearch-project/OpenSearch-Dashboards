@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '../../test_utils/vitest.utilities';
+import { renderHook, act } from '@testing-library/react';
 import { useElementGeometry } from './use_element_geometry.hook';
 describe('useElementGeometry', () => {
   test('should initialize with null rect', () => {

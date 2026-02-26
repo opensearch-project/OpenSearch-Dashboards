@@ -53,7 +53,6 @@ export const AGENT_NODE_KINDS: Record<AgentNodeKind, AgentNodeKindConfig> = {
     label: 'Content',
     color: 'var(--osd-color-type-content, #D6BF57)',
     icon: ContentIcon,
-    textColor: '#1A1A1A',
   },
   other: {
     label: 'Other',

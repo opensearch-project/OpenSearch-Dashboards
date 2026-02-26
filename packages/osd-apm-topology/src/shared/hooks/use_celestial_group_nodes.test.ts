@@ -84,7 +84,6 @@ describe('useCelestialGroupNodes', () => {
     expect(nodes[0]).toMatchObject({
       id: 'group-1',
       type: 'celestialNode',
-      draggable: true,
       selectable: true,
       deletable: false,
     });
@@ -111,7 +110,6 @@ describe('useCelestialGroupNodes', () => {
     expect(nodes[1]).toMatchObject({
       id: 'group-2',
       type: 'celestialNode',
-      draggable: true,
       selectable: true,
       deletable: false,
     });

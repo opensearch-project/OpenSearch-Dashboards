@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '../../test_utils/vitest.utilities';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ServiceCardNode } from './service_card_node';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 
@@ -53,8 +53,17 @@ describe('ServiceCardNode', () => {
     expect(screen.getByText('us-west-2')).toBeInTheDocument();
   });
 
-  it('renders TypeBadge with "Service" label', () => {
+  it('does not render TypeBadge by default', () => {
     render(<ServiceCardNode {...createNodeProps()} />);
+    expect(screen.queryByText('Service')).not.toBeInTheDocument();
+  });
+
+  it('renders TypeBadge when typeBadge prop is provided', () => {
+    render(
+      <ServiceCardNode
+        {...createNodeProps({ typeBadge: { label: 'Service', color: '#006CE0' } })}
+      />
+    );
     expect(screen.getByText('Service')).toBeInTheDocument();
   });
 
@@ -128,5 +137,35 @@ describe('ServiceCardNode', () => {
     expect(
       container.querySelector('[data-test-subj="serviceCardNode-svc-99"]')
     ).toBeInTheDocument();
+  });
+
+  it('applies custom color as borderColor and glowColor', () => {
+    const { container } = render(<ServiceCardNode {...createNodeProps({ color: '#6366F1' })} />);
+    const shell = container.querySelector(
+      '[data-test-subj="serviceCardNode-svc-1"]'
+    ) as HTMLElement;
+    expect(shell.style.borderColor).toBe('#6366f1');
+    expect(shell.style.getPropertyValue('--osd-node-glow-color')).toBe('#6366F1');
+  });
+
+  it('breach state overrides custom color', () => {
+    const { container } = render(
+      <ServiceCardNode
+        {...createNodeProps({
+          color: '#6366F1',
+          health: { status: 'breached', breached: 1, total: 1, recovered: 0 },
+        })}
+      />
+    );
+    const shell = container.querySelector(
+      '[data-test-subj="serviceCardNode-svc-1"]'
+    ) as HTMLElement;
+    // JSDOM doesn't resolve CSS var() in borderColor — it stays empty
+    // but the glow color custom property is set correctly
+    expect(shell.style.getPropertyValue('--osd-node-glow-color')).toBe(
+      'var(--osd-color-status-breached)'
+    );
+    // Verify the custom color is NOT applied (breach wins)
+    expect(shell.style.borderColor).not.toBe('#6366f1');
   });
 });

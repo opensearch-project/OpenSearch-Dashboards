@@ -153,6 +153,10 @@ export const Celestial = (props: CelestialMapProps) => {
             showMinimap={props.showMinimap}
             showSliSlo={props.showSliSlo}
             showLayoutControls={props.showLayoutControls}
+            nodesDraggable={props.nodesDraggable}
+            rootBreadcrumbIcon={props.rootBreadcrumbIcon}
+            onNodeClickZoom={props.onNodeClickZoom}
+            onEdgeClickZoom={props.onEdgeClickZoom}
           />
         </div>
       </div>

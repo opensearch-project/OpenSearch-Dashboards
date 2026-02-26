@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { renderHook, act } from '../../test_utils/vitest.utilities';
+import { renderHook, act } from '@testing-library/react';
 import { useBreadcrumbs } from './use_breadcrumbs.hook';
 
 describe('useBreadcrumbs', () => {

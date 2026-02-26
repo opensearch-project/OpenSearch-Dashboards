@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '../../test_utils/vitest.utilities';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ServiceCircleNode } from './service_circle_node';
 import { useCelestialNodeActionsContext } from '../../shared/contexts/node_actions_context';
 import { useElementHover } from '../../shared/hooks/use_element_hover.hook';
@@ -81,9 +81,9 @@ describe('ServiceCircleNode', () => {
     expect(screen.getByText('100')).toBeInTheDocument();
   });
 
-  it('renders "0" when no metrics', () => {
+  it('hides request count when no metrics', () => {
     render(<ServiceCircleNode {...createNodeProps()} />);
-    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
   it('renders data-test-subj with node id', () => {
@@ -112,10 +112,8 @@ describe('ServiceCircleNode', () => {
       selectedNodeId: 'node-1',
     });
     const { container } = render(<ServiceCircleNode {...createNodeProps()} />);
-    const shell = container.querySelector(
-      '[data-test-subj="serviceCircleNode-node-1"]'
-    ) as HTMLElement;
-    expect(shell.className).toContain('shadow-node-selected');
+    const circleContainer = container.querySelector('.celServiceCircle__container') as HTMLElement;
+    expect(circleContainer.className).toContain('celServiceCircle__container--selected');
   });
 
   it('uses default diameter 80 when circleDiameter not set', () => {
@@ -123,5 +121,34 @@ describe('ServiceCircleNode', () => {
     const circleContainer = container.querySelector('.celServiceCircle__container') as HTMLElement;
     expect(circleContainer.style.width).toBe('80px');
     expect(circleContainer.style.height).toBe('80px');
+  });
+
+  it('applies custom color as glow color', () => {
+    const { container } = render(<ServiceCircleNode {...createNodeProps({ color: '#6366F1' })} />);
+    const shell = container.querySelector(
+      '[data-test-subj="serviceCircleNode-node-1"]'
+    ) as HTMLElement;
+    expect(shell.style.getPropertyValue('--osd-node-glow-color')).toBe('#6366F1');
+    const circleContainer = container.querySelector('.celServiceCircle__container') as HTMLElement;
+    expect(circleContainer.style.getPropertyValue('--osd-node-glow-color')).toBe('#6366F1');
+  });
+
+  it('applies custom color as borderColor when no metrics', () => {
+    const { container } = render(<ServiceCircleNode {...createNodeProps({ color: '#6366F1' })} />);
+    const circleContainer = container.querySelector('.celServiceCircle__container') as HTMLElement;
+    expect(circleContainer.style.borderColor).toBe('#6366f1');
+  });
+
+  it('does not apply custom borderColor when metrics are present', () => {
+    const { container } = render(
+      <ServiceCircleNode
+        {...createNodeProps({
+          color: '#6366F1',
+          metrics: { requests: 100, faults5xx: 0, errors4xx: 0 },
+        })}
+      />
+    );
+    const circleContainer = container.querySelector('.celServiceCircle__container') as HTMLElement;
+    expect(circleContainer.style.borderColor).toBe('');
   });
 });

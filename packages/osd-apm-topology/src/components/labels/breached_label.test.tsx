@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen } from '../../test_utils/vitest.utilities';
+import { render, screen } from '@testing-library/react';
 import { BreachedLabel } from './breached_label';
 // Mock the SliStatusIcon component
 jest.mock('../sli_status_icon', () => ({

@@ -24,7 +24,7 @@ export const Breadcrumb = ({
     ) : (
       <button
         onClick={onBreadcrumbClick}
-        className="osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:duration-200 osd:focus:outline-none osd:rounded osd:px-2 osd:py-1 osd:cursor-pointer"
+        className="osd-resetFocusState osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:duration-200 osd:focus:outline-none osd:rounded osd:px-2 osd:py-1 osd:cursor-pointer"
       >
         {title}
       </button>

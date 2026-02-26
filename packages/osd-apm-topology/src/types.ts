@@ -64,6 +64,12 @@ export interface CelestialEdgeStyleData {
   };
 }
 
+/** Camera behavior when a node is clicked */
+export type NodeClickZoom = 'none' | 'zoomToNode' | 'zoomToNeighborhood';
+
+/** Camera behavior when an edge is clicked */
+export type EdgeClickZoom = 'none' | 'zoomToEdge';
+
 export interface CelestialMapProps {
   map: { [groupId: string]: CelestialMapModel };
   nodesInFocus?: CelestialNode[];
@@ -100,4 +106,16 @@ export interface CelestialMapProps {
 
   /** Show layout control buttons (Expand all / Update layout). Default: false */
   showLayoutControls?: boolean;
+
+  /** Allow nodes to be dragged. Default: false */
+  nodesDraggable?: boolean;
+
+  /** Custom icon (URL or data-URI) for the root breadcrumb. Defaults to globe icon. */
+  rootBreadcrumbIcon?: string;
+
+  /** Camera zoom behavior on node click. Default: 'none' */
+  onNodeClickZoom?: NodeClickZoom;
+
+  /** Camera zoom behavior on edge click. Default: 'none' */
+  onEdgeClickZoom?: EdgeClickZoom;
 }

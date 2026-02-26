@@ -17,7 +17,7 @@ import {
 } from '@xyflow/react';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { useCelestialStateContext } from '../shared/contexts/celestial_state_context';
-import type { CelestialEdge, CelestialEdgeStyleData } from '../types';
+import type { CelestialEdge, CelestialEdgeStyleData, EdgeClickZoom, NodeClickZoom } from '../types';
 import { Breadcrumb, BreadcrumbTrail } from './breadcrumb_trail';
 import type { CelestialCardProps } from './celestial_card/types';
 import { CelestialControls } from './celestial_controls';
@@ -87,6 +87,14 @@ interface MapContainerProps {
   isDarkMode?: boolean;
   /** Show layout control buttons (Expand all / Update layout). Default: false */
   showLayoutControls?: boolean;
+  /** Allow nodes to be dragged. Default: false */
+  nodesDraggable?: boolean;
+  /** Custom icon (URL or data-URI) for the root breadcrumb. Defaults to globe icon. */
+  rootBreadcrumbIcon?: string;
+  /** Camera zoom behavior on node click. Default: 'none' */
+  onNodeClickZoom?: NodeClickZoom;
+  /** Camera zoom behavior on edge click. Default: 'none' */
+  onEdgeClickZoom?: EdgeClickZoom;
 }
 
 export const MapContainer: React.FC<MapContainerProps> = ({
@@ -108,6 +116,10 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   showSliSlo,
   isDarkMode,
   showLayoutControls,
+  nodesDraggable,
+  rootBreadcrumbIcon,
+  onNodeClickZoom,
+  onEdgeClickZoom,
 }) => {
   const { viewLock } = useCelestialStateContext();
   const reactFlowInstance = useReactFlow();
@@ -127,33 +139,70 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     return <Legend showSliSlo={showSliSlo} />;
   };
 
-  /** Focus camera on a clicked node */
+  /** Focus camera on a clicked node (configurable via onNodeClickZoom) */
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
+      if (!onNodeClickZoom || onNodeClickZoom === 'none') return;
+
       viewLock.lock();
-      const width = node.measured?.width ?? node.width ?? 272;
-      const height = node.measured?.height ?? node.height ?? 156;
       const padding = 50;
-      reactFlowInstance.fitBounds(
-        {
-          x: node.position.x - padding,
-          y: node.position.y - padding,
-          width: width + 2 * padding,
-          height: height + 2 * padding,
-        },
-        { padding: 0.3, duration: 400 }
-      );
+
+      if (onNodeClickZoom === 'zoomToNode') {
+        const width = node.measured?.width ?? node.width ?? 272;
+        const height = node.measured?.height ?? node.height ?? 156;
+        reactFlowInstance.fitBounds(
+          {
+            x: node.position.x - padding,
+            y: node.position.y - padding,
+            width: width + 2 * padding,
+            height: height + 2 * padding,
+          },
+          { padding: 0.3, duration: 400 }
+        );
+      } else if (onNodeClickZoom === 'zoomToNeighborhood') {
+        const connectedEdges = resolvedEdges.filter(
+          (e) => e.source === node.id || e.target === node.id
+        );
+        const neighborIds = new Set<string>();
+        connectedEdges.forEach((e) => {
+          neighborIds.add(e.source);
+          neighborIds.add(e.target);
+        });
+        const neighborNodes = nodes.filter((n) => neighborIds.has(n.id) || n.id === node.id);
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        for (const n of neighborNodes) {
+          const w = n.measured?.width ?? n.width ?? 272;
+          const h = n.measured?.height ?? n.height ?? 156;
+          minX = Math.min(minX, n.position.x);
+          minY = Math.min(minY, n.position.y);
+          maxX = Math.max(maxX, n.position.x + w);
+          maxY = Math.max(maxY, n.position.y + h);
+        }
+        reactFlowInstance.fitBounds(
+          {
+            x: minX - padding,
+            y: minY - padding,
+            width: maxX - minX + 2 * padding,
+            height: maxY - minY + 2 * padding,
+          },
+          { padding: 0.1, duration: 400 }
+        );
+      }
     },
-    [reactFlowInstance, viewLock]
+    [reactFlowInstance, viewLock, onNodeClickZoom, nodes, resolvedEdges]
   );
 
   /** Focus camera on the midpoint between an edge's source and target nodes */
   const handleEdgeClickWithFocus = useCallback(
     (event: any, edge: CelestialEdge) => {
-      viewLock.lock();
-      // Fire the consumer callback first
       onEdgeClick(event, edge);
 
+      if (!onEdgeClickZoom || onEdgeClickZoom === 'none') return;
+
+      viewLock.lock();
       const sourceNode = reactFlowInstance.getNode(edge.source);
       const targetNode = reactFlowInstance.getNode(edge.target);
       if (sourceNode && targetNode) {
@@ -179,7 +228,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         );
       }
     },
-    [reactFlowInstance, onEdgeClick, viewLock]
+    [reactFlowInstance, onEdgeClick, viewLock, onEdgeClickZoom]
   );
 
   return (
@@ -191,6 +240,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           breadcrumbs={breadcrumbs}
           onBreadcrumbClick={onBreadcrumbClick}
           hotspot={hotspot}
+          rootIcon={rootBreadcrumbIcon}
         />
       </div>
       {numMatches !== undefined && (
@@ -227,6 +277,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           minZoom={0}
           nodeTypes={mergedNodeTypes}
           edgeTypes={mergedEdgeTypes}
+          nodesDraggable={nodesDraggable ?? false}
           proOptions={{ hideAttribution: true }}
           className="osd:w-full osd:h-full osd:z-1"
         >

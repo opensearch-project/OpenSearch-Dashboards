@@ -13,4 +13,6 @@ export interface BreadcrumbTrailProps {
   breadcrumbs: Breadcrumb[];
   onBreadcrumbClick: (Breadcrumb: Breadcrumb, index: number) => void;
   hotspot?: React.ReactNode;
+  /** Custom icon (URL or data-URI) for the root breadcrumb. Defaults to globe icon. */
+  rootIcon?: string;
 }

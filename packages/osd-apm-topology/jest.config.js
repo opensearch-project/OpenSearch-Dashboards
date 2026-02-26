@@ -15,8 +15,6 @@ module.exports = {
     '\\.s?css$': '<rootDir>/src/test_utils/__mocks__/styles.ts',
     '^src/(.*)$': '<rootDir>/src/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
-    '^vitest$': '<rootDir>/src/test_utils/vitest_compat.ts',
-    '^@testing-library/jest-dom/vitest$': '<rootDir>/src/test_utils/__mocks__/empty.ts',
   },
   transform: {
     '^.+\\.(ts|tsx|js|jsx)$': path.resolve(__dirname, '../../src/dev/jest/babel_transform.js'),

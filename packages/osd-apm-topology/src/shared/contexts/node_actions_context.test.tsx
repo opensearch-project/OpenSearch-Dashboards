@@ -4,17 +4,11 @@
  */
 
 import React from 'react';
-import {} from '../../test_utils/vitest.utilities';
 import { renderHook, act } from '@testing-library/react';
 import {
   CelestialNodeActionsProvider,
   useCelestialNodeActionsContext,
 } from './node_actions_context';
-
-const mockFitViewWithDelay = jest.fn();
-jest.mock('../hooks/use_fit_view_with_delay.hook', () => ({
-  useFitViewWithDelay: () => mockFitViewWithDelay,
-}));
 
 const mockSetSelectedNodeId = jest.fn();
 const mockSetUnstackedAggregateNodeIds = jest.fn();
@@ -32,7 +26,7 @@ const mockGetEdges = jest.fn(() => []);
 const mockSetNodes = jest.fn();
 const mockSetEdges = jest.fn();
 
-// Override the @xyflow/react mock from vitest.utilities for this test
+// Override the @xyflow/react mock from jest.setup for this test
 jest.mock('@xyflow/react', () => ({
   useReactFlow: () => ({
     fitView: jest.fn(),
@@ -70,7 +64,7 @@ describe('NodeActionsContext', () => {
       expect(onDashboardClick).toHaveBeenCalledWith(nodeProps);
     });
 
-    it('calls fitViewWithDelay when onDashboardClick is provided', () => {
+    it('does not call fitViewWithDelay (zoom controlled by onNodeClickZoom)', () => {
       const onDashboardClick = jest.fn();
       const wrapper = createWrapper({ onDashboardClick });
       const { result } = renderHook(() => useCelestialNodeActionsContext(), { wrapper });
@@ -82,21 +76,7 @@ describe('NodeActionsContext', () => {
         result.current.onDashboardClick?.(mockEvent, nodeProps);
       });
 
-      expect(mockFitViewWithDelay).toHaveBeenCalled();
-    });
-
-    it('does NOT call fitViewWithDelay when onDashboardClick is undefined', () => {
-      const wrapper = createWrapper({});
-      const { result } = renderHook(() => useCelestialNodeActionsContext(), { wrapper });
-
-      const mockEvent = {} as any;
-      const nodeProps = { id: 'node-1' } as any;
-
-      act(() => {
-        result.current.onDashboardClick?.(mockEvent, nodeProps);
-      });
-
-      expect(mockFitViewWithDelay).not.toHaveBeenCalled();
+      expect(onDashboardClick).toHaveBeenCalledWith(nodeProps);
     });
   });
 

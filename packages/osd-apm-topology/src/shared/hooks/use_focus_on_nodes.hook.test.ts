@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { it, mockUseReactFlow } from '../../test_utils/vitest.utilities';
+import { mockUseReactFlow } from '../../test_utils/jest.setup';
 import { useFocusOnNodes } from './use_focus_on_nodes.hook';
 import type { CelestialNode } from '../../types';
 

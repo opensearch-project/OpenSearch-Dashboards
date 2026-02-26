@@ -11,7 +11,7 @@ export const MenuItem = ({ label, isDisabled, onClick }: MenuItemProps) => (
     <button
       onClick={onClick}
       disabled={isDisabled}
-      className={`
+      className={`osd-resetFocusState
                 osd:block osd:w-full osd:text-left osd:px-4 osd:py-2 osd:text-sm osd:whitespace-nowrap
                 ${
                   isDisabled

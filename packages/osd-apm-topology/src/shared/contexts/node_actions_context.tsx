@@ -5,7 +5,6 @@
 
 import React, { createContext, useContext, PropsWithChildren, useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { useFitViewWithDelay } from '../hooks/use_fit_view_with_delay.hook';
 import type { CelestialCardProps } from '../../components/celestial_card';
 import { useCelestialStateContext } from './celestial_state_context';
 
@@ -29,7 +28,6 @@ export const CelestialNodeActionsProvider: React.FC<PropsWithChildren<
   CelestialNodeActionsProviderProps
 >> = ({ onDataFetch, addBreadcrumb, onDashboardClick, children }) => {
   // Track the selected node ID
-  const fitViewWithDelay = useFitViewWithDelay();
   const {
     selectedNodeId,
     setSelectedNodeId,
@@ -53,11 +51,8 @@ export const CelestialNodeActionsProvider: React.FC<PropsWithChildren<
   const handleDashboardClick = useCallback(
     (event: React.MouseEvent, props: CelestialCardProps) => {
       onDashboardClick?.(props);
-      if (onDashboardClick) {
-        fitViewWithDelay();
-      }
     },
-    [onDashboardClick, fitViewWithDelay]
+    [onDashboardClick]
   );
 
   // Create onClick handler for unstacking nodes

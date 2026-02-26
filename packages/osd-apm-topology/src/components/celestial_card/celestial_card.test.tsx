@@ -4,7 +4,7 @@
  */
 import React from 'react';
 
-import { render, screen, fireEvent, waitFor } from '../../test_utils/vitest.utilities';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CelestialNodeActionsProvider } from '../../shared/contexts/node_actions_context';
 import { PropsWithChildren } from 'react';
 import { CelestialStateProvider } from '../../shared/contexts/celestial_state_context';
@@ -110,6 +110,35 @@ describe('CelestialCard', () => {
         expect(addBreadcrumb).toHaveBeenCalledWith(groupProps.title, groupProps);
         expect(onDataFetch).toHaveBeenCalledWith(groupProps);
       });
+    });
+  });
+
+  describe('Custom color prop', () => {
+    it('applies custom borderColor and glow color when color is set', () => {
+      const { container } = render(<CelestialCard {...defaultProps} color="#6366F1" />, {
+        wrapper: Providers,
+      });
+      const card = container.firstChild as HTMLElement;
+      expect(card.style.borderColor).toBe('#6366f1');
+      expect(card.style.getPropertyValue('--osd-node-glow-color')).toBe('#6366F1');
+    });
+
+    it('does not apply custom color when health is breached', () => {
+      const { container } = render(
+        <CelestialCard {...defaultProps} color="#6366F1" health={breachedHealth} />,
+        { wrapper: Providers }
+      );
+      const card = container.firstChild as HTMLElement;
+      expect(card.style.borderColor).not.toBe('#6366F1');
+      expect(card).toHaveClass('osd:border-status-breached');
+    });
+
+    it('skips default hover border class when color is set', () => {
+      const { container } = render(<CelestialCard {...defaultProps} color="#6366F1" />, {
+        wrapper: Providers,
+      });
+      const card = container.firstChild as HTMLElement;
+      expect(card.className).not.toContain('osd:hover:border-status-default-hover');
     });
   });
 

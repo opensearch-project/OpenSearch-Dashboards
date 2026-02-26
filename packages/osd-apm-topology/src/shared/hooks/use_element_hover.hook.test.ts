@@ -4,7 +4,6 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { expect } from '../../test_utils/vitest.utilities';
 import { useElementHover } from './use_element_hover.hook';
 
 describe('useElementHover', () => {

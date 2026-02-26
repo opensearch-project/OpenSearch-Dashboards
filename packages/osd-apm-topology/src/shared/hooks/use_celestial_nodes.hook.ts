@@ -32,7 +32,6 @@ export const useCelestialNodes = (data: GetServiceMapOutput): CelestialMapModel 
         type: 'celestialNode',
         position,
         data: new TopologyNodeTransformer(model).toCelestialCard(),
-        draggable: true,
         selectable: true,
         deletable: false,
       };
