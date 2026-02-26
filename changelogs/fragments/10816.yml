@@ -1,0 +1,2 @@
+fix:
+- [BUG] Fix careating index-patterns with ccs causes search threadPool to be exhausted ([#10816](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10816))

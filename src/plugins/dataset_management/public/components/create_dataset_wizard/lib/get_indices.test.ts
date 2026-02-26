@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getIndices, responseToItemArray, dedupeMatchedItems } from './get_indices';
+import { getIndices, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs, MatchedItem } from '../types';
 import { Observable } from 'rxjs';
@@ -105,11 +105,10 @@ describe('getIndices', () => {
     });
 
     expect(http.get).toHaveBeenCalled();
-    expect(result.length).toBe(4);
+    expect(result.length).toBe(3);
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
-    expect(result[2].name).toBe('opensearch_dashboards_sample_data_ecommerce');
-    expect(result[3].name).toBe('remoteCluster1:bar-01');
+    expect(result[2].name).toBe('remoteCluster1:bar-01');
   });
 
   it('should ignore ccs query-all', async () => {
@@ -158,12 +157,6 @@ describe('getIndices', () => {
     };
     expect(responseToItemArray(result, getIndexTags)).toMatchSnapshot();
     expect(responseToItemArray({}, getIndexTags)).toEqual([]);
-  });
-
-  it('matched items are deduped', () => {
-    const setA = [{ name: 'a' }, { name: 'b' }] as MatchedItem[];
-    const setB = [{ name: 'b' }, { name: 'c' }] as MatchedItem[];
-    expect(dedupeMatchedItems(setA, setB)).toHaveLength(3);
   });
 
   describe('errors', () => {
