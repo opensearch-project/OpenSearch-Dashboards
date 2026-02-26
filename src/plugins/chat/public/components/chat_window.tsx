@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
-import { EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -63,6 +64,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(true);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
   const loadingMessageIdRef = useRef<string | null>(null);
@@ -127,18 +130,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
-  // Restore timeline from current chat state on component mount
-  useEffect(() => {
-    const restoreTimeline = async () => {
-      const currentMessages = chatService.getCurrentMessages();
-      if (currentMessages.length > 0) {
+  // Extracted restoration logic to avoid duplication
+  const restoreConversationTimeline = useCallback(async () => {
+    setIsRestoring(true);
+    setRestoreError(null);
+
+    try {
+      const result = await chatService.restoreLatestConversation();
+
+      if (result && result.messages.length > 0) {
+        const { messages } = result;
+
         // load message and query unfinished tool call
-        const lastMessage = currentMessages[currentMessages.length - 1];
+        const lastMessage = messages[messages.length - 1];
         if (lastMessage.role === 'assistant' && lastMessage.toolCalls) {
           // restore unfinished tool call by triggering events
           const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
             // Check if there's no corresponding tool result message
-            const hasToolResult = currentMessages.some(msg =>
+            const hasToolResult = messages.some(msg =>
               msg.role === 'tool' && msg.toolCallId === toolCall.id
             );
             return !hasToolResult;
@@ -176,17 +185,27 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             }
           }
         }
-        setTimeline(currentMessages);
+        setTimeline(messages);
       }
-    };
-
-    restoreTimeline();
+    } catch (error: any) {
+      console.error('Error restoring conversation:', error);
+      setRestoreError(error.message || 'Failed to restore conversation');
+    } finally {
+      setIsRestoring(false);
+    }
   }, [chatService, eventHandler]);
 
-  // Sync timeline changes with ChatService for persistence
+  // Restore timeline from latest conversation on component mount
   useEffect(() => {
-    chatService.updateCurrentMessages(timeline);
-  }, [timeline, chatService]);
+    restoreConversationTimeline();
+  }, [restoreConversationTimeline]);
+
+  // Save conversation to history whenever timeline changes
+  useEffect(() => {
+    if (timeline.length > 0 && !isRestoring) {
+      chatService.saveConversation(timeline);
+    }
+  }, [timeline, chatService, isRestoring]);
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
@@ -374,6 +393,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(false);
     setPendingConfirmation(null);
     setShowHistory(false);
+    setRestoreError(null);
   }, [chatService]);
 
   const handleStop = useCallback(() => {
@@ -449,6 +469,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const handleShowHistory = useCallback(() => {
     setShowHistory(true);
+    setRestoreError(null);
   }, []);
 
   const handleCloseHistory = useCallback(() => {
@@ -456,21 +477,32 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
-    // Load the conversation and get AG-UI event array
-    const events = await chatService.loadConversation(conversation.threadId);
-    if (events) {
-      // Process each event through the event handler for proper state restoration
-      for (const event of events) {
-        await eventHandler.handleEvent(event);
-      }
+    try {
+      // Load the conversation and get AG-UI event array
+      const events = await chatService.loadConversation(conversation.threadId);
+      if (events) {
+        // Process each event through the event handler for proper state restoration
+        for (const event of events) {
+          await eventHandler.handleEvent(event);
+        }
 
-      // Reset UI state
-      setCurrentRunId(null);
-      setIsStreaming(false);
-      setPendingConfirmation(null);
+        // Reset UI state
+        setCurrentRunId(null);
+        setIsStreaming(false);
+        setPendingConfirmation(null);
+        setShowHistory(false);
+        setRestoreError(null);
+      }
+    } catch (error: any) {
+      console.error('Error loading conversation:', error);
+      setRestoreError(error.message || 'Failed to load conversation');
       setShowHistory(false);
     }
   }, [chatService, eventHandler]);
+
+  const handleRetryRestore = useCallback(() => {
+    restoreConversationTimeline();
+  }, [restoreConversationTimeline]);
 
   // Build window instance object
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
@@ -503,7 +535,50 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         title={showHistory ? 'All conversations' : undefined}
       />
 
-      {showHistory ? (
+      {isRestoring ? (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          gap: '16px'
+        }}>
+          <EuiLoadingSpinner size="xl" />
+          <EuiText color="subdued">
+            {i18n.translate('chat.window.restoringMessage', {
+              defaultMessage: 'Restoring conversation...',
+            })}
+          </EuiText>
+        </div>
+      ) : restoreError ? (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          gap: '16px',
+          padding: '24px'
+        }}>
+          <EuiText color="danger" textAlign="center">
+            <h3>
+              {i18n.translate('chat.window.restoreErrorTitle', {
+                defaultMessage: 'Failed to restore conversation',
+              })}
+            </h3>
+            <p>{restoreError}</p>
+          </EuiText>
+          <EuiButton
+            onClick={handleRetryRestore}
+            iconType="refresh"
+          >
+            {i18n.translate('chat.window.retryButton', {
+              defaultMessage: 'Retry',
+            })}
+          </EuiButton>
+        </div>
+      ) : showHistory ? (
         <ConversationHistoryPanel
           conversationHistoryService={chatService.conversationHistoryService}
           onSelectConversation={handleSelectConversation}

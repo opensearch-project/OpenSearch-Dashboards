@@ -48,10 +48,6 @@ export class ChatService {
   private coreChatService?: ChatServiceStart;
   private workspaces?: WorkspacesStart;
 
-  // Chat state persistence
-  private readonly STORAGE_KEY = 'chat.currentState';
-  private currentMessages: Message[] = [];
-
   // ChatWindow instance for delegating sendMessage calls to proper timeline management
   private chatWindowInstance: ChatWindowInstance | null = null;
 
@@ -84,17 +80,6 @@ export class ChatService {
       throw new Error('Core chat service is required for conversation history');
     }
     this.conversationHistoryService = new ConversationHistoryService(coreChatService);
-
-    // Try to restore existing state first
-    const currentChatState = this.loadCurrentChatState();
-    if (currentChatState?.threadId && this.coreChatService) {
-      // Set thread ID in core service
-      this.coreChatService.setThreadId(currentChatState.threadId);
-    }
-
-    // Clean up trailing error messages from interrupted sessions (e.g., page refresh)
-    const messages = currentChatState?.messages || [];
-    this.currentMessages = this.removeTrailingErrorMessages(messages);
 
     // Subscribe to assistant action service to keep tools in sync
     const assistantActionService = AssistantActionService.getInstance();
@@ -561,87 +546,13 @@ export class ChatService {
     this.agent.resetConnection();
   }
 
-  // Chat state persistence methods
-  private saveCurrentChatState(): void {
-    const state: CurrentChatState = {
-      threadId: this.getThreadId(),
-      messages: this.currentMessages,
-    };
-    try {
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to save chat state to sessionStorage:', error);
-    }
-  }
-
-  private loadCurrentChatState(): CurrentChatState | null {
-    try {
-      const stored = sessionStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to load chat state from sessionStorage:', error);
-      return null;
-    }
-  }
-
-  private clearCurrentChatState(): void {
-    try {
-      sessionStorage.removeItem(this.STORAGE_KEY);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to clear chat state from sessionStorage:', error);
-    }
-  }
-
   /**
-   * Remove trailing system error messages from restored chat sessions.
-   * This prevents stale "network error" messages from interrupted connections (page refresh)
-   * from appearing when the user returns to the chat.
+   * Save messages to conversation history
    */
-  private removeTrailingErrorMessages(messages: any[]): any[] {
-    if (!messages.length) {
-      return messages;
-    }
-
-    // Work backwards from the end, removing trailing system error messages
-    let endIndex = messages.length;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
-
-      // Check if this is the specific network error from page refresh
-      if (message.role === 'system' && message.content === 'Error: network error') {
-        endIndex = i; // Mark for removal
-      } else {
-        // Stop when we hit a non-error message
-        break;
-      }
-    }
-
-    // Return array without trailing error messages
-    return messages.slice(0, endIndex);
-  }
-
-  public saveCurrentChatStatePublic(): void {
-    this.saveCurrentChatState();
-  }
-
-  public getCurrentMessages(): Message[] {
-    return this.currentMessages;
-  }
-
-  public updateCurrentMessages(messages: Message[]): void {
-    this.currentMessages = messages;
-    this.saveCurrentChatState();
-
-    // Save to conversation history (async but don't await to avoid blocking)
+  public async saveConversation(messages: Message[]): Promise<void> {
     if (messages.length > 0) {
       const threadId = this.getThreadId();
-      this.conversationHistoryService.saveConversation(threadId, messages).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to save conversation to history:', error);
-      });
+      await this.conversationHistoryService.saveConversation(threadId, messages);
     }
   }
 
@@ -669,14 +580,57 @@ export class ChatService {
     }
     this.coreChatService.newThread();
 
-    this.currentMessages = [];
-    this.clearCurrentChatState();
-
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
 
     // Reset AgUiAgent connection state to clear any aborted controllers
     this.resetConnection();
+  }
+
+  /**
+   * Restore the latest conversation from agentic memory
+   * Returns the messages and thread ID
+   */
+  public async restoreLatestConversation(): Promise<{
+    threadId: string;
+    messages: Message[];
+  } | null> {
+    // Get the latest conversation summary from conversation history service
+    const result = await this.conversationHistoryService.getConversations({
+      page: 1,
+      pageSize: 1,
+    });
+
+    if (result.conversations.length > 0) {
+      // Found a latest conversation - get full details
+      const latestConversationSummary = result.conversations[0];
+
+      // Get the full conversation with all events
+      const events = await this.conversationHistoryService.getConversation(
+        latestConversationSummary.threadId
+      );
+
+      if (!events) {
+        return null;
+      }
+
+      // Set the thread ID in core service
+      if (this.coreChatService) {
+        this.coreChatService.setThreadId(latestConversationSummary.threadId);
+      }
+
+      // Extract messages from MESSAGES_SNAPSHOT event
+      const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
+      if (snapshotEvent && 'messages' in snapshotEvent) {
+        return {
+          threadId: latestConversationSummary.threadId,
+          messages: snapshotEvent.messages,
+        };
+      }
+    }
+
+    // No snapshot event found
+    return null;
   }
 
   /**
@@ -692,13 +646,6 @@ export class ChatService {
     // Set the thread ID in core service
     if (this.coreChatService) {
       this.coreChatService.setThreadId(threadId);
-    }
-
-    // Extract messages from MESSAGES_SNAPSHOT event for current state management
-    const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
-    if (snapshotEvent && 'messages' in snapshotEvent) {
-      this.currentMessages = snapshotEvent.messages;
-      this.saveCurrentChatState();
     }
 
     return events;
