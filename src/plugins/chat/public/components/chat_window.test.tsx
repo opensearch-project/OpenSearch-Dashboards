@@ -775,7 +775,7 @@ describe('ChatWindow', () => {
       const { getByText, container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Should show loading spinner and message
-      expect(getByText('Restoring conversation...')).toBeTruthy();
+      expect(getByText('Loading conversation...')).toBeTruthy();
       const spinner = container.querySelector('.euiLoadingSpinner');
       expect(spinner).toBeTruthy();
     });

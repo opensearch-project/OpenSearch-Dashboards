@@ -32,6 +32,8 @@ import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CoreStart } from '../../../../core/public';
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
@@ -58,13 +60,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const service = AssistantActionService.getInstance();
   const { chatService, confirmationService } = useChatContext();
+  const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
+  const toasts = services.core?.notifications?.toasts;
   const [timeline, setTimeline] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
@@ -132,7 +136,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   // Extracted restoration logic to avoid duplication
   const restoreConversationTimeline = useCallback(async () => {
-    setIsRestoring(true);
+    setIsLoading(true);
     setRestoreError(null);
 
     try {
@@ -191,7 +195,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       console.error('Error restoring conversation:', error);
       setRestoreError(error.message || 'Failed to restore conversation');
     } finally {
-      setIsRestoring(false);
+      setIsLoading(false);
     }
   }, [chatService, eventHandler]);
 
@@ -202,10 +206,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   // Save conversation to history whenever timeline changes
   useEffect(() => {
-    if (timeline.length > 0 && !isRestoring) {
+    if (timeline.length > 0 && !isLoading) {
       chatService.saveConversation(timeline);
     }
-  }, [timeline, chatService, isRestoring]);
+  }, [timeline, chatService, isLoading]);
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
@@ -477,6 +481,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
+    setIsLoading(true);
+
     try {
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
@@ -491,14 +497,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         setIsStreaming(false);
         setPendingConfirmation(null);
         setShowHistory(false);
-        setRestoreError(null);
       }
     } catch (error: any) {
-      console.error('Error loading conversation:', error);
-      setRestoreError(error.message || 'Failed to load conversation');
-      setShowHistory(false);
+      toasts?.addWarning({
+        title: i18n.translate('chat.window.loadConversationErrorTitle', {
+          defaultMessage: 'Failed to load conversation',
+        }),
+        text:
+          error instanceof Error
+            ? error.message
+            : i18n.translate('chat.window.loadConversationErrorMessage', {
+                defaultMessage: 'An unexpected error occurred while loading the conversation.',
+              }),
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [chatService, eventHandler]);
+  }, [chatService, eventHandler, toasts]);
 
   const handleRetryRestore = useCallback(() => {
     restoreConversationTimeline();
@@ -535,7 +550,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         title={showHistory ? 'All conversations' : undefined}
       />
 
-      {isRestoring ? (
+      {isLoading ? (
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -546,8 +561,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         }}>
           <EuiLoadingSpinner size="xl" />
           <EuiText color="subdued">
-            {i18n.translate('chat.window.restoringMessage', {
-              defaultMessage: 'Restoring conversation...',
+            {i18n.translate('chat.window.loadingMessage', {
+              defaultMessage: 'Loading conversation...',
             })}
           </EuiText>
         </div>

@@ -614,14 +614,13 @@ export class ChatService {
         return null;
       }
 
-      // Set the thread ID in core service
-      if (this.coreChatService) {
-        this.coreChatService.setThreadId(latestConversationSummary.threadId);
-      }
-
       // Extract messages from MESSAGES_SNAPSHOT event
       const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
       if (snapshotEvent && 'messages' in snapshotEvent) {
+        // Set the thread ID in core service
+        if (this.coreChatService) {
+          this.coreChatService.setThreadId(latestConversationSummary.threadId);
+        }
         return {
           threadId: latestConversationSummary.threadId,
           messages: snapshotEvent.messages,
