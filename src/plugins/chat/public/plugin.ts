@@ -24,6 +24,7 @@ import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
 import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
+import { AgenticMemoryProvider } from './services/agentic_memory_provider';
 
 const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
   const state = test as ChatWindowState | null;
@@ -104,7 +105,11 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
     // Get plugin configuration (same as original implementation)
-    const chatConfig = this.initializerContext.config.get<{ enabled: boolean; agUiUrl?: string }>();
+    const chatConfig = this.initializerContext.config.get<{
+      enabled: boolean;
+      agUiUrl?: string;
+      mlCommonsAgentId?: string;
+    }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
     // Check enablement using the unified logic
@@ -132,6 +137,18 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         openWindow: this.chatService.openWindow.bind(this.chatService),
         closeWindow: this.chatService.closeWindow.bind(this.chatService),
       });
+    }
+
+    // Set up agentic memory provider only if ML Commons agent ID is configured
+    if (this.coreSetup?.chat?.setMemoryProvider && chatConfig.mlCommonsAgentId) {
+      try {
+        const agenticMemoryProvider = new AgenticMemoryProvider(core.http);
+        this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
+      } catch (error) {
+        // If agentic memory provider setup fails, fall back to default LocalStorageMemoryProvider
+        // eslint-disable-next-line no-console
+        console.warn('Failed to set up agentic memory provider, using default:', error);
+      }
     }
 
     // Register chat button in header with conditional visibility
