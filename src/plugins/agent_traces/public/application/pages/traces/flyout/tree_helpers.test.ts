@@ -10,7 +10,7 @@ import {
   countSpans,
   sumTokens,
   parseLatencyMs,
-  parseRawTimestampMs,
+  parseTimestampMs,
   extractTimestamps,
   flattenVisibleNodes,
   calculateTimelineRange,
@@ -128,21 +128,21 @@ describe('tree_helpers', () => {
     });
   });
 
-  describe('parseRawTimestampMs', () => {
+  describe('parseTimestampMs', () => {
     it('parses ISO timestamp', () => {
-      const ms = parseRawTimestampMs('2025-01-01T00:00:00Z');
+      const ms = parseTimestampMs('2025-01-01T00:00:00Z');
       expect(ms).toBe(new Date('2025-01-01T00:00:00Z').getTime());
     });
 
     it('normalizes space-separated timestamps', () => {
-      const ms = parseRawTimestampMs('2025-01-01 12:00:00');
+      const ms = parseTimestampMs('2025-01-01 12:00:00');
       expect(ms).toBeGreaterThan(0);
     });
 
     it('returns 0 for invalid input', () => {
-      expect(parseRawTimestampMs(null)).toBe(0);
-      expect(parseRawTimestampMs('')).toBe(0);
-      expect(parseRawTimestampMs(123)).toBe(0);
+      expect(parseTimestampMs(null)).toBe(0);
+      expect(parseTimestampMs('')).toBe(0);
+      expect(parseTimestampMs(123)).toBe(0);
     });
   });
 

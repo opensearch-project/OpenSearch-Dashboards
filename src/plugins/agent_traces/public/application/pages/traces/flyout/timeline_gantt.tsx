@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { getCategoryMeta, hexToRgba } from '../../../../services/span_categorization';
+import { formatMs } from '../trace_details/utils/span_timerange_utils';
 import { TimelineSpan } from './tree_helpers';
 import './timeline_gantt.scss';
 
@@ -30,11 +31,6 @@ export interface TimelineGanttProps {
   onSelectNode: (nodeId: string) => void;
   onToggleExpanded: (nodeId: string) => void;
 }
-
-const formatRelativeMs = (ms: number): string => {
-  if (ms >= 1000) return `${(ms / 1000).toFixed(2)} s`;
-  return `${ms.toFixed(2)} ms`;
-};
 
 export const TimelineGantt: React.FC<TimelineGanttProps> = ({
   timelineVisibleSpans,
@@ -173,15 +169,13 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                           <div style={{ lineHeight: 1.6 }}>
                             <div>
                               <strong>Duration:</strong>{' '}
-                              {span.node.latency || formatRelativeMs(span.durationMs)}
+                              {span.node.latency || formatMs(span.durationMs)}
                             </div>
                             <div>
-                              <strong>Start:</strong>{' '}
-                              {formatRelativeMs(span.startMs - timelineRange.minMs)}
+                              <strong>Start:</strong> {formatMs(span.startMs - timelineRange.minMs)}
                             </div>
                             <div>
-                              <strong>End:</strong>{' '}
-                              {formatRelativeMs(span.endMs - timelineRange.minMs)}
+                              <strong>End:</strong> {formatMs(span.endMs - timelineRange.minMs)}
                             </div>
                           </div>
                         }

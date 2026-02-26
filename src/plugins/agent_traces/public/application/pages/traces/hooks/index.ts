@@ -9,4 +9,9 @@ export { useTraceMetrics, useTraceMetricsContext, TraceMetricsContext } from './
 export type { TraceMetrics } from './use_trace_metrics';
 export { formatDuration, traceHitToAgentSpan } from './span_transforms';
 export type { AgentSpan } from './span_transforms';
+export {
+  formatMs,
+  parseLatencyMs,
+  parseTimestampMs,
+} from '../trace_details/utils/span_timerange_utils';
 export type { BaseRow, LoadingState } from './tree_utils';

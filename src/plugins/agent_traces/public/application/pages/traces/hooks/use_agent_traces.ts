@@ -11,7 +11,14 @@ import { transformPPLDataToTraceHits } from '../trace_details/traces/ppl_to_trac
 import { useIsTabActive } from '../../../../components/tabs/tabs';
 import { AgentSpan } from './span_transforms';
 import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
-import { BaseRow, setLevels, spanToRow, buildFullSpanTree, hitsToAgentSpans } from './tree_utils';
+import {
+  BaseRow,
+  setLevels,
+  spanToRow,
+  buildFullSpanTree,
+  hitsToAgentSpans,
+  formatTimestamp,
+} from './tree_utils';
 
 export interface TraceRow extends BaseRow {
   displayName?: string;
@@ -32,16 +39,6 @@ export interface UseAgentTracesResult {
   traceSpansCache: Map<string, TraceRow[]>;
   traceLoadingState: Map<string, TraceLoadingState>;
 }
-
-// Format timestamp to readable date/time respecting the configured timezone.
-// PPL returns timestamps without timezone indicator (e.g. "2025-05-29 03:11:25.292"),
-// so we parse as UTC first, then convert to the configured timezone.
-const formatTimestamp = (timestamp: string, timezone: string): string => {
-  if (!timestamp) return '—';
-  const m = moment.utc(timestamp);
-  if (!m.isValid()) return '—';
-  return m.tz(timezone).format('MM/DD/YYYY, h:mm:ss.SSS A');
-};
 
 // Build hierarchical tree from flat spans (gen_ai spans only, for initial table view)
 const buildSpanTree = (spans: AgentSpan[], timezone: string): TraceRow[] => {
@@ -69,13 +66,6 @@ const buildSpanTree = (spans: AgentSpan[], timezone: string): TraceRow[] => {
   // All top-level gen_ai spans are expandable (children fetched on demand)
   rootSpans.forEach((row) => {
     row.isExpandable = true;
-  });
-
-  // Sort by start time (most recent first)
-  rootSpans.sort((a, b) => {
-    const timeA = new Date(a.startTime).getTime() || 0;
-    const timeB = new Date(b.startTime).getTime() || 0;
-    return timeB - timeA;
   });
 
   return rootSpans;
@@ -128,7 +118,11 @@ export const useAgentTraces = (
   const [error, setError] = useState<string | null>(null);
   const [refreshCounter, setRefreshCounter] = useState(0);
 
-  // Cache of fully-loaded trace span trees (keyed by traceId)
+  // Cache of fully-loaded trace span trees (keyed by traceId).
+  // Ref holds the mutable source of truth so expandTrace can read it without
+  // being listed as a dependency (avoids identity churn on every cache update).
+  // State copy triggers consumer re-renders.
+  const traceSpansCacheRef = useRef<Map<string, TraceRow[]>>(new Map());
   const [traceSpansCache, setTraceSpansCache] = useState<Map<string, TraceRow[]>>(new Map());
   const [traceLoadingState, setTraceLoadingState] = useState<Map<string, TraceLoadingState>>(
     new Map()
@@ -204,6 +198,7 @@ export const useAgentTraces = (
 
   // Refresh by incrementing counter and clearing caches
   const refresh = useCallback(() => {
+    traceSpansCacheRef.current = new Map();
     setTraceSpansCache(new Map());
     setTraceLoadingState(new Map());
     inFlightRef.current.clear();
@@ -213,8 +208,8 @@ export const useAgentTraces = (
   // Fetch all spans for a traceId and cache the result
   const expandTrace = useCallback(
     async (traceId: string) => {
-      // Already cached
-      if (traceSpansCache.has(traceId)) return;
+      // Read from ref to avoid stale closures and dependency churn
+      if (traceSpansCacheRef.current.has(traceId)) return;
 
       // Already in-flight
       if (inFlightRef.current.has(traceId)) return;
@@ -238,13 +233,10 @@ export const useAgentTraces = (
         const traceHits = transformPPLDataToTraceHits(response);
         const agentSpans = hitsToAgentSpans(traceHits);
         const fmt = (ts: string) => formatTimestamp(ts, timezone);
-        const fullTree = buildFullSpanTree<TraceRow>(agentSpans, fmt);
+        const fullTree = buildFullSpanTree(agentSpans, fmt) as TraceRow[];
 
-        setTraceSpansCache((prev) => {
-          const next = new Map(prev);
-          next.set(traceId, fullTree);
-          return next;
-        });
+        traceSpansCacheRef.current.set(traceId, fullTree);
+        setTraceSpansCache(new Map(traceSpansCacheRef.current));
         setTraceLoadingState((prev) => {
           const next = new Map(prev);
           next.set(traceId, { loading: false, error: null });
@@ -263,7 +255,7 @@ export const useAgentTraces = (
         inFlightRef.current.delete(traceId);
       }
     },
-    [pplService, datasetParam, traceSpansCache, timezone]
+    [pplService, datasetParam, timezone]
   );
 
   return {

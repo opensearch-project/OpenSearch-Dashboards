@@ -3,8 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment-timezone';
 import { AgentSpan, formatDuration, traceHitToAgentSpan } from './span_transforms';
+import { parseTimestampMs } from '../trace_details/utils/span_timerange_utils';
 import { TraceHit } from '../trace_details/traces/ppl_to_trace_hits';
+
+// Format timestamp to readable date/time respecting the configured timezone.
+// PPL returns timestamps without timezone indicator (e.g. "2025-05-29 03:11:25.292"),
+// so we parse as UTC first, then convert to the configured timezone.
+export const formatTimestamp = (timestamp: string, timezone: string): string => {
+  if (!timestamp) return '—';
+  const m = moment.utc(timestamp);
+  if (!m.isValid()) return '—';
+  return m.tz(timezone).format('MM/DD/YYYY, h:mm:ss.SSS A');
+};
 
 export interface BaseRow {
   id: string;
@@ -34,10 +46,7 @@ export interface LoadingState {
 }
 
 /** Set nesting levels recursively */
-export const setLevels = <T extends { level?: number; children?: T[] }>(
-  rows: T[],
-  level: number
-): void => {
+export const setLevels = (rows: BaseRow[], level: number): void => {
   rows.forEach((row) => {
     row.level = level;
     if (row.children && row.children.length > 0) {
@@ -50,7 +59,7 @@ export const setLevels = <T extends { level?: number; children?: T[] }>(
 export const spanToRow = (
   span: AgentSpan,
   index: number,
-  formatTimestamp: (ts: string) => string
+  formatTs: (ts: string) => string
 ): BaseRow => ({
   id: span.spanId || `span-${index}`,
   spanId: span.spanId,
@@ -61,8 +70,8 @@ export const spanToRow = (
   name: span.name || span.operationName || 'Unknown',
   input: span.input || '—',
   output: span.output || '—',
-  startTime: formatTimestamp(span.startTime),
-  endTime: formatTimestamp(span.endTime),
+  startTime: formatTs(span.startTime),
+  endTime: formatTs(span.endTime),
   latency: formatDuration(span.durationNanos),
   totalTokens:
     span.genAiTotalTokens ??
@@ -76,22 +85,22 @@ export const spanToRow = (
 });
 
 /** Build hierarchical tree from flat spans, sorted children earliest-first */
-export const buildFullSpanTree = <T extends BaseRow>(
+export const buildFullSpanTree = (
   spans: AgentSpan[],
-  formatTimestamp: (ts: string) => string
-): T[] => {
-  const spanMap = new Map<string, T>();
-  const rootSpans: T[] = [];
+  formatTs: (ts: string) => string
+): BaseRow[] => {
+  const spanMap = new Map<string, BaseRow>();
+  const rootSpans: BaseRow[] = [];
 
   spans.forEach((span, index) => {
-    spanMap.set(span.spanId, spanToRow(span, index, formatTimestamp) as T);
+    spanMap.set(span.spanId, spanToRow(span, index, formatTs));
   });
 
   spanMap.forEach((row) => {
     if (row.parentSpanId && spanMap.has(row.parentSpanId)) {
       const parent = spanMap.get(row.parentSpanId)!;
       parent.children = parent.children || [];
-      (parent.children as T[]).push(row);
+      parent.children.push(row);
       parent.isExpandable = true;
     } else {
       rootSpans.push(row);
@@ -100,15 +109,15 @@ export const buildFullSpanTree = <T extends BaseRow>(
 
   setLevels(rootSpans, 0);
 
-  const sortChildren = (rows: T[]) => {
+  const sortChildren = (rows: BaseRow[]) => {
     rows.sort((a, b) => {
-      const timeA = new Date(a.startTime).getTime() || 0;
-      const timeB = new Date(b.startTime).getTime() || 0;
+      const timeA = parseTimestampMs(a.rawDocument?.startTime);
+      const timeB = parseTimestampMs(b.rawDocument?.startTime);
       return timeA - timeB;
     });
     rows.forEach((row) => {
       if (row.children && row.children.length > 0) {
-        sortChildren(row.children as T[]);
+        sortChildren(row.children);
       }
     });
   };

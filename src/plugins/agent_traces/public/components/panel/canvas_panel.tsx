@@ -17,7 +17,7 @@ export const CanvasPanel: React.FC<ICanvasPanelProps> = ({ children, testId, cla
       hasBorder={true}
       hasShadow={false}
       paddingSize="s"
-      className={className ?? 'dscCanvas'}
+      className={className ?? 'agtCanvas'}
       data-test-subj={testId}
       borderRadius="none"
     >

@@ -32,12 +32,12 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
 
   return (
     <EuiErrorBoundary>
-      <div className="mainPage">
+      <div className="agentTraces-mainPage">
         <EuiPage className="agentTraces-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="agentTraces-layout__page-body">
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedAgentTraces={savedAgentTraces} />
 
-            <div className="dscCanvas__queryPanel">
+            <div className="agtCanvas__queryPanel">
               <QueryPanel />
             </div>
 

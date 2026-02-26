@@ -65,7 +65,7 @@ describe('SpanNode', () => {
 
   it('renders category badge', () => {
     render(<SpanNode data={{ span: makeSpan(), totalDuration: 1000 }} />);
-    expect(screen.getByText('AGENT')).toBeInTheDocument();
+    expect(screen.getByText('Agent')).toBeInTheDocument();
   });
 
   it('renders latency', () => {

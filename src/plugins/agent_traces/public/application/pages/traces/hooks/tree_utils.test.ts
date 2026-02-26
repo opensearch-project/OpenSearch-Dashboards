@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { setLevels, spanToRow, buildFullSpanTree, hitsToAgentSpans, BaseRow } from './tree_utils';
+import {
+  formatTimestamp,
+  setLevels,
+  spanToRow,
+  buildFullSpanTree,
+  hitsToAgentSpans,
+} from './tree_utils';
 import { AgentSpan } from './span_transforms';
 
 const makeSpan = (overrides: Partial<AgentSpan> = {}): AgentSpan => ({
@@ -31,11 +37,29 @@ const makeSpan = (overrides: Partial<AgentSpan> = {}): AgentSpan => ({
 });
 
 describe('tree_utils', () => {
+  describe('formatTimestamp', () => {
+    it('formats UTC timestamp in the given timezone', () => {
+      const result = formatTimestamp('2025-01-01 12:00:00', 'America/New_York');
+      expect(result).toBe('01/01/2025, 7:00:00.000 AM');
+    });
+
+    it('returns dash for empty timestamp', () => {
+      expect(formatTimestamp('', 'UTC')).toBe('—');
+    });
+
+    it('returns dash for invalid timestamp', () => {
+      expect(formatTimestamp('not-a-date', 'UTC')).toBe('—');
+    });
+
+    it('preserves millisecond precision', () => {
+      const result = formatTimestamp('2025-06-15 08:30:45.789', 'UTC');
+      expect(result).toContain('.789');
+    });
+  });
+
   describe('setLevels', () => {
     it('sets levels recursively', () => {
-      const rows: Array<{ level?: number; children?: any[] }> = [
-        { children: [{ children: [{}] }] },
-      ];
+      const rows: any[] = [{ children: [{ children: [{}] }] }];
       setLevels(rows, 0);
       expect(rows[0].level).toBe(0);
       expect(rows[0].children![0].level).toBe(1);
@@ -74,7 +98,7 @@ describe('tree_utils', () => {
         makeSpan({ spanId: 'root', parentSpanId: null }),
         makeSpan({ spanId: 'child', parentSpanId: 'root' }),
       ];
-      const tree = buildFullSpanTree<BaseRow>(spans, (ts) => ts);
+      const tree = buildFullSpanTree(spans, (ts) => ts);
 
       expect(tree).toHaveLength(1);
       expect(tree[0].spanId).toBe('root');
@@ -87,10 +111,64 @@ describe('tree_utils', () => {
         makeSpan({ spanId: 'root', parentSpanId: null }),
         makeSpan({ spanId: 'child', parentSpanId: 'root' }),
       ];
-      const tree = buildFullSpanTree<BaseRow>(spans, (ts) => ts);
+      const tree = buildFullSpanTree(spans, (ts) => ts);
 
       expect(tree[0].level).toBe(0);
       expect(tree[0].children![0].level).toBe(1);
+    });
+
+    it('sorts children earliest-first using rawDocument.startTime', () => {
+      const spans = [
+        makeSpan({ spanId: 'root', parentSpanId: null }),
+        makeSpan({
+          spanId: 'late',
+          parentSpanId: 'root',
+          rawDocument: { startTime: '2025-01-01 00:00:10' },
+        }),
+        makeSpan({
+          spanId: 'early',
+          parentSpanId: 'root',
+          rawDocument: { startTime: '2025-01-01 00:00:01' },
+        }),
+        makeSpan({
+          spanId: 'mid',
+          parentSpanId: 'root',
+          rawDocument: { startTime: '2025-01-01 00:00:05' },
+        }),
+      ];
+      const tree = buildFullSpanTree(spans, (ts) => ts);
+      const childIds = tree[0].children!.map((c) => c.spanId);
+      expect(childIds).toEqual(['early', 'mid', 'late']);
+    });
+
+    it('handles spans without rawDocument.startTime in sort', () => {
+      const spans = [
+        makeSpan({ spanId: 'root', parentSpanId: null }),
+        makeSpan({
+          spanId: 'has-time',
+          parentSpanId: 'root',
+          rawDocument: { startTime: '2025-01-01 00:00:01' },
+        }),
+        makeSpan({
+          spanId: 'no-time',
+          parentSpanId: 'root',
+          rawDocument: {},
+        }),
+      ];
+      const tree = buildFullSpanTree(spans, (ts) => ts);
+      // Should not throw; span without startTime sorts to beginning (time 0)
+      expect(tree[0].children).toHaveLength(2);
+      expect(tree[0].children![0].spanId).toBe('no-time');
+      expect(tree[0].children![1].spanId).toBe('has-time');
+    });
+
+    it('treats orphan spans as roots', () => {
+      const spans = [
+        makeSpan({ spanId: 'a', parentSpanId: 'missing' }),
+        makeSpan({ spanId: 'b', parentSpanId: null }),
+      ];
+      const tree = buildFullSpanTree(spans, (ts) => ts);
+      expect(tree).toHaveLength(2);
     });
   });
 

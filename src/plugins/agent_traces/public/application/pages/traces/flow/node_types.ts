@@ -14,6 +14,5 @@ export const nodeTypes: NodeTypes = {
   content: SpanNode,
   embeddings: SpanNode,
   retrieval: SpanNode,
-  error: SpanNode,
   other: SpanNode,
 };

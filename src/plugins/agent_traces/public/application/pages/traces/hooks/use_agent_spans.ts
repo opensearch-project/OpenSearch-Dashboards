@@ -3,14 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState, useRef, useEffect } from 'react';
-import moment from 'moment';
+import { useMemo, useCallback, useState, useRef, useEffect } from 'react';
+import moment from 'moment-timezone';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../utils/state_management/store';
 import { transformPPLDataToTraceHits } from '../trace_details/traces/ppl_to_trace_hits';
 import { useIsTabActive } from '../../../../components/tabs/tabs';
 import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
-import { BaseRow, spanToRow, buildFullSpanTree, hitsToAgentSpans } from './tree_utils';
+import {
+  BaseRow,
+  spanToRow,
+  buildFullSpanTree,
+  hitsToAgentSpans,
+  formatTimestamp,
+} from './tree_utils';
 
 export interface SpanRow extends BaseRow {
   children?: SpanRow[];
@@ -31,13 +37,6 @@ export interface UseAgentSpansResult {
   spanLoadingState: Map<string, SpanLoadingState>;
 }
 
-const formatTimestamp = (timestamp: string): string => {
-  if (!timestamp) return '—';
-  const m = moment(timestamp);
-  if (!m.isValid()) return '—';
-  return m.format('MM/DD/YYYY, h:mm:ss.SSS A');
-};
-
 export const useAgentSpans = (
   pageIndex: number = 0,
   pageSize: number = 50
@@ -46,6 +45,13 @@ export const useAgentSpans = (
   const fetchVersion = useSelector((state: RootState) => state.queryEditor.fetchVersion);
   const isTabActive = useIsTabActive();
   const timeVersion = useTimeVersion(services);
+
+  // Resolve timezone from application settings (dateFormat:tz)
+  const timezone = useMemo(() => {
+    const tz = services.uiSettings?.get('dateFormat:tz');
+    if (tz && tz !== 'Browser') return tz;
+    return moment.tz.guess() || moment().format('Z');
+  }, [services.uiSettings]);
 
   // Ref-based tab visibility check: avoids re-fetching on simple tab switches
   // while still deferring fetch if query params change while hidden.
@@ -104,7 +110,7 @@ export const useAgentSpans = (
 
         const agentSpans = hitsToAgentSpans(transformPPLDataToTraceHits(response));
         const rows = agentSpans.map(
-          (span, index) => spanToRow(span, index, formatTimestamp) as SpanRow
+          (span, index) => spanToRow(span, index, (ts) => formatTimestamp(ts, timezone)) as SpanRow
         );
         setSpans(rows);
       } catch (err) {
@@ -131,6 +137,7 @@ export const useAgentSpans = (
     pageSize,
     refreshCounter,
     timeVersion,
+    timezone,
     fetchVersion,
   ]);
 
@@ -162,7 +169,8 @@ export const useAgentSpans = (
         });
 
         const agentSpans = hitsToAgentSpans(transformPPLDataToTraceHits(response));
-        const fullTree = buildFullSpanTree<SpanRow>(agentSpans, formatTimestamp);
+        const fmt = (ts: string) => formatTimestamp(ts, timezone);
+        const fullTree = buildFullSpanTree<SpanRow>(agentSpans, fmt);
 
         setSpanSpansCache((prev) => {
           const next = new Map(prev);
@@ -187,7 +195,7 @@ export const useAgentSpans = (
         inFlightRef.current.delete(traceId);
       }
     },
-    [pplService, datasetParam, spanSpansCache]
+    [pplService, datasetParam, spanSpansCache, timezone]
   );
 
   return {

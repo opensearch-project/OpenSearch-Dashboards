@@ -13,7 +13,7 @@ import {
   hexToRgba,
   SpanCategory,
 } from '../../../../services/span_categorization';
-import { parseLatencyMs } from '../flyout/tree_helpers';
+import { parseLatencyMs } from '../trace_details/utils/span_timerange_utils';
 import './span_node.scss';
 
 interface SpanNodeProps {

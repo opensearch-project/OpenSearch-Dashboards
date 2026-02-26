@@ -4,11 +4,14 @@
  */
 
 import { TraceRow } from '../hooks/use_agent_traces';
+import { parseLatencyMs, parseTimestampMs } from '../trace_details/utils/span_timerange_utils';
 import {
   getSpanCategory,
   getCategoryMeta,
   SpanCategory,
 } from '../../../../services/span_categorization';
+
+export { parseLatencyMs, parseTimestampMs };
 
 export interface TreeNode {
   label: string;
@@ -81,38 +84,18 @@ export const sumTokens = (nodes: TreeNode[]): number => {
   return total;
 };
 
-export const parseLatencyMs = (latency?: string): number => {
-  if (!latency || latency === '—') return 0;
-  if (latency.endsWith('ms')) return parseFloat(latency) || 0;
-  if (latency.endsWith('s')) return (parseFloat(latency) || 0) * 1000;
-  return 0;
-};
-
-export const parseRawTimestampMs = (ts: unknown): number => {
-  if (!ts || typeof ts !== 'string') return 0;
-  let normalized = ts;
-  if (ts.includes(' ') && !ts.includes('T')) {
-    normalized = ts.replace(' ', 'T');
-    if (!normalized.includes('Z') && !normalized.includes('+')) {
-      normalized += 'Z';
-    }
-  }
-  const ms = new Date(normalized).getTime();
-  return isNaN(ms) ? 0 : ms;
-};
-
 export const extractTimestamps = (node: TreeNode): { startMs: number; endMs: number } => {
   const raw = node.traceRow?.rawDocument;
   if (raw) {
     const rawStart = raw.startTime;
-    const s = parseRawTimestampMs(rawStart);
+    const s = parseTimestampMs(rawStart);
     if (s > 0) {
       // Prefer durationInNanos for sub-ms precision; fall back to endTime.
       const durationNanos = (raw.durationInNanos as number) || 0;
       if (durationNanos > 0) {
         return { startMs: s, endMs: s + durationNanos / 1_000_000 };
       }
-      const e = parseRawTimestampMs(raw.endTime);
+      const e = parseTimestampMs(raw.endTime);
       if (e > 0) return { startMs: s, endMs: e };
     }
   }

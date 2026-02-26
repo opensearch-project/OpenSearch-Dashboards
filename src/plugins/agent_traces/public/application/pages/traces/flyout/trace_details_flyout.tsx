@@ -22,13 +22,13 @@ import {
 } from '@elastic/eui';
 import { TraceRow } from '../hooks/use_agent_traces';
 import { TraceFlowView } from '../flow/trace_flow_view';
+import { parseLatencyMs } from '../trace_details/utils/span_timerange_utils';
 import {
   TreeNode,
   buildTreeFromTraceRow,
   flattenTree,
   countSpans,
   sumTokens,
-  parseLatencyMs,
   flattenVisibleNodes,
   calculateTimelineRange,
 } from './tree_helpers';

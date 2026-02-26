@@ -14,7 +14,9 @@ describe('nodeTypes', () => {
     expect(nodeTypes.agent).toBe('MockSpanNode');
     expect(nodeTypes.llm).toBe('MockSpanNode');
     expect(nodeTypes.tool).toBe('MockSpanNode');
-    expect(nodeTypes.error).toBe('MockSpanNode');
+    expect(nodeTypes.content).toBe('MockSpanNode');
+    expect(nodeTypes.embeddings).toBe('MockSpanNode');
+    expect(nodeTypes.retrieval).toBe('MockSpanNode');
     expect(nodeTypes.other).toBe('MockSpanNode');
   });
 });

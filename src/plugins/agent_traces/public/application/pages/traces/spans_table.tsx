@@ -2,31 +2,22 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useMemo, useCallback, useEffect, useRef } from 'react';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiText,
-  EuiLink,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import './traces_table.scss';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { getCategoryMeta, getSpanCategory } from '../../../services/span_categorization';
 import { useTraceFlyout } from './flyout/trace_flyout_context';
+import { SpanRow, useAgentSpans } from './hooks/use_agent_spans';
 import { TraceRow } from './hooks/use_agent_traces';
-import { useAgentSpans, SpanRow } from './hooks/use_agent_spans';
 import { useTraceMetricsContext } from './hooks/use_trace_metrics';
-import { getSpanCategory, getCategoryMeta } from '../../../services/span_categorization';
 import {
-  useTablePagination,
   renderStatus,
-  TableLoadingState,
-  TableErrorState,
   TableEmptyState,
+  TableLoadingState,
+  useTablePagination,
 } from './table_shared';
+import './traces_table.scss';
 
 export const SpansTable = () => {
   const { pageIndex, pageSize, pagination: basePagination, onTableChange } = useTablePagination(0);
@@ -43,13 +34,6 @@ export const SpansTable = () => {
     }),
     [basePagination, metrics?.totalSpans, spans.length]
   );
-
-  // Reset to first page when current page is beyond available results
-  useEffect(() => {
-    if (!loading && spans.length === 0 && pageIndex > 0) {
-      // handled by useTablePagination query reset
-    }
-  }, [loading, spans.length, pageIndex]);
 
   const { openFlyout, updateFlyoutFullTree } = useTraceFlyout();
   const flyoutTraceIdRef = useRef<string | null>(null);
