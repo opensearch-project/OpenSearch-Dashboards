@@ -20,7 +20,7 @@ module.exports = {
     '^.+\\.(ts|tsx|js|jsx)$': path.resolve(__dirname, '../../src/dev/jest/babel_transform.js'),
   },
   transformIgnorePatterns: [
-    '[/\\\\]node_modules(?![\\/\\\\](@xyflow|@dagrejs|d3-color|ramda))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](@xyflow|@dagrejs|d3-[^/\\\\]+|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
   ],
   testEnvironment: 'jest-environment-jsdom',
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
