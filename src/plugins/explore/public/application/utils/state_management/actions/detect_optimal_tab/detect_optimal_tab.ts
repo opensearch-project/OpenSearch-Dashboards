@@ -8,6 +8,7 @@ import { RootState } from '../../store';
 import { setActiveTab } from '../../slices';
 import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
+import { resultsCache } from '../../slices';
 import { visualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
 import { FIELD_TYPE_MAP } from '../../../../../components/visualizations/constants';
 import { VisColumn, VisFieldType } from '../../../../../components/visualizations/types';
@@ -73,7 +74,6 @@ export const detectAndSetOptimalTab = createAsyncThunk<
 >('ui/detectAndSetOptimalTab', async ({ services }, { getState, dispatch }) => {
   const state = getState();
   const query = state.query;
-  const results = state.results;
   const queryStatusMap = state.queryEditor.queryStatusMap;
 
   // Get results for visualization tab
@@ -87,7 +87,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
 
-  const visualizationResults = results[visualizationTabCacheKey];
+  const visualizationResults = resultsCache.get(visualizationTabCacheKey);
   const visualizationQueryStatus = queryStatusMap[visualizationTabCacheKey];
 
   let activeTab = '';

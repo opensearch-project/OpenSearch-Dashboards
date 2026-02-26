@@ -14,6 +14,8 @@ import {
   uiReducer,
   queryReducer,
   resultsReducer,
+  resultsCache,
+  clearResultsCache,
 } from '../../application/utils/state_management/slices';
 import { ExploreFlavor } from '../../../common';
 
@@ -92,8 +94,32 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   })),
 }));
 
+const fullTestResult = {
+  elapsedMs: 100,
+  took: 10,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [
+      {
+        _id: '1',
+        _index: 'test-index',
+        _type: '_doc',
+        _score: 1.0,
+        _source: { message: 'test message', '@timestamp': '2023-01-01T00:00:00Z' },
+      },
+    ],
+    total: 1,
+    max_score: 1.0,
+  },
+  fieldSchema: [],
+};
+
 describe('ExploreDataTable', () => {
   const createMockStore = (hasResults = true) => {
+    if (hasResults) {
+      resultsCache.set('test-cache-key', fullTestResult as any);
+    }
     return configureStore({
       reducer: {
         legacy: legacyReducer,
@@ -127,24 +153,10 @@ describe('ExploreDataTable', () => {
         results: hasResults
           ? {
               'test-cache-key': {
+                total: 1,
                 elapsedMs: 100,
-                took: 10,
-                timed_out: false,
-                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-                hits: {
-                  hits: [
-                    {
-                      _id: '1',
-                      _index: 'test-index',
-                      _type: '_doc',
-                      _score: 1.0,
-                      _source: { message: 'test message', '@timestamp': '2023-01-01T00:00:00Z' },
-                    },
-                  ],
-                  total: 1,
-                  max_score: 1.0,
-                },
                 fieldSchema: [],
+                hasResults: true,
               },
             }
           : {},
@@ -163,6 +175,10 @@ describe('ExploreDataTable', () => {
 
   beforeEach(() => {
     jest.spyOn(useFlavorHooks, 'useFlavorId').mockReturnValue(ExploreFlavor.Logs);
+  });
+
+  afterEach(() => {
+    clearResultsCache();
   });
 
   it('renders the explore data table container', () => {
