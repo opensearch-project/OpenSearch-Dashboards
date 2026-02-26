@@ -6,20 +6,26 @@
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { FIELD_TYPE_MAP } from '../constants';
 import { VisColumn, VisFieldType } from '../types';
+import { normalizeField } from './field';
 
 export const normalizeResultRows = <T = unknown>(
   rows: Array<OpenSearchSearchHit<T>>,
   schema: Array<{ type?: string; name?: string }>
 ) => {
-  const columns: VisColumn[] = schema.map((field, index) => {
-    return {
-      id: index,
-      schema: FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown,
-      name: field.name || '',
-      column: `field-${index}`,
-      validValuesCount: 0,
-      uniqueValuesCount: 0,
-    };
+  const columns: VisColumn[] = [];
+  schema.forEach((field, index) => {
+    if (field.name) {
+      const type = field.type ? FIELD_TYPE_MAP[field.type] : VisFieldType.Unknown;
+      const column: VisColumn = {
+        id: index,
+        schema: type ?? VisFieldType.Unknown,
+        name: field.name,
+        column: normalizeField(field.name),
+        validValuesCount: 0,
+        uniqueValuesCount: 0,
+      };
+      columns.push(column);
+    }
   });
 
   const transformedData = rows.map((row: OpenSearchSearchHit) => {
