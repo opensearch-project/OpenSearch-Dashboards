@@ -40,8 +40,7 @@ const options = {
     desc: 'Pass in a config. Can pass in multiple configs.',
   },
   opensearchFrom: {
-    arg: '<snapshot|source>',
-    choices: ['snapshot', 'source'],
+    arg: '<snapshot|source|path>',
     desc: 'Build OpenSearch from source or run from snapshot.',
     defaultHelp: 'Default: $TEST_OPENSEARCH_FROM or snapshot',
   },
