@@ -103,6 +103,20 @@ export function fillMissingTimestamps(
   return filledSeriesMap;
 }
 
+/**
+ * Strips head clauses from the main query only, preserving head inside subquery brackets [...].
+ */
+export const stripHeadFromQuery = (query: string): string => {
+  return query
+    .replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length))
+    .replace(/\|\s*head\s+\d+\s*/gi, (match) => ' '.repeat(match.length))
+    .split('')
+    .map((ch, i) => (ch === '\0' ? query[i] : ch))
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
   const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
 
@@ -114,6 +128,31 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
     return `${query} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
   } else {
     return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+  }
+};
+
+/**
+ * Builds a PPL total count query by stripping head from the query before appending histogram
+ * aggregation. This ensures the total hit count reflects all matching documents, not just the
+ * head-limited rows. When no head is present, this produces the same query as
+ * buildPPLHistogramQuery, allowing deduplication at the search layer.
+ */
+export const buildPPLTotalCountQuery = (
+  query: string,
+  histogramConfig: HistogramConfig
+): string => {
+  const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
+
+  if (!aggs || !timeFieldName || !finalInterval) {
+    return query;
+  }
+
+  const baseQuery = stripHeadFromQuery(query);
+
+  if (breakdownField) {
+    return `${baseQuery} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+  } else {
+    return `${baseQuery} | stats count() by span(${timeFieldName}, ${finalInterval})`;
   }
 };
 
@@ -223,7 +262,7 @@ export const processRawResultsForHistogram = (
 
     Object.entries(responseAggs).forEach(([id, value]) => {
       if (aggsConfig && aggsConfig.date_histogram) {
-        let totalHits = rawResults.hits.total;
+        let totalHits = 0;
         const buckets = value as Array<{ key: string; value: number }>;
         tempResult.aggregations[id] = {
           buckets: buckets.map((bucket) => {

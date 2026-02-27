@@ -14,6 +14,7 @@ import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
 import { useHistogramResults } from '../../../application/utils/hooks/use_histogram_results';
+import { useTotalCountResults } from '../../../application/utils/hooks/use_total_count_results';
 
 interface ActionBarProps {
   filteredRowsCount?: number;
@@ -28,6 +29,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
   const { results: histogramResults } = useHistogramResults();
+  const { results: totalCountResults } = useTotalCountResults();
   const { core, inspector, inspectorAdapters, slotRegistry } = services;
   const savedSearch = useSelector(selectSavedSearch);
 
@@ -45,7 +47,8 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   };
 
   const rows = results?.hits?.hits || [];
-  const totalHits = histogramResults?.hits.total;
+  // Use total count results (head-stripped) for true total, fallback to histogram total
+  const totalHits = totalCountResults?.hits?.total ?? histogramResults?.hits.total;
   const elapsedMs = results?.elapsedMs;
 
   return (

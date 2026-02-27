@@ -113,6 +113,58 @@ describe('Utils - Histogram Breakdown Support', () => {
     });
   });
 
+  describe('stripHeadFromQuery', () => {
+    it('should strip head clause from query', () => {
+      expect(utils.stripHeadFromQuery('source=logs | head 200')).toBe('source=logs');
+    });
+
+    it('should strip head but preserve WHERE clause', () => {
+      expect(utils.stripHeadFromQuery('source=logs | WHERE status = 200 | head 100')).toBe(
+        'source=logs | WHERE status = 200'
+      );
+    });
+
+    it('should preserve head inside subquery brackets', () => {
+      expect(
+        utils.stripHeadFromQuery('source=logs | where id in [source=other | head 10] | head 200')
+      ).toBe('source=logs | where id in [source=other | head 10]');
+    });
+
+    it('should preserve head inside multiple subquery brackets', () => {
+      expect(
+        utils.stripHeadFromQuery(
+          'source=logs | where id in [source=a | head 5] | where name in [source=b | head 10] | head 200'
+        )
+      ).toBe('source=logs | where id in [source=a | head 5] | where name in [source=b | head 10]');
+    });
+
+    it('should handle subquery without head and main query with head', () => {
+      expect(utils.stripHeadFromQuery('source=logs | where id in [source=other] | head 100')).toBe(
+        'source=logs | where id in [source=other]'
+      );
+    });
+
+    it('should handle multiple subqueries where only some have head', () => {
+      expect(
+        utils.stripHeadFromQuery(
+          'source=logs | where id in [source=a | head 5] | where name in [source=b] | head 200'
+        )
+      ).toBe('source=logs | where id in [source=a | head 5] | where name in [source=b]');
+    });
+
+    it('should handle subquery with head but no main query head', () => {
+      expect(utils.stripHeadFromQuery('source=logs | where id in [source=other | head 10]')).toBe(
+        'source=logs | where id in [source=other | head 10]'
+      );
+    });
+
+    it('should return query unchanged when no head is present', () => {
+      expect(utils.stripHeadFromQuery('source=logs | WHERE status = 200')).toBe(
+        'source=logs | WHERE status = 200'
+      );
+    });
+  });
+
   describe('buildPPLHistogramQuery', () => {
     it('should return original query when aggs is missing', () => {
       const query = 'source=logs';
@@ -143,6 +195,134 @@ describe('Utils - Histogram Breakdown Support', () => {
 
       const result = utils.buildPPLHistogramQuery(query, histogramConfig);
       expect(result).toBe('source=logs | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('should preserve head clause in histogram query', () => {
+      const query = 'source=logs | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLHistogramQuery(query, histogramConfig);
+      expect(result).toBe('source=logs | head 200 | stats count() by span(@timestamp, 1h)');
+    });
+  });
+
+  describe('buildPPLTotalCountQuery', () => {
+    it('should return original query when aggs is missing', () => {
+      const query = 'source=logs';
+      const histogramConfig = createBaseHistogramConfig();
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(query);
+    });
+
+    it('should strip head clause from total count query', () => {
+      const query = 'source=logs | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe('source=logs | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('should strip head but preserve WHERE clause', () => {
+      const query = 'source=logs | WHERE status = 200 | head 100';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | WHERE status = 200 | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should strip head from breakdown total count query', () => {
+      const query = 'source=logs | head 50';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+        breakdownField: 'status',
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | rename @timestamp as @timestamp | timechart span=1h limit=4 count() by status'
+      );
+    });
+
+    it('should preserve head inside subquery brackets while stripping main query head', () => {
+      const query = 'source=logs | where id in [source=other | head 10] | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | where id in [source=other | head 10] | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should preserve head inside multiple subquery brackets', () => {
+      const query =
+        'source=logs | where id in [source=a | head 5] | where name in [source=b | head 10] | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | where id in [source=a | head 5] | where name in [source=b | head 10] | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should handle subquery without head and main query with head', () => {
+      const query = 'source=logs | where id in [source=other] | head 100';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | where id in [source=other] | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should handle multiple subqueries where only some have head', () => {
+      const query =
+        'source=logs | where id in [source=a | head 5] | where name in [source=b] | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | where id in [source=a | head 5] | where name in [source=b] | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should handle subquery with head but no main query head', () => {
+      const query = 'source=logs | where id in [source=other | head 10]';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | where id in [source=other | head 10] | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should produce same query as buildPPLHistogramQuery when no head is present', () => {
+      const query = 'source=logs | WHERE status = 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const histogramResult = utils.buildPPLHistogramQuery(query, histogramConfig);
+      const totalCountResult = utils.buildPPLTotalCountQuery(query, histogramConfig);
+      expect(histogramResult).toBe(totalCountResult);
     });
   });
 
