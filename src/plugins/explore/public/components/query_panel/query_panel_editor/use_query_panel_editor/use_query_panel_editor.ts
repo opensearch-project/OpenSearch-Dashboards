@@ -132,9 +132,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       defaultMessage: 'Search',
     }),
     keys: '/',
-    execute: () => {
+    execute: useCallback(() => {
       editorRef.current?.focus();
-    },
+    }, []),
   });
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
