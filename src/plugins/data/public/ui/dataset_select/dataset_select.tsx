@@ -330,6 +330,38 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           // This handles cases where flyouts temporarily change the query dataset
           // Keep the current UI state - don't update
         }
+        return;
+      }
+
+      // FALLBACK: Dataset not in list (e.g., from URL, saved query, or non-index-pattern type)
+      // Only fetch if initial load is complete to avoid race with fetchDatasets()
+      if (!hasCompletedInitialLoad.current) {
+        return;
+      }
+
+      // For non-index-pattern datasets (e.g., PROMETHEUS), try to enrich with DataView details
+      // Use onlyCheckCache=true for non-index-pattern types since they may not have DataViews
+      const onlyCheckCache = currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+      const dataView = await dataViews.get(currentDataset.id, onlyCheckCache);
+
+      // If dataView is not in cache (onlyCheckCache returns undefined), use currentDataset as-is
+      if (!dataView) {
+        setSelectedDataset(currentDataset as DetailedDataset);
+        return;
+      }
+
+      // Enrich the dataset with DataView details
+      const detailedDataset = {
+        ...currentDataset,
+        description: dataView.description,
+        displayName: dataView.displayName,
+        signalType: dataView.signalType,
+      } as DetailedDataset;
+
+      const isCompatible = isDatasetCompatibleWithSignalType(detailedDataset, signalType);
+
+      if (isCompatible) {
+        setSelectedDataset(detailedDataset);
       }
     };
     updateSelectedDataset();

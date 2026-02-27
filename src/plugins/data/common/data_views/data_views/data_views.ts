@@ -262,7 +262,16 @@ export class DataViewsService {
     });
 
     // Return DataViews in the same order as input IDs
-    return ids.map((id) => cachedDataViews.get(id) || newDataViewsMap.get(id)!);
+    // Throw error if any DataView is missing (shouldn't happen in normal flow)
+    return ids.map((id) => {
+      const dataView = cachedDataViews.get(id) || newDataViewsMap.get(id);
+      if (!dataView) {
+        throw new Error(
+          `DataView with id "${id}" was not found in cache or fetch results. This may indicate a failed fetch operation.`
+        );
+      }
+      return dataView;
+    });
   };
 
   /**

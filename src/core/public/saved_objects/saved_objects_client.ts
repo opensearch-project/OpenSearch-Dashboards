@@ -509,6 +509,10 @@ export class SavedObjectsClient {
     const request = new Promise<SimpleSavedObject<T>>((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
       this.processBatchQueue();
+    }).catch((error) => {
+      // Remove from cache on error so subsequent calls can retry
+      this.getRequestCache.delete(cacheKey);
+      throw error;
     });
 
     // Store the promise in the cache (persistent - not removed after completion)
