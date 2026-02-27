@@ -52,6 +52,7 @@
   --color-primary-hover:  #005bbf;
   --color-primary-active: #004da6;
   --color-primary-tint:   #dceeff;
+  --color-primary-faded:  rgba(0, 108, 224, 0.11); /* for date picker month background */
 
   /* AWS page / neutral palette */
   --color-secondary:    #00827d;
@@ -344,4 +345,18 @@ a {
 
 .euiSuperDatePicker__prettyFormatLink{
   color: var(--color-primary)
+}
+
+.react-datepicker__day--selected, .react-datepicker__day--in-selecting-range {
+  background-color: var(--color-primary) !important;
+}
+
+.react-datepicker__month--accessible:focus {
+  background-color: var(--color-primary-faded) !important
+}
+
+/* sidebar for larger fonts */
+
+.mgtSideBarNav {
+  width: unset !important
 }

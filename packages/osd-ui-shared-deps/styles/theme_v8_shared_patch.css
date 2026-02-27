@@ -181,3 +181,17 @@ body {
   li.react-datepicker__time-list-item--selected {
   background-color: var(--color-primary);
 }
+
+.react-datepicker__day--selected, .react-datepicker__day--in-selecting-range {
+  background-color: var(--color-primary) !important;
+}
+
+.react-datepicker__month--accessible:focus {
+  background-color: var(--color-primary-faded) !important
+}
+
+/* sidebar for larger fonts */
+
+.mgtSideBarNav {
+  width: unset !important
+}
