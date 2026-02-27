@@ -539,7 +539,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.data.withLongNumeralsTitle', {
         defaultMessage: 'Extend Numeric Precision',
       }),
-      value: true,
+      value: false,
       description: i18n.translate('data.advancedSettings.data.withLongNumeralsText', {
         defaultMessage:
           "Turn on for precise handling of extremely large numbers. Turn off to optimize performance when high precision for large values isn't required.",
