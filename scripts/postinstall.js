@@ -93,6 +93,34 @@ const run = async () => {
     })
   );
 
+  promises.push(
+    patchFile('node_modules/vega/build-es5/vega.js', {
+      from: 'return nameOrFunction;',
+      to: 'return isRegisteredScale(nameOrFunction) ? nameOrFunction : undefined;',
+    })
+  );
+
+  promises.push(
+    patchFile('node_modules/vega/build/vega.js', {
+      from: 'return nameOrFunction;',
+      to: 'return isRegisteredScale(nameOrFunction) ? nameOrFunction : undefined;',
+    })
+  );
+
+  promises.push(
+    patchFile('node_modules/vega-functions/build/vega-functions.module.js', {
+      from: 'return nameOrFunction;',
+      to: 'return isRegisteredScale(nameOrFunction) ? nameOrFunction : undefined;',
+    })
+  );
+
+  promises.push(
+    patchFile('node_modules/vega-functions/build/vega-functions.js', {
+      from: 'return nameOrFunction;',
+      to: 'return isRegisteredScale(nameOrFunction) ? nameOrFunction : undefined;',
+    })
+  );
+
   await Promise.all(promises);
 };
 
