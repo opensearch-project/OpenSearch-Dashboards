@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useCallback, useState, useEffect } from 'react';
+import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -37,6 +37,14 @@ export function DevToolsIcon({
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [devToolTab, setDevToolTab] = useState('');
+  const [sidecarPaddingRight, setSidecarPaddingRight] = useState('0px');
+
+  useEffect(() => {
+    const subscription = core.overlays.sidecar.getSidecarConfig$().subscribe((config) => {
+      setSidecarPaddingRight(config?.dockedMode === 'right' ? `${config.paddingSize}px` : '0px');
+    });
+    return () => subscription.unsubscribe();
+  }, [core.overlays.sidecar]);
 
   // Use refs to avoid closure issues
   const modalVisibleRef = useRef(modalVisible);
@@ -107,6 +115,32 @@ export function DevToolsIcon({
     setModalVisible(false);
   };
 
+  const memoizedMainApp = useMemo(
+    () => (
+      <MainApp
+        devTools={devTools}
+        savedObjects={core.savedObjects}
+        notifications={core.notifications}
+        dataSourceEnabled={!!deps.dataSource}
+        dataSourceManagement={deps.dataSourceManagement}
+        useUpdatedUX
+        setMenuMountPoint={setMountPoint}
+        RouterComponent={MemoryRouter}
+        defaultRoute={devToolTab}
+        onManageDataSource={closeModalVisible}
+      />
+    ),
+    [
+      devTools,
+      core.savedObjects,
+      core.notifications,
+      deps.dataSource,
+      deps.dataSourceManagement,
+      setMountPoint,
+      devToolTab,
+    ]
+  );
+
   return (
     <>
       <EuiToolTip
@@ -130,7 +164,15 @@ export function DevToolsIcon({
          * but overlay mask has a default padding bottom that prevent the modal from covering the whole page.
          */
         <EuiOverlayMask className="devToolsOverlayMask" headerZindexLocation="below">
-          <div style={{ width: '100vw', height: '100vh', maxWidth: '100vw' }}>
+          <div
+            style={{
+              width: '100vw',
+              height: '100vh',
+              maxWidth: '100vw',
+              marginRight: sidecarPaddingRight,
+              position: 'relative',
+            }}
+          >
             <EuiButtonIcon
               iconType="cross"
               onClick={() => setModalVisible(false)}
@@ -159,18 +201,7 @@ export function DevToolsIcon({
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem className="devAppWrapper">
-                  <MainApp
-                    devTools={devTools}
-                    savedObjects={core.savedObjects}
-                    notifications={core.notifications}
-                    dataSourceEnabled={!!deps.dataSource}
-                    dataSourceManagement={deps.dataSourceManagement}
-                    useUpdatedUX
-                    setMenuMountPoint={setMountPoint}
-                    RouterComponent={MemoryRouter}
-                    defaultRoute={devToolTab}
-                    onManageDataSource={closeModalVisible}
-                  />
+                  {memoizedMainApp}
                   <EuiSpacer size="s" />
                   <EuiSmallButton
                     iconType="cross"
