@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import minimatch from 'minimatch';
+import { makeRe } from 'minimatch';
 
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask, normalizePath } from '../lib';
 
@@ -75,7 +75,7 @@ export const CleanExtraFilesFromModules: Task = {
 
   async run(config, log, build) {
     const makeRegexps = (patterns: string[]) =>
-      patterns.map((pattern) => minimatch.makeRe(pattern, { nocase: true }));
+      patterns.map((pattern) => makeRe(pattern, { nocase: true }));
 
     const regularExpressions = makeRegexps([
       // tests
