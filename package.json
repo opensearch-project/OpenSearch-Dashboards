@@ -262,7 +262,7 @@
     "file-saver": "^2.0.5",
     "font-awesome": "4.7.0",
     "getos": "^3.2.1",
-    "glob": "^7.1.7",
+    "glob": "^13.0.6",
     "glob-all": "^3.2.1",
     "globby": "^11.1.0",
     "handlebars": "4.7.7",
