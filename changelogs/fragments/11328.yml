@@ -1,0 +1,2 @@
+feat:
+- '[Chat] Support stop agent when it is streaming' ([#11328](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11328))

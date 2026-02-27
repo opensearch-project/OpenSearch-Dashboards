@@ -31,6 +31,15 @@ async function forwardToAgUI(
 
   logger?.debug('Forwarding to external AG-UI', { agUiUrl, dataSourceId });
 
+  // Create AbortController to handle client disconnect
+  const abortController = new AbortController();
+
+  // Listen for client disconnect event
+  request.events.aborted$.subscribe(() => {
+    logger?.debug('Client disconnected, aborting AG-UI request');
+    abortController.abort();
+  });
+
   // Forward the request to AG-UI server using native fetch (Node 18+)
   const agUiResponse = await fetch(agUiUrl, {
     method: 'POST',
@@ -39,6 +48,7 @@ async function forwardToAgUI(
       Accept: 'text/event-stream',
     },
     body: JSON.stringify(requestBody),
+    signal: abortController.signal,
   });
 
   if (!agUiResponse.ok) {

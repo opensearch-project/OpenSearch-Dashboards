@@ -13,6 +13,7 @@ import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { ActivityType } from '../../common/types';
 
 // Create mock observable before using it in mocks
 const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
@@ -53,9 +54,6 @@ describe('ChatWindow', () => {
     jest.clearAllMocks();
     mockCore = coreMock.createStart();
     mockContextProvider = {};
-    mockSuggestedActionsService = {
-      registerProvider: jest.fn(),
-    };
     mockChatService = {
       sendMessage: jest.fn().mockResolvedValue({
         observable: of({ type: 'message', content: 'test' }),
@@ -74,7 +72,6 @@ describe('ChatWindow', () => {
         }),
       },
     } as any;
-    mockSuggestedActionsService = {} as any;
     mockConfirmationService = {
       getPendingConfirmations$: jest.fn().mockReturnValue(of([])),
       requestConfirmation: jest.fn(),
@@ -157,7 +154,7 @@ describe('ChatWindow', () => {
 
   describe('loading message functionality', () => {
     it('should add loading message to timeline when sending a message', async () => {
-      const { container } = renderWithContext(<ChatWindow />);
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Mock the sendMessage to return a controllable observable
       const loadingObservable = {
@@ -173,7 +170,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      const { rerender } = renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await act(async () => {
         // Send a message
@@ -206,7 +203,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -234,7 +231,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -262,7 +259,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -418,16 +415,16 @@ describe('ChatWindow', () => {
   describe('message resending functionality', () => {
     it('should resend user message and truncate timeline', async () => {
       const initialTimeline = [
-        { id: 'user-1', role: 'user', content: 'First message' },
-        { id: 'assistant-1', role: 'assistant', content: 'First response' },
-        { id: 'user-2', role: 'user', content: 'Second message' },
-        { id: 'assistant-2', role: 'assistant', content: 'Second response' },
+        { id: 'user-1', role: 'user' as const, content: 'First message' },
+        { id: 'assistant-1', role: 'assistant' as const, content: 'First response' },
+        { id: 'user-2', role: 'user' as const, content: 'Second message' },
+        { id: 'assistant-2', role: 'assistant' as const, content: 'Second response' },
       ];
 
-      mockChatService.getCurrentMessages.mockReturnValue(initialTimeline);
+      mockChatService.getCurrentMessages.mockReturnValue(initialTimeline as any);
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Wait for initial timeline to be set
       await act(async () => {
@@ -472,13 +469,13 @@ describe('ChatWindow', () => {
 
     it('should not resend non-user messages', async () => {
       const initialTimeline = [
-        { id: 'assistant-1', role: 'assistant', content: 'Assistant message' },
+        { id: 'assistant-1', role: 'assistant' as const, content: 'Assistant message' },
       ];
 
-      mockChatService.getCurrentMessages.mockReturnValue(initialTimeline);
+      mockChatService.getCurrentMessages.mockReturnValue(initialTimeline as any);
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Wait for initial timeline to be set
       await act(async () => {
@@ -515,7 +512,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await ref.current?.sendMessage({ content: 'test message' });
 
@@ -529,7 +526,7 @@ describe('ChatWindow', () => {
   describe('streaming state management', () => {
     it('should prevent sending messages while streaming', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Mock a long-running observable that doesn't complete
       const longRunningObservable = {
@@ -553,7 +550,7 @@ describe('ChatWindow', () => {
 
     it('should handle runId updates from events', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       const observableWithRunId = {
         subscribe: jest.fn((callbacks) => {
@@ -580,10 +577,8 @@ describe('ChatWindow', () => {
 
     it('should clean up subscriptions on unmount', async () => {
       const unsubscribeMock = jest.fn();
-      let subscriptionCallbacks: any;
       const observableWithCleanup = {
-        subscribe: jest.fn((callbacks) => {
-          subscriptionCallbacks = callbacks;
+        subscribe: jest.fn(() => {
           return { unsubscribe: unsubscribeMock };
         }),
       };
@@ -594,7 +589,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      const { unmount } = renderWithContext(<ChatWindow ref={ref} />);
+      const { unmount } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Create subscription by sending a message
       await act(async () => {
@@ -616,7 +611,7 @@ describe('ChatWindow', () => {
   describe('input handling', () => {
     it('should handle empty input gracefully', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await act(async () => {
         // Try to send empty message
@@ -629,7 +624,7 @@ describe('ChatWindow', () => {
 
     it('should handle whitespace-only input', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await act(async () => {
         // Try to send whitespace-only message
@@ -643,7 +638,7 @@ describe('ChatWindow', () => {
 
     it('should not trim input when sent via ref sendMessage', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await act(async () => {
         await ref.current?.sendMessage({ content: '  test message  ' });
@@ -660,7 +655,7 @@ describe('ChatWindow', () => {
   describe('new chat functionality', () => {
     it('should clear timeline and reset state on new chat', () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       ref.current?.startNewChat();
 
@@ -669,7 +664,7 @@ describe('ChatWindow', () => {
 
     it('should reset streaming state on new chat', () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       // Start new chat should reset all state
       ref.current?.startNewChat();
@@ -681,7 +676,7 @@ describe('ChatWindow', () => {
   describe('error handling', () => {
     it('should handle sendMessage promise rejection', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       mockChatService.sendMessage.mockRejectedValue(new Error('Network error'));
 
@@ -691,7 +686,7 @@ describe('ChatWindow', () => {
 
     it('should reset streaming state on sendMessage error', async () => {
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       mockChatService.sendMessage.mockRejectedValue(new Error('Network error'));
 
@@ -706,14 +701,14 @@ describe('ChatWindow', () => {
     it('should initialize with empty timeline', () => {
       mockChatService.getCurrentMessages.mockReturnValue([]);
 
-      const { container } = renderWithContext(<ChatWindow />);
+      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       expect(container).toBeTruthy();
       expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
     });
 
     it('should handle component unmount gracefully', () => {
-      const { unmount } = renderWithContext(<ChatWindow />);
+      const { unmount } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       expect(() => unmount()).not.toThrow();
     });
@@ -732,7 +727,7 @@ describe('ChatWindow', () => {
         .AssistantActionService;
       AssistantActionService.getInstance = jest.fn(() => mockService);
 
-      renderWithContext(<ChatWindow />);
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Verify that getState$ was called during mount
       expect(mockGetState).toHaveBeenCalled();

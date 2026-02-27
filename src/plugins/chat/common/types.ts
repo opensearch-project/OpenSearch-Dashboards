@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { ActivityType } from '../../../core/public';
 
 // Import interface types from core - these define the structure
 export type {
@@ -15,8 +16,12 @@ export type {
   AssistantMessage,
   UserMessage,
   ToolMessage,
+  ActivityMessage,
   Role,
 } from '../../../core/public/chat';
+
+// Re-export ActivityType enum
+export { ActivityType };
 
 // Zod schemas for runtime validation - these ensure the core types are followed
 export const FunctionCallSchema = z.object({
@@ -83,12 +88,19 @@ export const ToolMessageSchema = z.object({
   error: z.string().optional(),
 });
 
+export const ActivityMessageSchema = BaseMessageSchema.extend({
+  role: z.literal('activity'),
+  activityType: z.nativeEnum(ActivityType),
+  content: z.record(z.unknown()),
+});
+
 export const MessageSchema = z.discriminatedUnion('role', [
   DeveloperMessageSchema,
   SystemMessageSchema,
   AssistantMessageSchema,
   UserMessageSchema,
   ToolMessageSchema,
+  ActivityMessageSchema,
 ]);
 
 export const RoleSchema = z.union([
@@ -97,6 +109,7 @@ export const RoleSchema = z.union([
   z.literal('assistant'),
   z.literal('user'),
   z.literal('tool'),
+  z.literal('activity'),
 ]);
 
 export const ContextSchema = z.object({

@@ -112,6 +112,7 @@ describe('Chat Proxy Routes', () => {
           Accept: 'text/event-stream',
         },
         body: JSON.stringify(validRequest),
+        signal: expect.any(AbortSignal),
       });
 
       // Verify response headers for SSE
@@ -292,6 +293,7 @@ describe('Chat Proxy Routes', () => {
             Accept: 'text/event-stream',
           },
           body: JSON.stringify(validRequest),
+          signal: expect.any(AbortSignal),
         });
       });
 
@@ -337,6 +339,7 @@ describe('Chat Proxy Routes', () => {
             Accept: 'text/event-stream',
           },
           body: JSON.stringify(validRequest),
+          signal: expect.any(AbortSignal),
         });
       });
 

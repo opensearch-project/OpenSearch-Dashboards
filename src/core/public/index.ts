@@ -452,6 +452,7 @@ export {
   PaginatedConversations,
   ChatScreenshotServiceInterface,
   ChatScreenshotButton,
+  ActivityType,
   // AG-UI Event types
   EventType,
   BaseEvent,
