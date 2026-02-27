@@ -32,11 +32,11 @@ import { resolve } from 'path';
 import { readFile } from 'fs';
 
 import { fromNode as fcb } from 'bluebird';
-import glob from 'glob';
+import { glob } from 'glob';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await fcb((cb) => glob(pattern, cb));
+  const paths = await glob(pattern, { nodir: true });
   return Promise.all(
     paths.map(async (path) => ({
       path,
