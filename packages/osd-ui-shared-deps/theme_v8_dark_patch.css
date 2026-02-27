@@ -14,6 +14,10 @@
  * This file is appended to the v8dark webpack entry so its rules come after the
  * pre-built bundle in the cascade and win.
  *
+ * Shared rules (font family, focus ring keyframes, and common component states
+ * that are identical between light and dark) live in theme_v8_shared_patch.css,
+ * which is loaded before this file in the webpack entry.
+ *
  * AWS v8dark palette (_globals_v8dark.scss):
  *   $ouiColorPrimary:        #006ce0  (AWS Blue — interactive)
  *   $ouiColorSecondary:      #00827d  (AWS Teal)
@@ -35,50 +39,38 @@
  */
 
 /* ==========================================================================
-   FONTS
+   DESIGN TOKENS
+   Theme-specific custom properties. Shared tokens (font family) are in
+   theme_v8_shared_patch.css.
    ========================================================================== */
 
-/*
- * Override font family for the pre-built EUI bundle (unaffected by SCSS variable overrides).
- * Both --oui-font-family and --eui-font-family must be overridden since EUI components may
- * reference either. The body rule uses a literal value (not a CSS variable) so it wins even
- * if the variable declarations are later overridden by another stylesheet.
- */
 :root {
-  --oui-font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --eui-font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-}
+  /* AWS primary color scale */
+  --color-primary:            #006ce0;  /* fill backgrounds (same as light) */
+  --color-primary-on-dark:    #4da6ff;  /* text/border on dark backgrounds */
+  --color-primary-hover:      #005bbf;  /* fill button hover */
+  --color-primary-hover-dark: #70baff;  /* link hover on dark backgrounds */
 
-body {
-  font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-}
+  /* AWS dark-mode page palette */
+  --color-empty-shade:   #0a1018;
+  --color-lightest-shade: #131c27;
+  --color-light-shade:   #1f2d40;
+  --color-page-bg:       #0d1926;
+  --color-text:          #c9cfd6;
+  --color-white:         #ffffff;
+  --color-focus-bg:      #003a7a;
 
-/* ==========================================================================
-   FOCUS RINGS
-   Keyframes reference rgba(7, 130, 126, ...) — replace with AWS Blue rgba
-   (dark-mode variant, lightened for visibility on dark backgrounds).
-   ========================================================================== */
+  /* Focus ring */
+  --focus-ring:             rgba(77, 166, 255, 0.3);
+  --focus-ring-transparent: rgba(77, 166, 255, 0);
+  --primary-alpha-10:       rgba(77, 166, 255, 0.1);
+  --primary-alpha-15:       rgba(77, 166, 255, 0.15);
 
-@keyframes focusRingAnimate {
-  0%   { box-shadow: 0 0 0  6px rgba(77, 166, 255, 0); }
-  100% { box-shadow: 0 0 0  3px rgba(77, 166, 255, 0.3); }
-}
-
-@keyframes focusRingAnimateLarge {
-  0%   { box-shadow: 0 0 0 10px rgba(77, 166, 255, 0); }
-  100% { box-shadow: 0 0 0  4px rgba(77, 166, 255, 0.3); }
-}
-
-/* Outline-based focus rings used by ButtonGroup, ColorStops, FormControlLayout, Image */
-.euiButtonGroup--compressed .euiButtonGroupButton:not([class*=isDisabled]):focus,
-.euiColorStops:not(.euiColorStops-isDisabled):focus,
-.euiFormControlLayout--group .euiButtonIcon:focus-visible,
-.euiImage .euiImage__button:focus {
-  outline: 2px solid rgba(77, 166, 255, 0.3);
-}
-
-.tvbVisGauge__label{
-  padding:10px 0;
+  /* Box shadows */
+  --shadow-base:       rgba(0, 0, 0, 0.4);
+  --shadow-base-light: rgba(0, 0, 0, 0.25);
+  --shadow-field:      rgba(0, 0, 0, 0.3);
+  --shadow-inset:      rgba(255, 255, 255, 0.1);
 }
 
 /* ==========================================================================
@@ -86,19 +78,19 @@ body {
    ========================================================================== */
 
 a {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 
 .euiLink.euiLink--primary {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 .euiLink.euiLink--primary:hover,
 .euiLink.euiLink--primary:focus {
-  color: #70baff;
+  color: var(--color-primary-hover-dark);
 }
 .euiLink.euiLink--primary:focus,
 .euiLink:focus {
-  background: rgba(77, 166, 255, 0.15);
+  background: var(--primary-alpha-15);
 }
 
 /* ==========================================================================
@@ -110,39 +102,21 @@ a {
 .euiButtonEmpty:disabled .euiButtonContent__spinner,
 .euiButtonIcon.euiButtonIcon-isDisabled .euiButtonContent__spinner,
 .euiButtonGroupButton.euiButtonGroupButton-isDisabled .euiButtonContent__spinner {
-  border-color: #4da6ff currentColor currentColor currentColor;
+  border-color: var(--color-primary-on-dark) currentColor currentColor currentColor;
 }
 
 /* Outlined (default) primary button */
 .euiButton--primary {
-  color: #4da6ff;
-  border-color: #4da6ff;
+  color: var(--color-primary-on-dark);
+  border-color: var(--color-primary-on-dark);
 }
 .euiButton--primary.euiButton--fill {
-  background-color: #006ce0;
-  border-color: #006ce0;
-  color: #ffffff;
-}
-.euiButton--primary.euiButton--fill:not([class*=isDisabled]):hover,
-.euiButton--primary.euiButton--fill:not([class*=isDisabled]):focus,
-.euiButton--primary.euiButton--fill:not([class*=isDisabled]):focus-within {
-  background-color: #005bbf;
-  border-color: #005bbf;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
 }
 .euiButton--primary.euiButton--fill:not([class*=isDisabled]):active {
-  box-shadow: inset 1px 2px 8px rgba(0, 0, 0, 0.4);
-}
-.euiButton--primary:not([class*=isDisabled]) {
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
-}
-.euiButton--primary:not([class*=isDisabled]):hover,
-.euiButton--primary:not([class*=isDisabled]):focus,
-.euiButton--primary:not([class*=isDisabled]):focus-within {
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 2px 2px -1px rgba(0, 0, 0, 0.4);
-  background-color: rgba(77, 166, 255, 0.1);
-}
-.euiButton--primary:not([class*=isDisabled]):active {
-  box-shadow: inset 1px 2px 8px rgba(77, 166, 255, 0.15);
+  box-shadow: inset 1px 2px 8px var(--shadow-base);
 }
 
 /* ==========================================================================
@@ -150,10 +124,7 @@ a {
    ========================================================================== */
 
 .euiButtonEmpty--primary {
-  color: #4da6ff;
-}
-.euiButtonEmpty--primary:focus {
-  background-color: rgba(77, 166, 255, 0.1);
+  color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -161,18 +132,8 @@ a {
    ========================================================================== */
 
 .euiButtonIcon--primary {
-  color: #4da6ff;
-  border-color: #4da6ff;
-}
-.euiButtonIcon--primary.euiButtonIcon--fill {
-  background-color: #006ce0;
-  border-color: #006ce0;
-}
-.euiButtonIcon--primary.euiButtonIcon--fill:not([class*=isDisabled]):hover,
-.euiButtonIcon--primary.euiButtonIcon--fill:not([class*=isDisabled]):focus,
-.euiButtonIcon--primary.euiButtonIcon--fill:not([class*=isDisabled]):focus-within {
-  background-color: #005bbf;
-  border-color: #005bbf;
+  color: var(--color-primary-on-dark);
+  border-color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -180,60 +141,44 @@ a {
    ========================================================================== */
 
 .euiButtonGroupButton--primary {
-  color: #4da6ff;
-  border-color: #4da6ff;
+  color: var(--color-primary-on-dark);
+  border-color: var(--color-primary-on-dark);
 }
 .euiButtonGroupButton--primary.euiButtonGroupButton--fill,
 .euiButtonGroupButton--primary.euiButtonGroupButton-isSelected {
-  background-color: #006ce0;
-  border-color: #006ce0;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
 }
 
 /* ==========================================================================
    HEADER
    ========================================================================== */
 
-/* Dark-mode header: background uses AWS Teal, border uses dark shade */
+/* Dark-mode header: background uses AWS Blue, border uses dark shade */
 .euiHeader {
-  background: #00827d;
-  border-bottom: 1px solid #1f2d40;
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4), 0 1px 5px -2px rgba(0, 0, 0, 0.4);
-}
-
-/* Divider line between header sections */
-.euiHeaderSectionItem:after {
-  background: #1f2d40;
-}
-
-/* Notification dot/badge outlines use page background */
-.euiHeaderSectionItemButton__notification--dot {
-  stroke: #0d1926;
-}
-.euiHeaderSectionItemButton__notification--badge {
-  box-shadow: 0 0 0 1px #0d1926;
+  background: var(--color-primary);
+  border-bottom: 1px solid var(--color-light-shade);
+  box-shadow: 0 2px 2px -1px var(--shadow-base), 0 1px 5px -2px var(--shadow-base);
 }
 
 /* Logo focus state */
 .euiHeaderLogo:focus {
-  background: #003a7a;
+  background: var(--color-focus-bg);
 }
 
 /* Active link uses lightened AWS Blue for visibility on dark/teal header */
 .euiHeaderLink-isActive {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 .euiHeaderLogo:focus,
 .euiHeaderLink:focus,
 .euiHeaderSectionItemButton:focus {
-  background: #003a7a;
-}
-.euiHeaderSectionItemButton__notification--badge {
-  box-shadow: 0 0 0 1px #0d1926;
+  background: var(--color-focus-bg);
 }
 
 .euiHeader--default {
-  background-color: #131c27;
+  background-color: var(--color-lightest-shade);
 }
 
 /* ==========================================================================
@@ -242,21 +187,12 @@ a {
 
 .euiCollapsibleNav.euiFlyout,
 .euiCollapsibleNavGroup {
-  background-color: #131c27;
-}
-.euiCollapsibleNavGroup:not(:first-child) {
-  border-top: 1px solid #1f2d40;
+  background-color: var(--color-lightest-shade);
 }
 
 /* Selected nav item uses lightened AWS Blue */
 .euiSideNavItemButton.euiSideNavItemButton-isSelected {
-  color: #4da6ff;
-}
-
-/* Branch guide lines use dark shade */
-.euiSideNavItem--branch::after,
-.euiSideNavItem--branch > .euiSideNavItemButton:after {
-  background: #1f2d40;
+  color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -265,17 +201,17 @@ a {
 
 /* Selected state border uses lightened AWS Blue */
 .euiCard--isSelectable--primary.euiCard-isSelected:not(.euiCard-isDisabled) {
-  border-color: #4da6ff !important;
+  border-color: var(--color-primary-on-dark) !important;
 }
 
 /* Card select button highlight */
 .euiCardSelect--primary:enabled {
-  background-color: rgba(77, 166, 255, 0.15);
+  background-color: var(--primary-alpha-15);
 }
 
 /* Checkable card selected border */
 .euiCheckableCard:not(.euiCheckableCard-isDisabled).euiCheckableCard-isChecked {
-  border-color: #4da6ff;
+  border-color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -284,90 +220,61 @@ a {
 
 /* Field text: match v8dark background and text */
 .euiFieldText {
-  background-color: #131c27;
-  color: #c9cfd6;
+  background-color: var(--color-lightest-shade);
+  color: var(--color-text);
   box-shadow:
-    0 1px 1px -1px rgba(0, 0, 0, 0.3),
-    0 3px 2px -2px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 1px 1px -1px var(--shadow-field),
+    0 3px 2px -2px var(--shadow-field),
+    inset 0 0 0 1px var(--shadow-inset);
 }
 /* Focus underline switches from teal to AWS Blue */
 .euiFieldText:focus {
-  background-color: #0a1018;
-  background-image: linear-gradient(to top, #4da6ff, #4da6ff 2px, transparent 2px, transparent 100%);
+  background-color: var(--color-empty-shade);
+  background-image: linear-gradient(to top, var(--color-primary-on-dark), var(--color-primary-on-dark) 2px, transparent 2px, transparent 100%);
   box-shadow:
-    0 1px 1px -1px rgba(0, 0, 0, 0.3),
-    0 4px 4px -2px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 1px 1px -1px var(--shadow-field),
+    0 4px 4px -2px var(--shadow-field),
+    inset 0 0 0 1px var(--shadow-inset);
 }
 
 /* FormControlLayout group (input with appended button) */
 .euiFormControlLayout--group {
-  background-color: #131c27;
+  background-color: var(--color-lightest-shade);
   box-shadow:
-    0 1px 1px -1px rgba(0, 0, 0, 0.3),
-    0 3px 2px -2px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 1px 1px -1px var(--shadow-field),
+    0 3px 2px -2px var(--shadow-field),
+    inset 0 0 0 1px var(--shadow-inset);
 }
 
 /* Focused label */
 .euiFormLabel.euiFormLabel-isFocused {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 
 /* ComboBox open focus underline */
 .euiComboBox.euiComboBox-isOpen .euiComboBox__inputWrap {
-  background-image: linear-gradient(to top, #4da6ff, #4da6ff 2px, transparent 2px, transparent 100%);
+  background-image: linear-gradient(to top, var(--color-primary-on-dark), var(--color-primary-on-dark) 2px, transparent 2px, transparent 100%);
 }
 
 /* ComboBox focused option highlight */
 .euiComboBoxOption.euiComboBoxOption-isFocused {
-  color: #4da6ff;
-  background-color: rgba(77, 166, 255, 0.15);
-}
-
-/* Date picker selected time */
-.react-datepicker__time-container
-  .react-datepicker__time
-  .react-datepicker__time-box
-  ul.react-datepicker__time-list
-  li.react-datepicker__time-list-item--selected {
-  background-color: #006ce0;
+  color: var(--color-primary-on-dark);
+  background-color: var(--primary-alpha-15);
 }
 
 /* Select field (euiSelect) focus underline */
 .euiSelect:focus {
-  background-image: linear-gradient(to top, #4da6ff, #4da6ff 2px, transparent 2px, transparent 100%);
-}
-
-/* Checkbox — checked state */
-.euiCheckbox .euiCheckbox__input:checked + .euiCheckbox__square {
-  border-color: #006ce0;
-  background-color: #006ce0;
-}
-
-/* Radio — checked state */
-.euiRadio .euiRadio__input:checked + .euiRadio__circle {
-  border-color: #006ce0;
-  background-color: #006ce0;
-}
-
-/* Switch — checked state (primary variant) */
-.euiSwitch--primary .euiSwitch__body {
-  background-color: #006ce0;
-}
-.euiSwitch--primary.euiSwitch--compressed .euiSwitch__button[aria-checked=true] .euiSwitch__thumb {
-  border-color: #006ce0;
+  background-image: linear-gradient(to top, var(--color-primary-on-dark), var(--color-primary-on-dark) 2px, transparent 2px, transparent 100%);
 }
 
 /* Color picker hue slider focus */
 .euiHue__range:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.3);
-  border-color: #4da6ff;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  border-color: var(--color-primary-on-dark);
 }
 .euiHue__range:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.3);
-  border-color: #4da6ff;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  border-color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -375,14 +282,14 @@ a {
    ========================================================================== */
 
 .euiCallOut--primary {
-  border-color: #4da6ff;
-  background-color: rgba(77, 166, 255, 0.1);
+  border-color: var(--color-primary-on-dark);
+  background-color: var(--primary-alpha-10);
 }
 .euiCallOut--primary .euiCallOutHeader__icon {
-  fill: #4da6ff;
+  fill: var(--color-primary-on-dark);
 }
 .euiCallOut--primary .euiCallOutHeader__title {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -390,10 +297,10 @@ a {
    ========================================================================== */
 
 .euiAccordion__button:focus .euiAccordion__iconWrapper {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 .euiAccordion__iconButton:focus {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -401,7 +308,7 @@ a {
    ========================================================================== */
 
 .euiContextMenuItem:focus {
-  background-color: rgba(77, 166, 255, 0.15);
+  background-color: var(--primary-alpha-15);
 }
 
 /* ==========================================================================
@@ -409,8 +316,8 @@ a {
    ========================================================================== */
 
 .euiControlBar__tab.euiControlBar__tab--active {
-  box-shadow: inset 0 4px 0 #4da6ff;
-  color: #4da6ff;
+  box-shadow: inset 0 4px 0 var(--color-primary-on-dark);
+  color: var(--color-primary-on-dark);
 }
 
 /* ==========================================================================
@@ -418,12 +325,12 @@ a {
    ========================================================================== */
 
 .euiCodeEditorKeyboardHint:focus {
-  border: 2px solid #4da6ff;
+  border: 2px solid var(--color-primary-on-dark);
 }
 
 
 /* MISCELLANEOUS */
 
 .euiSuperDatePicker__prettyFormatLink {
-  color: #4da6ff;
+  color: var(--color-primary-on-dark);
 }

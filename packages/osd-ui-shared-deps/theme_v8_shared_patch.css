@@ -1,0 +1,183 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * Shared patch for v8 (eui-next) pre-built CSS bundles.
+ *
+ * Contains rules that are identical for both light and dark themes.
+ * This file is loaded before the theme-specific patch in each webpack entry,
+ * so theme-specific patches can override anything here if needed.
+ *
+ * Rules here reference CSS custom properties (--color-primary, --focus-ring,
+ * etc.) that are defined by the theme-specific patch loaded after this file.
+ */
+
+/* ==========================================================================
+   DESIGN TOKENS — shared across themes
+   ========================================================================== */
+
+:root {
+  /* Brand font */
+  --font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --oui-font-family: var(--font-family);
+  --eui-font-family: var(--font-family);
+}
+
+/* ==========================================================================
+   FONTS
+   Override font family for the pre-built EUI bundle (unaffected by SCSS
+   variable overrides). Both --oui-font-family and --eui-font-family must be
+   overridden since EUI components may reference either. The body rule uses a
+   literal value (not a CSS variable) so it wins even if the variable
+   declarations are later overridden by another stylesheet.
+   ========================================================================== */
+
+body {
+  font-family: var(--font-family);
+}
+
+/* ==========================================================================
+   FOCUS RINGS
+   Keyframes reference theme-specific focus ring variables; they resolve
+   correctly for whichever theme's :root variables are active.
+   ========================================================================== */
+
+@keyframes focusRingAnimate {
+  0%   { box-shadow: 0 0 0  6px var(--focus-ring-transparent); }
+  100% { box-shadow: 0 0 0  3px var(--focus-ring); }
+}
+
+@keyframes focusRingAnimateLarge {
+  0%   { box-shadow: 0 0 0 10px var(--focus-ring-transparent); }
+  100% { box-shadow: 0 0 0  4px var(--focus-ring); }
+}
+
+/* Outline-based focus rings used by ButtonGroup, ColorStops, FormControlLayout, Image */
+.euiButtonGroup--compressed .euiButtonGroupButton:not([class*=isDisabled]):focus,
+.euiColorStops:not(.euiColorStops-isDisabled):focus,
+.euiFormControlLayout--group .euiButtonIcon:focus-visible,
+.euiImage .euiImage__button:focus {
+  outline: 2px solid var(--focus-ring);
+}
+
+.tvbVisGauge__label {
+  padding-bottom: 0 !important;
+  font-size: 0.4em !important;
+}
+
+.tvbVisGauge__additionalLabel {
+  font-size: 0.3em !important;
+}
+
+/* ==========================================================================
+   BUTTON — shared hover/active states
+   (Fill hover uses --color-primary-hover; box-shadows use shared shadow vars.)
+   ========================================================================== */
+
+.euiButton--primary.euiButton--fill:not([class*=isDisabled]):hover,
+.euiButton--primary.euiButton--fill:not([class*=isDisabled]):focus,
+.euiButton--primary.euiButton--fill:not([class*=isDisabled]):focus-within {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+.euiButton--primary:not([class*=isDisabled]) {
+  box-shadow: 0 2px 2px -1px var(--shadow-base);
+}
+.euiButton--primary:not([class*=isDisabled]):hover,
+.euiButton--primary:not([class*=isDisabled]):focus,
+.euiButton--primary:not([class*=isDisabled]):focus-within {
+  box-shadow: 0 4px 8px 0 var(--shadow-base-light), 0 2px 2px -1px var(--shadow-base);
+  background-color: var(--primary-alpha-10);
+}
+.euiButton--primary:not([class*=isDisabled]):active {
+  box-shadow: inset 1px 2px 8px var(--primary-alpha-15);
+}
+
+/* ==========================================================================
+   BUTTON EMPTY — shared focus background
+   ========================================================================== */
+
+.euiButtonEmpty--primary:focus {
+  background-color: var(--primary-alpha-10);
+}
+
+/* ==========================================================================
+   BUTTON ICON — shared fill state and hover
+   ========================================================================== */
+
+.euiButtonIcon--primary.euiButtonIcon--fill {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.euiButtonIcon--primary.euiButtonIcon--fill:not([class*=isDisabled]):hover,
+.euiButtonIcon--primary.euiButtonIcon--fill:not([class*=isDisabled]):focus,
+.euiButtonIcon--primary.euiButtonIcon--fill:not([class*=isDisabled]):focus-within {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+   HEADER — shared structural rules
+   ========================================================================== */
+
+/* Divider line between header sections */
+.euiHeaderSectionItem:after {
+  background: var(--color-light-shade);
+}
+
+/* Notification dot/badge outlines use page background */
+.euiHeaderSectionItemButton__notification--dot {
+  stroke: var(--color-page-bg);
+}
+.euiHeaderSectionItemButton__notification--badge {
+  box-shadow: 0 0 0 1px var(--color-page-bg);
+}
+
+/* ==========================================================================
+   SIDEBAR / COLLAPSIBLE NAV — shared dividers
+   ========================================================================== */
+
+.euiCollapsibleNavGroup:not(:first-child) {
+  border-top: 1px solid var(--color-light-shade);
+}
+
+/* Branch guide lines */
+.euiSideNavItem--branch::after,
+.euiSideNavItem--branch > .euiSideNavItemButton:after {
+  background: var(--color-light-shade);
+}
+
+/* ==========================================================================
+   FORM INPUTS — states driven purely by --color-primary (same in both themes)
+   ========================================================================== */
+
+/* Checkbox — checked state */
+.euiCheckbox .euiCheckbox__input:checked + .euiCheckbox__square {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+}
+
+/* Radio — checked state */
+.euiRadio .euiRadio__input:checked + .euiRadio__circle {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+}
+
+/* Switch — checked state (primary variant) */
+.euiSwitch--primary .euiSwitch__body {
+  background-color: var(--color-primary);
+}
+.euiSwitch--primary.euiSwitch--compressed .euiSwitch__button[aria-checked=true] .euiSwitch__thumb {
+  border-color: var(--color-primary);
+}
+
+/* Date picker selected time */
+.react-datepicker__time-container
+  .react-datepicker__time
+  .react-datepicker__time-box
+  ul.react-datepicker__time-list
+  li.react-datepicker__time-list-item--selected {
+  background-color: var(--color-primary);
+}
