@@ -4,13 +4,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
 import { convertIndexPatternTerminology } from '../../../../../../opensearch_dashboards_utils/public';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
-import { selectQuery } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
@@ -21,7 +20,6 @@ export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const dispatch = useDispatch();
-  const currentQuery = useSelector(selectQuery);
   const clearEditors = useClearEditors();
   const { isDatasetManagementEnabled } = services;
 
@@ -29,50 +27,16 @@ export const DatasetSelectWidget = () => {
     data: {
       ui: { DatasetSelect },
       query: { queryString },
-      dataViews,
     },
   } = services;
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const handleDataset = async () => {
-      if (currentQuery.dataset) {
-        const dataView = await dataViews.get(
-          currentQuery.dataset.id,
-          currentQuery.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-        );
-
-        if (!dataView) {
-          await queryString.getDatasetService().cacheDataset(
-            currentQuery.dataset,
-            {
-              uiSettings: services.uiSettings,
-              savedObjects: services.savedObjects,
-              notifications: services.notifications,
-              http: services.http,
-              data: services.data,
-            },
-            false
-          );
-        }
-      }
-    };
-
-    try {
-      handleDataset();
-    } catch (error) {
-      if (isMounted) {
-        services.notifications?.toasts.addWarning(
-          `Error fetching dataset: ${(error as Error).message}`
-        );
-      }
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentQuery, dataViews, queryString, services]);
+  // REMOVED: Redundant useEffect that was fetching DataView on every render
+  // This was causing early individual get() calls before the DatasetSelect component's
+  // getMultiple() optimization could batch fetch all DataViews together.
+  // The dataset caching is now handled by:
+  // 1. DatasetSelect.fetchDatasets() - fetches all datasets via bulkGet
+  // 2. DatasetProvider - fetches current dataset if needed
+  // 3. Query execution - fetches dataset when executing queries
 
   const handleDatasetSelect = useCallback(
     async (dataset: Dataset | undefined) => {
