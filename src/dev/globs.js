@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 export function matchesAnyGlob(path, globs) {
   return globs.some((pattern) =>
