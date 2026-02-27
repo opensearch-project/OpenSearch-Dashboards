@@ -107,8 +107,14 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
-      editorSupportedAppNames: ['discover', 'explore'],
-      supportedAppNames: ['discover', 'data-explorer', 'explore', 'dataset_management'],
+      editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
+      supportedAppNames: [
+        'discover',
+        'data-explorer',
+        'explore',
+        'dataset_management',
+        'agentTraces',
+      ],
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {

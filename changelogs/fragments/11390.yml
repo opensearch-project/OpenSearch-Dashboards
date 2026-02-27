@@ -1,0 +1,2 @@
+chore:
+- Improve performance with large query result ([#11390](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11390))

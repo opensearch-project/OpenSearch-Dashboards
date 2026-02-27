@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const simplifiedPPLSupportedApp = ['explore'];
+const simplifiedPPLSupportedApp = ['explore', 'agentTraces'];
 
 /**
  * Determines the effective language for autocomplete based on the base language and current app ID.

@@ -1,0 +1,63 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.agentTracesFlow__spanNode {
+  padding: $ouiSizeM;
+  border-radius: $ouiSizeS;
+  min-width: 180px;
+  max-width: 200px;
+  transition: all 0.2s;
+}
+
+.agentTracesFlow__handle {
+  width: $ouiSizeS;
+  height: $ouiSizeS;
+}
+
+.agentTracesFlow__header {
+  display: flex;
+  align-items: center;
+  gap: $ouiSizeS;
+  margin-bottom: $ouiSizeXS;
+}
+
+.agentTracesFlow__errorBadge {
+  font-size: 9px;
+  height: $ouiSize;
+  padding: 0 $ouiSizeXS;
+}
+
+.agentTracesFlow__displayName {
+  margin-bottom: $ouiSizeS;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agentTracesFlow__durationRow {
+  display: flex;
+  align-items: center;
+  gap: $ouiSizeS;
+}
+
+.agentTracesFlow__durationTrack {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background-color: $ouiColorLightShade;
+}
+
+.agentTracesFlow__durationFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.agentTracesFlow__durationText {
+  font-size: 9px;
+  white-space: nowrap;
+  color: $ouiColorDarkShade;
+}

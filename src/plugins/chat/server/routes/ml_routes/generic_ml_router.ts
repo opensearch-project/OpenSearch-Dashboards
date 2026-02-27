@@ -79,6 +79,67 @@ function isStreamResponse(response: MLClientResponse): response is MLStreamRespo
  * Works with any ML client provider that has a request() method
  */
 export class GenericMLRouter implements MLAgentRouter {
+  /**
+   * Proxy request to ML Commons API
+   * This method tries to find an ML client first, then falls back to OpenSearch client
+   * @param options Request options
+   * @returns Response body from the API call
+   */
+  async proxyRequest(options: {
+    context: RequestHandlerContext & {
+      dataSource?: {
+        opensearch: {
+          getClient: (dataSourceId: string) => Promise<OpenSearchClient>;
+        };
+      };
+    };
+    request: OpenSearchDashboardsRequest;
+    method: string;
+    path: string;
+    body?: any;
+    dataSourceId?: string;
+  }): Promise<any> {
+    const { context, request, method, path, body, dataSourceId } = options;
+
+    // Try to find ML client first
+    const mlClient = findMLClient(context);
+
+    if (mlClient) {
+      // Use ML client if available
+      const mlResponse = await mlClient.request(
+        {
+          method,
+          path,
+          body: body ? JSON.stringify(body) : undefined,
+          datasourceId: dataSourceId,
+          stream: false,
+        },
+        request,
+        context
+      );
+
+      // Handle response based on type
+      if (typeof mlResponse === 'object' && 'body' in mlResponse) {
+        return typeof mlResponse.body === 'string' ? JSON.parse(mlResponse.body) : mlResponse.body;
+      }
+      return mlResponse;
+    }
+
+    // Fallback to OpenSearch client
+    const client =
+      dataSourceId && context.dataSource
+        ? await context.dataSource.opensearch.getClient(dataSourceId)
+        : context.core.opensearch.client.asCurrentUser;
+
+    const result = await client.transport.request({
+      method,
+      path,
+      body,
+    });
+
+    return result.body;
+  }
+
   async forward(
     context: RequestHandlerContext & {
       dataSource?: {
@@ -102,7 +163,8 @@ export class GenericMLRouter implements MLAgentRouter {
       });
     }
 
-    const language = request.body.forwardedProps?.queryAssistLanguage;
+    const requestBody = request.body as any;
+    const language = requestBody.forwardedProps?.queryAssistLanguage;
     const agentId = language ? observabilityAgentId : configuredAgentId;
 
     if (!agentId) {

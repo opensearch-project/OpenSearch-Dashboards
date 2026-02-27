@@ -7,6 +7,8 @@ import supertest from 'supertest';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { defineRoutes } from './index';
+import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
+import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 
 // Mock native fetch
 global.fetch = jest.fn();
@@ -488,6 +490,253 @@ describe('Chat Proxy Routes', () => {
 
         expect(requestBody.messages).toHaveLength(1);
         expect(requestBody.messages[0]).toEqual(validRequest.messages[0]);
+      });
+    });
+  });
+
+  describe('POST /api/chat/memory/sessions/search', () => {
+    const validSearchRequest = {
+      query: {
+        match_all: {},
+      },
+      from: 0,
+      size: 10,
+      sort: [{ created_time: { order: 'desc' } }],
+    };
+
+    let mockMLRouter: any;
+    let mockMLAgentRouterFactory: any;
+    let mockMLAgentRouterRegistry: any;
+
+    beforeEach(() => {
+      // Mock ML router with proxyRequest method
+      mockMLRouter = {
+        proxyRequest: jest.fn(),
+        getRouterName: jest.fn().mockReturnValue('GenericMLRouter'),
+      };
+
+      // Mock MLAgentRouterFactory static methods
+      mockMLAgentRouterFactory = MLAgentRouterFactory;
+      jest.spyOn(mockMLAgentRouterFactory, 'getRouter').mockReturnValue(mockMLRouter);
+
+      // Mock MLAgentRouterRegistry.initialize
+      mockMLAgentRouterRegistry = MLAgentRouterRegistry;
+      jest.spyOn(mockMLAgentRouterRegistry, 'initialize').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should successfully search memory sessions with valid request', async () => {
+      const mockAgentDetail = {
+        memory: {
+          memory_container_id: 'container-123',
+        },
+      };
+
+      const mockSearchResponse = {
+        hits: {
+          total: { value: 2 },
+          hits: [
+            {
+              _id: 'session-1',
+              _source: {
+                session_id: 'session-1',
+                created_time: '2024-01-01T00:00:00Z',
+                messages: [],
+              },
+            },
+            {
+              _id: 'session-2',
+              _source: {
+                session_id: 'session-2',
+                created_time: '2024-01-02T00:00:00Z',
+                messages: [],
+              },
+            },
+          ],
+        },
+      };
+
+      // Mock agent detail call
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockAgentDetail);
+      // Mock search call
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockSearchResponse);
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+
+      const response = await supertest(httpSetup.server.listener)
+        .post('/api/chat/memory/sessions/search')
+        .send(validSearchRequest)
+        .expect(200);
+
+      expect(response.body).toEqual(mockSearchResponse);
+
+      // Verify agent detail was fetched
+      expect(mockMLRouter.proxyRequest).toHaveBeenCalledWith({
+        context: expect.any(Object),
+        request: expect.any(Object),
+        method: 'GET',
+        path: '/_plugins/_ml/agents/test-agent-id',
+        dataSourceId: undefined,
+      });
+
+      // Verify search was performed
+      expect(mockMLRouter.proxyRequest).toHaveBeenCalledWith({
+        context: expect.any(Object),
+        request: expect.any(Object),
+        method: 'POST',
+        path: '/_plugins/_ml/memory_containers/container-123/memories/sessions/_search',
+        body: validSearchRequest,
+        dataSourceId: undefined,
+      });
+    });
+
+    it('should return 503 when ML Commons agent ID is not configured', async () => {
+      const httpSetup = await testSetup(
+        undefined,
+        () => mockCapabilitiesResolver,
+        undefined // No ML Commons agent ID
+      );
+
+      const response = await supertest(httpSetup.server.listener)
+        .post('/api/chat/memory/sessions/search')
+        .send(validSearchRequest)
+        .expect(503);
+
+      expect(response.body).toEqual({
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'ML Commons agent ID not configured',
+      });
+
+      // Verify proxyRequest was not called
+      expect(mockMLRouter.proxyRequest).not.toHaveBeenCalled();
+    });
+
+    it('should return 503 when ML router is not available', async () => {
+      // Override the mock to return null (no router available)
+      mockMLAgentRouterFactory.getRouter.mockReturnValue(null);
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+
+      const response = await supertest(httpSetup.server.listener)
+        .post('/api/chat/memory/sessions/search')
+        .send(validSearchRequest)
+        .expect(503);
+
+      expect(response.body).toEqual({
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'ML router not available',
+      });
+    });
+
+    it('should handle error when memory container ID is not found', async () => {
+      const mockAgentDetailWithoutMemory = {
+        name: 'test-agent',
+        // No memory field
+      };
+
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockAgentDetailWithoutMemory);
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+
+      const response = await supertest(httpSetup.server.listener)
+        .post('/api/chat/memory/sessions/search')
+        .send(validSearchRequest)
+        .expect(500);
+
+      expect(response.body.message).toBe('Memory container ID not found in agent detail');
+
+      // Verify agent detail was fetched but search was not performed
+      expect(mockMLRouter.proxyRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('should support optional query parameters (from, size, sort)', async () => {
+      const mockAgentDetail = {
+        memory: {
+          memory_container_id: 'container-456',
+        },
+      };
+
+      const mockSearchResponse = {
+        hits: {
+          total: { value: 100 },
+          hits: [],
+        },
+      };
+
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockAgentDetail);
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockSearchResponse);
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+
+      // Test with minimal request (only query)
+      const minimalRequest = {
+        query: { match_all: {} },
+      };
+
+      await supertest(httpSetup.server.listener)
+        .post('/api/chat/memory/sessions/search')
+        .send(minimalRequest)
+        .expect(200);
+
+      // Verify search was called with only query parameter
+      expect(mockMLRouter.proxyRequest).toHaveBeenLastCalledWith({
+        context: expect.any(Object),
+        request: expect.any(Object),
+        method: 'POST',
+        path: '/_plugins/_ml/memory_containers/container-456/memories/sessions/_search',
+        body: {
+          query: { match_all: {} },
+        },
+        dataSourceId: undefined,
+      });
+    });
+
+    it('should support dataSourceId query parameter', async () => {
+      const mockAgentDetail = {
+        memory: {
+          memory_container_id: 'container-789',
+        },
+      };
+
+      const mockSearchResponse = {
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      };
+
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockAgentDetail);
+      mockMLRouter.proxyRequest.mockResolvedValueOnce(mockSearchResponse);
+
+      const httpSetup = await testSetup(undefined, () => mockCapabilitiesResolver, 'test-agent-id');
+
+      await supertest(httpSetup.server.listener)
+        .post('/api/chat/memory/sessions/search?dataSourceId=ds-123')
+        .send(validSearchRequest)
+        .expect(200);
+
+      // Verify agent detail was fetched with dataSourceId
+      expect(mockMLRouter.proxyRequest).toHaveBeenCalledWith({
+        context: expect.any(Object),
+        request: expect.any(Object),
+        method: 'GET',
+        path: '/_plugins/_ml/agents/test-agent-id',
+        dataSourceId: 'ds-123',
+      });
+
+      // Verify search was performed with dataSourceId
+      expect(mockMLRouter.proxyRequest).toHaveBeenCalledWith({
+        context: expect.any(Object),
+        request: expect.any(Object),
+        method: 'POST',
+        path: '/_plugins/_ml/memory_containers/container-789/memories/sessions/_search',
+        body: validSearchRequest,
+        dataSourceId: 'ds-123',
       });
     });
   });
