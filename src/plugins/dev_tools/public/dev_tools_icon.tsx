@@ -111,9 +111,9 @@ export function DevToolsIcon({
     };
   }, [modalVisible, core.keyboardShortcut, closeModal]);
 
-  const closeModalVisible = () => {
+  const closeModalVisible = useCallback(() => {
     setModalVisible(false);
-  };
+  }, []);
 
   const memoizedMainApp = useMemo(
     () => (
@@ -138,6 +138,7 @@ export function DevToolsIcon({
       deps.dataSourceManagement,
       setMountPoint,
       devToolTab,
+      closeModalVisible,
     ]
   );
 
