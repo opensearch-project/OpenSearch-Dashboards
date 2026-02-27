@@ -144,6 +144,41 @@ describe('Utils - Histogram Breakdown Support', () => {
       const result = utils.buildPPLHistogramQuery(query, histogramConfig);
       expect(result).toBe('source=logs | stats count() by span(@timestamp, 1h)');
     });
+
+    it('should strip head clause from query before building histogram', () => {
+      const query = 'source=logs | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLHistogramQuery(query, histogramConfig);
+      expect(result).toBe('source=logs | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('should strip head clause from query with WHERE before building histogram', () => {
+      const query = 'source=logs | WHERE status = 200 | head 100';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLHistogramQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | WHERE status = 200 | stats count() by span(@timestamp, 1h)'
+      );
+    });
+
+    it('should strip head clause from breakdown query', () => {
+      const query = 'source=logs | head 50';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+        breakdownField: 'status',
+      });
+
+      const result = utils.buildPPLHistogramQuery(query, histogramConfig);
+      expect(result).toBe(
+        'source=logs | rename @timestamp as @timestamp | timechart span=1h limit=4 count() by status'
+      );
+    });
   });
 
   describe('processRawResultsForHistogram', () => {
