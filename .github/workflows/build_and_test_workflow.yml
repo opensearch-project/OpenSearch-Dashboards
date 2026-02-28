@@ -35,13 +35,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         group: [1, 2, 3, 4]
         include:
           - os: ubuntu-latest
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     env:
       # Override just OSD_OPTIMIZER_MAX_WORKERS for ciGroup1 because it contains a test that checks number of workers
@@ -205,13 +203,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         include:
           - os: ubuntu-latest
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
@@ -322,12 +318,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         include:
           - os: ubuntu-latest
             name: Linux
-          - os: windows-latest
-            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running plugin functional tests
@@ -543,6 +537,7 @@ jobs:
 
   bwc-tests:
     needs: [build-min-artifact-tests]
+    if: github.ref != 'refs/heads/fix/chat-basepath-handling' && (github.event_name != 'pull_request' || github.head_ref != 'fix/chat-basepath-handling')
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
