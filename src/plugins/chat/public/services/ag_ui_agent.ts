@@ -5,6 +5,7 @@
 
 import { Observable } from 'rxjs';
 import { HttpSetup } from '../../../../core/public';
+import { CHAT_PROXY_PATH } from '../../common';
 import { RunAgentInput } from '../../common/types';
 
 export interface BaseEvent {
@@ -32,7 +33,7 @@ export class AgUiAgent {
    * Uses OSD's http.basePath.prepend() if available, otherwise returns the path as-is.
    * This ensures URLs work correctly in development mode where OSD uses a random basePath.
    *
-   * @param path - API path (e.g., '/api/chat/proxy')
+   * @param path - API path (e.g., CHAT_PROXY_PATH)
    * @returns Full URL with basePath prepended if available, or the original path
    */
   private getUrl(path: string): string {
@@ -42,7 +43,7 @@ export class AgUiAgent {
     return path;
   }
 
-  constructor(proxyUrl: string = '/api/chat/proxy', http?: HttpSetup) {
+  constructor(proxyUrl: string = CHAT_PROXY_PATH, http?: HttpSetup) {
     this.proxyUrl = proxyUrl;
     this.http = http;
   }

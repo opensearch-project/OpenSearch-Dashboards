@@ -5,6 +5,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
+import { CHAT_PROXY_PATH } from '../../common';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -76,7 +77,7 @@ export class ChatService {
     http?: HttpSetup
   ) {
     // Pass http client for basePath handling in dev mode
-    this.agent = new AgUiAgent('/api/chat/proxy', http);
+    this.agent = new AgUiAgent(CHAT_PROXY_PATH, http);
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
