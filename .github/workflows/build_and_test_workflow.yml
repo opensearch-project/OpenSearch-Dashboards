@@ -6,7 +6,13 @@ name: Build and test
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
+    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+', 'fix/chat-basepath-handling'] # Run the functional test on push for release branches and fix/chat-basepath-handling
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
 
@@ -108,6 +114,8 @@ jobs:
 
       - name: Upload Code Coverage
         id: upload-code-coverage
+        # Only run in the main repo (secrets not available in forks)
+        if: github.repository_owner == 'opensearch-project'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
