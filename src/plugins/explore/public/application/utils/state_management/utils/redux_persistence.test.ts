@@ -806,19 +806,21 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=traces',
         language: 'PPL',
-        dataset: { id: 'traces-dataset', title: 'Traces Dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'traces-dataset',
+          title: 'Traces Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.TRACES, // Add signalType to dataset
+        },
       };
 
       (logsServices.osdUrlStateStorage!.get as jest.Mock)
         .mockReturnValueOnce(mockQueryState)
         .mockReturnValueOnce(null);
 
-      // Mock dataViews.get to return TRACES signal type (incompatible with logs)
-      (logsServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
-        if (id === 'traces-dataset') {
-          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
-        }
-        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
+      // Mock dataViews.get for the fetched logs dataset
+      (logsServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        signalType: CORE_SIGNAL_TYPES.LOGS,
       });
 
       // Mock dataset service to return a logs dataset
@@ -849,45 +851,30 @@ describe('redux_persistence', () => {
       const mockQueryState = {
         query: 'source=logs | head 10',
         language: 'PPL',
-        dataset: { id: 'invalid-dataset', title: 'Invalid Dataset', type: 'INDEX_PATTERN' },
+        dataset: {
+          id: 'invalid-dataset',
+          title: 'Invalid Dataset',
+          type: 'INDEX_PATTERN',
+          // No signalType - will be treated as compatible with logs flavor
+        },
       };
 
       (mockServices.osdUrlStateStorage!.get as jest.Mock)
         .mockReturnValueOnce(mockQueryState)
         .mockReturnValueOnce(null);
 
-      // Mock dataViews.get to throw an error for invalid dataset, but succeed for fallback
-      (mockServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
-        if (id === 'invalid-dataset') {
-          return Promise.reject(new Error('Dataset not found'));
-        }
-        if (id === 'fallback-dataset') {
-          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
-        }
-        return Promise.reject(new Error('Unknown dataset'));
-      });
-
-      // Mock dataset service to return a fallback dataset
-      (mockServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
-        getType: jest.fn(() => ({
-          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'fallback-dataset' }] })),
-          toDataset: jest.fn(() => ({
-            id: 'fallback-dataset',
-            title: 'Fallback Dataset',
-            type: 'INDEX_PATTERN',
-          })),
-        })),
-      });
-
       const result = await loadReduxState(mockServices);
 
-      // Should fall back to fetching a new dataset when validation fails
+      // Since the dataset has no signalType, it's compatible with logs flavor
+      // and should be used as-is (no need to fetch a fallback)
       expect(result.query.dataset).toEqual({
-        id: 'fallback-dataset',
-        title: 'Fallback Dataset',
+        id: 'invalid-dataset',
+        title: 'Invalid Dataset',
         type: 'INDEX_PATTERN',
         timeFieldName: undefined,
         dataSource: undefined,
+        language: undefined,
+        signalType: undefined,
       });
     });
   });
