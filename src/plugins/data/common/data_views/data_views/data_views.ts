@@ -348,12 +348,6 @@ export class DataViewsService {
     if (clearSavedObjectsCache) {
       this.savedObjectsCache = null;
     }
-    // Also clear the SavedObjectsClient cache for index-patterns
-    if (id) {
-      this.savedObjectsClient.clearCache('index-pattern', id);
-    } else {
-      this.savedObjectsClient.clearCache('index-pattern');
-    }
     this.patterns.clearCache(id, clearSavedObjectsCache);
   };
 
