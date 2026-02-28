@@ -4,6 +4,7 @@
  */
 
 import { AgUiAgent, EventType } from './ag_ui_agent';
+import { CHAT_PROXY_PATH } from '../../common';
 import { RunAgentInput } from '../../common/types';
 import { HttpSetup } from '../../../../core/public';
 
@@ -553,7 +554,7 @@ describe('AgUiAgent', () => {
 
     it('should use path as-is in production mode when http is undefined', (done) => {
       // Production mode: no http client provided
-      const productionAgent = new AgUiAgent('/api/chat/proxy', undefined);
+      const productionAgent = new AgUiAgent(CHAT_PROXY_PATH, undefined);
 
       const mockResponse = {
         ok: true,
@@ -573,7 +574,7 @@ describe('AgUiAgent', () => {
         complete: () => {
           // Should use the path as-is without basePath prepending
           expect(mockFetch).toHaveBeenCalledWith(
-            '/api/chat/proxy',
+            CHAT_PROXY_PATH,
             expect.objectContaining({
               method: 'POST',
             })
@@ -591,7 +592,7 @@ describe('AgUiAgent', () => {
         } as any,
       };
 
-      const devAgent = new AgUiAgent('/api/chat/proxy', mockHttp as HttpSetup);
+      const devAgent = new AgUiAgent(CHAT_PROXY_PATH, mockHttp as HttpSetup);
 
       const mockResponse = {
         ok: true,
@@ -610,9 +611,9 @@ describe('AgUiAgent', () => {
       observable.subscribe({
         complete: () => {
           // Should prepend basePath in development mode
-          expect(mockHttp.basePath!.prepend).toHaveBeenCalledWith('/api/chat/proxy');
+          expect(mockHttp.basePath!.prepend).toHaveBeenCalledWith(CHAT_PROXY_PATH);
           expect(mockFetch).toHaveBeenCalledWith(
-            '/dev-basepath/api/chat/proxy',
+            `/dev-basepath${CHAT_PROXY_PATH}`,
             expect.objectContaining({
               method: 'POST',
             })
@@ -629,7 +630,7 @@ describe('AgUiAgent', () => {
         } as any,
       };
 
-      const devAgent = new AgUiAgent('/api/chat/proxy', mockHttp as HttpSetup);
+      const devAgent = new AgUiAgent(CHAT_PROXY_PATH, mockHttp as HttpSetup);
 
       const mockResponse = {
         ok: true,
@@ -648,9 +649,9 @@ describe('AgUiAgent', () => {
       observable.subscribe({
         complete: () => {
           // Should prepend basePath and then add query parameter
-          expect(mockHttp.basePath!.prepend).toHaveBeenCalledWith('/api/chat/proxy');
+          expect(mockHttp.basePath!.prepend).toHaveBeenCalledWith(CHAT_PROXY_PATH);
           expect(mockFetch).toHaveBeenCalledWith(
-            '/dev-basepath/api/chat/proxy?dataSourceId=test-datasource-id',
+            `/dev-basepath${CHAT_PROXY_PATH}?dataSourceId=test-datasource-id`,
             expect.objectContaining({
               method: 'POST',
             })
@@ -666,7 +667,7 @@ describe('AgUiAgent', () => {
         basePath: {} as any, // basePath exists but prepend is missing
       };
 
-      const fallbackAgent = new AgUiAgent('/api/chat/proxy', mockHttp as HttpSetup);
+      const fallbackAgent = new AgUiAgent(CHAT_PROXY_PATH, mockHttp as HttpSetup);
 
       const mockResponse = {
         ok: true,
@@ -686,7 +687,7 @@ describe('AgUiAgent', () => {
         complete: () => {
           // Should fallback to using path as-is
           expect(mockFetch).toHaveBeenCalledWith(
-            '/api/chat/proxy',
+            CHAT_PROXY_PATH,
             expect.objectContaining({
               method: 'POST',
             })
@@ -716,9 +717,8 @@ describe('AgUiAgent', () => {
 
       observable.subscribe({
         complete: () => {
-          // Should use default path '/api/chat/proxy' as-is
           expect(mockFetch).toHaveBeenCalledWith(
-            '/api/chat/proxy',
+            CHAT_PROXY_PATH,
             expect.objectContaining({
               method: 'POST',
             })
