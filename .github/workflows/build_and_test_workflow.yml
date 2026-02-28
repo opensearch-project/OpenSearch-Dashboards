@@ -6,13 +6,7 @@ name: Build and test
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
   push:
-    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+', 'fix/chat-basepath-handling'] # Run the functional test on push for release branches and fix/chat-basepath-handling
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
+    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
   pull_request:
     branches: ['**']
 
@@ -35,16 +29,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         group: [1, 2, 3, 4]
         include:
           - os: ubuntu-latest
             name: Linux
+          - os: windows-latest
+            name: Windows
     runs-on: ${{ matrix.os }}
     env:
       # Override just OSD_OPTIMIZER_MAX_WORKERS for ciGroup1 because it contains a test that checks number of workers
       OSD_OPTIMIZER_MAX_WORKERS: ${{ matrix.group != 1 && 8 || '' }}
     steps:
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -66,19 +75,26 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
 
-      - name: Run bootstrap
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Run unit tests group ${{ matrix.group }} with coverage
         id: unit-tests
@@ -92,8 +108,6 @@ jobs:
 
       - name: Upload Code Coverage
         id: upload-code-coverage
-        # Only run in the main repo (secrets not available in forks)
-        if: github.repository_owner == 'opensearch-project'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -183,14 +197,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         include:
           - os: ubuntu-latest
             name: Linux
+          - os: windows-latest
+            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
+
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -213,11 +242,13 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
@@ -233,16 +264,29 @@ jobs:
           # v122
           version: 1250586
 
-      - name: Setup Chrome
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           sudo rm -rf /usr/bin/google-chrome /opt/google/chrome
           sudo ln -s ${{steps.download-chrome.outputs.path}}/${{steps.download-chrome.outputs.binary}} /usr/bin/google-chrome
 
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -Force -Type Directory "$Env:Programfiles/Google/Chrome/Application"
+          Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
+          Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
+
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
 
-      - name: Run bootstrap
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
@@ -270,13 +314,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
             name: Linux
+          - os: windows-latest
+            name: Windows
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo Running plugin functional tests
+
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -299,11 +358,13 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
@@ -319,16 +380,29 @@ jobs:
           # v122
           version: 1250586
 
-      - name: Setup Chrome
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           sudo rm -rf /usr/bin/google-chrome /opt/google/chrome
           sudo ln -s ${{steps.download-chrome.outputs.path}}/${{steps.download-chrome.outputs.binary}} /usr/bin/google-chrome
 
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -Force -Type Directory "$Env:Programfiles/Google/Chrome/Application"
+          Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
+          Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
+
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
 
-      - name: Run bootstrap
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
         run: yarn osd bootstrap
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        run: yarn osd bootstrap || yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
@@ -356,11 +430,45 @@ jobs:
             ext: tar.gz
             suffix: linux-x64
             script: build-platform --linux --skip-os-packages
+          - os: ubuntu-latest
+            name: Linux ARM64
+            ext: tar.gz
+            suffix: linux-arm64
+            script: build-platform --linux-arm --skip-os-packages
+          - os: macos-latest
+            name: macOS x64
+            ext: tar.gz
+            suffix: darwin-x64
+            script: build-platform --darwin --skip-os-packages
+          - os: macos-latest
+            name: macOS ARM64
+            ext: tar.gz
+            suffix: darwin-arm64
+            script: build-platform --darwin-arm --skip-os-packages
+          - os: windows-latest
+            name: Windows x64
+            ext: zip
+            suffix: windows-x64
+            script: build-platform --windows --skip-os-packages
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: ./artifacts
     steps:
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+        working-directory: .
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -378,24 +486,38 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache
+      - name: Configure Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
+        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
 
-      - name: Get package version
+      - name: Get package version (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
 
-      - name: Get artifact build name
+      - name: Get artifact build name (Linux)
+        if: matrix.os != 'windows-latest'
         run: |
           echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
+
+      - name: Get package version (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $env:GITHUB_ENV
+
+      - name: Get artifact build name (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
 
       - name: Run bootstrap
         run: yarn osd bootstrap
@@ -413,7 +535,6 @@ jobs:
 
   bwc-tests:
     needs: [build-min-artifact-tests]
-    if: github.ref != 'refs/heads/fix/chat-basepath-handling' && (github.event_name != 'pull_request' || github.head_ref != 'fix/chat-basepath-handling')
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
