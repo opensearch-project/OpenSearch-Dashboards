@@ -11,6 +11,7 @@ import {
   OpenSearchDashboardsRequest,
   Capabilities,
 } from '../../../../core/server';
+import { CHAT_PROXY_PATH } from '../../common';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
@@ -186,7 +187,7 @@ export function defineRoutes(
   // Proxy route for AG-UI requests
   router.post(
     {
-      path: '/api/chat/proxy',
+      path: CHAT_PROXY_PATH,
       validate: {
         body: schema.object({
           threadId: schema.string(),
