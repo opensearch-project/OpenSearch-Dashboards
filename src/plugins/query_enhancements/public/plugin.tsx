@@ -48,6 +48,8 @@ export class QueryEnhancementsPlugin
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private appIdSubscription?: Subscription;
 
+  private pplSearchInterceptor?: PPLSearchInterceptor;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
     this.storage = new DataStorage(window.localStorage, 'discover.queryAssist.');
@@ -64,17 +66,20 @@ export class QueryEnhancementsPlugin
     const pplControls = [pplLanguageReference('PPL')];
     const sqlControls = [sqlLanguageReference('SQL')];
 
+    // Create and store PPLSearchInterceptor instance
+    this.pplSearchInterceptor = new PPLSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+    });
+
     // Register PPL language configuration
     const pplLanguageConfig: LanguageConfig = {
       id: 'PPL',
       title: 'PPL',
-      search: new PPLSearchInterceptor({
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      }),
+      search: this.pplSearchInterceptor,
       getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
       addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
       addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
@@ -302,6 +307,9 @@ export class QueryEnhancementsPlugin
     data.resourceClientFactory.register('prometheus', (http) => new PrometheusResourceClient(http));
 
     return {
+      registerStrategySemaphore: (strategy: string, limit: number) => {
+        this.pplSearchInterceptor?.registerStrategySemaphore(strategy, limit);
+      },
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
       resultSummaryEnabled$: this.resultSummaryEnabled$,
       isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
