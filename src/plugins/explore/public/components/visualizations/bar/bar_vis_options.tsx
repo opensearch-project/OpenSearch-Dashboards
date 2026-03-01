@@ -17,6 +17,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyle>;
 
@@ -37,6 +38,9 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   const axes = [axisColumnMappings[AxisRole.X], axisColumnMappings[AxisRole.Y]];
   const hasDate = axes.some((axis) => axis?.schema === VisFieldType.Date);
@@ -136,6 +140,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

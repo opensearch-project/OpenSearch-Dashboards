@@ -56,7 +56,7 @@ export const createBarGaugeSpec = (
           calculateType: styleOptions.valueCalculation,
         })
       ), // Bar gauge uses individual series with custom itemStyle per bar, can't use 2d array format
-      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
+      createBaseConfig({ legend: { show: false } }),
       createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
       assembleBarGaugeSpec
     )({

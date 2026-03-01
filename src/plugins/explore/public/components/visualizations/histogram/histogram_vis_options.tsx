@@ -16,6 +16,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from '../bar/bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type HistogramVisStyleControlsProps = StyleControlsProps<HistogramChartStyle>;
 
@@ -36,6 +37,9 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   const axes = [axisColumnMappings[AxisRole.X], axisColumnMappings[AxisRole.Y]];
   const hasNum = axes.some((axis) => axis?.schema === VisFieldType.Numerical);
@@ -118,6 +122,7 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {

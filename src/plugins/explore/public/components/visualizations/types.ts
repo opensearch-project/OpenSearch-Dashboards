@@ -114,7 +114,7 @@ export interface GridOptions {
 }
 
 export interface TitleOptions {
-  show: boolean;
+  show?: boolean;
   titleName: string;
 }
 

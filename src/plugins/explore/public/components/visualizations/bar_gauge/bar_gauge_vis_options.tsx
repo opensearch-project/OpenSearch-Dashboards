@@ -18,6 +18,7 @@ import { ValueCalculationSelector } from '../style_panel/value/value_calculation
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 import { AxisRole, VisFieldType } from '../types';
+import { generateDefaultVisualizationTitle } from '../utils/title_generator';
 
 export type BarGaugeVisStyleControlsProps = StyleControlsProps<BarGaugeChartStyle>;
 
@@ -38,6 +39,9 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
   ) => {
     onStyleChange({ [key]: value });
   };
+  const suggestedTitle = selectedChartType
+    ? generateDefaultVisualizationTitle(selectedChartType, axisColumnMappings)
+    : null;
 
   const hasMappingSelected = !isEmpty(axisColumnMappings);
   const isXaxisNumerical = axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical;
@@ -105,6 +109,7 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
+              suggestions={suggestedTitle ? [suggestedTitle] : []}
               titleOptions={styleOptions.titleOptions}
               onShowTitleChange={(titleOptions) => {
                 updateStyleOption('titleOptions', {
