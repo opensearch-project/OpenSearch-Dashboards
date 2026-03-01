@@ -27,5 +27,5 @@ export const CHAT_ALLOWED_FILE_TYPES: Record<string, string[]> = {
  */
 export const CHAT_FILE_ACCEPT = [
   ...Object.keys(CHAT_ALLOWED_FILE_TYPES),
-  ...new Set(Object.values(CHAT_ALLOWED_FILE_TYPES).flat()),
+  ...Object.values(CHAT_ALLOWED_FILE_TYPES).flat(),
 ].join(',');

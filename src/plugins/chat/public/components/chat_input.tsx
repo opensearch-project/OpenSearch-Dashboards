@@ -55,7 +55,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const {
     services: {
-      core: { chat },
+      core: { chat, notifications },
     },
   } = useOpenSearchDashboards<{ core: CoreStart }>();
 
@@ -94,7 +94,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (oversized.length > 0) {
       const limitMB = (maxFileUploadBytes / (1024 * 1024)).toFixed(1);
       const names = oversized.map((f) => f.name).join(', ');
-      alert(`File(s) exceed the ${limitMB} MB limit and were skipped: ${names}`);
+      notifications.toasts.addWarning(
+        `File(s) exceed the ${limitMB} MB limit and were skipped: ${names}`
+      );
     }
 
     if (valid.length > 0) {
