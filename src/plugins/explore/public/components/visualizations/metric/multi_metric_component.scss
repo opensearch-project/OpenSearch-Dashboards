@@ -1,0 +1,164 @@
+.multi-metric-container {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+
+  /* Auto layout - default responsive grid */
+  &.layout-auto {
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+
+  /* Horizontal layout - single row */
+  &.layout-horizontal {
+    flex-flow: row nowrap;
+    overflow-x: auto;
+    align-items: stretch;
+    min-height: 200px;
+  }
+
+  /* Vertical layout - single column */
+  &.layout-vertical {
+    flex-flow: column nowrap;
+    overflow-y: auto;
+    align-items: stretch;
+  }
+}
+
+.multi-metric-item {
+  background: var(--eui-color-empty-shade);
+  border: 1px solid var(--eui-color-light-shade);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    border-color: var(--eui-color-primary);
+    box-shadow: var(--eui-shadow-small);
+  }
+
+  /* Auto layout - responsive grid behavior */
+  .layout-auto & {
+    flex: 1 1 300px;
+    min-width: 250px;
+    max-width: 400px;
+    min-height: 160px;
+  }
+
+  /* Horizontal layout - single row behavior */
+  .layout-horizontal & {
+    flex: 1 1 var(--min-item-width, 280px);
+    min-width: var(--min-item-width, 280px);
+    max-width: 450px;
+    min-height: 160px;
+    height: 100%;
+  }
+
+  /* Vertical layout - single column behavior */
+  .layout-vertical & {
+    flex: 1 1 auto;
+    min-height: max(var(--min-item-height, 80px), 160px);
+    width: 100%;
+  }
+}
+
+.multi-metric-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--eui-color-dark-shade);
+  margin-bottom: 8px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive layout - only for auto layout */
+@media (max-width: 768px) {
+  .layout-auto .multi-metric-item {
+    flex: 1 1 100%;
+    min-width: 200px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .layout-auto .multi-metric-item {
+    flex: 1 1 calc(50% - 4px);
+  }
+}
+
+@media (min-width: 1201px) {
+  .layout-auto .multi-metric-item {
+    flex: 1 1 calc(33.333% - 6px);
+    max-width: calc(100% - 4px);
+  }
+}
+
+@media (min-width: 1600px) {
+  .layout-auto .multi-metric-item {
+    flex: 1 1 calc(25% - 6px);
+  }
+}
+
+/* Single Metric Component Styles */
+.metric-component {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-sparkline {
+  position: absolute;
+  top: 70%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 30%;
+  z-index: 1;
+}
+
+.metric-text-overlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.metric-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.metric-value {
+  font-weight: bold;
+  margin: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.metric-change {
+  font-weight: 500;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
