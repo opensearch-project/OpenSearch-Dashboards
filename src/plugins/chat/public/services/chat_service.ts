@@ -68,6 +68,9 @@ export class ChatService {
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
 
+  // Max file upload size in bytes (set from plugin config)
+  public maxFileUploadBytes: number = 3145728; // 3MB default
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,

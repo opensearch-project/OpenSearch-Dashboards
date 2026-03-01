@@ -88,7 +88,8 @@ export function defineRoutes(
     | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
     | undefined,
   mlCommonsAgentId?: string,
-  observabilityAgentId?: string
+  observabilityAgentId?: string,
+  maxFileUploadBytes?: number
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -183,6 +184,9 @@ export function defineRoutes(
     }
   );
 
+  // Calculate payload limit to accommodate base64 overhead (~33%) plus message JSON
+  const proxyMaxBytes = maxFileUploadBytes ? Math.ceil(maxFileUploadBytes * 1.4) : undefined;
+
   // Proxy route for AG-UI requests
   router.post(
     {
@@ -202,6 +206,11 @@ export function defineRoutes(
             dataSourceId: schema.maybe(schema.string()),
           })
         ),
+      },
+      options: {
+        body: {
+          ...(proxyMaxBytes ? { maxBytes: proxyMaxBytes } : {}),
+        },
       },
     },
     async (context, request, response) => {

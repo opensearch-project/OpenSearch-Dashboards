@@ -32,7 +32,8 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
     typeof state === 'object' &&
     !!state &&
     typeof state.isWindowOpen === 'boolean' &&
-    [ChatLayoutMode.SIDECAR, ChatLayoutMode.FULLSCREEN].includes(state.windowMode) &&
+    (state.windowMode === ChatLayoutMode.SIDECAR ||
+      state.windowMode === ChatLayoutMode.FULLSCREEN) &&
     typeof state.paddingSize === 'number'
   );
 };
@@ -109,6 +110,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       enabled: boolean;
       agUiUrl?: string;
       mlCommonsAgentId?: string;
+      maxFileUploadBytes?: number;
     }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
@@ -122,6 +124,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     // Always initialize chat service - core service handles enablement
     this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
 
+    if (chatConfig.maxFileUploadBytes) {
+      this.chatService.maxFileUploadBytes = chatConfig.maxFileUploadBytes;
+    }
+
     if (!isEnabled) {
       return {
         chatService: undefined,
@@ -129,13 +135,16 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     }
 
     // Register implementation functions with core chat service
+    const chatService = this.chatService;
     if (this.coreSetup?.chat?.setImplementation) {
       this.coreSetup.chat.setImplementation({
         // Only business logic operations
-        sendMessage: this.chatService.sendMessage.bind(this.chatService),
-        sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-        openWindow: this.chatService.openWindow.bind(this.chatService),
-        closeWindow: this.chatService.closeWindow.bind(this.chatService),
+        sendMessage: chatService.sendMessage.bind(chatService),
+        sendMessageWithWindow: chatService.sendMessageWithWindow.bind(chatService),
+        openWindow: async () => {
+          await chatService.openWindow();
+        },
+        closeWindow: chatService.closeWindow.bind(chatService),
       });
     }
 

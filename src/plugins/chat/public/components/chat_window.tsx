@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
-import { EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -30,6 +30,7 @@ import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
+import { readFileAsBase64, FileAttachment } from '../utils/read_file_as_base64';
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
@@ -67,6 +68,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const loadingMessageIdRef = useRef<string | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
+  const [fileAttachments, setFileAttachments] = useState<FileAttachment[]>([]);
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
 
   // Use ref to track streaming state synchronously for React 18 compatibility
@@ -257,6 +259,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
+          setFileAttachments([]);
         },
       });
 
@@ -273,27 +276,42 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [chatService, currentRunId, eventHandler]);
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
+    const hasAttachments = fileAttachments.length > 0 || !!screenshotData;
     const messageContent = options?.input ?? input.trim();
     // Use ref for immediate check since React 18 batches state updates
-    if (!messageContent || isStreamingRef.current) return;
+    if ((!messageContent && !hasAttachments) || isStreamingRef.current) return;
 
     // Prepare additional messages for sending (but don't add to timeline yet)
     let additionalMessages = options?.messages ?? [];
 
-    // Only add screenshot data if messages not provided
-    if (!options?.messages && screenshotData) {
+    // Only add screenshot/file data if messages not provided
+    if (!options?.messages && (screenshotData || fileAttachments.length > 0)) {
+        const binaryContent: Array<{ type: 'binary'; mimeType: string; data: string; filename?: string }> = [];
+
+        if (screenshotData) {
+          binaryContent.push({
+            type: 'binary' as const,
+            mimeType: screenshotData.mimeType,
+            data: screenshotData.base64,
+          });
+        }
+
+        for (const file of fileAttachments) {
+          binaryContent.push({
+            type: 'binary' as const,
+            mimeType: file.mimeType,
+            data: file.base64,
+            filename: file.filename,
+          });
+        }
+
         additionalMessages = [
           {
             role: 'user' as const,
             id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-            content: [
-              {
-                type: 'binary' as const,
-                mimeType: screenshotData.mimeType,
-                data: screenshotData.base64,
-              },
-            ],
-        }]
+            content: binaryContent,
+          },
+        ];
     }
 
     setInput('');
@@ -301,18 +319,21 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Merge additional messages with current timeline for sending
     const messagesToSend = [...timeline, ...additionalMessages];
 
-    // Check if this is a slash command
-    const commandResult = await slashCommandRegistry.execute(messageContent);
-    if (commandResult.handled) {
-      // If command was handled and returned a message, send it to the AI
-      if (commandResult.message) {
-        return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
+    // Check if this is a slash command (only when there's actual text input)
+    if (messageContent) {
+      const commandResult = await slashCommandRegistry.execute(messageContent);
+      if (commandResult.handled) {
+        // If command was handled and returned a message, send it to the AI
+        if (commandResult.message) {
+          return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
+        }
+        return;
       }
-      return;
     }
 
-    // Normal message flow
-    return subscribeToMessageStream(messageContent, messagesToSend);
+    // Normal message flow — use a default prompt when only attachments are present
+    const effectiveContent = messageContent || 'Please analyze the attached file(s).';
+    return subscribeToMessageStream(effectiveContent, messagesToSend);
   };
 
   handleSendRef.current = handleSend;
@@ -373,6 +394,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(false);
     setPendingConfirmation(null);
     setShowHistory(false);
+    setScreenshotData(undefined);
+    setFileAttachments([]);
   }, [chatService]);
 
   const handleStop = useCallback(() => {
@@ -407,6 +430,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       confirmationService.reject(pendingConfirmation.id);
     }
   }, [pendingConfirmation, confirmationService]);
+
+  const handleFilesSelected = useCallback(async (files: File[]) => {
+    const settled = await Promise.allSettled(files.map(readFileAsBase64));
+    const succeeded = settled
+      .filter((r): r is PromiseFulfilledResult<FileAttachment> => r.status === 'fulfilled')
+      .map((r) => r.value);
+    if (succeeded.length > 0) {
+      setFileAttachments((prev) => [...prev, ...succeeded]);
+    }
+    const failed = settled.filter((r) => r.status === 'rejected');
+    if (failed.length > 0) {
+      console.error(`Failed to read ${failed.length} file(s)`);
+    }
+  }, []);
+
+  const handleRemoveFile = useCallback((index: number) => {
+    setFileAttachments((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const handleCaptureScreenshot = useCallback(async ()=>{
     setScreenshotData(undefined);
@@ -551,6 +592,27 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             )
           }
 
+          {fileAttachments.length > 0 && (
+            <div className="chatWindow__fileAttachments">
+              {fileAttachments.map((file, index) => (
+                <div key={`${file.filename}-${index}`} className="chatWindow__fileAttachment">
+                  <EuiIcon type="document" size="s" />
+                  <EuiText size="xs" className="chatWindow__fileAttachment__name">
+                    {file.filename}
+                  </EuiText>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    size="xs"
+                    color="text"
+                    onClick={() => handleRemoveFile(index)}
+                    disabled={isStreaming}
+                    aria-label={`Remove ${file.filename}`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
           <ChatInput
             layoutMode={layoutMode}
             input={input}
@@ -562,6 +624,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onKeyDown={handleKeyDown}
             includeScreenShotEnabled={screenshotFeatureEnabled}
             onCaptureScreenshot={handleCaptureScreenshot}
+            onFilesSelected={handleFilesSelected}
+            maxFileUploadBytes={chatService.maxFileUploadBytes}
+            hasAttachments={fileAttachments.length > 0 || !!screenshotData}
           />
         </>
       )}

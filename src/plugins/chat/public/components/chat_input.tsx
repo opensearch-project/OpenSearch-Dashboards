@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
@@ -15,6 +15,7 @@ import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
+import { CHAT_FILE_ACCEPT } from '../../common';
 
 import './chat_input.scss';
 
@@ -29,6 +30,9 @@ interface ChatInputProps {
   onKeyDown: (e: React.KeyboardEvent) => void;
   includeScreenShotEnabled: boolean;
   onCaptureScreenshot: () => void;
+  onFilesSelected: (files: File[]) => void;
+  maxFileUploadBytes: number;
+  hasAttachments: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -42,8 +46,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onKeyDown,
   includeScreenShotEnabled,
   onCaptureScreenshot,
+  onFilesSelected,
+  maxFileUploadBytes,
+  hasAttachments,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     services: {
@@ -76,6 +84,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     inputRef,
   });
 
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const valid = files.filter((f) => f.size <= maxFileUploadBytes);
+    const oversized = files.filter((f) => f.size > maxFileUploadBytes);
+
+    if (oversized.length > 0) {
+      const limitMB = (maxFileUploadBytes / (1024 * 1024)).toFixed(1);
+      const names = oversized.map((f) => f.name).join(', ');
+      alert(`File(s) exceed the ${limitMB} MB limit and were skipped: ${names}`);
+    }
+
+    if (valid.length > 0) {
+      onFilesSelected(valid);
+    }
+
+    // Reset so the same file can be re-attached
+    e.target.value = '';
+  };
+
   const chatContextPopoverOptions = useMemo(() => {
     return [
       ...(screenshotButton
@@ -87,11 +116,25 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             },
           ]
         : []),
+      {
+        title: i18n.translate('chat.input.attachFile', { defaultMessage: 'Attach file' }),
+        iconType: 'document',
+        onClick: () => fileInputRef.current?.click(),
+      },
     ];
   }, [screenshotButton, onCaptureScreenshot]);
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={CHAT_FILE_ACCEPT}
+        onChange={handleFileInputChange}
+        style={{ display: 'none' }}
+        data-test-subj="chatFileInput"
+      />
       <div className="chatInput__inputRow" style={{ position: 'relative' }}>
         {showCommandMenu && (
           <SlashCommandMenu
@@ -124,14 +167,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       </div>
       <div className="chatInput__bottomRow">
         <ChatContextPopover
-          enabled={includeScreenShotEnabled}
+          enabled={chatContextPopoverOptions.length > 0}
           options={chatContextPopoverOptions}
         />
         <ContextPills category="chat" />
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing}
+          isDisabled={(!isStreaming && input.trim().length === 0 && !hasAttachments) || isCapturing}
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}

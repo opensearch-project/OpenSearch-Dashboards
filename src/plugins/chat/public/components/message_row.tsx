@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPanel, EuiButtonIcon } from '@elastic/eui';
+import { EuiPanel, EuiButtonIcon, EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
 import type { Message } from '../../common/types';
@@ -55,15 +55,27 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       return (
         <>
           {content.map((block: any, index: number) => {
-            // Render binary content (images)
+            // Render binary content — images as <img>, other files as badges
             if (block.type === 'binary' && block.data) {
+              if (block.mimeType?.startsWith('image/')) {
+                return (
+                  <img
+                    key={index}
+                    src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
+                    alt={block.filename || 'Visualization'}
+                    style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
+                  />
+                );
+              }
               return (
-                <img
+                <EuiBadge
                   key={index}
-                  src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
-                  alt={block.filename || 'Visualization'}
-                  style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
-                />
+                  iconType="document"
+                  color="hollow"
+                  style={{ marginBottom: '4px', marginRight: '4px' }}
+                >
+                  {block.filename || block.mimeType || 'File'}
+                </EuiBadge>
               );
             }
             // Render text content as markdown

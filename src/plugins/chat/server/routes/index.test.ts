@@ -22,13 +22,23 @@ describe('Chat Proxy Routes', () => {
   const testSetup = async (
     agUiUrl?: string,
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
-    mlCommonsAgentId?: string
+    mlCommonsAgentId?: string,
+    observabilityAgentId?: string,
+    maxFileUploadBytes?: number
   ) => {
     const { server: testServer, httpSetup } = await setupServer();
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
-    defineRoutes(router, mockLogger, agUiUrl, getCapabilitiesResolver, mlCommonsAgentId);
+    defineRoutes(
+      router,
+      mockLogger,
+      agUiUrl,
+      getCapabilitiesResolver,
+      mlCommonsAgentId,
+      observabilityAgentId,
+      maxFileUploadBytes
+    );
 
     // Mock dynamicConfigService required by server.start()
     const dynamicConfigService = {
@@ -490,6 +500,71 @@ describe('Chat Proxy Routes', () => {
 
         expect(requestBody.messages).toHaveLength(1);
         expect(requestBody.messages[0]).toEqual(validRequest.messages[0]);
+      });
+    });
+
+    describe('maxFileUploadBytes configuration', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should accept large payloads when maxFileUploadBytes is configured', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // Configure with 1MB limit → maxBytes = ceil(1MB * 1.4) = 1468007
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          1048576
+        );
+
+        // Create a payload under the limit (should succeed)
+        const requestWithAttachment = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/csv',
+                  data: 'a'.repeat(100000), // ~100KB base64
+                  filename: 'test.csv',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithAttachment)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should use default payload limit when maxFileUploadBytes is not configured', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
       });
     });
   });
