@@ -47,7 +47,7 @@ export async function createSearchSource(
 ) {
   const searchSource = await create(initialState || {});
 
-  // Do not not inherit from rootSearchSource to avoid picking up time and globals
+  // Do not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(undefined);
   searchSource.setField('filter', () => {
     const activeFilters = [...filters];
