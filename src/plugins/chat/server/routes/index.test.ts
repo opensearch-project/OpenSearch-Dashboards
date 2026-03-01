@@ -442,6 +442,96 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('File MIME type validation', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should reject binary attachments with disallowed MIME types', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithBadFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'application/x-executable',
+                  data: 'AAAA',
+                  filename: 'malicious.exe',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithBadFile)
+          .expect(400);
+
+        expect(response.body.message).toContain(
+          "File type 'application/x-executable' is not allowed"
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow binary attachments with permitted MIME types', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithGoodFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/csv',
+                  data: 'bmFtZSxhZ2U=',
+                  filename: 'data.csv',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithGoodFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should allow messages with non-binary content (plain text)', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+    });
+
     describe('System Prompt Injection', () => {
       const mockSuccessfulAgUiResponse = () => {
         mockFetch.mockResolvedValue({

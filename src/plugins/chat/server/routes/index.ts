@@ -15,6 +15,9 @@ import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
 import { getMemoryContainerId } from './utils/get_memory_container_id';
+import { CHAT_ALLOWED_FILE_TYPES } from '../../common';
+
+const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
 
 /**
  * Forward request to external AG-UI server
@@ -217,6 +220,22 @@ export function defineRoutes(
       const dataSourceId = request.query?.dataSourceId;
 
       try {
+        // Validate MIME types on any binary attachments in messages
+        for (const msg of request.body.messages) {
+          const parts = Array.isArray(msg.content) ? msg.content : [];
+          for (const part of parts) {
+            if (part.type === 'binary' && !ALLOWED_MIME_TYPES.has(part.mimeType)) {
+              return response.badRequest({
+                body: {
+                  message: `File type '${part.mimeType}' is not allowed. Allowed types: ${[
+                    ...ALLOWED_MIME_TYPES,
+                  ].join(', ')}`,
+                },
+              });
+            }
+          }
+        }
+
         // Inject server-side system prompt if present
         injectSystemPrompt(request.body.messages, request.body.forwardedProps?.queryAssistLanguage);
 
