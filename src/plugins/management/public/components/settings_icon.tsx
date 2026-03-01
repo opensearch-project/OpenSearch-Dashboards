@@ -4,18 +4,13 @@
  */
 
 import React, { useState, useRef } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { Observable } from 'rxjs';
 import { DEFAULT_NAV_GROUPS, NavGroupItemInMap } from '../../../../core/public';
+import { AppearanceSettingsContent } from './appearance_settings_content';
 
 export function SettingsIcon({ core }: { core: CoreStart }) {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -23,6 +18,8 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
     core.chrome.navGroup.getNavGroupsMap$()
   );
   const navGroupMap = useObservable(navGroupsMapRef.current, undefined);
+  const enableUserControl = core.uiSettings.get('theme:enableUserControl');
+
   const onItemClick = (groupId: string) => {
     setPopover(false);
     core.chrome.navGroup.setCurrentNavGroup(groupId);
@@ -33,19 +30,52 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       }
     }
   };
-  const items = [
-    <EuiContextMenuItem
-      key={DEFAULT_NAV_GROUPS.settingsAndSetup.id}
-      onClick={() => onItemClick(DEFAULT_NAV_GROUPS.settingsAndSetup.id)}
-    >
-      {DEFAULT_NAV_GROUPS.settingsAndSetup.title}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key={DEFAULT_NAV_GROUPS.dataAdministration.id}
-      onClick={() => onItemClick(DEFAULT_NAV_GROUPS.dataAdministration.id)}
-    >
-      {DEFAULT_NAV_GROUPS.dataAdministration.title}
-    </EuiContextMenuItem>,
+
+  const handleAppearanceApply = () => {
+    setPopover(false);
+  };
+
+  const mainPanelItems: Array<{
+    name: string;
+    key: string;
+    onClick?: () => void;
+    icon?: string;
+    panel?: number;
+  }> = [
+    {
+      name: DEFAULT_NAV_GROUPS.settingsAndSetup.title,
+      key: DEFAULT_NAV_GROUPS.settingsAndSetup.id,
+      onClick: () => onItemClick(DEFAULT_NAV_GROUPS.settingsAndSetup.id),
+    },
+    {
+      name: DEFAULT_NAV_GROUPS.dataAdministration.title,
+      key: DEFAULT_NAV_GROUPS.dataAdministration.id,
+      onClick: () => onItemClick(DEFAULT_NAV_GROUPS.dataAdministration.id),
+    },
+  ];
+
+  if (enableUserControl) {
+    mainPanelItems.push({
+      name: i18n.translate('management.settings.appearances.title', {
+        defaultMessage: 'Appearances',
+      }),
+      key: 'appearances',
+      panel: 1,
+    });
+  }
+
+  const panels = [
+    {
+      id: 0,
+      items: mainPanelItems,
+    },
+    {
+      id: 1,
+      title: i18n.translate('management.settings.appearances.title', {
+        defaultMessage: 'Appearances',
+      }),
+      content: <AppearanceSettingsContent core={core} onApply={handleAppearanceApply} />,
+    },
   ];
 
   return (
@@ -68,8 +98,9 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}
       ownFocus={false}
+      panelPaddingSize="none"
     >
-      <EuiContextMenuPanel hasFocus={false} size="s" items={items} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 }
