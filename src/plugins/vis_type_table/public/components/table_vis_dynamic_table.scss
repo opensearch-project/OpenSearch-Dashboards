@@ -57,6 +57,10 @@
 
     &__dataField {
       word-break: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+      display: block;
+      width: 100%;
     }
 
     &__filter {
@@ -94,6 +98,8 @@
     padding: $euiSizeS;
     vertical-align: top;
     word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
     position: relative;
   }
 
