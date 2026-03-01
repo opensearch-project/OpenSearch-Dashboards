@@ -1,2 +1,2 @@
 fix:
-- "[Chat] Fix basePath handling for API calls in development mode ([`#11306`](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11292))"
+- "[Chat] Fix basePath handling for API calls in development mode ([`#11306`](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11306))"
