@@ -1,6 +1,7 @@
 {
   "paths": {
     "advancedSettings": "plugins/advanced_settings",
+    "agentTraces": "plugins/agent_traces",
     "apmOss": "plugins/apm_oss",
     "banner": "plugins/banner",
     "charts": "plugins/charts",

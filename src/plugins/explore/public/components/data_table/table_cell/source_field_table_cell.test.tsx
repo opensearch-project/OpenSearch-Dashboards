@@ -69,7 +69,7 @@ describe('SourceFieldTableCell', () => {
 
     renderInTable(defaultProps);
 
-    expect(mockDataset.formatHit).toHaveBeenCalledWith(mockRow);
+    expect(mockDataset.formatHit).toHaveBeenCalledWith(mockRow, 'text');
   });
 
   it('renders field names and values', () => {

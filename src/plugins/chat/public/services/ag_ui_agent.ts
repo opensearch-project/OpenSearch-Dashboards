@@ -62,7 +62,18 @@ export class AgUiAgent {
       })
         .then(async (response) => {
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            let errorMessage = `Request failed with status ${response.status}`;
+
+            try {
+              const errorBody = JSON.parse(errorText);
+              const reason = errorBody.error?.reason || errorBody.message || errorText;
+              errorMessage = reason ? `${reason} (Status: ${response.status})` : errorMessage;
+            } catch {
+              errorMessage = errorText ? `${errorText} (Status: ${response.status})` : errorMessage;
+            }
+
+            throw new Error(errorMessage);
           }
 
           const reader = response.body?.getReader();

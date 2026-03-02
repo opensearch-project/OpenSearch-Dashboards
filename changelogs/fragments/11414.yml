@@ -1,0 +1,2 @@
+fix:
+- Chat - remove confirmation bar and exclude customized tool output render from tool group ([#11414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11414))

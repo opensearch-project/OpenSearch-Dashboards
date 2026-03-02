@@ -13,6 +13,7 @@ import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../com
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
+import { AssistantActionService } from '../../../context_provider/public';
 
 /**
  * Determine tool status based on tool call and result
@@ -71,6 +72,7 @@ interface ChatMessagesProps {
  * - Non-tool messages (user, assistant, system) are included as-is
  * - Completed tool calls from consecutive assistant messages are grouped together
  * - Running tool calls are displayed individually
+ * - Tool calls with custom renderers are displayed individually (not grouped)
  * - Tool result messages are filtered out (they're referenced by tool calls)
  *
  * @param timeline - Array of messages from the conversation
@@ -113,6 +115,18 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       );
       return !toolResult; // No result means still running
     });
+  };
+
+  // Helper: Check if tool has custom renderer
+  const hasCustomRenderer = (toolName: string): boolean => {
+    const service = AssistantActionService.getInstance();
+    return service.shouldUseCustomRenderer(toolName);
+  };
+
+  // Helper: Check if any tool call has custom renderer
+  const hasCustomRendererTool = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    return toolCalls.some((tc) => hasCustomRenderer(tc.function.name));
   };
 
   // Helper: Find next message that closes a tool call batch
@@ -164,6 +178,12 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       continue;
     }
 
+    // If any tool has custom renderer, show individually (don't group)
+    if (hasCustomRendererTool(toolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
     // Find where this batch of tool calls ends
     const batchEndIndex = findBatchEndIndex(i + 1);
 
@@ -188,7 +208,13 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       continue;
     }
 
-    // All tools completed - group them together
+    // If any continuation tool has custom renderer, show all individually (don't group)
+    if (hasCustomRendererTool(continuationToolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // All tools completed and none have custom renderers - group them together
     addToolCallGroup([...toolCalls, ...continuationToolCalls]);
 
     // Skip to the message before batch end

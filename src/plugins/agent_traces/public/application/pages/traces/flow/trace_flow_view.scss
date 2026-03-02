@@ -1,0 +1,34 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.agentTracesFlow__loadingPanel {
+  height: 100%;
+}
+
+.agentTracesFlow__emptyState {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agentTracesFlow__container {
+  height: 100%;
+  position: relative;
+}
+
+.agentTracesFlow__controls {
+  position: absolute;
+  top: $ouiSizeM;
+  right: $ouiSizeM;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: $ouiSizeXS;
+}
+
+.agentTracesFlow__controlButton {
+  padding: $ouiSizeXXS;
+}
