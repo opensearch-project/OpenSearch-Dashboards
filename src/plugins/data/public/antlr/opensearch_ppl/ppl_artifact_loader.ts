@@ -18,6 +18,7 @@ export interface PPLArtifactBundle {
   antlr4ngVersion: string;
   grammarFileName: string;
   startRuleIndex: number;
+  pipeStartRuleIndex?: number;
 
   // Serialized ATN data as number arrays
   lexerSerializedATN: number[];

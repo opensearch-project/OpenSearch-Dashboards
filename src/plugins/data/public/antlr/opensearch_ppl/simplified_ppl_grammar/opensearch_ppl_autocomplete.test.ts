@@ -8,7 +8,6 @@ import { SimplifiedOpenSearchPPLParser as OpenSearchPPLParser } from '@osd/antlr
 import {
   enrichAutocompleteResult,
   getParseTree,
-  getPipeStartParseTree,
   openSearchPplAutocompleteData,
   processVisitedRules,
 } from './opensearch_ppl_autocomplete';
@@ -112,34 +111,6 @@ describe('getParseTree', () => {
 
     expect(getParseTree((mockParser as unknown) as OpenSearchPPLParser)).toBe('rootTree');
     expect(mockParser.root).toHaveBeenCalled();
-  });
-});
-
-describe('getPipeStartParseTree', () => {
-  it('should call parser.commands() and return the result', () => {
-    const mockParser = {
-      commands: jest.fn().mockReturnValue('commandsTree'),
-      buildParseTrees: false,
-    };
-
-    const result = getPipeStartParseTree((mockParser as unknown) as OpenSearchPPLParser);
-    expect(result).toBe('commandsTree');
-    expect(mockParser.commands).toHaveBeenCalled();
-  });
-
-  it('should set buildParseTrees to true', () => {
-    const mockParser = {
-      commands: jest.fn().mockReturnValue('commandsTree'),
-      buildParseTrees: false,
-    };
-
-    getPipeStartParseTree((mockParser as unknown) as OpenSearchPPLParser);
-    expect(mockParser.buildParseTrees).toBe(true);
-  });
-
-  it('should be present in openSearchPplAutocompleteData', () => {
-    expect(openSearchPplAutocompleteData.getPipeStartParseTree).toBeDefined();
-    expect(openSearchPplAutocompleteData.getPipeStartParseTree).toBe(getPipeStartParseTree);
   });
 });
 
