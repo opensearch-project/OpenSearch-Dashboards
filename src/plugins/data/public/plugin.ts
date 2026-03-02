@@ -316,20 +316,18 @@ export class DataPublicPlugin
     // This runs at app startup so grammar is fetched on dataset change, not on keystroke.
     let lastGrammarDatasourceId: string | undefined;
     query.queryString.getUpdates$().subscribe((q) => {
-      console.log('[PPL Grammar] queryString update', { language: q.language, dsId: q.dataset?.dataSource?.id, dsVersion: q.dataset?.dataSource?.version });
       if (q.language !== 'PPL') return;
       const dsId = q.dataset?.dataSource?.id;
       if (dsId === lastGrammarDatasourceId) {
-        console.log('[PPL Grammar] same datasource, skip');
         return;
       }
       const dsVersion = q.dataset?.dataSource?.version;
-      if (dsVersion && !pplGrammarCache.shouldFetchFromBackend(dsVersion)) {
-        console.log('[PPL Grammar] version too old, skip', dsVersion);
+      // Only fetch grammar if version is known and supports the grammar API (>= 3.6.0).
+      // If version is undefined, skip — we can't determine support without it.
+      if (!dsVersion || !pplGrammarCache.shouldFetchFromBackend(dsVersion)) {
         lastGrammarDatasourceId = dsId;
         return;
       }
-      console.log('[PPL Grammar] fetching grammar for', dsId, dsVersion);
       lastGrammarDatasourceId = dsId;
       pplGrammarCache.invalidate(dsId);
       pplGrammarCache.warmUp(http, savedObjects.client, dsId);

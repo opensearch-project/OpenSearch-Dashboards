@@ -31,6 +31,11 @@ export interface PPLArtifactBundle {
   literalNames: Array<string | null>;
   symbolicNames: Array<string | null>;
 
+  // Autocomplete configuration from backend
+  tokenDictionary?: Record<string, number>;
+  ignoredTokens?: number[];
+  rulesToVisit?: number[];
+
   // Language catalogs
   catalogs: {
     commands?: Array<{

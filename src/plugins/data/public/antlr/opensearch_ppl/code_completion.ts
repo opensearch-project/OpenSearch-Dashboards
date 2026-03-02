@@ -9,21 +9,39 @@
  * GitHub history for details.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { monaco } from '@osd/monaco';
+import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
 import {
-  SimplifiedOpenSearchPPLLexer,
-  SimplifiedOpenSearchPPLParser,
-  OpenSearchPPLParser,
-} from '@osd/antlr-grammar';
-import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
+  LexerInterpreter,
+  ParserInterpreter,
+  CharStream,
+  CommonTokenStream,
+  ParserRuleContext,
+  PredictionMode,
+  Token,
+  TokenStream,
+} from 'antlr4ng';
+import { CodeCompletionCore } from 'antlr4-c3';
+import {
+  CursorPosition,
+  OpenSearchPplAutocompleteResult,
+  SourceOrTableSuggestion,
+  TableContextSuggestion,
+} from '../shared/types';
 import {
   fetchColumnValues,
   formatAvailableFieldsToSuggestions,
   formatFieldsToSuggestions,
   formatValuesToSuggestions,
   parseQuery,
+  removePotentialBackticks,
 } from '../shared/utils';
-import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
+import {
+  getParseTree,
+  openSearchPplAutocompleteData as simplifiedPplAutocompleteData,
+} from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
 import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
 import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
@@ -36,10 +54,483 @@ import {
 } from './constants';
 import { Documentation } from './ppl_documentation';
 import { getPPLQuerySnippetForSuggestions } from '../../query_snippet_suggestions/ppl/suggestions';
-import { pplGrammarCache, createRemappedEnrichment } from './ppl_grammar_cache';
+import { pplGrammarCache, CachedGrammar } from './ppl_grammar_cache';
+import { findCursorTokenIndex } from '../shared/cursor';
+import { GeneralErrorListener } from '../shared/general_error_listerner';
+import { KeywordSuggestion, AutocompleteResultBase } from '../shared/types';
+import { quotesRegex } from '../shared/constants';
+
+// ─── Fix A: C3 follow-set cache isolation for runtime grammars ───────────────
+// CodeCompletionCore.followSetsByATN caches by parser.constructor.name.
+// All ParserInterpreter instances share "ParserInterpreter" as the key,
+// so different grammars (different datasources / versions) pollute each other's
+// cache, producing ghost token IDs that don't exist in the current vocabulary.
+// Clear the cache bucket whenever the grammar hash changes.
+let _lastC3GrammarHash: string | undefined;
+function resetC3CacheIfGrammarChanged(grammarHash: string, parser: any) {
+  if (_lastC3GrammarHash === grammarHash) return;
+  const cache = (CodeCompletionCore as any).followSetsByATN;
+  if (cache instanceof Map) cache.delete(parser.constructor.name);
+  _lastC3GrammarHash = grammarHash;
+}
+
+/**
+ * Sentinel for "rule not found". Rule indices are 0-based (rule 0 = root),
+ * so Token.INVALID_TYPE (0) would collide with root. -1 is safe here because
+ * EOF (-1) is a *token type* concept, not a rule index — they live in
+ * different domains and are never compared.
+ */
+const INVALID_RULE_INDEX = -1;
+
+/**
+ * Resolve the SPACE/WHITESPACE token type from the grammar's tokenDictionary.
+ * Backend sends WHITESPACE; compiled grammar uses SPACE. Normalize here.
+ * Guards against backend sending ≤0 (which could be EOF=-1 or INVALID_TYPE=0).
+ */
+function resolveSpaceToken(grammar: CachedGrammar): number {
+  const dict = grammar.tokenDictionary as any;
+  const v = dict?.WHITESPACE ?? dict?.SPACE;
+  return typeof v === 'number' && v > Token.INVALID_TYPE ? v : Token.INVALID_TYPE;
+}
+
+// ─── Lazy-cached name→index lookups ──────────────────────────────────────────
+// runtimeRuleNameToIndex / runtimeSymbolicNameToTokenType are Maps built
+// client-side in PPLGrammarCache.fetchAndCache. But if for any reason
+// the CachedGrammar comes from a code path that didn't build them (e.g.
+// raw JSON), these lazy caches rebuild from the arrays / vocabulary
+// directly, keyed by grammarHash so they're built at most once per grammar.
+
+const _lazyRuleIndexCache = new Map<string, Map<string, number>>();
+function ruleIndex(grammar: CachedGrammar, name: string): number {
+  // Fast path: use the pre-built map if available
+  if (grammar.runtimeRuleNameToIndex?.size > 0) {
+    return grammar.runtimeRuleNameToIndex.get(name) ?? INVALID_RULE_INDEX;
+  }
+  // Lazy rebuild from parserRuleNames array
+  let m = _lazyRuleIndexCache.get(grammar.grammarHash);
+  if (!m) {
+    m = new Map(grammar.parserRuleNames.map((n, i) => [n, i]));
+    _lazyRuleIndexCache.set(grammar.grammarHash, m);
+  }
+  return m.get(name) ?? INVALID_RULE_INDEX;
+}
+
+const _lazyTokenTypeCache = new Map<string, Map<string, number>>();
+function tokenTypeBySymbolic(grammar: CachedGrammar, symName: string): number {
+  // Fast path: use the pre-built map if available
+  if (grammar.runtimeSymbolicNameToTokenType?.size > 0) {
+    return grammar.runtimeSymbolicNameToTokenType.get(symName) ?? Token.INVALID_TYPE;
+  }
+  // Lazy rebuild from vocabulary (API-safe: handle both property and method)
+  let m = _lazyTokenTypeCache.get(grammar.grammarHash);
+  if (!m) {
+    m = new Map<string, number>();
+    const vocab = grammar.vocabulary;
+    const max =
+      (vocab as any).maxTokenType ??
+      (typeof (vocab as any).getMaxTokenType === 'function'
+        ? (vocab as any).getMaxTokenType()
+        : 0);
+    for (let i = 0; i <= max; i++) {
+      const sym = vocab.getSymbolicName(i);
+      if (sym) m.set(sym, i);
+    }
+    _lazyTokenTypeCache.set(grammar.grammarHash, m);
+  }
+  return m.get(symName) ?? Token.INVALID_TYPE;
+}
+
+/**
+ * Resolve a token type by symbolic name, with tokenDictionary fallback.
+ * tokenDictionary uses friendly keys (e.g. BACKTICK_QUOTE), symbolic names
+ * use ANTLR names (e.g. BQUOTA_STRING). We try both.
+ * Guards against backend providing ≤0 values (e.g. -1 for missing tokens).
+ */
+function resolveToken(grammar: CachedGrammar, symbolicName: string, dictKey?: string): number {
+  if (dictKey) {
+    const fromDict = (grammar.tokenDictionary as any)?.[dictKey];
+    if (typeof fromDict === 'number' && fromDict > Token.INVALID_TYPE) return fromDict;
+  }
+  return tokenTypeBySymbolic(grammar, symbolicName);
+}
+
+/**
+ * Pick the best start rule for C3 and parsing based on query shape.
+ * - `|`-first queries (pipe-first, no source=): start from subPipeline or commands
+ *   so pipeline commands (WHERE, SORT, FIELDS, etc.) become reachable candidates.
+ * - Normal queries: use the grammar's default start rule (root).
+ *
+ * Prefers backend-provided pipeStartRuleIndex if available (future-proof:
+ * backend is source of truth and knows the correct pipe-first entry for
+ * its grammar version, avoiding coupling to specific rule names).
+ */
+function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
+  const trimmed = query.trimStart();
+  if (trimmed.startsWith('|')) {
+    // Prefer backend-declared pipe start rule if available
+    const pipeStart = (grammar as any).pipeStartRuleIndex;
+    if (typeof pipeStart === 'number' && pipeStart >= 0) return pipeStart;
+
+    // Fallback: resolve by rule name
+    const subPipeline = grammar.parserRuleNames.indexOf('subPipeline');
+    if (subPipeline >= 0) return subPipeline;
+    const commands = grammar.parserRuleNames.indexOf('commands');
+    if (commands >= 0) return commands;
+  }
+  return grammar.startRuleIndex ?? 0;
+}
+
+// ─── Name-based helpers for runtime enrichment ────────────────────────────────
+// All lookups use rule/token NAMES from the grammar bundle, never compiled
+// constants. This ensures the frontend works out of the box when the backend
+// grammar version changes — no code changes required on the frontend.
+
+/**
+ * Determine which preferred rules should be removed for a C3 rerun.
+ * Mirrors the compiled processVisitedRules rerun logic, but uses rule names.
+ */
+function getRuntimeRerunRules(
+  grammar: CachedGrammar,
+  rules: Map<number, any>,
+  tokenStream: TokenStream,
+  cursorTokenIndex: number
+): number[] {
+  const rerun: number[] = [];
+  const spaceToken = resolveSpaceToken(grammar);
+
+  const RULE_searchCommand = ruleIndex(grammar, 'searchCommand');
+  const RULE_searchComparisonOperator = ruleIndex(grammar, 'searchComparisonOperator');
+  const RULE_comparisonOperator = ruleIndex(grammar, 'comparisonOperator');
+
+  // searchCommand: rerun to expand SEARCH/SOURCE/INDEX tokens
+  // (unless the context is DESCRIBE/SHOW which has its own path)
+  if (RULE_searchCommand !== INVALID_RULE_INDEX && rules.has(RULE_searchCommand)) {
+    const DESCRIBE = tokenTypeBySymbolic(grammar, 'DESCRIBE');
+    const SHOW = tokenTypeBySymbolic(grammar, 'SHOW');
+    const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
+
+    const firstAfterPipe = findFirstNonSpaceTokenAfterPipeRT(
+      tokenStream,
+      cursorTokenIndex,
+      spaceToken,
+      PIPE
+    );
+    if (!firstAfterPipe || ![DESCRIBE, SHOW].includes(firstAfterPipe.token.type)) {
+      rerun.push(RULE_searchCommand);
+    }
+  }
+
+  // searchComparisonOperator / comparisonOperator: rerun when last token
+  // is an identifier (expression end), to get pipe/comma suggestions
+  if (RULE_searchComparisonOperator !== INVALID_RULE_INDEX && rules.has(RULE_searchComparisonOperator)) {
+    const ID = resolveToken(grammar, 'ID', 'ID');
+    const BQUOTA = resolveToken(grammar, 'BQUOTA_STRING', 'BACKTICK_QUOTE');
+    const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
+    if (lastToken && (lastToken.token.type === ID || lastToken.token.type === BQUOTA)) {
+      rerun.push(RULE_searchComparisonOperator);
+      if (RULE_comparisonOperator !== INVALID_RULE_INDEX) rerun.push(RULE_comparisonOperator);
+      rerun.push(RULE_searchCommand); // parent of searchComparison
+    }
+  }
+
+  return rerun;
+}
+
+/**
+ * Name-based enrichment of autocomplete results using runtime grammar.
+ * Replaces compiled enrichAutocompleteResult — no coupling to OpenSearchPPLParser constants.
+ * When the grammar adds/removes/renumbers rules or tokens, this still works because
+ * all lookups are by name from the grammar bundle.
+ */
+function enrichRuntimeResult(
+  baseResult: AutocompleteResultBase,
+  grammar: CachedGrammar,
+  rules: Map<number, any>,
+  tokenStream: TokenStream,
+  cursorTokenIndex: number
+): OpenSearchPplAutocompleteResult {
+  const spaceToken = resolveSpaceToken(grammar);
+
+  // Resolve token types by name (Token.INVALID_TYPE=0 for tokens, INVALID_RULE_INDEX=-1 for rules)
+  const ID = resolveToken(grammar, 'ID', 'ID');
+  const SOURCE = resolveToken(grammar, 'SOURCE', 'SOURCE');
+  const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
+  const BQUOTA = resolveToken(grammar, 'BQUOTA_STRING', 'BACKTICK_QUOTE');
+  const DQUOTA = tokenTypeBySymbolic(grammar, 'DQUOTA_STRING');
+  const SQUOTA = tokenTypeBySymbolic(grammar, 'SQUOTA_STRING');
+  const EQUAL = resolveToken(grammar, 'EQUAL', 'EQUAL');
+  const DOT = resolveToken(grammar, 'DOT', 'DOT');
+  const OPENING_BRACKET = resolveToken(grammar, 'LT_PRTHS', 'OPENING_BRACKET');
+  const COMMA = resolveToken(grammar, 'COMMA', 'COMMA');
+
+  // Resolve rule indices by name
+  const RULE_statsFunction = ruleIndex(grammar, 'statsFunction');
+  const RULE_fieldList = ruleIndex(grammar, 'fieldList');
+  const RULE_wcFieldList = ruleIndex(grammar, 'wcFieldList');
+  const RULE_sortField = ruleIndex(grammar, 'sortField');
+  const fieldRules = [RULE_fieldList, RULE_wcFieldList, RULE_sortField].filter(
+    (r) => r !== INVALID_RULE_INDEX
+  );
+
+  let suggestSourcesOrTables: OpenSearchPplAutocompleteResult['suggestSourcesOrTables'];
+  let suggestAggregateFunctions = false;
+  let shouldSuggestColumns = false;
+  let suggestFieldsInAggregateFunction = false;
+  let suggestValuesForColumn: string | undefined;
+  let suggestRenameAs = false;
+  let suggestSingleQuotes = false;
+
+  const lastNonOperatorToken = findLastNonSpaceOperatorTokenRT(
+    tokenStream,
+    cursorTokenIndex,
+    spaceToken,
+    grammar
+  );
+
+  for (const [ruleId, rule] of rules) {
+    const parentRuleList: number[] = rule.ruleList ?? [];
+    const ruleName = grammar.parserRuleNames[ruleId];
+
+    switch (ruleName) {
+      case 'sqlLikeJoinType':
+      case 'positionFunctionName':
+      case 'integerLiteral':
+      case 'decimalLiteral':
+      case 'searchableKeyWord':
+      case 'keywordsCanBeId':
+      case 'takeAggFunction':
+        break;
+
+      case 'statsFunctionName':
+        suggestAggregateFunctions = true;
+        break;
+
+      case 'comparisonOperator':
+      case 'searchComparisonOperator':
+        // Handled by rerun logic — no enrichment flags needed
+        break;
+
+      case 'searchCommand': {
+        // Handled by rerun logic
+        break;
+      }
+
+      case 'wcQualifiedName':
+      case 'qualifiedName': {
+        const isInStatsFunction =
+          RULE_statsFunction !== INVALID_RULE_INDEX && parentRuleList.includes(RULE_statsFunction);
+        if (isInStatsFunction) suggestFieldsInAggregateFunction = true;
+
+        // Don't suggest columns when last token is SOURCE (should suggest table)
+        const lastTokenResult = findLastNonSpaceOperatorTokenRT(
+          tokenStream,
+          cursorTokenIndex,
+          spaceToken,
+          grammar
+        );
+        if (lastTokenResult?.token.type === SOURCE) break;
+
+        // In field list context: suggest field only if last token is not ID
+        if (parentRuleList.some((parentRule) => fieldRules.includes(parentRule))) {
+          const lastNonSpace = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
+          if (lastNonSpace?.token.type === ID) break;
+          shouldSuggestColumns = true;
+          break;
+        }
+
+        // When last non-operator token is ID, don't suggest columns
+        // (unless second-last is SOURCE, for "source = tablename <field>")
+        if (lastNonOperatorToken?.token.type === ID) {
+          const secondLast = findLastNonSpaceOperatorTokenRT(
+            tokenStream,
+            lastNonOperatorToken.index,
+            spaceToken,
+            grammar
+          );
+          if (secondLast?.token.type !== SOURCE) break;
+        }
+        shouldSuggestColumns = true;
+        break;
+      }
+
+      case 'tableQualifiedName': {
+        const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
+        if (lastToken && ![ID, BQUOTA].includes(lastToken.token.type)) {
+          suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
+        }
+        break;
+      }
+
+      case 'renameClasue': {
+        const expressionStart = rule.startTokenIndex;
+        if (expressionStart === cursorTokenIndex) {
+          shouldSuggestColumns = true;
+          break;
+        }
+        if (expressionStart + 2 === cursorTokenIndex) {
+          suggestRenameAs = true;
+          break;
+        }
+        break;
+      }
+
+      case 'stringLiteral': {
+        if (cursorTokenIndex < 2) break;
+        suggestSingleQuotes = true;
+
+        let currentIndex = cursorTokenIndex - 1;
+        const lastToken =
+          tokenStream.get(currentIndex).type === spaceToken
+            ? tokenStream.get(currentIndex - 1)
+            : tokenStream.get(currentIndex);
+
+        if (![EQUAL, OPENING_BRACKET, COMMA].includes(lastToken.type)) break;
+
+        while (currentIndex > -1) {
+          const token = tokenStream.get(currentIndex);
+          if (!token || token.type === PIPE || token.type === SOURCE) break;
+
+          if (token.type === ID || token.type === BQUOTA) {
+            let combinedText = removePotentialBackticks(token.text ?? '');
+            let lookBehindIndex = currentIndex;
+            while (lookBehindIndex > -1) {
+              lookBehindIndex--;
+              const prevToken = tokenStream.get(lookBehindIndex);
+              if (!prevToken || prevToken.type !== DOT) break;
+              lookBehindIndex--;
+              combinedText = `${removePotentialBackticks(
+                tokenStream.get(lookBehindIndex).text ?? ''
+              )}.${combinedText}`;
+            }
+            suggestValuesForColumn = removePotentialBackticks(combinedText);
+            break;
+          }
+          currentIndex--;
+        }
+        break;
+      }
+
+      default:
+        // Unknown rule from a newer grammar version — no-op, doesn't break anything
+        break;
+    }
+  }
+
+  // Detect quote context
+  const currentToken = tokenStream?.get(cursorTokenIndex);
+  const isInBackQuote = currentToken?.type === BQUOTA;
+  const isInQuote = currentToken?.type === DQUOTA || currentToken?.type === SQUOTA;
+
+  return {
+    ...baseResult,
+    suggestSourcesOrTables,
+    suggestAggregateFunctions,
+    suggestColumns: shouldSuggestColumns ? ({} as TableContextSuggestion) : undefined,
+    suggestFieldsInAggregateFunction,
+    suggestValuesForColumn,
+    suggestRenameAs,
+    suggestSingleQuotes,
+    isInQuote,
+    isInBackQuote,
+  };
+}
+
+// ─── Runtime token-stream helpers (name-based, no compiled constants) ─────────
+
+function findLastNonSpaceTokenRT(
+  tokenStream: TokenStream,
+  currentIndex: number,
+  spaceToken: number
+): { token: Token; index: number } | null {
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (token.type !== spaceToken && token.type !== Token.EOF) {
+      return { token, index: i };
+    }
+  }
+  return null;
+}
+
+function findLastNonSpaceOperatorTokenRT(
+  tokenStream: TokenStream,
+  currentIndex: number,
+  spaceToken: number,
+  grammar: CachedGrammar
+): { token: Token; index: number } | null {
+  // Build the set of operator tokens to skip (same as compiled operatorsToInclude)
+  const operators = getRuntimeOperatorTokens(grammar);
+  for (let i = currentIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (token && token.type !== spaceToken && token.type !== Token.EOF && !operators.has(token.type)) {
+      return { token, index: i };
+    }
+  }
+  return null;
+}
+
+function findFirstNonSpaceTokenAfterPipeRT(
+  tokenStream: TokenStream,
+  cursorIndex: number,
+  spaceToken: number,
+  pipeToken: number
+): { token: Token; index: number } | null {
+  let firstNonSpaceToken: { token: Token; index: number } | null = null;
+
+  for (let i = cursorIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (!token) continue;
+
+    if (token.type !== spaceToken && token.type !== Token.EOF) {
+      firstNonSpaceToken = { token, index: i };
+
+      if (token.type === pipeToken) {
+        for (let j = i + 1; j < tokenStream.size; j++) {
+          const nextToken = tokenStream.get(j);
+          if (!nextToken) break;
+          if (nextToken.type !== spaceToken && nextToken.type !== Token.EOF) {
+            return { token: nextToken, index: j };
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  return firstNonSpaceToken;
+}
+
+/** Cache for runtime operator token sets, keyed by grammarHash */
+const _operatorTokenCache = new Map<string, Set<number>>();
+
+/**
+ * Build the set of operator token type IDs that should be skipped
+ * when searching for the last non-space, non-operator token.
+ * Uses symbolic names from the grammar — no compiled constants.
+ */
+function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
+  const cached = _operatorTokenCache.get(grammar.grammarHash);
+  if (cached) return cached;
+
+  const names = [
+    'PIPE', 'EQUAL', 'COMMA', 'NOT_EQUAL', 'LESS', 'NOT_LESS',
+    'GREATER', 'NOT_GREATER', 'OR', 'AND', 'LT_PRTHS', 'RT_PRTHS',
+    'IN', 'SPAN', 'MATCH', 'MATCH_PHRASE', 'MATCH_BOOL_PREFIX',
+    'MATCH_PHRASE_PREFIX', 'SQUOTA_STRING',
+  ];
+  const set = new Set<number>();
+  for (const name of names) {
+    const id = tokenTypeBySymbolic(grammar, name);
+    if (id > Token.INVALID_TYPE) set.add(id);
+  }
+
+  _operatorTokenCache.set(grammar.grammarHash, set);
+  return set;
+}
 
 /**
  * Try runtime grammar suggestions using cached backend grammar.
+ * Creates LexerInterpreter/ParserInterpreter instances directly (with tokenStream.fill()),
+ * bypassing createParser which doesn't handle interpreter instances correctly.
  * Returns null if grammar not cached or version unsupported — caller falls through to compiled.
  */
 function tryRuntimeGrammarSuggestions(
@@ -47,8 +538,6 @@ function tryRuntimeGrammarSuggestions(
   cursor: CursorPosition,
   services: any,
   indexPattern: any,
-  autocompleteData: typeof simplifiedPplAutocompleteData | typeof defaultPplAutocompleteData,
-  compiledParserClass: any,
   skipSymbolicKeywords: boolean
 ): OpenSearchPplAutocompleteResult | null {
   try {
@@ -57,34 +546,132 @@ function tryRuntimeGrammarSuggestions(
       indexPattern?.dataSourceRef?.version ||
       services?.data?.query?.queryString?.getQuery()?.dataset?.dataSource?.version ||
       pplGrammarCache.getCachedVersion(dataSourceId);
-    console.log('version: ', version);
+
     if (!version || !pplGrammarCache.shouldFetchFromBackend(version)) return null;
 
     const grammar = pplGrammarCache.getCachedGrammar(dataSourceId);
     if (!grammar) return null;
-    console.log('grammar: ', grammar);
+    // ─── Normalize token dictionary ──────────────────────────────────────────
+    const spaceToken = resolveSpaceToken(grammar);
 
-    const { Lexer, Parser } = pplGrammarCache.getWrappedConstructors(grammar);
-    const { ruleRemap, tokenRemap } = pplGrammarCache.buildRemaps(grammar, compiledParserClass);
-    const remappedEnrich = createRemappedEnrichment(
-      autocompleteData.enrichAutocompleteResult,
-      ruleRemap,
-      tokenRemap
+    // ─── Pick start rule based on query shape ─────────────────────────────
+    const startRuleIndex = pickStartRuleIndex(query, grammar);
+
+    // ─── Create lexer + parser ────────────────────────────────────────────
+    const lexer = new LexerInterpreter(
+      'PPL',
+      grammar.vocabulary,
+      grammar.lexerRuleNames,
+      grammar.channelNames,
+      grammar.modeNames,
+      grammar.lexerATN,
+      CharStream.fromString(query)
     );
 
-    return parseQuery({
-      Lexer,
-      Parser,
-      tokenDictionary: grammar.tokenDictionary,
-      ignoredTokens: grammar.ignoredTokens,
-      rulesToVisit: grammar.rulesToVisit,
-      getParseTree: (parser: any) => parser.parse(grammar.startRuleIndex),
-      enrichAutocompleteResult: remappedEnrich,
-      query,
-      cursor,
-      skipSymbolicKeywords,
+    const tokenStream = new CommonTokenStream(lexer);
+    tokenStream.fill();
+
+    const parser = new ParserInterpreter(
+      'PPL',
+      grammar.vocabulary,
+      grammar.parserRuleNames,
+      grammar.parserATN,
+      tokenStream
+    );
+
+    parser.interpreter.predictionMode = PredictionMode.SLL;
+
+    // ─── Parse using the selected start rule (non-fatal) ───────────────────
+    // Gotcha 3: ParserInterpreter can throw on malformed/partial inputs.
+    // Completion should still work even if parse fails — C3 can use a
+    // synthetic context when no parse tree is available.
+    const errorListener = new GeneralErrorListener(spaceToken);
+    parser.removeErrorListeners();
+    parser.addErrorListener(errorListener);
+    parser.buildParseTrees = true;
+    let parseTree: ParserRuleContext | undefined;
+    try {
+      parseTree = parser.parse(startRuleIndex);
+    } catch {
+      // Parse failed — keep errors from listener, continue with completion
+    }
+
+    // ─── Collect C3 candidates ────────────────────────────────────────────
+    const core = new CodeCompletionCore(parser);
+    core.ignoredTokens = new Set(grammar.ignoredTokens);
+    core.preferredRules = new Set(grammar.rulesToVisit);
+    const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, spaceToken);
+    if (cursorTokenIndex === undefined) return null;
+
+    // Fix A: Clear stale C3 follow-set cache when grammar changes.
+    resetC3CacheIfGrammarChanged(grammar.grammarHash, parser);
+
+    // Use parse tree if available; otherwise create a synthetic context
+    // so C3 can still walk the ATN from the start rule.
+    let c3Context: ParserRuleContext;
+    if (parseTree) {
+      c3Context = parseTree;
+    } else {
+      c3Context = new ParserRuleContext(null, -1);
+      (c3Context as any).ruleIndex = startRuleIndex;
+      const firstToken = tokenStream.size > 0 ? tokenStream.get(0) : undefined;
+      if (firstToken) (c3Context as any).start = firstToken;
+    }
+
+    let { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
+
+    // ─── Fix B (generalized): rerun without preferred rules that hide tokens ─
+    // When a preferred rule appears at the cursor, C3 returns it as a rule
+    // candidate and does NOT return the tokens inside it. The compiled path
+    // handles this via processVisitedRules + parseQuery's rerun loop.
+    // Here we replicate the logic generically using rule names from the grammar.
+    const rerunRules = getRuntimeRerunRules(grammar, rules, tokenStream, cursorTokenIndex);
+    if (rerunRules.length > 0) {
+      const rerunPreferred = new Set(core.preferredRules);
+      for (const ruleIdx of rerunRules) rerunPreferred.delete(ruleIdx);
+
+      const savedPreferred = core.preferredRules;
+      core.preferredRules = rerunPreferred;
+
+      const second = core.collectCandidates(cursorTokenIndex, c3Context);
+
+      // Merge: add tokens/rules from second pass that first pass didn't have
+      second.tokens.forEach((followList, tokenType) => {
+        if (!tokens.has(tokenType)) tokens.set(tokenType, followList);
+      });
+      second.rules.forEach((ruleData, ruleIdx) => {
+        if (!rules.has(ruleIdx)) rules.set(ruleIdx, ruleData);
+      });
+
+      core.preferredRules = savedPreferred;
+    }
+
+    // ─── Build keyword suggestions from token candidates ──────────────────
+    const suggestKeywords: KeywordSuggestion[] = [];
+    tokens.forEach((_producerRules, tokenType) => {
+      // Fix C: Skip EOF and junk tokens where vocab can't resolve the ID.
+      if (tokenType === Token.EOF) return;
+      const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
+      const symbolicName = parser.vocabulary.getSymbolicName(tokenType);
+      if (!literalName && !symbolicName) return;
+
+      if (!literalName && skipSymbolicKeywords) return;
+      suggestKeywords.push({
+        value: literalName || '',
+        symbolicName: (!skipSymbolicKeywords && symbolicName) || '',
+        id: tokenType,
+      });
     });
-  } catch {
+
+    const baseResult: AutocompleteResultBase = {
+      errors: errorListener.errors,
+      suggestKeywords,
+    };
+
+    // ─── Name-based enrichment (no compiled grammar coupling) ─────────────
+    return enrichRuntimeResult(baseResult, grammar, rules, tokenStream, cursorTokenIndex);
+  } catch (e) {
+    console.log('error: ', e);
     return null;
   }
 }
@@ -160,7 +747,6 @@ export const getDefaultSuggestions = async ({
 }: QuerySuggestionGetFnArgs) => {
   if (!services || !services.appName || !indexPattern) return [];
 
-
   try {
     const { lineNumber, column } = position || {};
     const cursor: CursorPosition = {
@@ -169,15 +755,8 @@ export const getDefaultSuggestions = async ({
     };
 
     const suggestions =
-      tryRuntimeGrammarSuggestions(
-        query,
-        cursor,
-        services,
-        indexPattern,
-        defaultPplAutocompleteData,
-        OpenSearchPPLParser,
-        true
-      ) || getDefaultOpenSearchPplAutoCompleteSuggestions(query, cursor);
+      tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, true) ||
+      getDefaultOpenSearchPplAutoCompleteSuggestions(query, cursor);
 
     const finalSuggestions: QuerySuggestion[] = [];
 
@@ -261,7 +840,6 @@ export const getSimplifiedPPLSuggestions = async ({
 }: QuerySuggestionGetFnArgs) => {
   if (!services || !services.appName || !indexPattern) return [];
 
-
   try {
     const { lineNumber, column } = position || {};
     const cursor: CursorPosition = {
@@ -270,15 +848,8 @@ export const getSimplifiedPPLSuggestions = async ({
     };
 
     const suggestions =
-      tryRuntimeGrammarSuggestions(
-        query,
-        cursor,
-        services,
-        indexPattern,
-        simplifiedPplAutocompleteData,
-        SimplifiedOpenSearchPPLParser,
-        false
-      ) || getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
+      tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false) ||
+      getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
     console.log('getSimplifiedPPLSuggestions: ', suggestions);
     const finalSuggestions: QuerySuggestion[] = [];
     const isInQuotes = suggestions.isInQuote || false;
