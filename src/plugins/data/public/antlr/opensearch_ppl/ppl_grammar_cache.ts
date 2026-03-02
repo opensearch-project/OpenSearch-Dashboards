@@ -42,6 +42,7 @@ export interface CachedGrammar {
   channelNames: string[];
   modeNames: string[];
   startRuleIndex: number;
+  pipeStartRuleIndex?: number;
   grammarHash: string;
   lastUsed: number;
   backendVersion: string;
@@ -608,6 +609,7 @@ class PPLGrammarCache {
         channelNames: bundle.channelNames,
         modeNames: bundle.modeNames,
         startRuleIndex: bundle.startRuleIndex,
+        pipeStartRuleIndex: bundle.pipeStartRuleIndex,
         grammarHash: bundle.grammarHash,
         lastUsed: Date.now(),
         backendVersion: this.versionCache.get(cacheKey) || '',

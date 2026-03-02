@@ -4,6 +4,11 @@
  */
 
 import { monaco } from '@osd/monaco';
+import { CharStream, CommonTokenStream, ParserInterpreter } from 'antlr4ng';
+import {
+  SimplifiedOpenSearchPPLLexer,
+  SimplifiedOpenSearchPPLParser,
+} from '@osd/antlr-grammar';
 import { getSimplifiedPPLSuggestions } from './code_completion';
 import { IndexPattern } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
@@ -11,6 +16,8 @@ import { QuerySuggestion } from '../../autocomplete';
 import * as utils from '../shared/utils';
 import { PPL_AGGREGATE_FUNCTIONS } from './constants';
 import * as querySnippets from '../../query_snippet_suggestions/ppl/suggestions';
+import { pplGrammarCache, CachedGrammar } from './ppl_grammar_cache';
+import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
 
 describe('ppl code_completion', () => {
   // Mock the query snippet suggestions function at the top level
@@ -65,6 +72,22 @@ describe('ppl code_completion', () => {
     });
   };
 
+  const getSimpleSuggestionsForIndexPattern = async (
+    query: string,
+    indexPattern: IndexPattern,
+    position: monaco.Position = new monaco.Position(1, query.length + 1)
+  ) => {
+    return getSimplifiedPPLSuggestions({
+      query,
+      indexPattern,
+      position,
+      language: 'PPL',
+      selectionStart: 0,
+      selectionEnd: 0,
+      services: mockServices,
+    });
+  };
+
   const checkSuggestionsContain = (
     result: QuerySuggestion[],
     expected: Partial<QuerySuggestion>
@@ -91,6 +114,42 @@ describe('ppl code_completion', () => {
     } else if (expected.type) {
       expect(result.some((suggestion) => suggestion.type === expected.type)).toBeFalsy();
     }
+  };
+
+  const buildRuntimeGrammar = (overrides: Partial<CachedGrammar> = {}): CachedGrammar => {
+    const lexer = new SimplifiedOpenSearchPPLLexer(CharStream.fromString(''));
+    const tokenStream = new CommonTokenStream(lexer);
+    const parser = new SimplifiedOpenSearchPPLParser(tokenStream);
+
+    const runtimeSymbolicNameToTokenType = new Map<string, number>();
+    for (let i = 0; i <= parser.vocabulary.maxTokenType; i++) {
+      const symbolicName = parser.vocabulary.getSymbolicName(i);
+      if (symbolicName) runtimeSymbolicNameToTokenType.set(symbolicName, i);
+    }
+
+    const runtimeRuleNameToIndex = new Map<string, number>();
+    parser.ruleNames.forEach((name, idx) => runtimeRuleNameToIndex.set(name, idx));
+
+    return {
+      lexerATN: lexer.interpreter.atn,
+      parserATN: parser.interpreter.atn,
+      vocabulary: parser.vocabulary,
+      lexerRuleNames: lexer.ruleNames,
+      parserRuleNames: parser.ruleNames,
+      channelNames: lexer.channelNames,
+      modeNames: lexer.modeNames,
+      startRuleIndex: 0,
+      pipeStartRuleIndex: parser.ruleNames.indexOf('commands'),
+      grammarHash: 'runtime-test-grammar',
+      lastUsed: Date.now(),
+      backendVersion: '3.6.0',
+      tokenDictionary: simplifiedPplAutocompleteData.tokenDictionary,
+      ignoredTokens: Array.from(simplifiedPplAutocompleteData.ignoredTokens),
+      rulesToVisit: Array.from(simplifiedPplAutocompleteData.rulesToVisit),
+      runtimeSymbolicNameToTokenType,
+      runtimeRuleNameToIndex,
+      ...overrides,
+    };
   };
 
   describe('getSuggestions', () => {
@@ -528,109 +587,187 @@ describe('ppl code_completion', () => {
       );
     });
 
-    describe('pipe-first queries', () => {
-      it('should suggest pipeline commands when query starts with pipe', async () => {
-        const result = await getSimpleSuggestions('| ');
+    describe('runtime grammar pipe-first', () => {
+      const runtimeIndexPattern = {
+        ...mockIndexPattern,
+        dataSourceRef: { id: 'runtime-ds', version: '3.6.0' },
+      } as unknown as IndexPattern;
 
-        // Should suggest pipeline commands (Command type maps to CompletionItemKind.Function)
+      it('should use runtime grammar cache for pipe-first suggestions', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammarSpy = jest
+          .spyOn(pplGrammarCache, 'getCachedGrammar')
+          .mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(grammarSpy).toHaveBeenCalledWith('runtime-ds');
         checkSuggestionsContain(result, {
           text: 'WHERE',
           type: monaco.languages.CompletionItemKind.Function,
         });
-        checkSuggestionsContain(result, {
-          text: 'FIELDS',
-          type: monaco.languages.CompletionItemKind.Function,
-        });
-        checkSuggestionsContain(result, {
-          text: 'STATS',
-          type: monaco.languages.CompletionItemKind.Function,
-        });
-        checkSuggestionsContain(result, {
-          text: 'SORT',
-          type: monaco.languages.CompletionItemKind.Function,
-        });
-        checkSuggestionsContain(result, {
-          text: 'DEDUP',
-          type: monaco.languages.CompletionItemKind.Function,
-        });
-
-        // Should NOT suggest source-level commands
         checkSuggestionsShouldNotContain(result, {
           text: 'SOURCE',
         });
       });
 
-      it('should suggest field names for pipe-first where command', async () => {
-        const result = await getSimpleSuggestions('| where ');
+      it('should use runtime grammar cache for source-prefixed suggestions', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const parseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
+        const result = await getSimpleSuggestionsForIndexPattern('source = ', runtimeIndexPattern);
+
+        expect(parseSpy).toHaveBeenCalled();
         checkSuggestionsContain(result, {
-          text: 'field1',
-          type: monaco.languages.CompletionItemKind.Field,
-        });
-        checkSuggestionsContain(result, {
-          text: 'field2',
-          type: monaco.languages.CompletionItemKind.Field,
+          text: 'test-index',
+          type: monaco.languages.CompletionItemKind.Struct,
         });
       });
 
-      it('should suggest aggregate functions for pipe-first stats command', async () => {
-        const result = await getSimpleSuggestions('| stats ');
+      it('should honor backend pipeStartRuleIndex when provided', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const parseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+        jest
+          .spyOn(pplGrammarCache, 'getCachedGrammar')
+          .mockReturnValue(
+            buildRuntimeGrammar({
+              grammarHash: 'runtime-test-root-start',
+              pipeStartRuleIndex: 0,
+            })
+          );
 
-        Object.keys(PPL_AGGREGATE_FUNCTIONS).forEach((af) => {
-          checkSuggestionsContain(result, {
-            text: `${af}()`,
-            type: monaco.languages.CompletionItemKind.Module,
-          });
-        });
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(result.length).toBeGreaterThan(0);
+        expect(parseSpy).toHaveBeenCalledWith(0);
       });
 
-      it('should suggest field names for pipe-first fields command', async () => {
-        const result = await getSimpleSuggestions('| fields ');
+      it('should use cached runtime grammar when datasource version metadata is missing', async () => {
+        const parseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+        const shouldFetchSpy = jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend');
+        jest.spyOn(pplGrammarCache, 'getCachedVersion').mockReturnValue(undefined);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
-        checkSuggestionsContain(result, {
-          text: 'field1',
-          type: monaco.languages.CompletionItemKind.Field,
-        });
+        const indexPatternWithoutVersion = {
+          ...mockIndexPattern,
+          dataSourceRef: { id: 'runtime-ds' },
+        } as unknown as IndexPattern;
+        const result = await getSimpleSuggestionsForIndexPattern('| ', indexPatternWithoutVersion);
+
+        expect(result.length).toBeGreaterThan(0);
+        expect(parseSpy).toHaveBeenCalled();
+        expect(shouldFetchSpy).not.toHaveBeenCalled();
       });
 
-      it('should suggest additional fields after comma in pipe-first fields command', async () => {
-        const result = await getSimpleSuggestions('| fields field1, ');
+      it('should suggest equals after source keyword on runtime path', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
-        checkSuggestionsContain(result, {
-          text: 'field2',
-          type: monaco.languages.CompletionItemKind.Field,
-        });
+        const result = await getSimpleSuggestionsForIndexPattern('source ', runtimeIndexPattern);
+
+        expect(result.some((s) => s.text === '=')).toBeTruthy();
       });
 
-      it('should suggest "as" for pipe-first rename command', async () => {
-        const result = await getSimpleSuggestions('| rename field1 ');
+      it('should resolve datasource id from query when index pattern has no dataSourceRef', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammarSpy = jest
+          .spyOn(pplGrammarCache, 'getCachedGrammar')
+          .mockReturnValue(buildRuntimeGrammar());
 
-        checkSuggestionsContain(result, {
-          text: 'as',
-          type: monaco.languages.CompletionItemKind.Keyword,
+        const servicesWithDatasetRef = {
+          ...mockServices,
+          data: {
+            query: {
+              queryString: {
+                getQuery: () => ({
+                  dataset: {
+                    dataSource: {
+                      id: 'runtime-ds',
+                      version: '3.6.0',
+                    },
+                  },
+                }),
+              },
+            },
+          },
+        } as unknown as IDataPluginServices;
+
+        const result = await getSimplifiedPPLSuggestions({
+          query: '| ',
+          indexPattern: mockIndexPattern,
+          position: new monaco.Position(1, 3),
+          language: 'PPL',
+          selectionStart: 0,
+          selectionEnd: 0,
+          services: servicesWithDatasetRef,
         });
+
+        expect(grammarSpy).toHaveBeenCalledWith('runtime-ds');
+        expect(result.length).toBeGreaterThan(0);
       });
 
-      it('should handle pipe with leading whitespace', async () => {
-        const result = await getSimpleSuggestions('  | ');
+      it('should keep runtime cursor behavior when tokenDictionary whitespace is missing', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest
+          .spyOn(pplGrammarCache, 'getCachedGrammar')
+          .mockReturnValue(
+            buildRuntimeGrammar({
+              tokenDictionary: {} as any,
+            })
+          );
+
+        const result = await getSimpleSuggestionsForIndexPattern('source ', runtimeIndexPattern);
+
+        expect(result.some((s) => s.text === '=')).toBeTruthy();
+      });
+
+      it('should still expose command tokens when backend preferred rules include commands', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammar = buildRuntimeGrammar();
+        const commandsRule = grammar.runtimeRuleNameToIndex.get('commands');
+        grammar.rulesToVisit =
+          typeof commandsRule === 'number' ? [commandsRule] : grammar.rulesToVisit;
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
 
         checkSuggestionsContain(result, {
           text: 'WHERE',
           type: monaco.languages.CompletionItemKind.Function,
         });
+      });
+
+      it('should fall back to compiled suggestions when runtime grammar cache is missing', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(null);
+        const runtimeParseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(runtimeParseSpy).not.toHaveBeenCalled();
         checkSuggestionsContain(result, {
-          text: 'FIELDS',
+          text: 'WHERE',
           type: monaco.languages.CompletionItemKind.Function,
         });
       });
 
-      it('should not affect normal source-prefixed queries', async () => {
-        // Verify that existing non-pipe queries still work correctly
-        const result = await getSimpleSuggestions('source = test-index | where ');
+      it('should fall back to compiled suggestions when datasource version is unsupported', async () => {
+        const runtimeParseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(false);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
+        const unsupportedIndexPattern = {
+          ...mockIndexPattern,
+          dataSourceRef: { id: 'runtime-ds', version: '3.5.0' },
+        } as unknown as IndexPattern;
+
+        const result = await getSimpleSuggestionsForIndexPattern('source = ', unsupportedIndexPattern);
+
+        expect(runtimeParseSpy).not.toHaveBeenCalled();
         checkSuggestionsContain(result, {
-          text: 'field1',
-          type: monaco.languages.CompletionItemKind.Field,
+          text: 'test-index',
+          type: monaco.languages.CompletionItemKind.Struct,
         });
       });
     });

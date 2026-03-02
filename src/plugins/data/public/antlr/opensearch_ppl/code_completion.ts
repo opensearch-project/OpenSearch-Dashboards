@@ -12,7 +12,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { monaco } from '@osd/monaco';
-import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
+import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
 import {
   LexerInterpreter,
   ParserInterpreter,
@@ -60,6 +60,13 @@ import { GeneralErrorListener } from '../shared/general_error_listerner';
 import { KeywordSuggestion, AutocompleteResultBase } from '../shared/types';
 import { quotesRegex } from '../shared/constants';
 
+type KeywordSuggestionDetails = {
+  importance: string;
+  type: string;
+  isFunction: boolean;
+  optionalParam?: boolean;
+};
+
 // ─── Fix A: C3 follow-set cache isolation for runtime grammars ───────────────
 // CodeCompletionCore.followSetsByATN caches by parser.constructor.name.
 // All ParserInterpreter instances share "ParserInterpreter" as the key,
@@ -72,6 +79,55 @@ function resetC3CacheIfGrammarChanged(grammarHash: string, parser: any) {
   const cache = (CodeCompletionCore as any).followSetsByATN;
   if (cache instanceof Map) cache.delete(parser.constructor.name);
   _lastC3GrammarHash = grammarHash;
+}
+
+const _keywordDetailsByLiteral = new Map<string, KeywordSuggestionDetails>();
+const _keywordDetailsBySymbolic = new Map<string, KeywordSuggestionDetails>();
+
+{
+  const lexer = new SimplifiedOpenSearchPPLLexer(CharStream.fromString(''));
+  const tokenStream = new CommonTokenStream(lexer);
+  const parser = new SimplifiedOpenSearchPPLParser(tokenStream);
+  const vocabulary = parser.vocabulary;
+
+  for (const [tokenId, details] of PPL_SUGGESTION_IMPORTANCE.entries()) {
+    const literalName = vocabulary.getLiteralName(tokenId)?.replace(quotesRegex, '$1');
+    if (literalName) {
+      _keywordDetailsByLiteral.set(literalName.toUpperCase(), details);
+    }
+    const symbolicName = vocabulary.getSymbolicName(tokenId);
+    if (symbolicName) {
+      _keywordDetailsBySymbolic.set(symbolicName.toUpperCase(), details);
+    }
+  }
+}
+
+function resolveKeywordSuggestionDetails(sk: KeywordSuggestion): KeywordSuggestionDetails | null {
+  const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
+  if (keywordDetails) return keywordDetails;
+
+  if (sk.value) {
+    const detailsByLiteral = _keywordDetailsByLiteral.get(sk.value.toUpperCase());
+    if (detailsByLiteral) return detailsByLiteral;
+  }
+
+  if (sk.symbolicName) {
+    const detailsBySymbolic = _keywordDetailsBySymbolic.get(sk.symbolicName.toUpperCase());
+    if (detailsBySymbolic) return detailsBySymbolic;
+  }
+
+  return null;
+}
+
+function isCommandPositionInCurrentSegment(queryTillCursor: string): boolean {
+  const currentSegment = queryTillCursor.split('|').pop() ?? '';
+  const trimmed = currentSegment.trimStart();
+  if (!trimmed) return true;
+  return !/\s/.test(trimmed);
+}
+
+function isLikelyCommandKeyword(sk: KeywordSuggestion): boolean {
+  return !!sk.value && /^[A-Z][A-Z0-9_]*$/.test(sk.value) && sk.value.length > 2;
 }
 
 /**
@@ -90,7 +146,17 @@ const INVALID_RULE_INDEX = -1;
 function resolveSpaceToken(grammar: CachedGrammar): number {
   const dict = grammar.tokenDictionary as any;
   const v = dict?.WHITESPACE ?? dict?.SPACE;
-  return typeof v === 'number' && v > Token.INVALID_TYPE ? v : Token.INVALID_TYPE;
+  if (typeof v === 'number' && v > Token.INVALID_TYPE) return v;
+
+  // Fallback for bundles that omit tokenDictionary or use symbolic names only.
+  const WHITESPACE = tokenTypeBySymbolic(grammar, 'WHITESPACE');
+  if (WHITESPACE > Token.INVALID_TYPE) return WHITESPACE;
+  const SPACE = tokenTypeBySymbolic(grammar, 'SPACE');
+  if (SPACE > Token.INVALID_TYPE) return SPACE;
+  const WS = tokenTypeBySymbolic(grammar, 'WS');
+  if (WS > Token.INVALID_TYPE) return WS;
+
+  return Token.INVALID_TYPE;
 }
 
 // ─── Lazy-cached name→index lookups ──────────────────────────────────────────
@@ -155,27 +221,51 @@ function resolveToken(grammar: CachedGrammar, symbolicName: string, dictKey?: st
 }
 
 /**
+ * Synthetic parser context used for runtime C3 completion when a parse tree
+ * is unavailable/unreliable (e.g. pipe-first stripped input).
+ * ParserRuleContext.ruleIndex is getter-only, so we override it in a subclass.
+ */
+class RuntimeCompletionContext extends ParserRuleContext {
+  constructor(private readonly syntheticRuleIndex: number, startToken?: Token) {
+    super(undefined, -1);
+    if (startToken) {
+      (this as any).start = startToken;
+    }
+  }
+
+  override get ruleIndex(): number {
+    return this.syntheticRuleIndex;
+  }
+}
+
+/**
  * Pick the best start rule for C3 and parsing based on query shape.
- * - `|`-first queries (pipe-first, no source=): start from subPipeline or commands
+ * - `|`-first queries (pipe-first, no source=): start from commands or subPipeline
  *   so pipeline commands (WHERE, SORT, FIELDS, etc.) become reachable candidates.
  * - Normal queries: use the grammar's default start rule (root).
  *
  * Prefers backend-provided pipeStartRuleIndex if available (future-proof:
  * backend is source of truth and knows the correct pipe-first entry for
  * its grammar version, avoiding coupling to specific rule names).
+ *
+ * Since the leading `|` is stripped before lexing, the selected entry rule must
+ * expect input *after* the pipe. `commands` is the strip-compatible choice;
+ * `subPipeline` may expect the pipe token itself, so it's a secondary fallback.
  */
 function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
   const trimmed = query.trimStart();
   if (trimmed.startsWith('|')) {
     // Prefer backend-declared pipe start rule if available
-    const pipeStart = (grammar as any).pipeStartRuleIndex;
+    const pipeStart = grammar.pipeStartRuleIndex;
     if (typeof pipeStart === 'number' && pipeStart >= 0) return pipeStart;
 
-    // Fallback: resolve by rule name
-    const subPipeline = grammar.parserRuleNames.indexOf('subPipeline');
-    if (subPipeline >= 0) return subPipeline;
+    // Fallback: resolve by rule name.
+    // Prefer `commands` first — it expects input after the pipe (strip-compatible).
+    // `subPipeline` may expect the leading pipe token itself, so it's secondary.
     const commands = grammar.parserRuleNames.indexOf('commands');
     if (commands >= 0) return commands;
+    const subPipeline = grammar.parserRuleNames.indexOf('subPipeline');
+    if (subPipeline >= 0) return subPipeline;
   }
   return grammar.startRuleIndex ?? 0;
 }
@@ -188,12 +278,18 @@ function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
 /**
  * Determine which preferred rules should be removed for a C3 rerun.
  * Mirrors the compiled processVisitedRules rerun logic, but uses rule names.
+ *
+ * In pipe-first mode, search-oriented rules (searchCommand) are unreachable
+ * from the commands entry point and should be skipped. However, command-local
+ * reruns (e.g. comparisonOperator for `| where field `) are still useful and
+ * should not be suppressed.
  */
 function getRuntimeRerunRules(
   grammar: CachedGrammar,
   rules: Map<number, any>,
   tokenStream: TokenStream,
-  cursorTokenIndex: number
+  cursorTokenIndex: number,
+  isPipeFirst: boolean = false
 ): number[] {
   const rerun: number[] = [];
   const spaceToken = resolveSpaceToken(grammar);
@@ -204,7 +300,8 @@ function getRuntimeRerunRules(
 
   // searchCommand: rerun to expand SEARCH/SOURCE/INDEX tokens
   // (unless the context is DESCRIBE/SHOW which has its own path)
-  if (RULE_searchCommand !== INVALID_RULE_INDEX && rules.has(RULE_searchCommand)) {
+  // In pipe-first mode, searchCommand is unreachable — skip this rerun entirely.
+  if (!isPipeFirst && RULE_searchCommand !== INVALID_RULE_INDEX && rules.has(RULE_searchCommand)) {
     const DESCRIBE = tokenTypeBySymbolic(grammar, 'DESCRIBE');
     const SHOW = tokenTypeBySymbolic(grammar, 'SHOW');
     const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
@@ -221,7 +318,8 @@ function getRuntimeRerunRules(
   }
 
   // searchComparisonOperator / comparisonOperator: rerun when last token
-  // is an identifier (expression end), to get pipe/comma suggestions
+  // is an identifier (expression end), to get pipe/comma suggestions.
+  // This is useful in both normal and pipe-first mode (e.g. `| where field `).
   if (RULE_searchComparisonOperator !== INVALID_RULE_INDEX && rules.has(RULE_searchComparisonOperator)) {
     const ID = resolveToken(grammar, 'ID', 'ID');
     const BQUOTA = resolveToken(grammar, 'BQUOTA_STRING', 'BACKTICK_QUOTE');
@@ -229,10 +327,37 @@ function getRuntimeRerunRules(
     if (lastToken && (lastToken.token.type === ID || lastToken.token.type === BQUOTA)) {
       rerun.push(RULE_searchComparisonOperator);
       if (RULE_comparisonOperator !== INVALID_RULE_INDEX) rerun.push(RULE_comparisonOperator);
-      rerun.push(RULE_searchCommand); // parent of searchComparison
+      // Only include searchCommand parent when not in pipe-first mode
+      if (!isPipeFirst) {
+        rerun.push(RULE_searchCommand); // parent of searchComparison
+      }
     }
   }
 
+  return rerun;
+}
+
+/**
+ * Generic rerun fallback:
+ * if C3 returns preferred-rule candidates, rerun without those rules to expose
+ * token candidates hidden behind them. This keeps runtime behavior robust when
+ * backend grammar versions add/rename preferred rules.
+ */
+function getGenericPreferredRuleReruns(
+  grammar: CachedGrammar,
+  rules: Map<number, any>,
+  preferredRules: Set<number>,
+  isPipeFirst: boolean
+): number[] {
+  const rerun: number[] = [];
+  for (const ruleIdx of rules.keys()) {
+    if (!preferredRules.has(ruleIdx)) continue;
+    // In pipe-first mode, never force search-entry reruns.
+    if (isPipeFirst && grammar.parserRuleNames[ruleIdx] === 'searchCommand') {
+      continue;
+    }
+    rerun.push(ruleIdx);
+  }
   return rerun;
 }
 
@@ -541,16 +666,19 @@ function tryRuntimeGrammarSuggestions(
   skipSymbolicKeywords: boolean
 ): OpenSearchPplAutocompleteResult | null {
   try {
-    const dataSourceId = indexPattern?.dataSourceRef?.id;
-    const version =
-      indexPattern?.dataSourceRef?.version ||
-      services?.data?.query?.queryString?.getQuery()?.dataset?.dataSource?.version ||
-      pplGrammarCache.getCachedVersion(dataSourceId);
-
-    if (!version || !pplGrammarCache.shouldFetchFromBackend(version)) return null;
-
+    const currentQuery = services?.data?.query?.queryString?.getQuery?.();
+    const dataSourceId = indexPattern?.dataSourceRef?.id ?? currentQuery?.dataset?.dataSource?.id;
     const grammar = pplGrammarCache.getCachedGrammar(dataSourceId);
     if (!grammar) return null;
+
+    const version =
+      indexPattern?.dataSourceRef?.version ||
+      currentQuery?.dataset?.dataSource?.version ||
+      pplGrammarCache.getCachedVersion(dataSourceId);
+
+    // Grammar cache is the source of truth for runtime path.
+    // If version is unknown (e.g. datasource metadata missing), still use cached grammar.
+    if (version && !pplGrammarCache.shouldFetchFromBackend(version)) return null;
     // ─── Normalize token dictionary ──────────────────────────────────────────
     const spaceToken = resolveSpaceToken(grammar);
 
@@ -628,16 +756,16 @@ function tryRuntimeGrammarSuggestions(
     // Fix A: Clear stale C3 follow-set cache when grammar changes.
     resetC3CacheIfGrammarChanged(grammar.grammarHash, parser);
 
-    // Use parse tree if available; otherwise create a synthetic context
-    // so C3 can still walk the ATN from the start rule.
+    // For pipe-first mode, always use a synthetic C3 context anchored at the
+    // chosen start rule. The parse tree from a pipe-stripped input can be a
+    // recovery tree with mismatched contexts, which constrains C3 incorrectly.
+    // For normal mode, prefer the actual parse tree when available.
     let c3Context: ParserRuleContext;
-    if (parseTree) {
-      c3Context = parseTree;
-    } else {
-      c3Context = new ParserRuleContext(null, -1);
-      (c3Context as any).ruleIndex = startRuleIndex;
+    if (isPipeFirst || !parseTree) {
       const firstToken = tokenStream.size > 0 ? tokenStream.get(0) : undefined;
-      if (firstToken) (c3Context as any).start = firstToken;
+      c3Context = new RuntimeCompletionContext(startRuleIndex, firstToken);
+    } else {
+      c3Context = parseTree;
     }
 
     let { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
@@ -647,11 +775,24 @@ function tryRuntimeGrammarSuggestions(
     // candidate and does NOT return the tokens inside it. The compiled path
     // handles this via processVisitedRules + parseQuery's rerun loop.
     // Here we replicate the logic generically using rule names from the grammar.
-    // Skip search-oriented rerun for pipe-first mode — those rules are
-    // irrelevant when parsing from the commands entry point.
-    const rerunRules = isPipeFirst
-      ? []
-      : getRuntimeRerunRules(grammar, rules, tokenStream, cursorTokenIndex);
+    // For pipe-first mode, only search-oriented reruns (searchCommand) are
+    // suppressed; command-local reruns still apply (e.g. comparisonOperator).
+    const rerunRules = getRuntimeRerunRules(
+      grammar,
+      rules,
+      tokenStream,
+      cursorTokenIndex,
+      isPipeFirst
+    );
+    const genericReruns = getGenericPreferredRuleReruns(
+      grammar,
+      rules,
+      core.preferredRules,
+      isPipeFirst
+    );
+    for (const ruleIdx of genericReruns) {
+      if (!rerunRules.includes(ruleIdx)) rerunRules.push(ruleIdx);
+    }
     if (rerunRules.length > 0) {
       const rerunPreferred = new Set(core.preferredRules);
       for (const ruleIdx of rerunRules) rerunPreferred.delete(ruleIdx);
@@ -876,8 +1017,15 @@ export const getSimplifiedPPLSuggestions = async ({
     const suggestions =
       tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false) ||
       getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
-    console.log('getSimplifiedPPLSuggestions: ', suggestions);
     const finalSuggestions: QuerySuggestion[] = [];
+    const queryTillCursor =
+      position && position.lineNumber && position.column
+        ? extractQueryTillCursor(query, {
+            lineNumber: position.lineNumber,
+            column: position.column,
+          })
+        : query.slice(0, selectionEnd);
+    const isCommandPosition = isCommandPositionInCurrentSegment(queryTillCursor);
     const isInQuotes = suggestions.isInQuote || false;
     const isInBackQuote = suggestions.isInBackQuote || false;
 
@@ -984,7 +1132,8 @@ export const getSimplifiedPPLSuggestions = async ({
       const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
       finalSuggestions.push(
         ...literalKeywords.map((sk) => {
-          const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
+          const keywordDetails = resolveKeywordSuggestionDetails(sk);
+          const shouldTreatAsCommand = !keywordDetails && isCommandPosition && isLikelyCommandKeyword(sk);
           if (keywordDetails && keywordDetails.isFunction) {
             const functionName = sk.value;
             return {
@@ -1010,6 +1159,17 @@ export const getSimplifiedPPLSuggestions = async ({
               insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               detail: keywordDetails.type,
               sortText: keywordDetails.importance,
+              documentation: Documentation[sk.value.toUpperCase()] ?? '',
+            };
+          } else if (shouldTreatAsCommand) {
+            return {
+              text: sk.value,
+              type:
+                KEYWORD_ITEM_KIND_MAP.get(SuggestionItemDetailsTags.Command) ??
+                monaco.languages.CompletionItemKind.Function,
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
+              detail: SuggestionItemDetailsTags.Command,
+              sortText: '98' + sk.value,
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           } else {
@@ -1048,14 +1208,6 @@ export const getSimplifiedPPLSuggestions = async ({
       }
     }
 
-    const queryTillCursor =
-      position && position.lineNumber && position.column
-        ? extractQueryTillCursor(query, {
-            lineNumber: position.lineNumber,
-            column: position.column,
-          })
-        : query.slice(0, selectionEnd);
-
     const querySnippetSuggestions = await getPPLQuerySnippetForSuggestions(queryTillCursor);
 
     return [...finalSuggestions, ...querySnippetSuggestions];
@@ -1075,7 +1227,6 @@ export const getDefaultOpenSearchPplAutoCompleteSuggestions = (
     ignoredTokens: defaultPplAutocompleteData.ignoredTokens,
     rulesToVisit: defaultPplAutocompleteData.rulesToVisit,
     getParseTree: defaultPplAutocompleteData.getParseTree,
-    getPipeStartParseTree: defaultPplAutocompleteData.getPipeStartParseTree,
     enrichAutocompleteResult: defaultPplAutocompleteData.enrichAutocompleteResult,
     query,
     cursor,
@@ -1093,7 +1244,6 @@ export const getSimplifiedOpenSearchPplAutoCompleteSuggestions = (
     ignoredTokens: simplifiedPplAutocompleteData.ignoredTokens,
     rulesToVisit: simplifiedPplAutocompleteData.rulesToVisit,
     getParseTree: simplifiedPplAutocompleteData.getParseTree,
-    getPipeStartParseTree: simplifiedPplAutocompleteData.getPipeStartParseTree,
     enrichAutocompleteResult: simplifiedPplAutocompleteData.enrichAutocompleteResult,
     query,
     cursor,

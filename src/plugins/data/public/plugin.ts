@@ -312,26 +312,38 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
-    // Subscribe to dataset changes to pre-fetch PPL grammar for supported backends.
+    // Subscribe to dataset changes to pre-fetch PPL grammar.
     // This runs at app startup so grammar is fetched on dataset change, not on keystroke.
-    let lastGrammarDatasourceId: string | undefined;
-    query.queryString.getUpdates$().subscribe((q) => {
-      if (q.language !== 'PPL') return;
-      const dsId = q.dataset?.dataSource?.id;
-      if (dsId === lastGrammarDatasourceId) {
+    let lastGrammarDatasourceKey: string | undefined;
+    const maybeWarmUpPplGrammar = (q: {
+      language?: string;
+      dataset?: { dataSource?: { id?: string; version?: string } };
+    }) => {
+      const language = (q?.language ?? '').toUpperCase();
+      // In explore autocomplete, PPL uses PPL_Simplified. Both should warm runtime grammar.
+      if (!language.startsWith('PPL')) return;
+
+      const dsId = q?.dataset?.dataSource?.id;
+      // Track local cluster separately from remote datasources.
+      const dsKey = dsId ?? '__default__';
+      if (dsKey === lastGrammarDatasourceKey) {
         return;
       }
-      const dsVersion = q.dataset?.dataSource?.version;
-      // Only fetch grammar if version is known and supports the grammar API (>= 3.6.0).
-      // If version is undefined, skip — we can't determine support without it.
-      if (!dsVersion || !pplGrammarCache.shouldFetchFromBackend(dsVersion)) {
-        lastGrammarDatasourceId = dsId;
+      const dsVersion = q?.dataset?.dataSource?.version;
+      // If version is known and unsupported, skip warm-up.
+      // If version is missing, warm-up will resolve version via saved objects (/api/status for local).
+      if (dsVersion && !pplGrammarCache.shouldFetchFromBackend(dsVersion)) {
+        lastGrammarDatasourceKey = dsKey;
         return;
       }
-      lastGrammarDatasourceId = dsId;
+      lastGrammarDatasourceKey = dsKey;
       pplGrammarCache.invalidate(dsId);
       pplGrammarCache.warmUp(http, savedObjects.client, dsId);
-    });
+    };
+
+    // Warm current query state once at startup and then on subsequent query updates.
+    maybeWarmUpPplGrammar(query.queryString.getQuery());
+    query.queryString.getUpdates$().subscribe(maybeWarmUpPplGrammar);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
