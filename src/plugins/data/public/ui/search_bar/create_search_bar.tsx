@@ -40,11 +40,14 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { TimeRangeToolRegistration } from '../../chat_tools/time_range_tool_registration';
+import { ContextProviderStart } from '../../../../../plugins/context_provider/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
+  contextProvider?: ContextProviderStart;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -129,7 +132,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data, contextProvider }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -184,6 +187,10 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           ...core,
         }}
       >
+        <TimeRangeToolRegistration
+          timefilter={data.query.timefilter.timefilter}
+          useAssistantAction={contextProvider?.hooks?.useAssistantAction}
+        />
         <SearchBar
           showAutoRefreshOnly={props.showAutoRefreshOnly}
           showDatePicker={props.showDatePicker}
