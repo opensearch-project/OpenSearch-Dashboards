@@ -1,0 +1,2 @@
+fix:
+- Vis container grow while the vis config panel expanding ([#11419](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11419))
