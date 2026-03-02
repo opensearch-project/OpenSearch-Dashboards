@@ -323,7 +323,8 @@ export function createBarSeries(
     id,
     name,
     data: data.map((d) => [d.x, d.y]),
-    barMaxWidth: 50,
+    barWidth: '99%',
+    // barMaxWidth: 50,
     itemStyle: {
       color,
     },
@@ -589,8 +590,8 @@ export function createHistogramSpec(
     grid: {
       top: 20,
       right: hasMultipleSeries ? 180 : 20,
-      bottom: 40,
-      left: 50,
+      bottom: 25,
+      left: 20,
       containLabel: false,
     },
   };
