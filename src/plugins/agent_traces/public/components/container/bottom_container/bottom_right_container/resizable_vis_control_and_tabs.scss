@@ -16,6 +16,7 @@
 .visStylePanelTitle {
   padding-bottom: $euiSizeXS;
   padding-top: $ouiSizeXS;
+  padding-left: $ouiSizeXS;
   border-bottom: $euiBorderThin;
 }
 
@@ -26,4 +27,9 @@
 .tabsPanel {
   display: flex;
   padding-right: $euiSizeM;
+}
+
+.tabsPanelContainer {
+  min-height: 0;
+  flex-grow: 1;
 }

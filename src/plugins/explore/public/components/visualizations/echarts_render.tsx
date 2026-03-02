@@ -16,7 +16,7 @@ interface Props {
 }
 
 const DEFAULT_GRID = {
-  top: 50,
+  top: 15,
   right: 30,
   bottom: 50,
   left: 40,
@@ -179,6 +179,8 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
         }
       }
 
+      console.log('setOption');
+      console.log(option);
       instance.setOption(
         option,
         { notMerge: true } // this is a must to update compulsorily otherwise will merge with previous option
