@@ -9,15 +9,21 @@ import {
   IRouter,
   Logger,
   OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponseFactory,
   Capabilities,
 } from '../../../../core/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
 import { getMemoryContainerId } from './utils/get_memory_container_id';
-import { CHAT_ALLOWED_FILE_TYPES, CHAT_MAX_FILE_ATTACHMENTS } from '../../common';
+import {
+  CHAT_ALLOWED_FILE_TYPES,
+  CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
+} from '../../common';
 
 const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
+/** Base64 encoding increases payload size by ~33%; 1.4 provides margin. */
+const BASE64_OVERHEAD_FACTOR = 1.4;
 
 /**
  * Forward request to external AG-UI server
@@ -25,12 +31,14 @@ const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
 async function forwardToAgUI(
   agUiUrl: string,
   request: OpenSearchDashboardsRequest,
-  response: any,
+  response: OpenSearchDashboardsResponseFactory,
   dataSourceId?: string,
   logger?: Logger
 ) {
   // Prepare request body - include dataSourceId if provided
-  const requestBody = dataSourceId ? { ...(request.body || {}), dataSourceId } : request.body;
+  const requestBody = dataSourceId
+    ? { ...((request.body as Record<string, unknown>) || {}), dataSourceId }
+    : request.body;
 
   logger?.debug('Forwarding to external AG-UI', { agUiUrl, dataSourceId });
 
@@ -92,7 +100,8 @@ export function defineRoutes(
     | undefined,
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
-  maxFileUploadBytes?: number
+  maxFileUploadBytes?: number,
+  maxFileAttachments: number = DEFAULT_MAX_FILE_ATTACHMENTS
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -187,9 +196,10 @@ export function defineRoutes(
     }
   );
 
-  // Calculate payload limit to accommodate base64 overhead (~33%) plus message JSON
   const proxyMaxBytes =
-    maxFileUploadBytes !== undefined ? Math.ceil(maxFileUploadBytes * 1.4) : undefined;
+    maxFileUploadBytes !== undefined
+      ? Math.ceil(maxFileUploadBytes * maxFileAttachments * BASE64_OVERHEAD_FACTOR)
+      : undefined;
 
   // Proxy route for AG-UI requests
   router.post(
@@ -242,10 +252,10 @@ export function defineRoutes(
         for (let i = messages.length - 1; i >= 0; i--) {
           if (messages[i].role === 'user' && Array.isArray(messages[i].content)) {
             const binaryCount = messages[i].content.filter((p: any) => p.type === 'binary').length;
-            if (binaryCount > CHAT_MAX_FILE_ATTACHMENTS) {
+            if (binaryCount > maxFileAttachments) {
               return response.badRequest({
                 body: {
-                  message: `Too many file attachments (${binaryCount}). Maximum allowed: ${CHAT_MAX_FILE_ATTACHMENTS}`,
+                  message: `Too many file attachments (${binaryCount}). Maximum allowed: ${maxFileAttachments}`,
                 },
               });
             }

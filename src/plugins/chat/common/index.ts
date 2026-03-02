@@ -7,13 +7,14 @@ export const PLUGIN_ID = 'chat';
 export const PLUGIN_NAME = 'chat';
 export const CHAT_DEFAULT_AG_UI_URL = 'http://localhost:3000';
 
+export const ONE_MB = 1024 * 1024;
+
 /** Maximum number of file attachments per message. */
 export const CHAT_MAX_FILE_ATTACHMENTS = 10;
 
 /**
  * Text-based MIME types supported for file attachments.
- * Matches the os_art AG-UI server's TEXT_MIME_TYPES — only these types
- * are decoded and inlined as text in the LLM prompt.
+ * Only these types are decoded and inlined as text in the LLM prompt.
  */
 export const CHAT_ALLOWED_FILE_TYPES: Record<string, string[]> = {
   'text/plain': ['.txt'],

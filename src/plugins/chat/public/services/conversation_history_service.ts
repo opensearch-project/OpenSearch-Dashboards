@@ -42,7 +42,9 @@ export class ConversationHistoryService {
 
       // Handle array content - look for text content
       if (Array.isArray(msg.content)) {
-        const textContent = msg.content.find((item) => item.type === 'text');
+        const textContent = msg.content.find(
+          (item): item is Extract<typeof item, { type: 'text' }> => item.type === 'text'
+        );
         if (textContent?.text && textContent.text.trim()) {
           const text = textContent.text;
           return text.length > 50 ? text.substring(0, 50) + '...' : text;

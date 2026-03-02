@@ -772,42 +772,6 @@ describe('ChatService', () => {
         expect(storedData.messages).toEqual([]);
       });
     });
-
-    describe('saveCurrentChatStatePublic', () => {
-      it('should save current state to sessionStorage', () => {
-        const testMessages = [{ id: '1', role: 'user', content: 'test' }];
-        (chatService as any).currentMessages = testMessages;
-
-        chatService.saveCurrentChatStatePublic();
-
-        // Check that setItem was called with the correct key
-        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
-          'chat.currentState',
-          expect.any(String)
-        );
-
-        // Verify the stored JSON contains the expected data
-        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
-        const storedData = JSON.parse(setItemCall[1]);
-        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
-        expect(storedData.messages).toEqual(testMessages);
-      });
-
-      it('should handle sessionStorage errors gracefully', () => {
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-        ((global as any).sessionStorage.setItem as jest.Mock).mockImplementation(() => {
-          throw new Error('Storage full');
-        });
-
-        expect(() => chatService.saveCurrentChatStatePublic()).not.toThrow();
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Failed to save chat state to sessionStorage:',
-          expect.any(Error)
-        );
-
-        consoleSpy.mockRestore();
-      });
-    });
   });
 
   describe('window state management', () => {

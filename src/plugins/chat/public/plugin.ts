@@ -111,6 +111,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       agUiUrl?: string;
       mlCommonsAgentId?: string;
       maxFileUploadBytes?: number;
+      maxFileAttachments?: number;
     }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
@@ -128,6 +129,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     if (chatConfig.maxFileUploadBytes !== undefined) {
       this.chatService.maxFileUploadBytes = chatConfig.maxFileUploadBytes;
     }
+    if (chatConfig.maxFileAttachments !== undefined) {
+      this.chatService.maxFileAttachments = chatConfig.maxFileAttachments;
+    }
 
     if (!isEnabled) {
       return {
@@ -136,14 +140,13 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     }
 
     // Register implementation functions with core chat service
-    const chatService = this.chatService;
     if (this.coreSetup?.chat?.setImplementation) {
       this.coreSetup.chat.setImplementation({
         // Only business logic operations
-        sendMessage: chatService.sendMessage.bind(chatService),
-        sendMessageWithWindow: chatService.sendMessageWithWindow.bind(chatService),
-        openWindow: chatService.openWindow.bind(chatService),
-        closeWindow: chatService.closeWindow.bind(chatService),
+        sendMessage: this.chatService.sendMessage.bind(this.chatService),
+        sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
+        openWindow: this.chatService.openWindow.bind(this.chatService),
+        closeWindow: this.chatService.closeWindow.bind(this.chatService),
       });
     }
 

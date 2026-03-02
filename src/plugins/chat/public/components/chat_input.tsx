@@ -15,7 +15,11 @@ import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
-import { CHAT_FILE_ACCEPT, CHAT_MAX_FILE_ATTACHMENTS } from '../../common';
+import {
+  CHAT_FILE_ACCEPT,
+  CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
+  ONE_MB,
+} from '../../common';
 
 import './chat_input.scss';
 
@@ -32,6 +36,7 @@ interface ChatInputProps {
   onCaptureScreenshot: () => void;
   onFilesSelected: (files: File[]) => void;
   maxFileUploadBytes: number;
+  maxFileAttachments?: number;
   attachmentCount: number;
 }
 
@@ -48,6 +53,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onCaptureScreenshot,
   onFilesSelected,
   maxFileUploadBytes,
+  maxFileAttachments = DEFAULT_MAX_FILE_ATTACHMENTS,
   attachmentCount,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -88,13 +94,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const remaining = CHAT_MAX_FILE_ATTACHMENTS - attachmentCount;
+    const remaining = maxFileAttachments - attachmentCount;
     if (remaining <= 0) {
       notifications.toasts.addWarning(
         i18n.translate('chat.input.fileLimitReached', {
           defaultMessage:
             'You can attach up to {maxFiles} files. Remove a file before adding more.',
-          values: { maxFiles: CHAT_MAX_FILE_ATTACHMENTS },
+          values: { maxFiles: maxFileAttachments },
         })
       );
       e.target.value = '';
@@ -105,7 +111,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const oversized = files.filter((f) => f.size > maxFileUploadBytes);
 
     if (oversized.length > 0) {
-      const limitMB = (maxFileUploadBytes / (1024 * 1024)).toFixed(1);
+      const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
       const names = oversized.map((f) => f.name).join(', ');
       notifications.toasts.addWarning(
         i18n.translate('chat.input.filesExceedSizeLimit', {
@@ -124,7 +130,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           values: {
             acceptedCount: accepted.length,
             validCount: valid.length,
-            maxFiles: CHAT_MAX_FILE_ATTACHMENTS,
+            maxFiles: maxFileAttachments,
           },
         })
       );

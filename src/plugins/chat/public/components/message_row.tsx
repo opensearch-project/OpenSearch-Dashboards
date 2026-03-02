@@ -63,7 +63,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
                     key={index}
                     src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
                     alt={block.filename || 'Visualization'}
-                    style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
+                    className="msgRow__image"
                   />
                 );
               }
@@ -72,7 +72,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
                   key={index}
                   iconType="document"
                   color="hollow"
-                  style={{ marginBottom: '4px', marginRight: '4px' }}
+                  className="msgRow__fileBadge"
                 >
                   {block.filename || block.mimeType || 'File'}
                 </EuiBadge>
@@ -80,10 +80,6 @@ export const MessageRow: React.FC<MessageRowProps> = ({
             }
             // Render text content as markdown
             if (block.type === 'text' && block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            // Handle plain text blocks (for backward compatibility)
-            if (block.text) {
               return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
             }
             return null;

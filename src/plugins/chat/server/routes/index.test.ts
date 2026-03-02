@@ -532,6 +532,138 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('File attachment count limit', () => {
+      // Use a large maxFileUploadBytes so the payload size limit (413) doesn't
+      // trigger before our count validation (400) runs.
+      const largeMaxBytes = 100 * 1024 * 1024; // 100MB
+
+      it('should reject requests with more than 10 binary attachments', async () => {
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          largeMaxBytes
+        );
+
+        const tooManyFiles = Array.from({ length: 11 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithTooManyFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: tooManyFiles,
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithTooManyFiles)
+          .expect(400);
+
+        expect(response.body.message).toContain('Too many file attachments (11)');
+        expect(response.body.message).toContain('Maximum allowed: 10');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow exactly 10 binary attachments', async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          largeMaxBytes
+        );
+
+        const tenFiles = Array.from({ length: 10 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithTenFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: tenFiles,
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithTenFiles)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should only count attachments in the newest user message', async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          largeMaxBytes
+        );
+
+        const fiveFiles = Array.from({ length: 5 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        // Two user messages with 5 files each — total 10 but newest has only 5
+        const requestWithHistory = {
+          ...validRequest,
+          messages: [
+            { role: 'user', id: 'msg-1', content: fiveFiles },
+            { role: 'assistant', id: 'msg-2', content: 'I see your files.' },
+            { role: 'user', id: 'msg-3', content: [...fiveFiles] },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithHistory)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+    });
+
     describe('System Prompt Injection', () => {
       const mockSuccessfulAgUiResponse = () => {
         mockFetch.mockResolvedValue({

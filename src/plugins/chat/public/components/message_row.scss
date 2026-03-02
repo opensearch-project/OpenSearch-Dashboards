@@ -74,6 +74,17 @@
   }
 }
 
+.msgRow__image {
+  max-width: 100%;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.msgRow__fileBadge {
+  margin-bottom: 4px;
+  margin-right: 4px;
+}
+
 @keyframes blink {
   0%,
   50% {

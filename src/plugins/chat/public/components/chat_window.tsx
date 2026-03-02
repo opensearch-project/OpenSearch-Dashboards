@@ -280,7 +280,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = (options?.input ?? input.trim());
-    // Require a non-empty message; attachments alone are not sufficient
+    // Require non-empty text; use ref for immediate streaming check (React 18 batching)
     if (!messageContent || isStreamingRef.current) return;
 
     // Prepare additional messages for sending (but don't add to timeline yet)
@@ -292,7 +292,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       if (screenshotData) {
         binaryContent.push({
-          type: 'binary' as const,
+          type: 'binary',
           mimeType: screenshotData.mimeType,
           data: screenshotData.base64,
         });
@@ -300,7 +300,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       for (const file of fileAttachments) {
         binaryContent.push({
-          type: 'binary' as const,
+          type: 'binary',
           mimeType: file.mimeType,
           data: file.base64,
           filename: file.filename,
@@ -364,8 +364,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const additionalMessages: Message[] = [];
 
     if (Array.isArray(message.content)) {
-      const lastMessageContent =  message.content[message.content.length - 1];
-      if (lastMessageContent.type === "text") {
+      const lastMessageContent = message.content[message.content.length - 1];
+      if (lastMessageContent.type === 'text') {
         textContent = lastMessageContent.text;
         additionalMessages.push({
           ...message,
@@ -484,7 +484,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Handle array content - look for text content
       if (Array.isArray(msg.content)) {
-        const textContent = msg.content.find((item) => item.type === 'text');
+        const textContent = msg.content.find((item): item is Extract<typeof item, { type: 'text' }> => item.type === 'text');
         if (textContent?.text && textContent.text.trim()) {
           return textContent.text;
         }
@@ -600,7 +600,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           }
 
           {fileAttachments.length > 0 && (
-            <div className="chatWindow__fileAttachments">
+            <div className="chatWindow__fileAttachments" aria-label="Attached files">
               {fileAttachments.map((file, index) => (
                 <div key={`${file.filename}-${index}`} className="chatWindow__fileAttachment">
                   <EuiIcon type="document" size="s" />
@@ -633,6 +633,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onCaptureScreenshot={handleCaptureScreenshot}
             onFilesSelected={handleFilesSelected}
             maxFileUploadBytes={chatService.maxFileUploadBytes}
+            maxFileAttachments={chatService.maxFileAttachments}
             attachmentCount={fileAttachments.length + (screenshotData ? 1 : 0)}
           />
         </>

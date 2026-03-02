@@ -30,6 +30,9 @@ jest.mock('../hooks/use_command_menu_keyboard', () => ({
   }),
 }));
 
+// Shared mock so tests can assert on toast calls
+const mockAddWarning = jest.fn();
+
 // Mock useOpenSearchDashboards hook
 jest.mock('../../../opensearch_dashboards_react/public', () => {
   const { BehaviorSubject } = jest.requireActual('rxjs');
@@ -50,7 +53,7 @@ jest.mock('../../../opensearch_dashboards_react/public', () => {
           },
           notifications: {
             toasts: {
-              addWarning: jest.fn(),
+              addWarning: mockAddWarning,
               addDanger: jest.fn(),
               add: jest.fn(),
             },
@@ -367,6 +370,91 @@ describe('ChatInput', () => {
 
       // Should not throw when clicking with undefined callback
       expect(() => fireEvent.click(button)).not.toThrow();
+    });
+  });
+
+  describe('file validation', () => {
+    const createFileList = (files: File[]): FileList => {
+      const fileList = ({
+        length: files.length,
+        item: (i: number) => files[i] || null,
+        *[Symbol.iterator]() {
+          for (const f of files) yield f;
+        },
+      } as unknown) as FileList;
+      for (let i = 0; i < files.length; i++) {
+        (fileList as any)[i] = files[i];
+      }
+      return fileList;
+    };
+
+    const selectFiles = (container: HTMLElement, files: File[]) => {
+      const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+      Object.defineProperty(input, 'files', { value: createFileList(files), configurable: true });
+      fireEvent.change(input);
+    };
+
+    it('should call onFilesSelected with valid files', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const file = new File(['hello'], 'test.txt', { type: 'text/plain' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([file]);
+    });
+
+    it('should filter out oversized files and show warning', () => {
+      const onFilesSelected = jest.fn();
+      const maxBytes = 100;
+      const { container } = render(
+        <ChatInput
+          {...defaultProps}
+          onFilesSelected={onFilesSelected}
+          maxFileUploadBytes={maxBytes}
+        />
+      );
+
+      const small = new File(['hi'], 'small.txt', { type: 'text/plain' });
+      const big = new File(['x'.repeat(200)], 'big.txt', { type: 'text/plain' });
+      selectFiles(container, [small, big]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([small]);
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('big.txt'));
+    });
+
+    it('should reject all files when attachment limit is reached', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} attachmentCount={10} />
+      );
+
+      const file = new File(['hello'], 'test.txt', { type: 'text/plain' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Remove a file before adding more')
+      );
+    });
+
+    it('should truncate file list to remaining capacity', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} attachmentCount={8} />
+      );
+
+      const files = Array.from(
+        { length: 5 },
+        (_, i) => new File(['data'], `file${i}.txt`, { type: 'text/plain' })
+      );
+      selectFiles(container, files);
+
+      // Only 2 remaining slots (10 - 8)
+      expect(onFilesSelected).toHaveBeenCalledWith(files.slice(0, 2));
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('Only 2 of 5'));
     });
   });
 });

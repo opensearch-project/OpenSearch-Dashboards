@@ -71,6 +71,8 @@ export class ChatService {
 
   // Max file upload size in bytes (set from plugin config)
   public maxFileUploadBytes: number = 3145728; // 3MB default
+  // Max number of file attachments per message (set from plugin config)
+  public maxFileAttachments: number = 10;
 
   constructor(
     uiSettings: IUiSettingsClient,
@@ -627,10 +629,6 @@ export class ChatService {
 
     // Return array without trailing error messages
     return messages.slice(0, endIndex);
-  }
-
-  public saveCurrentChatStatePublic(): void {
-    this.saveCurrentChatState();
   }
 
   public getCurrentMessages(): Message[] {
