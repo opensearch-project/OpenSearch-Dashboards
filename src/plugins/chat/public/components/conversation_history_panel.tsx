@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -52,8 +52,11 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   const contentRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef(0);
   const PAGE_SIZE = 20;
-  const hideDeleteAction =
-    conversationHistoryService.getMemoryProvider() instanceof AgenticMemoryProvider;
+
+  const hideDeleteAction = useMemo(
+    () => conversationHistoryService.getMemoryProvider() instanceof AgenticMemoryProvider,
+    [conversationHistoryService]
+  );
 
   /**
    * Group conversations by date
@@ -273,6 +276,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
                   if (hideDeleteAction) {
                     return (
                       <EuiListGroupItem
+                        key={conversation.id}
                         label={conversation.name}
                         onClick={() => handleSelectConversation(conversation)}
                         size="s"
