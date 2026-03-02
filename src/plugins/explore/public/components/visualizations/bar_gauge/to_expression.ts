@@ -29,7 +29,8 @@ export const createBarGaugeSpec = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarGaugeChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  containerSize?: { width: number; height: number }
 ): any => {
   if (getChartRender() === 'echarts') {
     const { xAxis, yAxis } = getBarOrientation(styleOptions, axisColumnMappings);
@@ -57,8 +58,8 @@ export const createBarGaugeSpec = (
         })
       ), // Bar gauge uses individual series with custom itemStyle per bar, can't use 2d array format
       createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
-      createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
-      assembleBarGaugeSpec
+      createBarGaugeSeries({ styles: styleOptions, categoryField, valueField, containerSize }),
+      assembleBarGaugeSpec({ containerSize })
     )({
       data: transformedData,
       styles: styleOptions,

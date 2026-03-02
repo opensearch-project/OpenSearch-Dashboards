@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
@@ -51,6 +51,8 @@ export const VisualizationRender = ({
   const visConfig = useObservable(config$);
   const showRawTable = useObservable(showRawTable$);
   const { from, to } = searchContext?.timeRange || {};
+
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
   const rows = useMemo(() => {
     return visualizationData?.transformedData ?? [];
@@ -116,6 +118,8 @@ export const VisualizationRender = ({
         ExpressionRenderer={ExpressionRenderer}
         searchContext={searchContext}
         onSelectTimeRange={onSelectTimeRange}
+        containerSize={containerSize}
+        onContainerSizeChange={setContainerSize}
       />
     );
   }
@@ -130,6 +134,8 @@ const ChartRender = ({
   onSelectTimeRange,
   searchContext,
   ExpressionRenderer,
+  containerSize,
+  onContainerSizeChange,
 }: {
   data?: VisData;
   config?: RenderChartConfig;
@@ -137,13 +143,21 @@ const ChartRender = ({
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+  containerSize?: { width: number; height: number };
+  onContainerSizeChange?: (size: { width: number; height: number }) => void;
 }) => {
   const spec = useMemo(() => {
-    return createVisSpec({ data, config, timeRange });
-  }, [config, data, timeRange]);
+    return createVisSpec({ data, config, timeRange, containerSize });
+  }, [config, data, timeRange, containerSize]);
 
   if (getChartRender() === 'echarts') {
-    return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+    return (
+      <EchartsRender
+        spec={spec}
+        onSelectTimeRange={onSelectTimeRange}
+        onContainerSizeChange={onContainerSizeChange}
+      />
+    );
   }
 
   return (
