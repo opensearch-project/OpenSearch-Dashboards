@@ -136,17 +136,10 @@ export const DiscoverField = ({
     }
   };
 
-  function wrapOnDot(str?: string) {
-    // u200B is a non-width white-space character, which allows
-    // the browser to efficiently word-wrap right after the dot
-    // without us having to draw a lot of extra DOM elements, etc
-    return str ? str.replace(/\./g, '.\u200B') : '';
-  }
-
   const fieldName = (
     <EuiToolTip delay="long" content={field.name}>
       <span data-test-subj={`field-${field.name}`} className="exploreSidebarField__name">
-        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+        {useShortDots ? shortenDottedString(field.name) : field.displayName}
       </span>
     </EuiToolTip>
   );
