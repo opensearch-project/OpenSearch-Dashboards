@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../../../sql"
+		},
+		{
+			"path": "../../../../../.."
+		}
+	],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "interactive"
+  }
+}

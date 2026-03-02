@@ -47,8 +47,8 @@ export interface CachedGrammar {
   backendVersion: string;
   /** Dynamically resolved autocomplete metadata from backend grammar */
   tokenDictionary: TokenDictionary;
-  ignoredTokens: Set<number>;
-  rulesToVisit: Set<number>;
+  ignoredTokens: number[];
+  rulesToVisit: number[];
   /** Maps runtime symbolic token name → runtime token type ID */
   runtimeSymbolicNameToTokenType: Map<string, number>;
   /** Maps runtime rule name → runtime rule index */
@@ -70,133 +70,6 @@ function resolveTokenType(symbolicNames: Array<string | null>, name: string): nu
  */
 function resolveRuleIndex(parserRuleNames: string[], name: string): number {
   return parserRuleNames.indexOf(name);
-}
-
-/**
- * Build a TokenDictionary from backend symbolic names.
- * Maps semantic names used by autocomplete logic to token type IDs.
- */
-function buildTokenDictionary(symbolicNames: Array<string | null>): TokenDictionary {
-  const resolve = (name: string) => resolveTokenType(symbolicNames, name);
-  return {
-    SPACE: resolve('SPACE'),
-    FROM: resolve('FROM'),
-    OPENING_BRACKET: resolve('LT_PRTHS'),
-    CLOSING_BRACKET: resolve('RT_PRTHS'),
-    JOIN: resolve('JOIN'),
-    SEMICOLON: resolve('SEMI'),
-    SELECT: resolve('SELECT'),
-    ID: resolve('ID'),
-    // PPL-specific extensions (used by enrichAutocompleteResult)
-    SEARCH: resolve('SEARCH'),
-    SOURCE: resolve('SOURCE'),
-    PIPE: resolve('PIPE'),
-    EQUAL: resolve('EQUAL'),
-    IN: resolve('IN'),
-    COMMA: resolve('COMMA'),
-    BACKTICK_QUOTE: resolve('BQUOTA_STRING'),
-    DOT: resolve('DOT'),
-  } as TokenDictionary;
-}
-
-/**
- * Build the set of ignored tokens from backend symbolic names.
- * Mirrors the logic in the compiled grammar's getIgnoredTokens().
- */
-function buildIgnoredTokens(symbolicNames: Array<string | null>): Set<number> {
-  const resolve = (name: string) => resolveTokenType(symbolicNames, name);
-  const tokens: number[] = [];
-
-  // Explicitly ignored
-  const asToken = resolve('AS');
-  const inToken = resolve('IN');
-  if (asToken >= 0) tokens.push(asToken);
-  if (inToken >= 0) tokens.push(inToken);
-
-  // Operators to include (not ignored)
-  const operatorsToInclude = new Set(
-    [
-      'PIPE',
-      'EQUAL',
-      'COMMA',
-      'NOT_EQUAL',
-      'LESS',
-      'NOT_LESS',
-      'GREATER',
-      'NOT_GREATER',
-      'OR',
-      'AND',
-      'LT_PRTHS',
-      'RT_PRTHS',
-      'IN',
-      'SPAN',
-      'MATCH',
-      'MATCH_PHRASE',
-      'MATCH_BOOL_PREFIX',
-      'MATCH_PHRASE_PREFIX',
-      'SQUOTA_STRING',
-    ]
-      .map((n) => resolve(n))
-      .filter((id) => id >= 0)
-  );
-
-  // Ignore operator range: MATCH .. ERROR_RECOGNITION (excluding operatorsToInclude)
-  const matchIdx = resolve('MATCH');
-  const errorRecIdx = resolve('ERROR_RECOGNITION');
-  if (matchIdx >= 0 && errorRecIdx >= 0) {
-    for (let i = matchIdx; i <= errorRecIdx; i++) {
-      if (!operatorsToInclude.has(i)) tokens.push(i);
-    }
-  }
-
-  // Ignore function range: CASE .. CAST
-  const caseIdx = resolve('CASE');
-  const castIdx = resolve('CAST');
-  if (caseIdx >= 0 && castIdx >= 0) {
-    for (let i = caseIdx; i <= castIdx; i++) {
-      if (!operatorsToInclude.has(i)) tokens.push(i);
-    }
-  }
-
-  return new Set(tokens.filter((t) => t >= 0));
-}
-
-/**
- * Build the set of parser rules to visit from backend rule names.
- * Mirrors the compiled grammar's rulesToVisit set.
- */
-function buildRulesToVisit(parserRuleNames: string[]): Set<number> {
-  const resolve = (name: string) => resolveRuleIndex(parserRuleNames, name);
-  const ruleNames = [
-    'statsFunctionName',
-    'takeAggFunction',
-    'integerLiteral',
-    'decimalLiteral',
-    'keywordsCanBeId',
-    'renameClasue',
-    'qualifiedName',
-    'tableQualifiedName',
-    'wcQualifiedName',
-    'positionFunctionName',
-    'searchableKeyWord',
-    'stringLiteral',
-    'searchCommand',
-    'searchComparisonOperator',
-    'comparisonOperator',
-    'sqlLikeJoinType',
-    // Default grammar rules (may not exist in simplified grammar — resolve filters -1)
-    'fieldExpression',
-    'percentileAggFunction',
-    'timestampFunctionName',
-    'getFormatFunction',
-    'tableIdent',
-    'singleFieldRelevanceFunctionName',
-    'multiFieldRelevanceFunctionName',
-    'evalFunctionName',
-    'literalValue',
-    'logicalExpression',
-  ];
-  return new Set(ruleNames.map(resolve).filter((idx) => idx >= 0));
 }
 
 /**
@@ -270,13 +143,19 @@ export function createRemappedEnrichment(
   ruleRemap: Map<number, number>,
   tokenRemap: Map<number, number>
 ): EnrichAutocompleteResult<OpenSearchPplAutocompleteResult> {
+  // Build reverse rule remap (compiled → runtime) so rerunWithoutRules
+  // indices can be translated back for the parseQuery rerun loop.
+  const reverseRuleRemap = new Map<number, number>();
+  for (const [runtime, compiled] of ruleRemap) {
+    reverseRuleRemap.set(compiled, runtime);
+  }
+
   return (result, rules, tokenStream, cursorTokenIndex, cursor, query, tree) => {
     // Remap rule indices: runtime → compiled
     const remappedRules = new Map<number, any>();
     for (const [runtimeRuleIdx, ruleData] of rules) {
       const compiledIdx = ruleRemap.get(runtimeRuleIdx);
       if (compiledIdx !== undefined) {
-        // Also remap ruleList entries inside the CandidateRule
         const remappedRuleList = (ruleData.ruleList || [])
           .map((r: number) => ruleRemap.get(r))
           .filter((r: number | undefined): r is number => r !== undefined);
@@ -284,32 +163,41 @@ export function createRemappedEnrichment(
       }
     }
 
-    // Create a proxy for tokenStream that remaps token types on access
-    const proxyHandler: ProxyHandler<any> = {
-      get(target, prop, receiver) {
-        if (prop === 'get') {
-          return (index: number) => {
-            const token = target.get(index);
-            if (!token) return token;
-            const compiledType = tokenRemap.get(token.type);
-            if (compiledType !== undefined && compiledType !== token.type) {
-              // Return a lightweight wrapper with remapped type
-              return new Proxy(token, {
-                get(t, p) {
-                  if (p === 'type') return compiledType;
-                  return (t as any)[p];
-                },
-              });
-            }
-            return token;
-          };
+    // Wrap tokenStream with a lightweight object that remaps token types.
+    // Uses a per-index cache so each token is wrapped at most once, avoiding
+    // repeated Object.create calls when helpers loop over the same tokens.
+    const tokenCache = new Map<number, any>();
+    const remappedTokenStream = {
+      get(index: number) {
+        const cached = tokenCache.get(index);
+        if (cached !== undefined) return cached;
+        const token = tokenStream.get(index);
+        if (!token) return token;
+        const compiledType = tokenRemap.get(token.type);
+        let mapped;
+        if (compiledType !== undefined && compiledType !== token.type) {
+          mapped = Object.create(token, {
+            type: { value: compiledType, enumerable: true },
+          });
+        } else {
+          mapped = token;
         }
-        return Reflect.get(target, prop, receiver);
+        tokenCache.set(index, mapped);
+        return mapped;
+      },
+      // Forward properties that enrichment functions may access
+      get size() {
+        return tokenStream.size;
+      },
+      getTokens() {
+        return tokenStream.getTokens();
+      },
+      getText() {
+        return tokenStream.getText();
       },
     };
-    const remappedTokenStream = new Proxy(tokenStream, proxyHandler);
 
-    // Also remap suggestKeywords IDs in the base result
+    // Remap suggestKeywords IDs in the base result
     if (result.suggestKeywords) {
       result.suggestKeywords = result.suggestKeywords.map((kw) => ({
         ...kw,
@@ -317,15 +205,26 @@ export function createRemappedEnrichment(
       }));
     }
 
-    return originalEnrich(
+    const enriched = originalEnrich(
       result,
       remappedRules,
-      remappedTokenStream,
+      remappedTokenStream as any,
       cursorTokenIndex,
       cursor,
       query,
       tree
     );
+
+    // Reverse-remap rerunWithoutRules from compiled → runtime indices.
+    // parseQuery's rerun loop deletes from the runtime rulesToVisit set,
+    // so the indices must be in runtime space.
+    if (enriched.rerunWithoutRules) {
+      enriched.rerunWithoutRules = enriched.rerunWithoutRules
+        .map((compiledIdx: number) => reverseRuleRemap.get(compiledIdx))
+        .filter((idx: number | undefined): idx is number => idx !== undefined);
+    }
+
+    return enriched;
   };
 }
 
@@ -510,7 +409,7 @@ class PPLGrammarCache {
       channelNames,
       modeNames,
     } = grammar;
-
+    console.log('[autocomplete] getWrappedConstructors');
     const LexerCtor = function RuntimePPLLexer(this: any, input: CharStream) {
       return new LexerInterpreter(
         'PPL',
@@ -522,11 +421,11 @@ class PPLGrammarCache {
         input
       );
     } as any;
-
+    console.log('[autocomplete] LexerCtor: ', LexerCtor);
     const ParserCtor = function RuntimePPLParser(this: any, tokens: CommonTokenStream) {
       return new ParserInterpreter('PPL', vocabulary, parserRuleNames, parserATN, tokens);
     } as any;
-
+    console.log('[autocomplete] ParserCtor: ', ParserCtor);
     return { Lexer: LexerCtor, Parser: ParserCtor };
   }
 
@@ -686,6 +585,20 @@ class PPLGrammarCache {
         bundle.parserSerializedATN
       );
 
+      // Use backend-provided autocomplete config when available,
+      // fall back to local computation from symbolic/rule names.
+      // const resolvedTokenDictionary = bundle.tokenDictionary
+      //   ? (bundle.tokenDictionary as any as TokenDictionary)
+      //   : buildTokenDictionary(symbolicNames);
+      // const resolvedIgnoredTokens =
+      //   bundle.ignoredTokens && bundle.ignoredTokens.length > 0
+      //     ? new Set(bundle.ignoredTokens)
+      //     : buildIgnoredTokens(symbolicNames);
+      // const resolvedRulesToVisit =
+      //   bundle.rulesToVisit && bundle.rulesToVisit.length > 0
+      //     ? new Set(bundle.rulesToVisit)
+      //     : buildRulesToVisit(bundle.parserRuleNames);
+
       const entry: CachedGrammar = {
         lexerATN,
         parserATN,
@@ -698,9 +611,9 @@ class PPLGrammarCache {
         grammarHash: bundle.grammarHash,
         lastUsed: Date.now(),
         backendVersion: this.versionCache.get(cacheKey) || '',
-        tokenDictionary: buildTokenDictionary(bundle.symbolicNames),
-        ignoredTokens: buildIgnoredTokens(bundle.symbolicNames),
-        rulesToVisit: buildRulesToVisit(bundle.parserRuleNames),
+        tokenDictionary: bundle.tokenDictionary,
+        ignoredTokens: bundle.ignoredTokens,
+        rulesToVisit: bundle.rulesToVisit,
         runtimeSymbolicNameToTokenType: buildSymbolicNameToTokenType(bundle.symbolicNames),
         runtimeRuleNameToIndex: buildRuleNameToIndex(bundle.parserRuleNames),
       };

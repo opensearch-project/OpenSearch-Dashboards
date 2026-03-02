@@ -129,17 +129,16 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        logger.debug('PPL artifact route called');
+        logger.info(`PPL artifact route called, dataSourceId=${req.query.dataSourceId}`);
 
         // Get the OpenSearch client - use data source if provided
         const { dataSourceId } = req.query;
         let opensearchClient = client.asScoped(req);
 
         // Call OpenSearch artifact endpoint
-        // Note: We don't forward If-None-Match header because OSD framework
-        // can't properly handle 304 responses (treats them as redirects).
-        // Caching is handled entirely on the frontend via localStorage.
+        logger.info('PPL artifact: calling OpenSearch...');
         const result = await opensearchClient.callAsCurrentUser('enhancements.pplArtifact');
+        logger.info(`PPL artifact: got response, grammarHash=${result?.grammarHash}, keys=${Object.keys(result || {}).join(',')}`);
 
         // The result is the artifact bundle JSON
         // Forward headers from OpenSearch if available
