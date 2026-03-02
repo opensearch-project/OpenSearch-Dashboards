@@ -87,6 +87,7 @@ describe('AgUiAgent', () => {
       const mockResponse = {
         ok: false,
         status: 500,
+        text: jest.fn().mockResolvedValue(''),
       };
 
       mockFetch.mockResolvedValue(mockResponse as any);
@@ -96,10 +97,10 @@ describe('AgUiAgent', () => {
       observable.subscribe({
         next: (event) => {
           expect(event.type).toBe(EventType.RUN_ERROR);
-          expect(event.message).toBe('HTTP error! status: 500');
+          expect(event.message).toBe('Request failed with status 500');
         },
         error: (error) => {
-          expect(error.message).toBe('HTTP error! status: 500');
+          expect(error.message).toBe('Request failed with status 500');
           done();
         },
       });

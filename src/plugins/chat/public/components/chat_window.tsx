@@ -26,7 +26,6 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
-import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
@@ -68,6 +67,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const loadingMessageIdRef = useRef<string | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
+  const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -445,7 +445,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     return '';
   }, [timeline]);
-  
+
   const handleShowHistory = useCallback(() => {
     setShowHistory(true);
   }, []);
@@ -513,21 +513,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             layoutMode={layoutMode}
             timeline={timeline}
             isStreaming={isStreaming}
-            onResendMessage={handleResendMessage}
+            onResendMessage={resendAvailable ? handleResendMessage : undefined}
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
             {...enhancedProps}
           />
-
-          {/* Sticky confirmation message - positioned above chat input */}
-          {pendingConfirmation && (
-            <ConfirmationMessage
-              request={pendingConfirmation}
-              onApprove={handleApproveConfirmation}
-              onReject={handleRejectConfirmation}
-            />
-          )}
 
           {
             (isCapturing || screenshotData) && (
