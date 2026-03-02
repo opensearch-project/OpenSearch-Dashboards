@@ -1,0 +1,2 @@
+feat:
+- Add @osd/apm-topology package for APM service map, trace map and GenAI agent trace visualization ([#11394](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11394))

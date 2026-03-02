@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56" fill="none">
+  <!-- Edges -->
+  <line x1="28" y1="10" x2="10" y2="38" stroke="#fff" stroke-width="1" opacity="0.2"/>
+  <line x1="28" y1="10" x2="46" y2="38" stroke="#fff" stroke-width="1" opacity="0.2"/>
+  <line x1="28" y1="10" x2="28" y2="44" stroke="#fff" stroke-width="1" opacity="0.15"/>
+  <line x1="10" y1="38" x2="46" y2="38" stroke="#fff" stroke-width="1" opacity="0.2"/>
+  <line x1="10" y1="38" x2="28" y2="44" stroke="#fff" stroke-width="1" opacity="0.2"/>
+  <line x1="46" y1="38" x2="28" y2="44" stroke="#fff" stroke-width="1" opacity="0.2"/>
+  <!-- Secondary edges -->
+  <line x1="28" y1="10" x2="18" y2="22" stroke="#fff" stroke-width="1" opacity="0.15"/>
+  <line x1="28" y1="10" x2="38" y2="22" stroke="#fff" stroke-width="1" opacity="0.15"/>
+  <line x1="18" y1="22" x2="10" y2="38" stroke="#fff" stroke-width="1" opacity="0.15"/>
+  <line x1="38" y1="22" x2="46" y2="38" stroke="#fff" stroke-width="1" opacity="0.15"/>
+  <line x1="18" y1="22" x2="38" y2="22" stroke="#fff" stroke-width="1" opacity="0.12"/>
+  <!-- Secondary nodes -->
+  <circle cx="18" cy="22" r="3.5" fill="white" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="38" cy="22" r="3.5" fill="white" stroke="#fff" stroke-width="1.5"/>
+  <!-- Primary nodes -->
+  <circle cx="28" cy="10" r="5" fill="#fff"/>
+  <circle cx="28" cy="10" r="2" fill="white" opacity="0.5"/>
+  <circle cx="10" cy="38" r="5" fill="#fff"/>
+  <circle cx="10" cy="38" r="2" fill="white" opacity="0.5"/>
+  <circle cx="46" cy="38" r="5" fill="#fff"/>
+  <circle cx="46" cy="38" r="2" fill="white" opacity="0.5"/>
+  <!-- Outlier node -->
+  <circle cx="28" cy="44" r="4" fill="white" stroke="#fff" stroke-width="1.5"/>
+</svg>
