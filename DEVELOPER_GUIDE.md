@@ -134,7 +134,7 @@ $ yarn osd clean
 
 OpenSearch Dashboards requires a running version of OpenSearch to connect to. You can choose to run OpenSearch locally yourself or point to an existing cluster.
 
-#### Run a local OpenSearch cluster 
+#### Run a local OpenSearch cluster
 
 In a separate terminal you can run the latest snapshot built using:
 
@@ -149,21 +149,26 @@ $ yarn opensearch snapshot
 Instead of running OpenSearch locally, you can point OpenSearch Dashboards to an existing OpenSearch cluster:
 
 1. Clone the security dashboards plugin inside your OpenSearch Dashboards plugins folder and bootstrap:
+
 ```bash
 $ cd plugins
 $ git clone https://github.com/opensearch-project/security-dashboards-plugin.git
 $ cd ..
 $ yarn osd bootstrap --single-version=loose
 ```
+
 2. Create a configuration directory outside your repository to avoid accidentally committing credentials. For example:
+
 ```bash
 $ mkdir -p /configs/me
 $ mkdir -p /configs/prod
 ```
+
 3. Create `opensearch_dashboards.yml` file(s) in your config directories. Here's an example config:
+
 ```yaml
-opensearch.hosts: ["https://your-opensearch-host"]
-opensearch.username: 'admin' 
+opensearch.hosts: ['https://your-opensearch-host']
+opensearch.username: 'admin'
 opensearch.password: 'your-password'
 opensearch.ignoreVersionMismatch: true
 opensearch.ssl.verificationMode: none
@@ -172,12 +177,15 @@ opensearch_security.multitenancy.enabled: false
 opensearch_security.readonly_mode.roles: [kibana_read_only]
 opensearch_security.cookie.secure: false
 ```
+
 4. Set the `OSD_PATH_CONF` environment variable to point to your config directory:
+
 ```bash
 $ export OSD_PATH_CONF=/absolute/path/to/configs/me
 ```
 
 This approach allows you to:
+
 - Develop against a production-like environment
 - Avoid running resource-intensive local clusters
 - Maintain different configurations for different environments
@@ -231,7 +239,9 @@ $ sysctl -w vm.max_map_count=262144
 ```
 
 #### Debugging
+
 You can debug the OpenSearch Dashboards server by
+
 1. Attaching your debugger client to the debug port on port `9229`. If you're using VSCode, you can use the `attach-to-server` debug configuration provided.
 2. Running `yarn debug`. This will start the OpenSearch Dashboards development server with a debug port open on port `9229`.
 
@@ -301,7 +311,7 @@ Additional options can be passed after `yarn opensearch snapshot` to further con
 Options:
 
       --license         Run with a 'oss', 'basic', or 'trial' license [default: oss]
-      --version         Version of OpenSearch to download [default: 3.0.0}]
+      --version         Version of OpenSearch to download [default: 3.5.0]
       --base-path       Path containing cache/installations [default: /home/ubuntu/OpenSearch-Dashboards/.opensearch]
       --install-path    Installation path, defaults to 'source' within base-path
       --data-archive    Path to zip or tarball containing an OpenSearch data directory to seed the cluster with.
@@ -730,10 +740,12 @@ if (width < 300) {
 ```
 
 #### Avoid using `var` to declare variables
-Use `const` by default, and never use `var` to declare variables. `const` and `let` are block scoped, like variables in most other languages. `var` in JavaScript is function scoped, which can cause difficult to understand bugs. 
+
+Use `const` by default, and never use `var` to declare variables. `const` and `let` are block scoped, like variables in most other languages. `var` in JavaScript is function scoped, which can cause difficult to understand bugs.
 
 #### Avoid using the `Array` constructor
-Do not use the Array() constructor, with or without new. It has confusing and contradictory usage. 
+
+Do not use the Array() constructor, with or without new. It has confusing and contradictory usage.
 
 Instead, always use bracket notation to initialize arrays.
 
@@ -747,23 +759,26 @@ const arr = new Array(2, 3); //[2, 3];
 ```
 
 #### Avoid line continuations in string literals
+
 Do not use line continuations (that is, ending a line inside a string literal with a backslash) in either ordinary or template string literals. Even though ES5 allows this, it can lead to tricky errors if any trailing whitespace comes after the slash, and is less obvious to readers.
 
 ```js
 // good
-const LONG_STRING = 'This is a very very very very very very long string. ' +
-    'It does not contain long stretches of spaces because it uses ' +
-    'concatenated strings.';
+const LONG_STRING =
+  'This is a very very very very very very long string. ' +
+  'It does not contain long stretches of spaces because it uses ' +
+  'concatenated strings.';
 
 // bad
-const LONG_STRING = 'This is a very very very very very very very long string. \
+const LONG_STRING =
+  'This is a very very very very very very very long string. \
     It inadvertently contains long stretches of spaces due to how the \
     continued lines are indented.';
 ```
 
 #### Avoid using `@ts-ignore`
-Do not use @ts-ignore nor the variants @ts-expect-error or @ts-nocheck. They superficially seem to be an easy way to fix a compiler error, but in practice, a specific compiler error is often caused by a larger problem that can be fixed more directly.
 
+Do not use @ts-ignore nor the variants @ts-expect-error or @ts-nocheck. They superficially seem to be an easy way to fix a compiler error, but in practice, a specific compiler error is often caused by a larger problem that can be fixed more directly.
 
 #### Use native ES2015 module syntax
 
@@ -1029,13 +1044,15 @@ Do not use setters, they cause more problems than they can solve.
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)
 
 #### Use strict equality checks
+
 Use strict equality operators (===/!==) to compare the operands. The equality (==/!=) operator will try to convert and compare operands that are of different types causing unexpected behavior.
 
 #### Use uppercase for constants
+
 Constants should be declared in uppercase letters especially for primitives because they are truly immutable.
 
-
 #### Use named exports
+
 Use named exports instead of default exports. Default exports provide no canonical name, which makes central maintenance difficult with relatively little benefit to code owners, including potentially decreased readability.
 
 ```js
@@ -1050,8 +1067,8 @@ import Group from './user';  // Also legal.
 ```
 
 #### Use single quotes for string literals
-Ordinary string literals are delimited with single quotes ('), rather than double quotes ("). If a string contains a single quote character, consider using a template string to avoid having to escape the quote.
 
+Ordinary string literals are delimited with single quotes ('), rather than double quotes ("). If a string contains a single quote character, consider using a template string to avoid having to escape the quote.
 
 #### Attribution
 
@@ -1103,32 +1120,37 @@ POST /api/opensearch-dashboards/index_patterns
 ```
 
 ## Submit pull request
+
 ### Before submit a pull request
+
 First-time contributors should head to the [contributing guide](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CONTRIBUTING.md) to get started.
 
-Make sure your pull request adheres to our [code guidelines](#code-guidelines). 
+Make sure your pull request adheres to our [code guidelines](#code-guidelines).
 
 Follow [testing guideline](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md) about current tests in the repo, writing tests and running tests locally.
 
-
 ### Best practices for pull request
+
 We deeply appreciate everyone who takes the time to make a contribution. We will review all contributions as quickly as possible. As a best practice, opening an issue and discussing your change before you make it is the best way to smooth the PR process. This will prevent a rejection because someone else is already working on the problem, or because the solution is incompatible with the architectural direction.
 
 In addition, below are a few best practices so your pull request gets reviewed quickly.
 
 #### Mark unfinished pull requests
+
 It's okay to submit a draft PR if you want to solicit reviews before the implementation of your pull request is complete. To do that, you may add a `WIP` or `[WIP]` prefix to your pull request title and [convert the PR to a draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request#converting-a-pull-request-to-a-draft)
 
 #### Clear title and description for pull request
-Make sure that the title of the PR is easy to understand about the intent, and it should not conflict with the PR description or the implementation. To help reviewers get better context of the PR, we suggest to have a clear summary of the intent of the change as well as detailed steps for the manual tests that have been performed for this PR. 
+
+Make sure that the title of the PR is easy to understand about the intent, and it should not conflict with the PR description or the implementation. To help reviewers get better context of the PR, we suggest to have a clear summary of the intent of the change as well as detailed steps for the manual tests that have been performed for this PR.
 
 #### Small pull request is better
+
 Small pull requests get reviewed faster and are more likely to be correct than big ones. Breaking your change into small pull requests while keep in mind that every pull request should be useful on its own.
 
 #### Check and fix tests
-The repository uses codecov to gather coverage information, contributors submitting pull requests to the codebase are required to ensure that their code changes include appropriate testing coverage. Very few pull requests can touch the code and NOT touch the tests. 
+
+The repository uses codecov to gather coverage information, contributors submitting pull requests to the codebase are required to ensure that their code changes include appropriate testing coverage. Very few pull requests can touch the code and NOT touch the tests.
 
 If you don't know how to test a feature, please ask! Pull requests lacking sufficient testing coverage may be subject to delays in review or rejection until adequate tests are provided.
 
-The repository has automated test workflows, and contributors submitting pull requests are required to check the failed test workflows and fix the tests related to their code change. If flaky test is identified, please ask a maintainer to retry the workflow. 
-
+The repository has automated test workflows, and contributors submitting pull requests are required to check the failed test workflows and fix the tests related to their code change. If flaky test is identified, please ask a maintainer to retry the workflow.

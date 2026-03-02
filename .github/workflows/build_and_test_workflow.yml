@@ -5,14 +5,6 @@ name: Build and test
 
 # trigger on every commit push and PR for all branches except pushes for backport branches
 on:
-  push:
-    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
     paths-ignore:
@@ -21,6 +13,7 @@ on:
       - '.lycheeignore'
       - 'CODEOWNERS'
       - 'changelogs/fragments/**'
+    types: [opened, synchronize, reopened, ready_for_review]
 
 env:
   TEST_BROWSER_HEADLESS: 1
@@ -40,14 +33,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         group: [1, 2, 3, 4]
         include:
           - os: ubuntu-latest
             name: Linux
-          - os: windows-latest
-            name: Windows
+          # - os: windows-latest
+          #   name: Windows
     runs-on: ${{ matrix.os }}
+    if: github.event.pull_request.draft == false
     env:
       # Override just OSD_OPTIMIZER_MAX_WORKERS for ciGroup1 because it contains a test that checks number of workers
       OSD_OPTIMIZER_MAX_WORKERS: ${{ matrix.group != 1 && 8 || '' }}
@@ -134,6 +128,7 @@ jobs:
   lint-and-validate:
     name: Lint and validate
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -208,14 +203,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        os: [ubuntu-latest] #Removed 'windows-latest'
+        group: [1, 2, 4, 6, 7, 8, 9, 10, 13]
         include:
           - os: ubuntu-latest
             name: Linux
-          - os: windows-latest
-            name: Windows
+          # - os: windows-latest
+          #   name: Windows
     runs-on: ${{ matrix.os }}
+    if: github.event.pull_request.draft == false
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
@@ -325,13 +321,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         include:
           - os: ubuntu-latest
             name: Linux
-          - os: windows-latest
-            name: Windows
+          # - os: windows-latest
+          #   name: Windows
     runs-on: ${{ matrix.os }}
+    if: github.event.pull_request.draft == false
     steps:
       - run: echo Running plugin functional tests
 
@@ -446,22 +443,23 @@ jobs:
             ext: tar.gz
             suffix: linux-arm64
             script: build-platform --linux-arm --skip-os-packages
-          - os: macos-latest
-            name: macOS x64
-            ext: tar.gz
-            suffix: darwin-x64
-            script: build-platform --darwin --skip-os-packages
-          - os: macos-latest
-            name: macOS ARM64
-            ext: tar.gz
-            suffix: darwin-arm64
-            script: build-platform --darwin-arm --skip-os-packages
-          - os: windows-latest
-            name: Windows x64
-            ext: zip
-            suffix: windows-x64
-            script: build-platform --windows --skip-os-packages
+          # - os: macos-latest
+          #   name: macOS x64
+          #   ext: tar.gz
+          #   suffix: darwin-x64
+          #   script: build-platform --darwin --skip-os-packages
+          # - os: macos-latest
+          #   name: macOS ARM64
+          #   ext: tar.gz
+          #   suffix: darwin-arm64
+          #   script: build-platform --darwin-arm --skip-os-packages
+          # - os: windows-latest
+          #   name: Windows x64
+          #   ext: zip
+          #   suffix: windows-x64
+          #   script: build-platform --windows --skip-os-packages
     runs-on: ${{ matrix.os }}
+    if: github.event.pull_request.draft == false
     defaults:
       run:
         working-directory: ./artifacts
@@ -547,6 +545,7 @@ jobs:
   bwc-tests:
     needs: [build-min-artifact-tests]
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001

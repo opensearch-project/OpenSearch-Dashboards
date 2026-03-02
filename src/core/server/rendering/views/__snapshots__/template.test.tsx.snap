@@ -72,7 +72,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\",\\"darkModeUrl\\":\\"/darkModeMark\\"},\\"loadingLogo\\":{\\"defaultUrl\\":\\"/defaultModeLoadingLogo\\",\\"darkModeUrl\\":\\"/darkModeLoadingLogo\\"},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\",\\"darkModeUrl\\":\\"/darkModeMark\\"},\\"loadingLogo\\":{\\"defaultUrl\\":\\"/defaultModeLoadingLogo\\",\\"darkModeUrl\\":\\"/darkModeLoadingLogo\\"},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -214,7 +214,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\",\\"darkModeUrl\\":\\"/darkModeMark\\"},\\"loadingLogo\\":{\\"defaultUrl\\":\\"/defaultModeLoadingLogo\\"},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\",\\"darkModeUrl\\":\\"/darkModeMark\\"},\\"loadingLogo\\":{\\"defaultUrl\\":\\"/defaultModeLoadingLogo\\"},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -356,7 +356,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\",\\"darkModeUrl\\":\\"/darkModeMark\\"},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\",\\"darkModeUrl\\":\\"/darkModeMark\\"},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -504,7 +504,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\"},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\"},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -652,7 +652,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -670,18 +670,18 @@ Array [
         <img
           alt="OpenSearch Dashboards logo"
           class="loadingLogo darkOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-image-url="/ui/logos/spinner_on_dark.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_dark.svg"
+          src="/ui/logos/spinner_on_dark.svg"
         />
         <img
           alt="OpenSearch Dashboards logo"
           class="loadingLogo lightOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
+          data-test-image-url="/ui/logos/spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_light.svg"
+          src="/ui/logos/spinner_on_light.svg"
         />
       </div>
       <div
@@ -698,16 +698,16 @@ Array [
     <img
       alt="OpenSearch Dashboards logo"
       class="legacyBrowserErrorLogo darkOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_dark.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_dark.svg"
+      src="/ui/logos/wazuh_mark_on_dark.svg"
     />
     <img
       alt="OpenSearch Dashboards logo"
       class="legacyBrowserErrorLogo lightOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_light.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_light.svg"
+      src="/ui/logos/wazuh_mark_on_light.svg"
     />
     <h2
       class="osdWelcomeTitle"
@@ -794,7 +794,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\"},\\"loadingLogo\\":{\\"defaultUrl\\":\\"defaultModeLoadingLogo/\\"},\\"applicationTitle\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\"},\\"loadingLogo\\":{\\"defaultUrl\\":\\"defaultModeLoadingLogo/\\"},\\"applicationTitle\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -936,7 +936,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\"},\\"loadingLogo\\":{},\\"applicationTitle\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{\\"defaultUrl\\":\\"/defaultModeMark\\"},\\"loadingLogo\\":{},\\"applicationTitle\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -1084,7 +1084,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"applicationTitle\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"applicationTitle\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -1102,18 +1102,18 @@ Array [
         <img
           alt="custom title logo"
           class="loadingLogo darkOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-image-url="/ui/logos/spinner_on_dark.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_dark.svg"
+          src="/ui/logos/spinner_on_dark.svg"
         />
         <img
           alt="custom title logo"
           class="loadingLogo lightOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
+          data-test-image-url="/ui/logos/spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_light.svg"
+          src="/ui/logos/spinner_on_light.svg"
         />
       </div>
       <div
@@ -1130,16 +1130,16 @@ Array [
     <img
       alt="custom title logo"
       class="legacyBrowserErrorLogo darkOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_dark.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_dark.svg"
+      src="/ui/logos/wazuh_mark_on_dark.svg"
     />
     <img
       alt="custom title logo"
       class="legacyBrowserErrorLogo lightOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_light.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_light.svg"
+      src="/ui/logos/wazuh_mark_on_light.svg"
     />
     <h2
       class="osdWelcomeTitle"
@@ -1226,7 +1226,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"faviconUrl\\":\\"/customFavicon\\",\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"faviconUrl\\":\\"/customFavicon\\",\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -1244,18 +1244,18 @@ Array [
         <img
           alt="OpenSearch Dashboards logo"
           class="loadingLogo darkOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-image-url="/ui/logos/spinner_on_dark.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_dark.svg"
+          src="/ui/logos/spinner_on_dark.svg"
         />
         <img
           alt="OpenSearch Dashboards logo"
           class="loadingLogo lightOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
+          data-test-image-url="/ui/logos/spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_light.svg"
+          src="/ui/logos/spinner_on_light.svg"
         />
       </div>
       <div
@@ -1272,16 +1272,16 @@ Array [
     <img
       alt="OpenSearch Dashboards logo"
       class="legacyBrowserErrorLogo darkOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_dark.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_dark.svg"
+      src="/ui/logos/wazuh_mark_on_dark.svg"
     />
     <img
       alt="OpenSearch Dashboards logo"
       class="legacyBrowserErrorLogo lightOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_light.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_light.svg"
+      src="/ui/logos/wazuh_mark_on_light.svg"
     />
     <h2
       class="osdWelcomeTitle"
@@ -1368,7 +1368,7 @@ Array [
     data="{\\"strictCsp\\":true}"
   />,
   <osd-injected-metadata
-    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true}}"
+    data="{\\"version\\":\\"opensearchDashboardsVersion\\",\\"buildNumber\\":1,\\"wazuhVersion\\":\\"4.x.x\\",\\"basePath\\":\\"\\",\\"serverBasePath\\":\\"\\",\\"env\\":{\\"packageInfo\\":{\\"version\\":\\"\\",\\"branch\\":\\"\\",\\"buildNum\\":1,\\"buildSha\\":\\"\\",\\"dist\\":true,\\"wazuhVersion\\":\\"\\"},\\"mode\\":{\\"name\\":\\"production\\",\\"dev\\":true,\\"prod\\":false}},\\"anonymousStatusPage\\":false,\\"i18n\\":{\\"translationsUrl\\":\\"\\"},\\"csp\\":{\\"warnLegacyBrowsers\\":true},\\"uiPlugins\\":[],\\"legacyMetadata\\":{\\"uiSettings\\":{\\"defaults\\":{\\"legacyInjectedUiSettingDefaults\\":true},\\"user\\":{}}},\\"branding\\":{\\"darkMode\\":false,\\"logo\\":{},\\"mark\\":{},\\"loadingLogo\\":{},\\"title\\":\\"custom title\\"},\\"keyboardShortcuts\\":{\\"enabled\\":true},\\"healthCheck\\":{\\"enabled\\":true,\\"checks_enabled\\":\\".*\\",\\"retries_delay\\":2500,\\"interval\\":900000,\\"server_not_ready_troubleshooting_link\\":\\"https://example.healthcheck-docs.com\\",\\"max_retries\\":5}}"
   />,
   <div
     class="osdWelcomeView"
@@ -1386,18 +1386,18 @@ Array [
         <img
           alt="OpenSearch Dashboards logo"
           class="loadingLogo darkOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-image-url="/ui/logos/spinner_on_dark.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_dark.svg"
+          src="/ui/logos/spinner_on_dark.svg"
         />
         <img
           alt="OpenSearch Dashboards logo"
           class="loadingLogo lightOnly"
-          data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
+          data-test-image-url="/ui/logos/spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
-          src="/ui/logos/opensearch_spinner_on_light.svg"
+          src="/ui/logos/spinner_on_light.svg"
         />
       </div>
       <div
@@ -1414,16 +1414,16 @@ Array [
     <img
       alt="OpenSearch Dashboards logo"
       class="legacyBrowserErrorLogo darkOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_dark.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_dark.svg"
+      src="/ui/logos/wazuh_mark_on_dark.svg"
     />
     <img
       alt="OpenSearch Dashboards logo"
       class="legacyBrowserErrorLogo lightOnly"
-      data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+      data-test-image-url="/ui/logos/wazuh_mark_on_light.svg"
       data-test-subj="default logo"
-      src="/ui/logos/opensearch_mark_on_light.svg"
+      src="/ui/logos/wazuh_mark_on_light.svg"
     />
     <h2
       class="osdWelcomeTitle"

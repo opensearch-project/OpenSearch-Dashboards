@@ -40,7 +40,7 @@ export function DocViewTableRowIconNoMapping() {
     'discover.docViews.table.noCachedMappingForThisFieldTooltip',
     {
       defaultMessage:
-        'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
+        'No cached mapping for this field. Refresh field list from the Dashboards Management > Index Patterns page',
     }
   );
   return (

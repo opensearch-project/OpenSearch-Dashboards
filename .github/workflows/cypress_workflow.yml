@@ -10,6 +10,7 @@ on:
       - '.lycheeignore'
       - 'CODEOWNERS'
       - 'changelogs/fragments/**'
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
     inputs:
       test_repo:
@@ -53,10 +54,12 @@ env:
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
   LATEST_VERSION: '3.4.0'
+  OPENSEARCH_VERSION: ${{ vars.OPENSEARCH_VERSION }}
 
 jobs:
   cypress-tests:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
@@ -65,9 +68,10 @@ jobs:
           - group: 1
             config: standard
             test_location: ftr
-          - group: 2
-            config: standard
-            test_location: ftr
+          # Wazuh: Commented out groups because sample data of OpenSearch Dashboards is disabled
+          # - group: 2
+          #   config: standard
+          #   test_location: ftr
           - group: 3
             config: standard
             test_location: ftr
@@ -77,18 +81,19 @@ jobs:
           - group: 5
             config: standard
             test_location: ftr
-          - group: 6
-            config: standard
-            test_location: ftr
-          - group: 7
-            config: standard
-            test_location: ftr
-          - group: 8
-            config: standard
-            test_location: ftr
-          - group: 9
-            config: standard
-            test_location: ftr
+          # Wazuh: Commented out groups because sample data of OpenSearch Dashboards is disabled
+          # - group: 6
+          #   config: standard
+          #   test_location: ftr
+          # - group: 7
+          #   config: standard
+          #   test_location: ftr
+          # - group: 8
+          #   config: standard
+          #   test_location: ftr
+          # - group: 9
+          #   config: standard
+          #   test_location: ftr
           # Dashboard tests with query enhanced - group 1
           - group: 10Fast
             config: query_enhanced
@@ -97,18 +102,20 @@ jobs:
           - group: 10Slow
             config: query_enhanced
             test_location: source
+          # Wazuh: Commented out groups because sample data of OpenSearch Dashboards is disabled
           # Dashboard tests with no query enhanced
-          - group: 11
-            config: dashboard
-            test_location: source
+          # - group: 11
+          #   config: dashboard
+          #   test_location: source
           # Dashboard tests with query enhanced - group 2
           - group: 12
             config: query_enhanced
             test_location: source
+          # Wazuh: Commented out groups because sample data of OpenSearch Dashboards is disabled
           # Dashboard tests with query enhanced - group 3
-          - group: 13
-            config: query_enhanced
-            test_location: source
+          # - group: 13
+          #   config: query_enhanced
+          #   test_location: source
           # Dashboard tests with query enhanced - group 4
           - group: 14
             config: query_enhanced
@@ -117,44 +124,45 @@ jobs:
           - group: 15
             config: query_enhanced
             test_location: source
+          # Wazuh: Check if explore tests works on next version
           # Explore tests - group 1
-          - group: 10Explore
-            config: explore
-            test_location: source
+          # - group: 10Explore
+          #   config: explore
+          #   test_location: source
           # Explore tests - group 2
-          - group: 12Explore
-            config: explore
-            test_location: source
+          # - group: 12Explore
+          #   config: explore
+          #   test_location: source
+          # Wazuh: Commented out groups because sample data of OpenSearch Dashboards is disabled
           # Explore tests - group 3
-          - group: 13Explore
-            config: explore
-            test_location: source
+          # - group: 13Explore
+          #   config: explore
+          #   test_location: source
           # Explore tests - group 4
-          - group: 14Explore
-            config: explore
-            test_location: source
+          # - group: 14Explore
+          #   config: explore
+          #   test_location: source
           # Explore tests - group 5
-          - group: 15Explore
-            config: explore
-            test_location: source
-
-          - group: 16Explore
-            config: explore
-            test_location: source
-          - group: 17Explore
-            config: explore
-            test_location: source
+          # - group: 15Explore
+          #   config: explore
+          #   test_location: source
+          # - group: 16Explore
+          #   config: explore
+          #   test_location: source
+          # - group: 17Explore
+          #   config: explore
+          #   test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: '--user 1001 --shm-size=4g'
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true --opensearchDashboards.branding.useExpandedHeader=true' ||
         matrix.config == 'explore' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true --opensearchDashboards.branding.useExpandedHeader=true' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true' ||
-        'node ../scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false --home.disableExperienceModal=true' }}
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true --opensearchDashboards.branding.useExpandedHeader=true' ||
+        'node ../scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false --home.disableExperienceModal=true --opensearchDashboards.branding.useExpandedHeader=true' }}
       OPENSEARCH_SNAPSHOT_CMD:
         ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
@@ -170,7 +178,7 @@ jobs:
       - name: Get source information from PR number
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
         id: get_pr_info
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const { data: result } = await github.rest.pulls.get({
@@ -192,6 +200,15 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPO }}
           ref: '${{ env.SOURCE_BRANCH }}'
+
+      - name: Set TEST_BRANCH
+        run: |
+          if [ -n "${{ inputs.test_branch }}" ]; then
+            echo "TEST_BRANCH=${{ inputs.test_branch }}" >> $GITHUB_ENV
+          else
+            VERSION=$(jq -r '.version' package.json)
+            echo "TEST_BRANCH=$VERSION" >> $GITHUB_ENV
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -272,8 +289,9 @@ jobs:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --config ignoreTestFiles="dashboard_sanity_test_spec.js" --spec ${{ env.SPEC }}
 
+      # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Download OpenSearch
         if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         uses: suisei-cn/actions-download-file@v1.4.0
@@ -413,40 +431,37 @@ jobs:
           retention-days: 1
           overwrite: true
 
-  add-comment:
-    needs: [cypress-tests]
-    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
-    permissions:
-      pull-requests: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Find Comment
-        uses: peter-evans/find-comment@v2
-        id: fc
-        with:
-          issue-number: ${{ inputs.pr_number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '${{ env.COMMENT_TAG }}'
+  # Wazuh: Comment this add-comment job because is unused
+  # add-comment:
+  #   needs: [cypress-tests]
+  #   if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+  #   permissions:
+  #     pull-requests: write
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Find Comment
+  #       uses: peter-evans/find-comment@v2
+  #       id: fc
+  #       with:
+  #         issue-number: ${{ inputs.pr_number }}
+  #         comment-author: 'github-actions[bot]'
+  #         body-includes: '${{ env.COMMENT_TAG }}'
 
-      - name: Add comment on the PR
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ inputs.pr_number }}
-          body: |
-            ### ${{ env.COMMENT_TAG }}
-
-            #### ${{ needs.cypress-tests.result == 'success' && env.COMMENT_SUCCESS_MSG || env.COMMENT_FAILURE_MSG }}
-
-            #### Inputs:
-            ```
-            Test repo: '${{ env.TEST_REPO }}'
-            Test branch: '${{ env.TEST_BRANCH }}'
-
-            Test spec:
-            '${{ env.SPEC }}'
-            ```
-
-            #### Link to results:
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          edit-mode: replace
+  #     - name: Add comment on the PR
+  #       uses: peter-evans/create-or-update-comment@v3
+  #       with:
+  #         comment-id: ${{ steps.fc.outputs.comment-id }}
+  #         issue-number: ${{ inputs.pr_number }}
+  #         body: |
+  #           ### ${{ env.COMMENT_TAG }}
+  #           #### ${{ needs.cypress-tests.result == 'success' && env.COMMENT_SUCCESS_MSG || env.COMMENT_FAILURE_MSG }}
+  #           #### Inputs:
+  #           ```
+  #           Test repo: '${{ env.TEST_REPO }}'
+  #           Test branch: '${{ env.TEST_BRANCH }}'
+  #           Test spec:
+  #           '${{ env.SPEC }}'
+  #           ```
+  #           #### Link to results:
+  #           ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  #         edit-mode: replace

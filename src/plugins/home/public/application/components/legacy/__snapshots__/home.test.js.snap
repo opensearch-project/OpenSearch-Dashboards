@@ -27,12 +27,6 @@ exports[`home change home route should render a link to change the default route
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -78,12 +72,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -128,12 +116,6 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
@@ -191,24 +173,6 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={
-            Array [
-              Object {
-                "category": "data",
-                "description": "Display and share a collection of visualizations and saved searches.",
-                "icon": "dashboardApp",
-                "id": "dashboard",
-                "path": "dashboard_landing_page",
-                "showOnHomePage": true,
-                "title": "Dashboard",
-              },
-            ]
-          }
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
@@ -308,12 +272,6 @@ exports[`home directories should render solutions in the "solution section" 1`] 
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -359,12 +317,6 @@ exports[`home header render 1`] = `
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -409,12 +361,6 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
@@ -473,12 +419,6 @@ exports[`home header should show "Manage" link if stack management is available 
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -523,12 +463,6 @@ exports[`home isNewOpenSearchDashboardsInstance should safely handle execeptions
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
@@ -575,12 +509,6 @@ exports[`home isNewOpenSearchDashboardsInstance should set isNewOpenSearchDashbo
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -625,12 +553,6 @@ exports[`home isNewOpenSearchDashboardsInstance should set isNewOpenSearchDashbo
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
@@ -677,12 +599,6 @@ exports[`home should render home component 1`] = `
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -727,12 +643,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
@@ -779,12 +689,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       className="homData homData--expanded"
     >
       <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}
           features={Array []}
@@ -804,11 +708,48 @@ exports[`home welcome should show the normal home page if welcome screen is disa
 `;
 
 exports[`home welcome should show the welcome screen if enabled, and there are no index patterns defined 1`] = `
-<Welcome
-  branding={Object {}}
-  onSkip={[Function]}
-  urlBasePath="goober"
-/>
+<main
+  aria-labelledby="osdOverviewPageHeader__title"
+  className="homWrapper"
+  data-test-subj="homeApp"
+>
+  <mockConstructor
+    addBasePath={[Function]}
+    branding={Object {}}
+    overlap={0}
+    showDevToolsLink={true}
+    showManagementLink={true}
+    title={
+      <FormattedMessage
+        defaultMessage="Home"
+        id="home.header.title"
+        values={Object {}}
+      />
+    }
+  />
+  <div
+    className="homContent"
+  >
+    <EuiFlexGroup
+      className="homData homData--expanded"
+    >
+      <EuiFlexItem>
+        <ManageData
+          addBasePath={[Function]}
+          features={Array []}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule
+      aria-hidden="true"
+      margin="xl"
+    />
+    <mockConstructor
+      addBasePath={[Function]}
+      path="/app/home"
+    />
+  </div>
+</main>
 `;
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
@@ -837,12 +778,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     <EuiFlexGroup
       className="homData homData--expanded"
     >
-      <EuiFlexItem>
-        <AddData
-          addBasePath={[Function]}
-          features={Array []}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <ManageData
           addBasePath={[Function]}

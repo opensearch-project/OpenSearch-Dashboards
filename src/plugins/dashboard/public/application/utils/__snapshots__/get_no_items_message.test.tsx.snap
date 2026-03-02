@@ -295,17 +295,22 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
       >
         <p>
           <FormattedMessage
-            defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+            defaultMessage="You can combine data views from any {appName} app into one dashboard and see everything in one place."
             id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-            values={Object {}}
+            values={
+              Object {
+                "appName": "Wazuh dashboard",
+              }
+            }
           />
         </p>
         <p>
           <FormattedMessage
-            defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+            defaultMessage="New to {appName}? {sampleDataInstallLink} to take a test drive."
             id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
             values={
               Object {
+                "appName": "Wazuh dashboard",
                 "sampleDataInstallLink": <EuiLink
                   onClick={[Function]}
                 >
@@ -613,19 +618,24 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
               >
                 <p>
                   <FormattedMessage
-                    defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                    defaultMessage="You can combine data views from any {appName} app into one dashboard and see everything in one place."
                     id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-                    values={Object {}}
+                    values={
+                      Object {
+                        "appName": "Wazuh dashboard",
+                      }
+                    }
                   >
-                    You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place.
+                    You can combine data views from any Wazuh dashboard app into one dashboard and see everything in one place.
                   </FormattedMessage>
                 </p>
                 <p>
                   <FormattedMessage
-                    defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                    defaultMessage="New to {appName}? {sampleDataInstallLink} to take a test drive."
                     id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                     values={
                       Object {
+                        "appName": "Wazuh dashboard",
                         "sampleDataInstallLink": <EuiLink
                           onClick={[Function]}
                         >
@@ -638,7 +648,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                       }
                     }
                   >
-                    New to OpenSearch Dashboards? 
+                    New to Wazuh dashboard? 
                     <EuiLink
                       onClick={[Function]}
                     >

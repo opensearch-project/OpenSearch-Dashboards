@@ -61,7 +61,12 @@ describe('parseMilliseconds function', function () {
 describe('parse function', function () {
   const command = 'plugin name';
   const defaultOptions = { pluginDir: fromRoot('plugins') };
-  const osdPackage = { version: 1234 };
+  const osdPackage = {
+    version: 1234,
+    wazuh: {
+      version: 1234,
+    },
+  };
 
   afterAll(() => {
     Object.defineProperties(process, {

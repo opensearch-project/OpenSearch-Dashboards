@@ -7,24 +7,3 @@ Array [
   ],
 ]
 `;
-
-exports[`spins up notReady server until started if configured with \`autoListen:true\`: 503 response 1`] = `
-Object {
-  "body": Array [
-    Array [
-      "OpenSearch Dashboards server is not ready yet",
-    ],
-  ],
-  "code": Array [
-    Array [
-      503,
-    ],
-  ],
-  "header": Array [
-    Array [
-      "Retry-After",
-      "30",
-    ],
-  ],
-}
-`;

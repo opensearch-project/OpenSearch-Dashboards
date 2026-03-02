@@ -33,6 +33,14 @@ import { AppCategory } from '../types';
 
 /** @internal */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
+  explore: {
+    id: 'explore',
+    label: i18n.translate('core.ui.exploreNavList.label', {
+      defaultMessage: 'Explore',
+    }),
+    order: 100,
+    euiIconType: 'search',
+  },
   opensearchDashboards: {
     id: 'opensearchDashboards',
     label: i18n.translate('core.ui.opensearchDashboardsNavList.label', {
@@ -68,10 +76,18 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
   management: {
     id: 'management',
     label: i18n.translate('core.ui.managementNavList.label', {
-      defaultMessage: 'Management',
+      defaultMessage: 'Indexer management',
     }),
     order: 5000,
     euiIconType: 'managementApp',
+  },
+  dashboardManagement: {
+    id: 'wz-category-dashboard-management',
+    label: i18n.translate('core.ui.dashboardManagementNavList.label', {
+      defaultMessage: 'Dashboard management',
+    }),
+    order: 6000,
+    euiIconType: 'dashboardApp',
   },
   investigate: {
     id: 'investigate',
@@ -86,14 +102,14 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     label: i18n.translate('core.ui.visualizeAndReport.label', {
       defaultMessage: 'Visualize and report',
     }),
-    order: 2000,
+    order: 200,
   },
   visualizeAndReport: {
     id: 'visualizeAndReport',
     label: i18n.translate('core.ui.visualizeAndReport.label', {
       defaultMessage: 'Visualize and report',
     }),
-    order: 1000,
+    order: 200,
   },
   analyzeSearch: {
     id: 'analyzeSearch',

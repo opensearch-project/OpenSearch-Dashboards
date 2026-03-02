@@ -371,12 +371,12 @@ export class DashboardPlugin
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboards',
-      order: 2500,
+      order: 101,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      category: DEFAULT_APP_CATEGORIES.explore,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
@@ -493,7 +493,9 @@ export class DashboardPlugin
       {
         id: app.id,
         order: 300,
-        category: undefined,
+        /* Wazuh BEGIN */
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        /* Wazuh END */
       },
     ]);
 

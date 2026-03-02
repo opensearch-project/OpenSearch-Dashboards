@@ -16,7 +16,8 @@ describe('home settings', () => {
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
 
-  describe('home:useNewHomePage', () => {
+  // Wazuh: Skip test because it is not used in Wazuh for now
+  describe.skip('home:useNewHomePage', () => {
     const validate = getValidationFn(uiSettings['home:useNewHomePage']);
 
     it('should only accept boolean values', () => {

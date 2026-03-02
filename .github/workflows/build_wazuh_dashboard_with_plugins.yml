@@ -1,0 +1,564 @@
+run-name: Build ${{ inputs.system }} wazuh-dashboard on ${{ inputs.architecture }} ${{ inputs.is_stage && '- is stage' || '' }} ${{ inputs.checksum && '- checksum' || '' }} ${{ inputs.id }}
+name: Build Wazuh dashboard with plugins
+
+on:
+  workflow_dispatch:
+    inputs:
+      system:
+        type: choice
+        description: 'Package OS'
+        required: true
+        options:
+          - deb
+          - rpm
+        default: 'deb'
+      architecture:
+        type: choice
+        description: 'Package architecture'
+        required: true
+        options:
+          - amd64
+          - x86_64
+          - aarch64
+          - arm64
+        default: amd64
+      revision:
+        type: string
+        description: 'Package revision'
+        required: true
+        default: '0'
+      reference_security_plugins:
+        type: string
+        description: 'Branch/tag/commit of the wazuh-security-dashboards-plugin repository to build the security plugin'
+        required: true
+        default: 'main'
+      reference_wazuh_plugins:
+        type: string
+        description: 'Branch/tag/commit of the wazuh-dashboard-plugins repository to build the main plugins'
+        required: true
+        default: 'main'
+      is_stage:
+        type: boolean
+        description: 'Set production nomenclature'
+        required: true
+        default: false
+      checksum:
+        type: boolean
+        description: 'Generate package checksum'
+        required: true
+        default: false
+      id:
+        description: 'ID used to identify the workflow uniquely.'
+        type: string
+        required: false
+
+  workflow_call:
+    inputs:
+      system:
+        type: string
+        required: true
+        default: 'deb'
+      architecture:
+        type: string
+        required: true
+        default: amd64
+      revision:
+        type: string
+        required: true
+        default: '0'
+      reference_security_plugins:
+        type: string
+        required: true
+        default: 'main'
+      reference_wazuh_plugins:
+        type: string
+        required: true
+        default: 'main'
+      is_stage:
+        type: boolean
+        required: true
+        default: false
+      checksum:
+        type: boolean
+        required: true
+        default: false
+      id:
+        type: string
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup-variables:
+    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    name: Setup variables
+    outputs:
+      CURRENT_DIR: ${{ steps.setup-variables.outputs.CURRENT_DIR }}
+      VERSION: ${{ steps.setup-variables.outputs.VERSION }}
+      PREVIOUS: ${{ steps.setup-variables.outputs.PREVIOUS }}
+      REVISION: ${{ steps.setup-variables.outputs.REVISION }}
+      COMMIT_SHA: ${{ steps.setup-variables.outputs.COMMIT_SHA }}
+      PLUGINS_SHA: ${{ steps.setup-variables.outputs.PLUGINS_SHA }}
+      SECURITY_SHA: ${{ steps.setup-variables.outputs.SECURITY_SHA }}
+      PRODUCTION: ${{ steps.setup-variables.outputs.PRODUCTION }}
+      WAZUH_DASHBOARD_SLIM: ${{ steps.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+      WAZUH_SECURITY_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
+      WAZUH_PLUGINS_WAZUH: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_WAZUH }}
+      WAZUH_PLUGINS_CORE: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+      WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
+      WAZUH_REPORT_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+      PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
+      ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Get SHA of wazuh-dashboard-plugins
+        id: get-plugins-sha
+        run: |
+          git clone -b ${{ inputs.reference_wazuh_plugins }} --single-branch https://github.com/wazuh/wazuh-dashboard-plugins.git wzdp
+          cd wzdp
+          echo "WAZUH_PLUGINS_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get SHA of wazuh-security-dashboards-plugin
+        id: get-security-sha
+        run: |
+          git clone -b ${{ inputs.reference_security_plugins }} --single-branch https://github.com/wazuh/wazuh-security-dashboards-plugin.git wzsp
+          cd wzsp
+          echo "WAZUH_SECURITY_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Setup variables
+        id: setup-variables
+        run: |
+          CURRENT_DIR=$(pwd -P)
+          VERSION=$(jq -r '.version' VERSION.json)
+          # Check the corresponding previous version to be used in the upgrade test
+          sudo curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && sudo chmod 644 /usr/share/keyrings/wazuh.gpg
+          sudo echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee -a /etc/apt/sources.list.d/wazuh.list
+          sudo apt-get update
+          PREVIOUS=$(apt-cache madison wazuh-dashboard | grep -A 1 "$VERSION" | tail -1 | awk '{print $3}')
+          if [ -z "$PREVIOUS" ]; then
+            MAJOR_MINOR=$(echo "$VERSION" | cut -d '.' -f 1,2)$(echo ".")
+            PREVIOUS=$(apt-cache madison wazuh-dashboard | grep "$MAJOR_MINOR" | head -1 | awk '{print $3}')
+          fi
+          if [ -z "$PREVIOUS" ]; then
+            PREVIOUS=$(apt-cache madison wazuh-dashboard | head -1 | awk '{print $3}')
+          fi
+          if [ -z "$PREVIOUS" ]; then
+            echo "::warning No previous version::No previous version found for this architecture. Upgrade test will be skipped."
+          fi
+          REVISION=$(yarn --silent wzd-revision)
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          PLUGINS_SHA=${{steps.get-plugins-sha.outputs.WAZUH_PLUGINS_SHA}}
+          SECURITY_SHA=${{steps.get-security-sha.outputs.WAZUH_SECURITY_SHA}}
+          if [ "${{ inputs.is_stage }}" = "true" ]; then
+            PRODUCTION=--production
+          else
+            PRODUCTION=""
+          fi
+          WAZUH_DASHBOARD_SLIM=wazuh-dashboard_${VERSION}-${REVISION}_${{ (inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'x64' || 'arm64' }}.tar.gz
+          WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_security_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_WAZUH=wazuh-dashboard-plugins_wazuh_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_CORE=wazuh-dashboard-plugins_wazuh-core_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          if [ "${{ inputs.system }}" = "deb" ]; then
+            if [ "${{ inputs.is_stage }}" = "true" ]; then
+              PACKAGE_NAME=wazuh-dashboard_${VERSION}-${{ inputs.revision }}_${{ inputs.architecture }}.deb
+            else
+              PACKAGE_NAME=wazuh-dashboard_${VERSION}-${{ inputs.revision }}_${{ inputs.architecture }}_${COMMIT_SHA}-${PLUGINS_SHA}-${SECURITY_SHA}-${REPORTING_SHA}.deb
+            fi
+          else
+            if [ "${{ inputs.is_stage }}" = "true" ]; then
+              PACKAGE_NAME=wazuh-dashboard-${VERSION}-${{ inputs.revision }}.${{ inputs.architecture }}.rpm
+            else
+              PACKAGE_NAME=wazuh-dashboard_${VERSION}-${{ inputs.revision }}_${{ inputs.architecture }}_${COMMIT_SHA}-${PLUGINS_SHA}-${SECURITY_SHA}-${REPORTING_SHA}.rpm
+            fi
+          fi
+          if [[ "${{ inputs.architecture }}" == "x86_64" || "${{ inputs.architecture }}" == "amd64" ]]; then
+            ARCHITECTURE_FLAG=""
+          else
+            ARCHITECTURE_FLAG=--arm
+          fi
+          echo "CURRENT_DIR=$CURRENT_DIR" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "PREVIOUS=$PREVIOUS" >> $GITHUB_OUTPUT
+          echo "REVISION=$REVISION" >> $GITHUB_OUTPUT
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "PLUGINS_SHA=$PLUGINS_SHA" >> $GITHUB_OUTPUT
+          echo "SECURITY_SHA=$SECURITY_SHA" >> $GITHUB_OUTPUT
+          echo "PRODUCTION=$PRODUCTION" >> $GITHUB_OUTPUT
+          echo "WAZUH_DASHBOARD_SLIM=$WAZUH_DASHBOARD_SLIM" >> $GITHUB_OUTPUT
+          echo "WAZUH_SECURITY_PLUGIN=$WAZUH_SECURITY_PLUGIN" >> $GITHUB_OUTPUT
+          echo "WAZUH_REPORT_PLUGIN=$WAZUH_REPORT_PLUGIN" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_WAZUH=$WAZUH_PLUGINS_WAZUH" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CORE=$WAZUH_PLUGINS_CORE" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CHECK_UPDATES=$WAZUH_PLUGINS_CHECK_UPDATES" >> $GITHUB_OUTPUT
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "ARCHITECTURE_FLAG=$ARCHITECTURE_FLAG" >> $GITHUB_OUTPUT
+
+  validate-job:
+    runs-on: ubuntu-24.04
+    needs: setup-variables
+    name: Validate inputs
+    steps:
+      - name: Validate inputs
+        run: |
+          if [[ "${{ inputs.architecture }}" == "amd64" || "${{ inputs.architecture }}" == "arm64" ]] && [[ "${{ inputs.system }}" == "rpm" ]]; then
+            echo "Invalid combination of architecture and system"
+            exit 1
+          fi
+          if [[ "${{ inputs.architecture }}" == "x86_64" || "${{ inputs.architecture }}" == "aarch64" ]] && [[ "${{ inputs.system }}" == "deb" ]]; then
+            echo "Invalid combination of architecture and system"
+            exit 1
+          fi
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+          aws-region: ${{ secrets.CI_AWS_REGION }}
+
+  build-base:
+    needs: [validate-job]
+    name: Build dashboard
+    uses: wazuh/wazuh-dashboard/.github/workflows/build_base.yml@main
+    with:
+      CHECKOUT_TO: ${{ github.head_ref || github.ref_name }}
+      ARCHITECTURE: ${{ inputs.architecture }}
+
+  build-main-plugins:
+    needs: [validate-job]
+    name: Build plugins
+    permissions:
+      pull-requests: write
+    uses: wazuh/wazuh-dashboard-plugins/.github/workflows/manual-build.yml@main
+    with:
+      reference: ${{ inputs.reference_wazuh_plugins }}
+
+  build-security-plugin:
+    needs: [validate-job]
+    name: Build security plugin
+    permissions:
+      pull-requests: write
+    uses: wazuh/wazuh-security-dashboards-plugin/.github/workflows/manual-build.yml@main
+    with:
+      reference: ${{ inputs.reference_security_plugins }}
+
+  build-package:
+    needs: [setup-variables, build-main-plugins, build-base, build-security-plugin]
+    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'wz-linux-arm64' || 'ubuntu-22.04' }}
+    name: Generate packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download dashboard artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/dashboard
+
+      - name: Download security plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-plugin
+
+      - name: Download main plugin's artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_WAZUH }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download core plugin's artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download check update plugin's artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download report plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/report-plugin
+
+      - name: Zip plugins
+        run: |
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/wazuh-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-plugin
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/dashboard-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/dashboard/${{ needs.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+
+      - name: Build package
+        run: |
+          cd ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages
+          bash ./build-packages.sh \
+            -r ${{ inputs.revision }} ${{ needs.setup-variables.outputs.ARCHITECTURE_FLAG }} \
+            -a file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/wazuh-package.zip \
+            -s file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/security-package.zip \
+            -b file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/dashboard-package.zip \
+            --commit-sha ${{needs.setup-variables.outputs.COMMIT_SHA}}-${{needs.setup-variables.outputs.PLUGINS_SHA}}-${{needs.setup-variables.outputs.SECURITY_SHA}} \
+            --${{ inputs.system }} ${{ needs.setup-variables.outputs.PRODUCTION }} --debug
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          retention-days: 30
+          overwrite: true
+
+      - name: Upload checksum
+        if: success() && ${{ inputs.checksum }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
+          retention-days: 30
+          overwrite: true
+
+  test-package:
+    needs: [setup-variables, build-package]
+    runs-on: ${{ needs.setup-variables.outputs.ARCHITECTURE_FLAG == '--arm' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    strategy:
+      fail-fast: false
+    name: Test package
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download  artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages
+
+      - name: Test package integrity
+        run: |
+          cd ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages
+          cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}}  ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages/${{ inputs.system }}
+          bash ./test-packages.sh \
+            -p ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+
+      - name: DEB - Test package install/uninstall
+        if: ${{ inputs.system == 'deb' }}
+        run: |
+          sudo dpkg -i ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          if dpkg-query -W -f='${Status}' wazuh-dashboard 2>/dev/null | grep -q "install ok installed"; then
+            echo "Package installed"
+          else
+            echo "Package not installed"
+            exit 1
+          fi
+          sudo  systemctl daemon-reload
+          sudo  systemctl enable wazuh-dashboard
+          sudo  systemctl start wazuh-dashboard
+          if sudo systemctl status wazuh-dashboard | grep -q "active (running)"; then
+            echo "Service running"
+          else
+            echo "Service not running"
+            exit 1
+          fi
+          sudo apt-get remove --purge wazuh-dashboard -y
+          if dpkg-query -W -f='${Status}' wazuh-dashboard 2>/dev/null | grep -q "install ok installed"; then
+            echo "Package not uninstalled"
+            exit 1
+          else
+            echo "Package uninstalled"
+          fi
+
+      - name: DEB - Test package upgrade
+        if: ${{ needs.setup-variables.outputs.PREVIOUS != '' && inputs.system == 'deb' }}
+        run: |
+          sudo apt-get install debhelper tar curl libcap2-bin #debhelper version 9 or later
+          sudo apt-get install gnupg apt-transport-https
+          sudo curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && sudo chmod 644 /usr/share/keyrings/wazuh.gpg
+          sudo echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee -a /etc/apt/sources.list.d/wazuh.list
+          sudo apt-get update
+          sudo apt-get -y install wazuh-dashboard=${{needs.setup-variables.outputs.PREVIOUS}}
+          sudo  systemctl daemon-reload
+          sudo  systemctl enable wazuh-dashboard
+          sudo  systemctl start wazuh-dashboard
+          sudo dpkg -i ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          sudo systemctl restart wazuh-dashboard
+
+          if dpkg -s wazuh-dashboard | grep '^Version:' | grep -q "${{needs.setup-variables.outputs.VERSION}}"; then
+            echo "Package upgraded"
+          else
+            echo "Package not upgraded"
+            exit 1
+          fi
+
+          if sudo systemctl status wazuh-dashboard | grep -q "active (running)"; then
+            echo "Service running"
+          else
+            echo "Service not running"
+            exit 1
+          fi
+
+      - name: RPM - Clone automation repo
+        if: ${{ inputs.system == 'rpm' }}
+        env:
+          username: 'wazuh-devel-xdrsiem-dashboard'
+        run: |
+          git clone https://${{ env.username }}:${{ secrets.DASHBOARD_BOT_SMOKE_TEST_TOKEN }}@github.com/wazuh/wazuh-automation.git
+          cd wazuh-automation
+          sudo pip3 install -r deployability/deps/requirements.txt
+
+      - name: RPM - Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.system == 'rpm' }}
+        with:
+          aws-region: 'us-east-1'
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE }}
+          role-session-name: 'Dashboard-smoke-test'
+
+      - name: RPM - Setup environment
+        if: ${{ inputs.system == 'rpm' }}
+        run: |
+          if [ "${{ inputs.architecture }}" = "x86_64" ]; then
+            python3 wazuh-automation/deployability/modules/allocation/main.py --action create --provider aws --size large --composite-name centos_stream-9-amd64 --instance-name "centos_9_amd_large_aws" --inventory-output "/tmp/inventory.yaml" --track-output "/tmp/track.yaml" --label-team dashboard --label-termination-date 1d --working-dir /tmp/dashboard
+          else
+            python3 wazuh-automation/deployability/modules/allocation/main.py --action create --provider aws --size large --composite-name centos_stream-8-arm64 --instance-name "centos_8_arm_large_aws" --inventory-output "/tmp/inventory.yaml" --track-output "/tmp/track.yaml" --label-team dashboard --label-termination-date 1d --working-dir /tmp/dashboard
+          fi
+          ansible_host=$(grep 'ansible_host:' /tmp/inventory.yaml | sed 's/.*: *//')
+          ansible_port=$(grep 'ansible_port:' /tmp/inventory.yaml | sed 's/.*: *//')
+          ansible_user=$(grep 'ansible_user:' /tmp/inventory.yaml | sed 's/.*: *//')
+          ansible_ssh_private_key_file=$(grep 'ansible_ssh_private_key_file:' /tmp/inventory.yaml | sed 's/.*: *//')
+          ssh_command="ssh -o StrictHostKeyChecking=no -i $ansible_ssh_private_key_file -p $ansible_port $ansible_user@$ansible_host"
+          scp_command="scp -o StrictHostKeyChecking=no -i $ansible_ssh_private_key_file -P $ansible_port"
+          echo "ansible_host=$ansible_host" >> $GITHUB_OUTPUT
+          echo "ansible_port=$ansible_port" >> $GITHUB_OUTPUT
+          echo "ansible_user=$ansible_user" >> $GITHUB_OUTPUT
+          echo "ansible_ssh_private_key_file=$ansible_ssh_private_key_file" >> $GITHUB_OUTPUT
+          echo "ssh_command=$ssh_command" >> $GITHUB_OUTPUT
+          echo "scp_command=$scp_command" >> $GITHUB_OUTPUT
+        id: setup_rpm_env
+
+      - name: RPM - Test package install/uninstall
+        if: ${{ inputs.system == 'rpm' }}
+        run: |
+          # echo 'Installing package...' is necessary to init the ssh connection prior to running scp
+          ${{ steps.setup_rpm_env.outputs.ssh_command }} "echo 'Installing package...'"
+          ${{ steps.setup_rpm_env.outputs.scp_command }} ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages/${{needs.setup-variables.outputs.PACKAGE_NAME}} ${{ steps.setup_rpm_env.outputs.ansible_user }}@${{ steps.setup_rpm_env.outputs.ansible_host }}:/home/${{ steps.setup_rpm_env.outputs.ansible_user }}/
+
+          ${{ steps.setup_rpm_env.outputs.ssh_command }} "sudo rpm -i ./${{needs.setup-variables.outputs.PACKAGE_NAME}}; \
+              if rpm -q wazuh-dashboard &>/dev/null; then \
+                echo 'Package installed'; \
+              else \
+                echo 'Package not installed'; \
+                exit 1; \
+              fi; \
+              sudo  systemctl daemon-reload;\
+              sudo  systemctl enable wazuh-dashboard;\
+              sudo  systemctl start wazuh-dashboard;\
+              if sudo systemctl status wazuh-dashboard | grep -q 'active (running)'; then \
+                echo 'Service running'; \
+              else \
+                echo 'Service not running' ;\
+                exit 1 ;\
+              fi; \
+              sudo yum remove wazuh-dashboard -y ;\
+              sudo rm -rf /var/lib/wazuh-dashboard/ ; \
+              sudo rm -rf /usr/share/wazuh-dashboard/ ; \
+              sudo rm -rf /etc/wazuh-dashboard/; \
+              if rpm -q wazuh-dashboard &>/dev/null; then \
+                echo 'Package not uninstalled'; \
+                exit 1; \
+              else \
+                echo 'Package uninstalled'; \
+              fi
+              "
+
+      - name: RPM - Test package upgrade
+        if: ${{ needs.setup-variables.outputs.PREVIOUS != '' && inputs.system == 'rpm' }}
+        run: |
+          ${{ steps.setup_rpm_env.outputs.ssh_command }} "sudo yum install libcap; \
+            sudo rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH; \
+            sudo echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1' | sudo tee /etc/yum.repos.d/wazuh.repo; \
+            sudo yum install -y wazuh-dashboard-${{needs.setup-variables.outputs.PREVIOUS}}; \
+            sudo  systemctl daemon-reload; \
+            sudo  systemctl enable wazuh-dashboard; \
+            sudo  systemctl start wazuh-dashboard; \
+            sudo yum install -y ${{needs.setup-variables.outputs.PACKAGE_NAME}}; \
+            sudo systemctl restart wazuh-dashboard; \
+            if rpm -q wazuh-dashboard | grep -q '${{needs.setup-variables.outputs.VERSION}}'; then \
+              echo 'Package upgraded'; \
+            else \
+              echo 'Package not upgraded'; \
+              exit 1; \
+            fi; \
+            if sudo systemctl status wazuh-dashboard | grep -q 'active (running)'; then \
+              echo 'Service running'; \
+            else \
+              echo 'Service not running'; \
+              exit 1; \
+            fi
+            "
+      - name: Destroy Allocator Machine
+        #DO NOT DELETE. This ensures that the generated instance is destroyed even if the job fails.
+        if: ${{ always() }}
+        ########################################
+        run: |
+          if [ "${{ inputs.system }}" = "rpm" ]; then
+            echo "Destroying Allocator Machine"
+            cd wazuh-automation/deployability
+            python3 modules/allocation/main.py --action delete --track-output "/tmp/track.yaml"
+          fi
+
+  upload-package:
+    needs: [setup-variables, test-package]
+    runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    name: Upload package
+    steps:
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+          aws-region: ${{ secrets.CI_AWS_REGION }}
+
+      - name: Download  artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          path: ./
+
+      - name: Download  checksum
+        if: ${{ inputs.checksum }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
+          path: ./
+
+      - name: Upload package
+        run: |
+          echo "Uploading package"
+          aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}} s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
+          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}"
+          echo "S3 URI: ${s3uri}"
+
+      - name: Upload SHA512
+        if: ${{ inputs.checksum }}
+        run: |
+          echo "Uploading checksum"
+          aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512 s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
+          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512"
+          echo "S3 sha512 URI: ${s3uri}"

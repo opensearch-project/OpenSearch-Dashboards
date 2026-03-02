@@ -107,6 +107,9 @@ describe('PluginsService', () => {
         number: 100,
         sha: 'feature-v1-build-sha',
       },
+      wazuh: {
+        version: '4.x.x',
+      },
     };
 
     const env = Env.createDefault(REPO_ROOT, getEnvOptions());

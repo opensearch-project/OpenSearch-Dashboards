@@ -65,7 +65,8 @@ describe('theme settings', () => {
         - [0]: expected value to equal [v7]
         - [1]: expected value to equal [v8]
         - [2]: expected value to equal [v9]
-        - [3]: expected value to equal [Next (preview)]"
+        - [3]: expected value to equal [Next (preview)]
+        - [4]: expected value to equal [v9 (preview)]"
       `);
     });
   });

@@ -67,6 +67,9 @@ export interface RawPackageInfo {
     number: number;
     sha: string;
   };
+  wazuh: {
+    version: string;
+  };
 }
 
 export class Env {
@@ -159,6 +162,7 @@ export class Env {
         : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
       dist: isOpenSearchDashboardsDistributable,
+      wazuhVersion: pkg.wazuh.version,
     });
   }
 }

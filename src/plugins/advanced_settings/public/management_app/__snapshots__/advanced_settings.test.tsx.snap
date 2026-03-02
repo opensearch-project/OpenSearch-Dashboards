@@ -423,6 +423,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
         },
       },
+      "wazuh": Object {
+        "index": "https://documentation.wazuh.com/4.x/index.html",
+      },
     }
   }
   enableSaving={false}
@@ -1088,6 +1091,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
               "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
             },
+          },
+          "wazuh": Object {
+            "index": "https://documentation.wazuh.com/4.x/index.html",
           },
         }
       }
@@ -2069,6 +2075,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
                       },
+                      "wazuh": Object {
+                        "index": "https://documentation.wazuh.com/4.x/index.html",
+                      },
                     }
                   }
                   enableSaving={false}
@@ -2485,6 +2494,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
                           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
+                      },
+                      "wazuh": Object {
+                        "index": "https://documentation.wazuh.com/4.x/index.html",
                       },
                     }
                   }
@@ -2903,6 +2915,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
                       },
+                      "wazuh": Object {
+                        "index": "https://documentation.wazuh.com/4.x/index.html",
+                      },
                     }
                   }
                   enableSaving={false}
@@ -3319,6 +3334,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
                           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
+                      },
+                      "wazuh": Object {
+                        "index": "https://documentation.wazuh.com/4.x/index.html",
                       },
                     }
                   }
@@ -3792,6 +3810,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
                       },
+                      "wazuh": Object {
+                        "index": "https://documentation.wazuh.com/4.x/index.html",
+                      },
                     }
                   }
                   enableSaving={false}
@@ -4210,6 +4231,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "collaborators": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#defining-workspace-collaborators",
                           "privacy": "https://opensearch.org/docs/mocked-test-branch/dashboards/workspace/workspace-acl/#configuring-workspace-privacy",
                         },
+                      },
+                      "wazuh": Object {
+                        "index": "https://documentation.wazuh.com/4.x/index.html",
                       },
                     }
                   }

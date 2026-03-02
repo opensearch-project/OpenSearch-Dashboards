@@ -19,6 +19,10 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
+  "wazuh": {
+    "version": "5.0.0",
+    "revision": "00"
+  },
   "homepage": "https://opensearch.org",
   "bugs": {
     "url": "http://github.com/opensearch-project/OpenSearch-Dashboards/issues"
@@ -111,7 +115,9 @@
     "generate:grammars:sql": "yarn workspace @osd/antlr-grammar generate:opensearchsql",
     "generate:grammars:ppl": "yarn workspace @osd/antlr-grammar generate:opensearchppl",
     "generate:grammars:ppl-simplified": "yarn workspace @osd/antlr-grammar generate:opensearchppl-simplified",
-    "generate:grammars:dql": "yarn workspace @osd/antlr-grammar generate:dql"
+    "generate:grammars:dql": "yarn workspace @osd/antlr-grammar generate:dql",
+    "wzd-revision": "scripts/use_node -e \"console.log(require('./package.json').wazuh.revision)\"",
+    "wzd-version": "scripts/use_node -e \"console.log(require('./package.json').wazuh.version)\""
   },
   "repository": {
     "type": "git",

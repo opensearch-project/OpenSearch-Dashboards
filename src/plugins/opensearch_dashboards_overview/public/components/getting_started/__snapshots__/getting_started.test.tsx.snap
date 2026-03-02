@@ -168,19 +168,6 @@ exports[`GettingStarted dark mode on 1`] = `
         <EuiSpacer
           size="xl"
         />
-        <RedirectAppLinks>
-          <EuiSmallButton
-            fill={true}
-            href="/app/management/opensearch-dashboards/indexPatterns"
-            iconType="indexOpen"
-          >
-            <FormattedMessage
-              defaultMessage="Add your data"
-              id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiSmallButton>
-        </RedirectAppLinks>
       </div>
     </EuiFlexItem>
     <EuiFlexItem
@@ -363,19 +350,6 @@ exports[`GettingStarted render 1`] = `
         <EuiSpacer
           size="xl"
         />
-        <RedirectAppLinks>
-          <EuiSmallButton
-            fill={true}
-            href="/app/management/opensearch-dashboards/indexPatterns"
-            iconType="indexOpen"
-          >
-            <FormattedMessage
-              defaultMessage="Add your data"
-              id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
-              values={Object {}}
-            />
-          </EuiSmallButton>
-        </RedirectAppLinks>
       </div>
     </EuiFlexItem>
     <EuiFlexItem

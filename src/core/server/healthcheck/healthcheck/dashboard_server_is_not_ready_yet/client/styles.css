@@ -1,0 +1,805 @@
+/* Local fonts: use the embedded fonts already shipped with the app.
+   These files are served by the healthcheck server under
+   /healthcheck/public/server_not_ready/fonts/... and referenced relatively
+   so they also work when a server base path is configured. */
+
+/* UI font: Inter UI (local, embedded) */
+@font-face {
+  font-family: 'Inter UI';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Inter UI'),
+    local('Inter-UI-Regular'),
+    url('fonts/inter_ui/Inter-UI-Regular.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-Regular.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter UI';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Inter UI Italic'),
+    local('Inter-UI-Italic'),
+    url('fonts/inter_ui/Inter-UI-Italic.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-Italic.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter UI';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src:
+    local('Inter UI Medium'),
+    local('Inter-UI-Medium'),
+    url('fonts/inter_ui/Inter-UI-Medium.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-Medium.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter UI';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Inter UI Semibold'),
+    local('Inter-UI-SemiBold'),
+    url('fonts/inter_ui/Inter-UI-SemiBold.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-SemiBold.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter UI';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src:
+    local('Inter UI Semibold Italic'),
+    local('Inter-UI-SemiBoldItalic'),
+    url('fonts/inter_ui/Inter-UI-SemiBoldItalic.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-SemiBoldItalic.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter UI';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Inter UI Bold'),
+    local('Inter-UI-Bold'),
+    url('fonts/inter_ui/Inter-UI-Bold.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-Bold.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter UI';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Inter UI Bold Italic'),
+    local('Inter-UI-BoldItalic'),
+    url('fonts/inter_ui/Inter-UI-BoldItalic.woff2') format('woff2'),
+    url('fonts/inter_ui/Inter-UI-BoldItalic.woff') format('woff');
+}
+
+/* Monospace font: Roboto Mono (local TTF) */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Roboto Mono'),
+    local('RobotoMono-Regular'),
+    url('fonts/roboto_mono/RobotoMono-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    local('Roboto Mono Italic'),
+    local('RobotoMono-Italic'),
+    url('fonts/roboto_mono/RobotoMono-Italic.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Roboto Mono Bold'),
+    local('RobotoMono-Bold'),
+    url('fonts/roboto_mono/RobotoMono-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local('Roboto Mono Bold Italic'),
+    local('RobotoMono-BoldItalic'),
+    url('fonts/roboto_mono/RobotoMono-BoldItalic.ttf') format('truetype');
+}
+
+:root {
+  font-family: 'Inter UI', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  font-size: 16px;
+  color-scheme: light;
+  /* Brand */
+  --red: #ff0c29;
+  --blue: #006bb4;
+  --yellow: #ffa621;
+  /* Neutrals */
+  --text: #1f2937;
+  --muted: #6b7280;
+  --bg: #ffffff;
+  --bg-alt: #f6f8fb;
+  --border: #e5e8e7;
+  /* Typography */
+  --normal-weight: 400;
+  --light-bold: 500;
+  --semi-bold: 600;
+  --bold: 700;
+  --font-size-lg: 22px;
+  font-weight: var(--normal-weight);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--text);
+  background: var(--bg);
+}
+
+#root {
+  margin: 4rem auto;
+  max-width: 1440px;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-inline: 4rem;
+}
+
+code {
+  font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  /*
+  * font-size = maximum of:
+  * - 14px (minimum)
+  * - (container's text size) - 0.25rem
+  * Where:
+  * - 1em = parent's font-size
+  * - 0.25rem = 25% of the root font-size (≈4px if :root=16px)
+  * Example: if parent is 16px, calc(1em - 0.25rem) ≈ 12px → result is 14px.
+  *          if parent is 20px, calc(...) ≈ 16px → result is 16px.
+   */
+  font-size: max(14px, calc(1em - 0.25rem));
+  background-color: var(--bg-alt);
+  padding: 0px 8px;
+  border-radius: 4px;
+  white-space: break-spaces;
+  word-break: break-word;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+}
+
+.title > div {
+  display: flex;
+  align-items: baseline;
+}
+
+@media screen and (max-width: 768px) {
+  .title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .server-is.server-is {
+    padding-inline-start: 0;
+  }
+}
+
+@media screen and (max-width: 425px) {
+  .title > div {
+    flex-direction: column;
+  }
+}
+
+.server-is {
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 50px;
+  padding-inline: 0.75rem;
+  color: var(--muted);
+}
+
+.not-ready {
+  border-radius: 3px;
+  padding-left: 19px;
+  padding-right: 19px;
+  background-color: var(--red);
+  color: #ffffff;
+  line-height: 21px;
+  text-align: center;
+  font-weight: var(--light-bold);
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  align-self: first baseline;
+  /* Subtle breathing glow to draw attention */
+  animation: pulseGlow 2s ease-in-out infinite;
+  /* Base depth without conflicting with animated box-shadow */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+}
+
+.card {
+  padding-block: 30px;
+  padding-inline: 34px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
+  /* Fade/slide in when mounted */
+  animation: fadeInUp 320ms ease-out both;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-body {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+@media screen and (max-width: 768px) {
+  .card-body {
+    flex-direction: column;
+  }
+}
+
+.healthcheck-title {
+  font-size: 23px;
+  line-height: 50px;
+  letter-spacing: normal;
+  vertical-align: middle;
+  color: var(--text);
+  /* Smooth appearance in header area */
+  animation: fadeIn 300ms ease-out both;
+}
+
+/* Normalize icons so they align with adjacent text */
+picture {
+  /* Make picture participate as a flex container to center its content
+     even when the parent flex item is stretched by align-items: stretch */
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Remove inline-image baseline gap that makes icons look lower */
+picture > img {
+  display: block;
+}
+
+/* Normalize inline SVG icons inside buttons */
+.button svg {
+  display: block;
+}
+
+.button {
+  cursor: pointer;
+  border-radius: 10px;
+  border-width: 1px;
+  padding-block: 3px;
+  padding-inline: 27px;
+  border: 1px solid;
+  background-color: transparent;
+  text-align: center;
+  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 262px;
+  height: 54px;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, transform 60ms ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media screen and (max-width: 768px) {
+  .button {
+    min-width: 50px;
+  }
+}
+
+#btn-download {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+#btn-run-failed-critical-checks {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.button:hover:not([disabled]) {
+  background: var(--bg-alt);
+}
+
+#btn-download:hover:not([disabled]) {
+  background: var(--blue);
+  color: #ffffff;
+  border-color: var(--blue);
+}
+
+#btn-run-failed-critical-checks:hover:not([disabled]) {
+  background: var(--red);
+  color: #ffffff;
+  border-color: var(--red);
+}
+
+.button:active:not([disabled]) {
+  transform: translateY(0.5px);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06), 0 0 0 2px currentColor;
+}
+
+/* Lightweight spinner for running state */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Notice banners */
+.notice {
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 4px;
+  background-color: var(--bg-alt);
+  color: var(--text);
+  /* Slide down + fade on appear */
+  animation: slideDownFade 260ms ease-out both;
+  box-shadow: var(--shadow-sm);
+}
+
+.notice--info {
+  border-left-color: var(--blue);
+}
+
+.notice--success {
+  border-left-color: #2ea44f; /* green */
+  background-color: color-mix(in oklab, #2ea44f 12%, var(--bg-alt));
+}
+
+.notice__content {
+  line-height: 1.4;
+}
+
+/* Links */
+a {
+  color: var(--blue);
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+tr {
+  text-align: left;
+}
+
+th {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  font-weight: var(--semi-bold);
+}
+
+td {
+  border-bottom: 1px solid var(--border);
+}
+
+th,
+td {
+  padding: 22px 16px;
+}
+
+th,
+td {
+  vertical-align: top;
+  word-break: break-word;
+}
+
+tbody tr:nth-child(odd) {
+  background: color-mix(in oklab, var(--bg-alt) 50%, var(--bg));
+}
+
+/* Highlight table row on hover */
+tbody tr {
+  transition: background-color 160ms ease;
+  /* Animate in table rows */
+  animation: fadeIn 260ms ease-out both;
+}
+
+tbody tr:hover {
+  background: color-mix(in oklab, var(--blue) 12%, var(--bg-alt));
+}
+
+/* Slight lift and glow on buttons */
+.button:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Sequential delay for cards: consistent effect, staggered start */
+#root > .card:nth-of-type(1) {
+  animation-delay: 0ms;
+}
+#root > .card:nth-of-type(2) {
+  animation-delay: 120ms;
+}
+#root > .card:nth-of-type(3) {
+  animation-delay: 240ms;
+}
+#root > .card:nth-of-type(4) {
+  animation-delay: 360ms;
+}
+#root > .card:nth-of-type(5) {
+  animation-delay: 480ms;
+}
+
+/* Stagger table rows a bit for readability */
+tbody tr:nth-child(1) {
+  animation-delay: 40ms;
+}
+tbody tr:nth-child(2) {
+  animation-delay: 80ms;
+}
+tbody tr:nth-child(3) {
+  animation-delay: 120ms;
+}
+tbody tr:nth-child(4) {
+  animation-delay: 160ms;
+}
+tbody tr:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 12, 41, 0.35);
+  }
+  70% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 8px rgba(255, 12, 41, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 12, 41, 0);
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .not-ready,
+  .card,
+  .healthcheck-title,
+  .notice,
+  tbody tr,
+  .critical-item,
+  .noncritical-item {
+    animation: none !important;
+  }
+  .button,
+  .critical-item,
+  .noncritical-item {
+    transition: none !important;
+  }
+}
+
+/* Critical items list */
+.critical-list {
+  display: grid;
+  gap: 12px;
+}
+
+.critical-item {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--red);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--red) 4%, var(--bg));
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 260ms ease-out both;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+}
+
+.critical-item:hover {
+  background: color-mix(in oklab, var(--red) 8%, var(--bg-alt));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.critical-item:active {
+  transform: translateY(0);
+}
+
+.critical-item__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.critical-item__icon picture,
+.critical-item__icon svg,
+.critical-item__icon img {
+  width: 22px;
+  height: 22px;
+}
+
+/* Color SVG-based icons in critical items */
+.critical-item__icon svg {
+  color: var(--red);
+}
+
+.critical-item__title {
+  font-weight: var(--bold);
+  font-size: var(--font-size-lg);
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Allow badge/code to wrap on narrow screens instead of squashing text */
+  flex-wrap: wrap;
+}
+
+.critical-item__name {
+  color: var(--red);
+  /* Avoid per-letter vertical stacking on small widths */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.critical-item__msg {
+  margin-top: 6px;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.badge--critical {
+  background: var(--red);
+  color: #fff;
+}
+
+.critical-item__meta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.critical-item__meta .meta-key {
+  color: var(--text);
+  font-weight: var(--semi-bold);
+}
+
+/* Sequential delay for list items inside the card */
+.critical-list > .critical-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.critical-list > .critical-item:nth-child(2) {
+  animation-delay: 80ms;
+}
+.critical-list > .critical-item:nth-child(3) {
+  animation-delay: 160ms;
+}
+.critical-list > .critical-item:nth-child(4) {
+  animation-delay: 240ms;
+}
+.critical-list > .critical-item:nth-child(5) {
+  animation-delay: 320ms;
+}
+.critical-list > .critical-item:nth-child(6) {
+  animation-delay: 400ms;
+}
+.critical-list > .critical-item:nth-child(7) {
+  animation-delay: 480ms;
+}
+.critical-list > .critical-item:nth-child(8) {
+  animation-delay: 560ms;
+}
+
+/* Non-critical items list */
+.noncritical-list {
+  display: grid;
+  gap: 10px;
+}
+
+.noncritical-item {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--yellow);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--yellow) 6%, var(--bg));
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 260ms ease-out both;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+}
+
+.noncritical-item:hover {
+  background: color-mix(in oklab, var(--yellow) 10%, var(--bg-alt));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.noncritical-item:active {
+  transform: translateY(0);
+}
+
+.noncritical-item__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.noncritical-item__icon svg,
+.noncritical-item__icon picture,
+.noncritical-item__icon img {
+  width: 20px;
+  height: 20px;
+  color: var(--yellow);
+}
+
+.noncritical-item__title {
+  font-weight: var(--semi-bold);
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Allow badge/code to wrap on narrow screens instead of squashing text */
+  flex-wrap: wrap;
+}
+
+.noncritical-item__name {
+  color: var(--yellow);
+  /* Avoid per-letter vertical stacking on small widths */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.noncritical-item__msg {
+  margin-top: 4px;
+}
+
+.badge--minor {
+  background: var(--yellow);
+  color: #1f1f1f;
+}
+
+.noncritical-item__meta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.noncritical-item__meta .meta-key {
+  color: var(--text);
+  font-weight: var(--semi-bold);
+}
+
+/* Sequential delay for non-critical list */
+.noncritical-list > .noncritical-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.noncritical-list > .noncritical-item:nth-child(2) {
+  animation-delay: 60ms;
+}
+.noncritical-list > .noncritical-item:nth-child(3) {
+  animation-delay: 120ms;
+}
+.noncritical-list > .noncritical-item:nth-child(4) {
+  animation-delay: 180ms;
+}
+.noncritical-list > .noncritical-item:nth-child(5) {
+  animation-delay: 240ms;
+}
+.noncritical-list > .noncritical-item:nth-child(6) {
+  animation-delay: 300ms;
+}
+.noncritical-list > .noncritical-item:nth-child(7) {
+  animation-delay: 360ms;
+}
+.noncritical-list > .noncritical-item:nth-child(8) {
+  animation-delay: 420ms;
+}

@@ -94,7 +94,7 @@ describe('Header logo', () => {
       component.find('.logoContainer img').simulate('click');
 
       expect(props.navigateToApp).toHaveBeenCalledTimes(1);
-      expect(props.navigateToApp).toHaveBeenCalledWith('home');
+      expect(props.navigateToApp).toHaveBeenCalledWith('wz-home');
     });
 
     // ToDo: Add tests for onClick

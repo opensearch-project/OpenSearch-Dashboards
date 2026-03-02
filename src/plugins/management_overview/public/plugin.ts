@@ -10,7 +10,7 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
   CoreStart,
-  AppNavLinkStatus,
+  AppStatus,
 } from '../../../core/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { MANAGEMENT_OVERVIEW_PLUGIN_ID } from '../common/constants';
@@ -66,9 +66,7 @@ export class ManagementOverViewPlugin
       icon: '/ui/logos/opensearch_mark.svg',
       order: 9000,
       category: DEFAULT_APP_CATEGORIES.management,
-      navLinkStatus: coreSetup.chrome.navGroup.getNavGroupEnabled()
-        ? AppNavLinkStatus.hidden
-        : AppNavLinkStatus.visible,
+      status: AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { element } = params;
         const [core] = await getStartServices();

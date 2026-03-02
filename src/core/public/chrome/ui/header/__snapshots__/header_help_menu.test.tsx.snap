@@ -2,6 +2,7 @@
 
 exports[`Header help menu hides survey link 1`] = `
 <InjectIntl(HeaderHelpMenuUI)
+  darkmode={false}
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
@@ -808,6 +809,7 @@ exports[`Header help menu hides survey link 1`] = `
   useDefaultContent={true}
 >
   <HeaderHelpMenuUI
+    darkmode={false}
     helpExtension$={
       BehaviorSubject {
         "_isScalar": false,
@@ -1810,13 +1812,18 @@ exports[`Header help menu hides survey link 1`] = `
                       >
                         <a
                           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                          href="/doclink"
+                          href="https://documentation.wazuh.com/5.0/"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
                           <span
                             class="euiButtonContent euiButtonEmpty__content"
                           >
+                            <span
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="/ui/logos/icon_light.svg"
+                            />
                             <span
                               class="euiButtonEmpty__text"
                             >
@@ -1827,30 +1834,9 @@ exports[`Header help menu hides survey link 1`] = `
                         <div
                           class="euiSpacer euiSpacer--xs"
                         />
-                        <button
-                          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                          type="button"
-                        >
-                          <span
-                            class="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              class="euiButtonEmpty__text"
-                            >
-                              Community
-                            </span>
-                          </span>
-                        </button>
-                        <div
-                          class="euiSpacer euiSpacer--xs"
-                        />
-                        
-                        <div
-                          class="euiSpacer euiSpacer--xs"
-                        />
                         <a
                           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                          href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
+                          href="https://wazuh.com/community/join-us-on-slack/"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
@@ -1860,12 +1846,40 @@ exports[`Header help menu hides survey link 1`] = `
                             <span
                               class="euiButtonContent__icon"
                               color="inherit"
-                              data-euiicon-type="logoGithub"
+                              data-euiicon-type="logoSlack"
                             />
                             <span
                               class="euiButtonEmpty__text"
                             >
-                              Open an issue in GitHub
+                              Slack Channel
+                            </span>
+                          </span>
+                        </a>
+                        <div
+                          class="euiSpacer euiSpacer--xs"
+                        />
+                        
+                        <div
+                          class="euiSpacer euiSpacer--xs"
+                        />
+                        <a
+                          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
+                          href="https://groups.google.com/forum/#!forum/wazuh/"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          <span
+                            class="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <span
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="/ui/logos/google_groups.svg"
+                            />
+                            <span
+                              class="euiButtonEmpty__text"
+                            >
+                              Google Group
                             </span>
                           </span>
                         </a>
@@ -2016,13 +2030,14 @@ exports[`Header help menu hides survey link 1`] = `
                         >
                           <EuiButtonEmpty
                             flush="left"
-                            href="/doclink"
+                            href="https://documentation.wazuh.com/5.0/"
+                            iconType="/ui/logos/icon_light.svg"
                             size="xs"
                             target="_blank"
                           >
                             <a
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                              href="/doclink"
+                              href="https://documentation.wazuh.com/5.0/"
                               rel="noopener noreferrer"
                               target="_blank"
                             >
@@ -2031,6 +2046,7 @@ exports[`Header help menu hides survey link 1`] = `
                                 iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
+                                iconType="/ui/logos/icon_light.svg"
                                 textProps={
                                   Object {
                                     "className": "euiButtonEmpty__text",
@@ -2040,6 +2056,19 @@ exports[`Header help menu hides survey link 1`] = `
                                 <span
                                   className="euiButtonContent euiButtonEmpty__content"
                                 >
+                                  <EuiIcon
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    size="s"
+                                    type="/ui/logos/icon_light.svg"
+                                  >
+                                    <span
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      data-euiicon-type="/ui/logos/icon_light.svg"
+                                      size="s"
+                                    />
+                                  </EuiIcon>
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
@@ -2064,20 +2093,23 @@ exports[`Header help menu hides survey link 1`] = `
                           </EuiSpacer>
                           <EuiButtonEmpty
                             flush="left"
-                            href=""
+                            href="https://wazuh.com/community/join-us-on-slack/"
+                            iconType="logoSlack"
                             size="xs"
                             target="_blank"
                           >
-                            <button
+                            <a
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                              disabled={false}
-                              type="button"
+                              href="https://wazuh.com/community/join-us-on-slack/"
+                              rel="noopener noreferrer"
+                              target="_blank"
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
                                 iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
+                                iconType="logoSlack"
                                 textProps={
                                   Object {
                                     "className": "euiButtonEmpty__text",
@@ -2087,20 +2119,33 @@ exports[`Header help menu hides survey link 1`] = `
                                 <span
                                   className="euiButtonContent euiButtonEmpty__content"
                                 >
+                                  <EuiIcon
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    size="s"
+                                    type="logoSlack"
+                                  >
+                                    <span
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      data-euiicon-type="logoSlack"
+                                      size="s"
+                                    />
+                                  </EuiIcon>
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
                                     <FormattedMessage
-                                      defaultMessage="Community"
+                                      defaultMessage="Slack Channel"
                                       id="core.ui.chrome.headerGlobalNav.helpMenuAskOpenSearchTitle"
                                       values={Object {}}
                                     >
-                                      Community
+                                      Slack Channel
                                     </FormattedMessage>
                                   </span>
                                 </span>
                               </EuiButtonContent>
-                            </button>
+                            </a>
                           </EuiButtonEmpty>
                           <EuiSpacer
                             size="xs"
@@ -2118,14 +2163,14 @@ exports[`Header help menu hides survey link 1`] = `
                           </EuiSpacer>
                           <EuiButtonEmpty
                             flush="left"
-                            href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
-                            iconType="logoGithub"
+                            href="https://groups.google.com/forum/#!forum/wazuh/"
+                            iconType="/ui/logos/google_groups.svg"
                             size="xs"
                             target="_blank"
                           >
                             <a
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                              href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
+                              href="https://groups.google.com/forum/#!forum/wazuh/"
                               rel="noopener noreferrer"
                               target="_blank"
                             >
@@ -2134,7 +2179,7 @@ exports[`Header help menu hides survey link 1`] = `
                                 iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
-                                iconType="logoGithub"
+                                iconType="/ui/logos/google_groups.svg"
                                 textProps={
                                   Object {
                                     "className": "euiButtonEmpty__text",
@@ -2148,12 +2193,12 @@ exports[`Header help menu hides survey link 1`] = `
                                     className="euiButtonContent__icon"
                                     color="inherit"
                                     size="s"
-                                    type="logoGithub"
+                                    type="/ui/logos/google_groups.svg"
                                   >
                                     <span
                                       className="euiButtonContent__icon"
                                       color="inherit"
-                                      data-euiicon-type="logoGithub"
+                                      data-euiicon-type="/ui/logos/google_groups.svg"
                                       size="s"
                                     />
                                   </EuiIcon>
@@ -2161,11 +2206,11 @@ exports[`Header help menu hides survey link 1`] = `
                                     className="euiButtonEmpty__text"
                                   >
                                     <FormattedMessage
-                                      defaultMessage="Open an issue in GitHub"
+                                      defaultMessage="Google Group"
                                       id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
                                       values={Object {}}
                                     >
-                                      Open an issue in GitHub
+                                      Google Group
                                     </FormattedMessage>
                                   </span>
                                 </span>
@@ -2189,6 +2234,7 @@ exports[`Header help menu hides survey link 1`] = `
 
 exports[`Header help menu renders survey link 1`] = `
 <InjectIntl(HeaderHelpMenuUI)
+  darkmode={false}
   helpExtension$={
     BehaviorSubject {
       "_isScalar": false,
@@ -2995,6 +3041,7 @@ exports[`Header help menu renders survey link 1`] = `
   useDefaultContent={true}
 >
   <HeaderHelpMenuUI
+    darkmode={false}
     helpExtension$={
       BehaviorSubject {
         "_isScalar": false,
@@ -3997,13 +4044,18 @@ exports[`Header help menu renders survey link 1`] = `
                       >
                         <a
                           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                          href="/doclink"
+                          href="https://documentation.wazuh.com/5.0/"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
                           <span
                             class="euiButtonContent euiButtonEmpty__content"
                           >
+                            <span
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="/ui/logos/icon_light.svg"
+                            />
                             <span
                               class="euiButtonEmpty__text"
                             >
@@ -4014,27 +4066,34 @@ exports[`Header help menu renders survey link 1`] = `
                         <div
                           class="euiSpacer euiSpacer--xs"
                         />
-                        <button
+                        <a
                           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                          type="button"
+                          href="https://wazuh.com/community/join-us-on-slack/"
+                          rel="noopener noreferrer"
+                          target="_blank"
                         >
                           <span
                             class="euiButtonContent euiButtonEmpty__content"
                           >
                             <span
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="logoSlack"
+                            />
+                            <span
                               class="euiButtonEmpty__text"
                             >
-                              Community
+                              Slack Channel
                             </span>
                           </span>
-                        </button>
+                        </a>
                         <div
                           class="euiSpacer euiSpacer--xs"
                         />
                         <div>
                           <a
                             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                            href="/"
+                            href="https://github.com/wazuh/"
                             rel="noopener noreferrer"
                             target="_blank"
                           >
@@ -4042,9 +4101,14 @@ exports[`Header help menu renders survey link 1`] = `
                               class="euiButtonContent euiButtonEmpty__content"
                             >
                               <span
+                                class="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="logoGithub"
+                              />
+                              <span
                                 class="euiButtonEmpty__text"
                               >
-                                Give feedback
+                                Projects on Github
                               </span>
                             </span>
                           </a>
@@ -4057,7 +4121,7 @@ exports[`Header help menu renders survey link 1`] = `
                         />
                         <a
                           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                          href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
+                          href="https://groups.google.com/forum/#!forum/wazuh/"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
@@ -4067,12 +4131,12 @@ exports[`Header help menu renders survey link 1`] = `
                             <span
                               class="euiButtonContent__icon"
                               color="inherit"
-                              data-euiicon-type="logoGithub"
+                              data-euiicon-type="/ui/logos/google_groups.svg"
                             />
                             <span
                               class="euiButtonEmpty__text"
                             >
-                              Open an issue in GitHub
+                              Google Group
                             </span>
                           </span>
                         </a>
@@ -4223,13 +4287,14 @@ exports[`Header help menu renders survey link 1`] = `
                         >
                           <EuiButtonEmpty
                             flush="left"
-                            href="/doclink"
+                            href="https://documentation.wazuh.com/5.0/"
+                            iconType="/ui/logos/icon_light.svg"
                             size="xs"
                             target="_blank"
                           >
                             <a
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                              href="/doclink"
+                              href="https://documentation.wazuh.com/5.0/"
                               rel="noopener noreferrer"
                               target="_blank"
                             >
@@ -4238,6 +4303,7 @@ exports[`Header help menu renders survey link 1`] = `
                                 iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
+                                iconType="/ui/logos/icon_light.svg"
                                 textProps={
                                   Object {
                                     "className": "euiButtonEmpty__text",
@@ -4247,6 +4313,19 @@ exports[`Header help menu renders survey link 1`] = `
                                 <span
                                   className="euiButtonContent euiButtonEmpty__content"
                                 >
+                                  <EuiIcon
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    size="s"
+                                    type="/ui/logos/icon_light.svg"
+                                  >
+                                    <span
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      data-euiicon-type="/ui/logos/icon_light.svg"
+                                      size="s"
+                                    />
+                                  </EuiIcon>
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
@@ -4271,20 +4350,23 @@ exports[`Header help menu renders survey link 1`] = `
                           </EuiSpacer>
                           <EuiButtonEmpty
                             flush="left"
-                            href=""
+                            href="https://wazuh.com/community/join-us-on-slack/"
+                            iconType="logoSlack"
                             size="xs"
                             target="_blank"
                           >
-                            <button
+                            <a
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                              disabled={false}
-                              type="button"
+                              href="https://wazuh.com/community/join-us-on-slack/"
+                              rel="noopener noreferrer"
+                              target="_blank"
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
                                 iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
+                                iconType="logoSlack"
                                 textProps={
                                   Object {
                                     "className": "euiButtonEmpty__text",
@@ -4294,20 +4376,33 @@ exports[`Header help menu renders survey link 1`] = `
                                 <span
                                   className="euiButtonContent euiButtonEmpty__content"
                                 >
+                                  <EuiIcon
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    size="s"
+                                    type="logoSlack"
+                                  >
+                                    <span
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      data-euiicon-type="logoSlack"
+                                      size="s"
+                                    />
+                                  </EuiIcon>
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
                                     <FormattedMessage
-                                      defaultMessage="Community"
+                                      defaultMessage="Slack Channel"
                                       id="core.ui.chrome.headerGlobalNav.helpMenuAskOpenSearchTitle"
                                       values={Object {}}
                                     >
-                                      Community
+                                      Slack Channel
                                     </FormattedMessage>
                                   </span>
                                 </span>
                               </EuiButtonContent>
-                            </button>
+                            </a>
                           </EuiButtonEmpty>
                           <EuiSpacer
                             size="xs"
@@ -4319,13 +4414,14 @@ exports[`Header help menu renders survey link 1`] = `
                           <div>
                             <EuiButtonEmpty
                               flush="left"
-                              href="/"
+                              href="https://github.com/wazuh/"
+                              iconType="logoGithub"
                               size="xs"
                               target="_blank"
                             >
                               <a
                                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                                href="/"
+                                href="https://github.com/wazuh/"
                                 rel="noopener noreferrer"
                                 target="_blank"
                               >
@@ -4334,6 +4430,7 @@ exports[`Header help menu renders survey link 1`] = `
                                   iconGap="m"
                                   iconSide="left"
                                   iconSize="s"
+                                  iconType="logoGithub"
                                   textProps={
                                     Object {
                                       "className": "euiButtonEmpty__text",
@@ -4343,15 +4440,28 @@ exports[`Header help menu renders survey link 1`] = `
                                   <span
                                     className="euiButtonContent euiButtonEmpty__content"
                                   >
+                                    <EuiIcon
+                                      className="euiButtonContent__icon"
+                                      color="inherit"
+                                      size="s"
+                                      type="logoGithub"
+                                    >
+                                      <span
+                                        className="euiButtonContent__icon"
+                                        color="inherit"
+                                        data-euiicon-type="logoGithub"
+                                        size="s"
+                                      />
+                                    </EuiIcon>
                                     <span
                                       className="euiButtonEmpty__text"
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Give feedback"
+                                        defaultMessage="Projects on Github"
                                         id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackSurveyTitle"
                                         values={Object {}}
                                       >
-                                        Give feedback
+                                        Projects on Github
                                       </FormattedMessage>
                                     </span>
                                   </span>
@@ -4375,14 +4485,14 @@ exports[`Header help menu renders survey link 1`] = `
                           </EuiSpacer>
                           <EuiButtonEmpty
                             flush="left"
-                            href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
-                            iconType="logoGithub"
+                            href="https://groups.google.com/forum/#!forum/wazuh/"
+                            iconType="/ui/logos/google_groups.svg"
                             size="xs"
                             target="_blank"
                           >
                             <a
                               className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
-                              href="https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose"
+                              href="https://groups.google.com/forum/#!forum/wazuh/"
                               rel="noopener noreferrer"
                               target="_blank"
                             >
@@ -4391,7 +4501,7 @@ exports[`Header help menu renders survey link 1`] = `
                                 iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
-                                iconType="logoGithub"
+                                iconType="/ui/logos/google_groups.svg"
                                 textProps={
                                   Object {
                                     "className": "euiButtonEmpty__text",
@@ -4405,12 +4515,12 @@ exports[`Header help menu renders survey link 1`] = `
                                     className="euiButtonContent__icon"
                                     color="inherit"
                                     size="s"
-                                    type="logoGithub"
+                                    type="/ui/logos/google_groups.svg"
                                   >
                                     <span
                                       className="euiButtonContent__icon"
                                       color="inherit"
-                                      data-euiicon-type="logoGithub"
+                                      data-euiicon-type="/ui/logos/google_groups.svg"
                                       size="s"
                                     />
                                   </EuiIcon>
@@ -4418,11 +4528,11 @@ exports[`Header help menu renders survey link 1`] = `
                                     className="euiButtonEmpty__text"
                                   >
                                     <FormattedMessage
-                                      defaultMessage="Open an issue in GitHub"
+                                      defaultMessage="Google Group"
                                       id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
                                       values={Object {}}
                                     >
-                                      Open an issue in GitHub
+                                      Google Group
                                     </FormattedMessage>
                                   </span>
                                 </span>

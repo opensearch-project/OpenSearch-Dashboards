@@ -44,10 +44,27 @@ import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { WorkspaceObject } from 'src/core/public/workspace';
 import { HeaderVariant } from '../../constants';
 import { Header } from './header';
+import * as navUtils from '../../utils';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
+
+// Wazuh: Mock the getIsCategoryOpen function to return true by default.
+// This is because we change the default value of the getIsCategoryOpen function to false.
+// And all the tests fail because the getIsCategoryOpen function returns false on the first render.
+// That's why we mock it to return true by default.
+
+jest.spyOn(navUtils, 'getIsCategoryOpen').mockImplementation((category, storage) => {
+  // Try to get the value from the storage first
+  const storageKey = `core.navGroup.${category}`;
+  const storedValue = storage.getItem(storageKey);
+  // If the value is not stored, return the default value
+  if (storedValue !== null) {
+    return storedValue === 'true';
+  }
+  return true;
+});
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
@@ -97,6 +114,7 @@ function mockProps() {
     currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
     globalSearchCommands$: new BehaviorSubject([]),
+    darkmode: false, // Wazuh
   };
 }
 

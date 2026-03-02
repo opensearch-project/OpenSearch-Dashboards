@@ -27,7 +27,9 @@ jest.mock('./tutorial_directory', () => ({
   ),
 }));
 
-describe('<HomeApp />', () => {
+// Wazuh: skip this because we remove the sampledata and the tutorial because sample data is needed
+
+describe.skip('<HomeApp />', () => {
   let currentService: ReturnType<typeof getMockedServices>;
   beforeEach(() => {
     currentService = getMockedServices();
@@ -47,7 +49,7 @@ describe('<HomeApp />', () => {
   });
 });
 
-describe('<ImportSampleDataApp />', () => {
+describe.skip('<ImportSampleDataApp />', () => {
   let currentService: ReturnType<typeof getMockedServices>;
   beforeEach(() => {
     currentService = getMockedServices();

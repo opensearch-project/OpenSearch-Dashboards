@@ -61,7 +61,7 @@ describe('HomePublicPlugin', () => {
           category: 'data',
           icon: 'indexOpen',
           id: 'home_tutorial_directory',
-          showOnHomePage: true,
+          showOnHomePage: false,
         })
       );
     });

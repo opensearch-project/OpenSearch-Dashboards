@@ -69,7 +69,8 @@
     "visTypeXy": "plugins/vis_type_xy",
     "visualizations": "plugins/visualizations",
     "visualize": "plugins/visualize",
-    "workspace": "plugins/workspace"
+    "workspace": "plugins/workspace",
+    "healthcheck": "plugins/healthcheck"
   },
   "exclude": [
     "legacy/ui/ui_render/ui_render_mixin.js",

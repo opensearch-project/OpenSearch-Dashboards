@@ -55,6 +55,8 @@ import { CoreUsageDataStart } from './core_usage_data';
 import { InternalSecurityServiceSetup } from './security/types';
 import { CrossCompatibilityServiceStart } from './cross_compatibility';
 import { InternalWorkspaceServiceSetup, InternalWorkspaceServiceStart } from './workspace';
+// Wazuh
+import { HealthCheckServiceSetup, HealthCheckServiceStart } from './healthcheck';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -74,6 +76,8 @@ export interface InternalCoreSetup {
   security: InternalSecurityServiceSetup;
   dynamicConfig: InternalDynamicConfigServiceSetup;
   workspace: InternalWorkspaceServiceSetup;
+  // Wazuh
+  healthCheck: HealthCheckServiceSetup;
 }
 
 /**
@@ -91,6 +95,8 @@ export interface InternalCoreStart {
   crossCompatibility: CrossCompatibilityServiceStart;
   dynamicConfig: InternalDynamicConfigServiceStart;
   workspace: InternalWorkspaceServiceStart;
+  // Wazuh
+  healthCheck: HealthCheckServiceStart;
 }
 
 /**

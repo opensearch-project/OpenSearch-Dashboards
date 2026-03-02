@@ -69,8 +69,10 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
         defaultMessage: 'Theme version',
       }),
       value:
-        DEFAULT_THEME_VERSION === 'v8'
-          ? themeVersionLabelMap[DEFAULT_THEME_VERSION]
+        /* Wazuh BEGIN */
+        DEFAULT_THEME_VERSION === 'v9'
+          ? /* Wazuh END */
+            themeVersionLabelMap[DEFAULT_THEME_VERSION]
           : DEFAULT_THEME_VERSION,
       type: 'select',
       options: themeOptions,

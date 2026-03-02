@@ -64,7 +64,7 @@ describe('SolutionTitle ', () => {
     expect(elements.length).toEqual(1);
 
     const img = elements.first();
-    expect(img.prop('iconType')).toEqual(props.logos.Mark.url);
+    expect(img.prop('iconType')).toEqual('/ui/favicons/safari-pinned-tab.svg');
 
     const titles = component.find('EuiTitle > h3');
     expect(titles.length).toEqual(1);

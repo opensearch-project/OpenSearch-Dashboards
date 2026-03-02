@@ -153,62 +153,62 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "AnimatedMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                    "url": "/ui/logos/spinner_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                    "url": "/ui/logos/spinner_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  "url": "/ui/logos/spinner_on_light.svg",
                 },
                 "Application": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                 },
                 "CenterMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                 },
                 "Mark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_mark_on_light.svg",
                 },
                 "OpenSearch": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_dark.svg",
+                    "url": "/ui/logos/wazuh_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_light.svg",
+                    "url": "/ui/logos/wazuh_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_on_light.svg",
+                  "url": "/ui/logos/wazuh_on_light.svg",
                 },
                 "colorScheme": "light",
               },
@@ -519,6 +519,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
             "docLinks": Object {
               "DOC_LINK_VERSION": "mocked-test-branch",
               "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
+              "WAZUH_DOC_VERSION": "4.x",
               "links": Object {
                 "noDocumentation": Object {
                   "addData": "https://opensearch.org/docs/mocked-test-branch",
@@ -868,6 +869,9 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
                   },
+                },
+                "wazuh": Object {
+                  "index": "https://documentation.wazuh.com/4.x/index.html",
                 },
               },
             },
@@ -1352,62 +1356,62 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "AnimatedMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                    "url": "/ui/logos/spinner_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                    "url": "/ui/logos/spinner_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  "url": "/ui/logos/spinner_on_light.svg",
                 },
                 "Application": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                 },
                 "CenterMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                 },
                 "Mark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_mark_on_light.svg",
                 },
                 "OpenSearch": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_dark.svg",
+                    "url": "/ui/logos/wazuh_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_light.svg",
+                    "url": "/ui/logos/wazuh_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_on_light.svg",
+                  "url": "/ui/logos/wazuh_on_light.svg",
                 },
                 "colorScheme": "light",
               },
@@ -1718,6 +1722,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
             "docLinks": Object {
               "DOC_LINK_VERSION": "mocked-test-branch",
               "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
+              "WAZUH_DOC_VERSION": "4.x",
               "links": Object {
                 "noDocumentation": Object {
                   "addData": "https://opensearch.org/docs/mocked-test-branch",
@@ -2067,6 +2072,9 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
                   },
+                },
+                "wazuh": Object {
+                  "index": "https://documentation.wazuh.com/4.x/index.html",
                 },
               },
             },
@@ -2344,17 +2352,22 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   <React.Fragment>
                     <p>
                       <FormattedMessage
-                        defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                        defaultMessage="You can combine data views from any {appName} app into one dashboard and see everything in one place."
                         id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-                        values={Object {}}
+                        values={
+                          Object {
+                            "appName": "Wazuh dashboard",
+                          }
+                        }
                       />
                     </p>
                     <p>
                       <FormattedMessage
-                        defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                        defaultMessage="New to {appName}? {sampleDataInstallLink} to take a test drive."
                         id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                         values={
                           Object {
+                            "appName": "Wazuh dashboard",
                             "sampleDataInstallLink": <EuiLink
                               onClick={[Function]}
                             >
@@ -2612,62 +2625,62 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "AnimatedMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                    "url": "/ui/logos/spinner_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                    "url": "/ui/logos/spinner_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  "url": "/ui/logos/spinner_on_light.svg",
                 },
                 "Application": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                 },
                 "CenterMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                 },
                 "Mark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_mark_on_light.svg",
                 },
                 "OpenSearch": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_dark.svg",
+                    "url": "/ui/logos/wazuh_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_light.svg",
+                    "url": "/ui/logos/wazuh_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_on_light.svg",
+                  "url": "/ui/logos/wazuh_on_light.svg",
                 },
                 "colorScheme": "light",
               },
@@ -2978,6 +2991,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
             "docLinks": Object {
               "DOC_LINK_VERSION": "mocked-test-branch",
               "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
+              "WAZUH_DOC_VERSION": "4.x",
               "links": Object {
                 "noDocumentation": Object {
                   "addData": "https://opensearch.org/docs/mocked-test-branch",
@@ -3328,6 +3342,9 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                     "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
                   },
                 },
+                "wazuh": Object {
+                  "index": "https://documentation.wazuh.com/4.x/index.html",
+                },
               },
             },
             "embeddable": Object {
@@ -3604,17 +3621,22 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   <React.Fragment>
                     <p>
                       <FormattedMessage
-                        defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                        defaultMessage="You can combine data views from any {appName} app into one dashboard and see everything in one place."
                         id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-                        values={Object {}}
+                        values={
+                          Object {
+                            "appName": "Wazuh dashboard",
+                          }
+                        }
                       />
                     </p>
                     <p>
                       <FormattedMessage
-                        defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                        defaultMessage="New to {appName}? {sampleDataInstallLink} to take a test drive."
                         id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                         values={
                           Object {
+                            "appName": "Wazuh dashboard",
                             "sampleDataInstallLink": <EuiLink
                               onClick={[Function]}
                             >
@@ -3872,62 +3894,62 @@ exports[`dashboard listing renders table rows 1`] = `
                 "AnimatedMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                    "url": "/ui/logos/spinner_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                    "url": "/ui/logos/spinner_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  "url": "/ui/logos/spinner_on_light.svg",
                 },
                 "Application": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                 },
                 "CenterMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                 },
                 "Mark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_mark_on_light.svg",
                 },
                 "OpenSearch": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_dark.svg",
+                    "url": "/ui/logos/wazuh_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_light.svg",
+                    "url": "/ui/logos/wazuh_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_on_light.svg",
+                  "url": "/ui/logos/wazuh_on_light.svg",
                 },
                 "colorScheme": "light",
               },
@@ -4238,6 +4260,7 @@ exports[`dashboard listing renders table rows 1`] = `
             "docLinks": Object {
               "DOC_LINK_VERSION": "mocked-test-branch",
               "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
+              "WAZUH_DOC_VERSION": "4.x",
               "links": Object {
                 "noDocumentation": Object {
                   "addData": "https://opensearch.org/docs/mocked-test-branch",
@@ -4587,6 +4610,9 @@ exports[`dashboard listing renders table rows 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
                   },
+                },
+                "wazuh": Object {
+                  "index": "https://documentation.wazuh.com/4.x/index.html",
                 },
               },
             },
@@ -4864,17 +4890,22 @@ exports[`dashboard listing renders table rows 1`] = `
                   <React.Fragment>
                     <p>
                       <FormattedMessage
-                        defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                        defaultMessage="You can combine data views from any {appName} app into one dashboard and see everything in one place."
                         id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-                        values={Object {}}
+                        values={
+                          Object {
+                            "appName": "Wazuh dashboard",
+                          }
+                        }
                       />
                     </p>
                     <p>
                       <FormattedMessage
-                        defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                        defaultMessage="New to {appName}? {sampleDataInstallLink} to take a test drive."
                         id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                         values={
                           Object {
+                            "appName": "Wazuh dashboard",
                             "sampleDataInstallLink": <EuiLink
                               onClick={[Function]}
                             >
@@ -5132,62 +5163,62 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "AnimatedMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                    "url": "/ui/logos/spinner_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                    "url": "/ui/logos/spinner_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                  "url": "/ui/logos/spinner_on_light.svg",
                 },
                 "Application": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                    "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                  "url": "/ui/logos/wazuh_dashboards_on_light.svg",
                 },
                 "CenterMark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_center_mark_on_light.svg",
                 },
                 "Mark": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                    "url": "/ui/logos/wazuh_mark_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_mark_on_light.svg",
+                    "url": "/ui/logos/wazuh_mark_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                  "url": "/ui/logos/wazuh_mark_on_light.svg",
                 },
                 "OpenSearch": Object {
                   "dark": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_dark.svg",
+                    "url": "/ui/logos/wazuh_on_dark.svg",
                   },
                   "light": Object {
                     "type": "default",
-                    "url": "/ui/logos/opensearch_on_light.svg",
+                    "url": "/ui/logos/wazuh_on_light.svg",
                   },
                   "type": "default",
-                  "url": "/ui/logos/opensearch_on_light.svg",
+                  "url": "/ui/logos/wazuh_on_light.svg",
                 },
                 "colorScheme": "light",
               },
@@ -5498,6 +5529,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
             "docLinks": Object {
               "DOC_LINK_VERSION": "mocked-test-branch",
               "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
+              "WAZUH_DOC_VERSION": "4.x",
               "links": Object {
                 "noDocumentation": Object {
                   "addData": "https://opensearch.org/docs/mocked-test-branch",
@@ -5847,6 +5879,9 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   "visualize": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
                   },
+                },
+                "wazuh": Object {
+                  "index": "https://documentation.wazuh.com/4.x/index.html",
                 },
               },
             },
@@ -6124,17 +6159,22 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   <React.Fragment>
                     <p>
                       <FormattedMessage
-                        defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                        defaultMessage="You can combine data views from any {appName} app into one dashboard and see everything in one place."
                         id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-                        values={Object {}}
+                        values={
+                          Object {
+                            "appName": "Wazuh dashboard",
+                          }
+                        }
                       />
                     </p>
                     <p>
                       <FormattedMessage
-                        defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                        defaultMessage="New to {appName}? {sampleDataInstallLink} to take a test drive."
                         id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
                         values={
                           Object {
+                            "appName": "Wazuh dashboard",
                             "sampleDataInstallLink": <EuiLink
                               onClick={[Function]}
                             >

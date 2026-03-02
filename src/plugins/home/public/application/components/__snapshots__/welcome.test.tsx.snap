@@ -19,7 +19,7 @@ exports[`Welcome page renders the Welcome screen with no telemetry disclaimer 1`
         >
           <EuiIcon
             size="original"
-            type="/ui/logos/opensearch_center_mark_on_light.svg"
+            type="/ui/logos/wazuh_center_mark_on_light.svg"
           />
         </span>
         <EuiTitle
@@ -82,7 +82,7 @@ exports[`Welcome page renders the Welcome screen with the telemetry disclaimer w
         >
           <EuiIcon
             size="original"
-            type="/ui/logos/opensearch_center_mark_on_light.svg"
+            type="/ui/logos/wazuh_center_mark_on_light.svg"
           />
         </span>
         <EuiTitle
@@ -181,7 +181,7 @@ exports[`Welcome page renders the Welcome screen with the telemetry disclaimer w
         >
           <EuiIcon
             size="original"
-            type="/ui/logos/opensearch_center_mark_on_light.svg"
+            type="/ui/logos/wazuh_center_mark_on_light.svg"
           />
         </span>
         <EuiTitle
@@ -280,7 +280,7 @@ exports[`Welcome page renders the welcome logo with OpenSearch center mark when 
         >
           <EuiIcon
             size="original"
-            type="/ui/logos/opensearch_center_mark_on_light.svg"
+            type="/ui/logos/wazuh_center_mark_on_light.svg"
           />
         </span>
         <EuiTitle

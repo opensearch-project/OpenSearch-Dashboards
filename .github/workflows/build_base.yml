@@ -1,0 +1,98 @@
+# This is a basic workflow that is manually triggered
+
+name: Build base
+
+on:
+  workflow_call:
+    inputs:
+      CHECKOUT_TO: # This is the branch to checkout to. Defaults to 'main'
+        description: 'The branch/tag/commit to checkout to'
+        required: true
+        default: 'main'
+        type: string
+      ARCHITECTURE:
+        description: 'The architecture to build the package for'
+        required: true
+        default: 'amd64'
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      CHECKOUT_TO: # This is the branch to checkout to. Defaults to 'main'
+        description: 'The branch/tag/commit to checkout to'
+        required: true
+        default: 'main'
+      ARCHITECTURE:
+        description: 'The architecture to build the package for'
+        required: true
+        default: 'amd64'
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ (inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'ubuntu-latest' || 'wz-linux-arm64' }}
+    name: Build
+    defaults:
+      run:
+        working-directory: ./artifacts
+    strategy:
+      matrix:
+        DISTRIBUTION: [tar.gz]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: wazuh/wazuh-dashboard
+          path: ./artifacts
+          ref: ${{ inputs.CHECKOUT_TO }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: './artifacts/.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Get package version
+        run: |
+          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
+          echo "WZD_VERSION=$(yarn --silent wzd-version)" >> $GITHUB_ENV
+          echo "WZD_REVISION=$(yarn --silent wzd-revision)" >> $GITHUB_ENV
+
+      - name: Get artifact build name
+        run: |
+          echo "ARTIFACT_BUILD_NAME=wazuh-dashboard_${{ env.WZD_VERSION }}-${{ env.WZD_REVISION }}_${{ (inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'x64' || 'arm64' }}.${{ matrix.DISTRIBUTION }}" >> $GITHUB_ENV
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build
+        run: yarn build-platform --${{(inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'linux' || 'linux-arm'}} --skip-os-packages --release
+
+      - name: Rename artifact
+        run: mv /home/runner/work/wazuh-dashboard/wazuh-dashboard/artifacts/target/opensearch-dashboards-${{ env.VERSION }}-linux-${{ (inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'x64' || 'arm64' }}.${{ matrix.DISTRIBUTION }} /home/runner/work/wazuh-dashboard/wazuh-dashboard/artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ${{ env.ARTIFACT_BUILD_NAME }}
+          path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
+          retention-days: 30
+          overwrite: true

@@ -74,6 +74,8 @@ import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { DynamicConfigService } from './config/dynamic_config_service';
 import { WorkspaceService } from './workspace/workspace_service';
+// Wazuh
+import { config as healthCheckConfig, HealthCheckService } from './healthcheck';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -102,6 +104,8 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly security: SecurityService;
   private readonly crossCompatibility: CrossCompatibilityService;
+  // Wazuh
+  private readonly healthCheck: HealthCheckService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -146,6 +150,8 @@ export class Server {
     this.coreUsageData = new CoreUsageDataService(core);
     this.security = new SecurityService(core);
     this.crossCompatibility = new CrossCompatibilityService(core);
+    // Wazuh
+    this.healthCheck = new HealthCheckService(core);
   }
 
   public async setup() {
@@ -184,6 +190,9 @@ export class Server {
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
+      // Wazuh
+      enhanceNotReadyServer: (server, basePath) =>
+        this.healthCheck.enhanceNotReadyServer(server, basePath),
     });
 
     // Once http is setup, register routes and async local storage
@@ -217,11 +226,21 @@ export class Server {
       metrics: metricsSetup,
     });
 
+    // Wazuh
+    const healthCheckSetup = await this.healthCheck.setup({
+      http: httpSetup,
+      httpService: this.http,
+    });
+
     const renderingSetup = await this.rendering.setup({
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
       dynamicConfig: dynamicConfigServiceSetup,
+      // Wazuh
+      healthCheck: {
+        getConfig: () => this.healthCheck.healthCheck.getConfig(),
+      },
     });
 
     const httpResourcesSetup = this.httpResources.setup({
@@ -254,6 +273,8 @@ export class Server {
       security: securitySetup,
       dynamicConfig: dynamicConfigServiceSetup,
       workspace: workspaceSetup,
+      // Wazuh
+      healthCheck: healthCheckSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -305,6 +326,20 @@ export class Server {
       plugins: this.openSearchPluginDeps,
     });
 
+    // Wazuh
+    const healthCheckStart = await this.healthCheck.start({
+      capabilities: capabilitiesStart,
+      opensearch: opensearchStart,
+      http: httpStart,
+      metrics: metricsStart,
+      savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
+      coreUsageData: coreUsageDataStart,
+      crossCompatibility: crossCompatibilityServiceStart,
+      dynamicConfig: dynamicConfigServiceStart,
+      workspace: workspaceStart,
+    });
+
     this.coreStart = {
       capabilities: capabilitiesStart,
       opensearch: opensearchStart,
@@ -317,6 +352,8 @@ export class Server {
       crossCompatibility: crossCompatibilityServiceStart,
       dynamicConfig: dynamicConfigServiceStart,
       workspace: workspaceStart,
+      // Wazuh
+      healthCheck: healthCheckStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -342,6 +379,8 @@ export class Server {
 
     await this.legacy.stop();
     await this.plugins.stop();
+    // Wazuh
+    await this.healthCheck.stop();
     await this.savedObjects.stop();
     await this.opensearch.stop();
     await this.http.stop();
@@ -383,6 +422,8 @@ export class Server {
       statusConfig,
       pidConfig,
       dynamicConfigServiceConfig,
+      // Wazuh
+      healthCheckConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

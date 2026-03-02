@@ -38,7 +38,7 @@ export type Theme = typeof LightTheme;
 // in the OpenSearch Dashboards app we can rely on this global being defined, but in
 // some cases (like jest) the global is undefined
 export const tag: string = globals.__osdThemeTag__;
-const themeVersion = tag?.replace(/(light|dark)$/, '') || 'v8';
+const themeVersion = tag?.replace(/(light|dark)$/, '') || 'v7';
 export const version = parseInt(themeVersion.replace(/[^\d]+/g, ''), 10) || 8;
 export const darkMode = tag?.endsWith?.('dark');
 

@@ -11,7 +11,7 @@ exports[`SolutionTitle  renders correctly by default 1`] = `
     <EuiToken
       className="homSolutionPanel__icon"
       fill="light"
-      iconType="/ui/logos/opensearch_mark_on_light.svg"
+      iconType="/ui/favicons/safari-pinned-tab.svg"
       shape="circle"
       size="l"
     />

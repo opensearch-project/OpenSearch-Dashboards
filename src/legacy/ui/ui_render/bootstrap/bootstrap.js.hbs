@@ -58,6 +58,10 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
     '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
     '{{basePath}}/ui/legacy_' + themeMode + '_theme.css',
+    // Wazuh: add a style files to overwrite some v7 theme styles
+    ...(['v7', 'v7'].includes(themeVersion)
+    ? ['{{basePath}}/ui/wz_v7_theme_overwrite.css']
+    : []),
   ];
 
   window.onload = function () {

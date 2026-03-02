@@ -77,7 +77,7 @@ export function CollapsibleNavGroupEnabled({
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
   const navLinks = allNavLinks.filter((link) => !link.hidden);
-  const homeLink = useMemo(() => allNavLinks.find((item) => item.id === 'home'), [allNavLinks]);
+  const homeLink = useMemo(() => allNavLinks.find((item) => item.id === 'wz-home'), [allNavLinks]);
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);

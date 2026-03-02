@@ -162,6 +162,11 @@ describe('searchNavigationLinks', () => {
     title: 'Child Link',
     baseUrl: '',
     href: '',
+    category: {
+      id: 'endpoint-security',
+      label: 'Endpoint security',
+      order: 1,
+    },
     order: 2,
   };
 
@@ -263,6 +268,21 @@ describe('searchNavigationLinks', () => {
       })
     );
   });
+
+  /* Wazuh BEGIN */
+  it('should return links when searching by category label', () => {
+    const query = 'endpoint';
+    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'child',
+        title: 'Child Link',
+      })
+    );
+  });
+  /* Wazuh END */
 
   it('should handle non-existent nav group', () => {
     const result = searchNavigationLinks(['non-existent'], navGroupMap, 'test');

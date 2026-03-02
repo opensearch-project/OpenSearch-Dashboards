@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  indexer:
+    # Specifying the latest available image - modify if you want a specific version
+    image: opensearchproject/opensearch:${OPENSEARCH_VERSION}
+    container_name: indexer-${OPENSEARCH_VERSION}
+    environment:
+      # Name the cluster
+      - cluster.name=opensearch-cluster
+      # Name the node that will run in this container
+      - node.name=indexer
+      # Nodes to look for when discovering the cluster
+      - discovery.seed_hosts=indexer
+      # Nodes eligible to serve as cluster manager
+      - cluster.initial_cluster_manager_nodes=indexer
+      #  Disable JVM heap memory swapping
+      - bootstrap.memory_lock=true
+      # Set min and max JVM heap sizes to at least 50% of system RAM
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=yourStrongPassword123!
+    ulimits:
+      # Set memlock to unlimited (no soft or hard limit)
+      memlock:
+        soft: -1
+        hard: -1
+      # Maximum number of open files for the opensearch user - set to at least 65536
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      # Creates volume called opensearch-data and mounts it to the container
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - 9200:9200 # REST API
+      - 9600:9600 # Performance Analyzer
+    networks:
+      # All of the containers will join the same Docker bridge network
+      - opensearch-net
+
+  # Runs the bootstrap and exits
+  installer:
+    image: node:${NODE_VERSION}
+    container_name: installer-security-${OPENSEARCH_VERSION}
+    volumes:
+      - ${REPO_PATH}:/home/node/app
+      - ${SECURITY_PLUGIN_REPO_PATH}:/home/node/app/plugins/security
+    user: "1000:1000"
+    working_dir: /home/node/app
+    command: >
+      /bin/bash -c "
+        yarn osd bootstrap
+        cd plugins/security
+        yarn
+      "
+
+  wazuh-dashboard:
+    image: node:${NODE_VERSION}
+    container_name: wazuh-dashboard-security-${OPENSEARCH_VERSION}
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+      # indexer:
+      #   condition: service_healthy
+    ports:
+      - 5601:5601 # Map host port 5601 to container port 5601
+    expose:
+      - "5601" # Expose port 5601 for web access to Wazuh Dashboard
+    volumes:
+      - ${REPO_PATH}:/home/node/app
+      - ${SECURITY_PLUGIN_REPO_PATH}:/home/node/app/plugins/security
+      - ${REPO_PATH}/docker/config/opensearch_dashboards.dev.security.yml:/home/node/app/config/opensearch_dashboards.dev.yml
+    user: "1000"
+    working_dir: /home/node/app
+    networks:
+      - opensearch-net
+    command: >
+      /bin/bash -c "
+        tail -f /dev/null
+      "
+
+volumes:
+  opensearch-data:
+
+networks:
+  opensearch-net:

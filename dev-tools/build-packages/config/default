@@ -1,0 +1,8 @@
+user="wazuh-dashboard"
+group="wazuh-dashboard"
+chroot="/"
+chdir="/"
+nice=""
+KILL_ON_STOP_TIMEOUT=0
+
+OSD_PATH_CONF="/etc/wazuh-dashboard"

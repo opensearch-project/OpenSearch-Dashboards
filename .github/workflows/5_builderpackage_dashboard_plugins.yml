@@ -1,0 +1,117 @@
+name: Build Wazuh Dashboard Plugins
+
+on:
+  workflow_call:
+    inputs:
+      reference_plugins:
+        type: string
+        description: 'Git ref (branch/tag) to use for all plugins'
+        required: false
+      version_opensearch:
+        type: string
+        description: 'OpenSearch version'
+        required: true
+      name:
+        description: 'Name of the plugin'
+        required: true
+        type: string
+      packageName:
+        description: 'Name of the package'
+        required: true
+        type: string
+      repo:
+        type: string
+        description: 'Repository of the plugin ( owner/repo )'
+        required: true
+      path:
+        description: 'Path to the plugin ( only for wazuh-dashboard-plugins repo )'
+        required: false
+        type: string
+      pathPlugin:
+        type: string
+        description: 'Path to the plugins folder ( only for wazuh-dashboard-plugins repo )'
+        required: false
+
+jobs:
+  build-plugins:
+    name: Build Plugin ${{ inputs.name }}
+    runs-on: wz-linux-amd64
+    env:
+      PLUGIN_REF: ${{ inputs.reference_plugins }}
+    steps:
+      - name: Checkout Wazuh Dashboards
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Yarn
+        run: npm install -g yarn@^1.22.10
+
+      - name: Check if plugin reference exists or use github.ref_name
+        run: |
+          if [ -z "${{ inputs.reference_plugins }}" ]; then
+            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
+            echo "PLUGIN_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            if [ "$(git ls-remote https://github.com/${{ inputs.repo }}.git ${{ inputs.reference_plugins }})" ]; then
+              echo "Plugin reference ${{ inputs.reference_plugins }} exists."
+              PLUGIN_REF=${{ inputs.reference_plugins }}
+            else
+              echo "Plugin reference ${{ inputs.reference_plugins }} does not exist, trying with github.ref_name: ${{ github.ref_name }}"
+              if [ "$(git ls-remote https://github.com/${{ inputs.repo }}.git ${{ github.ref_name }})" ]; then
+                echo "Plugin reference ${{ github.ref_name }} exists."
+                PLUGIN_REF=${{ github.ref_name }}
+              else
+                echo "Plugin reference ${{ github.ref_name }} does not exist. Please check if the reference is correct."
+                exit 1
+              fi
+            fi
+
+            echo "PLUGIN_REF=$PLUGIN_REF" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout Plugin
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+          ref: ${{ env.PLUGIN_REF }}
+          path: ${{ inputs.pathPlugin || format('plugins/{0}', inputs.name) }}
+
+      - name: Move plugin to correct path and remove wazuh-dashboard-plugins parent folder
+        if: ${{ inputs.repo == 'wazuh/wazuh-dashboard-plugins' }}
+        run: |
+          mv ${{inputs.pathPlugin}}/${{ inputs.path }} plugins/${{ inputs.name }}
+          rm -rf ${{inputs.pathPlugin}}
+
+      - name: Bootstrap with Plugins
+        env:
+          GIT_REF: ${{ env.PLUGIN_REF }}
+        run: yarn osd bootstrap --single-version=loose
+
+      - name: Build Plugin
+        working-directory: plugins/${{ inputs.name }}
+        run: |
+          set -o pipefail
+          OPENSEARCH_DASHBOARDS_VERSION=${{ inputs.version_opensearch }} yarn build 2>&1 | tee build.log
+
+      - name: Upload Plugin Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.packageName }}
+          path: plugins/${{ inputs.name }}/build/*.zip
+          retention-days: 1
+
+      - name: Upload Build Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.name }}-${{ inputs.version_opensearch }}-failed-log
+          path: plugins/${{ inputs.name }}/build.log
+          retention-days: 1

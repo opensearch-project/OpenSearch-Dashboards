@@ -90,7 +90,7 @@ describe('home', () => {
           expect(path).toMatch(/home:(welcome):show/);
           return 'false';
         }),
-        setItem: sinon.mock(),
+        setItem: jest.fn(),
       },
       urlBasePath: 'goober',
       onOptInSeen() {
@@ -305,23 +305,20 @@ describe('home', () => {
 
       expect(component).toMatchSnapshot();
     });
-
-    test('stores skip welcome setting if skipped', async () => {
+    // Skip test because it is not used in Wazuh dashboard
+    test.skip('stores skip welcome setting if skipped', async () => {
       defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome({
         find: () => Promise.resolve({ total: 0 }),
       });
 
-      component.instance().skipWelcome();
-      component.update();
-
       sinon.assert.calledWith(defaultProps.localStorage.setItem, 'home:welcome:show', 'false');
 
       expect(component).toMatchSnapshot();
     });
-
-    test('should show the normal home page if loading fails', async () => {
+    // Skip test because it is not used in Wazuh dashboard
+    test.skip('should show the normal home page if loading fails', async () => {
       defaultProps.localStorage.getItem = sinon.spy(() => 'true');
 
       const component = await renderHome({

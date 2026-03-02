@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  # Runs the bootstrap and exits
+  installer:
+    image: node:${NODE_VERSION}
+    container_name: installer-${OPENSEARCH_VERSION}
+    volumes:
+      - ${REPO_PATH}:/home/node/app
+    user: "1000:1000"
+    working_dir: /home/node/app
+    command: >
+      /bin/bash -c "
+        yarn osd bootstrap
+      "
+
+  wazuh-dashboard:
+    image: node:${NODE_VERSION}
+    container_name: wazuh-dashboard-${OPENSEARCH_VERSION}
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+    ports:
+      - 5601:5601 # Map host port 5601 to container port 5601
+    expose:
+      - "5601" # Expose port 5601 for web access to Wazuh Dashboard
+    volumes:
+      - ${REPO_PATH}:/home/node/app
+      - ${REPO_PATH}/docker/config/opensearch_dashboards.dev.yml:/home/node/app/config/opensearch_dashboards.dev.yml
+    user: "1000:1000"
+    working_dir: /home/node/app
+    command: >
+      /bin/bash -c "
+        yarn opensearch snapshot
+      "

@@ -1,0 +1,116 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+#
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets by Bill Allombert 2001
+#
+# Modified by Wazuh
+# Copyright (C) 2021, Wazuh Inc.
+#
+# This program is a free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public
+# License (version 2) as published by the FSF - Free Software
+# Foundation.
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+export TARGET_DIR=${CURDIR}/debian/wazuh-dashboard
+export NAME=wazuh-dashboard
+export CONFIG_DIR=/etc/$(NAME)
+export INSTALLATION_DIR=$(INSTALLATION_DIR)
+export USER=$(NAME)
+export GROUP=$(NAME)
+export DASHBOARD_FILE=wazuh-dashboard.tar.gz
+
+# -----------------------------------------------------------------------------
+
+%:
+	dh $@
+
+# -----------------------------------------------------------------------------
+
+override_dh_shlibdeps:
+
+# -----------------------------------------------------------------------------
+
+override_dh_auto_configure:
+
+# -----------------------------------------------------------------------------
+
+override_dh_auto_install:
+
+# -----------------------------------------------------------------------------
+
+override_dh_install:
+	cp /tmp/$(DASHBOARD_FILE) ./
+
+	groupadd $(GROUP)
+	useradd -g $(GROUP) $(USER)
+
+	tar -xf $(DASHBOARD_FILE)
+	sed -i 's/OSD_NODE_OPTS_PREFIX/OSD_PATH_CONF="\/etc\/wazuh-dashboard" OSD_NODE_OPTS_PREFIX/g' "wazuh-dashboard-base/bin/opensearch-dashboards"
+	sed -i 's/OSD_USE_NODE_JS_FILE_PATH/OSD_PATH_CONF="\/etc\/wazuh-dashboard" OSD_USE_NODE_JS_FILE_PATH/g' "wazuh-dashboard-base/bin/opensearch-dashboards-keystore"
+
+
+	mkdir -p $(TARGET_DIR)$(CONFIG_DIR)
+	mkdir -p $(TARGET_DIR)$(INSTALLATION_DIR)
+	mkdir -p $(TARGET_DIR)/usr/lib/systemd/system
+	mkdir -p $(TARGET_DIR)/etc/default
+
+	mv wazuh-dashboard-base/config/node.options $(TARGET_DIR)$(CONFIG_DIR)
+	mv wazuh-dashboard-base/config/opensearch_dashboards.yml $(TARGET_DIR)$(CONFIG_DIR)
+	mv wazuh-dashboard-base/* $(TARGET_DIR)$(INSTALLATION_DIR)
+
+	mkdir -p $(TARGET_DIR)$(INSTALLATION_DIR)/config
+
+	cp $(TARGET_DIR)$(INSTALLATION_DIR)/wazuh-dashboard.service $(TARGET_DIR)/usr/lib/systemd/system/wazuh-dashboard.service
+	cp $(TARGET_DIR)$(INSTALLATION_DIR)/wazuh-dashboard $(TARGET_DIR)/usr/lib/systemd/system/$(NAME)
+	cp $(TARGET_DIR)$(INSTALLATION_DIR)/default $(TARGET_DIR)/etc/default/$(NAME)
+
+	rm -rf $(TARGET_DIR)$(INSTALLATION_DIR)/etc
+
+	chown -R $(USER):$(GROUP) $(TARGET_DIR)$(INSTALLATION_DIR)
+	chown -R $(USER):$(GROUP) $(TARGET_DIR)$(CONFIG_DIR)
+
+	find $(TARGET_DIR)$(INSTALLATION_DIR)/plugins/wazuh/ -exec chown $(USER):$(GROUP) {} \;
+
+# -----------------------------------------------------------------------------
+
+override_dh_fixperms:
+	chmod 750 $(TARGET_DIR)$(CONFIG_DIR)
+	chown -R $(USER):$(GROUP) $(TARGET_DIR)$(CONFIG_DIR)
+	chmod 750 $(TARGET_DIR)$(INSTALLATION_DIR)
+	chown -R $(USER):$(GROUP) $(TARGET_DIR)$(INSTALLATION_DIR)
+	chown root:root $(TARGET_DIR)/usr/lib/systemd/system/wazuh-dashboard.service
+	chown root:root $(TARGET_DIR)/usr/lib/systemd/system/"$(NAME)"
+	chown $(USER):$(GROUP) $(TARGET_DIR)/etc/default/"$(NAME)"
+	chown $(USER):$(GROUP) $(TARGET_DIR)$(INSTALLATION_DIR)/VERSION.json
+	chmod 440 $(TARGET_DIR)$(INSTALLATION_DIR)/VERSION.json
+	chmod 750 $(TARGET_DIR)/usr/lib/systemd/system/wazuh-dashboard
+	chmod 750 $(TARGET_DIR)/etc/default/wazuh-dashboard
+	chmod 640 "$(TARGET_DIR)$(CONFIG_DIR)"/opensearch_dashboards.yml
+	chmod 640 "$(TARGET_DIR)$(CONFIG_DIR)"/node.options
+	chmod 644 $(TARGET_DIR)/usr/lib/systemd/system/wazuh-dashboard.service
+	find "$(TARGET_DIR)$(INSTALLATION_DIR)" -type d -exec chmod 750 {} \;
+	find "$(TARGET_DIR)$(INSTALLATION_DIR)" -type f -perm 644 -exec chmod 640 {} \;
+	find "$(TARGET_DIR)$(INSTALLATION_DIR)" -type f -perm 755 -exec chmod 750 {} \;
+	find "$(TARGET_DIR)$(INSTALLATION_DIR)" -type f -perm 744 -exec chmod 740 {} \;
+
+# -----------------------------------------------------------------------------
+
+override_dh_strip:
+	dh_strip --no-automatic-dbgsym -XlibGLESv2.so -XlibEGL.so
+
+# -----------------------------------------------------------------------------
+
+.PHONY: override_dh_strip override_dh_auto_clean override_dh_auto_build override_dh_auto_configure

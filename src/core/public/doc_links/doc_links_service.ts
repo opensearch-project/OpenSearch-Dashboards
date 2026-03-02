@@ -62,11 +62,17 @@ export class DocLinksService {
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
     const OPENSEARCH_DASHBOARDS_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/dashboards/`;
+    const WAZUH_DOC_VERSION = injectedMetadata.getWazuhDocVersion();
+    const WAZUH_WEBSITE_DOCS = `https://documentation.wazuh.com/${WAZUH_DOC_VERSION}`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       OPENSEARCH_WEBSITE_URL,
+      WAZUH_DOC_VERSION,
       links: {
+        wazuh: {
+          index: `${WAZUH_WEBSITE_DOCS}/index.html`,
+        },
         opensearch: {
           // https://opensearch.org/docs/latest/opensearch/index/
           introduction: `${OPENSEARCH_VERSIONED_DOCS}index/`,
@@ -652,7 +658,11 @@ export class DocLinksService {
 export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly OPENSEARCH_WEBSITE_URL: string;
+  readonly WAZUH_DOC_VERSION: string;
   readonly links: {
+    readonly wazuh: {
+      readonly index: string;
+    };
     readonly opensearch: {
       readonly introduction: string;
       readonly installation: {

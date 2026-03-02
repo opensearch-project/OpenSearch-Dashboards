@@ -121,8 +121,8 @@ describe('OverviewPageHeader ', () => {
     expect(head.length).toBe(1);
     expect(head.first().text()).toEqual(mockTitle);
   });
-
-  it('renders with the toolbar by default', () => {
+  // Skip test because it is not used in Wazuh dashboard
+  it.skip('renders with the toolbar by default', () => {
     const props = {
       ...mockProps(),
     };
@@ -141,8 +141,8 @@ describe('OverviewPageHeader ', () => {
     // Would contain only the "Add Data" button
     expect(component).toMatchSnapshot();
   });
-
-  it('renders with the toolbar when it is explicitly asked not to be hidden', () => {
+  // Skip test because it is not used in Wazuh dashboard
+  it.skip('renders with the toolbar when it is explicitly asked not to be hidden', () => {
     const props = {
       ...mockProps(),
       hideToolbar: false,

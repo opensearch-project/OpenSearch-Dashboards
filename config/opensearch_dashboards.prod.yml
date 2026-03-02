@@ -1,0 +1,27 @@
+server.host: 0.0.0.0
+server.port: 443
+opensearch.hosts: https://localhost:9200
+opensearch.ssl.verificationMode: certificate
+#opensearch.username:
+#opensearch.password:
+opensearch.requestHeadersAllowlist: ["securitytenant","Authorization"]
+opensearch_security.multitenancy.enabled: false
+opensearch_security.readonly_mode.roles: ["kibana_read_only"]
+server.ssl.enabled: true
+server.ssl.key: "/etc/wazuh-dashboard/certs/dashboard-key.pem"
+server.ssl.certificate: "/etc/wazuh-dashboard/certs/dashboard.pem"
+opensearch.ssl.certificateAuthorities: ["/etc/wazuh-dashboard/certs/root-ca.pem"]
+uiSettings.overrides.defaultRoute: /app/wz-home
+# Session expiration settings
+opensearch_security.cookie.ttl: 900000
+opensearch_security.session.ttl: 900000
+opensearch_security.session.keepalive: true
+
+# Define the Wazuh server hosts
+wazuh_core.hosts:
+  default:
+    url: https://localhost
+    port: 55000
+    username: wazuh-wui
+    password: wazuh-wui
+    run_as: false

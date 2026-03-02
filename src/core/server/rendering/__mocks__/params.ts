@@ -33,6 +33,8 @@ import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 import { statusServiceMock } from '../../status/status_service.mock';
 import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
+// Wazuh
+import { healthCheckConfig } from 'opensearch-dashboards/server/healthcheck/healthcheck/health_check.mock';
 
 const context = mockCoreContext.create();
 const http = httpServiceMock.createInternalSetupContract();
@@ -46,4 +48,6 @@ export const mockRenderingSetupDeps = {
   uiPlugins,
   status,
   dynamicConfig,
+  // Wazuh
+  healthCheck: { getConfig: () => healthCheckConfig },
 };

@@ -33,6 +33,6 @@ describe('dashboard listing table with no item', () => {
     expect(component).toMatchSnapshot();
     component.find(EuiLink).simulate('click');
 
-    expect(application.navigateToApp).toHaveBeenCalledWith('import_sample_data');
+    expect(application.navigateToApp).toHaveBeenCalledWith('sample-data');
   });
 });

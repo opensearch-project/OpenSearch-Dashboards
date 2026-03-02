@@ -178,8 +178,9 @@ export const Template: FunctionComponent<Props> = ({
               })}
             >
               {i18n('core.ui.welcomeMessage', {
-                defaultMessage: 'Loading {applicationTitle}',
-                values: { applicationTitle },
+                // Wazuh: change the default message to avoid
+                // showing the "Loading Wazuh" message twice.
+                defaultMessage: 'Loading ...',
               })}
             </div>
             {/* Show a progress bar if a static custom branded logo is used */}

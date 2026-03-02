@@ -130,62 +130,62 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "AnimatedMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+          "url": "/test/ui/logos/spinner_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+          "url": "/test/ui/logos/spinner_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+        "url": "/test/ui/logos/spinner_on_light.svg",
       },
       "Application": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+        "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
       },
       "CenterMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
       },
       "Mark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_mark_on_light.svg",
       },
       "OpenSearch": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_light.svg",
+          "url": "/test/ui/logos/wazuh_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_on_light.svg",
+        "url": "/test/ui/logos/wazuh_on_light.svg",
       },
       "colorScheme": "light",
     }
@@ -241,7 +241,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "managementApp",
             "id": "management",
-            "label": "Management",
+            "label": "Indexer management",
             "order": 5000,
           },
           "data-test-subj": "monitoring",
@@ -817,9 +817,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
-              data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_light.svg"
+              data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
-              iconType="/test/ui/logos/opensearch_mark_on_light.svg"
+              iconType="/test/ui/logos/wazuh_mark_on_light.svg"
               initialIsOpen={true}
               isCollapsible={true}
               key="opensearchDashboards"
@@ -840,7 +840,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     >
                       <EuiIcon
                         size="l"
-                        type="/test/ui/logos/opensearch_mark_on_light.svg"
+                        type="/test/ui/logos/wazuh_mark_on_light.svg"
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -858,7 +858,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   </EuiFlexGroup>
                 }
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_light.svg"
+                data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
                 initialIsOpen={true}
@@ -869,7 +869,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               >
                 <div
                   className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_light.svg"
+                  data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
                 >
@@ -918,10 +918,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               >
                                 <EuiIcon
                                   size="l"
-                                  type="/test/ui/logos/opensearch_mark_on_light.svg"
+                                  type="/test/ui/logos/wazuh_mark_on_light.svg"
                                 >
                                   <span
-                                    data-euiicon-type="/test/ui/logos/opensearch_mark_on_light.svg"
+                                    data-euiicon-type="/test/ui/logos/wazuh_mark_on_light.svg"
                                     size="l"
                                   />
                                 </EuiIcon>
@@ -1595,7 +1595,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               isCollapsible={true}
               key="management"
               onToggle={[Function]}
-              title="Management"
+              title="Indexer management"
             >
               <EuiAccordion
                 arrowDisplay="right"
@@ -1622,7 +1622,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           className="euiCollapsibleNavGroup__title"
                           id="mockId__title"
                         >
-                          Management
+                          Indexer management
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
@@ -1709,7 +1709,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                     id="mockId__title"
                                   >
-                                    Management
+                                    Indexer management
                                   </h3>
                                 </EuiTitle>
                               </div>
@@ -1737,7 +1737,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__children"
                           >
                             <EuiListGroup
-                              aria-label="Primary navigation links, Management"
+                              aria-label="Primary navigation links, Indexer management"
                               color="subdued"
                               gutterSize="none"
                               listItems={
@@ -1756,7 +1756,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               size="s"
                             >
                               <ul
-                                aria-label="Primary navigation links, Management"
+                                aria-label="Primary navigation links, Indexer management"
                                 className="euiListGroup"
                                 style={
                                   Object {
@@ -2078,62 +2078,62 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "AnimatedMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+          "url": "/test/ui/logos/spinner_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+          "url": "/test/ui/logos/spinner_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+        "url": "/test/ui/logos/spinner_on_light.svg",
       },
       "Application": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+        "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
       },
       "CenterMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
       },
       "Mark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_mark_on_light.svg",
       },
       "OpenSearch": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_light.svg",
+          "url": "/test/ui/logos/wazuh_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_on_light.svg",
+        "url": "/test/ui/logos/wazuh_on_light.svg",
       },
       "colorScheme": "light",
     }
@@ -2384,62 +2384,62 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "AnimatedMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+          "url": "/test/ui/logos/spinner_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+          "url": "/test/ui/logos/spinner_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+        "url": "/test/ui/logos/spinner_on_light.svg",
       },
       "Application": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+        "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
       },
       "CenterMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
       },
       "Mark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_mark_on_light.svg",
       },
       "OpenSearch": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_light.svg",
+          "url": "/test/ui/logos/wazuh_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_on_light.svg",
+        "url": "/test/ui/logos/wazuh_on_light.svg",
       },
       "colorScheme": "light",
     }
@@ -2690,62 +2690,62 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "AnimatedMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+          "url": "/test/ui/logos/spinner_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+          "url": "/test/ui/logos/spinner_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+        "url": "/test/ui/logos/spinner_on_light.svg",
       },
       "Application": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+        "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
       },
       "CenterMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
       },
       "Mark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_mark_on_light.svg",
       },
       "OpenSearch": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_light.svg",
+          "url": "/test/ui/logos/wazuh_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_on_light.svg",
+        "url": "/test/ui/logos/wazuh_on_light.svg",
       },
       "colorScheme": "light",
     }
@@ -5531,62 +5531,62 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
       "AnimatedMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+          "url": "/test/ui/logos/spinner_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+          "url": "/test/ui/logos/spinner_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+        "url": "/test/ui/logos/spinner_on_dark.svg",
       },
       "Application": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+        "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
       },
       "CenterMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+        "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
       },
       "Mark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+        "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
       },
       "OpenSearch": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_light.svg",
+          "url": "/test/ui/logos/wazuh_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_on_dark.svg",
+        "url": "/test/ui/logos/wazuh_on_dark.svg",
       },
       "colorScheme": "dark",
     }
@@ -5982,9 +5982,9 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
-              data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_dark.svg"
+              data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_dark.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
-              iconType="/test/ui/logos/opensearch_mark_on_dark.svg"
+              iconType="/test/ui/logos/wazuh_mark_on_dark.svg"
               initialIsOpen={true}
               isCollapsible={true}
               key="opensearchDashboards"
@@ -6005,7 +6005,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                     >
                       <EuiIcon
                         size="l"
-                        type="/test/ui/logos/opensearch_mark_on_dark.svg"
+                        type="/test/ui/logos/wazuh_mark_on_dark.svg"
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -6023,7 +6023,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                   </EuiFlexGroup>
                 }
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_dark.svg"
+                data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_dark.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
                 initialIsOpen={true}
@@ -6034,7 +6034,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
               >
                 <div
                   className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_dark.svg"
+                  data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_dark.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
                 >
@@ -6083,10 +6083,10 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                               >
                                 <EuiIcon
                                   size="l"
-                                  type="/test/ui/logos/opensearch_mark_on_dark.svg"
+                                  type="/test/ui/logos/wazuh_mark_on_dark.svg"
                                 >
                                   <span
-                                    data-euiicon-type="/test/ui/logos/opensearch_mark_on_dark.svg"
+                                    data-euiicon-type="/test/ui/logos/wazuh_mark_on_dark.svg"
                                     size="l"
                                   />
                                 </EuiIcon>
@@ -6639,62 +6639,62 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
       "AnimatedMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_dark.svg",
+          "url": "/test/ui/logos/spinner_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+          "url": "/test/ui/logos/spinner_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_spinner_on_light.svg",
+        "url": "/test/ui/logos/spinner_on_light.svg",
       },
       "Application": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+          "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_dashboards_on_light.svg",
+        "url": "/test/ui/logos/wazuh_dashboards_on_light.svg",
       },
       "CenterMark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_center_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_center_mark_on_light.svg",
       },
       "Mark": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+          "url": "/test/ui/logos/wazuh_mark_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_mark_on_light.svg",
+        "url": "/test/ui/logos/wazuh_mark_on_light.svg",
       },
       "OpenSearch": Object {
         "dark": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_dark.svg",
+          "url": "/test/ui/logos/wazuh_on_dark.svg",
         },
         "light": Object {
           "type": "default",
-          "url": "/test/ui/logos/opensearch_on_light.svg",
+          "url": "/test/ui/logos/wazuh_on_light.svg",
         },
         "type": "default",
-        "url": "/test/ui/logos/opensearch_on_light.svg",
+        "url": "/test/ui/logos/wazuh_on_light.svg",
       },
       "colorScheme": "light",
     }
@@ -7090,9 +7090,9 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
-              data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_light.svg"
+              data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
-              iconType="/test/ui/logos/opensearch_mark_on_light.svg"
+              iconType="/test/ui/logos/wazuh_mark_on_light.svg"
               initialIsOpen={true}
               isCollapsible={true}
               key="opensearchDashboards"
@@ -7113,7 +7113,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                     >
                       <EuiIcon
                         size="l"
-                        type="/test/ui/logos/opensearch_mark_on_light.svg"
+                        type="/test/ui/logos/wazuh_mark_on_light.svg"
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -7131,7 +7131,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                   </EuiFlexGroup>
                 }
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_light.svg"
+                data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
                 data-test-subj="collapsibleNavGroup-opensearchDashboards"
                 id="mockId"
                 initialIsOpen={true}
@@ -7142,7 +7142,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
               >
                 <div
                   className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
-                  data-test-opensearch-logo="/test/ui/logos/opensearch_mark_on_light.svg"
+                  data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
                 >
@@ -7191,10 +7191,10 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                               >
                                 <EuiIcon
                                   size="l"
-                                  type="/test/ui/logos/opensearch_mark_on_light.svg"
+                                  type="/test/ui/logos/wazuh_mark_on_light.svg"
                                 >
                                   <span
-                                    data-euiicon-type="/test/ui/logos/opensearch_mark_on_light.svg"
+                                    data-euiicon-type="/test/ui/logos/wazuh_mark_on_light.svg"
                                     size="l"
                                   />
                                 </EuiIcon>

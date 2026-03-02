@@ -42,7 +42,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
-  describe('sample data', function describeIndexTests() {
+  /**
+   * This test suite is skipped because the seccion of the sample data set is not available in the UI.
+   */
+  describe.skip('sample data', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'opensearch_dashboards_admin',

@@ -247,7 +247,7 @@ export default () =>
         }),
         faviconUrl: Joi.any().default('/'),
         applicationTitle: Joi.any().default(''),
-        useExpandedHeader: Joi.boolean().default(true),
+        useExpandedHeader: Joi.boolean().default(false),
       }),
       survey: Joi.object({
         url: Joi.any().default('/'),

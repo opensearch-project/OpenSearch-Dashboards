@@ -52,7 +52,7 @@ import { ExclusiveUnion } from '@elastic/eui';
 import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
-import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
+import { WAZUH_DOCUMENTATION_URL } from '../../constants';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -126,6 +126,7 @@ interface Props {
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
+  darkmode: boolean;
 }
 
 interface State {
@@ -201,15 +202,21 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       intl,
       opensearchDashboardsVersion,
       useDefaultContent,
-      opensearchDashboardsDocLink,
       surveyLink,
       useUpdatedAppearance,
+      darkmode,
     } = this.props;
-    const { helpExtension, helpSupportUrl } = this.state;
+    const { helpExtension } = this.state;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
-        <EuiButtonEmpty href={opensearchDashboardsDocLink} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty
+          href={WAZUH_DOCUMENTATION_URL}
+          target="_blank"
+          size="xs"
+          flush="left"
+          iconType={darkmode ? '/ui/logos/icon_dark.svg' : '/ui/logos/icon_light.svg'}
+        >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuOpenSearchDashboardsDocumentationTitle"
             defaultMessage="Documentation"
@@ -218,10 +225,16 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="xs" flush="left">
+        <EuiButtonEmpty
+          href="https://wazuh.com/community/join-us-on-slack/"
+          target="_blank"
+          size="xs"
+          flush="left"
+          iconType="logoSlack"
+        >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskOpenSearchTitle"
-            defaultMessage="Community"
+            defaultMessage="Slack Channel"
           />
         </EuiButtonEmpty>
 
@@ -229,10 +242,16 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         {surveyLink && (
           <div>
-            <EuiButtonEmpty href={surveyLink} target="_blank" size="xs" flush="left">
+            <EuiButtonEmpty
+              href="https://github.com/wazuh/"
+              target="_blank"
+              size="xs"
+              flush="left"
+              iconType="logoGithub"
+            >
               <FormattedMessage
                 id="core.ui.chrome.headerGlobalNav.helpMenuFeedbackSurveyTitle"
-                defaultMessage="Give feedback"
+                defaultMessage="Projects on Github"
               />
             </EuiButtonEmpty>
             <EuiSpacer size="xs" />
@@ -242,15 +261,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
-          href={GITHUB_CREATE_ISSUE_LINK}
+          href="https://groups.google.com/forum/#!forum/wazuh/"
           target="_blank"
           size="xs"
-          iconType="logoGithub"
+          iconType="/ui/logos/google_groups.svg"
           flush="left"
         >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
-            defaultMessage="Open an issue in GitHub"
+            defaultMessage="Google Group"
           />
         </EuiButtonEmpty>
       </Fragment>

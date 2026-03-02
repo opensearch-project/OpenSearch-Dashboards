@@ -1,0 +1,16 @@
+[Unit]
+Description=wazuh-dashboard
+
+[Service]
+Type=simple
+User=wazuh-dashboard
+Group=wazuh-dashboard
+EnvironmentFile=-/etc/default/wazuh-dashboard
+EnvironmentFile=-/etc/sysconfig/wazuh-dashboard
+ExecStart=/usr/share/wazuh-dashboard/bin/opensearch-dashboards
+WorkingDirectory=/usr/share/wazuh-dashboard
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

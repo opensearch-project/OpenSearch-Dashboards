@@ -161,33 +161,33 @@ export class HomePublicPlugin
       });
     };
 
-    core.application.register({
-      id: PLUGIN_ID,
-      title: 'Home',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, { navigation }] = await core.getStartServices();
-        if (!!coreStart.application.capabilities.workspaces?.enabled) {
-          coreStart.application.navigateToApp('workspace_initial');
-          return () => {};
-        }
-        setCommonService();
-        coreStart.chrome.docTitle.change(
-          i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
-        );
-        const { renderApp } = await import('./application');
-        return await renderApp(
-          params.element,
-          {
-            ...coreStart,
-            navigation,
-            setHeaderActionMenu: params.setHeaderActionMenu,
-          },
-          params.history
-        );
-      },
-      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
-    });
+    // core.application.register({
+    //   id: PLUGIN_ID,
+    //   title: 'Home',
+    //   navLinkStatus: AppNavLinkStatus.hidden,
+    //   mount: async (params: AppMountParameters) => {
+    //     const [coreStart, { navigation }] = await core.getStartServices();
+    //     if (!!coreStart.application.capabilities.workspaces?.enabled) {
+    //       coreStart.application.navigateToApp('workspace_initial');
+    //       return () => {};
+    //     }
+    //     setCommonService();
+    //     coreStart.chrome.docTitle.change(
+    //       i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
+    //     );
+    //     const { renderApp } = await import('./application');
+    //     return await renderApp(
+    //       params.element,
+    //       {
+    //         ...coreStart,
+    //         navigation,
+    //         setHeaderActionMenu: params.setHeaderActionMenu,
+    //       },
+    //       params.history
+    //     );
+    //   },
+    //   workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    // });
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       // register search use case overview page
@@ -241,9 +241,9 @@ export class HomePublicPlugin
       description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
         defaultMessage: 'Get started with sample data, visualizations, and dashboards.',
       }),
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppNavLinkStatus.default
-        : AppNavLinkStatus.hidden,
+      /* Wazuh BEGIN */
+      navLinkStatus: AppNavLinkStatus.hidden,
+      /* Wazuh END */
       mount: async (params: AppMountParameters) => {
         const [coreStart, { navigation }] = await core.getStartServices();
         setCommonService();
@@ -272,7 +272,8 @@ export class HomePublicPlugin
     urlForwarding.forwardApp('home', 'home');
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
-
+    // Disable sample data in home/view app directory
+    // To activate it again, remove visible() and change showOnHomePage to true.
     featureCatalogue.register({
       id: 'home_tutorial_directory',
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
@@ -282,9 +283,12 @@ export class HomePublicPlugin
         defaultMessage: 'Get started with sample data, visualizations, and dashboards.',
       }),
       icon: 'indexOpen',
-      showOnHomePage: true,
+      showOnHomePage: false,
       path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
       category: 'data' as FeatureCatalogueCategory.DATA,
+      visible() {
+        return false;
+      },
       order: 500,
     });
 
@@ -346,7 +350,7 @@ export class HomePublicPlugin
         mount: toMountPoint(
           React.createElement(HomeIcon, {
             core,
-            appId: PLUGIN_ID,
+            appId: 'wz-home',
           })
         ),
       });

@@ -47,6 +47,10 @@ const createSetupContractMock = () => {
     getBranding: jest.fn(),
     getSurvey: jest.fn(),
     getKeyboardShortcuts: jest.fn(),
+    getWazuhVersion: jest.fn(),
+    getWazuhDocVersion: jest.fn(),
+    // Wazuh
+    getHealthCheck: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getOpenSearchDashboardsVersion.mockReturnValue('opensearchDashboardsVersion');
@@ -64,6 +68,8 @@ const createSetupContractMock = () => {
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
   setupContract.getKeyboardShortcuts.mockReturnValue({ enabled: true });
+  setupContract.getWazuhVersion.mockReturnValue('4.x.x');
+  setupContract.getWazuhDocVersion.mockReturnValue('4.x');
   return setupContract;
 };
 

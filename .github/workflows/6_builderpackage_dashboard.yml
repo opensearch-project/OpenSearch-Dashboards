@@ -1,0 +1,402 @@
+# This workflow automates the build of the Wazuh Dashboard package along with
+# its plugins.
+#
+# This workflow:
+# - Download, build, package, test, and upload the Wazuh dashboard along
+#   with its plugins.
+# - Customizable through inputs to adapt to different environments
+#   (production, staging, various architectures).
+# - Ensure that each component is built with the exact reference provided and
+#   validated before the final packaging.
+#
+# - Allows customization of:
+#   - Operating system (`deb` or `rpm`)
+#   - Architecture (`amd64`, `x86_64`, `aarch64`, `arm64`)
+#   - Package revision
+#   - Plugin references (branches, tags, or commits)
+#   - Staging, upload, and checksum options.
+
+run-name: Build ${{ inputs.system }} wazuh-dashboard on ${{ inputs.architecture }} ${{ inputs.is_stage && '- is stage' || '' }} ${{ inputs.checksum && '- checksum' || '' }} ${{ inputs.id }}
+name: (6.x) Build Wazuh dashboard package with plugins (on demand)
+
+on:
+  workflow_dispatch:
+    inputs:
+      system:
+        type: choice
+        description: 'Distribution format of the package [deb, rpm].'
+        required: true
+        options:
+          - deb
+          - rpm
+        default: 'deb'
+      architecture:
+        type: choice
+        description: 'Architecture of the package [amd64, x86_64, aarch64, arm64].'
+        required: true
+        options:
+          - amd64
+          - x86_64
+          - aarch64
+          - arm64
+        default: amd64
+      revision:
+        type: string
+        description: 'Revision number of the package.'
+        required: true
+        default: '0'
+      reference_security_plugins:
+        type: string
+        description: 'Git reference (branch, tag, or commit SHA) from "wazuh-security-dashboards-plugin" repository.'
+        required: true
+        default: 'main'
+      reference_wazuh_plugins:
+        type: string
+        description: 'Git reference (branch, tag, or commit SHA) from "wazuh-dashboard-plugins" repository.'
+        required: true
+        default: 'main'
+      reference_report_plugins:
+        type: string
+        description: 'Git reference (branch, tag, or commit SHA) from "wazuh-dashboard-reporting" repository.'
+        required: true
+        default: 'main'
+      is_stage:
+        type: boolean
+        description: 'Enable to use the release naming nomenclature.'
+        required: true
+        default: false
+      upload:
+        description: 'Enable to upload the packages to the S3 bucket.'
+        type: boolean
+        default: true
+      checksum:
+        type: boolean
+        description: 'Enable to generate the checksums of the packages. If the upload to the S3 bucket is enabled, these will be uploaded too.'
+        required: true
+        default: false
+      id:
+        description: 'ID used to identify the workflow uniquely.'
+        type: string
+        required: false
+
+  workflow_call:
+    inputs:
+      system:
+        type: string
+        required: true
+        default: 'deb'
+      architecture:
+        type: string
+        required: true
+        default: amd64
+      revision:
+        type: string
+        required: true
+        default: '0'
+      reference_security_plugins:
+        type: string
+        required: true
+        default: 'main'
+      reference_wazuh_plugins:
+        type: string
+        required: true
+        default: 'main'
+      reference_report_plugins:
+        type: string
+        required: true
+        default: 'main'
+      is_stage:
+        type: boolean
+        required: true
+        default: false
+      upload:
+        type: boolean
+        default: true
+      checksum:
+        type: boolean
+        required: true
+        default: false
+      id:
+        type: string
+        required: false
+
+jobs:
+  setup-variables:
+    # 1. Clone plugin repositories and get SHA for each one.
+    # 2. Configure key variables such as:
+    #   - Final package name based on system, architecture and stage.
+    #   - Architecture flags.
+    #   - Version, revision and commit SHA information.
+    runs-on: wz-linux-amd64
+    name: Setup variables
+    outputs:
+      CURRENT_DIR: ${{ steps.setup-variables.outputs.CURRENT_DIR }}
+      VERSION: ${{ steps.setup-variables.outputs.VERSION }}
+      REVISION: ${{ steps.setup-variables.outputs.REVISION }}
+      COMMIT_SHA: ${{ steps.setup-variables.outputs.COMMIT_SHA }}
+      PLUGINS_SHA: ${{ steps.setup-variables.outputs.PLUGINS_SHA }}
+      SECURITY_SHA: ${{ steps.setup-variables.outputs.SECURITY_SHA }}
+      REPORTING_SHA: ${{ steps.setup-variables.outputs.REPORTING_SHA }}
+      PRODUCTION: ${{ steps.setup-variables.outputs.PRODUCTION }}
+      WAZUH_DASHBOARD_SLIM: ${{ steps.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+      WAZUH_SECURITY_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
+      WAZUH_REPORT_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+      WAZUH_PLUGINS_CORE: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+      WAZUH_PLUGINS_FLEET: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_FLEET }}
+      WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
+      PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
+      FINAL_NAME: ${{ steps.setup-variables.outputs.FINAL_NAME }}
+      ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get SHA of wazuh-dashboard-plugins
+        id: get-plugins-sha
+        run: |
+          git clone -b ${{ inputs.reference_wazuh_plugins }} --single-branch https://github.com/wazuh/wazuh-dashboard-plugins.git wzdp
+          cd wzdp
+          echo "WAZUH_PLUGINS_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get SHA of wazuh-security-dashboards-plugin
+        id: get-security-sha
+        run: |
+          git clone -b ${{ inputs.reference_security_plugins }} --single-branch https://github.com/wazuh/wazuh-security-dashboards-plugin.git wzsp
+          cd wzsp
+          echo "WAZUH_SECURITY_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get SHA of wazuh-dashboard-reporting
+        id: get-reporting-sha
+        run: |
+          git clone -b ${{ inputs.reference_report_plugins }} --single-branch https://github.com/wazuh/wazuh-dashboard-reporting.git wzrp
+          cd wzrp
+          echo "WAZUH_REPORTING_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup variables
+        id: setup-variables
+        run: |
+          CURRENT_DIR=$(pwd -P)
+          VERSION=$(jq -r '.version' VERSION.json)
+          REVISION=$(yarn --silent wzd-revision)
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          PLUGINS_SHA=${{steps.get-plugins-sha.outputs.WAZUH_PLUGINS_SHA}}
+          SECURITY_SHA=${{steps.get-security-sha.outputs.WAZUH_SECURITY_SHA}}
+          REPORTING_SHA=${{steps.get-reporting-sha.outputs.WAZUH_REPORTING_SHA}}
+          if [ "${{ inputs.is_stage }}" = "true" ]; then
+            PRODUCTION=--production
+          else
+            PRODUCTION=""
+          fi
+          WAZUH_DASHBOARD_SLIM=wazuh-dashboard_${VERSION}-${REVISION}_${{ (inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'x64' || 'arm64' }}.tar.gz
+          WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_security_plugins }} | sed 's/\//-/g').zip
+          WAZUH_REPORT_PLUGIN=reports-dashboards_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_report_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_CORE=wazuh-dashboard-plugins_wazuh-core_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_FLEET=wazuh-dashboard-plugins_wazuh-fleet_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          if [ "${{ inputs.is_stage }}" = "true" ]; then
+            if [ "${{ inputs.system }}" = "deb" ]; then
+              PACKAGE_NAME=wazuh-dashboard_${VERSION}-${{ inputs.revision }}_${{ inputs.architecture }}.deb
+            else
+              PACKAGE_NAME=wazuh-dashboard-${VERSION}-${{ inputs.revision }}.${{ inputs.architecture }}.rpm
+            fi
+            FINAL_NAME=${PACKAGE_NAME}
+          else
+            PACKAGE_BASE_NAME=wazuh-dashboard_${VERSION}-${{ inputs.revision }}_${{ inputs.architecture }}_${COMMIT_SHA}
+            PACKAGE_NAME=${PACKAGE_BASE_NAME}.${{ inputs.system }}
+            FINAL_NAME=${PACKAGE_BASE_NAME}-${PLUGINS_SHA}-${SECURITY_SHA}-${REPORTING_SHA}.${{ inputs.system }}
+          fi
+          if [[ "${{ inputs.architecture }}" == "x86_64" || "${{ inputs.architecture }}" == "amd64" ]]; then
+            ARCHITECTURE_FLAG=""
+          else
+            ARCHITECTURE_FLAG=--arm
+          fi
+          echo "CURRENT_DIR=$CURRENT_DIR" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "REVISION=$REVISION" >> $GITHUB_OUTPUT
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "PLUGINS_SHA=$PLUGINS_SHA" >> $GITHUB_OUTPUT
+          echo "SECURITY_SHA=$SECURITY_SHA" >> $GITHUB_OUTPUT
+          echo "REPORTING_SHA=$REPORTING_SHA" >> $GITHUB_OUTPUT
+          echo "PRODUCTION=$PRODUCTION" >> $GITHUB_OUTPUT
+          echo "WAZUH_DASHBOARD_SLIM=$WAZUH_DASHBOARD_SLIM" >> $GITHUB_OUTPUT
+          echo "WAZUH_SECURITY_PLUGIN=$WAZUH_SECURITY_PLUGIN" >> $GITHUB_OUTPUT
+          echo "WAZUH_REPORT_PLUGIN=$WAZUH_REPORT_PLUGIN" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CORE=$WAZUH_PLUGINS_CORE" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_FLEET=$WAZUH_PLUGINS_FLEET" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CHECK_UPDATES=$WAZUH_PLUGINS_CHECK_UPDATES" >> $GITHUB_OUTPUT
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "FINAL_NAME=$FINAL_NAME" >> $GITHUB_OUTPUT
+          echo "ARCHITECTURE_FLAG=$ARCHITECTURE_FLAG" >> $GITHUB_OUTPUT
+
+  validate-job:
+    # 1. Validates valid combinations of system and architecture.
+    # 2. Sets up AWS CLI for future uploads if needed.
+    runs-on: wz-linux-amd64
+    needs: setup-variables
+    name: Validate job
+    steps:
+      - name: Validate inputs
+        run: |
+          if [[ "${{ inputs.architecture }}" == "amd64" || "${{ inputs.architecture }}" == "arm64" ]] && [[ "${{ inputs.system }}" == "rpm" ]]; then
+            echo "Invalid combination of architecture and system"
+            exit 1
+          fi
+          if [[ "${{ inputs.architecture }}" == "x86_64" || "${{ inputs.architecture }}" == "aarch64" ]] && [[ "${{ inputs.system }}" == "deb" ]]; then
+            echo "Invalid combination of architecture and system"
+            exit 1
+          fi
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+          aws-region: ${{ secrets.CI_AWS_REGION }}
+
+  build-base:
+    needs: [validate-job]
+    name: Build dashboard
+    uses: wazuh/wazuh-dashboard/.github/workflows/6_builderpackage_dashboard_core.yml@6.0.0
+    with:
+      CHECKOUT_TO: ${{ github.head_ref || github.ref_name }}
+      ARCHITECTURE: ${{ inputs.architecture }}
+
+  build-main-plugins:
+    needs: [validate-job]
+    name: Build plugins
+    uses: wazuh/wazuh-dashboard-plugins/.github/workflows/6_builderpackage_plugins.yml@6.0.0
+    with:
+      reference: ${{ inputs.reference_wazuh_plugins }}
+
+  build-security-plugin:
+    needs: [validate-job]
+    name: Build security plugin
+    uses: wazuh/wazuh-security-dashboards-plugin/.github/workflows/6_builderpackage_security_plugin.yml@6.0.0
+    with:
+      reference: ${{ inputs.reference_security_plugins }}
+
+  build-report-plugin:
+    needs: [validate-job]
+    name: Build reporting plugin
+    uses: wazuh/wazuh-dashboard-reporting/.github/workflows/6_builderpackage_reporting_plugin.yml@6.0.0
+    with:
+      reference: ${{ inputs.reference_report_plugins }}
+
+  build-and-test-package:
+    # 1. Download previously built artifacts.
+    # 2. Package the plugins and dashboard into `.zip` files.
+    # 3. Execute the build script to generate the final package (`.deb` or `.rpm`).
+    # 4. Perform tests on the generated package.
+    # 5. Rename the package with the appropriate final name.
+    # 6. If requested, generate the `.sha512` checksum file.
+    # 7. Finally, upload the resulting package as an artifact.
+    needs:
+      [setup-variables, build-main-plugins, build-base, build-security-plugin, build-report-plugin]
+    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'wz-linux-arm64' || 'wz-linux-amd64' }}
+    name: Generate packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download dashboard artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/dashboard
+
+      - name: Download security plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-plugin
+
+      - name: Download plugins artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download plugins artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_FLEET }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download plugins artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download report plugin artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/report-plugin
+
+      - name: Zip plugins
+        run: |
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/wazuh-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-plugin
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/dashboard-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/dashboard/${{ needs.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+          zip -r -j ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/report-package.zip ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/report-plugin
+
+      - name: Build package
+        run: |
+          cd ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages
+          bash ./build-packages.sh \
+            -r ${{ inputs.revision }} ${{ needs.setup-variables.outputs.ARCHITECTURE_FLAG }}  \
+            -a file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/wazuh-package.zip \
+            -s file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/security-package.zip \
+            -b file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/dashboard-package.zip \
+            -rp file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/report-package.zip \
+            --commit-sha ${{needs.setup-variables.outputs.COMMIT_SHA}}-${{needs.setup-variables.outputs.PLUGINS_SHA}}-${{needs.setup-variables.outputs.SECURITY_SHA}}-${{needs.setup-variables.outputs.REPORTING_SHA}} \
+            ${{ needs.setup-variables.outputs.PRODUCTION }} --${{ inputs.system }} --debug
+
+      - name: Test package
+        run: |
+          cd ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages
+          ls -laR ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output
+          echo "PACKAGE NAME: ${{ needs.setup-variables.outputs.PACKAGE_NAME }}"
+          echo "FINAL NAME: ${{ needs.setup-variables.outputs.FINAL_NAME }}"
+          cp ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.FINAL_NAME}}  ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages/${{ inputs.system }}
+          bash ./test-packages.sh \
+            -p ${{needs.setup-variables.outputs.FINAL_NAME}}
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ${{ needs.setup-variables.outputs.FINAL_NAME }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.FINAL_NAME}}
+          retention-days: 30
+
+      - name: Set up AWS CLI
+        if: ${{ inputs.upload }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+          aws-region: ${{ secrets.CI_AWS_REGION }}
+
+      - name: Upload package
+        if: ${{ inputs.upload }}
+        run: |
+          echo "Uploading package"
+          aws s3 cp  ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.FINAL_NAME}} s3://xdrsiem-packages-dev-internal/development/wazuh/6.x/main/packages/
+          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/6.x/main/packages/${{needs.setup-variables.outputs.FINAL_NAME}}"
+          echo "S3 URI: ${s3uri}"
+
+      - name: Upload SHA512
+        if: ${{ inputs.checksum }}
+        run: |
+          echo "Uploading checksum"
+          aws s3 cp ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.FINAL_NAME}}.sha512 s3://xdrsiem-packages-dev-internal/development/wazuh/6.x/main/packages/
+          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/6.x/main/packages/${{needs.setup-variables.outputs.FINAL_NAME}}.sha512"
+          echo "S3 sha512 URI: ${s3uri}"

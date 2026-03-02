@@ -39,6 +39,8 @@ import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
+import { Server } from '@hapi/hapi';
+import { BasePath } from '../base_path_service';
 
 let server: HttpService;
 
@@ -48,6 +50,8 @@ const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  // Wazuh
+  enhanceNotReadyServer: (_server: Server, _basePath: BasePath) => {},
 };
 
 const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
@@ -78,15 +82,15 @@ describe('OnPreRouting', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((_req, _res, t) => {
       callingOrder.push('first');
       return t.next();
     });
 
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((_req, _res, t) => {
       callingOrder.push('second');
       return t.next();
     });
@@ -103,21 +107,21 @@ describe('OnPreRouting', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/initial', validate: false }, (context, req, res) =>
+    router.get({ path: '/initial', validate: false }, (_context, _req, res) =>
       res.ok({ body: 'initial' })
     );
-    router.get({ path: '/redirectUrl', validate: false }, (context, req, res) =>
+    router.get({ path: '/redirectUrl', validate: false }, (_context, _req, res) =>
       res.ok({ body: 'redirected' })
     );
 
     let urlBeforeForwarding;
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((req, _res, t) => {
       urlBeforeForwarding = ensureRawRequest(req).raw.req.url;
       return t.rewriteUrl('/redirectUrl');
     });
 
     let urlAfterForwarding;
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((req, _res, t) => {
       // used by legacy platform
       urlAfterForwarding = ensureRawRequest(req).raw.req.url;
       return t.next();
@@ -138,9 +142,9 @@ describe('OnPreRouting', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/initial', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) =>
+    registerOnPreRouting((_req, res, _t) =>
       res.redirected({
         headers: {
           location: redirectUrl,
@@ -160,9 +164,9 @@ describe('OnPreRouting', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) =>
+    registerOnPreRouting((_req, res, _t) =>
       res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
@@ -182,9 +186,9 @@ describe('OnPreRouting', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((_req, _res, _t) => {
       throw new Error('reason');
     });
     await server.start({ dynamicConfigService });
@@ -207,9 +211,9 @@ describe('OnPreRouting', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) => ({} as any));
+    registerOnPreRouting((_req, _res, _t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -230,19 +234,19 @@ describe('OnPreRouting', () => {
     );
     const router = createRouter('/');
 
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((req, _res, t) => {
       // don't complain customField is not defined on Request type
       (req as any).customField = { value: 42 };
       return t.next();
     });
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((req, _res, t) => {
       // don't complain customField is not defined on Request type
       if (typeof (req as any).customField !== 'undefined') {
         throw new Error('Request object was mutated');
       }
       return t.next();
     });
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, req, res) =>
       // don't complain customField is not defined on Request type
       res.ok({ body: { customField: String((req as any).customField) } })
     );
@@ -258,15 +262,15 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((_req, _res, t) => {
       callingOrder.push('first');
       return t.next();
     });
 
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((_req, _res, t) => {
       callingOrder.push('second');
       return t.next();
     });
@@ -282,9 +286,9 @@ describe('OnPreAuth', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/initial', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) =>
+    registerOnPreAuth((_req, res, _t) =>
       res.redirected({
         headers: {
           location: redirectUrl,
@@ -302,9 +306,9 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) =>
+    registerOnPreAuth((_req, res, _t) =>
       res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
@@ -322,9 +326,9 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((_req, _res, _t) => {
       throw new Error('reason');
     });
     await server.start({ dynamicConfigService });
@@ -345,9 +349,9 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => ({} as any));
+    registerOnPreAuth((_req, _res, _t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -366,19 +370,19 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((req, _res, t) => {
       // @ts-expect-error customField property is not defined on request object
       req.customField = { value: 42 };
       return t.next();
     });
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((req, _res, t) => {
       // @ts-expect-error customField property is not defined on request object
       if (typeof req.customField !== 'undefined') {
         throw new Error('Request object was mutated');
       }
       return t.next();
     });
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, req, res) =>
       // @ts-expect-error customField property is not defined on request object
       res.ok({ body: { customField: String(req.customField) } })
     );
@@ -392,7 +396,7 @@ describe('OnPreAuth', () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
     let requestBody = null;
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((req, _res, t) => {
       requestBody = req.body;
       return t.next();
     });
@@ -406,7 +410,7 @@ describe('OnPreAuth', () => {
           }),
         },
       },
-      (context, req, res) => res.ok({ body: req.body.term })
+      (_context, req, res) => res.ok({ body: req.body.term })
     );
 
     await server.start({ dynamicConfigService });
@@ -427,15 +431,15 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((_req, _res, t) => {
       callingOrder.push('first');
       return t.next();
     });
 
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((_req, _res, t) => {
       callingOrder.push('second');
       return t.next();
     });
@@ -451,9 +455,9 @@ describe('OnPostAuth', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/initial', validate: false }, (_context, _req, res) => res.ok());
 
-    registerOnPostAuth((req, res, t) =>
+    registerOnPostAuth((_req, res, _t) =>
       res.redirected({
         headers: {
           location: redirectUrl,
@@ -471,8 +475,8 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
-    registerOnPostAuth((req, res, t) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(undefined));
+    registerOnPostAuth((_req, res, _t) =>
       res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
@@ -490,8 +494,8 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
-    registerOnPostAuth((req, res, t) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(undefined));
+    registerOnPostAuth((_req, _res, _t) => {
       throw new Error('reason');
     });
     await server.start({ dynamicConfigService });
@@ -512,8 +516,8 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({} as any));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    registerOnPostAuth((_req, _res, _t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -532,12 +536,12 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((req, _res, t) => {
       // don't complain customField is not defined on Request type
       (req as any).customField = { value: 42 };
       return t.next();
     });
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((req, _res, t) => {
       // don't complain customField is not defined on Request type
       if (typeof (req as any).customField !== 'undefined') {
         throw new Error('Request object was mutated');
@@ -545,7 +549,7 @@ describe('OnPostAuth', () => {
       return t.next();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, req, res) =>
       // don't complain customField is not defined on Request type
       res.ok({ body: { customField: String((req as any).customField) } })
     );
@@ -559,7 +563,7 @@ describe('OnPostAuth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
     let requestBody = null;
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((req, _res, t) => {
       requestBody = req.body;
       return t.next();
     });
@@ -573,7 +577,7 @@ describe('OnPostAuth', () => {
           }),
         },
       },
-      (context, req, res) => res.ok({ body: req.body.term })
+      (_context, req, res) => res.ok({ body: req.body.term })
     );
 
     await server.start({ dynamicConfigService });
@@ -609,10 +613,10 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) =>
       res.ok({ body: { content: 'ok' } })
     );
-    registerAuth((req, res, t) => t.authenticated());
+    registerAuth((_req, _res, t) => t.authenticated());
     await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, { content: 'ok' });
@@ -622,10 +626,10 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) =>
       res.ok({ body: { content: 'ok' } })
     );
-    registerAuth((req, res, t) => t.notHandled());
+    registerAuth((_req, _res, t) => t.notHandled());
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
@@ -637,10 +641,10 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, req, res) =>
       res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
-    const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated());
+    const authenticate = jest.fn().mockImplementation((_req, _res, t) => t.authenticated());
     registerAuth(authenticate);
 
     await server.start({ dynamicConfigService });
@@ -655,7 +659,7 @@ describe('Auth', () => {
 
     router.get(
       { path: '/', validate: false, options: { authRequired: false } },
-      (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+      (_context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
 
     const authenticate = jest.fn();
@@ -673,10 +677,10 @@ describe('Auth', () => {
 
     router.get(
       { path: '/', validate: false, options: { authRequired: true } },
-      (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+      (_context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
 
-    const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated({}));
+    const authenticate = jest.fn().mockImplementation((_req, _res, t) => t.authenticated({}));
     await registerAuth(authenticate);
 
     await server.start({ dynamicConfigService });
@@ -689,8 +693,8 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerAuth((req, res) => res.unauthorized());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    registerAuth((_req, res) => res.unauthorized());
     await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(401);
@@ -700,9 +704,9 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
     const redirectTo = '/redirect-url';
-    registerAuth((req, res, t) =>
+    registerAuth((_req, _res, t) =>
       t.redirected({
         location: redirectTo,
       })
@@ -717,8 +721,8 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerAuth((req, res, t) => t.redirected({} as any));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    registerAuth((_req, _res, t) => t.redirected({} as any));
     await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(500);
@@ -728,8 +732,8 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerAuth((req, t) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    registerAuth((_req, _t) => {
       throw new Error('reason');
     });
     await server.start({ dynamicConfigService });
@@ -755,12 +759,12 @@ describe('Auth', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
 
     const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
       cookieOptions
     );
-    registerAuth((req, res, toolkit) => {
+    registerAuth((req, _res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
       sessionStorage.set({ value: user, expires: Date.now() + 1000 });
@@ -798,15 +802,15 @@ describe('Auth', () => {
     const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
       cookieOptions
     );
-    registerAuth((req, res, toolkit) => {
+    registerAuth((req, _res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
       sessionStorage.set({ value: user, expires: Date.now() + 1000 });
       return toolkit.authenticated();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    router.get({ path: '/with-cookie', validate: false }, (context, req, res) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    router.get({ path: '/with-cookie', validate: false }, (_context, req, res) => {
       const sessionStorage = sessionStorageFactory.asScoped(req);
       sessionStorage.clear();
       return res.ok();
@@ -837,26 +841,26 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     let fromregisterOnPreRouting;
-    await registerOnPreRouting((req, res, toolkit) => {
+    await registerOnPreRouting((req, _res, toolkit) => {
       fromregisterOnPreRouting = req.headers.authorization;
       return toolkit.next();
     });
 
     let fromRegisterAuth;
-    registerAuth((req, res, toolkit) => {
+    registerAuth((req, _res, toolkit) => {
       fromRegisterAuth = req.headers.authorization;
       return toolkit.authenticated();
     });
 
     let fromRegisterOnPostAuth;
-    await registerOnPostAuth((req, res, toolkit) => {
+    await registerOnPostAuth((req, _res, toolkit) => {
       fromRegisterOnPostAuth = req.headers.authorization;
       return toolkit.next();
     });
 
     let fromRouteHandler;
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
+    router.get({ path: '/', validate: false }, (_context, req, res) => {
       fromRouteHandler = req.headers.authorization;
       return res.ok();
     });
@@ -878,11 +882,11 @@ describe('Auth', () => {
     const authResponseHeader = {
       'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
     };
-    registerAuth((req, res, toolkit) => {
+    registerAuth((_req, _res, toolkit) => {
       return toolkit.authenticated({ responseHeaders: authResponseHeader });
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
     await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
@@ -897,11 +901,11 @@ describe('Auth', () => {
       'www-authenticate': 'Negotiate ade0234568a4209af8bc0280289eca',
     };
 
-    registerAuth((req, res, toolkit) => {
+    registerAuth((_req, _res, toolkit) => {
       return toolkit.authenticated({ responseHeaders: authResponseHeader });
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.badRequest());
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.badRequest());
     await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(400);
@@ -917,11 +921,11 @@ describe('Auth', () => {
       'www-authenticate': 'from auth interceptor',
     };
 
-    registerAuth((req, res, toolkit) => {
+    registerAuth((_req, _res, toolkit) => {
       return toolkit.authenticated({ responseHeaders: authResponseHeader });
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) =>
       res.ok({
         headers: {
           'www-authenticate': 'from handler',
@@ -951,11 +955,11 @@ describe('Auth', () => {
       'www-authenticate': 'from auth interceptor',
     };
 
-    registerAuth((req, res, toolkit) => {
+    registerAuth((_req, _res, toolkit) => {
       return toolkit.authenticated({ responseHeaders: authResponseHeader });
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) =>
       res.badRequest({
         headers: {
           'www-authenticate': 'from handler',
@@ -981,8 +985,8 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
-    router.get({ path: '/initial', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) =>
+    router.get({ path: '/initial', validate: false }, (_context, _req, res) => res.ok());
+    registerOnPostAuth((_req, res, _t) =>
       res.redirected({
         headers: {
           location: redirectUrl,
@@ -1000,9 +1004,9 @@ describe('Auth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(undefined));
 
-    registerOnPostAuth((req, res, t) =>
+    registerOnPostAuth((_req, res, _t) =>
       res.unauthorized({
         headers: {
           'www-authenticate': 'challenge',
@@ -1020,8 +1024,8 @@ describe('Auth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
-    registerOnPostAuth((req, res, t) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(undefined));
+    registerOnPostAuth((_req, _res, _t) => {
       throw new Error('reason');
     });
     await server.start({ dynamicConfigService });
@@ -1042,8 +1046,8 @@ describe('Auth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({} as any));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    registerOnPostAuth((_req, _res, _t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -1062,19 +1066,19 @@ describe('Auth', () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((req, _res, t) => {
       // don't complain customField is not defined on Request type
       (req as any).customField = { value: 42 };
       return t.next();
     });
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((req, _res, t) => {
       // don't complain customField is not defined on Request type
       if (typeof (req as any).customField !== 'undefined') {
         throw new Error('Request object was mutated');
       }
       return t.next();
     });
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, req, res) =>
       // don't complain customField is not defined on Request type
       res.ok({ body: { customField: String((req as any).customField) } })
     );
@@ -1088,7 +1092,7 @@ describe('Auth', () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
     let requestBody = null;
-    registerAuth((req, res, t) => {
+    registerAuth((req, _res, t) => {
       requestBody = req.body;
       return t.authenticated({});
     });
@@ -1102,7 +1106,7 @@ describe('Auth', () => {
           }),
         },
       },
-      (context, req, res) => res.ok({ body: req.body.term })
+      (_context, req, res) => res.ok({ body: req.body.term })
     );
 
     await server.start({ dynamicConfigService });
@@ -1125,15 +1129,15 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     const callingOrder: string[] = [];
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       callingOrder.push('first');
       return t.next();
     });
 
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       callingOrder.push('second');
       return t.next();
     });
@@ -1150,7 +1154,7 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) =>
       res.ok({
         headers: {
           'x-my-header': 'foo',
@@ -1158,7 +1162,7 @@ describe('OnPreResponse', () => {
       })
     );
 
-    registerOnPreResponse((req, res, t) =>
+    registerOnPreResponse((_req, _res, t) =>
       t.next({
         headers: {
           'x-opensearch-dashboards-header': 'value',
@@ -1179,12 +1183,12 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) =>
+    router.get({ path: '/', validate: false }, (_context, _req, res) =>
       res.ok({
         headers: { 'x-opensearch-dashboards-header': 'value' },
       })
     );
-    registerOnPreResponse((req, res, t) =>
+    registerOnPreResponse((_req, _res, t) =>
       t.next({
         headers: { 'x-opensearch-dashboards-header': 'value' },
       })
@@ -1208,8 +1212,8 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
-    registerOnPreResponse((req, res, t) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(undefined));
+    registerOnPreResponse((_req, _res, _t) => {
       throw new Error('reason');
     });
     await server.start({ dynamicConfigService });
@@ -1232,8 +1236,8 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPreResponse((req, res, t) => ({} as any));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok());
+    registerOnPreResponse((_req, _res, _t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -1254,12 +1258,12 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, res, t) => {
       res.statusCode = 500;
       return t.next();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     await server.start({ dynamicConfigService });
 
@@ -1272,7 +1276,7 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
     let requestBody = null;
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((req, _res, t) => {
       requestBody = req.body;
       return t.next();
     });
@@ -1286,7 +1290,7 @@ describe('OnPreResponse', () => {
           }),
         },
       },
-      (context, req, res) => res.ok({ body: req.body.term })
+      (_context, req, res) => res.ok({ body: req.body.term })
     );
 
     await server.start({ dynamicConfigService });
@@ -1307,7 +1311,7 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => {
       return res.ok({
         headers: {
           'Original-Header-A': 'A',
@@ -1316,7 +1320,7 @@ describe('OnPreResponse', () => {
       });
     });
 
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       return t.render({ body: 'overridden' });
     });
 
@@ -1333,7 +1337,7 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
+    router.get({ path: '/', validate: false }, (_context, _req, res) => {
       return res.ok({
         headers: {
           'Original-Header-A': 'A',
@@ -1343,7 +1347,7 @@ describe('OnPreResponse', () => {
       });
     });
 
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       return t.render({
         headers: {
           'Original-Header-A': 'AA',
@@ -1378,28 +1382,28 @@ describe('run interceptors in the right order', () => {
     const router = createRouter('/');
 
     const executionOrder: string[] = [];
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((_req, _res, t) => {
       executionOrder.push('onPreRouting');
       return t.next();
     });
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((_req, _res, t) => {
       executionOrder.push('onPreAuth');
       return t.next();
     });
-    registerAuth((req, res, t) => {
+    registerAuth((_req, _res, t) => {
       executionOrder.push('auth');
       return t.authenticated({});
     });
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((_req, _res, t) => {
       executionOrder.push('onPostAuth');
       return t.next();
     });
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       executionOrder.push('onPreResponse');
       return t.next();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     await server.start({ dynamicConfigService });
 
@@ -1426,24 +1430,24 @@ describe('run interceptors in the right order', () => {
     const router = createRouter('/');
 
     const executionOrder: string[] = [];
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((_req, _res, t) => {
       executionOrder.push('onPreRouting');
       return t.next();
     });
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((_req, _res, t) => {
       executionOrder.push('onPreAuth');
       return t.next();
     });
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((_req, _res, t) => {
       executionOrder.push('onPostAuth');
       return t.next();
     });
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       executionOrder.push('onPreResponse');
       return t.next();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     await server.start({ dynamicConfigService });
 
@@ -1465,28 +1469,28 @@ describe('run interceptors in the right order', () => {
     const router = createRouter('/');
 
     const executionOrder: string[] = [];
-    registerOnPreRouting((req, res, t) => {
+    registerOnPreRouting((_req, _res, t) => {
       executionOrder.push('onPreRouting');
       return t.next();
     });
-    registerOnPreAuth((req, res, t) => {
+    registerOnPreAuth((_req, _res, t) => {
       executionOrder.push('onPreAuth');
       return t.next();
     });
-    registerAuth((req, res, t) => {
+    registerAuth((_req, res, _t) => {
       executionOrder.push('auth');
       return res.forbidden();
     });
-    registerOnPostAuth((req, res, t) => {
+    registerOnPostAuth((_req, _res, t) => {
       executionOrder.push('onPostAuth');
       return t.next();
     });
-    registerOnPreResponse((req, res, t) => {
+    registerOnPreResponse((_req, _res, t) => {
       executionOrder.push('onPreResponse');
       return t.next();
     });
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+    router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok({ body: 'ok' }));
 
     await server.start({ dynamicConfigService });
 

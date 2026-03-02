@@ -42,6 +42,9 @@ const packageInfos: RawPackageInfo = {
     number: 42,
     sha: 'one',
   },
+  wazuh: {
+    version: '4.x.x',
+  },
 };
 
 beforeEach(() => {
@@ -52,6 +55,9 @@ test('correctly creates default environment in dev mode when isDevClusterMaster 
   mockPackage.raw = {
     branch: 'some-branch',
     version: 'some-version',
+    wazuh: {
+      version: '4.x.x',
+    },
   };
 
   const defaultEnv = Env.createDefault(
@@ -71,6 +77,9 @@ test('correctly creates default environment in dev mode when isDevClusterManager
   mockPackage.raw = {
     branch: 'some-branch',
     version: 'some-version',
+    wazuh: {
+      version: '4.x.x',
+    },
   };
 
   const defaultEnv = Env.createDefault(
@@ -90,6 +99,9 @@ test('correctly creates default environment in dev mode when isDevClusterManager
   mockPackage.raw = {
     branch: 'some-branch',
     version: 'some-version',
+    wazuh: {
+      version: '4.x.x',
+    },
   };
 
   const defaultEnv = Env.createDefault(
@@ -114,6 +126,9 @@ test('correctly creates default environment in prod distributable mode.', () => 
       number: 100,
       sha: 'feature-v1-build-sha',
     },
+    wazuh: {
+      version: '4.x.x',
+    },
   };
 
   const defaultEnv = Env.createDefault(
@@ -136,6 +151,9 @@ test('correctly creates default environment in prod non-distributable mode.', ()
       number: 100,
       sha: 'feature-v1-build-sha',
     },
+    wazuh: {
+      version: '4.x.x',
+    },
   };
 
   const defaultEnv = Env.createDefault(
@@ -157,6 +175,9 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
+    },
+    wazuh: {
+      version: '4.x.x',
     },
   };
 
@@ -190,6 +211,9 @@ test('correctly creates environment with constructor.', () => {
         distributable: true,
         number: 100,
         sha: 'feature-v1-build-sha',
+      },
+      wazuh: {
+        version: '4.x.x',
       },
     },
     getEnvOptions({

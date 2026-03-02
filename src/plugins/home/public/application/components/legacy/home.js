@@ -40,7 +40,6 @@ import {
 import { HOME_APP_BASE_PATH } from '../../../../common/constants';
 import { FeatureCatalogueCategory } from '../../../services';
 import { getServices } from '../../opensearch_dashboards_services';
-import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from '../welcome';
@@ -76,7 +75,11 @@ export class Home extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.fetchIsNewOpenSearchDashboardsInstance();
+    // is commented and the skipWelcome function is added to avoid loading
+    // the add sample data page the first time the application is accessed.
+    // this.fetchIsNewOpenSearchDashboardsInstance();
+    // Wazuh dashboard changes
+    this.skipWelcome();
 
     const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
     getServices().chrome.setBreadcrumbs([{ text: homeTitle }]);
@@ -174,10 +177,6 @@ export class Home extends Component {
                 : 'homData--expanded'
             }`}
           >
-            <EuiFlexItem>
-              <AddData addBasePath={addBasePath} features={addDataFeatures} />
-            </EuiFlexItem>
-
             <EuiFlexItem>
               <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
             </EuiFlexItem>

@@ -29,35 +29,7 @@ exports[`EmptyState should render normally 1`] = `
         className="inpEmptyState__cardGrid"
         columns={3}
         responsive={true}
-      >
-        <EuiFlexItem>
-          <EuiCard
-            className="inpEmptyState__card"
-            description={
-              <FormattedMessage
-                defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
-                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
-                values={Object {}}
-              />
-            }
-            icon={
-              <EuiIcon
-                color="subdued"
-                size="xl"
-                type="heatmap"
-              />
-            }
-            onClick={[Function]}
-            title={
-              <FormattedMessage
-                defaultMessage="Add sample data"
-                id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardTitle"
-                values={Object {}}
-              />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGrid>
+      />
       <EuiSpacer
         size="xxl"
       />

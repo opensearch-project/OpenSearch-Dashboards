@@ -5,7 +5,8 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "rootDir": "../../"
   },
   "include": [
     "public/**/*",
@@ -15,9 +16,8 @@
     "test_helpers/**/*",
     "utils/**/*",
     "index.ts",
-    "typings.ts"
+    "typings.ts",
+    "../../package.json"
   ],
-  "references": [
-    { "path": "../test_utils/" }
-  ]
+  "references": [{ "path": "../test_utils/" }]
 }

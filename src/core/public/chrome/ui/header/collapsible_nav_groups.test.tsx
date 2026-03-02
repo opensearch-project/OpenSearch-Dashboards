@@ -8,6 +8,23 @@ import { fireEvent, render } from '@testing-library/react';
 import { NavGroups } from './collapsible_nav_groups';
 import { ChromeRegistrationNavLink } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
+import * as navUtils from '../../utils';
+
+// Wazuh: Mock the getIsCategoryOpen function to return true by default.
+// This is because we change the default value of the getIsCategoryOpen function to false.
+// And all the tests fail because the getIsCategoryOpen function returns false on the first render.
+// That's why we mock it to return true by default.
+
+jest.spyOn(navUtils, 'getIsCategoryOpen').mockImplementation((category, storage) => {
+  // Try to get the value from the storage first
+  const storageKey = `core.navGroup.${category}`;
+  const storedValue = storage.getItem(storageKey);
+  // If the value is not stored, return the default value
+  if (storedValue !== null) {
+    return storedValue === 'true';
+  }
+  return true;
+});
 
 describe('<NavGroups />', () => {
   const getMockedNavLink = (

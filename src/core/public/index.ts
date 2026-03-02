@@ -105,6 +105,7 @@ import { WorkspacesStart, WorkspacesSetup } from './workspace';
 import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
 import { ChatServiceSetup, ChatServiceStart } from './chat';
 import type { TelemetryServiceSetup, TelemetryServiceStart } from './telemetry';
+import { HealthCheckServiceSetup, HealthCheckServiceStart } from './healthcheck';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -298,6 +299,9 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   chat: ChatServiceSetup;
   /** {@link TelemetryServiceSetup} */
   telemetry: TelemetryServiceSetup;
+  // Wazuh
+  /** {@link HealthCheckServiceSetup} */
+  healthCheck: HealthCheckServiceSetup;
 }
 
 /**
@@ -360,6 +364,9 @@ export interface CoreStart {
   chat: ChatServiceStart;
   /** {@link TelemetryServiceStart} */
   telemetry: TelemetryServiceStart;
+  // Wazuh
+  /** {@link HealthCheckServiceStart} */
+  healthCheck: HealthCheckServiceStart;
 }
 
 export {

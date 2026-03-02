@@ -64,6 +64,8 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { securityServiceMock } from '../security/security_service.mock';
 import { workspaceServiceMock } from '../workspace/mocks';
+// Wazuh
+import { healthCheckServiceMock } from '../healthcheck/healthcheck/service.mock';
 
 const MockOsdServer: jest.Mock<OsdServer> = OsdServer as any;
 
@@ -116,6 +118,8 @@ beforeEach(() => {
       security: securityServiceMock.createSetupContract(),
       dynamicConfig: dynamicConfigServiceMock.createInternalSetupContract(),
       workspace: workspaceServiceMock.createInternalSetupContract(),
+      // Wazuh
+      healthCheck: healthCheckServiceMock.createSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {

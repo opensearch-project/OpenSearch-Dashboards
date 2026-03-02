@@ -76,8 +76,9 @@ export const SolutionTitle: FC<Props> = ({ subtitle, branding, logos }) => (
           />
         </div>
       ) : (
+        // Wazuh logo in the overview card
         <EuiToken
-          iconType={logos.Mark.url}
+          iconType="/ui/favicons/safari-pinned-tab.svg"
           shape="circle"
           fill="light"
           size="l"

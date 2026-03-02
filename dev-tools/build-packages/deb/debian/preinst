@@ -1,0 +1,73 @@
+#!/bin/sh
+# postinst script for wazuh-dashboard
+# Copyright (C) 2021, Wazuh Inc.
+#
+# This program is a free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public
+# License (version 2) as published by the FSF - Free Software
+# Foundation.
+
+set -e
+
+#
+# This script is executed in the pre-installation phase
+#
+#   On Debian,
+#       $1=install : indicates an new install
+#       $1=upgrade : indicates an upgrade
+
+# configuration variables
+export NAME=wazuh-dashboard
+export CONFIG_DIR=/etc/"${NAME}"
+export INSTALLATION_DIR=/usr/share/"${NAME}"
+
+case "$1" in
+# Debian ####################################################
+install)
+    # environment configuration
+    mkdir -p "${CONFIG_DIR}"
+    mkdir -p "${INSTALLATION_DIR}"
+
+    # Create wazuh-dashboard group if not existing
+    if ! getent group "${NAME}" >/dev/null 2>&1; then
+        echo -n "Creating ${NAME} group..."
+        addgroup --quiet --system "${NAME}"
+        echo " OK"
+    fi
+    # Create wazuh-dashboard user if not existing
+    if ! id "${NAME}" >/dev/null 2>&1; then
+        echo -n "Creating ${NAME} user..."
+        adduser --quiet \
+            --system \
+            --no-create-home \
+            --home /nonexistent \
+            --ingroup "${NAME}" \
+            --disabled-password \
+            --shell /bin/false \
+            "${NAME}"
+        echo " OK"
+    fi
+
+    ;;
+upgrade)
+    # Stop the services to upgrade the package
+    if command -v systemctl >/dev/null 2>&1 && systemctl >/dev/null 2>&1 && systemctl is-active --quiet "${NAME}" >/dev/null 2>&1; then
+        systemctl stop "${NAME}".service >/dev/null 2>&1
+        touch "${INSTALLATION_DIR}"/"${NAME}".restart
+    # Check for SysV
+    elif command -v service >/dev/null 2>&1 && service "${NAME}" status 2>/dev/null | grep "running" >/dev/null 2>&1; then
+        service "${NAME}" stop >/dev/null 2>&1
+        touch "${INSTALLATION_DIR}"/"${NAME}".restart
+    fi
+    ;;
+abort-deconfigure | abort-upgrade | abort-remove) ;;
+
+*)
+    echo "preinst called with unknown argument \`$1'" >&2
+    exit 1
+
+    ;;
+
+esac
+
+exit 0

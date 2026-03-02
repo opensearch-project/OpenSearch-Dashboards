@@ -58,9 +58,15 @@ export class RenderingService {
     const appUi = application.getComponent();
     const bannerUi = overlays.banners.getComponent();
 
+    /**
+     * This is done so that modifications to login styles are only applied to the login.
+     */
+    const pathName = chromeUi.props.application?.history?.location?.pathname || '';
+    const classContent = pathName === '/app/login' ? 'content wz-login' : 'content';
+
     ReactDOM.render(
       <I18nProvider>
-        <div className="content" data-test-subj="opensearchDashboardsChrome">
+        <div className={classContent} data-test-subj="opensearchDashboardsChrome">
           {chromeUi}
 
           <AppWrapper

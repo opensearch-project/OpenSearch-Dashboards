@@ -143,6 +143,7 @@ function pluginInitializerContextMock() {
         buildNum: 100,
         buildSha: 'buildSha',
         dist: false,
+        wazuhVersion: 'wazuhVersion',
       },
     },
     config: {
@@ -168,6 +169,7 @@ function createCoreContext(): CoreContext {
         buildNum: 100,
         buildSha: 'buildSha',
         dist: false,
+        wazuhVersion: 'wazuhVersion',
       },
     },
   };

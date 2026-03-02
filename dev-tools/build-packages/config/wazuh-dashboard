@@ -1,0 +1,170 @@
+#!/bin/sh
+# chkconfig: 2345 95 20
+# description: Wazuh dashboard
+#
+# Source function libraries if present.
+# (It improves integration with systemd)
+#
+# Red Hat
+if [ -f /etc/rc.d/init.d/functions ]; then
+    . /etc/rc.d/init.d/functions
+
+# Debian
+elif [ -f /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+
+# SUSE
+elif [ -f /etc/rc.status ]; then
+    . /etc/rc.status
+    rc_reset
+fi
+
+name=wazuh-dashboard
+program=/usr/share/wazuh-dashboard/bin/opensearch-dashboards
+args=-c\\\ /etc/wazuh-dashboard/opensearch_dashboards.yml
+PID_DIR="/run/wazuh-dashboard"
+pidfile="$PID_DIR/$name.pid"
+
+[ -r /etc/default/$name ] && . /etc/default/$name
+[ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
+
+export NODE_OPTIONS
+
+[ -z "$nice" ] && nice=0
+
+trace() {
+  logger -t "/etc/init.d/wazuh-dashboard" "$@"
+}
+
+emit() {
+  trace "$@"
+  echo "$@"
+}
+
+start() {
+
+
+  # Setup any environmental stuff beforehand
+
+  # Ensure that the PID_DIR exists (it is cleaned at OS startup time)
+  if [ -n "$PID_DIR" ] && [ ! -e "$PID_DIR" ]; then
+      mkdir -p "$PID_DIR" && chown "$user":"$group" "$PID_DIR"
+  fi
+  if [ -n "$pidfile" ] && [ ! -e "$pidfile" ]; then
+      touch "$pidfile" && chown "$user":"$group" "$pidfile"
+  fi
+
+
+  # Run the program!
+
+  chroot --userspec "$user":"$group" "$chroot" sh -c "cd \"$chdir\";exec \"$program\" $args" &
+
+
+
+  # Generate the pidfile from here. If we instead made the forked process
+  # generate it there will be a race condition between the pidfile writing
+  # and a process possibly asking for status.
+  echo $! > $pidfile
+
+  emit "$name started"
+  return 0
+}
+
+stop() {
+  # Try a few times to kill TERM the program
+  if status ; then
+    pid=$(cat "$pidfile")
+    trace "Killing $name (pid $pid) with SIGTERM"
+    kill -TERM $pid
+    # Wait for it to exit.
+    for i in 1 2 3 4 5 ; do
+      trace "Waiting $name (pid $pid) to die..."
+      status || break
+      sleep 1
+    done
+    if status ; then
+      if [ "$KILL_ON_STOP_TIMEOUT" -eq 1 ] ; then
+        trace "Timeout reached. Killing $name (pid $pid) with SIGKILL.  This may result in data loss."
+        kill -KILL $pid
+        emit "$name killed with SIGKILL."
+      else
+        emit "$name stop failed; still running."
+      fi
+    else
+      emit "$name stopped."
+    fi
+  fi
+}
+
+status() {
+  if [ -f "$pidfile" ] ; then
+    pid=$(cat "$pidfile")
+    if ps -p $pid > /dev/null 2> /dev/null ; then
+      # process by this pid is running.
+      # It may not be our pid, but that's what you get with just pidfiles.
+      # TODO(sissel): Check if this process seems to be the same as the one we
+      # expect. It'd be nice to use flock here, but flock uses fork, not exec,
+      # so it makes it quite awkward to use in this case.
+      return 0
+    else
+      return 2 # program is dead but pid file exists
+    fi
+  else
+    return 3 # program is not running
+  fi
+}
+
+force_stop() {
+  if status ; then
+    stop
+    status && kill -KILL $(cat "$pidfile")
+  fi
+}
+
+
+case "$1" in
+  force-start|start|stop|force-stop|restart)
+    trace "Attempting '$1' on wazuh-dashboard"
+    ;;
+esac
+
+case "$1" in
+  force-start)
+    PRESTART=no
+    exec "$0" start
+    ;;
+  start)
+    status
+    code=$?
+    if [ $code -eq 0 ]; then
+      emit "$name is already running"
+      exit $code
+    else
+      start
+      exit $?
+    fi
+    ;;
+  stop) stop ;;
+  force-stop) force_stop ;;
+  status)
+    status
+    code=$?
+    if [ $code -eq 0 ] ; then
+      emit "$name is running"
+    else
+      emit "$name is not running"
+    fi
+    exit $code
+    ;;
+  restart)
+
+    stop && start
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|force-start|stop|force-start|force-stop|status|restart}" >&2
+    exit 3
+  ;;
+esac
+
+exit $?
+

@@ -15,6 +15,7 @@ function mockProps() {
     opensearchDashboardsDocLink: '/doclink',
     opensearchDashboardsVersion: '1.0',
     useDefaultContent: true,
+    darkmode: false,
   };
 }
 

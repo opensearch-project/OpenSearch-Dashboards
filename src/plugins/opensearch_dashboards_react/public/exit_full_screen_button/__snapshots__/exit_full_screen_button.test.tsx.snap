@@ -27,7 +27,7 @@ exports[`ExitFullScreenButton is rendered using the dark theme's mark by default
         >
           <EuiIcon
             size="l"
-            type="/ui/logos/opensearch_mark_on_dark.svg"
+            type="/ui/logos/wazuh_mark_on_dark.svg"
           />
         </EuiFlexItem>
         <EuiFlexItem
@@ -86,7 +86,7 @@ exports[`ExitFullScreenButton is rendered using the dark theme's mark when light
         >
           <EuiIcon
             size="l"
-            type="/ui/logos/opensearch_mark_on_dark.svg"
+            type="/ui/logos/wazuh_mark_on_dark.svg"
           />
         </EuiFlexItem>
         <EuiFlexItem
@@ -145,7 +145,7 @@ exports[`ExitFullScreenButton is rendered using the light theme's mark when dark
         >
           <EuiIcon
             size="l"
-            type="/ui/logos/opensearch_mark_on_light.svg"
+            type="/ui/logos/wazuh_mark_on_light.svg"
           />
         </EuiFlexItem>
         <EuiFlexItem

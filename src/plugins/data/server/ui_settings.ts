@@ -91,10 +91,12 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
         defaultMessage: 'Meta fields',
       }),
-      value: ['_source', '_id', '_type', '_index', '_score'],
+      // Wazuh
+      value: ['_source', '_index'],
       description: i18n.translate('data.advancedSettings.metaFieldsText', {
+        // Wazuh
         defaultMessage:
-          'Fields that exist outside of _source to merge into our document when displaying it',
+          'Fields that exist outside of _source to merge into our document when displaying it. Other fields: _id, _score, _type',
       }),
       schema: schema.arrayOf(schema.string()),
     },
@@ -568,8 +570,9 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.timepicker.timeDefaultsTitle', {
         defaultMessage: 'Time filter defaults',
       }),
+      // Wazuh
       value: `{
-  "from": "now-15m",
+  "from": "now-24h",
   "to": "now"
 }`,
       type: 'json',

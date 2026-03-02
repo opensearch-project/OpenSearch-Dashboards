@@ -50,11 +50,11 @@ export const CallOuts = () => {
           <FormattedMessage
             id="advancedSettings.callOutCautionDescription"
             defaultMessage="Be careful in here, these settings are for very advanced users only.
-            Tweaks you make here can break large portions of OpenSearch Dashboards.
+            Tweaks you make here can break large portions of Wazuh dashboard.
             Some of these settings may be undocumented, unsupported or experimental.
             If a field has a default value, blanking the field will reset it to its default which may be
             unacceptable given other configuration directives.
-            Deleting a custom setting will permanently remove it from OpenSearch Dashboards's config."
+            Deleting a custom setting will permanently remove it from Wazuh Dashboard's config."
           />
         </p>
       </EuiCallOut>

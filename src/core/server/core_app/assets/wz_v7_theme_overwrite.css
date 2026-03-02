@@ -1,0 +1,42 @@
+/*
+  Wazuh: overwrite some styles related to a empty button text is cut off in v7 OUI 1.19.0
+  See https://github.com/wazuh/wazuh-dashboard/issues/423#issuecomment-2674893230
+*/
+
+.euiButtonEmpty {
+  line-height: 1.5;
+}
+
+.euiButtonEmpty .euiButtonEmpty__text{
+  display: flex;
+}
+
+/* See https://github.com/wazuh/wazuh-dashboard-plugins/issues/7330#issuecomment-2715160164 */
+@media (min-width: 992px) {
+  .dscCanvas > .dscCanvas_results > div:nth-child(3) {
+    /*
+      When the screen size is too narrow; you can't even view the table, so I added a minimum height.
+      This number is arbitrary, but it's a good starting point.
+      See https://github.com/wazuh/wazuh-dashboard-plugins/issues/7330#issuecomment-2715690125
+    */
+    min-height: 267px;
+    /*
+      Why is the max-height calculated this way?
+      This is to ensure that the table will fit well within the available viewport height.
+      The 462px accounts for the combined height of the wrapping search bar, bar chart, and header elements.
+    */
+    max-height: calc(100vh - 484px);
+  }
+}
+
+/* See https://github.com/wazuh/wazuh-dashboard-plugins/issues/7330#issuecomment-2715160164 */
+@media (min-width: 1174px) {
+  .dscCanvas > .dscCanvas_results > div:nth-child(3) {
+    /*
+      Why is the max-height calculated this way?
+      This is to ensure that the table will fit well within the available viewport height.
+      The 422px accounts for the combined height of the non-wrapping search bar, bar chart, and header elements.
+    */
+    max-height: calc(100vh - 444px);
+  }
+}

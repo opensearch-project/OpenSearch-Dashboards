@@ -267,11 +267,11 @@ export class DiscoverPlugin
       id: PLUGIN_ID,
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
-      order: 1000,
+      order: 100,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      category: DEFAULT_APP_CATEGORIES.explore,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
@@ -344,7 +344,9 @@ export class DiscoverPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
         id: PLUGIN_ID,
-        category: undefined,
+        /* Wazuh BEGIN */
+        category: DEFAULT_APP_CATEGORIES.explore,
+        /* Wazuh END */
         order: 200,
       },
     ]);

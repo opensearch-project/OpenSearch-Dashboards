@@ -111,24 +111,6 @@ export const OverviewPageHeader: FC<Props> = ({
           {!hideToolbar && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup className="osdOverviewPageHeader__actions" responsive={false} wrap>
-                <EuiFlexItem className="osdOverviewPageHeader__actionItem" grow={false}>
-                  <RedirectAppLinks application={application}>
-                    <EuiSmallButtonEmpty
-                      className="osdOverviewPageHeader__actionButton"
-                      flush="both"
-                      href={addBasePath('/app/home#/tutorial_directory')}
-                      iconType="indexOpen"
-                    >
-                      {i18n.translate(
-                        'opensearch-dashboards-react.osdOverviewPageHeader.addDataButtonLabel',
-                        {
-                          defaultMessage: 'Add data',
-                        }
-                      )}
-                    </EuiSmallButtonEmpty>
-                  </RedirectAppLinks>
-                </EuiFlexItem>
-
                 {showManagementLink && isManagementEnabled ? (
                   <EuiFlexItem className="osdOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>

@@ -48,6 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('detect navigate back issues', async () => {
+      // Wazuh: Set a local storage item to show the nav group
+      // because the nav group is hidden by default in our fork
+      await browser.setLocalStorageItem('core.navGroup.explore', 'true');
       let currUrl;
       // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
       // Navigate to home app

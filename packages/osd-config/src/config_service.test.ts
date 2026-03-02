@@ -48,6 +48,9 @@ const packageInfos: RawPackageInfo = {
     number: 42,
     sha: 'one',
   },
+  wazuh: {
+    version: '4.5.0',
+  },
 };
 const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/opensearch-dashboards', packageInfos, emptyArgv);
@@ -269,6 +272,9 @@ test('correctly passes context', async () => {
       distributable: true,
       number: 100,
       sha: 'feature-v1-build-sha',
+    },
+    wazuh: {
+      version: '4.5.0',
     },
   };
 

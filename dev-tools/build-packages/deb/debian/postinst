@@ -1,0 +1,58 @@
+#!/bin/sh
+# postinst script for wazuh-dashboard
+# Copyright (C) 2021, Wazuh Inc.
+#
+# This program is a free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public
+# License (version 2) as published by the FSF - Free Software
+# Foundation.
+
+set -e
+
+export NAME=wazuh-dashboard
+export CONFIG_DIR=/etc/"${NAME}"
+export INSTALLATION_DIR=/usr/share/"${NAME}"
+export PID_DIR=/run/"${NAME}"
+
+# Setting Owner and group of own folders
+mkdir -p "${PID_DIR}"
+chown -R "${NAME}":"${NAME}" "${PID_DIR}"
+
+case "$1" in
+configure)
+    chmod 750 "${TARGET_DIR}""${CONFIG_DIR}"
+    chown -R "${NAME}":"${NAME}" "${TARGET_DIR}""${CONFIG_DIR}"
+    chmod 750 "${TARGET_DIR}""${INSTALLATION_DIR}"
+    chown -R "${NAME}":"${NAME}" "${TARGET_DIR}""${INSTALLATION_DIR}"
+    if [ -f "${TARGET_DIR}"/usr/lib/systemd/system/wazuh-dashboard.service ]; then
+        chmod 644 "${TARGET_DIR}"/usr/lib/systemd/system/wazuh-dashboard.service
+    fi
+    setcap 'cap_net_bind_service=+ep' "${INSTALLATION_DIR}"/node/bin/node
+    setcap 'cap_net_bind_service=+ep' "${INSTALLATION_DIR}"/node/fallback/bin/node
+    rm -f /usr/share/wazuh-dashboard/VERSION
+    if [ -f "${INSTALLATION_DIR}"/"${NAME}".restart ]; then
+        rm -f "${INSTALLATION_DIR}"/"${NAME}".restart
+        if command -v systemctl >/dev/null 2>&1 && systemctl >/dev/null 2>&1; then
+            systemctl daemon-reload >/dev/null 2>&1
+            systemctl restart wazuh-dashboard.service >/dev/null 2>&1
+        elif command -v service >/dev/null 2>&1 && service wazuh-dashboard status 2>/dev/null | grep "running" >/dev/null 2>&1; then
+            service wazuh-dashboard restart >/dev/null 2>&1
+        fi
+    fi
+    if [ ! -f "${CONFIG_DIR}"/opensearch_dashboards.keystore ]; then
+        runuser "${NAME}" --shell="/bin/bash" --command="${INSTALLATION_DIR}/bin/opensearch-dashboards-keystore create" >/dev/null 2>&1
+        runuser "${NAME}" --shell="/bin/bash" --command="echo kibanaserver | ${INSTALLATION_DIR}/bin/opensearch-dashboards-keystore add opensearch.username --stdin" >/dev/null 2>&1
+        runuser "${NAME}" --shell="/bin/bash" --command="echo kibanaserver | ${INSTALLATION_DIR}/bin/opensearch-dashboards-keystore add opensearch.password --stdin" >/dev/null 2>&1
+    fi
+    ;;
+
+abort-upgrade | abort-remove | abort-deconfigure) ;;
+
+*)
+  echo "postinst called with unknown argument \`$1'" >&2
+  exit 1
+  ;;
+
+esac
+
+exit 0

@@ -126,6 +126,8 @@ export function createPluginSetupContext<
     keyboardShortcut: deps.keyboardShortcut,
     chat: deps.chat,
     telemetry: deps.telemetry,
+    // Wazuh
+    healthCheck: deps.healthCheck,
   };
 }
 
@@ -187,5 +189,7 @@ export function createPluginStartContext<
       // Auto-inject plugin name - plugins don't need to pass pluginId
       getPluginRecorder: () => deps.telemetry.getPluginRecorder(plugin.name),
     },
+    // Wazuh
+    healthCheck: deps.healthCheck,
   };
 }

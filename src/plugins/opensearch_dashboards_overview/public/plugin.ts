@@ -78,18 +78,13 @@ export class OpenSearchDashboardsOverviewPlugin
         return hasOpenSearchDashboardsApp;
       }),
       distinct(),
-      map((hasOpenSearchDashboardsApp) => {
+      map(() => {
         return () => {
-          if (!hasOpenSearchDashboardsApp) {
-            return { status: AppStatus.inaccessible, navLinkStatus: AppNavLinkStatus.hidden };
-          } else {
-            return {
-              status: AppStatus.accessible,
-              navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-                ? AppNavLinkStatus.hidden
-                : AppNavLinkStatus.default,
-            };
-          }
+          // Wazuh: Hide the OpenSearch Dashboards Overview app
+          return {
+            status: AppStatus.inaccessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          };
         };
       })
     );

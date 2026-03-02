@@ -29,10 +29,21 @@ export const GlobalSearchPageItem = ({ link, search, callback, renderBreadcrumbs
       </EuiHighlight>
     );
 
-    const isOverviewPage = appId.endsWith('overview');
-    if (isOverviewPage && link.category) {
-      breadcrumbList.push({ text: link.category.label });
+    /* Wazuh BEGIN */
+    if (
+      link.category &&
+      !link.parentNavLinkId &&
+      link.category.label.trim().toLowerCase() !== (link.title || '').trim().toLowerCase()
+    ) {
+      breadcrumbList.push({
+        text: (
+          <EuiHighlight search={search} highlightAll={true}>
+            {link.category.label}
+          </EuiHighlight>
+        ),
+      });
     }
+    /* Wazuh END */
 
     if (link.parentNavLinkId) {
       const parentNavLinkTitle = link.navGroup.navLinks.find(

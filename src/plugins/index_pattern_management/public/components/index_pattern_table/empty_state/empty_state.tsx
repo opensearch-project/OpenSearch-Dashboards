@@ -45,7 +45,6 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiFlexGrid,
-  EuiCard,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
@@ -173,25 +172,6 @@ export const EmptyState = ({
               />
             </EuiFlexItem> */}
             {getMlCardState() !== MlCardState.HIDDEN ? mlCard : <></>}
-            <EuiFlexItem>
-              <EuiCard
-                className="inpEmptyState__card"
-                onClick={() => navigateToApp('home', { path: '#/tutorial_directory/sampleData' })}
-                icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
-                title={
-                  <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardTitle"
-                    defaultMessage="Add sample data"
-                  />
-                }
-                description={
-                  <FormattedMessage
-                    id="indexPatternManagement.createIndexPattern.emptyState.sampleDataCardDescription"
-                    defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
-                  />
-                }
-              />
-            </EuiFlexItem>
           </EuiFlexGrid>
           <EuiSpacer size="xxl" />
           <div className="inpEmptyState__footer">
