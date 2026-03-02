@@ -597,7 +597,7 @@ export class ChatService {
   } | null> {
     // Get the latest conversation summary from conversation history service
     const result = await this.conversationHistoryService.getConversations({
-      page: 1,
+      page: 0,
       pageSize: 1,
     });
 
