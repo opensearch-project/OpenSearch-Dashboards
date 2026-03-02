@@ -748,6 +748,36 @@ export class DataViewsService {
       return await dataView.toDataset();
     }
 
+    // Fetch actual data source to get its title and version
+    let dataSourceInfo;
+    if (dataView.dataSourceRef?.id) {
+      // Default dataSourceInfo with common fields
+      const defaultDataSourceInfo = {
+        id: dataView.dataSourceRef.id,
+        title: dataView.dataSourceRef.id,
+        type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        version: '',
+      };
+
+      try {
+        const dataSource = await this.getDataSource(dataView.dataSourceRef.id);
+        if (dataSource) {
+          // Override with actual data source title and version if available
+          dataSourceInfo = {
+            ...defaultDataSourceInfo,
+            title: dataSource.attributes?.title || defaultDataSourceInfo.title,
+            version: dataSource.attributes?.dataSourceVersion || '',
+          };
+        } else {
+          // If dataSource is null/undefined, use default
+          dataSourceInfo = defaultDataSourceInfo;
+        }
+      } catch (error) {
+        // If fetching fails, use default
+        dataSourceInfo = defaultDataSourceInfo;
+      }
+    }
+
     return {
       id: dataView.id || '',
       title: dataView.title,
@@ -755,12 +785,8 @@ export class DataViewsService {
       timeFieldName: dataView.timeFieldName,
       displayName: dataView.displayName,
       description: dataView.description,
-      ...(dataView.dataSourceRef?.id && {
-        dataSource: {
-          id: dataView.dataSourceRef.id,
-          title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
-          type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-        },
+      ...(dataSourceInfo && {
+        dataSource: dataSourceInfo,
       }),
     };
   }
