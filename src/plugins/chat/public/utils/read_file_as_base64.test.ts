@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { readFileAsBase64 } from './read_file_as_base64';
+import { readFileAsBase64, clearAttachmentBase64 } from './read_file_as_base64';
 
 describe('readFileAsBase64', () => {
   // Helper to create a mock File
@@ -81,5 +81,27 @@ describe('readFileAsBase64', () => {
     await expect(promise).rejects.toThrow('Failed to read file: bad.txt');
 
     global.FileReader = originalFileReader;
+  });
+
+  describe('clearAttachmentBase64', () => {
+    it('clears base64 from attachments to release memory', () => {
+      const attachments = [
+        { filename: 'a.txt', mimeType: 'text/plain', base64: 'SGVsbG8=', size: 5 },
+        { filename: 'b.csv', mimeType: 'text/csv', base64: 'bmFtZSxhZ2U=', size: 8 },
+      ];
+      clearAttachmentBase64(attachments);
+      expect(attachments[0].base64).toBe('');
+      expect(attachments[1].base64).toBe('');
+    });
+
+    it('handles empty array', () => {
+      expect(() => clearAttachmentBase64([])).not.toThrow();
+    });
+
+    it('skips attachments with empty base64', () => {
+      const attachment = { filename: 'x.txt', mimeType: 'text/plain', base64: '', size: 0 };
+      clearAttachmentBase64([attachment]);
+      expect(attachment.base64).toBe('');
+    });
   });
 });

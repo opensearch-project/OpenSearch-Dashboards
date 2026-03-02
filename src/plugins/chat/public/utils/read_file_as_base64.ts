@@ -11,6 +11,17 @@ export interface FileAttachment {
 }
 
 /**
+ * Clear base64 data from attachments to release memory.
+ * Large files (~4MB base64) would otherwise persist until GC runs.
+ * Call before discarding attachments (remove, clear all, send complete).
+ */
+export function clearAttachmentBase64(attachments: FileAttachment[]): void {
+  attachments.forEach((item) => {
+    if (item.base64) item.base64 = '';
+  });
+}
+
+/**
  * Read a File as base64-encoded data using FileReader.
  * Returns the raw base64 string (without the data URI prefix).
  */

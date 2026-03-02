@@ -48,6 +48,13 @@ jest.mock('../../../opensearch_dashboards_react/public', () => {
               getScreenshotButton$: () => mockScreenshotButton$,
             },
           },
+          notifications: {
+            toasts: {
+              addWarning: jest.fn(),
+              addDanger: jest.fn(),
+              add: jest.fn(),
+            },
+          },
         },
       },
     }),
@@ -66,6 +73,9 @@ describe('ChatInput', () => {
     onSend: jest.fn(),
     onStop: jest.fn(),
     onKeyDown: jest.fn(),
+    onFilesSelected: jest.fn(),
+    maxFileUploadBytes: 10 * 1024 * 1024,
+    attachmentCount: 0,
   };
 
   beforeEach(() => {
@@ -167,6 +177,15 @@ describe('ChatInput', () => {
 
       const button = getByLabelText('Send message') as HTMLButtonElement;
       expect(button.disabled).toBe(false);
+    });
+
+    it('should disable send button when input is empty even with attachments', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="" attachmentCount={1} />
+      );
+
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
     });
 
     it('should show sortUp icon when not streaming', () => {

@@ -188,7 +188,8 @@ export function defineRoutes(
   );
 
   // Calculate payload limit to accommodate base64 overhead (~33%) plus message JSON
-  const proxyMaxBytes = maxFileUploadBytes ? Math.ceil(maxFileUploadBytes * 1.4) : undefined;
+  const proxyMaxBytes =
+    maxFileUploadBytes !== undefined ? Math.ceil(maxFileUploadBytes * 1.4) : undefined;
 
   // Proxy route for AG-UI requests
   router.post(

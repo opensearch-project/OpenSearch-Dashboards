@@ -117,8 +117,9 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
    */
   public async getConversation(threadId: string) {
     try {
-      // Use AgUiAgent to handle SSE streaming consistently
-      const agent = new AgUiAgent();
+      // Use AgUiAgent to handle SSE streaming consistently (prepend basePath for OSD dev mode).
+      const proxyUrl = this.http.basePath.prepend('/api/chat/proxy');
+      const agent = new AgUiAgent(proxyUrl);
       const collectedEvents: Event[] = [];
 
       // Collect all events from the agent run

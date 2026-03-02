@@ -91,7 +91,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const remaining = CHAT_MAX_FILE_ATTACHMENTS - attachmentCount;
     if (remaining <= 0) {
       notifications.toasts.addWarning(
-        `You can attach up to ${CHAT_MAX_FILE_ATTACHMENTS} files. Remove a file before adding more.`
+        i18n.translate('chat.input.fileLimitReached', {
+          defaultMessage:
+            'You can attach up to {maxFiles} files. Remove a file before adding more.',
+          values: { maxFiles: CHAT_MAX_FILE_ATTACHMENTS },
+        })
       );
       e.target.value = '';
       return;
@@ -104,14 +108,25 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const limitMB = (maxFileUploadBytes / (1024 * 1024)).toFixed(1);
       const names = oversized.map((f) => f.name).join(', ');
       notifications.toasts.addWarning(
-        `File(s) exceed the ${limitMB} MB limit and were skipped: ${names}`
+        i18n.translate('chat.input.filesExceedSizeLimit', {
+          defaultMessage: 'File(s) exceed the {limitMB} MB limit and were skipped: {names}',
+          values: { limitMB, names },
+        })
       );
     }
 
     const accepted = valid.slice(0, remaining);
     if (accepted.length < valid.length) {
       notifications.toasts.addWarning(
-        `Only ${accepted.length} of ${valid.length} file(s) were attached to stay within the ${CHAT_MAX_FILE_ATTACHMENTS}-file limit.`
+        i18n.translate('chat.input.filesTruncatedByLimit', {
+          defaultMessage:
+            'Only {acceptedCount} of {validCount} file(s) were attached to stay within the {maxFiles}-file limit.',
+          values: {
+            acceptedCount: accepted.length,
+            validCount: valid.length,
+            maxFiles: CHAT_MAX_FILE_ATTACHMENTS,
+          },
+        })
       );
     }
 

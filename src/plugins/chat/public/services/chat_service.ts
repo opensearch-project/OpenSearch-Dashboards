@@ -18,6 +18,7 @@ import {
   WorkspacesStart,
   Event,
   EventType,
+  HttpSetup,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
@@ -74,10 +75,12 @@ export class ChatService {
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
-    workspaces?: WorkspacesStart
+    workspaces?: WorkspacesStart,
+    http?: HttpSetup
   ) {
-    // No need to pass URL anymore - agent will use the proxy endpoint
-    this.agent = new AgUiAgent();
+    // Use basePath.prepend so the proxy URL works when OSD runs with a basePath (e.g. dev mode).
+    const proxyUrl = http ? http.basePath.prepend('/api/chat/proxy') : '/api/chat/proxy';
+    this.agent = new AgUiAgent(proxyUrl);
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;

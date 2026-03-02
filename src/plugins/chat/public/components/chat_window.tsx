@@ -30,7 +30,7 @@ import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
-import { readFileAsBase64, FileAttachment } from '../utils/read_file_as_base64';
+import { readFileAsBase64, clearAttachmentBase64, FileAttachment } from '../utils/read_file_as_base64';
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
@@ -259,7 +259,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
-          setFileAttachments([]);
+          setFileAttachments((prev) => {
+            clearAttachmentBase64(prev);
+            return [];
+          });
         },
       });
 
@@ -276,42 +279,41 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [chatService, currentRunId, eventHandler]);
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
-    const hasAttachments = fileAttachments.length > 0 || !!screenshotData;
-    const messageContent = options?.input ?? input.trim();
-    // Use ref for immediate check since React 18 batches state updates
-    if ((!messageContent && !hasAttachments) || isStreamingRef.current) return;
+    const messageContent = (options?.input ?? input.trim());
+    // Require a non-empty message; attachments alone are not sufficient
+    if (!messageContent || isStreamingRef.current) return;
 
     // Prepare additional messages for sending (but don't add to timeline yet)
     let additionalMessages = options?.messages ?? [];
 
     // Only add screenshot/file data if messages not provided
     if (!options?.messages && (screenshotData || fileAttachments.length > 0)) {
-        const binaryContent: Array<{ type: 'binary'; mimeType: string; data: string; filename?: string }> = [];
+      const binaryContent: Array<{ type: 'binary'; mimeType: string; data: string; filename?: string }> = [];
 
-        if (screenshotData) {
-          binaryContent.push({
-            type: 'binary' as const,
-            mimeType: screenshotData.mimeType,
-            data: screenshotData.base64,
-          });
-        }
+      if (screenshotData) {
+        binaryContent.push({
+          type: 'binary' as const,
+          mimeType: screenshotData.mimeType,
+          data: screenshotData.base64,
+        });
+      }
 
-        for (const file of fileAttachments) {
-          binaryContent.push({
-            type: 'binary' as const,
-            mimeType: file.mimeType,
-            data: file.base64,
-            filename: file.filename,
-          });
-        }
+      for (const file of fileAttachments) {
+        binaryContent.push({
+          type: 'binary' as const,
+          mimeType: file.mimeType,
+          data: file.base64,
+          filename: file.filename,
+        });
+      }
 
-        additionalMessages = [
-          {
-            role: 'user' as const,
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-            content: binaryContent,
-          },
-        ];
+      additionalMessages = [
+        {
+          role: 'user' as const,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          content: binaryContent,
+        },
+      ];
     }
 
     setInput('');
@@ -331,9 +333,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       }
     }
 
-    // Normal message flow — use a default prompt when only attachments are present
-    const effectiveContent = messageContent || 'Please analyze the attached file(s).';
-    return subscribeToMessageStream(effectiveContent, messagesToSend);
+    // Normal message flow — messageContent is guaranteed non-empty by guard above
+    return subscribeToMessageStream(messageContent, messagesToSend);
   };
 
   handleSendRef.current = handleSend;
@@ -395,7 +396,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setPendingConfirmation(null);
     setShowHistory(false);
     setScreenshotData(undefined);
-    setFileAttachments([]);
+    setFileAttachments((prev) => {
+      clearAttachmentBase64(prev);
+      return [];
+    });
   }, [chatService]);
 
   const handleStop = useCallback(() => {
@@ -446,7 +450,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, []);
 
   const handleRemoveFile = useCallback((index: number) => {
-    setFileAttachments((prev) => prev.filter((_, i) => i !== index));
+    setFileAttachments((prev) => {
+      clearAttachmentBase64([prev[index]].filter(Boolean));
+      return prev.filter((_, i) => i !== index);
+    });
   }, []);
 
   const handleCaptureScreenshot = useCallback(async ()=>{
@@ -626,7 +633,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onCaptureScreenshot={handleCaptureScreenshot}
             onFilesSelected={handleFilesSelected}
             maxFileUploadBytes={chatService.maxFileUploadBytes}
-            hasAttachments={fileAttachments.length > 0 || !!screenshotData}
+            attachmentCount={fileAttachments.length + (screenshotData ? 1 : 0)}
           />
         </>
       )}
