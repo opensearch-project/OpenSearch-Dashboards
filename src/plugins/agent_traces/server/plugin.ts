@@ -41,20 +41,36 @@ export class AgentTracesPlugin implements Plugin<AgentTracesPluginSetup, AgentTr
       try {
         const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
         const client = dynamicConfigServiceStart.getClient();
-        const store = dynamicConfigServiceStart.getAsyncLocalStore();
+        const store = dynamicConfigServiceStart.createStoreFromRequest(request);
 
         const config = await client.getConfig(
-          { name: 'explore' },
-          { asyncLocalStorageContext: store! }
+          { pluginConfigPath: 'explore' },
+          store ? { asyncLocalStorageContext: store } : undefined
         );
 
-        return {
+        const updatedCapabilities = {
           ...capabilities,
           agentTraces: {
             ...(capabilities.agentTraces || {}),
             agentTracesEnabled: config.agentTraces?.enabled ?? false,
           },
         };
+        this.logger.info(
+          `Applied capabilities - agentTracesEnabled: ${updatedCapabilities.agentTraces.agentTracesEnabled}`
+        );
+
+        // Apply security restrictions
+        const finalCapabilities = await core.security
+          .readonlyService()
+          .hideForReadonly(request, updatedCapabilities, {
+            explore: {
+              createShortUrl: false,
+              save: false,
+              saveQuery: false,
+            },
+          });
+
+        return finalCapabilities;
       } catch (error) {
         this.logger.error('Failed to load agentTraces dynamic config, using defaults', error);
         return capabilities;
