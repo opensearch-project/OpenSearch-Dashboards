@@ -532,26 +532,26 @@ describe('ppl code_completion', () => {
       it('should suggest pipeline commands when query starts with pipe', async () => {
         const result = await getSimpleSuggestions('| ');
 
-        // Should suggest pipeline commands
+        // Should suggest pipeline commands (Command type maps to CompletionItemKind.Function)
         checkSuggestionsContain(result, {
           text: 'WHERE',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
         checkSuggestionsContain(result, {
           text: 'FIELDS',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
         checkSuggestionsContain(result, {
           text: 'STATS',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
         checkSuggestionsContain(result, {
           text: 'SORT',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
         checkSuggestionsContain(result, {
           text: 'DEDUP',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
 
         // Should NOT suggest source-level commands
@@ -616,11 +616,11 @@ describe('ppl code_completion', () => {
 
         checkSuggestionsContain(result, {
           text: 'WHERE',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
         checkSuggestionsContain(result, {
           text: 'FIELDS',
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: monaco.languages.CompletionItemKind.Function,
         });
       });
 
