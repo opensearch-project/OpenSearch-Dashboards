@@ -286,56 +286,27 @@ const singleParseQuery = <
   ignoredTokens,
   rulesToVisit,
   getParseTree,
-  getPipeStartParseTree,
   enrichAutocompleteResult,
   query,
   cursor,
   context,
   skipSymbolicKeywords,
 }: ParsingSubject<A, L, P>): A => {
-  // ─── Pipe-first: strip leading pipe so token stream matches start rule ───
-  const isPipeFirst = !!getPipeStartParseTree && query.trimStart().startsWith('|');
-  let effectiveQuery = query;
-  let effectiveCursor = cursor;
-
-  if (isPipeFirst) {
-    const pipePos = query.indexOf('|');
-    effectiveQuery = query.substring(pipePos + 1);
-    const strippedPrefix = query.substring(0, pipePos + 1);
-    const prefixLines = strippedPrefix.split(/\r\n|\n|\r/);
-    const numStrippedNewlines = prefixLines.length - 1;
-    const lastPrefixLineLen = prefixLines[prefixLines.length - 1].length;
-
-    effectiveCursor = {
-      line: Math.max(1, cursor.line - numStrippedNewlines),
-      column:
-        cursor.line === numStrippedNewlines + 1
-          ? Math.max(1, cursor.column - lastPrefixLineLen)
-          : cursor.column,
-    };
-  }
-
-  const parser = createParser(Lexer, Parser, effectiveQuery);
+  const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
-  const parseTree = isPipeFirst
-    ? getPipeStartParseTree!(parser)
-    : getParseTree(parser);
+  const parseTree = getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
-  const cursorTokenIndex = findCursorTokenIndex(
-    tokenStream,
-    effectiveCursor,
-    tokenDictionary.SPACE
-  );
+  const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
   if (cursorTokenIndex === undefined) {
     throw new Error(
-      `Could not find cursor token index for line: ${effectiveCursor.line}, column: ${effectiveCursor.column}`
+      `Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
     );
   }
 
@@ -381,8 +352,8 @@ const singleParseQuery = <
     rules,
     tokenStream,
     cursorTokenIndex,
-    effectiveCursor,
-    effectiveQuery,
+    cursor,
+    query,
     parseTree
   );
 };
@@ -398,7 +369,6 @@ export const parseQuery = <
   ignoredTokens,
   rulesToVisit,
   getParseTree,
-  getPipeStartParseTree,
   enrichAutocompleteResult,
   query,
   cursor,
@@ -412,7 +382,6 @@ export const parseQuery = <
     ignoredTokens,
     rulesToVisit,
     getParseTree,
-    getPipeStartParseTree,
     enrichAutocompleteResult,
     query,
     cursor,
@@ -434,7 +403,6 @@ export const parseQuery = <
       ignoredTokens,
       rulesToVisit: modifiedRulesToVisit,
       getParseTree,
-      getPipeStartParseTree,
       enrichAutocompleteResult,
       query,
       cursor,
