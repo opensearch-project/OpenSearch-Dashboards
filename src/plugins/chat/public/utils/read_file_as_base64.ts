@@ -4,6 +4,7 @@
  */
 
 export interface FileAttachment {
+  id: string;
   filename: string;
   mimeType: string;
   base64: string;
@@ -34,6 +35,7 @@ export function readFileAsBase64(file: File): Promise<FileAttachment> {
       // Strip the "data:<mime>;base64," prefix
       const base64 = dataUrl.split(',')[1] || '';
       resolve({
+        id: `attachment-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         filename: file.name,
         mimeType: file.type || 'application/octet-stream',
         base64,

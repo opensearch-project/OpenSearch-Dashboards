@@ -16,6 +16,7 @@ describe('readFileAsBase64', () => {
     const file = createMockFile('test.txt', 'Hello, world!', 'text/plain');
     const result = await readFileAsBase64(file);
 
+    expect(result.id).toBeDefined();
     expect(result.filename).toBe('test.txt');
     expect(result.mimeType).toBe('text/plain');
     expect(result.size).toBe(13);
@@ -86,8 +87,8 @@ describe('readFileAsBase64', () => {
   describe('clearAttachmentBase64', () => {
     it('clears base64 from attachments to release memory', () => {
       const attachments = [
-        { filename: 'a.txt', mimeType: 'text/plain', base64: 'SGVsbG8=', size: 5 },
-        { filename: 'b.csv', mimeType: 'text/csv', base64: 'bmFtZSxhZ2U=', size: 8 },
+        { id: '1', filename: 'a.txt', mimeType: 'text/plain', base64: 'SGVsbG8=', size: 5 },
+        { id: '2', filename: 'b.csv', mimeType: 'text/csv', base64: 'bmFtZSxhZ2U=', size: 8 },
       ];
       clearAttachmentBase64(attachments);
       expect(attachments[0].base64).toBe('');
@@ -99,7 +100,13 @@ describe('readFileAsBase64', () => {
     });
 
     it('skips attachments with empty base64', () => {
-      const attachment = { filename: 'x.txt', mimeType: 'text/plain', base64: '', size: 0 };
+      const attachment = {
+        id: '3',
+        filename: 'x.txt',
+        mimeType: 'text/plain',
+        base64: '',
+        size: 0,
+      };
       clearAttachmentBase64([attachment]);
       expect(attachment.base64).toBe('');
     });

@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
-import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -568,6 +568,37 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             {...enhancedProps}
           />
 
+          {/* Sticky confirmation message - positioned above chat input */}
+          {pendingConfirmation && (
+            <ConfirmationMessage
+              request={pendingConfirmation}
+              onApprove={handleApproveConfirmation}
+              onReject={handleRejectConfirmation}
+            />
+          )}
+
+          {fileAttachments.length > 0 && (
+            <div className="chatWindow__fileAttachments" aria-label="Attached files">
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {fileAttachments.map((file, index) => (
+                  <EuiFlexItem grow={false} key={file.id}>
+                    <EuiBadge
+                      color="hollow"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => handleRemoveFile(index)}
+                      iconOnClickAriaLabel={`Remove ${file.filename}`}
+                      className="chatWindow__fileAttachment"
+                      isDisabled={isStreaming}
+                    >
+                      {file.filename}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </div>
+          )}
+
           {
             (isCapturing || screenshotData) && (
               <div className={`chatWindow__screenshotRow ${!screenshotData && isCapturing ? 'capturing' : ''}`}>
@@ -598,27 +629,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               </div>
             )
           }
-
-          {fileAttachments.length > 0 && (
-            <div className="chatWindow__fileAttachments" aria-label="Attached files">
-              {fileAttachments.map((file, index) => (
-                <div key={`${file.filename}-${index}`} className="chatWindow__fileAttachment">
-                  <EuiIcon type="document" size="s" />
-                  <EuiText size="xs" className="chatWindow__fileAttachment__name">
-                    {file.filename}
-                  </EuiText>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    size="xs"
-                    color="text"
-                    onClick={() => handleRemoveFile(index)}
-                    disabled={isStreaming}
-                    aria-label={`Remove ${file.filename}`}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
 
           <ChatInput
             layoutMode={layoutMode}

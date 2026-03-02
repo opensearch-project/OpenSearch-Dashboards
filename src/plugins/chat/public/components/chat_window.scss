@@ -1,24 +1,11 @@
 .chatWindow__fileAttachments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
   padding: 8px 8px 0;
+  margin-bottom: 8px;
+  grid-area: files;
 }
 
 .chatWindow__fileAttachment {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  background-color: $euiColorLightestShade;
-  border-radius: 12px;
-  padding: 2px 4px 2px 2px;
   max-width: 200px;
-
-  &__name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 .chatWindow__screenshotRow {
