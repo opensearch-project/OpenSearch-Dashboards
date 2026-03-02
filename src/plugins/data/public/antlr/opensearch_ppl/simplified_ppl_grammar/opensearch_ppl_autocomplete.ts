@@ -429,6 +429,11 @@ export function getParseTree(
   }
 }
 
+export function getPipeStartParseTree(parser: OpenSearchPPLParser): ParserRuleContext {
+  parser.buildParseTrees = true;
+  return parser.commands();
+}
+
 export function enrichAutocompleteResult(
   baseResult: AutocompleteResultBase,
   rules: c3.CandidatesCollection['rules'],
@@ -469,5 +474,6 @@ export const openSearchPplAutocompleteData: AutocompleteData<
   ignoredTokens,
   rulesToVisit,
   getParseTree,
+  getPipeStartParseTree,
   enrichAutocompleteResult,
 };
