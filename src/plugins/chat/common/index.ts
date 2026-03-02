@@ -7,6 +7,9 @@ export const PLUGIN_ID = 'chat';
 export const PLUGIN_NAME = 'chat';
 export const CHAT_DEFAULT_AG_UI_URL = 'http://localhost:3000';
 
+/** Maximum number of file attachments per message. */
+export const CHAT_MAX_FILE_ATTACHMENTS = 10;
+
 /**
  * Text-based MIME types supported for file attachments.
  * Matches the os_art AG-UI server's TEXT_MIME_TYPES — only these types

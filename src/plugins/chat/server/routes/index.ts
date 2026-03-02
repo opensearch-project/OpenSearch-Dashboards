@@ -15,7 +15,7 @@ import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
 import { getMemoryContainerId } from './utils/get_memory_container_id';
-import { CHAT_ALLOWED_FILE_TYPES } from '../../common';
+import { CHAT_ALLOWED_FILE_TYPES, CHAT_MAX_FILE_ATTACHMENTS } from '../../common';
 
 const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
 
@@ -220,7 +220,7 @@ export function defineRoutes(
       const dataSourceId = request.query?.dataSourceId;
 
       try {
-        // Validate MIME types on any binary attachments in messages
+        // Validate MIME types across all messages
         for (const msg of request.body.messages) {
           const parts = Array.isArray(msg.content) ? msg.content : [];
           for (const part of parts) {
@@ -233,6 +233,22 @@ export function defineRoutes(
                 },
               });
             }
+          }
+        }
+
+        // Enforce attachment limit on the newest user message only (not full history)
+        const messages = request.body.messages;
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].role === 'user' && Array.isArray(messages[i].content)) {
+            const binaryCount = messages[i].content.filter((p: any) => p.type === 'binary').length;
+            if (binaryCount > CHAT_MAX_FILE_ATTACHMENTS) {
+              return response.badRequest({
+                body: {
+                  message: `Too many file attachments (${binaryCount}). Maximum allowed: ${CHAT_MAX_FILE_ATTACHMENTS}`,
+                },
+              });
+            }
+            break;
           }
         }
 

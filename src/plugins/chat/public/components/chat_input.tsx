@@ -15,7 +15,7 @@ import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
-import { CHAT_FILE_ACCEPT } from '../../common';
+import { CHAT_FILE_ACCEPT, CHAT_MAX_FILE_ATTACHMENTS } from '../../common';
 
 import './chat_input.scss';
 
@@ -32,7 +32,7 @@ interface ChatInputProps {
   onCaptureScreenshot: () => void;
   onFilesSelected: (files: File[]) => void;
   maxFileUploadBytes: number;
-  hasAttachments: boolean;
+  attachmentCount: number;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -48,7 +48,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onCaptureScreenshot,
   onFilesSelected,
   maxFileUploadBytes,
-  hasAttachments,
+  attachmentCount,
 }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +88,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
+    const remaining = CHAT_MAX_FILE_ATTACHMENTS - attachmentCount;
+    if (remaining <= 0) {
+      notifications.toasts.addWarning(
+        `You can attach up to ${CHAT_MAX_FILE_ATTACHMENTS} files. Remove a file before adding more.`
+      );
+      e.target.value = '';
+      return;
+    }
+
     const valid = files.filter((f) => f.size <= maxFileUploadBytes);
     const oversized = files.filter((f) => f.size > maxFileUploadBytes);
 
@@ -99,8 +108,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       );
     }
 
-    if (valid.length > 0) {
-      onFilesSelected(valid);
+    const accepted = valid.slice(0, remaining);
+    if (accepted.length < valid.length) {
+      notifications.toasts.addWarning(
+        `Only ${accepted.length} of ${valid.length} file(s) were attached to stay within the ${CHAT_MAX_FILE_ATTACHMENTS}-file limit.`
+      );
+    }
+
+    if (accepted.length > 0) {
+      onFilesSelected(accepted);
     }
 
     // Reset so the same file can be re-attached
@@ -176,7 +192,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={(!isStreaming && input.trim().length === 0 && !hasAttachments) || isCapturing}
+          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing}
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}
