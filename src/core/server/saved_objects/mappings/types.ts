@@ -138,8 +138,8 @@ export interface IndexMapping {
 
 /** @internal */
 export interface IndexMappingMeta {
-  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
+  // A dictionary of key -> sha256 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
   // with each key being a root-level mapping property, and each value being
-  // the md5 hash of that mapping's value when the index was created.
+  // the sha256 hash of that mapping's value when the index was created.
   migrationMappingPropertyHashes?: { [k: string]: string };
 }
