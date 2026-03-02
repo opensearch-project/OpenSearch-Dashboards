@@ -732,7 +732,7 @@ describe('ChatService', () => {
 
     describe('updateCurrentMessages', () => {
       it('should update current messages and save to sessionStorage', () => {
-        const newMessages = [
+        const newMessages: Message[] = [
           { id: '1', role: 'user', content: 'Test message' },
           { id: '2', role: 'assistant', content: 'Test response' },
         ];
