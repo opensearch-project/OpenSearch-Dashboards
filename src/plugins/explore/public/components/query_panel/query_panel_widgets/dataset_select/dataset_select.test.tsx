@@ -189,35 +189,12 @@ describe('DatasetSelectWidget', () => {
     expect(screen.getByTestId('dataset-select')).toBeInTheDocument();
   });
 
-  it('attempts to get dataView on component mount', async () => {
-    mockGetDataView.mockResolvedValue({ id: 'test-id' });
-
-    renderWithStore();
-
-    await waitFor(() => {
-      expect(mockGetDataView).toHaveBeenCalledWith('test-id', false);
-    });
-  });
-
-  it('caches dataset if dataView does not exist', async () => {
-    mockGetDataView.mockResolvedValue(null);
-
-    renderWithStore();
-
-    await waitFor(() => {
-      expect(mockCacheDataset).toHaveBeenCalledWith(
-        { id: 'test-id', type: 'index_pattern' },
-        expect.objectContaining({
-          uiSettings: {},
-          savedObjects: {},
-          notifications: expect.anything(),
-          http: {},
-          data: expect.anything(),
-        }),
-        false
-      );
-    });
-  });
+  // NOTE: The following tests were removed because the redundant useEffect that fetched
+  // DataView on component mount was removed as part of the bulkGet optimization.
+  // The DatasetSelect component now handles all dataset fetching internally via getMultiple().
+  // Tests removed:
+  // - "attempts to get dataView on component mount"
+  // - "caches dataset if dataView does not exist"
 
   it('handles dataset selection correctly', async () => {
     renderWithStore();
