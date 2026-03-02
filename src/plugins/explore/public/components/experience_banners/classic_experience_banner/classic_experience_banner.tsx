@@ -3,26 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSmallButton } from '@elastic/eui';
 import './classic_experience_banner.scss';
-import { NEW_DISCOVER_INFO_URL, SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY } from '../constants';
+import {
+  NEW_DISCOVER_INFO_URL,
+  SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
+  HIDE_OLD_DISCOVER_LOCAL_STORAGE_KEY,
+} from '../constants';
 
 export interface ClassicExperienceBannerProps {
   navigateToExplore: () => void;
 }
 
 export const ClassicExperienceBanner = ({ navigateToExplore }: ClassicExperienceBannerProps) => {
+  const [isVisible, setIsVisible] = useState<boolean>(true);
+
+  // short circuit if the user has already dismissed the banner
+  if (!!localStorage.getItem(HIDE_OLD_DISCOVER_LOCAL_STORAGE_KEY)) {
+    return null;
+  }
   const switchToNewExperience = () => {
     localStorage.removeItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY);
     navigateToExplore();
   };
 
-  return (
+  const handleDismiss = () => {
+    setIsVisible(false);
+    localStorage.setItem(HIDE_OLD_DISCOVER_LOCAL_STORAGE_KEY, 'true');
+  };
+
+  return isVisible ? (
     <EuiCallOut
       className="exploreClassicExperienceBanner"
       data-test-subj="exploreClassicExperienceBanner"
       size="s"
+      dismissible={true}
+      onDismiss={handleDismiss}
     >
       <div>
         <span
@@ -49,5 +66,5 @@ export const ClassicExperienceBanner = ({ navigateToExplore }: ClassicExperience
         Try the new Discover
       </EuiSmallButton>
     </EuiCallOut>
-  );
+  ) : null;
 };

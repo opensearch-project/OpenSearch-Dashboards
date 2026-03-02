@@ -67,12 +67,6 @@ jest.mock('../../../components/container/bottom_container', () => ({
   ),
 }));
 
-jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
-  NewExperienceBanner: () => (
-    <div data-test-subj="new-experience-banner">New Experience Banner</div>
-  ),
-}));
-
 jest.mock('../../../components/top_nav/top_nav', () => ({
   TopNav: ({ setHeaderActionMenu }: { setHeaderActionMenu?: () => void }) => (
     <div data-test-subj="top-nav">
@@ -166,7 +160,10 @@ describe('LogsPage', () => {
     });
   };
 
-  const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
+  const TestHarness: FC<{
+    store: ReturnType<typeof createTestStore>;
+    children: React.ReactNode;
+  }> = ({ children, store }) => {
     return (
       <MemoryRouter>
         <Provider store={store}>{children}</Provider>
@@ -206,7 +203,6 @@ describe('LogsPage', () => {
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
-    expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 

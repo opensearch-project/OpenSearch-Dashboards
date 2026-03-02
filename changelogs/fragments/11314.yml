@@ -1,0 +1,2 @@
+feat:
+- Enable both old discover and new discover in analytics workspace and remove banners ([#11314](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11314))

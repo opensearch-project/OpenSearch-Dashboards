@@ -47,10 +47,7 @@ import { buildServices } from './build_services';
 import { DocViewTable } from './components/doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from './components/doc_viewer/json_code_block/json_code_block';
 import { TraceDetailsView } from './components/doc_viewer/trace_details_view/trace_details_view';
-import {
-  createQueryEditorExtensionConfig,
-  SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY,
-} from './components/experience_banners';
+import { createQueryEditorExtensionConfig } from './components/experience_banners';
 import { createSavedExploreLoader } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { setUsageCollector } from './services/usage_collector';
@@ -283,7 +280,7 @@ export class ExplorePlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         updater$: appStateUpdater.asObservable(),
-        order: 1000,
+        order: 500,
         workspaceAvailability: WorkspaceAvailability.insideWorkspace,
         euiIconType: 'inputOutput',
         defaultPath: '#/',
@@ -298,12 +295,8 @@ export class ExplorePlugin
           const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
           // We want to limit explore UI to only show up under the explore-enabled
           // workspaces. If user lands in the explore plugin URL in a different
-          // workspace, we will redirect them to classic discover. We will also redirect if
-          // they have manually selected classic discover
-          if (
-            !isExploreEnabledWorkspace ||
-            !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
-          ) {
+          // workspace, we will redirect them to classic discover.
+          if (!isExploreEnabledWorkspace) {
             coreStart.application.navigateToApp('discover', { replace: true });
             return () => {};
           }
@@ -437,29 +430,30 @@ export class ExplorePlugin
       {
         id: PLUGIN_ID,
         category: undefined,
-        order: 300,
+        order: 500,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
-        order: 300,
+        order: 500,
         parentNavLinkId: PLUGIN_ID,
       },
     ];
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -721,7 +715,9 @@ export class ExplorePlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }

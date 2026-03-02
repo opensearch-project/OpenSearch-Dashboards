@@ -295,27 +295,37 @@ export class DiscoverPlugin
             unmount();
           };
         } else {
-          navigateToApp('data-explorer', {
-            replace: true,
-            path: `/${PLUGIN_ID}${newPath}`,
-          });
+          // Check current workspace to decide navigation destination
+          const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+          const features = currentWorkspace?.features;
+
+          // Check if current workspace is observability using the same logic as explore plugin
+          const isObservability =
+            features &&
+            features.some(
+              (feature) =>
+                feature.includes(`use-case-${DEFAULT_NAV_GROUPS.observability.id}`) ||
+                feature === DEFAULT_NAV_GROUPS.observability.id
+            );
+
+          if (isObservability) {
+            // In observability workspace: redirect to new discover (explore/logs) by default
+            navigateToApp('explore/logs', {
+              replace: true,
+              path: newPath || '#/',
+            });
+          } else {
+            // In other workspaces: use classic discover via data-explorer
+            navigateToApp('data-explorer', {
+              replace: true,
+              path: `/${PLUGIN_ID}${newPath}`,
+            });
+          }
         }
 
         return () => {};
       },
     });
-
-    // If Explore plugin is enabled, it will register a Discover menu to the
-    // side nav in observability workspaces, we should skip registration here.
-    if (!plugins.explore) {
-      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-        {
-          id: PLUGIN_ID,
-          category: undefined,
-          order: 300,
-        },
-      ]);
-    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {

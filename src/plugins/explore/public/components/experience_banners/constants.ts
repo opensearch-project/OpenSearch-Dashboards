@@ -10,3 +10,4 @@ export const NEW_DISCOVER_INFO_URL =
 
 export const SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY = 'openSearchDashboards.showClassicDiscover';
 export const HIDE_NEW_DISCOVER_LOCAL_STORAGE_KEY = 'openSearchDashboards.hideNewDiscoverBanner';
+export const HIDE_OLD_DISCOVER_LOCAL_STORAGE_KEY = 'openSearchDashboards.hideOldDiscoverBanner';
