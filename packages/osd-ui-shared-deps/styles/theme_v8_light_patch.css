@@ -1,0 +1,362 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * Patch for the v8light (eui-next) pre-built CSS bundle.
+ *
+ * The pre-built bundle (@elastic/eui/dist/eui_theme_next_light.css) is compiled
+ * with eui-next's native primary color (teal, ~#07827E). Our AWS color overrides
+ * live in _globals_v8light.scss and affect plugin SCSS files, but have no effect
+ * on the pre-built bundle.
+ *
+ * This file is appended to the v8light webpack entry so its rules come after the
+ * pre-built bundle in the cascade and win.
+ *
+ * Shared rules (font family, focus ring keyframes, and common component states
+ * that are identical between light and dark) live in theme_v8_shared_patch.css,
+ * which is loaded before this file in the webpack entry.
+ *
+ * AWS v8light palette (_globals_v8light.scss):
+ *   $ouiColorPrimary:        #006ce0  (AWS Blue — interactive)
+ *   $ouiColorSecondary:      #00827d  (AWS Teal)
+ *   $ouiColorAccent:         #ff9900  (AWS Orange)
+ *   $ouiColorWarning:        #8d6605
+ *   $ouiColorDanger:         #d91515
+ *   $ouiPageBackgroundColor: #f2f3f3
+ *   $ouiColorLightShade:     #eaeded
+ *   $ouiColorLightestShade:  #f2f3f3
+ *   $ouiColorEmptyShade:     #ffffff
+ *   $ouiColorMediumShade:    #879596
+ *   $ouiColorDarkestShade:   #16191f
+ *   $ouiTextColor:           #16191f
+ *
+ * Derived values:
+ *   Primary hover (darken ~8%):   #005bbf
+ *   Primary active (darken ~16%): #004da6
+ *   Primary light tint (focus):   #dceeff
+ *   Focus ring rgba:              rgba(0, 108, 224, 0.3)
+ *   Shadow base rgba:             rgba(0, 55, 112, 0.3)
+ */
+
+/* ==========================================================================
+   DESIGN TOKENS
+   Theme-specific custom properties. Shared tokens (font family) are in
+   theme_v8_shared_patch.css.
+   ========================================================================== */
+
+:root {
+  /* AWS primary color scale */
+  --color-primary:        #006ce0;
+  --color-primary-hover:  #005bbf;
+  --color-primary-active: #004da6;
+  --color-primary-tint:   #dceeff;
+  --color-primary-faded:  rgba(0, 108, 224, 0.11); /* for date picker month background */
+
+  /* AWS page / neutral palette */
+  --color-secondary:    #00827d;
+  --color-empty-shade:  #ffffff;
+  --color-light-shade:  #eaeded;
+  --color-page-bg:      #f2f3f3;
+  --color-text:         #16191f;
+
+  /* Dark-mode header overrides */
+  --color-dark-active: #4da6ff;
+  --color-dark-focus:  #003a7a;
+  --color-dark-badge:  #172430;
+
+  /* Focus ring */
+  --focus-ring:             rgba(0, 108, 224, 0.3);
+  --focus-ring-transparent: rgba(0, 108, 224, 0);
+  --primary-alpha-10:       rgba(0, 108, 224, 0.1);
+  --primary-alpha-15:       rgba(0, 108, 224, 0.15);
+
+  /* Box shadows */
+  --shadow-button:       rgba(0, 45, 90, 0.4);
+  --shadow-base:         rgba(0, 55, 112, 0.3);
+  --shadow-base-light:   rgba(0, 55, 112, 0.15);
+  --shadow-field:        rgba(135, 149, 150, 0.2);
+  --shadow-field-strong: rgba(135, 149, 150, 0.3);
+  --shadow-inset:        rgba(22, 25, 31, 0.1);
+}
+
+/* ==========================================================================
+   LINKS & ANCHORS
+   ========================================================================== */
+
+a {
+  color: var(--color-primary);
+}
+
+.euiLink.euiLink--primary {
+  color: var(--color-primary);
+}
+.euiLink.euiLink--primary:hover,
+.euiLink.euiLink--primary:focus {
+  color: var(--color-primary-active);
+}
+.euiLink.euiLink--primary:focus,
+.euiLink:focus {
+  background: var(--color-primary-tint);
+}
+
+/* ==========================================================================
+   BUTTON — filled and outlined primary variants
+   ========================================================================== */
+
+/* Spinner color (used when button is disabled but still loading) */
+.euiButton.euiButton-isDisabled .euiButtonContent__spinner,
+.euiButtonEmpty:disabled .euiButtonContent__spinner,
+.euiButtonIcon.euiButtonIcon-isDisabled .euiButtonContent__spinner,
+.euiButtonGroupButton.euiButtonGroupButton-isDisabled .euiButtonContent__spinner {
+  border-color: var(--color-primary) currentColor currentColor currentColor;
+}
+
+/* Outlined (default) primary button */
+.euiButton--primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.euiButton--primary.euiButton--fill {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-empty-shade);
+}
+.euiButton--primary.euiButton--fill:not([class*=isDisabled]):active {
+  box-shadow: inset 1px 2px 8px var(--shadow-button);
+}
+
+/* ==========================================================================
+   BUTTON EMPTY — ghost/text-style primary buttons
+   (Add data, Manage, Dev tools top nav + footer links)
+   ========================================================================== */
+
+.euiButtonEmpty--primary {
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   BUTTON ICON — icon-only primary buttons
+   ========================================================================== */
+
+.euiButtonIcon--primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   BUTTON GROUP — segmented primary buttons
+   ========================================================================== */
+
+.euiButtonGroupButton--primary {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.euiButtonGroupButton--primary.euiButtonGroupButton--fill,
+.euiButtonGroupButton--primary.euiButtonGroupButton-isSelected {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-empty-shade);
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+/* Light-mode header: background and border match v8light page palette */
+.euiHeader {
+  background: var(--color-secondary);
+  border-bottom: 1px solid var(--color-light-shade);
+  box-shadow: 0 2px 2px -1px var(--shadow-field-strong), 0 1px 5px -2px var(--shadow-field-strong);
+}
+
+/* Logo focus state */
+.euiHeaderLogo:focus {
+  background: var(--color-primary-tint);
+}
+
+/* Dark-mode header: active link uses AWS Blue instead of teal */
+.euiHeader--dark .euiHeaderLink-isActive {
+  color: var(--color-dark-active);
+}
+.euiHeader--dark .euiHeaderLogo:focus,
+.euiHeader--dark .euiHeaderLink:focus,
+.euiHeader--dark .euiHeaderSectionItemButton:focus {
+  background: var(--color-dark-focus);
+}
+.euiHeader--dark .euiHeaderSectionItemButton__notification--badge {
+  box-shadow: 0 0 0 1px var(--color-dark-badge);
+}
+
+.euiHeader--default{
+  background-color: var(--color-page-bg);
+}
+
+/* ==========================================================================
+   SIDEBAR / COLLAPSIBLE NAV
+   ========================================================================== */
+
+.euiCollapsibleNav.euiFlyout,
+.euiCollapsibleNavGroup {
+  background-color: var(--color-page-bg);
+}
+
+/* Selected nav item uses AWS Blue */
+.euiSideNavItemButton.euiSideNavItemButton-isSelected {
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   CARD
+   ========================================================================== */
+
+/* Selected state border uses AWS Blue */
+.euiCard--isSelectable--primary.euiCard-isSelected:not(.euiCard-isDisabled) {
+  border-color: var(--color-primary) !important;
+}
+
+/* Card select button highlight */
+.euiCardSelect--primary:enabled {
+  background-color: var(--color-primary-tint);
+}
+
+/* Checkable card selected border */
+.euiCheckableCard:not(.euiCheckableCard-isDisabled).euiCheckableCard-isChecked {
+  border-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   FORM INPUTS
+   ========================================================================== */
+
+/* Field text: match v8light background and text */
+.euiFieldText {
+  background-color: var(--color-page-bg);
+  color: var(--color-text);
+  box-shadow:
+    0 1px 1px -1px var(--shadow-field),
+    0 3px 2px -2px var(--shadow-field),
+    inset 0 0 0 1px var(--shadow-inset);
+}
+/* Focus underline switches from teal to AWS Blue */
+.euiFieldText:focus {
+  background-color: var(--color-empty-shade);
+  background-image: linear-gradient(to top, var(--color-primary), var(--color-primary) 2px, transparent 2px, transparent 100%);
+  box-shadow:
+    0 1px 1px -1px var(--shadow-field),
+    0 4px 4px -2px var(--shadow-field),
+    inset 0 0 0 1px var(--shadow-inset);
+}
+
+/* FormControlLayout group (input with appended button) */
+.euiFormControlLayout--group {
+  background-color: var(--color-page-bg);
+  box-shadow:
+    0 1px 1px -1px var(--shadow-field),
+    0 3px 2px -2px var(--shadow-field),
+    inset 0 0 0 1px var(--shadow-inset);
+}
+
+/* Focused label */
+.euiFormLabel.euiFormLabel-isFocused {
+  color: var(--color-primary);
+}
+
+/* ComboBox open focus underline */
+.euiComboBox.euiComboBox-isOpen .euiComboBox__inputWrap {
+  background-image: linear-gradient(to top, var(--color-primary), var(--color-primary) 2px, transparent 2px, transparent 100%);
+}
+
+/* ComboBox focused option highlight */
+.euiComboBoxOption.euiComboBoxOption-isFocused {
+  color: var(--color-primary);
+  background-color: var(--color-primary-tint);
+}
+
+/* Select field (euiSelect) focus underline */
+.euiSelect:focus {
+  background-image: linear-gradient(to top, var(--color-primary), var(--color-primary) 2px, transparent 2px, transparent 100%);
+}
+
+/* Color picker hue slider focus */
+.euiHue__range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  border-color: var(--color-primary);
+}
+.euiHue__range:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  border-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   CALLOUT (informational banners — primary variant)
+   ========================================================================== */
+
+.euiCallOut--primary {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-tint);
+}
+.euiCallOut--primary .euiCallOutHeader__icon {
+  fill: var(--color-primary);
+}
+.euiCallOut--primary .euiCallOutHeader__title {
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   ACCORDION — icon/button focus
+   ========================================================================== */
+
+.euiAccordion__button:focus .euiAccordion__iconWrapper {
+  color: var(--color-primary);
+}
+.euiAccordion__iconButton:focus {
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   CONTEXT MENU — focused item
+   ========================================================================== */
+
+.euiContextMenuItem:focus {
+  background-color: var(--color-primary-tint);
+}
+
+/* ==========================================================================
+   CONTROL BAR — active tab indicator
+   ========================================================================== */
+
+.euiControlBar__tab.euiControlBar__tab--active {
+  box-shadow: inset 0 4px 0 var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   CODE EDITOR — keyboard hint focus
+   ========================================================================== */
+
+.euiCodeEditorKeyboardHint:focus {
+  border: 2px solid var(--color-primary);
+}
+
+
+/* MISCELLANEOUS */
+
+.euiSuperDatePicker__prettyFormatLink{
+  color: var(--color-primary)
+}
+
+.react-datepicker__day--selected, .react-datepicker__day--in-selecting-range {
+  background-color: var(--color-primary) !important;
+}
+
+.react-datepicker__month--accessible:focus {
+  background-color: var(--color-primary-faded) !important
+}
+
+/* sidebar for larger fonts */
+
+.mgtSideBarNav {
+  width: unset !important
+}
