@@ -26,7 +26,6 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
-import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
@@ -520,15 +519,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onFillInput={setInput}
             {...enhancedProps}
           />
-
-          {/* Sticky confirmation message - positioned above chat input */}
-          {pendingConfirmation && (
-            <ConfirmationMessage
-              request={pendingConfirmation}
-              onApprove={handleApproveConfirmation}
-              onReject={handleRejectConfirmation}
-            />
-          )}
 
           {
             (isCapturing || screenshotData) && (
