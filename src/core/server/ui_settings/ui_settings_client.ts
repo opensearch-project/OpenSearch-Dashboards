@@ -146,7 +146,36 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async get<T = any>(key: string, scope?: UiSettingScope): Promise<T> {
-    const all = await this.getAll(scope);
+    // If a specific scope is provided, use it directly
+    if (scope) {
+      const all = await this.getAll(scope);
+      return all[key];
+    }
+
+    const scopeValue = this.defaults[key]?.scope;
+    const scopes = scopeValue ? (Array.isArray(scopeValue) ? scopeValue : [scopeValue]) : [];
+
+    // If no scope is provided and the key has multiple scopes
+    if (scopes && scopes?.length > 1) {
+      const validScopes = [...scopes].sort((a, b) => {
+        const indexA = UiSettingScopeReadOptions.findIndex((opt) => opt.scope === a);
+        const indexB = UiSettingScopeReadOptions.findIndex((opt) => opt.scope === b);
+        return indexB - indexA;
+      });
+
+      for (const s of validScopes) {
+        const userProvided = await this.getUserProvided(s);
+
+        if (userProvided && Object.prototype.hasOwnProperty.call(userProvided, key)) {
+          // align with getUserProvided, higher scope takes priority
+          return userProvided[key].userValue as T;
+        }
+      }
+    }
+
+    // For single scope
+    // or no user-provided value is found, fallback to default value
+    const all = await this.getAll(scopes?.[0] as UiSettingScope | undefined);
     return all[key];
   }
 
