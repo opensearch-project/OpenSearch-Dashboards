@@ -58,7 +58,7 @@ describe('ChatWindow', () => {
     mockContextProvider = {};
     mockSuggestedActionsService = {
       registerProvider: jest.fn(),
-    };
+    } as any;
     mockChatService = {
       sendMessage: jest.fn().mockResolvedValue({
         observable: of({ type: 'message', content: 'test' }),
@@ -902,6 +902,204 @@ describe('ChatWindow', () => {
 
       // Verify that getState$ was called during mount
       expect(mockGetState).toHaveBeenCalled();
+    });
+  });
+
+  describe('conversation loading abort functionality', () => {
+    it('should abort conversation loading when handleCloseHistory is called', async () => {
+      // Mock a long-running restoration that never resolves
+      let resolveRestore: any;
+      mockChatService.restoreLatestConversation.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveRestore = resolve;
+          })
+      );
+
+      const { getByLabelText, queryByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Wait a bit to ensure loading state is set
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Verify loading screen is shown
+      expect(queryByText('Loading conversation...')).toBeTruthy();
+
+      // Click the "Show conversation history" button to show history
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      // Wait for state updates
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Now click back button to close history (which should abort loading)
+      const backButton = getByLabelText('Go back');
+      await act(async () => {
+        backButton.click();
+      });
+
+      // Wait for state updates
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Loading screen should be hidden immediately
+      expect(queryByText('Loading conversation...')).toBeNull();
+
+      // Verify restoration was called but not completed
+      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
+    });
+
+    it('should abort loading when selecting a conversation and then closing history', async () => {
+      mockChatService.restoreLatestConversation.mockResolvedValue(null);
+
+      // Mock getConversations to return a conversation
+      mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            id: 'conv-1',
+            threadId: 'thread-1',
+            name: 'Test conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      });
+
+      // Mock loadConversation to never resolve
+      let resolveLoad: any;
+      mockChatService.loadConversation.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveLoad = resolve;
+          })
+      );
+
+      const { getByLabelText, getByText, queryByText } = renderWithContext(
+        <ChatWindow onClose={jest.fn()} />
+      );
+
+      // Wait for initial restoration to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Open history panel
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Click on a conversation to load it
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      // Wait a bit to ensure loading state is set
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Verify loading screen is shown
+      expect(queryByText('Loading conversation...')).toBeTruthy();
+
+      // Click back button to abort loading
+      const backButton = getByLabelText('Go back');
+      await act(async () => {
+        backButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Loading screen should be hidden immediately
+      expect(queryByText('Loading conversation...')).toBeNull();
+
+      // Verify loadConversation was called but not completed
+      expect(mockChatService.loadConversation).toHaveBeenCalled();
+    });
+
+    it('should not show error toast when loading is aborted', async () => {
+      mockChatService.restoreLatestConversation.mockResolvedValue(null);
+
+      mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            id: 'conv-1',
+            threadId: 'thread-1',
+            name: 'Test conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      });
+
+      // Mock loadConversation to reject after a delay
+      let rejectLoad: any;
+      mockChatService.loadConversation.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            rejectLoad = reject;
+          })
+      );
+
+      const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Wait for initial restoration
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Open history and select conversation
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Abort by clicking back
+      const backButton = getByLabelText('Go back');
+      await act(async () => {
+        backButton.click();
+      });
+
+      // Now reject the promise (simulating error after abort)
+      await act(async () => {
+        rejectLoad(new Error('Loading failed'));
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Verify no error toast was shown (since loading was aborted)
+      expect(mockCore.notifications.toasts.addWarning).not.toHaveBeenCalled();
     });
   });
 
