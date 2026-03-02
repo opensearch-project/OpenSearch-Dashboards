@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { glob } from 'glob';
+import { globSync } from 'glob';
 import { REPO_ROOT } from '@osd/dev-utils';
 import { ListrContext } from '.';
 import { I18nConfig, normalizePath, readFileAsync } from '..';
@@ -69,7 +69,7 @@ async function checkFilesForUntrackedMessagesTask({
   ]);
 
   const filesToCheck = files.filter(
-    (file) => glob.sync(file, { ignore: ignoredPatterns, root: REPO_ROOT }).length > 0
+    (file) => globSync(file, { ignore: ignoredPatterns, root: REPO_ROOT }).length > 0
   );
 
   const fileContents = await Promise.all(
