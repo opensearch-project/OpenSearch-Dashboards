@@ -147,6 +147,7 @@ export interface AutocompleteData<
   Lexer: LexerConstructor<L>;
   Parser: ParserConstructor<P>;
   getParseTree: GetParseTree<P>;
+  getPipeStartParseTree?: GetParseTree<P>;
   tokenDictionary: TokenDictionary;
   ignoredTokens: Set<number>;
   rulesToVisit: Set<number>;
@@ -178,6 +179,7 @@ export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
   ignoredTokens: Set<number>;
   rulesToVisit: Set<number>;
   getParseTree: GetParseTree<P>;
+  getPipeStartParseTree?: GetParseTree<P>;
   enrichAutocompleteResult: EnrichAutocompleteResult<A>;
   query: string;
   cursor: CursorPosition;
