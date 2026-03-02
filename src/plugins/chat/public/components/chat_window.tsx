@@ -568,15 +568,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             {...enhancedProps}
           />
 
-          {/* Sticky confirmation message - positioned above chat input */}
-          {pendingConfirmation && (
-            <ConfirmationMessage
-              request={pendingConfirmation}
-              onApprove={handleApproveConfirmation}
-              onReject={handleRejectConfirmation}
-            />
-          )}
-
           {fileAttachments.length > 0 && (
             <div className="chatWindow__fileAttachments" aria-label="Attached files">
               <EuiFlexGroup gutterSize="xs" wrap responsive={false}>

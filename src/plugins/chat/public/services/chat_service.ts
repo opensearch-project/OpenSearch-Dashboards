@@ -631,6 +631,10 @@ export class ChatService {
     return messages.slice(0, endIndex);
   }
 
+  public saveCurrentChatStatePublic(): void {
+    this.saveCurrentChatState();
+  }
+
   public getCurrentMessages(): Message[] {
     return this.currentMessages;
   }

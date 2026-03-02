@@ -82,6 +82,10 @@ export const MessageRow: React.FC<MessageRowProps> = ({
             if (block.type === 'text' && block.text) {
               return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
             }
+            // Handle plain text blocks (for backward compatibility)
+            if (block.text) {
+              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+            }
             return null;
           })}
         </>
