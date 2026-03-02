@@ -68,6 +68,11 @@ describe('ChatWindow', () => {
       abort: jest.fn(),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
+      conversationHistoryService: {
+        getMemoryProvider: jest.fn().mockReturnValue({
+          includeFullHistory: true,
+        }),
+      },
     } as any;
     mockSuggestedActionsService = {} as any;
     mockConfirmationService = {
