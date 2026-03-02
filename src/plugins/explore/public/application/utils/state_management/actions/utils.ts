@@ -110,10 +110,13 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
     return query;
   }
 
+  // Strip head clause so the histogram counts all matching documents, not just the limited rows
+  const baseQuery = query.replace(/\|\s*head\s+\d+\s*/gi, '').trim();
+
   if (breakdownField) {
-    return `${query} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+    return `${baseQuery} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
   } else {
-    return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+    return `${baseQuery} | stats count() by span(${timeFieldName}, ${finalInterval})`;
   }
 };
 
@@ -223,7 +226,7 @@ export const processRawResultsForHistogram = (
 
     Object.entries(responseAggs).forEach(([id, value]) => {
       if (aggsConfig && aggsConfig.date_histogram) {
-        let totalHits = rawResults.hits.total;
+        let totalHits = 0;
         const buckets = value as Array<{ key: string; value: number }>;
         tempResult.aggregations[id] = {
           buckets: buckets.map((bucket) => {
