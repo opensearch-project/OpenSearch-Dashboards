@@ -555,7 +555,29 @@ function tryRuntimeGrammarSuggestions(
     const spaceToken = resolveSpaceToken(grammar);
 
     // ─── Pick start rule based on query shape ─────────────────────────────
+    const isPipeFirst = query.trimStart().startsWith('|');
     const startRuleIndex = pickStartRuleIndex(query, grammar);
+
+    // ─── Pipe-first: strip leading pipe so token stream matches start rule ─
+    let effectiveQuery = query;
+    let effectiveCursor = cursor;
+
+    if (isPipeFirst) {
+      const pipePos = query.indexOf('|');
+      effectiveQuery = query.substring(pipePos + 1);
+      const strippedPrefix = query.substring(0, pipePos + 1);
+      const prefixLines = strippedPrefix.split(/\r\n|\n|\r/);
+      const numStrippedNewlines = prefixLines.length - 1;
+      const lastPrefixLineLen = prefixLines[prefixLines.length - 1].length;
+
+      effectiveCursor = {
+        line: Math.max(1, cursor.line - numStrippedNewlines),
+        column:
+          cursor.line === numStrippedNewlines + 1
+            ? Math.max(1, cursor.column - lastPrefixLineLen)
+            : cursor.column,
+      };
+    }
 
     // ─── Create lexer + parser ────────────────────────────────────────────
     const lexer = new LexerInterpreter(
@@ -565,7 +587,7 @@ function tryRuntimeGrammarSuggestions(
       grammar.channelNames,
       grammar.modeNames,
       grammar.lexerATN,
-      CharStream.fromString(query)
+      CharStream.fromString(effectiveQuery)
     );
 
     const tokenStream = new CommonTokenStream(lexer);
@@ -600,7 +622,7 @@ function tryRuntimeGrammarSuggestions(
     const core = new CodeCompletionCore(parser);
     core.ignoredTokens = new Set(grammar.ignoredTokens);
     core.preferredRules = new Set(grammar.rulesToVisit);
-    const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, spaceToken);
+    const cursorTokenIndex = findCursorTokenIndex(tokenStream, effectiveCursor, spaceToken);
     if (cursorTokenIndex === undefined) return null;
 
     // Fix A: Clear stale C3 follow-set cache when grammar changes.
@@ -625,7 +647,11 @@ function tryRuntimeGrammarSuggestions(
     // candidate and does NOT return the tokens inside it. The compiled path
     // handles this via processVisitedRules + parseQuery's rerun loop.
     // Here we replicate the logic generically using rule names from the grammar.
-    const rerunRules = getRuntimeRerunRules(grammar, rules, tokenStream, cursorTokenIndex);
+    // Skip search-oriented rerun for pipe-first mode — those rules are
+    // irrelevant when parsing from the commands entry point.
+    const rerunRules = isPipeFirst
+      ? []
+      : getRuntimeRerunRules(grammar, rules, tokenStream, cursorTokenIndex);
     if (rerunRules.length > 0) {
       const rerunPreferred = new Set(core.preferredRules);
       for (const ruleIdx of rerunRules) rerunPreferred.delete(ruleIdx);
@@ -1049,6 +1075,7 @@ export const getDefaultOpenSearchPplAutoCompleteSuggestions = (
     ignoredTokens: defaultPplAutocompleteData.ignoredTokens,
     rulesToVisit: defaultPplAutocompleteData.rulesToVisit,
     getParseTree: defaultPplAutocompleteData.getParseTree,
+    getPipeStartParseTree: defaultPplAutocompleteData.getPipeStartParseTree,
     enrichAutocompleteResult: defaultPplAutocompleteData.enrichAutocompleteResult,
     query,
     cursor,
@@ -1066,6 +1093,7 @@ export const getSimplifiedOpenSearchPplAutoCompleteSuggestions = (
     ignoredTokens: simplifiedPplAutocompleteData.ignoredTokens,
     rulesToVisit: simplifiedPplAutocompleteData.rulesToVisit,
     getParseTree: simplifiedPplAutocompleteData.getParseTree,
+    getPipeStartParseTree: simplifiedPplAutocompleteData.getPipeStartParseTree,
     enrichAutocompleteResult: simplifiedPplAutocompleteData.enrichAutocompleteResult,
     query,
     cursor,

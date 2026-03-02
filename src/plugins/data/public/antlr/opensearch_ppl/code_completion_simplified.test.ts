@@ -528,6 +528,113 @@ describe('ppl code_completion', () => {
       );
     });
 
+    describe('pipe-first queries', () => {
+      it('should suggest pipeline commands when query starts with pipe', async () => {
+        const result = await getSimpleSuggestions('| ');
+
+        // Should suggest pipeline commands
+        checkSuggestionsContain(result, {
+          text: 'WHERE',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+        checkSuggestionsContain(result, {
+          text: 'FIELDS',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+        checkSuggestionsContain(result, {
+          text: 'STATS',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+        checkSuggestionsContain(result, {
+          text: 'SORT',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+        checkSuggestionsContain(result, {
+          text: 'DEDUP',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+
+        // Should NOT suggest source-level commands
+        checkSuggestionsShouldNotContain(result, {
+          text: 'SOURCE',
+        });
+      });
+
+      it('should suggest field names for pipe-first where command', async () => {
+        const result = await getSimpleSuggestions('| where ');
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+        checkSuggestionsContain(result, {
+          text: 'field2',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should suggest aggregate functions for pipe-first stats command', async () => {
+        const result = await getSimpleSuggestions('| stats ');
+
+        Object.keys(PPL_AGGREGATE_FUNCTIONS).forEach((af) => {
+          checkSuggestionsContain(result, {
+            text: `${af}()`,
+            type: monaco.languages.CompletionItemKind.Module,
+          });
+        });
+      });
+
+      it('should suggest field names for pipe-first fields command', async () => {
+        const result = await getSimpleSuggestions('| fields ');
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should suggest additional fields after comma in pipe-first fields command', async () => {
+        const result = await getSimpleSuggestions('| fields field1, ');
+
+        checkSuggestionsContain(result, {
+          text: 'field2',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should suggest "as" for pipe-first rename command', async () => {
+        const result = await getSimpleSuggestions('| rename field1 ');
+
+        checkSuggestionsContain(result, {
+          text: 'as',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+      });
+
+      it('should handle pipe with leading whitespace', async () => {
+        const result = await getSimpleSuggestions('  | ');
+
+        checkSuggestionsContain(result, {
+          text: 'WHERE',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+        checkSuggestionsContain(result, {
+          text: 'FIELDS',
+          type: monaco.languages.CompletionItemKind.Keyword,
+        });
+      });
+
+      it('should not affect normal source-prefixed queries', async () => {
+        // Verify that existing non-pipe queries still work correctly
+        const result = await getSimpleSuggestions('source = test-index | where ');
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+    });
+
     describe('extractQueryTillCursor behavior', () => {
       it('should handle single line queries correctly', async () => {
         const query = 'source = test-index | where field1 = "value" ';
