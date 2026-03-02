@@ -6,8 +6,10 @@
 import { createGauge } from './to_expression';
 import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultGaugeChartStyles } from './gauge_vis_config';
+import * as utils from '../utils/utils';
 
 jest.mock('./gauge_chart_utils', () => ({
+  ...jest.requireActual('./gauge_chart_utils'),
   mergeThresholdsWithBase: jest.fn(() => [{ value: 0, color: '#00BD6B' }]),
   locateThreshold: jest.fn(() => ({ value: 0, color: '#00BD6B' })),
   generateRanges: jest.fn(() => [{ min: 0, max: 100, color: '#00BD6B' }]),
@@ -130,5 +132,120 @@ describe('createGauge', () => {
     const spec = createGauge(mockData, [mockNumericalColumn], [], [], defaultGaugeChartStyles);
 
     expect(spec.params.find((p) => p.name === 'mainValue')?.value).toBe(50);
+  });
+});
+
+// TODO rename after cleaning
+describe('createGauge in echarts', () => {
+  beforeEach(() => {
+    jest.spyOn(utils, 'getChartRender').mockReturnValue('echarts');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+  const mockNumericalColumn: VisColumn = {
+    id: 1,
+    name: 'value',
+    column: 'value',
+    schema: VisFieldType.Numerical,
+    validValuesCount: 100,
+    uniqueValuesCount: 50,
+  };
+
+  const mockData = [{ value: 10 }, { value: 20 }, { value: 30 }];
+
+  const mockAxisColumnMappings = {
+    [AxisRole.Value]: mockNumericalColumn,
+  };
+
+  it('should create ECharts gauge specification with valid mappings', () => {
+    const result = createGauge(
+      mockData,
+      [mockNumericalColumn],
+      [],
+      [],
+      defaultGaugeChartStyles,
+      mockAxisColumnMappings
+    );
+
+    expect(result).toHaveProperty('series');
+    expect(result?.series[0].type).toBe('gauge');
+    expect(result).toHaveProperty('dataset');
+  });
+
+  it('uses custom min and max values', () => {
+    const customStyles = {
+      ...defaultGaugeChartStyles,
+      min: 10,
+      max: 200,
+    };
+
+    const result = createGauge(
+      mockData,
+      [mockNumericalColumn],
+      [],
+      [],
+      customStyles,
+      mockAxisColumnMappings
+    );
+
+    // value arc
+    expect(result?.series[0].min).toBe(10);
+    expect(result?.series[0].max).toBe(200);
+
+    // threshold arc
+    expect(result?.series[0].min).toBe(10);
+    expect(result?.series[0].max).toBe(200);
+  });
+
+  it('includes title when showTitle is true', () => {
+    const customStyles = {
+      ...defaultGaugeChartStyles,
+      showTitle: true,
+      title: 'Custom Gauge Title',
+    };
+
+    const result = createGauge(
+      mockData,
+      [mockNumericalColumn],
+      [],
+      [],
+      customStyles,
+      mockAxisColumnMappings
+    );
+
+    const textCustomSeries = result.series?.[2];
+    expect(textCustomSeries.type).toBe('custom');
+    expect(textCustomSeries.coordinateSystem).toBe('polar');
+    expect(typeof textCustomSeries.renderItem).toBe('function');
+
+    const mockApi = {
+      getWidth: () => 400,
+      getHeight: () => 300,
+    };
+    const mockParams = {
+      dataIndex: 0,
+      seriesIndex: 0,
+    };
+
+    const renderResult = textCustomSeries.renderItem(mockParams, mockApi);
+
+    expect(renderResult).toEqual(
+      expect.objectContaining({
+        type: 'group',
+        x: 200, // width * 0.5
+        y: 180, // height * 0.6
+      })
+    );
+
+    expect(renderResult.children[1]).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        style: expect.objectContaining({
+          text: 'Custom Gauge Title',
+        }),
+      })
+    );
   });
 });
