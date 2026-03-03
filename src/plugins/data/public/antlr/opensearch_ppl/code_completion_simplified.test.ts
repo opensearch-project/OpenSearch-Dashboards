@@ -14,7 +14,7 @@ import { IndexPattern } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
 import { QuerySuggestion } from '../../autocomplete';
 import * as utils from '../shared/utils';
-import { PPL_AGGREGATE_FUNCTIONS } from './constants';
+import { PPL_AGGREGATE_FUNCTIONS, PPL_SUGGESTION_IMPORTANCE } from './constants';
 import * as querySnippets from '../../query_snippet_suggestions/ppl/suggestions';
 import { pplGrammarCache, CachedGrammar } from './ppl_grammar_cache';
 import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
@@ -669,6 +669,90 @@ describe('ppl code_completion', () => {
         expect(result.some((s) => s.text === '=')).toBeTruthy();
       });
 
+      it('should suggest equals after rex field on runtime path', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern('| rex field ', runtimeIndexPattern);
+
+        expect(result.some((s) => s.text === '=')).toBeTruthy();
+      });
+
+      it('should suggest fields after rex field equals on runtime path', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern('| rex field = ', runtimeIndexPattern);
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should suggest full schema fields after rex field equals on runtime path', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern('| rex field = ', runtimeIndexPattern);
+        const suggestedFieldNames = result
+          .filter((s) => s.type === monaco.languages.CompletionItemKind.Field)
+          .map((s) => s.text);
+        const expectedFieldNames = runtimeIndexPattern.fields
+          .filter((field) => !field?.subType)
+          .map((field) => field.name);
+
+        expectedFieldNames.forEach((name) => {
+          expect(suggestedFieldNames).toContain(name);
+        });
+      });
+
+      it('should keep rex field equals suggestions field-only and include subtype fields', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+        (querySnippets.getPPLQuerySnippetForSuggestions as jest.Mock).mockResolvedValue([
+          {
+            text: '{} (()',
+            insertText: '{} (() ',
+            type: monaco.languages.CompletionItemKind.Reference,
+            detail: 'Saved Query Snippet',
+          },
+        ]);
+
+        const runtimeIndexPatternWithSubtype = {
+          ...runtimeIndexPattern,
+          fields: [
+            ...(
+              runtimeIndexPattern.fields as Array<{
+                name: string;
+                type: string;
+                subType?: unknown;
+              }>
+            ),
+            {
+              name: 'field1.keyword',
+              type: 'string',
+              subType: {
+                multi: {
+                  parent: 'field1',
+                },
+              },
+            },
+          ],
+        } as unknown as IndexPattern;
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          '| rex field = ',
+          runtimeIndexPatternWithSubtype
+        );
+
+        checkSuggestionsContain(result, {
+          text: 'field1.keyword',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+        expect(result.every((s) => s.type === monaco.languages.CompletionItemKind.Field)).toBeTruthy();
+      });
+
       it('should resolve datasource id from query when index pattern has no dataSourceRef', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
         const grammarSpy = jest
@@ -738,6 +822,77 @@ describe('ppl code_completion', () => {
         });
       });
 
+      it('should not suppress literal command tokens even if backend ignoredTokens includes them', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammar = buildRuntimeGrammar();
+        const appendToken = grammar.runtimeSymbolicNameToTokenType.get('APPEND');
+        if (typeof appendToken === 'number') {
+          grammar.ignoredTokens = [...grammar.ignoredTokens, appendToken];
+        }
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(result.some((s) => s.text === 'APPEND')).toBeTruthy();
+      });
+
+      it('should include runtime symbolic keywords when literal names are missing', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammar = buildRuntimeGrammar();
+        const whereToken = grammar.runtimeSymbolicNameToTokenType.get('WHERE');
+        const originalVocabulary = grammar.vocabulary;
+        const patchedVocabulary = Object.create(originalVocabulary);
+        patchedVocabulary.getLiteralName = (tokenType: number) =>
+          tokenType === whereToken ? null : originalVocabulary.getLiteralName(tokenType);
+        grammar.vocabulary = patchedVocabulary;
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        checkSuggestionsContain(result, {
+          text: 'WHERE',
+          type: monaco.languages.CompletionItemKind.Function,
+        });
+      });
+
+      it('should include runtime function keywords in expression context', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | where ',
+          runtimeIndexPattern
+        );
+
+        expect(result.some((s) => s.text === 'MVJOIN')).toBeTruthy();
+      });
+
+      it('should not render punctuation tokens as function calls when runtime ids drift', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const equalToken = SimplifiedOpenSearchPPLParser.EQUAL;
+        const originalDetails = PPL_SUGGESTION_IMPORTANCE.get(equalToken);
+
+        PPL_SUGGESTION_IMPORTANCE.set(equalToken, {
+          importance: '6',
+          type: 'Function',
+          isFunction: true,
+        });
+
+        try {
+          const result = await getSimpleSuggestionsForIndexPattern('| rex field ', runtimeIndexPattern);
+          expect(result.some((s) => s.text === '=()')).toBeFalsy();
+          expect(result.some((s) => s.text === '=')).toBeTruthy();
+        } finally {
+          if (originalDetails) {
+            PPL_SUGGESTION_IMPORTANCE.set(equalToken, originalDetails);
+          } else {
+            PPL_SUGGESTION_IMPORTANCE.delete(equalToken);
+          }
+        }
+      });
+
       it('should fall back to compiled suggestions when runtime grammar cache is missing', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(null);
@@ -752,7 +907,7 @@ describe('ppl code_completion', () => {
         });
       });
 
-      it('should fall back to compiled suggestions when datasource version is unsupported', async () => {
+      it('should use runtime grammar when cached grammar exists even if datasource version is unsupported', async () => {
         const runtimeParseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(false);
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
@@ -762,12 +917,12 @@ describe('ppl code_completion', () => {
           dataSourceRef: { id: 'runtime-ds', version: '3.5.0' },
         } as unknown as IndexPattern;
 
-        const result = await getSimpleSuggestionsForIndexPattern('source = ', unsupportedIndexPattern);
+        const result = await getSimpleSuggestionsForIndexPattern('| rex field = ', unsupportedIndexPattern);
 
-        expect(runtimeParseSpy).not.toHaveBeenCalled();
+        expect(runtimeParseSpy).toHaveBeenCalled();
         checkSuggestionsContain(result, {
-          text: 'test-index',
-          type: monaco.languages.CompletionItemKind.Struct,
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
         });
       });
     });

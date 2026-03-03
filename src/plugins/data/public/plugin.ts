@@ -332,13 +332,6 @@ export class DataPublicPlugin
       if (dsKey === lastGrammarDatasourceKey) {
         return;
       }
-      const dsVersion = q?.dataset?.dataSource?.version;
-      // If version is known and unsupported, skip warm-up.
-      // If version is missing, warm-up will resolve version via saved objects (/api/status for local).
-      if (dsVersion && !pplGrammarCache.shouldFetchFromBackend(dsVersion)) {
-        lastGrammarDatasourceKey = dsKey;
-        return;
-      }
       lastGrammarDatasourceKey = dsKey;
       pplGrammarCache.invalidate(dsId);
       pplGrammarCache.warmUp(http, savedObjects.client, dsId);
