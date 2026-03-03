@@ -67,6 +67,12 @@ type KeywordSuggestionDetails = {
   optionalParam?: boolean;
 };
 
+const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
+  importance: '92',
+  type: SuggestionItemDetailsTags.Function,
+  isFunction: true,
+};
+
 // ─── Fix A: C3 follow-set cache isolation for runtime grammars ───────────────
 // CodeCompletionCore.followSetsByATN caches by parser.constructor.name.
 // All ParserInterpreter instances share "ParserInterpreter" as the key,
@@ -150,6 +156,29 @@ function isCommandPositionInCurrentSegment(queryTillCursor: string): boolean {
 
 function isLikelyCommandKeyword(sk: KeywordSuggestion): boolean {
   return !!sk.value && /^[A-Z][A-Z0-9_]*$/.test(sk.value) && sk.value.length > 2;
+}
+
+function isLikelyExpressionFunctionKeyword(sk: KeywordSuggestion): boolean {
+  if (!sk.value) return false;
+  if (!/^[A-Z][A-Z0-9_]*$/.test(sk.value)) return false;
+  if (sk.value.length <= 2) return false;
+  if (['AS', 'BY', 'ON', 'IN', 'OR', 'AND', 'NOT', 'TRUE', 'FALSE'].includes(sk.value)) {
+    return false;
+  }
+  return true;
+}
+
+function isRuntimeFunctionRuleContext(
+  grammar: CachedGrammar,
+  rules: Map<number, unknown>
+): boolean {
+  for (const ruleIdx of rules.keys()) {
+    const ruleName = grammar.parserRuleNames[ruleIdx];
+    if (typeof ruleName === 'string' && ruleName.toLowerCase().includes('function')) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
@@ -883,7 +912,9 @@ function tryRuntimeGrammarSuggestions(
 
     // ─── Build keyword suggestions from token candidates ──────────────────
     const suggestKeywords: KeywordSuggestion[] = [];
-    tokens.forEach((_producerRules, tokenType) => {
+    const inRuntimeFunctionContext = isRuntimeFunctionRuleContext(grammar, rules);
+    const openingParenToken = tokenTypeBySymbolic(grammar, 'LT_PRTHS');
+    tokens.forEach((followingTokens, tokenType) => {
       // Fix C: Skip EOF and junk tokens where vocab can't resolve the ID.
       if (tokenType === Token.EOF) return;
       const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
@@ -893,9 +924,15 @@ function tryRuntimeGrammarSuggestions(
       const fallbackValue = deriveKeywordFromSymbolicName(symbolicName);
       const keywordValue = literalName || fallbackValue;
       if (!keywordValue && skipSymbolicKeywords) return;
+      const followsOpeningParen =
+        openingParenToken > Token.INVALID_TYPE &&
+        Array.isArray(followingTokens) &&
+        followingTokens.includes(openingParenToken);
       suggestKeywords.push({
         value: keywordValue,
         symbolicName: (!skipSymbolicKeywords && symbolicName) || '',
+        followsOpeningParen,
+        inRuntimeFunctionContext,
         id: tokenType,
       });
     });
@@ -1216,21 +1253,35 @@ export const getSimplifiedPPLSuggestions = async ({
       finalSuggestions.push(
         ...literalKeywords.map((sk) => {
           const keywordDetails = resolveKeywordSuggestionDetails(sk);
+          const inferredFunctionDetails =
+            !keywordDetails &&
+            isRuntimeGrammar &&
+            !isCommandPosition &&
+            (
+              sk.followsOpeningParen ||
+              sk.inRuntimeFunctionContext ||
+              isLikelyExpressionFunctionKeyword(sk)
+            )
+              ? INFERRED_RUNTIME_FUNCTION_DETAILS
+              : null;
+          const functionDetails = keywordDetails?.isFunction
+            ? keywordDetails
+            : inferredFunctionDetails;
           const shouldTreatAsCommand = !keywordDetails && isCommandPosition && isLikelyCommandKeyword(sk);
-          if (keywordDetails && keywordDetails.isFunction) {
+          if (functionDetails) {
             const functionName = sk.value;
             return {
               text: `${functionName}()`,
               type:
-                KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
+                KEYWORD_ITEM_KIND_MAP.get(functionDetails.type) ??
                 monaco.languages.CompletionItemKind.Function,
               insertText: getInsertText(functionName, 'function', isInQuotes, {
-                hasOptionalParam: keywordDetails?.optionalParam,
+                hasOptionalParam: functionDetails?.optionalParam,
                 isSnippet: true,
               }),
               insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
-              detail: keywordDetails.type,
-              sortText: keywordDetails.importance,
+              detail: functionDetails.type,
+              sortText: functionDetails.importance,
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           } else if (keywordDetails && !keywordDetails.isFunction) {
