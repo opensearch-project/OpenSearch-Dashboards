@@ -104,6 +104,7 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
   suggestSourcesOrTables?: SourceOrTableSuggestion;
   suggestRenameAs?: boolean;
   suggestFieldsInAggregateFunction?: boolean;
+  preferColumnSuggestionsOnly?: boolean;
   isInBackQuote?: boolean;
   isInQuote?: boolean;
   suggestSingleQuotes?: boolean;

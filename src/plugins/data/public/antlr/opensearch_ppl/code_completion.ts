@@ -83,6 +83,10 @@ function resetC3CacheIfGrammarChanged(grammarHash: string, parser: any) {
 
 const _keywordDetailsByLiteral = new Map<string, KeywordSuggestionDetails>();
 const _keywordDetailsBySymbolic = new Map<string, KeywordSuggestionDetails>();
+const _supportedNonLiteralBySymbolic = new Map<
+  string,
+  { insertText: string; label: string; sortText: string }
+>();
 
 {
   const lexer = new SimplifiedOpenSearchPPLLexer(CharStream.fromString(''));
@@ -100,12 +104,18 @@ const _keywordDetailsBySymbolic = new Map<string, KeywordSuggestionDetails>();
       _keywordDetailsBySymbolic.set(symbolicName.toUpperCase(), details);
     }
   }
+
+  for (const [tokenId, details] of SUPPORTED_NON_LITERAL_KEYWORDS.entries()) {
+    const symbolicName = vocabulary.getSymbolicName(tokenId);
+    if (symbolicName) {
+      _supportedNonLiteralBySymbolic.set(symbolicName.toUpperCase(), details);
+    }
+  }
 }
 
 function resolveKeywordSuggestionDetails(sk: KeywordSuggestion): KeywordSuggestionDetails | null {
-  const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
-  if (keywordDetails) return keywordDetails;
-
+  // Runtime grammar token IDs can drift from compiled IDs. Name-based lookup
+  // (literal/symbolic) is stable across grammar versions, so prefer it.
   if (sk.value) {
     const detailsByLiteral = _keywordDetailsByLiteral.get(sk.value.toUpperCase());
     if (detailsByLiteral) return detailsByLiteral;
@@ -116,7 +126,19 @@ function resolveKeywordSuggestionDetails(sk: KeywordSuggestion): KeywordSuggesti
     if (detailsBySymbolic) return detailsBySymbolic;
   }
 
+  // Keep ID lookup only as a last resort when no names are available.
+  if (!sk.value && !sk.symbolicName) {
+    return PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
+  }
+
   return null;
+}
+
+function resolveSupportedNonLiteralKeywordDetails(sk: KeywordSuggestion) {
+  const byId = SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
+  if (byId) return byId;
+  if (!sk.symbolicName) return undefined;
+  return _supportedNonLiteralBySymbolic.get(sk.symbolicName.toUpperCase());
 }
 
 function isCommandPositionInCurrentSegment(queryTillCursor: string): boolean {
@@ -128,6 +150,16 @@ function isCommandPositionInCurrentSegment(queryTillCursor: string): boolean {
 
 function isLikelyCommandKeyword(sk: KeywordSuggestion): boolean {
   return !!sk.value && /^[A-Z][A-Z0-9_]*$/.test(sk.value) && sk.value.length > 2;
+}
+
+function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
+  if (!symbolicName) return '';
+  if (!/^[A-Z][A-Z0-9_]*$/.test(symbolicName)) return '';
+  if (/_STRING$/.test(symbolicName)) return '';
+  if (/^(ID|WS|SPACE|EOF|ERROR_RECOGNITION|ERROR|UNRECOGNIZED|NUMBER|INTEGER|DECIMAL)$/.test(symbolicName)) {
+    return '';
+  }
+  return symbolicName;
 }
 
 /**
@@ -157,6 +189,25 @@ function resolveSpaceToken(grammar: CachedGrammar): number {
   if (WS > Token.INVALID_TYPE) return WS;
 
   return Token.INVALID_TYPE;
+}
+
+/**
+ * Backend is source-of-truth for ignoredTokens, but runtime safety requires
+ * that literal tokens (keywords/operators) are never suppressed by mistake.
+ * Keep only valid non-literal token IDs from the backend ignore list.
+ */
+function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number> {
+  const safe = new Set<number>();
+  const ignored = Array.isArray(grammar.ignoredTokens) ? grammar.ignoredTokens : [];
+
+  for (const tokenType of ignored) {
+    if (typeof tokenType !== 'number') continue;
+    if (tokenType <= Token.INVALID_TYPE || tokenType === Token.EOF) continue;
+    if (grammar.vocabulary.getLiteralName(tokenType)) continue;
+    safe.add(tokenType);
+  }
+
+  return safe;
 }
 
 // ─── Lazy-cached name→index lookups ──────────────────────────────────────────
@@ -384,6 +435,7 @@ function enrichRuntimeResult(
   const DQUOTA = tokenTypeBySymbolic(grammar, 'DQUOTA_STRING');
   const SQUOTA = tokenTypeBySymbolic(grammar, 'SQUOTA_STRING');
   const EQUAL = resolveToken(grammar, 'EQUAL', 'EQUAL');
+  const FIELD = resolveToken(grammar, 'FIELD', 'FIELD');
   const DOT = resolveToken(grammar, 'DOT', 'DOT');
   const OPENING_BRACKET = resolveToken(grammar, 'LT_PRTHS', 'OPENING_BRACKET');
   const COMMA = resolveToken(grammar, 'COMMA', 'COMMA');
@@ -404,6 +456,7 @@ function enrichRuntimeResult(
   let suggestValuesForColumn: string | undefined;
   let suggestRenameAs = false;
   let suggestSingleQuotes = false;
+  let preferColumnSuggestionsOnly = false;
 
   const lastNonOperatorToken = findLastNonSpaceOperatorTokenRT(
     tokenStream,
@@ -541,6 +594,18 @@ function enrichRuntimeResult(
     }
   }
 
+  // Runtime fallback/context narrowing: when token context is `FIELD =`,
+  // force column suggestions and suppress generic keyword/snippet noise.
+  // This keeps `rex field =` focused on schema fields across grammar versions.
+  const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
+  if (lastToken?.token.type === EQUAL) {
+    const previousToken = findLastNonSpaceTokenRT(tokenStream, lastToken.index, spaceToken);
+    if (previousToken?.token.type === FIELD) {
+      shouldSuggestColumns = true;
+      preferColumnSuggestionsOnly = true;
+    }
+  }
+
   // Detect quote context
   const currentToken = tokenStream?.get(cursorTokenIndex);
   const isInBackQuote = currentToken?.type === BQUOTA;
@@ -555,6 +620,7 @@ function enrichRuntimeResult(
     suggestValuesForColumn,
     suggestRenameAs,
     suggestSingleQuotes,
+    preferColumnSuggestionsOnly,
     isInQuote,
     isInBackQuote,
   };
@@ -676,9 +742,9 @@ function tryRuntimeGrammarSuggestions(
       currentQuery?.dataset?.dataSource?.version ||
       pplGrammarCache.getCachedVersion(dataSourceId);
 
-    // Grammar cache is the source of truth for runtime path.
-    // If version is unknown (e.g. datasource metadata missing), still use cached grammar.
-    if (version && !pplGrammarCache.shouldFetchFromBackend(version)) return null;
+    // Grammar cache is the source of truth for runtime path. If grammar has already
+    // been fetched and cached from backend, use it regardless of datasource version
+    // metadata so runtime autocomplete remains dynamic for backported/new bundles.
     // ─── Normalize token dictionary ──────────────────────────────────────────
     const spaceToken = resolveSpaceToken(grammar);
 
@@ -748,7 +814,7 @@ function tryRuntimeGrammarSuggestions(
 
     // ─── Collect C3 candidates ────────────────────────────────────────────
     const core = new CodeCompletionCore(parser);
-    core.ignoredTokens = new Set(grammar.ignoredTokens);
+    core.ignoredTokens = getSafeRuntimeIgnoredTokens(grammar);
     core.preferredRules = new Set(grammar.rulesToVisit);
     const cursorTokenIndex = findCursorTokenIndex(tokenStream, effectiveCursor, spaceToken);
     if (cursorTokenIndex === undefined) return null;
@@ -756,12 +822,14 @@ function tryRuntimeGrammarSuggestions(
     // Fix A: Clear stale C3 follow-set cache when grammar changes.
     resetC3CacheIfGrammarChanged(grammar.grammarHash, parser);
 
-    // For pipe-first mode, always use a synthetic C3 context anchored at the
-    // chosen start rule. The parse tree from a pipe-stripped input can be a
-    // recovery tree with mismatched contexts, which constrains C3 incorrectly.
-    // For normal mode, prefer the actual parse tree when available.
+    // For empty pipe-first (`|`) use a synthetic context anchored at the
+    // selected start rule so command discovery is not constrained by an empty
+    // recovery parse tree. Once there is actual command text after the pipe,
+    // prefer parse-tree context to preserve deep command semantics
+    // (e.g. `| rex field =` expecting a field/qualifiedName).
     let c3Context: ParserRuleContext;
-    if (isPipeFirst || !parseTree) {
+    const hasPipeContent = isPipeFirst && effectiveQuery.trim().length > 0;
+    if (!parseTree || (isPipeFirst && !hasPipeContent)) {
       const firstToken = tokenStream.size > 0 ? tokenStream.get(0) : undefined;
       c3Context = new RuntimeCompletionContext(startRuleIndex, firstToken);
     } else {
@@ -822,9 +890,11 @@ function tryRuntimeGrammarSuggestions(
       const symbolicName = parser.vocabulary.getSymbolicName(tokenType);
       if (!literalName && !symbolicName) return;
 
-      if (!literalName && skipSymbolicKeywords) return;
+      const fallbackValue = deriveKeywordFromSymbolicName(symbolicName);
+      const keywordValue = literalName || fallbackValue;
+      if (!keywordValue && skipSymbolicKeywords) return;
       suggestKeywords.push({
-        value: literalName || '',
+        value: keywordValue,
         symbolicName: (!skipSymbolicKeywords && symbolicName) || '',
         id: tokenType,
       });
@@ -1014,9 +1084,9 @@ export const getSimplifiedPPLSuggestions = async ({
       column: column || selectionEnd,
     };
 
+    const runtimeSuggestions = tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false);
     const suggestions =
-      tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false) ||
-      getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
+      runtimeSuggestions || getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
     const finalSuggestions: QuerySuggestion[] = [];
     const queryTillCursor =
       position && position.lineNumber && position.column
@@ -1028,17 +1098,26 @@ export const getSimplifiedPPLSuggestions = async ({
     const isCommandPosition = isCommandPositionInCurrentSegment(queryTillCursor);
     const isInQuotes = suggestions.isInQuote || false;
     const isInBackQuote = suggestions.isInBackQuote || false;
+    const isRuntimeGrammar = Boolean(runtimeSuggestions);
+    const isRexFieldEqualsContext =
+      isRuntimeGrammar && /(?:^|\|)\s*rex\s+field\s*=\s*$/i.test(queryTillCursor);
+    const preferColumnSuggestionsOnly =
+      suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
+    const shouldSuggestColumns = Boolean(suggestions.suggestColumns || isRexFieldEqualsContext);
 
-    if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
+    if (shouldSuggestColumns && (isInBackQuote || !isInQuotes)) {
       const initialFields = indexPattern.fields;
 
-      // Get available fields from symbol table based on current query context
-      const cursorPosition = position?.column || selectionEnd;
+      // Use absolute query length up to cursor (line/column safe for multiline).
+      const cursorPosition = queryTillCursor.length;
+      const fieldFilter = preferColumnSuggestionsOnly
+        ? undefined
+        : (field: { subType?: unknown }) => !field?.subType;
       const availableFields = getAvailableFieldsForAutocomplete(
         query,
         cursorPosition,
         initialFields,
-        (field) => !field?.subType
+        fieldFilter
       );
 
       finalSuggestions.push(
@@ -1074,6 +1153,10 @@ export const getSimplifiedPPLSuggestions = async ({
           }
         )
       );
+    }
+
+    if (preferColumnSuggestionsOnly) {
+      return finalSuggestions;
     }
 
     if (suggestions.suggestAggregateFunctions) {
@@ -1186,22 +1269,24 @@ export const getSimplifiedPPLSuggestions = async ({
         })
       );
 
-      const supportedSymbolicKeywords = suggestions.suggestKeywords.filter(
-        (sk) => !sk.value && SUPPORTED_NON_LITERAL_KEYWORDS.has(sk.id)
-      );
+      const supportedSymbolicKeywords = suggestions.suggestKeywords
+        .filter((sk) => !sk.value)
+        .map((sk) => resolveSupportedNonLiteralKeywordDetails(sk))
+        .filter((details): details is { insertText: string; label: string; sortText: string } =>
+          Boolean(details)
+        );
 
-      if (supportedSymbolicKeywords) {
+      if (supportedSymbolicKeywords.length > 0) {
         finalSuggestions.push(
-          ...supportedSymbolicKeywords.map((sk) => {
-            const details = SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
+          ...supportedSymbolicKeywords.map((details) => {
             return {
-              text: details!.label,
-              insertText: details!.insertText,
+              text: details.label,
+              insertText: details.insertText,
               type: monaco.languages.CompletionItemKind.Keyword,
               detail: SuggestionItemDetailsTags.Keyword,
               insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
               // sortText is the only option to sort suggestions, compares strings
-              sortText: details!.sortText,
+              sortText: details.sortText,
             };
           })
         );
