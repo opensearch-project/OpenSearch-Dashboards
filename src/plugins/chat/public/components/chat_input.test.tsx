@@ -440,6 +440,59 @@ describe('ChatInput', () => {
       );
     });
 
+    it('should reject files with unsupported MIME types', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const exe = new File(['binary'], 'malware.exe', { type: 'application/x-msdownload' });
+      selectFiles(container, [exe]);
+
+      expect(onFilesSelected).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('malware.exe'));
+    });
+
+    it('should accept files matched by extension when MIME type is empty', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      // Linux browsers often report empty MIME type
+      const file = new File(['{"key":"val"}'], 'data.json', { type: '' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([file]);
+    });
+
+    it('should reject files with unsupported extension and empty MIME type', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const file = new File(['data'], 'image.png', { type: '' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('image.png'));
+    });
+
+    it('should keep valid files and reject unsupported files in a mixed selection', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const good = new File(['hello'], 'notes.txt', { type: 'text/plain' });
+      const bad = new File(['binary'], 'photo.jpg', { type: 'image/jpeg' });
+      selectFiles(container, [good, bad]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([good]);
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('photo.jpg'));
+    });
+
     it('should truncate file list to remaining capacity', () => {
       const onFilesSelected = jest.fn();
       const { container } = render(

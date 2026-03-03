@@ -17,6 +17,7 @@ import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/pu
 import { CoreStart } from '../../../../core/public';
 import {
   CHAT_FILE_ACCEPT,
+  CHAT_ALLOWED_FILE_TYPES,
   CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
   ONE_MB,
 } from '../../common';
@@ -107,8 +108,34 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       return;
     }
 
-    const valid = files.filter((f) => f.size <= maxFileUploadBytes);
-    const oversized = files.filter((f) => f.size > maxFileUploadBytes);
+    const allowedMimeTypes = Object.keys(CHAT_ALLOWED_FILE_TYPES);
+    const allowedExtensions = Object.values(CHAT_ALLOWED_FILE_TYPES).flat();
+    const isFileTypeAllowed = (f: File) => {
+      if (f.type && allowedMimeTypes.includes(f.type)) return true;
+      const ext = f.name.slice(f.name.lastIndexOf('.')).toLowerCase();
+      return allowedExtensions.includes(ext);
+    };
+
+    const typeAllowed = files.filter(isFileTypeAllowed);
+    const typeRejected = files.filter((f) => !isFileTypeAllowed(f));
+
+    if (typeRejected.length > 0) {
+      const names = typeRejected.map((f) => f.name).join(', ');
+      notifications.toasts.addWarning(
+        i18n.translate('chat.input.unsupportedFileType', {
+          defaultMessage: 'Unsupported file type(s) skipped: {names}. Allowed types: {extensions}.',
+          values: { names, extensions: allowedExtensions.join(', ') },
+        })
+      );
+    }
+
+    if (typeAllowed.length === 0) {
+      e.target.value = '';
+      return;
+    }
+
+    const valid = typeAllowed.filter((f) => f.size <= maxFileUploadBytes);
+    const oversized = typeAllowed.filter((f) => f.size > maxFileUploadBytes);
 
     if (oversized.length > 0) {
       const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
