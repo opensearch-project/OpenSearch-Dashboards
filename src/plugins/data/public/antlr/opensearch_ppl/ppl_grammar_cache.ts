@@ -237,39 +237,31 @@ class PPLGrammarCache {
   warmUp(
     http: HttpSetup,
     savedObjectsClient?: SavedObjectsClientContract,
-    datasourceId?: string
+    datasourceId?: string,
+    datasourceVersion?: string
   ): void {
     const cacheKey = datasourceId || DEFAULT_CACHE_KEY;
 
-    // Version warm-up (only if not already cached, in-flight, or previously failed)
-    // For local cluster (no datasourceId), savedObjectsClient is not needed
-    if (
-      !this.versionCache.has(cacheKey) &&
-      !this.pendingVersionFetches.has(cacheKey) &&
-      !this.failedVersionFetches.has(cacheKey)
-    ) {
-      if (!datasourceId || savedObjectsClient) {
-        this.getBackendVersion(http, savedObjectsClient!, datasourceId)
-          .then((version) => {
-            if (!version) {
-              this.failedVersionFetches.add(cacheKey);
-            }
-          })
-          .catch(() => {
-            this.failedVersionFetches.add(cacheKey);
-          });
-      }
+    if (datasourceVersion) {
+      this.versionCache.set(cacheKey, datasourceVersion);
     }
 
-    // Grammar warm-up (only if not already cached, in-flight, or previously failed)
+    // Grammar warm-up (only if not already cached, in-flight, or previously failed).
+    // This is version-gated to avoid hitting the grammar endpoint for unsupported backends.
     if (
       !this.grammarCache.has(cacheKey) &&
       !this.pendingFetches.has(cacheKey) &&
       !this.failedGrammarFetches.has(cacheKey)
     ) {
-      this.getOrFetchGrammar(http, datasourceId)
+      this.warmUpGrammarForDatasource(
+        http,
+        savedObjectsClient,
+        cacheKey,
+        datasourceId,
+        datasourceVersion
+      )
         .then((result) => {
-          if (result === null) {
+          if (!result) {
             this.failedGrammarFetches.add(cacheKey);
           }
         })
@@ -287,6 +279,63 @@ class PPLGrammarCache {
     this.pendingVersionFetches.clear();
     this.failedGrammarFetches.clear();
     this.failedVersionFetches.clear();
+  }
+
+  private async warmUpGrammarForDatasource(
+    http: HttpSetup,
+    savedObjectsClient: SavedObjectsClientContract | undefined,
+    cacheKey: string,
+    datasourceId?: string,
+    datasourceVersion?: string
+  ): Promise<CachedGrammar | null> {
+    const backendVersion = await this.resolveBackendVersionForWarmUp(
+      http,
+      savedObjectsClient,
+      cacheKey,
+      datasourceId,
+      datasourceVersion
+    );
+    if (!this.shouldFetchFromBackend(backendVersion)) {
+      return null;
+    }
+    return this.getOrFetchGrammar(http, datasourceId);
+  }
+
+  private async resolveBackendVersionForWarmUp(
+    http: HttpSetup,
+    savedObjectsClient: SavedObjectsClientContract | undefined,
+    cacheKey: string,
+    datasourceId?: string,
+    datasourceVersion?: string
+  ): Promise<string | undefined> {
+    if (datasourceVersion) {
+      return datasourceVersion;
+    }
+
+    const cachedVersion = this.versionCache.get(cacheKey);
+    if (cachedVersion) {
+      return cachedVersion;
+    }
+
+    if (this.failedVersionFetches.has(cacheKey)) {
+      return undefined;
+    }
+
+    if (datasourceId && !savedObjectsClient) {
+      this.failedVersionFetches.add(cacheKey);
+      return undefined;
+    }
+
+    try {
+      const version = await this.getBackendVersion(http, savedObjectsClient!, datasourceId);
+      if (!version) {
+        this.failedVersionFetches.add(cacheKey);
+      }
+      return version;
+    } catch {
+      this.failedVersionFetches.add(cacheKey);
+      return undefined;
+    }
   }
 
   /** Fetch artifact bundle from backend, deserialize ATNs, and store in cache */

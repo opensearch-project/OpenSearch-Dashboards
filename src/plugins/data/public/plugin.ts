@@ -31,6 +31,7 @@
 import './index.scss';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { createStartServicesGetter } from '../../opensearch_dashboards_utils/public';
 import {
@@ -107,7 +108,7 @@ import {
   getDefaultSuggestions as getPPLSuggestions,
   getSimplifiedPPLSuggestions,
 } from './antlr/opensearch_ppl/code_completion';
-import { pplGrammarCache } from './antlr/opensearch_ppl/ppl_grammar_cache';
+import { createPplGrammarWarmupHandler } from './antlr/opensearch_ppl/ppl_grammar_warmup';
 import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
 import { promqlTriggerCharacters } from './antlr/promql/constants';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
@@ -138,6 +139,7 @@ export class DataPublicPlugin
   private readonly sessionStorage: DataStorage;
   private readonly config: ConfigSchema;
   private resourceClientFactory!: ResourceClientFactory;
+  private pplGrammarWarmupSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -316,30 +318,14 @@ export class DataPublicPlugin
     setQueryService(query);
 
     // Subscribe to dataset changes to pre-fetch PPL grammar.
-    // This runs at app startup so grammar is fetched on dataset change, not on keystroke.
-    let lastGrammarDatasourceKey: string | undefined;
-    const maybeWarmUpPplGrammar = (q: {
-      language?: string;
-      dataset?: { dataSource?: { id?: string; version?: string } };
-    }) => {
-      const language = (q?.language ?? '').toUpperCase();
-      // In explore autocomplete, PPL uses PPL_Simplified. Both should warm runtime grammar.
-      if (!language.startsWith('PPL')) return;
-
-      const dsId = q?.dataset?.dataSource?.id;
-      // Track local cluster separately from remote datasources.
-      const dsKey = dsId ?? '__default__';
-      if (dsKey === lastGrammarDatasourceKey) {
-        return;
-      }
-      lastGrammarDatasourceKey = dsKey;
-      pplGrammarCache.invalidate(dsId);
-      pplGrammarCache.warmUp(http, savedObjects.client, dsId);
-    };
+    // This runs at app startup so grammar is fetched on dataset selection/switch, not on keystroke.
+    const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(http, savedObjects.client);
 
     // Warm current query state once at startup and then on subsequent query updates.
     maybeWarmUpPplGrammar(query.queryString.getQuery());
-    query.queryString.getUpdates$().subscribe(maybeWarmUpPplGrammar);
+    this.pplGrammarWarmupSubscription = query.queryString
+      .getUpdates$()
+      .subscribe(maybeWarmUpPplGrammar);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
@@ -394,6 +380,8 @@ export class DataPublicPlugin
   }
 
   public stop() {
+    this.pplGrammarWarmupSubscription?.unsubscribe();
+    this.pplGrammarWarmupSubscription = undefined;
     this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();

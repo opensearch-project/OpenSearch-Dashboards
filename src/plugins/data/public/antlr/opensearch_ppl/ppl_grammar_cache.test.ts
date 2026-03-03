@@ -11,6 +11,9 @@ import { PPLArtifactBundle } from './ppl_artifact_loader';
 const flushPromises = async () => {
   await Promise.resolve();
   await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+  await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
 const createBundle = (grammarHash = 'sha256:test'): PPLArtifactBundle => ({
@@ -175,6 +178,71 @@ describe('ppl_grammar_cache', () => {
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
+  it('should skip grammar fetch during warm-up when backend version is unsupported', async () => {
+    const http = ({
+      get: jest.fn(),
+    } as unknown) as HttpSetup;
+    const savedObjectsClient = ({
+      get: jest.fn().mockResolvedValue({
+        attributes: { dataSourceVersion: '3.5.9' },
+      }),
+    } as unknown) as SavedObjectsClientContract;
+
+    pplGrammarCache.warmUp(http, savedObjectsClient, 'ds-unsupported');
+    await flushPromises();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(http.get).not.toHaveBeenCalled();
+    expect(pplGrammarCache.getCachedGrammar('ds-unsupported')).toBeNull();
+  });
+
+  it('should skip grammar fetch when backend version lookup fails', async () => {
+    const http = ({
+      get: jest.fn(),
+    } as unknown) as HttpSetup;
+    const savedObjectsClient = ({
+      get: jest.fn().mockRejectedValue(new Error('saved object unavailable')),
+    } as unknown) as SavedObjectsClientContract;
+
+    pplGrammarCache.warmUp(http, savedObjectsClient, 'ds-version-fail');
+    await flushPromises();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(http.get).not.toHaveBeenCalled();
+    expect(pplGrammarCache.getCachedGrammar('ds-version-fail')).toBeNull();
+  });
+
+  it('should use provided datasource version to gate warm-up without saved object lookup', async () => {
+    const http = ({
+      get: jest.fn().mockResolvedValue(createBundle('sha256:provided-version')),
+    } as unknown) as HttpSetup;
+
+    pplGrammarCache.warmUp(http, undefined, 'ds-provided', '3.6.0');
+    await flushPromises();
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledWith('/api/enhancements/ppl/grammar', {
+      query: { dataSourceId: 'ds-provided' },
+      signal: expect.any(AbortSignal),
+    });
+    expect(pplGrammarCache.getCachedGrammar('ds-provided')?.grammarHash).toBe(
+      'sha256:provided-version'
+    );
+  });
+
+  it('should skip grammar fetch for local cluster when /api/status reports unsupported version', async () => {
+    const http = ({
+      get: jest.fn().mockResolvedValue({ version: { number: '3.5.0' } }),
+    } as unknown) as HttpSetup;
+
+    pplGrammarCache.warmUp(http, {} as SavedObjectsClientContract, undefined);
+    await flushPromises();
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledWith('/api/status');
+    expect(pplGrammarCache.getCachedGrammar(undefined)).toBeNull();
+  });
+
   it('should deduplicate warm-up calls while fetches are pending', async () => {
     const http = ({
       get: jest.fn().mockResolvedValue(createBundle('sha256:warmup')),
@@ -190,6 +258,22 @@ describe('ppl_grammar_cache', () => {
     await flushPromises();
 
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('should serve grammar from cache after warm-up without additional backend requests', async () => {
+    const http = ({
+      get: jest.fn().mockResolvedValue(createBundle('sha256:cache-hit')),
+    } as unknown) as HttpSetup;
+
+    pplGrammarCache.warmUp(http, undefined, 'ds-cache-hit', '3.6.0');
+    await flushPromises();
+
+    const cached1 = pplGrammarCache.getCachedGrammar('ds-cache-hit');
+    const cached2 = pplGrammarCache.getCachedGrammar('ds-cache-hit');
+
+    expect(cached1?.grammarHash).toBe('sha256:cache-hit');
+    expect(cached2?.grammarHash).toBe('sha256:cache-hit');
     expect(http.get).toHaveBeenCalledTimes(1);
   });
 
