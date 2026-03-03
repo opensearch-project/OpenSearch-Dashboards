@@ -158,12 +158,6 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     needBody: true,
   });
 
-  enhancements.pplSuggest = createAction(client, components, {
-    endpoint: URI.PPL_SUGGEST,
-    method: 'POST',
-    needBody: true,
-  });
-
   enhancements.pplArtifact = createAction(client, components, {
     endpoint: URI.PPL_ARTIFACT,
     method: 'GET',

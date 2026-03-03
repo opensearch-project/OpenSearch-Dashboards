@@ -58,7 +58,6 @@ export const URI = {
   ML: '/_plugins/_ml',
   OBSERVABILITY: '/_plugins/_observability',
   DATA_CONNECTIONS: '/_plugins/_query/_datasources',
-  PPL_SUGGEST: '/_plugins/_ppl/_suggest',
   PPL_ARTIFACT: '/_plugins/_ppl/_grammar',
 };
 
