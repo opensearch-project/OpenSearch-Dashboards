@@ -28,7 +28,6 @@ const CATEGORY_ICON: Record<SpanCategory, string> = {
   AGENT: 'user',
   LLM: 'bolt',
   TOOL: 'wrench',
-  CONTENT: 'document',
   EMBEDDINGS: 'aggregate',
   RETRIEVAL: 'search',
   OTHER: 'dot',
