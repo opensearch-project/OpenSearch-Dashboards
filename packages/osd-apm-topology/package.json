@@ -24,6 +24,9 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
+  "optionalDependencies": {
+    "@osd/i18n": "1.0.0"
+  },
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.17",
     "@types/ramda": "^0.30.1",

@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { StackWrapperProps } from './types';
+import { t } from '../../shared/i18n/t';
 
 export const StackWrapper: React.FC<StackWrapperProps> = ({
   children,
@@ -52,9 +53,9 @@ export const StackWrapper: React.FC<StackWrapperProps> = ({
           transform: 'translate(8px, -8px)',
           zIndex: maxVisibleStacks + 2,
         }}
-        title={`${hiddenChildrenCount} hidden children`}
+        title={t('node.hiddenChildren', { count: String(hiddenChildrenCount) })}
         role="status"
-        aria-label={`${hiddenChildrenCount} hidden children`}
+        aria-label={t('node.hiddenChildren', { count: String(hiddenChildrenCount) })}
       >
         +{hiddenChildrenCount}
       </div>

@@ -15,6 +15,7 @@ import { TypeBadge } from './type_badge';
 import { MetricBar } from './metric_bar';
 import { StatusIndicator } from './status_indicator';
 import type { StatusLevel } from './status_indicator';
+import { t } from '../../shared/i18n/t';
 import './service_card_node.scss';
 
 export type ServiceCardCustomNode = Node<
@@ -80,7 +81,11 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
           {sliStatus && (
             <StatusIndicator
               status={sliStatus}
-              label={data.health?.status === 'breached' ? 'SLI breach' : 'Recovered'}
+              label={
+                data.health?.status === 'breached'
+                  ? t('node.sliStatus.breached')
+                  : t('node.sliStatus.recovered')
+              }
             />
           )}
         </div>
@@ -101,10 +106,10 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
             <button
               className="osd-resetFocusState osd:text-link-default osd:hover:text-link-hover osd:transition-colors osd:cursor-pointer osd:bg-transparent osd:border-0 osd:p-0 osd:text-xs osd:whitespace-nowrap osd:flex-shrink-0"
               onClick={actionButton?.onClick ?? onViewDashboardClick}
-              aria-label={`${actionButton?.label ?? 'View insights'} for ${data.title}`}
+              aria-label={`${actionButton?.label ?? t('buttons.viewInsights')} for ${data.title}`}
               data-test-subj={`serviceCardNode-viewInsights-${data.id}`}
             >
-              {actionButton?.label ?? 'View insights'}
+              {actionButton?.label ?? t('buttons.viewInsights')}
             </button>
           )}
         </div>
@@ -122,7 +127,9 @@ export const ServiceCardNode = ({ data }: NodeProps<ServiceCardCustomNode>) => {
             </div>
           )}
           <div className="osd:flex-1 osd:flex osd:flex-col osd:gap-1">
-            <div className="osd:text-xs osd:text-body-secondary">Req: {totalRequests}</div>
+            <div className="osd:text-xs osd:text-body-secondary">
+              {t('node.requestsAbbreviated', { value: totalRequests })}
+            </div>
             <MetricBar
               value={errorRate}
               max={100}

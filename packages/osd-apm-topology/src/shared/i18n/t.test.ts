@@ -4,17 +4,17 @@
  */
 
 import { t, getLocalizedMessages } from './t';
-import { Locale } from './locale';
+import { DEFAULT_LOCALE } from './locale';
 
 describe('getLocalizedMessages', () => {
   it('returns English messages for English locale', () => {
-    const messages = getLocalizedMessages(Locale.en);
+    const messages = getLocalizedMessages(DEFAULT_LOCALE);
     expect(messages).toBeDefined();
     expect(messages.breadcrumbs.world).toBe('World');
   });
 
   it('defaults to English for unknown locale', () => {
-    const messages = getLocalizedMessages('unknown' as Locale);
+    const messages = getLocalizedMessages('unknown' as string);
     expect(messages.breadcrumbs.world).toBe('World');
   });
 });
@@ -41,7 +41,7 @@ describe('t', () => {
   });
 
   it('falls back to English for unknown locale', () => {
-    const result = t('breadcrumbs.world', {}, 'unknown' as Locale);
+    const result = t('breadcrumbs.world', {}, 'unknown' as string);
     expect(result).toBe('World');
   });
 });

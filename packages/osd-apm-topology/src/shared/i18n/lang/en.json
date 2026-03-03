@@ -47,6 +47,8 @@
     "percentOfUninstrumentedServices": "{value}% uninstrumented",
     "service": "Service",
     "showNodeActions": "Show node actions",
+    "hiddenChildren": "{count} hidden children",
+    "requestsAbbreviated": "Req: {value}",
     "sliStatus": {
       "breached": "SLI breach",
       "recovered": "Recovered"

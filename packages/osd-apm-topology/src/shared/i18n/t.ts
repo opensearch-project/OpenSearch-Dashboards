@@ -3,18 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 import { pathOr } from 'ramda';
-import { DEFAULT_LOCALE, Locale, locale } from './locale';
+import { DEFAULT_LOCALE, getLocale } from './locale';
 import en from './lang/en.json';
 
 type Messages = typeof en;
 
-const localizedMessages: Record<Locale, Messages> = {
-    [Locale.en]: en,
+const localizedMessages: Record<string, Messages> = {
+    en,
 };
 
-export const getLocalizedMessages = (selectedLocale: Locale): Messages =>
+export const getLocalizedMessages = (selectedLocale: string): Messages =>
     localizedMessages[selectedLocale] ?? localizedMessages[DEFAULT_LOCALE];
 
 const replaceParameters = (value: string, parameters: Array<[string, string]>): string =>
@@ -47,9 +46,9 @@ export type TId = Join<PathsToStringProps<Messages>, '.'>;
 export const t = (
     messageId: TId,
     parameters = {},
-    selectedLocale = locale,
+    selectedLocale?: string,
 ): string => {
-    const messages = getLocalizedMessages(selectedLocale);
+    const messages = getLocalizedMessages(selectedLocale ?? getLocale());
     const messagePath = messageId.split('.');
     const message = pathOr(messageId, messagePath, messages);
 
