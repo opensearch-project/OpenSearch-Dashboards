@@ -133,12 +133,16 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
 
         // Get the OpenSearch client - use data source if provided
         const { dataSourceId } = req.query;
-        let opensearchClient = client.asScoped(req);
+        const opensearchClient = client.asScoped(req);
 
         // Call OpenSearch artifact endpoint
         logger.info('PPL artifact: calling OpenSearch...');
         const result = await opensearchClient.callAsCurrentUser('enhancements.pplArtifact');
-        logger.info(`PPL artifact: got response, grammarHash=${result?.grammarHash}, keys=${Object.keys(result || {}).join(',')}`);
+        logger.info(
+          `PPL artifact: got response, grammarHash=${result?.grammarHash}, keys=${Object.keys(
+            result || {}
+          ).join(',')}`
+        );
 
         // The result is the artifact bundle JSON
         // Forward headers from OpenSearch if available
@@ -165,46 +169,6 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
         return res.custom({
           statusCode: coerceStatusCode(err.status || err.statusCode),
           body: err.message || 'Failed to fetch PPL artifact',
-        });
-      }
-    }
-  );
-}
-
-/**
- * Defines route for PPL suggest endpoint
- */
-export function definePPLSuggestRoute(logger: Logger, router: IRouter, client: any) {
-  router.post(
-    {
-      path: '/api/enhancements/ppl/suggest',
-      validate: {
-        body: schema.object({
-          query: schema.string(),
-          cursor: schema.object({
-            line: schema.number(),
-            column: schema.number(),
-          }),
-          index: schema.string(),
-          dataSourceId: schema.maybe(schema.string()),
-        }),
-      },
-    },
-    async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      try {
-        logger.debug('PPL suggest route called');
-        const { query, cursor, index } = req.body;
-
-        const result = await client.asScoped(req).callAsCurrentUser('enhancements.pplSuggest', {
-          body: { query, cursor, index },
-        });
-
-        return res.ok({ body: result });
-      } catch (err: any) {
-        logger.error(`PPL suggest error: ${err.message}`);
-        return res.custom({
-          statusCode: coerceStatusCode(err.status || err.statusCode),
-          body: err.message,
         });
       }
     }
@@ -239,5 +203,4 @@ export function defineRoutes(
   registerResourceRoutes(router);
 
   definePPLArtifactRoute(logger, router, client);
-  definePPLSuggestRoute(logger, router, client);
 }
