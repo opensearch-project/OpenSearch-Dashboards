@@ -36,7 +36,7 @@ import Del from 'del';
 
 import * as Rx from 'rxjs';
 import { map, filter, take } from 'rxjs/operators';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import { getConfigFromFiles } from '@osd/config';
 
 const legacyConfig = follow('__fixtures__/reload_logging_config/opensearch_dashboards.test.yml');
@@ -89,7 +89,7 @@ function createConfigManager(configPath: string) {
   return {
     modify(fn: (input: Record<string, any>) => Record<string, any>) {
       const oldContent = getConfigFromFiles([configPath]);
-      const yaml = safeDump(fn(oldContent));
+      const yaml = dump(fn(oldContent));
       Fs.writeFileSync(configPath, yaml);
     },
   };

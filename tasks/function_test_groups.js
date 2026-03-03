@@ -33,10 +33,10 @@ import { resolve } from 'path';
 
 import execa from 'execa';
 import grunt from 'grunt';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
-const TEST_TAGS = safeLoad(JOBS_YAML)
+const TEST_TAGS = load(JOBS_YAML)
   .JOB.filter((id) => id.startsWith('opensearch-dashboards-ciGroup'))
   .map((id) => id.replace(/^opensearch-dashboards-/, ''));
 
