@@ -12,7 +12,7 @@
     "build:babel:node": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --quiet",
     "build:babel:web": "babel src --env-name web --out-dir target/web --extensions .ts,.tsx --copy-files --quiet",
     "build:babel": "yarn build:babel:node && yarn build:babel:web",
-    "build:clean": "del target/node/celestial.css target/web/celestial.css",
+    "build:clean": "node -e \"['target/node/celestial.css','target/web/celestial.css'].forEach(f=>{try{require('fs').unlinkSync(f)}catch(e){}})\"",
     "build": "yarn build:css && yarn build:babel && yarn build:clean",
     "osd:bootstrap": "yarn build",
     "osd:watch": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --watch"
@@ -30,7 +30,6 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.17",
     "@types/ramda": "^0.30.1",
-    "del-cli": "^3.0.1",
     "tailwindcss": "^4.0.17"
   }
 }
