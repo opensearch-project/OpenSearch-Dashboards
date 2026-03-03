@@ -27,7 +27,13 @@ import {
 import './traces_table.scss';
 
 export const TracesTable = () => {
-  const { pageIndex, pageSize, pagination: basePagination, onTableChange } = useTablePagination(0);
+  const {
+    pageIndex,
+    pageSize,
+    pagination: basePagination,
+    onTableChange,
+    sortState,
+  } = useTablePagination(0);
   const {
     traces,
     loading,
@@ -36,7 +42,7 @@ export const TracesTable = () => {
     expandTrace,
     traceSpansCache,
     traceLoadingState,
-  } = useAgentTraces(pageIndex, pageSize);
+  } = useAgentTraces(pageIndex, pageSize, sortState.field, sortState.direction);
   const { metrics } = useTraceMetricsContext();
 
   const pagination = useMemo(
@@ -139,6 +145,7 @@ export const TracesTable = () => {
       field: 'startTime',
       name: i18n.translate('agentTraces.tracesTable.timeColumn', { defaultMessage: 'Time' }),
       width: '200px',
+      sortable: true,
       render: (time: string) => <EuiLink color="primary">{time}</EuiLink>,
     },
     {
@@ -191,12 +198,14 @@ export const TracesTable = () => {
     {
       field: 'name',
       name: i18n.translate('agentTraces.tracesTable.nameColumn', { defaultMessage: 'Name' }),
+      sortable: true,
       render: (name: string) => <EuiText size="s">{name}</EuiText>,
     },
     {
       field: 'status',
       width: '100px',
       name: i18n.translate('agentTraces.tracesTable.statusColumn', { defaultMessage: 'Status' }),
+      sortable: true,
       render: renderStatus,
     },
     {
@@ -205,11 +214,13 @@ export const TracesTable = () => {
       name: i18n.translate('agentTraces.tracesTable.latencyColumn', {
         defaultMessage: 'Latency',
       }),
+      sortable: true,
       render: (latency: string) => <EuiText size="s">{latency}</EuiText>,
     },
     {
       field: 'totalTokens',
       name: i18n.translate('agentTraces.tracesTable.tokensColumn', { defaultMessage: 'Tokens' }),
+      sortable: true,
       render: (tokens: number | string) => <EuiText size="s">{tokens}</EuiText>,
     },
     {
@@ -286,6 +297,12 @@ export const TracesTable = () => {
         compressed
         loading={loading}
         pagination={pagination}
+        sorting={{
+          sort: {
+            field: sortState.field as keyof TraceRow,
+            direction: sortState.direction,
+          },
+        }}
         onChange={onTableChange}
         rowProps={(item: TraceRow) => ({
           onClick: () => handleRowClick(item),
