@@ -1593,6 +1593,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🪛 Refactoring
 
 - [Home] Remove unused tutorials ([#5212](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5212))
+- [De-Angular] Clean angular context in Data plugin ([#5682](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5682))
 - [UiSharedDeps] Standardize theme JSON imports to be light/dark-mode aware ([#5662](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5662))
 
 ### 🔩 Tests
