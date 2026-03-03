@@ -5,6 +5,7 @@
 
 import { monaco } from '@osd/monaco';
 import { CharStream, CommonTokenStream, ParserInterpreter } from 'antlr4ng';
+import { CodeCompletionCore } from 'antlr4-c3';
 import {
   SimplifiedOpenSearchPPLLexer,
   SimplifiedOpenSearchPPLParser,
@@ -855,16 +856,34 @@ describe('ppl code_completion', () => {
         });
       });
 
-      it('should include runtime function keywords in expression context', async () => {
+      it('should classify runtime-only function keywords as functions from runtime context', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
-        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+        const grammar = buildRuntimeGrammar();
+        const runtimeOnlyTokenType = grammar.vocabulary.maxTokenType + 1000;
+        const functionRuleIndex = grammar.runtimeRuleNameToIndex.get('collectionFunctionName') ?? 0;
+        const originalVocabulary = grammar.vocabulary;
+        const patchedVocabulary = Object.create(originalVocabulary);
+        patchedVocabulary.getLiteralName = (tokenType: number) =>
+          tokenType === runtimeOnlyTokenType ? "'mvappend'" : originalVocabulary.getLiteralName(tokenType);
+        patchedVocabulary.getSymbolicName = (tokenType: number) =>
+          tokenType === runtimeOnlyTokenType ? 'MVAPPEND' : originalVocabulary.getSymbolicName(tokenType);
+        grammar.vocabulary = patchedVocabulary;
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[runtimeOnlyTokenType, []]]),
+          rules: new Map<number, { startTokenIndex: number; ruleList: number[] }>([
+            [functionRuleIndex, { startTokenIndex: 0, ruleList: [functionRuleIndex] }],
+          ]),
+        } as any);
 
         const result = await getSimpleSuggestionsForIndexPattern(
           'source = test-index | where ',
           runtimeIndexPattern
         );
 
-        expect(result.some((s) => s.text === 'MVJOIN')).toBeTruthy();
+        const suggestion = result.find((s) => s.text === 'mvappend()');
+        expect(suggestion).toBeTruthy();
+        expect(suggestion?.type).toBe(monaco.languages.CompletionItemKind.Module);
       });
 
       it('should not render punctuation tokens as function calls when runtime ids drift', async () => {
