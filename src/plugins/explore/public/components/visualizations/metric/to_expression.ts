@@ -17,6 +17,9 @@ import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
+import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { assembleForMetric, createMetricChartSeries } from './metric_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -52,18 +55,29 @@ export const createSingleMetric = (
       throw Error('Missing value for metric chart');
     }
 
+    if (!dateField) {
+      return null;
+    }
+
     // Return React component spec for HTML text rendering with ECharts sparkline
-    return {
-      __singleMetricReactComponent: true,
+    const result = pipe(
+      transform(convertTo2DArray()),
+      createBaseConfig({ title: '' }),
+      buildAxisConfigs,
+      createMetricChartSeries({
+        styles,
+        dateField,
+        seriesFields: [numericField],
+      }),
+      assembleSpec,
+      assembleForMetric
+    )({
       data: transformedData,
       styles,
-      metricField: numericField,
-      timeField: dateField,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      axisColumnMappings,
-    };
+      axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return { spec: result.spec, name: '', data: transformedData };
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
@@ -267,12 +281,7 @@ export const createMultiMetric = (
   }
 
   // For multi-metric, we split the data by the categorical field
-  const metricField = valueMapping.column;
   const splitByField = splitByMapping.column;
-
-  // Get time field if present
-  const timeMapping = axisColumnMappings?.[AxisRole.Time];
-  const timeField = timeMapping?.column;
 
   // Group data by the split by field (categorical)
   const groupedData = new Map<string, any[]>();
@@ -284,30 +293,20 @@ export const createMultiMetric = (
     groupedData.get(groupValue)!.push(row);
   });
 
-  // Transform grouped data into separate datasets for each category
-  const facetedData = Array.from(groupedData.entries()).map(([, rows]) => {
-    // Create a dataset containing the metric field and time field (if present) for this category
-    const header = timeField ? [timeField, metricField] : [metricField];
-    const data = rows.map((row) => {
-      return timeField ? [row[timeField], row[metricField]] : [row[metricField]];
-    });
-    return [header, ...data];
-  });
+  const specs: any[] = [];
+  for (const [key, value] of groupedData) {
+    const result = createSingleMetric(
+      value,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styles,
+      axisColumnMappings
+    );
+    if (result && 'spec' in result) {
+      specs.push({ spec: result.spec, name: key, data: value });
+    }
+  }
 
-  // Use category values as names for grid titles
-  const categoryNames = Array.from(groupedData.keys());
-
-  // Return a special spec that indicates this should use React component rendering
-  return {
-    __multiMetricReactComponent: true,
-    facetedData,
-    categoryNames,
-    styles,
-    metricField,
-    timeField, // Add time field info
-    numericalColumns,
-    categoricalColumns,
-    dateColumns,
-    axisColumnMappings,
-  };
+  return specs;
 };

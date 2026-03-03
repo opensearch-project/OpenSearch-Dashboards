@@ -291,11 +291,16 @@ export enum FilterOperator {
 export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
 
 export type CellAlignment = 'auto' | 'left' | 'center' | 'right';
+
+export interface UnitDisplay {
+  label: string | number;
+  segments?: Array<{ type: 'unit' | 'value'; value: number | string }>;
+}
 export interface UnitItem {
   id: string;
   name: string;
   symbol?: string;
-  display?: (value: number, symbol?: string) => any;
+  display?: (value: number, symbol?: string) => UnitDisplay;
   fontScale?: number;
 }
 

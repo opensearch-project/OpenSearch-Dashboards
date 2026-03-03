@@ -36,20 +36,6 @@ describe('metric_utils', () => {
     ...overrides,
   });
 
-  // Helper to remove renderItem function for snapshot comparison
-  const seriesForSnapshot = (series?: any[]) => {
-    if (!series) {
-      throw Error('No series was created');
-    }
-    return series.map((s) => {
-      const { renderItem, ...rest } = s;
-      return {
-        ...rest,
-        renderItem: renderItem ? 'function' : undefined,
-      };
-    });
-  };
-
   describe('createMetricChartSeries', () => {
     describe('snapshot tests', () => {
       it('should create basic metric series structure', () => {
@@ -62,11 +48,12 @@ describe('metric_utils', () => {
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
           styles,
+          dateField: 'date_field',
         });
 
         const state = result(createMockState());
         expect(state.series?.length).toBeTruthy();
-        expect(seriesForSnapshot(state.series)).toMatchSnapshot();
+        expect(state.series).toMatchSnapshot();
       });
 
       it('should create metric with sparkline when date field is provided', () => {
@@ -90,7 +77,7 @@ describe('metric_utils', () => {
         });
 
         const state = result(createMockState({ transformedData }));
-        expect(seriesForSnapshot(state.series)).toMatchSnapshot();
+        expect(state.series).toMatchSnapshot();
       });
 
       it('should create metric with threshold colors enabled', () => {
@@ -110,74 +97,12 @@ describe('metric_utils', () => {
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
+          dateField: 'date_field',
           styles,
         });
 
         const state = result(createMockState());
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
-      });
-
-      it('should create metric with percentage display', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showPercentage: true,
-          percentageColor: 'standard',
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
-      });
-
-      it('should create metric with custom font sizes', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          fontSize: 80,
-          titleSize: 24,
-          percentageSize: 16,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
-      });
-
-      it('should create metric with unit formatting', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          unitId: 'percentage',
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
-      });
-
-      it('should create metric without title', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: false,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
+        expect(state.series!).toMatchSnapshot();
       });
 
       it('should create multiple metric series', () => {
@@ -194,312 +119,59 @@ describe('metric_utils', () => {
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field', 'value_field_2'],
+          dateField: 'date_field',
           styles,
         });
 
         const state = result(createMockState({ transformedData }));
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
+        expect(state.series!).toMatchSnapshot();
       });
 
-      it('should create metric with inverted percentage colors', () => {
+      it('should apply white sparkline color for background color modes', () => {
         const styles: MetricChartStyle = {
           ...defaultMetricChartStyles,
-          showPercentage: true,
-          percentageColor: 'inverted',
+          colorMode: 'background_solid',
         };
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
+          dateField: 'date_field',
           styles,
         });
 
         const state = result(createMockState());
-        expect(seriesForSnapshot(state.series!)).toMatchSnapshot();
+        const lineSeries = state.series![0] as any;
+        expect(lineSeries.lineStyle.color).toBe('rgba(255, 255, 255, 0.7)');
+        expect(lineSeries.areaStyle.color).toBe('rgba(255, 255, 255, 0.7)');
       });
-    });
 
-    describe('renderItem function tests', () => {
-      it('should snapshot renderItem output for basic metric', () => {
+      it('should apply threshold color when useThresholdColor is true', () => {
+        const thresholds: Threshold[] = [
+          { value: 100, color: '#ffcc00' },
+          { value: 200, color: '#ff0000' },
+        ];
+
         const styles: MetricChartStyle = {
           ...defaultMetricChartStyles,
-          showTitle: true,
-          title: 'Test Title',
-          showPercentage: true,
+          colorMode: 'value',
+          useThresholdColor: true,
+          thresholdOptions: {
+            baseColor: '#00ff00',
+            thresholds,
+          },
         };
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
+          dateField: 'date_field',
           styles,
         });
 
         const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-        expect(renderResult).toMatchSnapshot();
-      });
-
-      it('should snapshot renderItem output with custom font sizes', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: true,
-          title: 'Custom Fonts',
-          fontSize: 80,
-          titleSize: 24,
-          percentageSize: 16,
-          showPercentage: true,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-        expect(renderResult).toMatchSnapshot();
-      });
-
-      it('should snapshot renderItem output without title or percentage', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: false,
-          showPercentage: false,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-        expect(renderResult).toMatchSnapshot();
-      });
-
-      it('should create renderItem function that returns group with children', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: true,
-          showPercentage: true,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        expect(customSeries).toBeDefined();
-        expect(customSeries.renderItem).toBeDefined();
-        expect(typeof customSeries.renderItem).toBe('function');
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        expect(renderResult).toHaveProperty('type', 'group');
-        expect(renderResult).toHaveProperty('children');
-        expect(Array.isArray(renderResult.children)).toBe(true);
-      });
-
-      it('should render three text elements (title, value, percentage) when all enabled', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: true,
-          title: 'Test Title',
-          showPercentage: true,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        expect(renderResult.children).toHaveLength(3);
-        expect(renderResult.children[0]).toHaveProperty('type', 'text');
-        expect(renderResult.children[0]).toHaveProperty('style.text', 'Test Title');
-        expect(renderResult.children[1]).toHaveProperty('type', 'text');
-        expect(renderResult.children[2]).toHaveProperty('type', 'text');
-      });
-
-      it('should render empty title when showTitle is false', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: false,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        expect(renderResult.children[0]).toHaveProperty('style.text', '');
-      });
-
-      it('should calculate font sizes based on chart dimensions', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 400,
-          getHeight: () => 300,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        // Font sizes should be calculated based on dimensions
-        expect(renderResult.children[0].style.fontSize).toBeGreaterThan(0);
-        expect(renderResult.children[1].style.fontSize).toBeGreaterThan(0);
-        expect(renderResult.children[2].style.fontSize).toBeGreaterThan(0);
-      });
-
-      it('should use custom font sizes when provided', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          fontSize: 80,
-          titleSize: 24,
-          percentageSize: 16,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        expect(renderResult.children[0].style.fontSize).toBe(24); // titleSize
-        expect(renderResult.children[1].style.fontSize).toBe(80); // fontSize
-        expect(renderResult.children[2].style.fontSize).toBe(16); // percentageSize
-      });
-
-      it('should position elements correctly', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-          showTitle: true,
-          showPercentage: true,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        // Group should be positioned
-        expect(renderResult).toHaveProperty('x');
-        expect(renderResult).toHaveProperty('y');
-
-        // Text elements should have y positions
-        expect(renderResult.children[0].style.y).toBe(0);
-        expect(renderResult.children[1].style.y).toBeGreaterThan(0);
-        expect(renderResult.children[2].style.y).toBeGreaterThan(renderResult.children[1].style.y);
-      });
-
-      it('should center align all text elements', () => {
-        const styles: MetricChartStyle = {
-          ...defaultMetricChartStyles,
-        };
-
-        const result = createMetricChartSeries({
-          seriesFields: ['value_field'],
-          styles,
-        });
-
-        const state = result(createMockState());
-        const customSeries = state.series!.find((s) => s.type === 'custom') as any;
-
-        const mockParams = { context: {} };
-        const mockApi = {
-          getWidth: () => 300,
-          getHeight: () => 200,
-        };
-
-        const renderResult = customSeries.renderItem(mockParams as any, mockApi as any);
-
-        renderResult.children.forEach((child: any) => {
-          expect(child.style.textAlign).toBe('center');
-        });
+        const lineSeries = state.series![0] as any;
+        // With max value 250, should use the second threshold color
+        expect(lineSeries.lineStyle.color).toBe('#ff0000');
+        expect(lineSeries.areaStyle.color).toBe('#ff0000');
       });
     });
 
@@ -513,6 +185,7 @@ describe('metric_utils', () => {
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
+          dateField: 'date_field',
           styles,
         });
 
@@ -530,6 +203,7 @@ describe('metric_utils', () => {
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
+          dateField: 'date_field',
           styles,
         });
 
@@ -546,11 +220,28 @@ describe('metric_utils', () => {
 
         const result = createMetricChartSeries({
           seriesFields: ['value_field'],
+          dateField: 'date_field',
           styles,
         });
 
         const state = result(createMockState({ transformedData }));
         expect(state.series).toBeDefined();
+      });
+
+      it('should handle missing transformedData', () => {
+        const styles: MetricChartStyle = {
+          ...defaultMetricChartStyles,
+        };
+
+        const result = createMetricChartSeries({
+          seriesFields: ['value_field'],
+          dateField: 'date_field',
+          styles,
+        });
+
+        const state = result(createMockState({ transformedData: [] }));
+        expect(state.series).toBeDefined();
+        expect(state.series!.length).toBe(0);
       });
     });
   });
@@ -561,6 +252,28 @@ describe('metric_utils', () => {
       const result = assembleForMetric(initialState);
 
       expect(result.spec).toMatchSnapshot();
+    });
+
+    it('should hide axes and set grid to zero margins', () => {
+      const initialState = createMockState();
+      const result = assembleForMetric(initialState);
+
+      expect(result.spec!.grid).toEqual({
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      });
+      expect(result.spec!.xAxis).toEqual({ show: false, silent: true });
+      expect(result.spec!.yAxis).toEqual({ show: false, silent: true });
+    });
+
+    it('should hide tooltip and legend', () => {
+      const initialState = createMockState();
+      const result = assembleForMetric(initialState);
+
+      expect(result.spec!.tooltip).toEqual({ show: false });
+      expect(result.spec!.legend).toEqual({ show: false });
     });
 
     it('should preserve existing spec properties while hiding axes', () => {

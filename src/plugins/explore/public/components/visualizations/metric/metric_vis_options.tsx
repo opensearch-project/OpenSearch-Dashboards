@@ -15,7 +15,7 @@ import {
   ColorMode,
 } from './metric_vis_config';
 import { AxisRole } from '../types';
-import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
@@ -94,15 +94,42 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiFormRow>
-                <EuiSwitch
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.textDisplay', {
+                  defaultMessage: 'Text display',
+                })}
+              >
+                <EuiSelect
                   compressed
-                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
-                    defaultMessage: 'Use threshold colors',
-                  })}
-                  data-test-subj="useThresholdColorButton"
-                  checked={styleOptions?.useThresholdColor ?? false}
-                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                  options={[
+                    {
+                      value: 'value',
+                      text: i18n.translate('explore.vis.metric.textMode.value', {
+                        defaultMessage: 'Value only',
+                      }),
+                    },
+                    {
+                      value: 'name',
+                      text: i18n.translate('explore.vis.metric.textMode.name', {
+                        defaultMessage: 'Name only',
+                      }),
+                    },
+                    {
+                      value: 'value_and_name',
+                      text: i18n.translate('explore.vis.metric.textMode.valueAndName', {
+                        defaultMessage: 'Value and Name',
+                      }),
+                    },
+                    {
+                      value: 'none',
+                      text: i18n.translate('explore.vis.metric.textMode.none', {
+                        defaultMessage: 'None',
+                      }),
+                    },
+                  ]}
+                  value={styleOptions.textMode || 'value_and_name'}
+                  onChange={(e) => updateStyleOption('textMode', e.target.value as TextMode)}
+                  data-test-subj="textModeSelect"
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -111,6 +138,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                 })}
               >
                 <EuiSelect
+                  compressed
                   options={[
                     {
                       value: 'none',
@@ -155,6 +183,17 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               <EuiFormRow>
                 <EuiSwitch
                   compressed
+                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
+                  })}
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                />
+              </EuiFormRow>
+              {/* <EuiFormRow>
+                <EuiSwitch
+                  compressed
                   label={i18n.translate('explore.stylePanel.metric.title', {
                     defaultMessage: 'Show title',
                   })}
@@ -162,9 +201,9 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
                   data-test-subj="showTitleSwitch"
                 />
-              </EuiFormRow>
+              </EuiFormRow> */}
 
-              {styleOptions.showTitle && (
+              {/* {styleOptions.showTitle && (
                 <EuiFormRow
                   label={i18n.translate('explore.vis.metric.title', {
                     defaultMessage: 'Title',
@@ -178,57 +217,10 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                     onChange={(text) => updateStyleOption('title', text)}
                   />
                 </EuiFormRow>
-              )}
+              )} */}
             </StyleAccordion>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <StyleAccordion
-              id="textModeSection"
-              accordionLabel={i18n.translate('explore.stylePanel.tabs.textMode', {
-                defaultMessage: 'Text Mode',
-              })}
-              initialIsOpen={false}
-            >
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.textMode', {
-                  defaultMessage: 'Display mode',
-                })}
-              >
-                <EuiSelect
-                  options={[
-                    {
-                      value: 'value',
-                      text: i18n.translate('explore.vis.metric.textMode.value', {
-                        defaultMessage: 'Value only',
-                      }),
-                    },
-                    {
-                      value: 'name',
-                      text: i18n.translate('explore.vis.metric.textMode.name', {
-                        defaultMessage: 'Name only',
-                      }),
-                    },
-                    {
-                      value: 'value_and_name',
-                      text: i18n.translate('explore.vis.metric.textMode.valueAndName', {
-                        defaultMessage: 'Value and Name',
-                      }),
-                    },
-                    {
-                      value: 'none',
-                      text: i18n.translate('explore.vis.metric.textMode.none', {
-                        defaultMessage: 'None',
-                      }),
-                    },
-                  ]}
-                  value={styleOptions.textMode || 'value_and_name'}
-                  onChange={(e) => updateStyleOption('textMode', e.target.value as TextMode)}
-                  data-test-subj="textModeSelect"
-                />
-              </EuiFormRow>
-            </StyleAccordion>
-          </EuiFlexItem>
           {hasMultiMetric && (
             <EuiFlexItem grow={false}>
               <StyleAccordion
@@ -244,6 +236,7 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   })}
                 >
                   <EuiSelect
+                    compressed
                     options={layoutOptions}
                     value={styleOptions.layoutType || 'auto'}
                     onChange={(e) => updateStyleOption('layoutType', e.target.value as LayoutType)}

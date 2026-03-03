@@ -3,318 +3,551 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
+import { debounce } from 'lodash';
+
 import { MetricChartStyle } from './metric_vis_config';
-import { AxisColumnMappings, VisColumn, AxisRole } from '../types';
+import { AxisColumnMappings, AxisRole } from '../types';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { getUnitById } from '../style_panel/unit/collection';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { EchartsRender } from '../echarts_render';
+import { darkenHexColor, getContrastTextColor, normalizeHexColor } from '../utils/color';
+
+import './metric_component.scss';
 
 interface MetricTextData {
-  displayValue: string;
+  numericValue: string;
+  unitText: string;
+  unitFirst: boolean; // True if unit should be displayed before value (e.g., currency)
   fillColor: string;
   changeText: string;
   changeColor: string;
-  title: string;
   backgroundColor?: string;
   backgroundGradient?: string;
 }
 
-interface MetricComponentProps {
-  data: Array<Record<string, any>>;
+interface MetricChartProps {
+  name: string;
+  data?: Array<Record<string, any>>;
   styles: MetricChartStyle;
-  metricField: string;
-  timeField?: string;
-  numericalColumns: VisColumn[];
-  categoricalColumns: VisColumn[];
-  dateColumns: VisColumn[];
   axisColumnMappings?: AxisColumnMappings;
+  spec?: echarts.EChartsOption;
+}
+
+interface SpecConfig {
+  spec: echarts.EChartsOption;
+  name: string;
+  data: Array<Record<string, any>>;
+}
+interface MetricChartRenderProps {
+  styles: MetricChartStyle;
+  axisColumnMappings?: AxisColumnMappings;
+  spec?: SpecConfig | SpecConfig[];
+}
+
+// Helper functions for metric text data calculation
+
+/**
+ * Finds the appropriate color based on threshold rules
+ */
+function getThresholdColor(
+  value: number | undefined,
+  thresholds: Array<{ value: number; color: string }>,
+  baseColor: string
+): string {
+  if (value === undefined) return baseColor;
+
+  // Find the last threshold that the value meets or exceeds
+  for (let i = thresholds.length - 1; i >= 0; i--) {
+    if (value >= thresholds[i].value) {
+      return thresholds[i].color;
+    }
+  }
+
+  return baseColor;
+}
+
+/**
+ * Applies color mode styling to determine text, background colors
+ */
+function applyColorMode(
+  colorMode: string | undefined,
+  thresholdColor: string,
+  textColor: string
+): {
+  fillColor: string;
+  backgroundColor?: string;
+  backgroundGradient?: string;
+} {
+  switch (colorMode) {
+    case 'value':
+      return { fillColor: thresholdColor };
+
+    case 'background_solid':
+      return {
+        fillColor: getContrastTextColor(thresholdColor),
+        backgroundColor: thresholdColor,
+      };
+
+    case 'background_gradient': {
+      const normalized = normalizeHexColor(thresholdColor);
+      const darkened = darkenHexColor(normalized, 0.7);
+      return {
+        fillColor: getContrastTextColor(thresholdColor),
+        backgroundGradient: `linear-gradient(135deg, ${normalized}, ${darkened})`,
+      };
+    }
+
+    case 'none':
+    default:
+      return { fillColor: textColor };
+  }
+}
+
+/**
+ * Determines the color for percentage change based on value and color mode
+ */
+function getPercentageChangeColor(
+  percentage: number | undefined,
+  percentageColorMode: string | undefined,
+  palette: ReturnType<typeof getColors>
+): string {
+  if (percentage === undefined || percentage === 0) {
+    return palette.text;
+  }
+
+  const isPositive = percentage > 0;
+  const isInverted = percentageColorMode === 'inverted';
+
+  // Standard mode: green for positive, red for negative
+  // Inverted mode: red for positive, green for negative
+  if (isPositive) {
+    return isInverted ? palette.statusRed : palette.statusGreen;
+  } else {
+    return isInverted ? palette.statusGreen : palette.statusRed;
+  }
+}
+
+/**
+ * Determines the title text based on text mode setting
+ */
+function getTitleText(textMode: string | undefined, title: string): string {
+  const mode = textMode || 'value_and_name';
+
+  // Both 'name' and 'value_and_name' show the title
+  if (mode === 'name' || mode === 'value_and_name') {
+    return title;
+  }
+
+  // 'none' and 'value' don't show title
+  return '';
+}
+
+/**
+ * Determines whether to show the display value based on text mode
+ */
+function shouldShowValue(textMode: string | undefined): boolean {
+  const mode = textMode || 'value_and_name';
+  return mode === 'value' || mode === 'value_and_name';
 }
 
 function calculateMetricTextData(
   data: Array<Record<string, any>>,
   styles: MetricChartStyle,
-  metricField: string,
-  fieldName?: string,
-  isMultiMetric: boolean = false
+  metricField: string
 ): MetricTextData {
   const colorPalette = getColors();
 
-  const numericalValues: number[] = data.map((d) => d[metricField]);
+  // Calculate the metric value and its display representation
+  const numericalValues: unknown[] = data.map((d) => d[metricField]);
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
   const isValidNumber =
     calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
 
   const selectedUnit = getUnitById(styles?.unitId);
-  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-  // Calculate fill color based on thresholds
-  const newThreshold = styles.thresholdOptions?.thresholds ?? [];
-  let textColor = styles.thresholdOptions?.baseColor ?? getColors().statusGreen;
+  // Determine threshold-based color
+  const thresholds = styles.thresholdOptions?.thresholds ?? [];
+  const baseColor = styles.thresholdOptions?.baseColor ?? colorPalette.statusGreen;
+  const thresholdColor = getThresholdColor(calculatedValue, thresholds, baseColor);
 
-  if (calculatedValue !== undefined) {
-    for (let i = 0; i < newThreshold.length; i++) {
-      const { value, color } = newThreshold[i];
-      if (calculatedValue >= value) textColor = color;
-    }
-  }
-
-  // Determine colors based on color mode
+  // Apply color mode to determine fill, background colors
   let fillColor = colorPalette.text;
   let backgroundColor: string | undefined;
   let backgroundGradient: string | undefined;
 
   if (calculatedValue === undefined) {
+    // No value available - use grey or default text color
     fillColor = styles.useThresholdColor ? DEFAULT_GREY : colorPalette.text;
   } else {
-    const thresholdColor = styles.useThresholdColor ? textColor : colorPalette.categories[0];
+    // Use threshold color or category color based on settings
+    const effectiveColor = styles.useThresholdColor ? thresholdColor : colorPalette.categories[0];
+    const colorResult = applyColorMode(styles.colorMode, effectiveColor, colorPalette.text);
 
-    switch (styles.colorMode) {
-      case 'value':
-        fillColor = thresholdColor;
-        break;
-      case 'background_solid':
-        fillColor = colorPalette.text;
-        backgroundColor = thresholdColor;
-        break;
-      case 'background_gradient':
-        fillColor = colorPalette.text;
-        // Convert 3-digit hex to 6-digit hex before adding alpha
-        const normalizedColor =
-          thresholdColor.length === 4
-            ? thresholdColor.replace(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i, '#$1$1$2$2$3$3')
-            : thresholdColor;
-        backgroundGradient = `linear-gradient(135deg, ${normalizedColor}33, ${normalizedColor})`;
-        break;
-      case 'none':
-      default:
-        fillColor = colorPalette.text;
-        break;
-    }
+    fillColor = colorResult.fillColor;
+    backgroundColor = colorResult.backgroundColor;
+    backgroundGradient = colorResult.backgroundGradient;
   }
 
-  // Calculate percentage change
+  // Calculate percentage change text and color
   let changeText = '';
   let changeColor = colorPalette.text;
+
   if (styles.showPercentage) {
     const percentage = calculatePercentage(numericalValues);
+
     if (percentage === undefined) {
       changeText = '-';
     } else {
       changeText = `${percentage > 0 ? '+' : ''}${(percentage * 100).toFixed(2)}%`;
-    }
-
-    if (percentage !== undefined && percentage > 0) {
-      if (styles.percentageColor === 'standard') {
-        changeColor = colorPalette.statusGreen;
-      } else if (styles.percentageColor === 'inverted') {
-        changeColor = colorPalette.statusRed;
-      } else {
-        changeColor = colorPalette.statusGreen;
-      }
-    }
-    if (percentage !== undefined && percentage < 0) {
-      if (styles.percentageColor === 'standard') {
-        changeColor = colorPalette.statusRed;
-      } else if (styles.percentageColor === 'inverted') {
-        changeColor = colorPalette.statusGreen;
-      } else {
-        changeColor = colorPalette.statusRed;
-      }
+      changeColor = getPercentageChangeColor(percentage, styles.percentageColor, colorPalette);
     }
   }
 
-  // Calculate title based on text mode and metric type
-  let title = '';
-  const textMode = styles.textMode || 'value_and_name';
+  const showValue = shouldShowValue(styles.textMode);
 
-  if (textMode === 'none') {
-    title = '';
-  } else if (textMode === 'name') {
-    // For single metric: show field name; for multi metric: this will be overridden by category name
-    title = styles.title || fieldName || metricField;
-  } else if (textMode === 'value') {
-    title = '';
-  } else if (textMode === 'value_and_name') {
-    // For single metric: show field name; for multi metric: this will be overridden by category name
-    title = styles.title || fieldName || metricField;
+  // Separate numeric value and unit for individual styling
+  let valueText = '';
+  let unitText = '';
+  let unitFirst = false;
+
+  if (showValue) {
+    if (isValidNumber && calculatedValue !== undefined) {
+      // Format the numeric value
+      if (selectedUnit?.display) {
+        const unitDisplay = selectedUnit.display(calculatedValue, selectedUnit.symbol);
+
+        // Check if we have segments to extract value and unit separately
+        if (unitDisplay.segments) {
+          const segments = unitDisplay.segments;
+
+          // Check if unit comes first (e.g., currency: $ 50)
+          if (segments.length > 0 && segments[0].type === 'unit') {
+            unitFirst = true;
+            unitText = String(segments[0].value);
+            valueText = segments.length > 1 ? String(segments[1].value) : '';
+          } else {
+            // Value comes first (e.g., data: 100 KB)
+            unitFirst = false;
+            valueText = segments.length > 0 ? String(segments[0].value) : '';
+            unitText = segments.length > 1 ? String(segments[1].value) : '';
+          }
+        } else {
+          // No segments, use label as combined value (e.g., date/time formats)
+          valueText = String(unitDisplay.label);
+          unitText = '';
+          unitFirst = false;
+        }
+      } else {
+        // Simple formatting without custom display
+        valueText = `${Math.round(calculatedValue * 100) / 100}`;
+        unitText = selectedUnit?.symbol || '';
+        unitFirst = false;
+      }
+    } else {
+      valueText = '-';
+      unitText = '';
+      unitFirst = false;
+    }
   }
 
   return {
-    displayValue: textMode === 'value' || textMode === 'value_and_name' ? displayValue ?? '-' : '',
+    numericValue: valueText,
+    unitText,
+    unitFirst,
     fillColor,
-    changeText:
-      (textMode === 'value' || textMode === 'value_and_name') && styles.showPercentage
-        ? changeText
-        : '',
+    changeText: showValue && styles.showPercentage ? changeText : '',
     changeColor,
-    title,
     backgroundColor,
     backgroundGradient,
   };
 }
 
-export const MetricComponent: React.FC<MetricComponentProps> = ({
-  data,
+export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   styles,
-  metricField,
-  timeField,
   axisColumnMappings,
+  spec,
 }) => {
-  const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const valueMapping = axisColumnMappings?.[AxisRole.Value];
-  const fieldName = valueMapping?.name;
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const resizeObserver = new ResizeObserver(
+      debounce((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          if (width !== containerDimensions.width || height !== containerDimensions.height) {
+            setContainerDimensions({ width, height });
+          }
+        }
+      }, 300)
+    );
+
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [containerDimensions.height, containerDimensions.width]);
+
+  const itemFlexBasis = useMemo(() => {
+    if (containerDimensions.width > 1600) {
+      return 'calc(15% - 6px)';
+    } else if (containerDimensions.width > 1200) {
+      return 'calc(25% - 6px)';
+    } else if (containerDimensions.width > 800) {
+      return 'calc(33.3% - 6px)';
+    } else if (containerDimensions.width > 500) {
+      return 'calc(50% - 6px)';
+    } else {
+      return 'calc(100% - 6px)';
+    }
+  }, [containerDimensions]);
+
+  if (!spec) {
+    return null;
+  }
+
+  const layoutClass = `layout-${styles.layoutType || 'auto'}`;
+  const containerStyle = {} as React.CSSProperties;
+  const specs = Array.isArray(spec) ? spec : [spec];
+  return (
+    <div
+      className={`multi-metric-container ${layoutClass}`}
+      style={containerStyle}
+      ref={containerRef}
+    >
+      {specs.map((s) => (
+        <div key={s.name} className="multi-metric-item" style={{ flexBasis: itemFlexBasis }}>
+          <MetricChart
+            spec={s.spec}
+            data={s.data}
+            styles={styles}
+            name={s.name}
+            axisColumnMappings={axisColumnMappings}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export const MetricChart: React.FC<MetricChartProps> = ({
+  data = [],
+  styles,
+  axisColumnMappings,
+  spec,
+  name,
+}) => {
+  const valueColumn = axisColumnMappings?.[AxisRole.Value];
+  const numericField = valueColumn?.column ?? '';
+
+  // State for container dimensions
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
-    return calculateMetricTextData(data, styles, metricField, fieldName, false);
-  }, [data, styles, metricField, fieldName]);
+    return calculateMetricTextData(data, styles, numericField);
+  }, [data, styles, numericField]);
 
-  // Create sparkline ECharts option
-  useEffect(() => {
-    if (!timeField || !chartRef.current) return;
-
-    const chartInstance = echarts.init(chartRef.current);
-    chartInstanceRef.current = chartInstance;
-
-    const colorPalette = getColors();
-
-    let sparklineColor: string;
-    if (styles.colorMode === 'background_solid' || styles.colorMode === 'background_gradient') {
-      sparklineColor = 'rgba(255, 255, 255, 0.7)';
-    } else {
-      if (
-        styles.useThresholdColor &&
-        (styles.colorMode === 'value' || styles.colorMode === 'none')
-      ) {
-        const numericalValues: number[] = data.map((d) => d[metricField]);
-        const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
-        const thresholds = styles.thresholdOptions?.thresholds ?? [];
-        let thresholdColor = styles.thresholdOptions?.baseColor ?? colorPalette.statusGreen;
-
-        if (calculatedValue !== undefined) {
-          for (let i = 0; i < thresholds.length; i++) {
-            const { value, color } = thresholds[i];
-            if (calculatedValue >= value) thresholdColor = color;
-          }
-        }
-        sparklineColor = thresholdColor;
-      } else {
-        sparklineColor = colorPalette.categories[0];
-      }
-    }
-
-    const option = {
-      grid: {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-      },
-      xAxis: {
-        type: 'time',
-        show: false,
-        silent: true,
-      },
-      yAxis: {
-        type: 'value',
-        show: false,
-        silent: true,
-      },
-      series: [
-        {
-          name: fieldName || metricField,
-          type: 'line',
-          data: data
-            .filter((d) => d[timeField] != null && d[metricField] != null)
-            .sort((a, b) => new Date(a[timeField]).getTime() - new Date(b[timeField]).getTime())
-            .map((d) => [d[timeField], d[metricField]]),
-          symbol: 'none',
-          smooth: true,
-          areaStyle: {
-            color: sparklineColor,
-            opacity: 0.5,
-          },
-          lineStyle: {
-            color: sparklineColor,
-          },
-        },
-      ],
-      tooltip: {
-        show: false,
-      },
-      legend: {
-        show: false,
-      },
-    };
-
-    chartInstance.setOption(option);
-
-    return () => {
-      chartInstance.dispose();
-    };
-  }, [
-    data,
-    timeField,
-    metricField,
-    fieldName,
-    axisColumnMappings,
-    styles.colorMode,
-    styles.useThresholdColor,
-    styles.thresholdOptions,
-    styles.valueCalculation,
-  ]);
-
+  const title = getTitleText(styles.textMode, name);
   const selectedUnit = getUnitById(styles?.unitId);
 
-  // Dynamic font sizes
-  const titleFontSize = styles.titleSize || 18;
-  const valueFontSize = styles.fontSize || 40 * (selectedUnit?.fontScale ?? 1);
-  const changeFontSize = styles.percentageSize || 24;
+  // ResizeObserver to track container dimensions
+  useEffect(() => {
+    const element = overlayRef.current;
+    if (!element) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width !== containerDimensions.width || height !== containerDimensions.height) {
+          setContainerDimensions({ width, height });
+        }
+      }
+    });
+
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [containerDimensions.height, containerDimensions.width]);
+
+  // Calculate dynamic font sizes based on container dimensions
+  const dynamicFontSizes = useMemo(() => {
+    const { width, height } = containerDimensions;
+
+    // If container hasn't been measured yet, return defaults
+    if (width === 0 || height === 0) {
+      return {
+        title: styles.titleSize || 18,
+        value: styles.fontSize || 40 * (selectedUnit?.fontScale ?? 1),
+        change: styles.percentageSize || 24,
+      };
+    }
+
+    // If user has set custom sizes, use them
+    if (styles.titleSize && styles.fontSize && styles.percentageSize) {
+      return {
+        title: styles.titleSize,
+        value: styles.fontSize * (selectedUnit?.fontScale ?? 1),
+        change: styles.percentageSize,
+      };
+    }
+
+    // Calculate number of visible elements
+    const hasTitle = !!name;
+    const hasValue = !!textData.numericValue;
+    const hasChange = styles.showPercentage && !!textData.changeText;
+    const visibleElements = [hasTitle, hasValue, hasChange].filter(Boolean).length;
+
+    // Calculate base sizes as percentage of available height
+    // Distribute height proportionally based on visual hierarchy
+    let titleSize = 0;
+    let valueSize = 0;
+    let changeSize = 0;
+
+    if (visibleElements === 1) {
+      // Only one element - use most of the space
+      if (hasValue) {
+        valueSize = height * 0.45;
+      } else if (hasTitle) {
+        titleSize = height * 0.3;
+      } else if (hasChange) {
+        changeSize = height * 0.35;
+      }
+    } else if (visibleElements === 2) {
+      // Two elements
+      if (hasTitle && hasValue) {
+        titleSize = height * 0.15;
+        valueSize = height * 0.45;
+      } else if (hasValue && hasChange) {
+        valueSize = height * 0.45;
+        changeSize = height * 0.25;
+      } else if (hasTitle && hasChange) {
+        titleSize = height * 0.2;
+        changeSize = height * 0.3;
+      }
+    } else if (visibleElements === 3) {
+      // All three elements
+      titleSize = height * 0.12;
+      valueSize = height * 0.4;
+      changeSize = height * 0.2;
+    }
+
+    // Apply unit font scale to value
+    valueSize *= selectedUnit?.fontScale ?? 1;
+
+    // Apply min/max bounds for readability
+    const minTitleSize = 12;
+    const maxTitleSize = 24;
+    const minValueSize = 20;
+    const maxValueSize = 120;
+    const minChangeSize = 14;
+    const maxChangeSize = 32;
+
+    titleSize = Math.max(minTitleSize, Math.min(maxTitleSize, titleSize));
+    valueSize = Math.max(minValueSize, Math.min(maxValueSize, valueSize));
+    changeSize = Math.max(minChangeSize, Math.min(maxChangeSize, changeSize));
+
+    // Override with user-defined sizes if provided
+    return {
+      title: styles.titleSize || titleSize,
+      value: styles.fontSize || valueSize,
+      change: styles.percentageSize || changeSize,
+    };
+  }, [
+    containerDimensions,
+    styles.titleSize,
+    styles.fontSize,
+    styles.percentageSize,
+    styles.showPercentage,
+    selectedUnit?.fontScale,
+    name,
+    textData.numericValue,
+    textData.changeText,
+  ]);
+
+  // Use calculated dynamic font sizes
+  const titleFontSize = dynamicFontSizes.title;
+  const valueFontSize = dynamicFontSizes.value;
+  const changeFontSize = dynamicFontSizes.change;
 
   // Determine container styles based on color mode
   const containerStyle: React.CSSProperties = {};
 
   if (textData.backgroundColor) {
     containerStyle.backgroundColor = textData.backgroundColor;
-    containerStyle.padding = '16px';
-    containerStyle.borderRadius = '8px';
   } else if (textData.backgroundGradient) {
     containerStyle.background = textData.backgroundGradient;
-    containerStyle.padding = '16px';
-    containerStyle.borderRadius = '8px';
   }
 
   return (
     <div className="metric-component" style={containerStyle}>
-      {/* Sparkline chart - only rendered if timeField exists */}
-      {timeField && <div ref={chartRef} className="metric-sparkline" />}
+      {/* Sparkline */}
+      {spec && (
+        <div className="metric-sparkline">
+          <EchartsRender spec={spec} />
+        </div>
+      )}
 
       {/* HTML rendered text content */}
-      <div className="metric-text-overlay">
-        {textData.title && (
+      <div className="metric-text-overlay" ref={overlayRef}>
+        {title && (
           <div
             className="metric-title"
             style={{
               fontSize: titleFontSize,
-              color: getColors().text,
+              color:
+                textData.backgroundColor || textData.backgroundGradient
+                  ? textData.fillColor
+                  : getColors().text,
             }}
           >
-            {textData.title}
+            {title}
           </div>
         )}
 
-        <div
-          className="metric-value"
-          style={{
-            fontSize: valueFontSize,
-            color: textData.fillColor,
-          }}
-        >
-          {textData.displayValue}
+        <div className="metric-value">
+          {textData.unitFirst && textData.unitText && (
+            <span
+              className="metric-value-unit"
+              style={{
+                fontSize: valueFontSize,
+                color: textData.fillColor,
+              }}
+            >
+              {textData.unitText}
+            </span>
+          )}
+          <span
+            className="metric-value-number"
+            style={{
+              fontSize: valueFontSize,
+              color: textData.fillColor,
+            }}
+          >
+            {textData.numericValue}
+          </span>
+          {!textData.unitFirst && textData.unitText && (
+            <span
+              className="metric-value-unit"
+              style={{
+                fontSize: valueFontSize * 0.45,
+                color: textData.fillColor,
+                marginLeft: '0.2em',
+              }}
+            >
+              {textData.unitText}
+            </span>
+          )}
         </div>
 
         {styles.showPercentage && textData.changeText && (
@@ -322,7 +555,10 @@ export const MetricComponent: React.FC<MetricComponentProps> = ({
             className="metric-change"
             style={{
               fontSize: changeFontSize,
-              color: textData.changeColor,
+              color:
+                textData.backgroundColor || textData.backgroundGradient
+                  ? textData.fillColor
+                  : textData.changeColor,
             }}
           >
             {textData.changeText}
