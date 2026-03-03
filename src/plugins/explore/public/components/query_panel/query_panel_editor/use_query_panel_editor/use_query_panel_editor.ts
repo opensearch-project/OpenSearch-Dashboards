@@ -307,34 +307,48 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        const maxHeight = 100;
-        const finalHeight = Math.min(contentHeight, maxHeight);
+        const editorContainer = editor.getContainerDomNode();
+        const isInResizableLayout = editorContainer?.closest('.exploreVerticalLayout__queryPanel');
 
-        editor.layout({
-          width: editor.getLayoutInfo().width,
-          height: finalHeight,
-        });
+        if (isInResizableLayout) {
+          // In resizable layout, let the editor use available space
+          editor.updateOptions({
+            scrollBeyondLastLine: false,
+            scrollbar: {
+              vertical: 'auto',
+            },
+          });
+        } else {
+          // Original behavior for other contexts
+          const maxHeight = 100;
+          const finalHeight = Math.min(contentHeight, maxHeight);
 
-        editor.updateOptions({
-          scrollBeyondLastLine: false,
-          scrollbar: {
-            vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
-          },
-        });
+          editor.layout({
+            width: editor.getLayoutInfo().width,
+            height: finalHeight,
+          });
 
-        // Automatically scroll to the bottom when new lines are added
-        if (contentHeight > finalHeight) {
-          const cursorLine = editor.getPosition()?.lineNumber || 0;
-          const visibleRanges = editor.getVisibleRanges();
+          editor.updateOptions({
+            scrollBeyondLastLine: false,
+            scrollbar: {
+              vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
+            },
+          });
 
-          if (visibleRanges.length > 0) {
-            // use index 0 since we did not introduce code folding in our monaco editor
-            const firstVisibleLine = visibleRanges[0].startLineNumber;
-            const lastVisibleLine = visibleRanges[0].endLineNumber;
+          // Automatically scroll to the bottom when new lines are added
+          if (contentHeight > finalHeight) {
+            const cursorLine = editor.getPosition()?.lineNumber || 0;
+            const visibleRanges = editor.getVisibleRanges();
 
-            // Only reveal if cursor is outside the visible range
-            if (cursorLine < firstVisibleLine || cursorLine > lastVisibleLine) {
-              editor.revealLine(cursorLine);
+            if (visibleRanges.length > 0) {
+              // use index 0 since we did not introduce code folding in our monaco editor
+              const firstVisibleLine = visibleRanges[0].startLineNumber;
+              const lastVisibleLine = visibleRanges[0].endLineNumber;
+
+              // Only reveal if cursor is outside the visible range
+              if (cursorLine < firstVisibleLine || cursorLine > lastVisibleLine) {
+                editor.revealLine(cursorLine);
+              }
             }
           }
         }

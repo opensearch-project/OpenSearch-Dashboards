@@ -6,7 +6,7 @@
 import '../explore_page.scss';
 
 import React from 'react';
-import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -91,12 +91,38 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <div className="dscCanvas__queryPanel">
-              <QueryPanel />
-            </div>
+            {/* Vertical resizable container for query panel and results */}
+            <div className="exploreVerticalLayout">
+              <EuiResizableContainer direction="vertical">
+                {(EuiResizablePanel, EuiResizableButton) => (
+                  <>
+                    <EuiResizablePanel
+                      id="query"
+                      initialSize={10}
+                      minSize="5%"
+                      paddingSize="none"
+                      className="exploreVerticalLayout__queryPanel"
+                    >
+                      <div className="dscCanvas__queryPanel">
+                        <QueryPanel />
+                      </div>
+                    </EuiResizablePanel>
 
-            {/* Main content area with resizable panels under QueryPanel */}
-            <BottomContainer />
+                    <EuiResizableButton className="exploreVerticalLayout__resizeButton" />
+
+                    <EuiResizablePanel
+                      id="results"
+                      initialSize={90}
+                      minSize="40%"
+                      paddingSize="none"
+                      className="exploreVerticalLayout__resultsPanel"
+                    >
+                      <BottomContainer />
+                    </EuiResizablePanel>
+                  </>
+                )}
+              </EuiResizableContainer>
+            </div>
           </EuiPageBody>
         </EuiPage>
       </div>

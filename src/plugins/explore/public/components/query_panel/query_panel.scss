@@ -6,4 +6,21 @@
 .exploreQueryPanel.exploreQueryPanel {
   border-top: 0;
   padding-bottom: $ouiSizeXXS;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  // Inside vertical layout, fill the entire space
+  .exploreVerticalLayout__queryPanel & {
+    height: 100%;
+    margin: 0;
+    padding-bottom: 0;
+  }
+
+  .exploreQueryPanel__editorsWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
 }
