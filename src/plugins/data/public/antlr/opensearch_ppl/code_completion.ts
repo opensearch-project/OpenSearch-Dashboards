@@ -9,8 +9,6 @@
  * GitHub history for details.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { monaco } from '@osd/monaco';
 import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
 import {
@@ -60,12 +58,12 @@ import { GeneralErrorListener } from '../shared/general_error_listerner';
 import { KeywordSuggestion, AutocompleteResultBase } from '../shared/types';
 import { quotesRegex } from '../shared/constants';
 
-type KeywordSuggestionDetails = {
+interface KeywordSuggestionDetails {
   importance: string;
   type: string;
   isFunction: boolean;
   optionalParam?: boolean;
-};
+}
 
 const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
   importance: '92',
@@ -185,7 +183,11 @@ function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
   if (!symbolicName) return '';
   if (!/^[A-Z][A-Z0-9_]*$/.test(symbolicName)) return '';
   if (/_STRING$/.test(symbolicName)) return '';
-  if (/^(ID|WS|SPACE|EOF|ERROR_RECOGNITION|ERROR|UNRECOGNIZED|NUMBER|INTEGER|DECIMAL)$/.test(symbolicName)) {
+  if (
+    /^(ID|WS|SPACE|EOF|ERROR_RECOGNITION|ERROR|UNRECOGNIZED|NUMBER|INTEGER|DECIMAL)$/.test(
+      symbolicName
+    )
+  ) {
     return '';
   }
   return symbolicName;
@@ -274,9 +276,7 @@ function tokenTypeBySymbolic(grammar: CachedGrammar, symName: string): number {
     const vocab = grammar.vocabulary;
     const max =
       (vocab as any).maxTokenType ??
-      (typeof (vocab as any).getMaxTokenType === 'function'
-        ? (vocab as any).getMaxTokenType()
-        : 0);
+      (typeof (vocab as any).getMaxTokenType === 'function' ? (vocab as any).getMaxTokenType() : 0);
     for (let i = 0; i <= max; i++) {
       const sym = vocab.getSymbolicName(i);
       if (sym) m.set(sym, i);
@@ -313,7 +313,7 @@ class RuntimeCompletionContext extends ParserRuleContext {
     }
   }
 
-  override get ruleIndex(): number {
+  public get ruleIndex(): number {
     return this.syntheticRuleIndex;
   }
 }
@@ -374,14 +374,14 @@ function getRuntimeRerunRules(
   const rerun: number[] = [];
   const spaceToken = resolveSpaceToken(grammar);
 
-  const RULE_searchCommand = ruleIndex(grammar, 'searchCommand');
-  const RULE_searchComparisonOperator = ruleIndex(grammar, 'searchComparisonOperator');
-  const RULE_comparisonOperator = ruleIndex(grammar, 'comparisonOperator');
+  const ruleSearchCommand = ruleIndex(grammar, 'searchCommand');
+  const ruleSearchComparisonOperator = ruleIndex(grammar, 'searchComparisonOperator');
+  const ruleComparisonOperator = ruleIndex(grammar, 'comparisonOperator');
 
   // searchCommand: rerun to expand SEARCH/SOURCE/INDEX tokens
   // (unless the context is DESCRIBE/SHOW which has its own path)
   // In pipe-first mode, searchCommand is unreachable — skip this rerun entirely.
-  if (!isPipeFirst && RULE_searchCommand !== INVALID_RULE_INDEX && rules.has(RULE_searchCommand)) {
+  if (!isPipeFirst && ruleSearchCommand !== INVALID_RULE_INDEX && rules.has(ruleSearchCommand)) {
     const DESCRIBE = tokenTypeBySymbolic(grammar, 'DESCRIBE');
     const SHOW = tokenTypeBySymbolic(grammar, 'SHOW');
     const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
@@ -393,23 +393,26 @@ function getRuntimeRerunRules(
       PIPE
     );
     if (!firstAfterPipe || ![DESCRIBE, SHOW].includes(firstAfterPipe.token.type)) {
-      rerun.push(RULE_searchCommand);
+      rerun.push(ruleSearchCommand);
     }
   }
 
   // searchComparisonOperator / comparisonOperator: rerun when last token
   // is an identifier (expression end), to get pipe/comma suggestions.
   // This is useful in both normal and pipe-first mode (e.g. `| where field `).
-  if (RULE_searchComparisonOperator !== INVALID_RULE_INDEX && rules.has(RULE_searchComparisonOperator)) {
+  if (
+    ruleSearchComparisonOperator !== INVALID_RULE_INDEX &&
+    rules.has(ruleSearchComparisonOperator)
+  ) {
     const ID = resolveToken(grammar, 'ID', 'ID');
     const BQUOTA = resolveToken(grammar, 'BQUOTA_STRING', 'BACKTICK_QUOTE');
     const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
     if (lastToken && (lastToken.token.type === ID || lastToken.token.type === BQUOTA)) {
-      rerun.push(RULE_searchComparisonOperator);
-      if (RULE_comparisonOperator !== INVALID_RULE_INDEX) rerun.push(RULE_comparisonOperator);
+      rerun.push(ruleSearchComparisonOperator);
+      if (ruleComparisonOperator !== INVALID_RULE_INDEX) rerun.push(ruleComparisonOperator);
       // Only include searchCommand parent when not in pipe-first mode
       if (!isPipeFirst) {
-        rerun.push(RULE_searchCommand); // parent of searchComparison
+        rerun.push(ruleSearchCommand); // parent of searchComparison
       }
     }
   }
@@ -470,11 +473,11 @@ function enrichRuntimeResult(
   const COMMA = resolveToken(grammar, 'COMMA', 'COMMA');
 
   // Resolve rule indices by name
-  const RULE_statsFunction = ruleIndex(grammar, 'statsFunction');
-  const RULE_fieldList = ruleIndex(grammar, 'fieldList');
-  const RULE_wcFieldList = ruleIndex(grammar, 'wcFieldList');
-  const RULE_sortField = ruleIndex(grammar, 'sortField');
-  const fieldRules = [RULE_fieldList, RULE_wcFieldList, RULE_sortField].filter(
+  const ruleStatsFunction = ruleIndex(grammar, 'statsFunction');
+  const ruleFieldList = ruleIndex(grammar, 'fieldList');
+  const ruleWcFieldList = ruleIndex(grammar, 'wcFieldList');
+  const ruleSortField = ruleIndex(grammar, 'sortField');
+  const fieldRules = [ruleFieldList, ruleWcFieldList, ruleSortField].filter(
     (r) => r !== INVALID_RULE_INDEX
   );
 
@@ -525,7 +528,7 @@ function enrichRuntimeResult(
       case 'wcQualifiedName':
       case 'qualifiedName': {
         const isInStatsFunction =
-          RULE_statsFunction !== INVALID_RULE_INDEX && parentRuleList.includes(RULE_statsFunction);
+          ruleStatsFunction !== INVALID_RULE_INDEX && parentRuleList.includes(ruleStatsFunction);
         if (isInStatsFunction) suggestFieldsInAggregateFunction = true;
 
         // Don't suggest columns when last token is SOURCE (should suggest table)
@@ -681,7 +684,12 @@ function findLastNonSpaceOperatorTokenRT(
   const operators = getRuntimeOperatorTokens(grammar);
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
-    if (token && token.type !== spaceToken && token.type !== Token.EOF && !operators.has(token.type)) {
+    if (
+      token &&
+      token.type !== spaceToken &&
+      token.type !== Token.EOF &&
+      !operators.has(token.type)
+    ) {
       return { token, index: i };
     }
   }
@@ -732,10 +740,25 @@ function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
   if (cached) return cached;
 
   const names = [
-    'PIPE', 'EQUAL', 'COMMA', 'NOT_EQUAL', 'LESS', 'NOT_LESS',
-    'GREATER', 'NOT_GREATER', 'OR', 'AND', 'LT_PRTHS', 'RT_PRTHS',
-    'IN', 'SPAN', 'MATCH', 'MATCH_PHRASE', 'MATCH_BOOL_PREFIX',
-    'MATCH_PHRASE_PREFIX', 'SQUOTA_STRING',
+    'PIPE',
+    'EQUAL',
+    'COMMA',
+    'NOT_EQUAL',
+    'LESS',
+    'NOT_LESS',
+    'GREATER',
+    'NOT_GREATER',
+    'OR',
+    'AND',
+    'LT_PRTHS',
+    'RT_PRTHS',
+    'IN',
+    'SPAN',
+    'MATCH',
+    'MATCH_PHRASE',
+    'MATCH_BOOL_PREFIX',
+    'MATCH_PHRASE_PREFIX',
+    'SQUOTA_STRING',
   ];
   const set = new Set<number>();
   for (const name of names) {
@@ -865,7 +888,7 @@ function tryRuntimeGrammarSuggestions(
       c3Context = parseTree;
     }
 
-    let { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
+    const { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
 
     // ─── Fix B (generalized): rerun without preferred rules that hide tokens ─
     // When a preferred rule appears at the cursor, C3 returns it as a rule
@@ -944,8 +967,7 @@ function tryRuntimeGrammarSuggestions(
 
     // ─── Name-based enrichment (no compiled grammar coupling) ─────────────
     return enrichRuntimeResult(baseResult, grammar, rules, tokenStream, cursorTokenIndex);
-  } catch (e) {
-    console.log('error: ', e);
+  } catch {
     return null;
   }
 }
@@ -1121,7 +1143,13 @@ export const getSimplifiedPPLSuggestions = async ({
       column: column || selectionEnd,
     };
 
-    const runtimeSuggestions = tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false);
+    const runtimeSuggestions = tryRuntimeGrammarSuggestions(
+      query,
+      cursor,
+      services,
+      indexPattern,
+      false
+    );
     const suggestions =
       runtimeSuggestions || getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
     const finalSuggestions: QuerySuggestion[] = [];
@@ -1257,17 +1285,16 @@ export const getSimplifiedPPLSuggestions = async ({
             !keywordDetails &&
             isRuntimeGrammar &&
             !isCommandPosition &&
-            (
-              sk.followsOpeningParen ||
+            (sk.followsOpeningParen ||
               sk.inRuntimeFunctionContext ||
-              isLikelyExpressionFunctionKeyword(sk)
-            )
+              isLikelyExpressionFunctionKeyword(sk))
               ? INFERRED_RUNTIME_FUNCTION_DETAILS
               : null;
           const functionDetails = keywordDetails?.isFunction
             ? keywordDetails
             : inferredFunctionDetails;
-          const shouldTreatAsCommand = !keywordDetails && isCommandPosition && isLikelyCommandKeyword(sk);
+          const shouldTreatAsCommand =
+            !keywordDetails && isCommandPosition && isLikelyCommandKeyword(sk);
           if (functionDetails) {
             const functionName = sk.value;
             return {

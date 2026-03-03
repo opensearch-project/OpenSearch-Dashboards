@@ -4,14 +4,58 @@
  */
 
 import { monaco } from '@osd/monaco';
+import { CharStream, CommonTokenStream, ParserInterpreter } from 'antlr4ng';
+import { OpenSearchPPLLexer, OpenSearchPPLParser } from '@osd/antlr-grammar';
 import { getDefaultSuggestions } from './code_completion';
 import { IndexPattern } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
 import { QuerySuggestion } from '../../autocomplete';
 import * as utils from '../shared/utils';
 import { PPL_AGGREGATE_FUNCTIONS } from './constants';
+import { pplGrammarCache, CachedGrammar } from './ppl_grammar_cache';
+import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
 
 describe('ppl code_completion', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const buildRuntimeGrammar = (overrides: Partial<CachedGrammar> = {}): CachedGrammar => {
+    const lexer = new OpenSearchPPLLexer(CharStream.fromString(''));
+    const tokenStream = new CommonTokenStream(lexer);
+    const parser = new OpenSearchPPLParser(tokenStream);
+
+    const runtimeSymbolicNameToTokenType = new Map<string, number>();
+    for (let i = 0; i <= parser.vocabulary.maxTokenType; i++) {
+      const symbolicName = parser.vocabulary.getSymbolicName(i);
+      if (symbolicName) runtimeSymbolicNameToTokenType.set(symbolicName, i);
+    }
+
+    const runtimeRuleNameToIndex = new Map<string, number>();
+    parser.ruleNames.forEach((name, idx) => runtimeRuleNameToIndex.set(name, idx));
+
+    return {
+      lexerATN: lexer.interpreter.atn,
+      parserATN: parser.interpreter.atn,
+      vocabulary: parser.vocabulary,
+      lexerRuleNames: lexer.ruleNames,
+      parserRuleNames: parser.ruleNames,
+      channelNames: lexer.channelNames,
+      modeNames: lexer.modeNames,
+      startRuleIndex: 0,
+      pipeStartRuleIndex: parser.ruleNames.indexOf('commands'),
+      grammarHash: 'runtime-default-test-grammar',
+      lastUsed: Date.now(),
+      backendVersion: '3.6.0',
+      tokenDictionary: defaultPplAutocompleteData.tokenDictionary,
+      ignoredTokens: Array.from(defaultPplAutocompleteData.ignoredTokens),
+      rulesToVisit: Array.from(defaultPplAutocompleteData.rulesToVisit),
+      runtimeSymbolicNameToTokenType,
+      runtimeRuleNameToIndex,
+      ...overrides,
+    };
+  };
+
   describe('getSuggestions', () => {
     const mockIndexPattern = {
       title: 'test-index',
@@ -123,5 +167,58 @@ describe('ppl code_completion', () => {
       });
     });
 
+    it('should use runtime grammar when cache is available for supported datasource versions', async () => {
+      const runtimeParseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+      jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+      jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+      const runtimeIndexPattern = {
+        ...mockIndexPattern,
+        dataSourceRef: { id: 'runtime-ds', version: '3.6.0' },
+      } as IndexPattern;
+
+      const result = await getDefaultSuggestions({
+        query: 'source ',
+        indexPattern: runtimeIndexPattern,
+        position: new monaco.Position(1, 'source '.length + 1),
+        language: 'PPL',
+        selectionStart: 0,
+        selectionEnd: 0,
+        services: mockServices,
+      });
+
+      expect(runtimeParseSpy).toHaveBeenCalled();
+      checkSuggestionsContain(result, {
+        text: '=',
+        type: monaco.languages.CompletionItemKind.Keyword,
+      });
+    });
+
+    it('should fall back to compiled default grammar when runtime cache is missing', async () => {
+      const runtimeParseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
+      jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+      jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(null);
+
+      const runtimeIndexPattern = {
+        ...mockIndexPattern,
+        dataSourceRef: { id: 'runtime-ds', version: '3.6.0' },
+      } as IndexPattern;
+
+      const result = await getDefaultSuggestions({
+        query: 'source = ',
+        indexPattern: runtimeIndexPattern,
+        position: new monaco.Position(1, 'source = '.length + 1),
+        language: 'PPL',
+        selectionStart: 0,
+        selectionEnd: 0,
+        services: mockServices,
+      });
+
+      expect(runtimeParseSpy).not.toHaveBeenCalled();
+      checkSuggestionsContain(result, {
+        text: 'test-index',
+        type: monaco.languages.CompletionItemKind.Struct,
+      });
+    });
   });
 });
