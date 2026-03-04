@@ -496,6 +496,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline]);
 
   const handleShowHistory = useCallback(() => {
+    loadingAbortControllerRef.current?.abort();
+    setIsLoading(false);
     setShowHistory(true);
     setRestoreError(null);
   }, []);

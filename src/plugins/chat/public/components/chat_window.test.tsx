@@ -906,6 +906,56 @@ describe('ChatWindow', () => {
   });
 
   describe('conversation loading abort functionality', () => {
+    it('should abort ongoing restoring latest after show history click', async () => {
+      // Mock a long-running restoration that never resolves
+      let resolveRestore: any;
+      mockChatService.restoreLatestConversation.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveRestore = resolve;
+          })
+      );
+
+      mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+      });
+
+      const { getByLabelText, queryByText, getByText } = renderWithContext(
+        <ChatWindow onClose={jest.fn()} />
+      );
+
+      // Wait a bit to ensure loading state is set
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Verify loading screen is shown
+      expect(queryByText('Loading conversation...')).toBeTruthy();
+
+      // Click the "Show conversation history" button to abort loading and show history
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      // Wait for state updates
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Loading screen should be hidden immediately
+      expect(queryByText('Loading conversation...')).toBeNull();
+
+      // Conversation history panel should be shown instead
+      expect(getByText('All conversations')).toBeTruthy();
+
+      // Verify restoration was called but aborted
+      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
+    });
+
     it('should abort conversation loading when handleCloseHistory is called', async () => {
       // Mock a long-running restoration that never resolves
       let resolveRestore: any;
