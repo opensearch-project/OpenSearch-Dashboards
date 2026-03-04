@@ -30,9 +30,8 @@
 
 /* eslint-disable import/namespace */
 
-// vega-lite 6.x no longer exports from /src subpath
 import { compile, version } from 'vega-lite/build/index.js';
-import * as vega from 'vega/build/vega.module.js';
+import * as vega from 'vega/build/vega.js';
 import { expressionInterpreter as vegaExpressionInterpreter } from 'vega-interpreter/build/vega-interpreter.module';
 
 const vegaLite = { compile, version };
