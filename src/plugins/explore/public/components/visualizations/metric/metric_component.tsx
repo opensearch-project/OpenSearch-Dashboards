@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import { debounce } from 'lodash';
+import { debounce, throttle } from 'lodash';
 
 import { MetricChartStyle } from './metric_vis_config';
 import { AxisColumnMappings, AxisRole } from '../types';
@@ -281,9 +281,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
       debounce((entries) => {
         for (const entry of entries) {
           const { width, height } = entry.contentRect;
-          if (width !== containerDimensions.width || height !== containerDimensions.height) {
-            setContainerDimensions({ width, height });
-          }
+          setContainerDimensions({ width, height });
         }
       }, 100)
     );
@@ -293,13 +291,13 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [containerDimensions.height, containerDimensions.width]);
+  }, []);
 
   const itemFlexBasis = useMemo(() => {
     if (containerDimensions.width > 1600) {
       return 'calc(15% - 6px)';
     } else if (containerDimensions.width > 1200) {
-      return 'calc(25% - 6px)';
+      return 'calc(20% - 6px)';
     } else if (containerDimensions.width > 800) {
       return 'calc(33.3% - 6px)';
     } else if (containerDimensions.width > 500) {
@@ -323,7 +321,11 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
       ref={containerRef}
     >
       {specs.map((s) => (
-        <div key={s.name} className="multi-metric-item" style={{ flexBasis: itemFlexBasis }}>
+        <div
+          key={s.name}
+          className="multi-metric-item"
+          style={{ width: itemFlexBasis, flexBasis: itemFlexBasis }}
+        >
           <MetricChart
             spec={s.spec}
             data={s.data}
@@ -364,21 +366,21 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     const element = overlayRef.current;
     if (!element) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (width !== containerDimensions.width || height !== containerDimensions.height) {
+    const resizeObserver = new ResizeObserver(
+      debounce((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
           setContainerDimensions({ width, height });
         }
-      }
-    });
+      }, 100)
+    );
 
     resizeObserver.observe(element);
 
     return () => {
       resizeObserver.disconnect();
     };
-  }, [containerDimensions.height, containerDimensions.width]);
+  }, []);
 
   // Calculate dynamic font sizes based on container dimensions
   const dynamicFontSizes = useMemo(() => {
@@ -388,7 +390,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     if (width === 0 || height === 0) {
       return {
         title: styles.titleSize || 18,
-        value: styles.fontSize || 40 * (selectedUnit?.fontScale ?? 1),
+        value: styles.fontSize || 40,
         change: styles.percentageSize || 24,
       };
     }
@@ -397,7 +399,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     if (styles.titleSize && styles.fontSize && styles.percentageSize) {
       return {
         title: styles.titleSize,
-        value: styles.fontSize * (selectedUnit?.fontScale ?? 1),
+        value: styles.fontSize,
         change: styles.percentageSize,
       };
     }
@@ -445,11 +447,48 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     // Apply unit font scale to value
     valueSize *= selectedUnit?.fontScale ?? 1;
 
+    // Calculate width-based constraints to prevent text overflow
+    // Build the full text string for each element
+    const fullValueText = textData.unitFirst
+      ? `${textData.unitText}${textData.numericValue}`
+      : `${textData.numericValue}${textData.unitText}`;
+
+    const titleText = title || '';
+    const changeText = textData.changeText || '';
+
+    // Average character width ratio relative to font size (empirically ~0.6 for typical number/text fonts)
+    const avgCharWidthRatio = 0.6;
+
+    // Reserve space for padding/margins (15% of width)
+    const paddingRatio = 0.15;
+    const availableWidth = width * (1 - paddingRatio);
+
+    // Calculate maximum font size that fits container width for each element
+    const maxTitleSizeByWidth =
+      titleText.length > 0
+        ? availableWidth / (titleText.length * avgCharWidthRatio)
+        : Number.MAX_SAFE_INTEGER;
+
+    const maxValueSizeByWidth =
+      fullValueText.length > 0
+        ? availableWidth / (fullValueText.length * avgCharWidthRatio)
+        : Number.MAX_SAFE_INTEGER;
+
+    const maxChangeSizeByWidth =
+      changeText.length > 0
+        ? availableWidth / (changeText.length * avgCharWidthRatio)
+        : Number.MAX_SAFE_INTEGER;
+
+    // Combine height-based and width-based constraints (use the smaller)
+    titleSize = Math.min(titleSize, maxTitleSizeByWidth);
+    valueSize = Math.min(valueSize, maxValueSizeByWidth);
+    changeSize = Math.min(changeSize, maxChangeSizeByWidth);
+
     // Apply min/max bounds for readability
     const minTitleSize = 12;
     const maxTitleSize = 24;
     const minValueSize = 20;
-    const maxValueSize = 120;
+    const maxValueSize = 90;
     const minChangeSize = 14;
     const maxChangeSize = 32;
 
@@ -472,7 +511,10 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     selectedUnit?.fontScale,
     name,
     textData.numericValue,
+    textData.unitText,
+    textData.unitFirst,
     textData.changeText,
+    title,
   ]);
 
   // Use calculated dynamic font sizes

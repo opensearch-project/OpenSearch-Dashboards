@@ -56,7 +56,7 @@ export const createSingleMetric = (
     }
 
     if (!dateField) {
-      return { spec: undefined, name: '', data: transformedData };
+      return { spec: undefined, name: numericFieldName, data: transformedData };
     }
 
     // Return React component spec for HTML text rendering with ECharts sparkline
@@ -77,7 +77,7 @@ export const createSingleMetric = (
       axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
       axisColumnMappings: axisColumnMappings ?? {},
     });
-    return { spec: result.spec, name: '', data: transformedData };
+    return { spec: result.spec, name: numericFieldName, data: transformedData };
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
