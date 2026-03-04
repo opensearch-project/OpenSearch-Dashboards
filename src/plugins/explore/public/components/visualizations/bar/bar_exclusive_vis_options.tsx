@@ -100,38 +100,6 @@ export const BarExclusiveVisOptions = ({
 
   return (
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
-      {/* {!shouldDisableUseThresholdColor && (
-        <EuiFormRow>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('explore.vis.bar.useThresholdColor', {
-              defaultMessage: 'Use threshold colors',
-            })}
-            data-test-subj="useThresholdColorButton"
-            checked={useThresholdColor ?? false}
-            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-          />
-        </EuiFormRow>
-      )} */}
-
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.bar.sizeMode', {
-          defaultMessage: 'Size',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.bar.sizeMode', {
-            defaultMessage: 'Size',
-          })}
-          options={sizeModeOptions}
-          idSelected={barSizeMode}
-          onChange={(id) => onBarSizeModeChange(id as 'auto' | 'manual')}
-          buttonSize="compressed"
-          isFullWidth
-          data-test-subj="barSizeModeButtonGroup"
-        />
-      </EuiFormRow>
-
       {type === 'bar' && (
         <EuiFormRow
           label={i18n.translate('explore.stylePanel.bar.stackMode', {
@@ -151,16 +119,21 @@ export const BarExclusiveVisOptions = ({
           />
         </EuiFormRow>
       )}
-
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.vis.bar.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
+      <EuiFormRow
+        label={i18n.translate('explore.stylePanel.bar.sizeMode', {
+          defaultMessage: 'Size',
+        })}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('explore.stylePanel.bar.sizeMode', {
+            defaultMessage: 'Size',
           })}
-          data-test-subj="useThresholdColorButton"
-          checked={useThresholdColor ?? false}
-          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+          options={sizeModeOptions}
+          idSelected={barSizeMode}
+          onChange={(id) => onBarSizeModeChange(id as 'auto' | 'manual')}
+          buttonSize="compressed"
+          isFullWidth
+          data-test-subj="barSizeModeButtonGroup"
         />
       </EuiFormRow>
 
@@ -213,8 +186,21 @@ export const BarExclusiveVisOptions = ({
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
         </>
       )}
+
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.bar.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
+          })}
+          data-test-subj="useThresholdColorButton"
+          checked={useThresholdColor ?? false}
+          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+        />
+      </EuiFormRow>
 
       <EuiSpacer size="s" />
 
