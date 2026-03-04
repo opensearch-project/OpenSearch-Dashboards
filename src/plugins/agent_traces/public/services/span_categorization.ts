@@ -24,15 +24,15 @@ interface CategoryMeta {
 function getCategoryColor(category: SpanCategory): string {
   switch (category) {
     case 'LLM':
-      return euiThemeVars.euiColorVis7;
-    case 'AGENT':
-      return euiThemeVars.euiColorVis1;
-    case 'EMBEDDINGS':
       return euiThemeVars.euiColorVis3;
+    case 'AGENT':
+      return euiThemeVars.euiColorPrimary;
+    case 'EMBEDDINGS':
+      return euiThemeVars.euiColorVis1;
     case 'TOOL':
-      return euiThemeVars.euiColorVis6;
+      return euiThemeVars.euiColorVis0;
     case 'RETRIEVAL':
-      return euiThemeVars.euiColorVis8;
+      return euiThemeVars.euiColorSecondary;
     case 'OTHER':
       return euiThemeVars.euiColorMediumShade;
   }

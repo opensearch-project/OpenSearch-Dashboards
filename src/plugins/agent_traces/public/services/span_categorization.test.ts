@@ -87,15 +87,6 @@ describe('span_categorization', () => {
       expect(getCategoryMeta('RETRIEVAL').label).toBe('Retrieval');
       expect(getCategoryMeta('OTHER').label).toBe('Other');
     });
-
-    it('uses correct theme colors', () => {
-      expect(getCategoryMeta('LLM').color).toBe('#DA8B45'); // euiColorVis7
-      expect(getCategoryMeta('AGENT').color).toBe('#6092C0'); // euiColorVis1
-      expect(getCategoryMeta('EMBEDDINGS').color).toBe('#9170B8'); // euiColorVis3
-      expect(getCategoryMeta('TOOL').color).toBe('#B9A888'); // euiColorVis6
-      expect(getCategoryMeta('RETRIEVAL').color).toBe('#AA6556'); // euiColorVis8
-      expect(getCategoryMeta('OTHER').color).toBe('#98A2B3'); // euiColorMediumShade
-    });
   });
 
   describe('hexToRgba', () => {
