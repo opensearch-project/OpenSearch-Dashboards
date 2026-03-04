@@ -317,15 +317,6 @@ const singleParseQuery = <
     (parseTree as unknown) as ParserRuleContext
   );
 
-  const decoded = [...tokens.keys()].map((t) => ({
-    id: t,
-    symbolic: parser.vocabulary.getSymbolicName(t),
-    literal: parser.vocabulary.getLiteralName(t),
-    display: parser.vocabulary.getDisplayName(t),
-  }));
-
-  console.table(decoded);
-
   tokens.forEach((producerRules, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
