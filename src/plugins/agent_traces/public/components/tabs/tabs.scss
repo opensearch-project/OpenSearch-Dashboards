@@ -1,0 +1,54 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.agentTracesTabs {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  > .euiTabs {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: $euiColorEmptyShade;
+    flex-shrink: 0;
+  }
+
+  // Container for all tab panels, stacked on top of each other.
+  // Using visibility:hidden instead of display:none keeps each panel's
+  // layout tree intact so switching tabs avoids a full reflow (~224 ms).
+  &__panels {
+    position: relative;
+    min-height: 0;
+    flex-grow: 1;
+  }
+
+  &__panel {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+    visibility: hidden;
+    pointer-events: none;
+
+    &--active {
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  .tab-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiTabs:not(.euiTabs--condensed)::before {
+    height: 0;
+  }
+}

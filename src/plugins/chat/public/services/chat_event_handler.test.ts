@@ -678,4 +678,177 @@ describe('ChatEventHandler', () => {
       consoleSpy.mockRestore();
     });
   });
+
+  describe('handleMessagesSnapshot', () => {
+    it('should restore timeline from MESSAGES_SNAPSHOT event', async () => {
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'Hello' },
+        { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
+        { id: 'msg-3', role: 'user', content: 'How are you?' },
+      ];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages,
+        timestamp: Date.now(),
+      });
+
+      expect(mockOnTimelineUpdate).toHaveBeenCalled();
+      expect(timeline).toEqual(messages);
+    });
+
+    it('should reset streaming state', async () => {
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'Hello' }];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages,
+        timestamp: Date.now(),
+      });
+
+      expect(mockOnStreamingStateChange).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle empty messages array', async () => {
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: [],
+        timestamp: Date.now(),
+      });
+
+      expect(timeline).toEqual([]);
+      expect(mockOnStreamingStateChange).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle messages with tool calls', async () => {
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'List files' },
+        {
+          id: 'msg-2',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            {
+              id: 'tool-1',
+              type: 'function',
+              function: {
+                name: 'list_files',
+                arguments: '{"path": "/"}',
+              },
+            },
+          ],
+        },
+        {
+          id: 'msg-3',
+          role: 'tool',
+          toolCallId: 'tool-1',
+          content: 'file1.txt\nfile2.txt',
+        },
+      ];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages,
+        timestamp: Date.now(),
+      });
+
+      expect(timeline).toEqual(messages);
+      expect(timeline).toHaveLength(3);
+      expect((timeline[1] as AssistantMessage).toolCalls).toHaveLength(1);
+      expect((timeline[2] as ToolMessage).toolCallId).toBe('tool-1');
+    });
+
+    it('should handle messages with array content', async () => {
+      const messages: Message[] = [
+        {
+          id: 'msg-1',
+          role: 'user',
+          content: [
+            { type: 'image', image: 'data:image/png;base64,abc' },
+            { type: 'text', text: 'What is this?' },
+          ],
+        },
+        { id: 'msg-2', role: 'assistant', content: 'This is an image.' },
+      ];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages,
+        timestamp: Date.now(),
+      });
+
+      expect(timeline).toEqual(messages);
+      expect(Array.isArray(timeline[0].content)).toBe(true);
+    });
+
+    it('should override existing timeline', async () => {
+      // Set up initial timeline
+      timeline = [
+        { id: 'old-1', role: 'user', content: 'Old message' },
+        { id: 'old-2', role: 'assistant', content: 'Old response' },
+      ];
+
+      const newMessages: Message[] = [
+        { id: 'new-1', role: 'user', content: 'New message' },
+        { id: 'new-2', role: 'assistant', content: 'New response' },
+      ];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages: newMessages,
+        timestamp: Date.now(),
+      });
+
+      expect(timeline).toEqual(newMessages);
+      expect(timeline).toHaveLength(2);
+      expect(timeline[0].id).toBe('new-1');
+    });
+
+    it('should handle snapshot with only user messages', async () => {
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'First question' },
+        { id: 'msg-2', role: 'user', content: 'Second question' },
+      ];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages,
+        timestamp: Date.now(),
+      });
+
+      expect(timeline).toEqual(messages);
+      expect(timeline.every((msg) => msg.role === 'user')).toBe(true);
+    });
+
+    it('should handle snapshot with complex conversation flow', async () => {
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'Start conversation' },
+        { id: 'msg-2', role: 'assistant', content: 'Hello!' },
+        { id: 'msg-3', role: 'user', content: 'Use tool' },
+        {
+          id: 'msg-4',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            {
+              id: 'tool-1',
+              type: 'function',
+              function: { name: 'tool1', arguments: '{}' },
+            },
+          ],
+        },
+        { id: 'msg-5', role: 'tool', toolCallId: 'tool-1', content: 'tool result' },
+        { id: 'msg-6', role: 'assistant', content: 'Based on the tool result...' },
+      ];
+
+      await chatEventHandler.handleEvent({
+        type: EventType.MESSAGES_SNAPSHOT,
+        messages,
+        timestamp: Date.now(),
+      });
+
+      expect(timeline).toEqual(messages);
+      expect(timeline).toHaveLength(6);
+    });
+  });
 });

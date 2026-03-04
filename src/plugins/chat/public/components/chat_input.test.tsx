@@ -120,14 +120,14 @@ describe('ChatInput', () => {
       expect(input.value).toBe('test value');
     });
 
-    it('should disable input when streaming', () => {
+    it('should keep input enabled when streaming', () => {
       const { getByPlaceholderText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
 
       const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
-      expect(input.disabled).toBe(true);
+      expect(input.disabled).toBe(false);
     });
 
-    it('should enable input when not streaming', () => {
+    it('should keep input enabled when not streaming', () => {
       const { getByPlaceholderText } = render(<ChatInput {...defaultProps} isStreaming={false} />);
 
       const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;

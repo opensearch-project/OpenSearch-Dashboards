@@ -40,6 +40,7 @@ describe('Header', () => {
         filterToDeleteValue={'test'}
         onCancelConfirmationModal={() => {}}
         onDeleteFilter={() => {}}
+        isSaving={false}
       />
     );
 
