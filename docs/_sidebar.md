@@ -69,6 +69,7 @@
               - [CREATE_INDEX_PATTERN](../src/plugins/index_pattern_management/public/components/create_index_pattern_wizard/CREATE_INDEX_PATTERN.md)
       - [Input_control_vis](../src/plugins/input_control_vis/README.md)
       - [Inspector](../src/plugins/inspector/README.md)
+      - [Metrics_recorder](../src/plugins/metrics_recorder/README.md)
       - [Navigation](../src/plugins/navigation/README.md)
       - [Opensearch_dashboards_legacy](../src/plugins/opensearch_dashboards_legacy/README.md)
       - [Opensearch_dashboards_overview](../src/plugins/opensearch_dashboards_overview/README.md)
