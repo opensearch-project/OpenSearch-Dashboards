@@ -12,7 +12,7 @@ import {
 } from '../../../../core/server';
 import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { ISearchStrategy } from '../../../data/server';
-import { API } from '../../common';
+import { API, URI } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
@@ -129,20 +129,15 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
     },
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        logger.info(`PPL artifact route called, dataSourceId=${req.query.dataSourceId}`);
-
-        // Get the OpenSearch client - use data source if provided
         const { dataSourceId } = req.query;
-        const opensearchClient = client.asScoped(req);
-
-        // Call OpenSearch artifact endpoint
-        logger.info('PPL artifact: calling OpenSearch...');
-        const result = await opensearchClient.callAsCurrentUser('enhancements.pplArtifact');
-        logger.info(
-          `PPL artifact: got response, grammarHash=${result?.grammarHash}, keys=${Object.keys(
-            result || {}
-          ).join(',')}`
-        );
+        const opensearchClient = dataSourceId
+          ? await context.dataSource.opensearch.getClient(dataSourceId)
+          : context.core.opensearch.client.asCurrentUser;
+        const result = await opensearchClient.transport.request({
+          method: 'GET',
+          path: URI.PPL_ARTIFACT,
+        });
+        const body = result?.body ?? result;
 
         // The result is the artifact bundle JSON
         // Forward headers from OpenSearch if available
@@ -152,13 +147,13 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
 
         // Note: OpenSearch client might not expose response headers directly
         // The artifact bundle itself should contain grammarHash for client-side caching
-        if (result && result.grammarHash) {
-          responseHeaders.etag = `"${result.grammarHash}"`;
+        if (body && body.grammarHash) {
+          responseHeaders.etag = `"${body.grammarHash}"`;
           responseHeaders['cache-control'] = 'public, max-age=3600';
         }
 
         return res.ok({
-          body: result,
+          body,
           headers: responseHeaders,
         });
       } catch (err: any) {
@@ -167,7 +162,7 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
         logger.debug(`PPL artifact fetch error: ${err.message || err}`);
 
         return res.custom({
-          statusCode: coerceStatusCode(err.status || err.statusCode),
+          statusCode: coerceStatusCode(err.status || err.statusCode || err?.meta?.statusCode),
           body: err.message || 'Failed to fetch PPL artifact',
         });
       }
