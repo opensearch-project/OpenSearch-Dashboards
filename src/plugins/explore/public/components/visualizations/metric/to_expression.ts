@@ -56,7 +56,7 @@ export const createSingleMetric = (
     }
 
     if (!dateField) {
-      return null;
+      return { spec: undefined, name: '', data: transformedData };
     }
 
     // Return React component spec for HTML text rendering with ECharts sparkline

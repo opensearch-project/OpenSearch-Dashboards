@@ -285,7 +285,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
             setContainerDimensions({ width, height });
           }
         }
-      }, 300)
+      }, 100)
     );
 
     resizeObserver.observe(element);
