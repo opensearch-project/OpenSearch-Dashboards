@@ -547,6 +547,47 @@ describe('ChatService', () => {
 
       expect(response.toolMessage.content).toBe(JSON.stringify(objectResult));
     });
+
+    it('should only pass tool message when memory provider does not include full history', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-456';
+      const result = { success: true };
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'Previous user message' },
+        { id: 'msg-2', role: 'assistant', content: 'Previous assistant message' },
+      ];
+
+      const response = await chatService.sendToolResult(toolCallId, result, messages);
+
+      // Verify that only the tool message is passed, not the full history
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        {
+          threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+          runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
+          messages: [response.toolMessage], // Only tool message, not [...messages, toolMessage]
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      );
+
+      // Verify the tool message structure
+      expect(response.toolMessage).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'tool',
+        content: JSON.stringify(result),
+        toolCallId,
+      });
+    });
   });
 
   describe('abort', () => {
