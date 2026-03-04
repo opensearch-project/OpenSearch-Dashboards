@@ -212,6 +212,44 @@ describe('ppl_grammar_cache', () => {
     expect(pplGrammarCache.getCachedGrammar('ds-version-fail')).toBeNull();
   });
 
+  it('should not retry version determination when datasource version is missing for the same datasource', async () => {
+    const http = ({
+      get: jest.fn(),
+    } as unknown) as HttpSetup;
+    const savedObjectsClient = ({
+      get: jest.fn().mockResolvedValue({
+        attributes: {},
+      }),
+    } as unknown) as SavedObjectsClientContract;
+
+    pplGrammarCache.warmUp(http, savedObjectsClient, 'ds-no-version');
+    await flushPromises();
+    pplGrammarCache.warmUp(http, savedObjectsClient, 'ds-no-version');
+    await flushPromises();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(http.get).not.toHaveBeenCalled();
+    expect(pplGrammarCache.getCachedGrammar('ds-no-version')).toBeNull();
+  });
+
+  it('should not retry version determination after datasource version 404 for the same datasource', async () => {
+    const http = ({
+      get: jest.fn(),
+    } as unknown) as HttpSetup;
+    const savedObjectsClient = ({
+      get: jest.fn().mockRejectedValue(new Error('404')),
+    } as unknown) as SavedObjectsClientContract;
+
+    pplGrammarCache.warmUp(http, savedObjectsClient, 'ds-version-404');
+    await flushPromises();
+    pplGrammarCache.warmUp(http, savedObjectsClient, 'ds-version-404');
+    await flushPromises();
+
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(http.get).not.toHaveBeenCalled();
+    expect(pplGrammarCache.getCachedGrammar('ds-version-404')).toBeNull();
+  });
+
   it('should use provided datasource version to gate warm-up without saved object lookup', async () => {
     const http = ({
       get: jest.fn().mockResolvedValue(createBundle('sha256:provided-version')),
