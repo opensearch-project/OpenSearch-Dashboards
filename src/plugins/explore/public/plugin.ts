@@ -76,8 +76,6 @@ import { SlotRegistryService } from './services/slot_registry';
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
-import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
-import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 
 export class ExplorePlugin
   implements
@@ -431,9 +429,8 @@ export class ExplorePlugin
     );
     core.application.register(createExploreApp());
 
-    // Register all nav links during setup
-    // Visibility will be controlled by capabilities in the start lifecycle
-    const navLinks = [
+    // Register nav links for different workspaces
+    const observabilityNavLinks = [
       {
         id: PLUGIN_ID,
         category: undefined,
@@ -459,7 +456,39 @@ export class ExplorePlugin
       },
     ];
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+    // For analytics workspace, place after discover (order: 200) and differentiate with "Explorer" title
+    const analyticsNavLinks = [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 250,
+        title: 'Explorer', // Different title for analytics workspace
+      },
+      {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+        category: undefined,
+        order: 250,
+        parentNavLinkId: PLUGIN_ID,
+      },
+      {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
+        category: undefined,
+        order: 250,
+        parentNavLinkId: PLUGIN_ID,
+      },
+      {
+        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+        category: undefined,
+        order: 250,
+        parentNavLinkId: PLUGIN_ID,
+      },
+    ];
+
+    core.chrome.navGroup.addNavLinksToGroup(
+      DEFAULT_NAV_GROUPS.observability,
+      observabilityNavLinks
+    );
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, analyticsNavLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -721,7 +750,9 @@ export class ExplorePlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }
