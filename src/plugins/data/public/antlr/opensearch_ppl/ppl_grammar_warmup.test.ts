@@ -86,6 +86,27 @@ describe('ppl_grammar_warmup', () => {
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
   });
 
+  it('should not re-warm when datasource id is unchanged and version is unavailable', () => {
+    const cache = createCacheMock();
+    const handler = createPplGrammarWarmupHandler(http, savedObjectsClient, cache);
+
+    const selected = {
+      language: 'PPL',
+      dataset: {
+        dataSource: {
+          id: 'ds-1',
+        },
+      },
+    };
+
+    handler(selected);
+    handler(selected);
+
+    expect(cache.invalidate).toHaveBeenCalledTimes(1);
+    expect(cache.warmUp).toHaveBeenCalledTimes(1);
+    expect(cache.warmUp).toHaveBeenCalledWith(http, savedObjectsClient, 'ds-1', undefined);
+  });
+
   it('should re-warm when datasource version changes', () => {
     const cache = createCacheMock();
     const handler = createPplGrammarWarmupHandler(http, savedObjectsClient, cache);
