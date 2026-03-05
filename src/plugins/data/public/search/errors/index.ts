@@ -30,3 +30,4 @@
 
 export * from './painless_error';
 export * from './timeout_error';
+export * from './session_disconnect_error';
