@@ -28,9 +28,10 @@
  * under the License.
  */
 
-// Build vega-lite from source for es5 compatibility
-import { compile, version } from 'vega-lite-next/src';
-import * as vega from 'vega/build-es5/vega';
+/* eslint-disable import/namespace */
+
+import { compile, version } from 'vega-lite/build/index.js';
+import * as vega from 'vega/build/vega.js';
 import { expressionInterpreter as vegaExpressionInterpreter } from 'vega-interpreter/build/vega-interpreter.module';
 
 const vegaLite = { compile, version };
