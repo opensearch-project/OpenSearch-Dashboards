@@ -158,8 +158,8 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     needBody: true,
   });
 
-  enhancements.pplArtifact = createAction(client, components, {
-    endpoint: URI.PPL_ARTIFACT,
+  enhancements.pplBundle = createAction(client, components, {
+    endpoint: URI.PPL_BUNDLE,
     method: 'GET',
   });
 };

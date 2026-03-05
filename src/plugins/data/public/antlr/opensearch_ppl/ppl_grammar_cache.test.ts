@@ -6,7 +6,7 @@
 import { ATNDeserializer } from 'antlr4ng';
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { pplGrammarCache } from './ppl_grammar_cache';
-import { PPLArtifactBundle } from './ppl_artifact_loader';
+import { PPLArtifactBundle } from './ppl_bundle_loader';
 
 const flushPromises = async () => {
   await Promise.resolve();

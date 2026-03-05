@@ -5,7 +5,7 @@
 
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { URI } from '../../common';
-import { coerceStatusCode, definePPLArtifactRoute } from './index';
+import { coerceStatusCode, definePPLBundleRoute } from './index';
 
 describe('coerceStatusCode', () => {
   it('should return 503 when input is 500', () => {
@@ -22,7 +22,7 @@ describe('coerceStatusCode', () => {
   });
 });
 
-describe('definePPLArtifactRoute', () => {
+describe('definePPLBundleRoute', () => {
   const createResponse = () => ({
     ok: jest.fn((v) => v),
     custom: jest.fn((v) => v),
@@ -38,7 +38,7 @@ describe('definePPLArtifactRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLArtifactRoute(logger, router, client);
+    definePPLBundleRoute(logger, router, client);
 
     const requestMock = jest.fn().mockResolvedValue({
       body: { grammarHash: 'sha256:ds', language: 'ppl' },
@@ -73,14 +73,12 @@ describe('definePPLArtifactRoute', () => {
     expect(context.dataSource.opensearch.getClient).toHaveBeenCalledWith('ds-1');
     expect(requestMock).toHaveBeenCalledWith({
       method: 'GET',
-      path: URI.PPL_ARTIFACT,
+      path: URI.PPL_BUNDLE,
     });
     expect(res.ok).toHaveBeenCalledWith({
       body: { grammarHash: 'sha256:ds', language: 'ppl' },
       headers: {
         'content-type': 'application/json',
-        etag: '"sha256:ds"',
-        'cache-control': 'public, max-age=3600',
       },
     });
     expect(result).toEqual(res.ok.mock.results[0].value);
@@ -96,7 +94,7 @@ describe('definePPLArtifactRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLArtifactRoute(logger, router, client);
+    definePPLBundleRoute(logger, router, client);
 
     const requestMock = jest.fn().mockResolvedValue({
       body: { language: 'ppl' },
@@ -127,50 +125,9 @@ describe('definePPLArtifactRoute', () => {
     expect(context.dataSource.opensearch.getClient).not.toHaveBeenCalled();
     expect(requestMock).toHaveBeenCalledWith({
       method: 'GET',
-      path: URI.PPL_ARTIFACT,
+      path: URI.PPL_BUNDLE,
     });
     expect(res.ok).toHaveBeenCalled();
-  });
-
-  it('should not set etag/cache headers when grammarHash is not header-safe', async () => {
-    let handler: any;
-    const router = {
-      get: jest.fn((_, h) => {
-        handler = h;
-      }),
-    } as any;
-    const logger = loggingSystemMock.create().get();
-    const client = { asScoped: jest.fn() } as any;
-
-    definePPLArtifactRoute(logger, router, client);
-
-    const requestMock = jest.fn().mockResolvedValue({
-      body: { grammarHash: 'sha256:bad"\nvalue', language: 'ppl' },
-    });
-    const context = {
-      core: {
-        opensearch: {
-          client: {
-            asCurrentUser: {
-              transport: {
-                request: requestMock,
-              },
-            },
-          },
-        },
-      },
-    } as any;
-    const req = { query: {} } as any;
-    const res = createResponse();
-
-    await handler(context, req, res);
-
-    expect(res.ok).toHaveBeenCalledWith({
-      body: { grammarHash: 'sha256:bad"\nvalue', language: 'ppl' },
-      headers: {
-        'content-type': 'application/json',
-      },
-    });
   });
 
   it('should coerce 500-class errors to 503 in custom response', async () => {
@@ -183,7 +140,7 @@ describe('definePPLArtifactRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLArtifactRoute(logger, router, client);
+    definePPLBundleRoute(logger, router, client);
 
     const context = {
       dataSource: {
@@ -228,7 +185,7 @@ describe('definePPLArtifactRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLArtifactRoute(logger, router, client);
+    definePPLBundleRoute(logger, router, client);
 
     const requestMock = jest.fn();
     const context = {

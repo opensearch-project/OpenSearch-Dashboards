@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { deserializeArtifacts, PPLArtifactBundle } from './ppl_artifact_loader';
+import { deserializeArtifacts, PPLArtifactBundle } from './ppl_bundle_loader';
 
-describe('PPL Artifact Loader', () => {
+describe('PPL Bundle Loader', () => {
   const mockBundle: PPLArtifactBundle = {
     language: 'ppl',
     bundleVersion: '1.0',

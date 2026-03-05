@@ -26,15 +26,6 @@ export const coerceStatusCode = (statusCode: number) => {
   return statusCode || 503;
 };
 
-const GRAMMAR_HASH_HEADER_PATTERN = /^[A-Za-z0-9:_-]{1,128}$/;
-
-const sanitizeGrammarHashHeaderValue = (value: unknown): string | undefined => {
-  if (typeof value !== 'string') return undefined;
-  const trimmed = value.trim();
-  if (!GRAMMAR_HASH_HEADER_PATTERN.test(trimmed)) return undefined;
-  return trimmed;
-};
-
 /**
  * @experimental
  *
@@ -123,10 +114,10 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
 }
 
 /**
- * Defines route for PPL artifact endpoint
+ * Defines route for PPL grammar bundle endpoint
  * Forwards requests to OpenSearch /_plugins/_ppl/_grammar
  */
-export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: any) {
+export function definePPLBundleRoute(logger: Logger, router: IRouter, client: any) {
   router.get(
     {
       path: '/api/enhancements/ppl/grammar',
@@ -150,23 +141,15 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
           : context.core.opensearch.client.asCurrentUser;
         const result = await opensearchClient.transport.request({
           method: 'GET',
-          path: URI.PPL_ARTIFACT,
+          path: URI.PPL_BUNDLE,
         });
         const body = result?.body ?? result;
 
-        // The result is the artifact bundle JSON
+        // The result is the grammar bundle JSON
         // Forward headers from OpenSearch if available
         const responseHeaders: Record<string, string> = {
           'content-type': 'application/json',
         };
-
-        // Note: OpenSearch client might not expose response headers directly
-        // The artifact bundle itself should contain grammarHash for client-side caching
-        const grammarHashHeader = sanitizeGrammarHashHeaderValue(body?.grammarHash);
-        if (grammarHashHeader) {
-          responseHeaders.etag = `"${grammarHashHeader}"`;
-          responseHeaders['cache-control'] = 'public, max-age=3600';
-        }
 
         return res.ok({
           body,
@@ -175,11 +158,11 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
       } catch (err: any) {
         // Don't try to return 304 - let frontend handle caching from localStorage
         // The OSD framework treats 304 as a redirect which requires a location header
-        logger.debug(`PPL artifact fetch error: ${err.message || err}`);
+        logger.debug(`PPL grammar bundle fetch error: ${err.message || err}`);
 
         return res.custom({
           statusCode: coerceStatusCode(err.status || err.statusCode || err?.meta?.statusCode),
-          body: err.message || 'Failed to fetch PPL artifact',
+          body: err.message || 'Failed to fetch PPL grammar bundle',
         });
       }
     }
@@ -213,5 +196,5 @@ export function defineRoutes(
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
 
-  definePPLArtifactRoute(logger, router, client);
+  definePPLBundleRoute(logger, router, client);
 }
