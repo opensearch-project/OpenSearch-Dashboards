@@ -11,7 +11,6 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiCallOut,
-  CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -21,10 +20,34 @@ import { RootState } from '../../utils/state_management/store';
 export const PAGE_SIZE_OPTIONS = [10, 25, 50];
 export const DEFAULT_PAGE_SIZE = 50;
 
-/** Shared hook for table pagination with query-change reset */
+export interface SortState {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+/** Maps UI column field names to PPL index field names */
+export const PPL_SORT_FIELDS: Record<string, string> = {
+  startTime: 'startTime',
+  latency: 'durationInNanos',
+  totalTokens: '`attributes.gen_ai.usage.output_tokens`',
+  name: 'name',
+  status: '`status.code`',
+};
+
+export const DEFAULT_SORT: SortState = { field: 'startTime', direction: 'desc' };
+
+/** Build a PPL sort clause from UI sort state */
+export const buildPplSortClause = (field: string, direction: 'asc' | 'desc'): string => {
+  const pplField = PPL_SORT_FIELDS[field] || 'startTime';
+  const prefix = direction === 'desc' ? '- ' : '';
+  return `| sort ${prefix}${pplField}`;
+};
+
+/** Shared hook for table pagination and sorting with query-change reset */
 export const useTablePagination = (totalItemCount: number) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [sortState, setSortState] = useState<SortState>(DEFAULT_SORT);
 
   const query = useSelector((state: RootState) => state.query);
   const prevQueryRef = useRef(query);
@@ -46,18 +69,25 @@ export const useTablePagination = (totalItemCount: number) => {
   );
 
   const onTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<any>) => {
-      if (page.size !== pageSize) {
-        setPageSize(page.size);
+    ({ page, sort }: { page?: { index: number; size: number }; sort?: SortState }) => {
+      if (sort && (sort.field !== sortState.field || sort.direction !== sortState.direction)) {
+        setSortState(sort);
         setPageIndex(0);
-      } else {
-        setPageIndex(page.index);
+        return;
+      }
+      if (page) {
+        if (page.size !== pageSize) {
+          setPageSize(page.size);
+          setPageIndex(0);
+        } else {
+          setPageIndex(page.index);
+        }
       }
     },
-    [pageSize]
+    [pageSize, sortState]
   );
 
-  return { pageIndex, pageSize, pagination, onTableChange };
+  return { pageIndex, pageSize, pagination, onTableChange, sortState };
 };
 
 /** Shared status column renderer */

@@ -6,63 +6,50 @@
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { TraceRow } from '../application/pages/traces/hooks/use_agent_traces';
 
-export type SpanCategory =
-  | 'AGENT'
-  | 'LLM'
-  | 'TOOL'
-  | 'CONTENT'
-  | 'EMBEDDINGS'
-  | 'RETRIEVAL'
-  | 'OTHER';
+export type SpanCategory = 'AGENT' | 'LLM' | 'TOOL' | 'EMBEDDINGS' | 'RETRIEVAL' | 'OTHER';
 
 export interface CategorizedSpan extends TraceRow {
   category: SpanCategory;
   categoryLabel: string;
   categoryColor: string;
-  categoryIcon: string;
   displayName: string;
 }
 
 interface CategoryMeta {
   color: string;
   bgColor: string;
-  icon: string;
   label: string;
 }
 
 function getCategoryColor(category: SpanCategory): string {
   switch (category) {
     case 'LLM':
-      return euiThemeVars.euiColorVis2;
-    case 'AGENT':
-      return euiThemeVars.euiColorVis0;
-    case 'EMBEDDINGS':
       return euiThemeVars.euiColorVis3;
+    case 'AGENT':
+      return euiThemeVars.euiColorPrimary;
+    case 'EMBEDDINGS':
+      return euiThemeVars.euiColorVis1;
     case 'TOOL':
-      return euiThemeVars.euiColorVis6;
-    case 'CONTENT':
-      return euiThemeVars.euiColorVis4;
+      return euiThemeVars.euiColorVis0;
     case 'RETRIEVAL':
-      return euiThemeVars.euiColorVis5;
+      return euiThemeVars.euiColorSecondary;
     case 'OTHER':
       return euiThemeVars.euiColorMediumShade;
   }
 }
 
-const CATEGORY_STATIC: Record<SpanCategory, { icon: string; label: string }> = {
-  AGENT: { icon: 'Bot', label: 'Agent' },
-  LLM: { icon: 'Zap', label: 'LLM' },
-  TOOL: { icon: 'Wrench', label: 'Tool' },
-  CONTENT: { icon: 'Document', label: 'Content' },
-  EMBEDDINGS: { icon: 'Aggregate', label: 'Embeddings' },
-  RETRIEVAL: { icon: 'Search', label: 'Retrieval' },
-  OTHER: { icon: 'Circle', label: 'Other' },
+const CATEGORY_LABEL: Record<SpanCategory, string> = {
+  AGENT: 'Agent',
+  LLM: 'LLM',
+  TOOL: 'Tool',
+  EMBEDDINGS: 'Embeddings',
+  RETRIEVAL: 'Retrieval',
+  OTHER: 'Other',
 };
 
 export function getCategoryMeta(category: SpanCategory): CategoryMeta {
   const color = getCategoryColor(category);
-  const { icon, label } = CATEGORY_STATIC[category];
-  return { color, bgColor: color, icon, label };
+  return { color, bgColor: color, label: CATEGORY_LABEL[category] };
 }
 
 export function hexToRgba(hex: string, alpha: number): string {
@@ -78,8 +65,8 @@ export function hexToRgba(hex: string, alpha: number): string {
  */
 const OPERATION_CATEGORY: Record<string, SpanCategory> = {
   chat: 'LLM',
-  text_completion: 'CONTENT',
-  generate_content: 'CONTENT',
+  text_completion: 'LLM',
+  generate_content: 'LLM',
   embeddings: 'EMBEDDINGS',
   execute_tool: 'TOOL',
   retrieval: 'RETRIEVAL',
@@ -106,7 +93,6 @@ function categorizeSpan(span: TraceRow): CategorizedSpan {
     category,
     categoryLabel: meta.label,
     categoryColor: meta.color,
-    categoryIcon: meta.icon,
     displayName: name.length > 40 ? name.substring(0, 37) + '...' : name,
   };
 }

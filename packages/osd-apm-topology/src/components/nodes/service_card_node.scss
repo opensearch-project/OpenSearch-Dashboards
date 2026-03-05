@@ -1,0 +1,27 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.celServiceCard {
+  width: 272px;
+  min-height: 96px;
+  padding: 12px;
+  background-color: var(--osd-color-container-default);
+  border-radius: 12px;
+  border: 2px solid var(--osd-color-status-default);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: var(--osd-color-status-default-hover);
+  }
+
+  &--breached {
+    background-color: var(--osd-color-container-breached);
+    border-color: var(--osd-color-status-breached);
+
+    &:hover {
+      border-color: var(--osd-color-status-breached-hover);
+    }
+  }
+}
