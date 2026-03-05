@@ -178,16 +178,10 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
-      try {
-        const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
-        setSavedQueries(
-          savedQueryItems.filter(
-            (sq) => sq?.attributes?.query && query?.language === sq.attributes.query.language
-          )
-        );
-      } catch (error) {
-        setSavedQueries([]);
-      }
+      const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
+      setSavedQueries(
+        savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
+      );
     };
 
     fetchSavedQueries();
@@ -197,8 +191,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     // Samples for the language
     const newSampleQueries: any = [];
     if (query?.language) {
-      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
-        ?.sampleQueries;
+      const languageSampleQueries = queryString
+        .getLanguageService()
+        ?.getLanguage(query.language)?.sampleQueries;
       if (Array.isArray(languageSampleQueries)) {
         newSampleQueries.push(...languageSampleQueries);
       }
@@ -268,12 +263,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
               content: (
                 <Fragment>
                   <EuiSpacer />
-                  {savedQueries.map((sq) => {
-                    const queryValue = sq.attributes.query.query;
-                    const queryStr =
-                      typeof queryValue === 'string' ? queryValue : JSON.stringify(queryValue);
-                    return buildSampleQueryBlock(sq.id, queryStr);
-                  })}
+                  {savedQueries.map((sq) =>
+                    buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
+                  )}
                 </Fragment>
               ),
             },
