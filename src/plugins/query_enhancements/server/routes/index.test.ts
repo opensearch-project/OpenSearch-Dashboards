@@ -132,6 +132,47 @@ describe('definePPLArtifactRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('should not set etag/cache headers when grammarHash is not header-safe', async () => {
+    let handler: any;
+    const router = {
+      get: jest.fn((_, h) => {
+        handler = h;
+      }),
+    } as any;
+    const logger = loggingSystemMock.create().get();
+    const client = { asScoped: jest.fn() } as any;
+
+    definePPLArtifactRoute(logger, router, client);
+
+    const requestMock = jest.fn().mockResolvedValue({
+      body: { grammarHash: 'sha256:bad"\nvalue', language: 'ppl' },
+    });
+    const context = {
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              transport: {
+                request: requestMock,
+              },
+            },
+          },
+        },
+      },
+    } as any;
+    const req = { query: {} } as any;
+    const res = createResponse();
+
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: { grammarHash: 'sha256:bad"\nvalue', language: 'ppl' },
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
+  });
+
   it('should coerce 500-class errors to 503 in custom response', async () => {
     let handler: any;
     const router = {
@@ -173,6 +214,45 @@ describe('definePPLArtifactRoute', () => {
     expect(res.custom).toHaveBeenCalledWith({
       statusCode: 503,
       body: 'backend failure',
+    });
+    expect(result).toEqual(res.custom.mock.results[0].value);
+  });
+
+  it('should return 400 when dataSourceId is provided but data source plugin context is unavailable', async () => {
+    let handler: any;
+    const router = {
+      get: jest.fn((_, h) => {
+        handler = h;
+      }),
+    } as any;
+    const logger = loggingSystemMock.create().get();
+    const client = { asScoped: jest.fn() } as any;
+
+    definePPLArtifactRoute(logger, router, client);
+
+    const requestMock = jest.fn();
+    const context = {
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              transport: {
+                request: requestMock,
+              },
+            },
+          },
+        },
+      },
+    } as any;
+    const req = { query: { dataSourceId: 'ds-1' } } as any;
+    const res = createResponse();
+
+    const result = await handler(context, req, res);
+
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(res.custom).toHaveBeenCalledWith({
+      statusCode: 400,
+      body: 'dataSourceId is not supported because data source plugin is unavailable',
     });
     expect(result).toEqual(res.custom.mock.results[0].value);
   });

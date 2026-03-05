@@ -19,7 +19,8 @@ const DEFAULT_CACHE_KEY = 'default';
 /** ATN deserialization options for autocomplete use */
 const ATN_DESERIALIZE_OPTIONS = {
   readOnly: false,
-  verifyATN: false,
+  // Keep verification enabled since ATN bytes come from backend responses.
+  verifyATN: true,
   generateRuleBypassTransitions: true,
 };
 
@@ -52,7 +53,8 @@ export interface CachedGrammar {
  */
 function buildSymbolicNameToTokenType(symbolicNames: Array<string | null>): Map<string, number> {
   const map = new Map<string, number>();
-  for (let i = 0; i < symbolicNames.length; i++) {
+  // Token slot 0 is INVALID_TYPE and should never be exposed as a valid token.
+  for (let i = 1; i < symbolicNames.length; i++) {
     const name = symbolicNames[i];
     if (name) map.set(name, i);
   }
@@ -101,8 +103,12 @@ class PPLGrammarCache {
   shouldFetchFromBackend(version?: string): boolean {
     if (!version) return false;
 
-    const parts = version.split('.').map(Number);
-    const [major = 0, minor = 0] = parts;
+    // Accept standard semver and suffixed versions (e.g. 3.6.0-SNAPSHOT)
+    const match = version.trim().match(/^(\d+)\.(\d+)/);
+    if (!match) return false;
+    const major = Number(match[1]);
+    const minor = Number(match[2]);
+    if (!Number.isFinite(major) || !Number.isFinite(minor)) return false;
 
     return major > 3 || (major === 3 && minor >= 6);
   }
