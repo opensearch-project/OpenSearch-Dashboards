@@ -5,16 +5,13 @@
 
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { AnyAction } from 'redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearQueryStatusMap, clearResults } from '../state_management/slices';
 
 /**
- * Hook to handle timefilter subscription for auto-refresh only
- * Note: Time range changes do NOT auto-execute queries - users must click "Run"
- * This preserves Explore's intentional UX where users control query execution
+ * Hook to handle auto-refresh subscription only
  */
 export const useTimefilterSubscription = (services: ExploreServices) => {
   const dispatch = useDispatch();
