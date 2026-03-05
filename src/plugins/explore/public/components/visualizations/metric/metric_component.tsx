@@ -89,7 +89,7 @@ function applyColorMode(
 
     case 'background_gradient': {
       const normalized = normalizeHexColor(thresholdColor);
-      const darkened = darkenHexColor(normalized, 0.7);
+      const darkened = darkenHexColor(normalized, 0.8);
       return {
         fillColor: getContrastTextColor(thresholdColor),
         backgroundGradient: `linear-gradient(135deg, ${normalized}, ${darkened})`,
