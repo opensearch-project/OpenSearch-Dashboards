@@ -29,6 +29,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { Transport } from '@opensearch-project/opensearch';
 import { Headers } from '../http/router';
 import { LegacyRequest, OpenSearchDashboardsRequest } from '../http';
 import { OpenSearchConfig } from './opensearch_config';
@@ -95,6 +96,31 @@ export interface OpenSearchServiceSetup {
      */
     readonly client: ILegacyClusterClient;
   };
+
+  /**
+   * Register a custom Transport class to be used when creating OpenSearch clients.
+   * This extension point allows plugins to intercept and transform requests/responses
+   * at the HTTP transport layer. Only one Transport class can be registered.
+   *
+   * @example
+   * ```ts
+   * class MyTransport extends Transport {
+   *   async request(params, options) {
+   *     // Transform request, call super.request(), transform response
+   *   }
+   * }
+   * core.opensearch.registerClientTransport(MyTransport);
+   * ```
+   */
+  registerClientTransport: (TransportClass: typeof Transport) => void;
+
+  /**
+   * Check if a custom Transport class has already been registered.
+   * Useful to avoid errors when multiple plugins might try to register a Transport.
+   *
+   * @returns true if a Transport class has been registered, false otherwise
+   */
+  hasClientTransport: () => boolean;
 }
 
 /** @internal */
@@ -187,7 +213,14 @@ export interface OpenSearchServiceStart {
 /**
  * @internal
  */
-export type InternalOpenSearchServiceStart = OpenSearchServiceStart;
+export interface InternalOpenSearchServiceStart extends OpenSearchServiceStart {
+  /**
+   * Returns the custom Transport class registered via `registerClientTransport`, if any.
+   * Useful for plugins that create their own OpenSearch clients and need to apply
+   * the same Transport extension.
+   */
+  getClientTransport?: () => typeof Transport | undefined;
+}
 
 /** @public */
 export interface OpenSearchStatusMeta {
