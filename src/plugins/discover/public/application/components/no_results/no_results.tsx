@@ -178,16 +178,10 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
-      try {
-        const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
-        setSavedQueries(
-          savedQueryItems.filter(
-            (sq) => sq?.attributes?.query && query?.language === sq.attributes.query.language
-          )
-        );
-      } catch (error) {
-        setSavedQueries([]);
-      }
+      const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
+      setSavedQueries(
+        savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
+      );
     };
 
     fetchSavedQueries();
@@ -268,12 +262,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
               content: (
                 <Fragment>
                   <EuiSpacer />
-                  {savedQueries.map((sq) => {
-                    const queryValue = sq.attributes.query.query;
-                    const queryStr =
-                      typeof queryValue === 'string' ? queryValue : JSON.stringify(queryValue);
-                    return buildSampleQueryBlock(sq.id, queryStr);
-                  })}
+                  {savedQueries.map((sq) =>
+                    buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
+                  )}
                 </Fragment>
               ),
             },
