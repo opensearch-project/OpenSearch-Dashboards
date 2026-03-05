@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createMetricChartSeries, assembleForMetric } from './metric_utils';
+import {
+  createMetricChartSeries,
+  assembleForMetric,
+  constrainFontSizeByWidth,
+} from './metric_utils';
 import { MetricChartStyle, defaultMetricChartStyles } from './metric_vis_config';
 import { EChartsSpecState } from '../utils/echarts_spec';
 import { VisColumn, VisFieldType, Threshold } from '../types';
@@ -313,6 +317,248 @@ describe('metric_utils', () => {
       expect(result.transformedData).toEqual(initialState.transformedData);
       expect(result.data).toEqual(initialState.data);
       expect(result.series).toEqual(initialState.series);
+    });
+  });
+
+  describe('constrainFontSizeByWidth', () => {
+    describe('basic functionality', () => {
+      it('should return desired font size when text fits within container', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 300,
+          text: 'Hello',
+          fontSize: 40,
+        });
+
+        // With default charWidthRatio (0.6) and paddingRatio (0.15):
+        // availableWidth = 300 * 0.85 = 255
+        // maxSizeByWidth = 255 / (5 * 0.6) = 255 / 3 = 85
+        // Result should be min(40, 85) = 40
+        expect(result).toBe(40);
+      });
+
+      it('should constrain font size when text is too long', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 100,
+          text: 'Very Long Text That Will Not Fit',
+          fontSize: 48,
+        });
+
+        // availableWidth = 100 * 0.85 = 85
+        // text length = 33
+        // maxSizeByWidth = 85 / (33 * 0.6) = 85 / 19.8 ≈ 4.29
+        // Result should be constrained by minSize (default 10)
+        expect(result).toBe(10);
+      });
+
+      it('should respect minSize parameter', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 50,
+          text: 'Very Long Text',
+          fontSize: 40,
+          minSize: 14,
+        });
+
+        // With such small container and long text, it would calculate very small
+        // but should be constrained by minSize
+        expect(result).toBe(14);
+      });
+
+      it('should respect maxSize parameter', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 1000,
+          text: 'Hi',
+          fontSize: 200,
+          maxSize: 60,
+        });
+
+        // Large container with short text would allow large font
+        // but should be constrained by maxSize
+        expect(result).toBe(60);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle empty text gracefully', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 300,
+          text: '',
+          fontSize: 40,
+        });
+
+        // Empty text should return fontSize within bounds
+        expect(result).toBe(40);
+      });
+
+      it('should handle zero container width', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 0,
+          text: 'Test',
+          fontSize: 40,
+          minSize: 12,
+          maxSize: 60,
+        });
+
+        // Should return fontSize constrained by min/max
+        expect(result).toBe(40);
+      });
+
+      it('should handle negative container width', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: -100,
+          text: 'Test',
+          fontSize: 40,
+          minSize: 12,
+          maxSize: 60,
+        });
+
+        // Should return fontSize constrained by min/max
+        expect(result).toBe(40);
+      });
+
+      it('should handle single character text', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 100,
+          text: 'A',
+          fontSize: 50,
+        });
+
+        // availableWidth = 100 * 0.85 = 85
+        // maxSizeByWidth = 85 / (1 * 0.6) = 141.67
+        // Result should be min(50, 141.67) = 50
+        expect(result).toBe(50);
+      });
+
+      it('should handle very long text', () => {
+        const longText = 'A'.repeat(1000);
+        const result = constrainFontSizeByWidth({
+          containerWidth: 300,
+          text: longText,
+          fontSize: 40,
+          minSize: 8,
+        });
+
+        // Should be constrained to minSize
+        expect(result).toBe(8);
+      });
+    });
+
+    describe('custom padding and character width ratios', () => {
+      it('should respect custom paddingRatio', () => {
+        const result1 = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test Text',
+          fontSize: 40,
+          paddingRatio: 0.1, // 10% padding
+        });
+
+        const result2 = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test Text',
+          fontSize: 40,
+          paddingRatio: 0.3, // 30% padding
+        });
+
+        // More padding means less available width, so smaller font size
+        expect(result1).toBeGreaterThan(result2);
+      });
+
+      it('should respect custom charWidthRatio', () => {
+        const result1 = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test Text',
+          fontSize: 40,
+          charWidthRatio: 0.5, // Narrow characters
+        });
+
+        const result2 = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test Text',
+          fontSize: 40,
+          charWidthRatio: 0.8, // Wide characters
+        });
+
+        // Narrower characters allow larger font size
+        expect(result1).toBeGreaterThan(result2);
+      });
+
+      it('should handle zero paddingRatio', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test',
+          fontSize: 40,
+          paddingRatio: 0,
+        });
+
+        // availableWidth = 200 * 1 = 200
+        // maxSizeByWidth = 200 / (4 * 0.6) = 200 / 2.4 ≈ 83.33
+        // Result should be min(40, 83.33) = 40
+        expect(result).toBe(40);
+      });
+    });
+
+    describe('boundary conditions', () => {
+      it('should handle minSize equal to maxSize', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test',
+          fontSize: 40,
+          minSize: 30,
+          maxSize: 30,
+        });
+
+        expect(result).toBe(30);
+      });
+
+      it('should handle minSize greater than fontSize', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 200,
+          text: 'Test',
+          fontSize: 20,
+          minSize: 30,
+          maxSize: 60,
+        });
+
+        // Should be constrained to minSize
+        expect(result).toBe(30);
+      });
+
+      it('should handle maxSize less than fontSize', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 500,
+          text: 'A',
+          fontSize: 100,
+          minSize: 10,
+          maxSize: 50,
+        });
+
+        // Should be constrained to maxSize
+        expect(result).toBe(50);
+      });
+
+      it('should handle very small minSize', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 50,
+          text: 'Very Long Text String',
+          fontSize: 40,
+          minSize: 1,
+        });
+
+        // Should calculate small size based on constraints
+        expect(result).toBeGreaterThanOrEqual(1);
+        expect(result).toBeLessThan(40);
+      });
+
+      it('should handle very large maxSize', () => {
+        const result = constrainFontSizeByWidth({
+          containerWidth: 1000,
+          text: 'A',
+          fontSize: 50,
+          maxSize: 500,
+        });
+
+        // Should return fontSize since it fits
+        expect(result).toBe(50);
+      });
     });
   });
 });

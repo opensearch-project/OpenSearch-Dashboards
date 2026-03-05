@@ -119,3 +119,77 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
   };
   return { ...state, spec };
 };
+
+/**
+ * Options for constraining font size based on container width and text length
+ */
+export interface ConstrainFontSizeOptions {
+  /** Width of the container in pixels */
+  containerWidth: number;
+  /** Text content to display */
+  text: string;
+  /** Desired font size in pixels */
+  fontSize: number;
+  /** Minimum allowed font size (default: 10) */
+  minSize?: number;
+  /** Maximum allowed font size (default: 100) */
+  maxSize?: number;
+  /** Percentage of width reserved for padding (default: 0.15) */
+  paddingRatio?: number;
+  /** Average character width relative to font size (default: 0.6) */
+  charWidthRatio?: number;
+}
+
+/**
+ * Constrains a font size based on container width and text length to prevent overflow.
+ *
+ * This utility calculates the maximum font size that allows the text to fit within
+ * the container width, considering padding and average character width. It then
+ * returns the smaller of the desired font size and the width-constrained size,
+ * ensuring the result stays within the specified min/max bounds.
+ *
+ * @param options - Configuration options for font size constraint
+ * @returns The constrained font size in pixels
+ *
+ * @example
+ * ```typescript
+ * const fontSize = constrainFontSizeByWidth({
+ *   containerWidth: 300,
+ *   text: "Hello World",
+ *   fontSize: 48,
+ *   minSize: 12,
+ *   maxSize: 60,
+ * });
+ * // Returns a font size that fits "Hello World" in 300px width
+ * ```
+ */
+export function constrainFontSizeByWidth(options: ConstrainFontSizeOptions): number {
+  const {
+    containerWidth,
+    text,
+    fontSize,
+    minSize = 10,
+    maxSize = 100,
+    paddingRatio = 0.15,
+    charWidthRatio = 0.6,
+  } = options;
+
+  // If no text or invalid width, return the desired size within bounds
+  if (text.length === 0 || containerWidth <= 0) {
+    return Math.max(minSize, Math.min(maxSize, fontSize));
+  }
+
+  // Calculate available width after padding
+  const availableWidth = containerWidth * (1 - paddingRatio);
+
+  // Calculate maximum font size that fits the text within available width
+  const maxSizeByWidth = availableWidth / (text.length * charWidthRatio);
+
+  // Use the smaller of desired size and width-constrained size
+  let constrainedSize = Math.min(fontSize, maxSizeByWidth);
+
+  // Apply min/max bounds
+  constrainedSize = Math.max(minSize, Math.min(maxSize, constrainedSize));
+
+  return constrainedSize;
+}

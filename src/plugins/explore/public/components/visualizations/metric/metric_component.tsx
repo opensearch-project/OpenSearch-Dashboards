@@ -14,6 +14,7 @@ import { getUnitById } from '../style_panel/unit/collection';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { EchartsRender } from '../echarts_render';
 import { darkenHexColor, getContrastTextColor, normalizeHexColor } from '../utils/color';
+import { constrainFontSizeByWidth } from './metric_utils';
 
 import './metric_component.scss';
 
@@ -359,7 +360,6 @@ export const MetricChart: React.FC<MetricChartProps> = ({
   }, [data, styles, numericField]);
 
   const title = getTitleText(styles.textMode, name);
-  const selectedUnit = getUnitById(styles?.unitId);
 
   // ResizeObserver to track container dimensions
   useEffect(() => {
@@ -444,10 +444,6 @@ export const MetricChart: React.FC<MetricChartProps> = ({
       changeSize = height * 0.2;
     }
 
-    // Apply unit font scale to value
-    valueSize *= selectedUnit?.fontScale ?? 1;
-
-    // Calculate width-based constraints to prevent text overflow
     // Build the full text string for each element
     const fullValueText = textData.unitFirst
       ? `${textData.unitText}${textData.numericValue}`
@@ -456,45 +452,30 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     const titleText = title || '';
     const changeText = textData.changeText || '';
 
-    // Average character width ratio relative to font size (empirically ~0.6 for typical number/text fonts)
-    const avgCharWidthRatio = 0.6;
+    // Apply width-based constraint using utility function
+    titleSize = constrainFontSizeByWidth({
+      containerWidth: width,
+      text: titleText,
+      fontSize: titleSize,
+      minSize: 12,
+      maxSize: 24,
+    });
 
-    // Reserve space for padding/margins (15% of width)
-    const paddingRatio = 0.15;
-    const availableWidth = width * (1 - paddingRatio);
+    valueSize = constrainFontSizeByWidth({
+      containerWidth: width,
+      text: fullValueText,
+      fontSize: valueSize,
+      minSize: 20,
+      maxSize: 90,
+    });
 
-    // Calculate maximum font size that fits container width for each element
-    const maxTitleSizeByWidth =
-      titleText.length > 0
-        ? availableWidth / (titleText.length * avgCharWidthRatio)
-        : Number.MAX_SAFE_INTEGER;
-
-    const maxValueSizeByWidth =
-      fullValueText.length > 0
-        ? availableWidth / (fullValueText.length * avgCharWidthRatio)
-        : Number.MAX_SAFE_INTEGER;
-
-    const maxChangeSizeByWidth =
-      changeText.length > 0
-        ? availableWidth / (changeText.length * avgCharWidthRatio)
-        : Number.MAX_SAFE_INTEGER;
-
-    // Combine height-based and width-based constraints (use the smaller)
-    titleSize = Math.min(titleSize, maxTitleSizeByWidth);
-    valueSize = Math.min(valueSize, maxValueSizeByWidth);
-    changeSize = Math.min(changeSize, maxChangeSizeByWidth);
-
-    // Apply min/max bounds for readability
-    const minTitleSize = 12;
-    const maxTitleSize = 24;
-    const minValueSize = 20;
-    const maxValueSize = 90;
-    const minChangeSize = 14;
-    const maxChangeSize = 32;
-
-    titleSize = Math.max(minTitleSize, Math.min(maxTitleSize, titleSize));
-    valueSize = Math.max(minValueSize, Math.min(maxValueSize, valueSize));
-    changeSize = Math.max(minChangeSize, Math.min(maxChangeSize, changeSize));
+    changeSize = constrainFontSizeByWidth({
+      containerWidth: width,
+      text: changeText,
+      fontSize: changeSize,
+      minSize: 14,
+      maxSize: 32,
+    });
 
     // Override with user-defined sizes if provided
     return {
@@ -508,7 +489,6 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     styles.fontSize,
     styles.percentageSize,
     styles.showPercentage,
-    selectedUnit?.fontScale,
     name,
     textData.numericValue,
     textData.unitText,
