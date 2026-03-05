@@ -32,14 +32,6 @@ export const DatasetSelectWidget = () => {
     },
   } = services;
 
-  // REMOVED: Redundant useEffect that was fetching DataView on every render
-  // This was causing early individual get() calls before the DatasetSelect component's
-  // getMultiple() optimization could batch fetch all DataViews together.
-  // The dataset caching is now handled by:
-  // 1. DatasetSelect.fetchDatasets() - fetches all datasets via bulkGet
-  // 2. DatasetProvider - fetches current dataset if needed
-  // 3. Query execution - fetches dataset when executing queries
-
   const handleDatasetSelect = useCallback(
     async (dataset: Dataset | undefined) => {
       try {

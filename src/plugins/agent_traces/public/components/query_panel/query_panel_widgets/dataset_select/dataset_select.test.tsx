@@ -189,13 +189,6 @@ describe('DatasetSelectWidget', () => {
     expect(screen.getByTestId('dataset-select')).toBeInTheDocument();
   });
 
-  // NOTE: The following tests were removed because the redundant useEffect that fetched
-  // DataView on component mount was removed as part of the bulkGet optimization.
-  // The DatasetSelect component now handles all dataset fetching internally via getMultiple().
-  // Tests removed:
-  // - "attempts to get dataView on component mount"
-  // - "caches dataset if dataView does not exist"
-
   it('handles dataset selection correctly', async () => {
     renderWithStore();
 
