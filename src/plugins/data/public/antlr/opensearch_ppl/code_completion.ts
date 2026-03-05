@@ -73,16 +73,44 @@ const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
 
 // ─── Fix A: C3 follow-set cache isolation for runtime grammars ───────────────
 // CodeCompletionCore.followSetsByATN caches by parser.constructor.name.
-// All ParserInterpreter instances share "ParserInterpreter" as the key,
-// so different grammars (different datasources / versions) pollute each other's
-// cache, producing ghost token IDs that don't exist in the current vocabulary.
-// Clear the cache bucket whenever the grammar hash changes.
-let _lastC3GrammarHash: string | undefined;
-function resetC3CacheIfGrammarChanged(grammarHash: string, parser: any) {
-  if (_lastC3GrammarHash === grammarHash) return;
-  const cache = (CodeCompletionCore as any).followSetsByATN;
-  if (cache instanceof Map) cache.delete(parser.constructor.name);
-  _lastC3GrammarHash = grammarHash;
+// All ParserInterpreter instances share "ParserInterpreter" as the key, so
+// different runtime grammars can pollute each other. Keep one follow-set bucket
+// per grammar hash and swap the active bucket before each runtime collect.
+const _runtimeC3BucketsByGrammarHash = new Map<string, unknown>();
+let _activeRuntimeC3GrammarHash: string | undefined;
+let _activeRuntimeC3ParserKey: string | undefined;
+
+interface C3FollowSetsCacheContainer {
+  followSetsByATN?: unknown;
+}
+
+function getC3FollowSetsCache(): Map<string, unknown> | null {
+  const maybeCache = ((CodeCompletionCore as unknown) as C3FollowSetsCacheContainer)
+    .followSetsByATN;
+  return maybeCache instanceof Map ? maybeCache : null;
+}
+
+function isolateC3CacheForRuntimeGrammar(grammarHash: string, parser: ParserInterpreter) {
+  const cache = getC3FollowSetsCache();
+  if (!cache) return;
+
+  const parserKey = parser.constructor?.name ?? 'ParserInterpreter';
+  if (_activeRuntimeC3GrammarHash === grammarHash && _activeRuntimeC3ParserKey === parserKey) {
+    return;
+  }
+
+  if (_activeRuntimeC3GrammarHash && _activeRuntimeC3ParserKey === parserKey) {
+    const activeBucket = cache.get(parserKey);
+    if (activeBucket !== undefined) {
+      _runtimeC3BucketsByGrammarHash.set(_activeRuntimeC3GrammarHash, activeBucket);
+    }
+  }
+
+  const bucketForGrammar = _runtimeC3BucketsByGrammarHash.get(grammarHash) ?? new Map();
+  cache.set(parserKey, bucketForGrammar);
+  _runtimeC3BucketsByGrammarHash.set(grammarHash, bucketForGrammar);
+  _activeRuntimeC3GrammarHash = grammarHash;
+  _activeRuntimeC3ParserKey = parserKey;
 }
 
 const _keywordDetailsByLiteral = new Map<string, KeywordSuggestionDetails>();
@@ -589,12 +617,11 @@ function enrichRuntimeResult(
         suggestSingleQuotes = true;
 
         let currentIndex = cursorTokenIndex - 1;
-        const lastToken =
-          tokenStream.get(currentIndex).type === spaceToken
-            ? tokenStream.get(currentIndex - 1)
-            : tokenStream.get(currentIndex);
+        const currentToken = currentIndex >= 0 ? tokenStream.get(currentIndex) : undefined;
+        const previousToken = currentIndex > 0 ? tokenStream.get(currentIndex - 1) : undefined;
+        const lastToken = currentToken?.type === spaceToken ? previousToken : currentToken;
 
-        if (![EQUAL, OPENING_BRACKET, COMMA].includes(lastToken.type)) break;
+        if (!lastToken || ![EQUAL, OPENING_BRACKET, COMMA].includes(lastToken.type)) break;
 
         while (currentIndex > -1) {
           const token = tokenStream.get(currentIndex);
@@ -603,14 +630,15 @@ function enrichRuntimeResult(
           if (token.type === ID || token.type === BQUOTA) {
             let combinedText = removePotentialBackticks(token.text ?? '');
             let lookBehindIndex = currentIndex;
-            while (lookBehindIndex > -1) {
+            while (lookBehindIndex > 0) {
               lookBehindIndex--;
               const prevToken = tokenStream.get(lookBehindIndex);
               if (!prevToken || prevToken.type !== DOT) break;
               lookBehindIndex--;
-              combinedText = `${removePotentialBackticks(
-                tokenStream.get(lookBehindIndex).text ?? ''
-              )}.${combinedText}`;
+              if (lookBehindIndex < 0) break;
+              const leftToken = tokenStream.get(lookBehindIndex);
+              if (!leftToken) break;
+              combinedText = `${removePotentialBackticks(leftToken.text ?? '')}.${combinedText}`;
             }
             suggestValuesForColumn = removePotentialBackticks(combinedText);
             break;
@@ -871,8 +899,8 @@ function tryRuntimeGrammarSuggestions(
     const cursorTokenIndex = findCursorTokenIndex(tokenStream, effectiveCursor, spaceToken);
     if (cursorTokenIndex === undefined) return null;
 
-    // Fix A: Clear stale C3 follow-set cache when grammar changes.
-    resetC3CacheIfGrammarChanged(grammar.grammarHash, parser);
+    // Fix A: switch C3 follow-set cache bucket to the current runtime grammar.
+    isolateC3CacheForRuntimeGrammar(grammar.grammarHash, parser);
 
     // For empty pipe-first (`|`) use a synthetic context anchored at the
     // selected start rule so command discovery is not constrained by an empty

@@ -26,6 +26,15 @@ export const coerceStatusCode = (statusCode: number) => {
   return statusCode || 503;
 };
 
+const GRAMMAR_HASH_HEADER_PATTERN = /^[A-Za-z0-9:_-]{1,128}$/;
+
+const sanitizeGrammarHashHeaderValue = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (!GRAMMAR_HASH_HEADER_PATTERN.test(trimmed)) return undefined;
+  return trimmed;
+};
+
 /**
  * @experimental
  *
@@ -130,6 +139,12 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
     async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const { dataSourceId } = req.query;
+        if (dataSourceId && !context.dataSource?.opensearch?.getClient) {
+          return res.custom({
+            statusCode: 400,
+            body: 'dataSourceId is not supported because data source plugin is unavailable',
+          });
+        }
         const opensearchClient = dataSourceId
           ? await context.dataSource.opensearch.getClient(dataSourceId)
           : context.core.opensearch.client.asCurrentUser;
@@ -147,8 +162,9 @@ export function definePPLArtifactRoute(logger: Logger, router: IRouter, client: 
 
         // Note: OpenSearch client might not expose response headers directly
         // The artifact bundle itself should contain grammarHash for client-side caching
-        if (body && body.grammarHash) {
-          responseHeaders.etag = `"${body.grammarHash}"`;
+        const grammarHashHeader = sanitizeGrammarHashHeaderValue(body?.grammarHash);
+        if (grammarHashHeader) {
+          responseHeaders.etag = `"${grammarHashHeader}"`;
           responseHeaders['cache-control'] = 'public, max-age=3600';
         }
 

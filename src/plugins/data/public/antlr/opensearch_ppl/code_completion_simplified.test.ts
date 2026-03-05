@@ -639,6 +639,36 @@ describe('ppl code_completion', () => {
         expect(parseSpy).toHaveBeenCalledWith(0);
       });
 
+      it('should isolate ParserInterpreter follow-set cache by runtime grammar hash', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest
+          .spyOn(pplGrammarCache, 'getCachedGrammar')
+          .mockReturnValueOnce(buildRuntimeGrammar({ grammarHash: 'runtime-cache-a' }))
+          .mockReturnValueOnce(buildRuntimeGrammar({ grammarHash: 'runtime-cache-b' }))
+          .mockReturnValueOnce(buildRuntimeGrammar({ grammarHash: 'runtime-cache-a' }));
+
+        const originalFollowSetsByATN = (CodeCompletionCore as any).followSetsByATN;
+        const followSetsByATN = new Map<string, unknown>();
+        (CodeCompletionCore as any).followSetsByATN = followSetsByATN;
+
+        try {
+          await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+          const grammarABucket = followSetsByATN.get('ParserInterpreter');
+          expect(grammarABucket).toBeDefined();
+
+          await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+          const grammarBBucket = followSetsByATN.get('ParserInterpreter');
+          expect(grammarBBucket).toBeDefined();
+          expect(grammarBBucket).not.toBe(grammarABucket);
+
+          await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+          const grammarABucketAgain = followSetsByATN.get('ParserInterpreter');
+          expect(grammarABucketAgain).toBe(grammarABucket);
+        } finally {
+          (CodeCompletionCore as any).followSetsByATN = originalFollowSetsByATN;
+        }
+      });
+
       it('should use cached runtime grammar when datasource version metadata is missing', async () => {
         const parseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
         const shouldFetchSpy = jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend');
