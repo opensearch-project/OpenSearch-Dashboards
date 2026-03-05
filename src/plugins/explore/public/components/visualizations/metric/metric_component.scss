@@ -13,20 +13,22 @@
     flex-flow: row nowrap;
     overflow-x: auto;
     align-items: stretch;
-    min-height: 200px;
   }
 
   &.layout-vertical {
     flex-flow: column nowrap;
     overflow-y: auto;
     align-items: stretch;
+
+    .multi-metric-item {
+      min-height: 80px;
+    }
   }
 }
 
 .multi-metric-item {
   display: flex;
   flex: 1;
-  min-height: 160px;
 }
 
 .metric-component {
@@ -55,7 +57,7 @@
   width: 100%;
   height: 100%;
   text-align: center;
-  padding: 0 10px;
+  padding: 10px 10px;
 }
 
 .metric-title {

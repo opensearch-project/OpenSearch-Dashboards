@@ -5,10 +5,10 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import { debounce, throttle } from 'lodash';
+import { debounce } from 'lodash';
 
 import { MetricChartStyle } from './metric_vis_config';
-import { AxisColumnMappings, AxisRole } from '../types';
+import { AxisColumnMappings, AxisRole, RendererSpecConfig } from '../types';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getUnitById } from '../style_panel/unit/collection';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
@@ -37,15 +37,10 @@ interface MetricChartProps {
   spec?: echarts.EChartsOption;
 }
 
-interface SpecConfig {
-  spec: echarts.EChartsOption;
-  name: string;
-  data: Array<Record<string, any>>;
-}
 interface MetricChartRenderProps {
   styles: MetricChartStyle;
   axisColumnMappings?: AxisColumnMappings;
-  spec?: SpecConfig | SpecConfig[];
+  spec?: RendererSpecConfig | RendererSpecConfig[];
 }
 
 // Helper functions for metric text data calculation
@@ -294,19 +289,22 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     };
   }, []);
 
-  const itemFlexBasis = useMemo(() => {
-    if (containerDimensions.width > 1600) {
-      return 'calc(15% - 6px)';
-    } else if (containerDimensions.width > 1200) {
-      return 'calc(20% - 6px)';
-    } else if (containerDimensions.width > 800) {
-      return 'calc(33.3% - 6px)';
-    } else if (containerDimensions.width > 500) {
-      return 'calc(50% - 6px)';
-    } else {
-      return 'calc(100% - 6px)';
+  const itemStyle = useMemo(() => {
+    if (styles.layoutType === 'auto' || !styles.layoutType) {
+      if (containerDimensions.width > 1600) {
+        return { flexBasis: 'calc(15% - 6px)' };
+      } else if (containerDimensions.width > 1200) {
+        return { flexBasis: 'calc(20% - 6px)' };
+      } else if (containerDimensions.width > 800) {
+        return { flexBasis: 'calc(33.3% - 6px)' };
+      } else if (containerDimensions.width > 500) {
+        return { flexBasis: 'calc(50% - 6px)' };
+      } else {
+        return { flexBasis: 'calc(100% - 6px)' };
+      }
     }
-  }, [containerDimensions]);
+    return { flexBasis: 0 };
+  }, [containerDimensions, styles.layoutType]);
 
   if (!spec) {
     return null;
@@ -322,11 +320,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
       ref={containerRef}
     >
       {specs.map((s) => (
-        <div
-          key={s.name}
-          className="multi-metric-item"
-          style={{ width: itemFlexBasis, flexBasis: itemFlexBasis }}
-        >
+        <div key={s.name} className="multi-metric-item" style={{ ...itemStyle }}>
           <MetricChart
             spec={s.spec}
             data={s.data}

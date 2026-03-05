@@ -340,3 +340,9 @@ export interface ConnectNullValuesOption {
   connectMode: DisableMode;
   threshold: string;
 }
+
+export interface RendererSpecConfig {
+  spec?: echarts.EChartsOption;
+  name: string;
+  data: Array<Record<string, any>>;
+}
