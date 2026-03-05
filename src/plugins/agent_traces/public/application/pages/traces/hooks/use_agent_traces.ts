@@ -19,6 +19,7 @@ import {
   hitsToAgentSpans,
   formatTimestamp,
 } from './tree_utils';
+import { buildPplSortClause } from '../table_shared';
 
 export interface TraceRow extends BaseRow {
   displayName?: string;
@@ -93,7 +94,9 @@ export const getChildrenFromFullTree = (
 
 export const useAgentTraces = (
   pageIndex: number = 0,
-  pageSize: number = 50
+  pageSize: number = 50,
+  sortField: string = 'startTime',
+  sortDirection: 'asc' | 'desc' = 'desc'
 ): UseAgentTracesResult => {
   const { services, pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
   const fetchVersion = useSelector((state: RootState) => state.queryEditor.fetchVersion);
@@ -159,7 +162,8 @@ export const useAgentTraces = (
 
       try {
         const offset = pageIndex * pageSize;
-        const pplQuery = `${baseQueryString} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) | sort - startTime | head ${pageSize} from ${offset}`;
+        const sortClause = buildPplSortClause(sortField, sortDirection);
+        const pplQuery = `${baseQueryString} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) ${sortClause} | head ${pageSize} from ${offset}`;
         const response = await pplService.executeQuery(datasetParam, pplQuery);
 
         if (cancelled) return;
@@ -190,6 +194,8 @@ export const useAgentTraces = (
     baseQueryString,
     pageIndex,
     pageSize,
+    sortField,
+    sortDirection,
     refreshCounter,
     timeVersion,
     timezone,

@@ -308,7 +308,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
                     {
                       id: 'agent-graph',
                       name: i18n.translate('agentTraces.flyout.tabAgentGraph', {
-                        defaultMessage: 'Agent Graph',
+                        defaultMessage: 'Trace Map',
                       }),
                       content: (
                         <TraceFlowView
