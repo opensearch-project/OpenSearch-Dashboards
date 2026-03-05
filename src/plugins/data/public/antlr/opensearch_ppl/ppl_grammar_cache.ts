@@ -5,7 +5,7 @@
 
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
-import { PPLArtifactBundle } from './ppl_artifact_loader';
+import { PPLArtifactBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
