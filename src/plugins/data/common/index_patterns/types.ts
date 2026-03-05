@@ -123,7 +123,6 @@ export interface SavedObjectsClientCommon {
     options: Record<string, any>
   ) => Promise<SavedObject>;
   delete: (type: string, id: string) => Promise<{}>;
-  clearCache: (type?: string, id?: string) => void;
 }
 
 export interface GetFieldsOptions {

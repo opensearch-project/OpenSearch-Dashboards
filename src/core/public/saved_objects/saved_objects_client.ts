@@ -191,12 +191,6 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
   /**
-   * Cache for in-flight get() requests to prevent duplicate requests for the same object.
-   * Key format: "type:id"
-   * This cache persists results to avoid refetching the same object multiple times.
-   */
-  private getRequestCache: Map<string, Promise<SimpleSavedObject<any>>>;
-  /**
    * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
   private currentWorkspaceId: string | undefined;
@@ -285,36 +279,10 @@ export class SavedObjectsClient {
   constructor(http: HttpSetup) {
     this.http = http;
     this.batchQueue = [];
-    this.getRequestCache = new Map();
   }
 
   public setCurrentWorkspace(workspaceId: string) {
     this.currentWorkspaceId = workspaceId;
-  }
-
-  /**
-   * Clears the get request cache
-   * @param type - Optional type to clear only specific type
-   * @param id - Optional id to clear only specific object (requires type)
-   */
-  public clearCache(type?: string, id?: string) {
-    if (type && id) {
-      // Clear specific object
-      const cacheKey = `${type}:${id}`;
-      this.getRequestCache.delete(cacheKey);
-    } else if (type) {
-      // Clear all objects of a specific type
-      const keysToDelete: string[] = [];
-      this.getRequestCache.forEach((_, key) => {
-        if (key.startsWith(`${type}:`)) {
-          keysToDelete.push(key);
-        }
-      });
-      keysToDelete.forEach((key) => this.getRequestCache.delete(key));
-    } else {
-      // Clear entire cache
-      this.getRequestCache.clear();
-    }
   }
 
   /**
@@ -405,13 +373,7 @@ export class SavedObjectsClient {
       force: !!options?.force,
     };
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query }).then(
-      (resp) => {
-        // Clear the cache for this object since it's been deleted
-        this.clearCache(type, id);
-        return resp;
-      }
-    );
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
   /**
@@ -497,28 +459,11 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    // Check if there's already a cached request for this object
-    const cacheKey = `${type}:${id}`;
-    const cachedRequest = this.getRequestCache.get(cacheKey);
-
-    if (cachedRequest) {
-      return cachedRequest;
-    }
-
-    // Create a new request and cache it
-    const request = new Promise<SimpleSavedObject<T>>((resolve, reject) => {
+    // Add to batch queue - processBatchQueue will deduplicate and batch requests
+    return new Promise<SimpleSavedObject<T>>((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
       this.processBatchQueue();
-    }).catch((error) => {
-      // Remove from cache on error so subsequent calls can retry
-      this.getRequestCache.delete(cacheKey);
-      throw error;
     });
-
-    // Store the promise in the cache (persistent - not removed after completion)
-    this.getRequestCache.set(cacheKey, request);
-
-    return request;
   };
 
   /**
@@ -585,11 +530,7 @@ export class SavedObjectsClient {
     return this.savedObjectsFetch(path, {
       method: 'PUT',
       body: JSON.stringify(body),
-    }).then((resp: SavedObject<T>) => {
-      // Clear the cache for this object since it's been updated
-      this.clearCache(type, id);
-      return this.createSavedObject(resp);
-    });
+    }).then((resp: SavedObject<T>) => this.createSavedObject(resp));
   }
 
   /**
@@ -605,10 +546,6 @@ export class SavedObjectsClient {
       method: 'PUT',
       body: JSON.stringify(objects),
     }).then((resp) => {
-      // Clear cache for all updated objects
-      objects.forEach((obj) => {
-        this.clearCache(obj.type, obj.id);
-      });
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,

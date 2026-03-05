@@ -82,11 +82,4 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id);
   }
-
-  clearCache(type?: string, id?: string) {
-    // The public SavedObjectsClient has a clearCache method
-    if (this.savedObjectClient.clearCache) {
-      this.savedObjectClient.clearCache(type, id);
-    }
-  }
 }
