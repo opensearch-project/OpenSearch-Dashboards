@@ -555,7 +555,7 @@ cy.explore.add(
   }
 );
 
-cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, options) => {
+cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) => {
   cy.explore.clearQueryEditor();
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
@@ -568,27 +568,23 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is correct
-
   cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
 
-  // for pie and area, it needs manual chart type switch
-  if (options && options.shouldManualSelectChartType) {
-    cy.getElementByTestId('exploreChartTypeSelector').then(($button) => {
-      const hasTargetType =
-        $button.find(`[data-test-subj="exploreChartTypeSelector-${chartType}"]`).length > 0;
+  // Switch chart type only if current type doesn't match the target
+  cy.getElementByTestId('exploreChartTypeSelector')
+    .should('be.visible')
+    .then(($selector) => {
+      const alreadySelected =
+        $selector.find(`[data-test-subj="exploreChartTypeSelector-${chartType}"]`).length > 0;
 
-      if (!hasTargetType) {
-        cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-        cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible').click();
+      if (!alreadySelected) {
+        cy.getElementByTestId('exploreChartTypeSelector').click();
+        cy.get(`#${chartType}`).should('be.visible').click();
       }
     });
-  }
 
-  // Ensure chart type is correct
-  cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-  cy.get(`#${chartType}`).should('match', '[role="option"][aria-selected="true"]');
-
-  cy.get('body').click(0, 0);
+  // Verify the correct chart type is now shown on the selector
+  cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible');
 });
 
 cy.explore.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
