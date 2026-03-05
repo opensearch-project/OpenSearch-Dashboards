@@ -1,0 +1,80 @@
+{
+  "mappings": {
+    "date_detection": false,
+    "_source": {
+      "enabled": true
+    },
+    "dynamic_templates": [
+      {
+        "long_resource_attributes": {
+          "mapping": { "type": "long" },
+          "path_match": "resource.attributes.*",
+          "match_mapping_type": "long"
+        }
+      },
+      {
+        "string_resource_attributes": {
+          "mapping": { "type": "keyword", "ignore_above": 256 },
+          "path_match": "resource.attributes.*",
+          "match_mapping_type": "string"
+        }
+      },
+      {
+        "long_attributes": {
+          "mapping": { "type": "long" },
+          "path_match": "attributes.*",
+          "match_mapping_type": "long"
+        }
+      },
+      {
+        "string_attributes": {
+          "mapping": { "type": "keyword", "ignore_above": 256 },
+          "path_match": "attributes.*",
+          "match_mapping_type": "string"
+        }
+      }
+    ],
+    "properties": {
+      "traceId": { "type": "keyword", "ignore_above": 32 },
+      "spanId": { "type": "keyword", "ignore_above": 16 },
+      "parentSpanId": { "type": "keyword", "ignore_above": 16 },
+      "name": { "type": "keyword", "ignore_above": 1024 },
+      "kind": { "type": "keyword", "ignore_above": 32 },
+      "serviceName": { "type": "keyword", "ignore_above": 256 },
+      "startTime": { "type": "date_nanos" },
+      "endTime": { "type": "date_nanos" },
+      "@timestamp": { "type": "date_nanos" },
+      "status": {
+        "properties": {
+          "code": { "type": "integer" },
+          "message": { "type": "keyword", "ignore_above": 2048 }
+        }
+      },
+      "durationInNanos": { "type": "long" },
+      "droppedAttributesCount": { "type": "integer" },
+      "droppedEventsCount": { "type": "integer" },
+      "droppedLinksCount": { "type": "integer" },
+      "events": { "type": "nested" },
+      "links": { "type": "nested" },
+      "resource": {
+        "properties": {
+          "droppedAttributesCount": { "type": "integer" }
+        }
+      },
+      "instrumentationScope": {
+        "properties": {
+          "name": { "type": "keyword", "ignore_above": 128 },
+          "version": { "type": "keyword", "ignore_above": 64 }
+        }
+      },
+      "traceGroup": { "type": "keyword", "ignore_above": 1024 },
+      "traceGroupFields": {
+        "properties": {
+          "endTime": { "type": "date_nanos" },
+          "durationInNanos": { "type": "long" },
+          "statusCode": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

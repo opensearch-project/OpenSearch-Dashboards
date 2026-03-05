@@ -22,7 +22,6 @@ jest.mock('../../../../services/span_categorization', () => ({
   getCategoryMeta: jest.fn(() => ({
     color: '#006BB4',
     bgColor: '#006BB4',
-    icon: 'user',
     label: 'Agent',
   })),
   hexToRgba: jest.fn(() => 'rgba(0,107,180,0.1)'),
@@ -46,7 +45,6 @@ const makeSpan = (overrides: Partial<CategorizedSpan> = {}): CategorizedSpan =>
     category: 'AGENT' as const,
     categoryLabel: 'Agent',
     categoryColor: '#006BB4',
-    categoryIcon: 'user',
     input: '',
     output: '',
     startTime: '',
