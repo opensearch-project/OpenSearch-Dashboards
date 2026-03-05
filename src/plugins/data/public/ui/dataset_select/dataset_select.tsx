@@ -330,34 +330,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           // This handles cases where flyouts temporarily change the query dataset
           // Keep the current UI state - don't update
         }
-        return;
-      }
-
-      const onlyCheckCache = currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
-      const dataView = await dataViews.get(currentDataset.id, onlyCheckCache);
-
-      // If dataView is not in cache (onlyCheckCache returns undefined), fallback to currentDataset
-      if (!dataView) {
-        setSelectedDataset(currentDataset as DetailedDataset);
-        return;
-      }
-
-      const detailedDataset = {
-        ...currentDataset,
-        description: dataView.description,
-        displayName: dataView.displayName,
-        signalType: dataView.signalType,
-      } as DetailedDataset;
-
-      const isCompatible = isDatasetCompatibleWithSignalType(detailedDataset, signalType);
-
-      if (isCompatible) {
-        setSelectedDataset(detailedDataset);
-      } else {
-        // Don't clear incompatible dataset - just ignore it
-        // This handles cases where flyouts temporarily change the query dataset
-        // (e.g., trace flyout querying related logs changes dataset from traces to logs)
-        // Keep the current UI state - don't update selectedDataset
       }
     };
     updateSelectedDataset();
@@ -386,17 +358,22 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       const datasetIds = await dataViews.getIds(true);
       const fetchedDatasets: DetailedDataset[] = [];
 
-      for (const id of datasetIds) {
-        const dataView = await dataViews.get(id);
-        const dataset = await dataViews.convertToDataset(dataView);
+      // Fetch all DataViews in parallel using bulkGet optimization
+      const dataViewsArray = await dataViews.getMultiple(datasetIds);
 
-        fetchedDatasets.push({
+      // Convert all DataViews to datasets in parallel
+      const datasetPromises = dataViewsArray.map(async (dataView) => {
+        const dataset = await dataViews.convertToDataset(dataView);
+        return {
           ...dataset,
           description: dataView.description,
           displayName: dataView.displayName,
           signalType: dataView.signalType,
-        });
-      }
+        };
+      });
+
+      const convertedDatasets = await Promise.all(datasetPromises);
+      fetchedDatasets.push(...convertedDatasets);
 
       // Check if we need to fetch from dataset types that do not use data views (e.g., PROMETHEUS)
       // These types have their own fetch mechanism via the type config

@@ -58,6 +58,14 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     const response = await this.savedObjectClient.get<T>(type, id);
     return simpleSavedObjectToSavedObject<T>(response);
   }
+
+  async bulkGet<T = unknown>(objects: Array<{ id: string; type: string }>) {
+    const response = await this.savedObjectClient.bulkGet<T>(objects);
+    return {
+      savedObjects: response.savedObjects.map<SavedObject<T>>(simpleSavedObjectToSavedObject),
+    };
+  }
+
   async update<T = unknown>(
     type: string,
     id: string,
@@ -73,5 +81,12 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id);
+  }
+
+  clearCache(type?: string, id?: string) {
+    // The public SavedObjectsClient has a clearCache method
+    if (this.savedObjectClient.clearCache) {
+      this.savedObjectClient.clearCache(type, id);
+    }
   }
 }

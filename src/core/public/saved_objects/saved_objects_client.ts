@@ -191,6 +191,12 @@ export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
   /**
+   * Cache for in-flight get() requests to prevent duplicate requests for the same object.
+   * Key format: "type:id"
+   * This cache persists results to avoid refetching the same object multiple times.
+   */
+  private getRequestCache: Map<string, Promise<SimpleSavedObject<any>>>;
+  /**
    * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
    */
   private currentWorkspaceId: string | undefined;
@@ -228,24 +234,42 @@ export class SavedObjectsClient {
       const queue = [...this.batchQueue];
       this.batchQueue = [];
 
+      // Deduplicate requests in the queue - if multiple requests for the same object exist,
+      // keep only the first one and resolve all duplicates with the same result
+      const deduplicatedQueue: BatchQueueEntry[] = [];
+      const seenObjects = new Map<string, BatchQueueEntry[]>();
+
+      queue.forEach((item) => {
+        const key = `${item.type}:${item.id}`;
+        if (!seenObjects.has(key)) {
+          seenObjects.set(key, [item]);
+          deduplicatedQueue.push(item);
+        } else {
+          seenObjects.get(key)!.push(item);
+        }
+      });
+
       try {
-        const objectsToFetch = getObjectsToFetch(queue);
+        const objectsToFetch = getObjectsToFetch(deduplicatedQueue);
         const { saved_objects: savedObjects } = await this.performBulkGet(objectsToFetch);
 
-        queue.forEach((queueItem) => {
+        // Resolve all requests (including duplicates) with the fetched objects
+        seenObjects.forEach((items, key) => {
           const foundObject = savedObjects.find((savedObject) => {
-            return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
+            const objKey = `${savedObject.type}:${savedObject.id}`;
+            return objKey === key;
           });
 
-          if (foundObject) {
-            // multiple calls may have been requested the same object.
-            // we need to clone to avoid sharing references between the instances
-            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
-          } else {
-            queueItem.resolve(
-              this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
-            );
-          }
+          items.forEach((queueItem) => {
+            if (foundObject) {
+              // Clone to avoid sharing references between instances
+              queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
+            } else {
+              queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
+            }
+          });
         });
       } catch (err) {
         queue.forEach((queueItem) => {
@@ -261,10 +285,36 @@ export class SavedObjectsClient {
   constructor(http: HttpSetup) {
     this.http = http;
     this.batchQueue = [];
+    this.getRequestCache = new Map();
   }
 
   public setCurrentWorkspace(workspaceId: string) {
     this.currentWorkspaceId = workspaceId;
+  }
+
+  /**
+   * Clears the get request cache
+   * @param type - Optional type to clear only specific type
+   * @param id - Optional id to clear only specific object (requires type)
+   */
+  public clearCache(type?: string, id?: string) {
+    if (type && id) {
+      // Clear specific object
+      const cacheKey = `${type}:${id}`;
+      this.getRequestCache.delete(cacheKey);
+    } else if (type) {
+      // Clear all objects of a specific type
+      const keysToDelete: string[] = [];
+      this.getRequestCache.forEach((_, key) => {
+        if (key.startsWith(`${type}:`)) {
+          keysToDelete.push(key);
+        }
+      });
+      keysToDelete.forEach((key) => this.getRequestCache.delete(key));
+    } else {
+      // Clear entire cache
+      this.getRequestCache.clear();
+    }
   }
 
   /**
@@ -355,7 +405,13 @@ export class SavedObjectsClient {
       force: !!options?.force,
     };
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query }).then(
+      (resp) => {
+        // Clear the cache for this object since it's been deleted
+        this.clearCache(type, id);
+        return resp;
+      }
+    );
   };
 
   /**
@@ -441,10 +497,24 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return new Promise((resolve, reject) => {
+    // Check if there's already a cached request for this object
+    const cacheKey = `${type}:${id}`;
+    const cachedRequest = this.getRequestCache.get(cacheKey);
+
+    if (cachedRequest) {
+      return cachedRequest;
+    }
+
+    // Create a new request and cache it
+    const request = new Promise<SimpleSavedObject<T>>((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
       this.processBatchQueue();
     });
+
+    // Store the promise in the cache (persistent - not removed after completion)
+    this.getRequestCache.set(cacheKey, request);
+
+    return request;
   };
 
   /**
@@ -512,6 +582,8 @@ export class SavedObjectsClient {
       method: 'PUT',
       body: JSON.stringify(body),
     }).then((resp: SavedObject<T>) => {
+      // Clear the cache for this object since it's been updated
+      this.clearCache(type, id);
       return this.createSavedObject(resp);
     });
   }
@@ -529,6 +601,10 @@ export class SavedObjectsClient {
       method: 'PUT',
       body: JSON.stringify(objects),
     }).then((resp) => {
+      // Clear cache for all updated objects
+      objects.forEach((obj) => {
+        this.clearCache(obj.type, obj.id);
+      });
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
