@@ -59,8 +59,12 @@ describe('ppl_grammar_cache', () => {
     expect(pplGrammarCache.shouldFetchFromBackend(undefined)).toBe(false);
     expect(pplGrammarCache.shouldFetchFromBackend('3.5.9')).toBe(false);
     expect(pplGrammarCache.shouldFetchFromBackend('3.6.0')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.0-SNAPSHOT')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.5.9-SNAPSHOT')).toBe(false);
     expect(pplGrammarCache.shouldFetchFromBackend('3.10.1')).toBe(true);
     expect(pplGrammarCache.shouldFetchFromBackend('4.0.0')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('v3.6.0')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('invalid')).toBe(false);
   });
 
   it('should cache local backend version from /api/status', async () => {
@@ -132,6 +136,43 @@ describe('ppl_grammar_cache', () => {
     expect(http.get).toHaveBeenCalledTimes(1);
   });
 
+  it('should ignore symbolicNames slot 0 when building runtime token map', async () => {
+    const bundle = createBundle('sha256:symbolic-zero');
+    bundle.symbolicNames = ['INVALID_SLOT_ZERO', 'SOURCE', 'EQUAL'];
+
+    const http = ({
+      get: jest.fn().mockResolvedValue(bundle),
+    } as unknown) as HttpSetup;
+
+    const grammar = await pplGrammarCache.getOrFetchGrammar(http, 'ds-symbolic-zero');
+
+    expect(grammar).not.toBeNull();
+    expect(grammar?.runtimeSymbolicNameToTokenType.has('INVALID_SLOT_ZERO')).toBe(false);
+    expect(grammar?.runtimeSymbolicNameToTokenType.get('SOURCE')).toBe(1);
+  });
+
+  it('should deserialize ATN with verification enabled', async () => {
+    const verifyFlags: boolean[] = [];
+    (ATNDeserializer.prototype.deserialize as jest.Mock).mockImplementation(function (this: unknown) {
+      const options = (this as {
+        deserializationOptions?: {
+          verifyATN?: boolean;
+        };
+      }).deserializationOptions;
+      verifyFlags.push(options?.verifyATN === true);
+      return {} as ReturnType<ATNDeserializer['deserialize']>;
+    });
+
+    const http = ({
+      get: jest.fn().mockResolvedValue(createBundle('sha256:verify-atn')),
+    } as unknown) as HttpSetup;
+
+    const grammar = await pplGrammarCache.getOrFetchGrammar(http, 'ds-verify-atn');
+
+    expect(grammar).not.toBeNull();
+    expect(verifyFlags).toEqual([true, true]);
+  });
+
   it('should keep datasource grammar caches isolated and invalidate only one datasource', async () => {
     const http = ({
       get: jest
@@ -176,6 +217,42 @@ describe('ppl_grammar_cache', () => {
     await flushPromises();
 
     expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('should return null when ATN deserialization fails', async () => {
+    (ATNDeserializer.prototype.deserialize as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('invalid lexer atn');
+    });
+    const http = ({
+      get: jest.fn().mockResolvedValue(createBundle('sha256:bad-atn')),
+    } as unknown) as HttpSetup;
+
+    const grammar = await pplGrammarCache.getOrFetchGrammar(http, 'ds-bad-atn');
+
+    expect(grammar).toBeNull();
+    expect(pplGrammarCache.getCachedGrammar('ds-bad-atn')).toBeNull();
+  });
+
+  it('should abort grammar fetch on timeout and return null', async () => {
+    jest.useFakeTimers();
+    try {
+      const http = ({
+        get: jest.fn().mockImplementation((_path: string, options?: { signal?: AbortSignal }) => {
+          return new Promise((_resolve, reject) => {
+            options?.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+          });
+        }),
+      } as unknown) as HttpSetup;
+
+      const pending = pplGrammarCache.getOrFetchGrammar(http, 'ds-timeout');
+      jest.advanceTimersByTime(10001);
+
+      await expect(pending).resolves.toBeNull();
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(pplGrammarCache.getCachedGrammar('ds-timeout')).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('should skip grammar fetch during warm-up when backend version is unsupported', async () => {

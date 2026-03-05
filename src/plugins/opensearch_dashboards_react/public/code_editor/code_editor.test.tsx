@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { CodeEditor } from './code_editor';
+import { CodeEditor, __resetCodeEditorProviderRegistryForTests } from './code_editor';
 import { monaco } from '@osd/monaco';
 import { shallow } from 'enzyme';
 
@@ -51,6 +51,15 @@ const simpleLogLang: monaco.languages.IMonarchLanguage = {
 
 monaco.languages.register({ id: 'loglang' });
 monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
+
+beforeEach(() => {
+  __resetCodeEditorProviderRegistryForTests();
+});
+
+afterEach(() => {
+  __resetCodeEditorProviderRegistryForTests();
+  jest.restoreAllMocks();
+});
 
 const logs = `
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
@@ -137,8 +146,8 @@ test('editor mount setup', () => {
   expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
   expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
 
-  // Verify disposables are tracked
-  expect(instance._providerDisposables.length).toBe(3);
+  expect(instance._providerRegistrationKey).toBeDefined();
+  wrapper.unmount();
 });
 
 test('providers are registered only once across multiple renders', () => {
@@ -214,11 +223,53 @@ test('providers are disposed on unmount', () => {
   const instance = wrapper.instance() as CodeEditor;
   instance._editorDidMount(mockEditor, monaco);
 
-  expect(instance._providerDisposables.length).toBe(3);
-
   wrapper.unmount();
 
   expect(mockDisposable.dispose).toHaveBeenCalledTimes(3);
+});
+
+test('shared providers are not disposed until all editor instances unmount', () => {
+  const mockDisposable = { dispose: jest.fn() };
+  monaco.languages.registerCompletionItemProvider = jest.fn().mockReturnValue(mockDisposable);
+
+  const provider = {
+    provideCompletionItems: () => ({ suggestions: [] }),
+  };
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue({
+      widget: { value: { _setDetailsVisible: jest.fn() } },
+    }),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+  } as any;
+
+  const wrapperA = shallow(
+    <CodeEditor
+      languageId="loglang"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={provider}
+    />
+  );
+  const wrapperB = shallow(
+    <CodeEditor
+      languageId="loglang"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={provider}
+    />
+  );
+
+  (wrapperA.instance() as CodeEditor)._editorDidMount(mockEditor, monaco);
+  (wrapperB.instance() as CodeEditor)._editorDidMount(mockEditor, monaco);
+
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+
+  wrapperA.unmount();
+  expect(mockDisposable.dispose).toHaveBeenCalledTimes(0);
+
+  wrapperB.unmount();
+  expect(mockDisposable.dispose).toHaveBeenCalledTimes(1);
 });
 
 test('suggest controller details visibility is set on editor mount', () => {
