@@ -126,7 +126,7 @@ describe('QueryExecutionButton', () => {
   it('renders with correct props', () => {
     renderWithProvider(<QueryExecutionButton />);
 
-    expect(screen.getByTestId('agentTracesQueryExecutionButton')).toBeInTheDocument();
+    expect(screen.getByTestId('querySubmitButton')).toBeInTheDocument();
   });
 
   it('shows "Update" text when query has changed', () => {
@@ -162,7 +162,7 @@ describe('QueryExecutionButton', () => {
       dateRange: { from: 'invalid', to: 'invalid' },
     });
 
-    const button = screen.getByTestId('agentTracesQueryExecutionButton');
+    const button = screen.getByTestId('querySubmitButton');
     expect(button).toBeDisabled();
     // When disabled, button shows "Refresh" text (the default state)
     expect(screen.getByText('Refresh')).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe('QueryExecutionButton', () => {
       dateRange: { from: 'invalid', to: 'invalid' },
     });
 
-    const button = screen.getByTestId('agentTracesQueryExecutionButton');
+    const button = screen.getByTestId('querySubmitButton');
     expect(button).toBeDisabled();
     // Should show "Refresh" text even when disabled
     expect(screen.getByText('Refresh')).toBeInTheDocument();
@@ -187,7 +187,7 @@ describe('QueryExecutionButton', () => {
 
     renderWithProvider(<QueryExecutionButton onClick={mockOnClick} />);
 
-    const button = screen.getByTestId('agentTracesQueryExecutionButton');
+    const button = screen.getByTestId('querySubmitButton');
     button.click();
 
     expect(mockOnClick).toHaveBeenCalled();
@@ -242,7 +242,7 @@ describe('QueryExecutionButton', () => {
       isQueryEditorDirty: true,
     });
 
-    const button = screen.getByTestId('agentTracesQueryExecutionButton');
+    const button = screen.getByTestId('querySubmitButton');
     // Verify the button shows "Update" text when needsUpdate is true
     expect(screen.getByText('Update')).toBeInTheDocument();
     // Verify the button has the primary color (blue) for consistent theming
@@ -335,13 +335,11 @@ describe('QueryExecutionButton', () => {
       });
 
       // Both buttons should be present
-      expect(screen.getByTestId('agentTracesQueryExecutionButton')).toBeInTheDocument();
+      expect(screen.getByTestId('querySubmitButton')).toBeInTheDocument();
       expect(screen.getByTestId('agentTracesQueryCancelButton')).toBeInTheDocument();
 
       // Should be wrapped in a flex group
-      expect(
-        screen.getByTestId('agentTracesQueryExecutionButton').closest('.euiFlexGroup')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('querySubmitButton').closest('.euiFlexGroup')).toBeInTheDocument();
     });
 
     it('renders only execution button when query is not loading', () => {
@@ -354,7 +352,7 @@ describe('QueryExecutionButton', () => {
         hasUserInitiatedQuery: true,
       });
 
-      expect(screen.getByTestId('agentTracesQueryExecutionButton')).toBeInTheDocument();
+      expect(screen.getByTestId('querySubmitButton')).toBeInTheDocument();
       expect(screen.queryByTestId('agentTracesQueryCancelButton')).not.toBeInTheDocument();
     });
 
@@ -403,7 +401,7 @@ describe('QueryExecutionButton', () => {
         hasUserInitiatedQuery: true,
       });
 
-      const executionButton = screen.getByTestId('agentTracesQueryExecutionButton');
+      const executionButton = screen.getByTestId('querySubmitButton');
       executionButton.click();
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
