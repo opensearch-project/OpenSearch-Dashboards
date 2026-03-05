@@ -63,6 +63,7 @@ interface ChatMessagesProps {
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
+  startResponse?: boolean;
 }
 
 /**
@@ -232,6 +233,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
+  startResponse,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -391,30 +393,15 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
-            const isLoadingMessage = message.id.startsWith('loading-');
-            const isEmptyAndStreaming =
-              !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
 
             return (
               <div key={message.id}>
-                {/* Show loading indicator for loading messages or empty streaming messages */}
-                {(isLoadingMessage || isEmptyAndStreaming) && (
-                  <div className="messageRow">
-                    <div className="messageRow__icon">
-                      <EuiIcon type="console" size="m" color="success" />
-                    </div>
-                    <div className="messageRow__content">
-                      <div className="chatMessages__thinkingText">Thinking...</div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Assistant message content */}
-                {!isLoadingMessage && assistantMsg.content && assistantMsg.content.trim() && (
+                {assistantMsg.content && assistantMsg.content.trim() && (
                   <MessageRow message={assistantMsg} />
                 )}
 
-                {!isLoadingMessage && suggestionsEnabled && lastAssistantMessageIndex === index && (
+                {suggestionsEnabled && lastAssistantMessageIndex === index && (
                   <ChatSuggestions messages={timeline} currentMessage={message} />
                 )}
               </div>
@@ -449,12 +436,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           return null;
         })}
 
-        {/* Loading indicator - waiting for agent response */}
-        {isStreaming && timeline.length === 0 && (
+        {isStreaming && !startResponse && (
           <div className="chatMessages__loadingIndicator">
             <div className="messageRow">
               <div className="messageRow__icon">
-                <EuiIcon type="discuss" size="m" color="success" />
+                <EuiIcon type="console" size="m" color="success" />
               </div>
               <div className="messageRow__content">
                 <div className="chatMessages__thinkingText">Thinking...</div>
@@ -462,7 +448,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             </div>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
     </>
