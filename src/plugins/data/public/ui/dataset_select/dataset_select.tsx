@@ -388,10 +388,12 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
     try {
       const datasetIds = await dataViews.getIds(true);
+      // Deduplicate IDs to prevent duplicate fetches and error notifications
+      const uniqueDatasetIds = [...new Set(datasetIds)];
       const fetchedDatasets: DetailedDataset[] = [];
 
       // Fetch all DataViews in parallel using bulkGet optimization
-      const dataViewsArray = await dataViews.getMultiple(datasetIds);
+      const dataViewsArray = await dataViews.getMultiple(uniqueDatasetIds);
 
       // Convert all DataViews to datasets in parallel
       const datasetPromises = dataViewsArray.map(async (dataView) => {

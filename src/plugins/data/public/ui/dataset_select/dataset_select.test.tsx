@@ -1115,4 +1115,112 @@ describe('DatasetSelect', () => {
       expect(mockCore.overlays.openModal).toHaveBeenCalled();
     });
   });
+
+  describe('Dataset ID deduplication', () => {
+    it('deduplicates dataset IDs before fetching to prevent duplicate error notifications', async () => {
+      // Mock getIds to return duplicate IDs
+      mockDataViews.getIds = jest
+        .fn()
+        .mockResolvedValue(['duplicate-id', 'duplicate-id', 'unique-id']);
+
+      // Mock getMultiple to track what IDs are actually fetched
+      const getMultipleSpy = jest.fn().mockImplementation((ids) => {
+        return Promise.resolve(
+          ids.map((id: string) => ({
+            id,
+            title: `Dataset ${id}`,
+            displayName: `Dataset ${id}`,
+            timeFieldName: '@timestamp',
+          }))
+        );
+      });
+      mockDataViews.getMultiple = getMultipleSpy;
+
+      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
+        return Promise.resolve({
+          id: dataView.id,
+          title: dataView.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        });
+      });
+
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+        expect(getMultipleSpy).toHaveBeenCalled();
+      });
+
+      // Verify that getMultiple was called with deduplicated IDs
+      // Should only have 2 unique IDs instead of 3
+      const calledIds = getMultipleSpy.mock.calls[0][0];
+      expect(calledIds).toHaveLength(2);
+      expect(calledIds).toContain('duplicate-id');
+      expect(calledIds).toContain('unique-id');
+
+      // Verify no duplicate IDs were passed
+      const uniqueIds = [...new Set(calledIds)];
+      expect(calledIds.length).toBe(uniqueIds.length);
+    });
+
+    it('handles empty array from getIds', async () => {
+      mockDataViews.getIds = jest.fn().mockResolvedValue([]);
+      mockDataViews.getMultiple = jest.fn().mockResolvedValue([]);
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+      });
+
+      // Should not call getMultiple with empty array
+      expect(mockDataViews.getMultiple).toHaveBeenCalledWith([]);
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
+    });
+
+    it('handles all duplicate IDs correctly', async () => {
+      // All IDs are the same
+      mockDataViews.getIds = jest.fn().mockResolvedValue(['same-id', 'same-id', 'same-id']);
+
+      const getMultipleSpy = jest.fn().mockImplementation((ids) => {
+        return Promise.resolve(
+          ids.map((id: string) => ({
+            id,
+            title: 'Same Dataset',
+            displayName: 'Same Dataset',
+            timeFieldName: '@timestamp',
+          }))
+        );
+      });
+      mockDataViews.getMultiple = getMultipleSpy;
+
+      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
+        return Promise.resolve({
+          id: dataView.id,
+          title: dataView.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        });
+      });
+
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+        expect(getMultipleSpy).toHaveBeenCalled();
+      });
+
+      // Should only fetch once for the single unique ID
+      const calledIds = getMultipleSpy.mock.calls[0][0];
+      expect(calledIds).toHaveLength(1);
+      expect(calledIds[0]).toBe('same-id');
+    });
+  });
 });
