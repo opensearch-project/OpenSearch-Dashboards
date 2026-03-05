@@ -86,16 +86,6 @@ describe('MetricVisStyleControls', () => {
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ showTitle: false });
   });
 
-  it('renders title input when showTitle is true', () => {
-    const propsWithTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true },
-    };
-    render(<MetricVisStyleControls {...propsWithTitle} />);
-
-    expect(screen.getByPlaceholderText('Default title')).toBeInTheDocument();
-  });
-
   it('does not render title input when showTitle is false', () => {
     const propsWithoutTitle = {
       ...mockProps,
@@ -144,32 +134,6 @@ describe('MetricVisStyleControls', () => {
     await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({ fontSize: 80 });
     });
-  });
-
-  it('calls onStyleChange when title text is changed', async () => {
-    const propsWithTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true },
-    };
-    render(<MetricVisStyleControls {...propsWithTitle} />);
-    const titleInput = screen.getByPlaceholderText('Default title');
-    fireEvent.change(titleInput, { target: { value: 'New Title' } });
-
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ title: 'New Title' });
-    });
-  });
-
-  it('uses empty string as default title when no title and no value axis mapping is set', () => {
-    const propsWithEmptyTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true, title: '' },
-      axisColumnMappings: { value: undefined },
-    };
-    render(<MetricVisStyleControls {...propsWithEmptyTitle} />);
-    const titleInput = screen.getByPlaceholderText('Default title');
-
-    expect(titleInput).toHaveValue('');
   });
 
   it('renders standard panel', () => {

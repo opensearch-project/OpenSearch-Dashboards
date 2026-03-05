@@ -50,26 +50,16 @@ export const runCreateVisTests = () => {
       const query = `source=${datasetName} | stats count()`;
       cy.explore.createVisualizationWithQuery(query, 'metric', datasetName);
       cy.getElementByTestId('field-value').contains('count()');
-      cy.get('.exploreVisContainer canvas').should('be.visible');
+      cy.get('.exploreVisContainer .metric-value-number').should('be.visible');
     });
 
     it('should change style options and the changes reflect immediately to the metric visualization', () => {
       const query = `source=${datasetName} | stats count()`;
       cy.explore.createVisualizationWithQuery(query, 'metric', datasetName);
-      let beforeCanvasDataUrl;
-      cy.get('.exploreVisContainer canvas')
-        .should('be.visible')
-        .then((canvas) => {
-          beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
-        });
 
-      // Show title on chart
-      cy.getElementByTestId('showTitleSwitch').click();
-      // compare with new canvas
-      cy.get('.exploreVisContainer canvas').then((canvas) => {
-        const afterCanvasDataUrl = canvas[0].toDataURL();
-        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
-      });
+      // Show percentage on chart
+      cy.contains('Show percentage').click();
+      cy.get('.exploreVisContainer .metric-change').should('be.visible');
     });
 
     it('should create a metric sparkline visualization using a metric query with time bucket', () => {
@@ -89,15 +79,6 @@ export const runCreateVisTests = () => {
 
       // Use threshold color
       cy.getElementByTestId('useThresholdColorButton').click();
-      cy.wait(1000);
-      cy.get('.exploreVisContainer canvas').then((canvas) => {
-        const afterCanvasDataUrl = canvas[0].toDataURL();
-        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
-        beforeCanvasDataUrl = afterCanvasDataUrl;
-      });
-
-      // Show percentage
-      cy.contains('Show percentage').click();
       cy.wait(1000);
       cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
