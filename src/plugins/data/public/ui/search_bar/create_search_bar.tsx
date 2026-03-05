@@ -55,6 +55,7 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
   useDefaultBehaviors?: boolean;
   savedQueryId?: string;
   onSavedQueryIdChange?: (savedQueryId?: string) => void;
+  disableTimeRangeTool?: boolean;
 };
 
 // Respond to user changing the filters
@@ -187,10 +188,12 @@ export function createSearchBar({ core, storage, data, contextProvider }: Statef
           ...core,
         }}
       >
-        <TimeRangeToolRegistration
-          timefilter={data.query.timefilter.timefilter}
-          useAssistantAction={contextProvider?.hooks?.useAssistantAction}
-        />
+        {!props.disableTimeRangeTool && (
+          <TimeRangeToolRegistration
+            timefilter={data.query.timefilter.timefilter}
+            useAssistantAction={contextProvider?.hooks?.useAssistantAction}
+          />
+        )}
         <SearchBar
           showAutoRefreshOnly={props.showAutoRefreshOnly}
           showDatePicker={props.showDatePicker}
