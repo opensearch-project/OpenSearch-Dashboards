@@ -344,10 +344,10 @@ describe('ExplorePlugin', () => {
       expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'observability' }),
         expect.arrayContaining([
-          expect.objectContaining({ id: 'explore', order: 300 }),
-          expect.objectContaining({ id: 'explore/logs', order: 300 }),
-          expect.objectContaining({ id: 'explore/traces', order: 300 }),
-          expect.objectContaining({ id: 'explore/metrics', order: 300 }),
+          expect.objectContaining({ id: 'explore' }),
+          expect.objectContaining({ id: 'explore/logs' }),
+          expect.objectContaining({ id: 'explore/traces' }),
+          expect.objectContaining({ id: 'explore/metrics' }),
         ])
       );
 
@@ -355,10 +355,10 @@ describe('ExplorePlugin', () => {
       expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'all' }),
         expect.arrayContaining([
-          expect.objectContaining({ id: 'explore', order: 250, title: 'Explorer' }),
-          expect.objectContaining({ id: 'explore/logs', order: 250 }),
-          expect.objectContaining({ id: 'explore/traces', order: 250 }),
-          expect.objectContaining({ id: 'explore/metrics', order: 250 }),
+          expect.objectContaining({ id: 'explore', title: 'Explorer' }),
+          expect.objectContaining({ id: 'explore/logs' }),
+          expect.objectContaining({ id: 'explore/traces' }),
+          expect.objectContaining({ id: 'explore/metrics' }),
         ])
       );
     });

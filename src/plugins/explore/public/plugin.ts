@@ -430,11 +430,12 @@ export class ExplorePlugin
     core.application.register(createExploreApp());
 
     // Register nav links for different workspaces
-    const observabilityNavLinks = [
+    const navLinks = (isObservability: boolean) => [
       {
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        ...(isObservability ? {} : { title: 'Explorer' }),
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
@@ -456,39 +457,9 @@ export class ExplorePlugin
       },
     ];
 
-    // For analytics workspace, place after discover (order: 200) and differentiate with "Explorer" title
-    const analyticsNavLinks = [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 250,
-        title: 'Explorer', // Different title for analytics workspace
-      },
-      {
-        id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
-        category: undefined,
-        order: 250,
-        parentNavLinkId: PLUGIN_ID,
-      },
-      {
-        id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
-        category: undefined,
-        order: 250,
-        parentNavLinkId: PLUGIN_ID,
-      },
-      {
-        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
-        category: undefined,
-        order: 250,
-        parentNavLinkId: PLUGIN_ID,
-      },
-    ];
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks(true));
 
-    core.chrome.navGroup.addNavLinksToGroup(
-      DEFAULT_NAV_GROUPS.observability,
-      observabilityNavLinks
-    );
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, analyticsNavLinks);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks(false));
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
