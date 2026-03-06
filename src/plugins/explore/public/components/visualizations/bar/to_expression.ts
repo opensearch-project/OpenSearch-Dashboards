@@ -936,13 +936,6 @@ export const createDoubleNumericalBarChart = (
       axisColumnMappings: axisColumnMappings ?? {},
     });
 
-    // TODO: check if this is needed
-    if (styles.switchAxes) {
-      result.yAxisConfig.type = 'category';
-    } else {
-      result.xAxisConfig.type = 'category';
-    }
-
     return result.spec;
   }
 
