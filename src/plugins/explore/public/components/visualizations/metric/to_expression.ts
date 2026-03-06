@@ -11,6 +11,7 @@ import {
   AxisColumnMappings,
   Threshold,
   VisFieldType,
+  RendererSpecConfig,
 } from '../types';
 import { getChartRender, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
@@ -293,7 +294,7 @@ export const createMultiMetric = (
     groupedData.get(groupValue)!.push(row);
   });
 
-  const specs: any[] = [];
+  const specs: RendererSpecConfig[] = [];
   for (const [key, value] of groupedData) {
     const result = createSingleMetric(
       value,

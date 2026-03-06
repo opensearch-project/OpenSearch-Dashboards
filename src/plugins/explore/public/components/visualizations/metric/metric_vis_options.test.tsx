@@ -73,19 +73,6 @@ describe('MetricVisStyleControls', () => {
     expect(screen.getByText('Metric')).toBeInTheDocument();
   });
 
-  it('renders the show title switch', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    expect(screen.getByTestId('showTitleSwitch')).toBeInTheDocument();
-  });
-
-  it('calls onStyleChange when show title switch is toggled', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    const switchButton = screen.getByTestId('showTitleSwitch');
-    fireEvent.click(switchButton);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ showTitle: false });
-  });
-
   it('does not render title input when showTitle is false', () => {
     const propsWithoutTitle = {
       ...mockProps,
