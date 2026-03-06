@@ -43,7 +43,7 @@ import {
   OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
-import { SearchTimeoutError, PainlessError, isPainlessError } from './errors';
+import { SearchTimeoutError, PainlessError, isPainlessError, SessionDisconnectError, isSessionDisconnectError } from './errors';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 
 export interface SearchInterceptorDeps {
@@ -102,6 +102,12 @@ export class SearchInterceptor {
     } else if (appAbortSignal?.aborted) {
       // In the case an application initiated abort, throw the existing AbortError.
       return e;
+    } else if (isSessionDisconnectError(e)) {
+      // Handle session disconnect/authentication failure
+      const err = new SessionDisconnectError(e);
+      // Show the disconnect banner here, so it's shown application-wide
+      this.showSessionDisconnectBanner(err);
+      return err;
     } else if (isPainlessError(e)) {
       return new PainlessError(e, request);
     } else {
