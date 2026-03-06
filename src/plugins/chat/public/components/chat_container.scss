@@ -9,11 +9,15 @@
     "confirmation"
     "screenshot"
     "input";
-  padding: 0 8px 8px 0;
+  padding: 0 8px 8px 12px;
 
   &--fullscreen {
     padding: 0 8px 8px;
     max-width: 1200px;
     margin: 0 auto;
   }
+}
+
+.chat-sidecar {
+  border-left: 1px solid $euiBorderColor;
 }

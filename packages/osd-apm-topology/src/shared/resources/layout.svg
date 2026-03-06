@@ -1,0 +1,13 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- Top left square - empty with border -->
+      <rect x="10" y="10" width="40" height="40" rx="6" ry="6" stroke="currentColor" fill-opacity="0" stroke-width="12"/>
+
+      <!-- Top right square - filled -->
+      <rect x="70" y="10" width="40" height="40" rx="6" ry="6" stroke="currentColor" fill-opacity="0" stroke-width="12"/>
+
+      <!-- Bottom left square - empty with border -->
+      <rect x="10" y="70" width="40" height="40" rx="6" ry="6" stroke="currentColor" fill-opacity="0" stroke-width="12"/>
+
+      <!-- Bottom right square - empty with border -->
+      <rect x="70" y="70" width="40" height="40" rx="6" ry="6" stroke="currentColor" fill-opacity="0" stroke-width="12"/>
+</svg>

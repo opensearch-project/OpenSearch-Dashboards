@@ -1,0 +1,32 @@
+.celSliStatusIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Add animation only when this class is present */
+.celSliStatusIcon.celAnimated {
+  animation: celPopIn 0.6s ease-out forwards;
+}
+
+@keyframes celPopIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+
+  80% {
+    transform: scale(0.9);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

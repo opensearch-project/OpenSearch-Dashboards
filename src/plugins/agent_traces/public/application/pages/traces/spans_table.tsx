@@ -20,10 +20,18 @@ import {
 import './traces_table.scss';
 
 export const SpansTable = () => {
-  const { pageIndex, pageSize, pagination: basePagination, onTableChange } = useTablePagination(0);
+  const {
+    pageIndex,
+    pageSize,
+    pagination: basePagination,
+    onTableChange,
+    sortState,
+  } = useTablePagination(0);
   const { spans, loading, error, refresh, expandSpan, spanSpansCache } = useAgentSpans(
     pageIndex,
-    pageSize
+    pageSize,
+    sortState.field,
+    sortState.direction
   );
   const { metrics } = useTraceMetricsContext();
 
@@ -69,6 +77,7 @@ export const SpansTable = () => {
       field: 'startTime',
       name: i18n.translate('agentTraces.spansTable.timeColumn', { defaultMessage: 'Time' }),
       width: '200px',
+      sortable: true,
       render: (time: string) => <EuiLink color="primary">{time}</EuiLink>,
     },
     {
@@ -87,23 +96,27 @@ export const SpansTable = () => {
     {
       field: 'name',
       name: i18n.translate('agentTraces.spansTable.nameColumn', { defaultMessage: 'Name' }),
+      sortable: true,
       render: (name: string) => <EuiText size="s">{name}</EuiText>,
     },
     {
       field: 'status',
       width: '100px',
       name: i18n.translate('agentTraces.spansTable.statusColumn', { defaultMessage: 'Status' }),
+      sortable: true,
       render: renderStatus,
     },
     {
       field: 'latency',
       width: '100px',
       name: i18n.translate('agentTraces.spansTable.latencyColumn', { defaultMessage: 'Latency' }),
+      sortable: true,
       render: (latency: string) => <EuiText size="s">{latency}</EuiText>,
     },
     {
       field: 'totalTokens',
       name: i18n.translate('agentTraces.spansTable.tokensColumn', { defaultMessage: 'Tokens' }),
+      sortable: true,
       render: (tokens: number | string) => <EuiText size="s">{tokens}</EuiText>,
     },
     {
@@ -181,6 +194,12 @@ export const SpansTable = () => {
           compressed
           loading={loading}
           pagination={pagination}
+          sorting={{
+            sort: {
+              field: sortState.field as keyof SpanRow,
+              direction: sortState.direction,
+            },
+          }}
           onChange={onTableChange}
           rowProps={(item: SpanRow) => ({
             onClick: () => handleRowClick(item),
