@@ -1,0 +1,2 @@
+refactor:
+- Cleanup all vega implementations of discover visualizations ([#11468](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11468))
