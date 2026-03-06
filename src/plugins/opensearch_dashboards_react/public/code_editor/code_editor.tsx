@@ -38,6 +38,38 @@ import { LIGHT_THEME, DARK_THEME, DEFAULT_DARK_THEME, DEAFULT_LIGHT_THEME } from
 
 import './editor.scss';
 
+interface SharedProviderRegistration {
+  refCount: number;
+  disposables: monaco.IDisposable[];
+}
+
+const sharedProviderRegistrations = new Map<string, SharedProviderRegistration>();
+const sharedProviderObjectIds = new WeakMap<object, number>();
+let nextSharedProviderObjectId = 1;
+
+function getObjectRegistrationId(value: object | undefined): string {
+  if (!value) return 'none';
+  const existing = sharedProviderObjectIds.get(value);
+  if (existing !== undefined) return String(existing);
+  const nextId = nextSharedProviderObjectId++;
+  sharedProviderObjectIds.set(value, nextId);
+  return String(nextId);
+}
+
+function getProviderRegistrationKey(props: Props): string {
+  return [
+    props.languageId,
+    getObjectRegistrationId((props.suggestionProvider as unknown) as object | undefined),
+    getObjectRegistrationId((props.signatureProvider as unknown) as object | undefined),
+    getObjectRegistrationId((props.hoverProvider as unknown) as object | undefined),
+    getObjectRegistrationId((props.languageConfiguration as unknown) as object | undefined),
+  ].join('|');
+}
+
+export function __resetCodeEditorProviderRegistryForTests() {
+  sharedProviderRegistrations.clear();
+}
+
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
@@ -122,6 +154,7 @@ export interface Props {
 
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+  _providerRegistrationKey?: string;
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -157,6 +190,9 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
+    // Register language providers once per mount (not per render)
+    this._registerProviders();
+
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
     }
@@ -183,26 +219,70 @@ export class CodeEditor extends React.Component<Props, {}> {
     suggestController.widget.value._setDetailsVisible(true);
   };
 
+  _registerProviders = () => {
+    if (this._providerRegistrationKey) return;
+
+    const { languageId } = this.props;
+    const registrationKey = getProviderRegistrationKey(this.props);
+    const existingRegistration = sharedProviderRegistrations.get(registrationKey);
+    if (existingRegistration) {
+      existingRegistration.refCount++;
+      this._providerRegistrationKey = registrationKey;
+      return;
+    }
+    const disposables: monaco.IDisposable[] = [];
+
+    // Register providers directly — by the time editorDidMount fires,
+    // the language is already active so onLanguage would never trigger.
+    if (this.props.suggestionProvider) {
+      disposables.push(
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+      );
+    }
+
+    if (this.props.signatureProvider) {
+      disposables.push(
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+      );
+    }
+
+    if (this.props.hoverProvider) {
+      disposables.push(
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+      );
+    }
+
+    if (this.props.languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+    }
+
+    sharedProviderRegistrations.set(registrationKey, {
+      refCount: 1,
+      disposables,
+    });
+    this._providerRegistrationKey = registrationKey;
+  };
+
+  componentWillUnmount() {
+    if (!this._providerRegistrationKey) return;
+    const existingRegistration = sharedProviderRegistrations.get(this._providerRegistrationKey);
+    if (!existingRegistration) {
+      this._providerRegistrationKey = undefined;
+      return;
+    }
+
+    existingRegistration.refCount--;
+    if (existingRegistration.refCount <= 0) {
+      for (const disposable of existingRegistration.disposables) {
+        disposable.dispose();
+      }
+      sharedProviderRegistrations.delete(this._providerRegistrationKey);
+    }
+    this._providerRegistrationKey = undefined;
+  }
+
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
-
-    monaco.languages.onLanguage(languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
-    });
 
     return (
       <React.Fragment>

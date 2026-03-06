@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import { monaco } from '@osd/monaco';
+import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
 import {
   IDataPluginServices,
   Query,
@@ -36,6 +36,12 @@ import { getQueryService, getIndexPatterns } from '../../services';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { getEffectiveLanguageForAutoComplete } from './utils';
+import { pplGrammarCache } from '../../antlr/opensearch_ppl/ppl_grammar_cache';
+import {
+  attachPPLGrammarRefresh,
+  attachPPLValidationContext,
+  syncPPLValidationContext,
+} from './validation_context';
 
 export interface QueryEditorProps {
   query: Query;
@@ -74,6 +80,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const detachValidationContextRef = useRef<(() => void) | undefined>();
+  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const bottomPanelRef = useRef<HTMLDivElement>(null);
@@ -111,11 +119,40 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   }, []);
 
+  const getValidationContext = (): PPLValidationContext => ({
+    useRuntimeGrammar: true,
+    dataSourceId: queryRef.current.dataset?.dataSource?.id,
+    dataSourceVersion: queryRef.current.dataset?.dataSource?.version,
+  });
+
+  useEffect(
+    () => () => {
+      detachValidationContextRef.current?.();
+      detachValidationContextRef.current = undefined;
+      detachGrammarRefreshRef.current?.();
+      detachGrammarRefreshRef.current = undefined;
+    },
+    []
+  );
+
   useEffect(() => {
     services.application?.currentAppId$?.subscribe?.((appId) => {
       setCurrentAppId(appId || '');
     });
   }, [services.application?.currentAppId$]);
+
+  useEffect(() => {
+    syncPPLValidationContext(inputRef.current, {
+      useRuntimeGrammar: true,
+      dataSourceId: query.dataset?.dataSource?.id,
+      dataSourceVersion: query.dataset?.dataSource?.version,
+    });
+
+    const model = inputRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+  }, [query.dataset?.dataSource?.id, query.dataset?.dataSource?.version]);
 
   const renderQueryEditorExtensions = () => {
     if (
@@ -314,6 +351,18 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       setLineCount(editor.getModel()?.getLineCount());
       inputRef.current = editor;
+      detachValidationContextRef.current?.();
+      detachGrammarRefreshRef.current?.();
+      detachValidationContextRef.current = attachPPLValidationContext(
+        editor,
+        getValidationContext()
+      );
+      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+        editor,
+        getValidationContext,
+        (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
+        revalidatePPLModel
+      );
       // eslint-disable-next-line no-bitwise
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
         const newQuery = {
@@ -376,6 +425,18 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       inputRef.current = editor;
+      detachValidationContextRef.current?.();
+      detachGrammarRefreshRef.current?.();
+      detachValidationContextRef.current = attachPPLValidationContext(
+        editor,
+        getValidationContext()
+      );
+      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+        editor,
+        getValidationContext,
+        (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
+        revalidatePPLModel
+      );
 
       editor.addCommand(monaco.KeyCode.Enter, () => {
         const newQuery = {

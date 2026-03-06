@@ -30,7 +30,9 @@
 
 import './index.scss';
 
+import { registerPPLValidationProvider } from '@osd/monaco';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { createStartServicesGetter } from '../../opensearch_dashboards_utils/public';
 import {
@@ -107,6 +109,8 @@ import {
   getDefaultSuggestions as getPPLSuggestions,
   getSimplifiedPPLSuggestions,
 } from './antlr/opensearch_ppl/code_completion';
+import { createPplGrammarWarmupHandler } from './antlr/opensearch_ppl/ppl_grammar_warmup';
+import { validateRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_validation';
 import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
 import { promqlTriggerCharacters } from './antlr/promql/constants';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
@@ -137,6 +141,8 @@ export class DataPublicPlugin
   private readonly sessionStorage: DataStorage;
   private readonly config: ConfigSchema;
   private resourceClientFactory!: ResourceClientFactory;
+  private pplGrammarWarmupSubscription?: Subscription;
+  private unregisterPplValidationProvider?: () => void;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -314,6 +320,17 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
+    // Subscribe to dataset changes to pre-fetch PPL grammar.
+    // This runs at app startup so grammar is fetched on dataset selection/switch, not on keystroke.
+    const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(http, savedObjects.client);
+
+    // Warm current query state once at startup and then on subsequent query updates.
+    maybeWarmUpPplGrammar(query.queryString.getQuery());
+    this.pplGrammarWarmupSubscription = query.queryString
+      .getUpdates$()
+      .subscribe(maybeWarmUpPplGrammar);
+    this.unregisterPplValidationProvider = registerPPLValidationProvider(validateRuntimePPLQuery);
+
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
@@ -367,6 +384,10 @@ export class DataPublicPlugin
   }
 
   public stop() {
+    this.pplGrammarWarmupSubscription?.unsubscribe();
+    this.pplGrammarWarmupSubscription = undefined;
+    this.unregisterPplValidationProvider?.();
+    this.unregisterPplValidationProvider = undefined;
     this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();
