@@ -19,6 +19,8 @@ import { VegaRender } from './vega_render';
 import { EchartsRender } from './echarts_render';
 import { createVisSpec } from './utils/create_vis_spec';
 import { getChartRender } from './utils/utils';
+import { MetricChartRender } from './metric/metric_component';
+import { MetricChartStyle } from './metric/metric_vis_config';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -138,11 +140,21 @@ const ChartRender = ({
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
 }) => {
-  const spec = useMemo(() => {
+  const { spec, axisColumnMappings } = useMemo(() => {
     return createVisSpec({ data, config, timeRange });
   }, [config, data, timeRange]);
 
   if (getChartRender() === 'echarts') {
+    if (config?.type === 'metric') {
+      return (
+        <MetricChartRender
+          spec={spec}
+          data={data?.transformedData}
+          styles={config.styles as MetricChartStyle}
+          axisColumnMappings={axisColumnMappings}
+        />
+      );
+    }
     return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
   }
 

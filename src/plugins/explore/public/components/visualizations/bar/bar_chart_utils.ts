@@ -254,9 +254,7 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
         },
       }),
       // Apply stack configuration based on stackMode
-      ...(options.kind === 'bar' &&
-        'stackMode' in styles &&
-        styles.stackMode === 'total' && { stack: 'total' }),
+      ...('stackMode' in styles && styles.stackMode === 'total' && { stack: 'total' }),
     };
 
     return seriesConfig as BarSeriesOption;

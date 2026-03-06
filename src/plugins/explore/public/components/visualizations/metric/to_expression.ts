@@ -4,7 +4,15 @@
  */
 
 import { MetricChartStyle } from './metric_vis_config';
-import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
+import {
+  VisColumn,
+  VEGASCHEMA,
+  AxisRole,
+  AxisColumnMappings,
+  Threshold,
+  VisFieldType,
+  RendererSpecConfig,
+} from '../types';
 import { getChartRender, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
@@ -48,7 +56,11 @@ export const createSingleMetric = (
       throw Error('Missing value for metric chart');
     }
 
-    // Echarts implementation here
+    if (!dateField) {
+      return { spec: undefined, name: numericFieldName, data: transformedData };
+    }
+
+    // Return React component spec for HTML text rendering with ECharts sparkline
     const result = pipe(
       transform(convertTo2DArray()),
       createBaseConfig({ title: '' }),
@@ -66,7 +78,7 @@ export const createSingleMetric = (
       axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
       axisColumnMappings: axisColumnMappings ?? {},
     });
-    return result.spec;
+    return { spec: result.spec, name: numericFieldName, data: transformedData };
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
@@ -243,4 +255,59 @@ export const createSingleMetric = (
   };
 
   return baseSpec;
+};
+
+export const createMultiMetric = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: MetricChartStyle,
+  axisColumnMappings?: AxisColumnMappings
+) => {
+  if (getChartRender() !== 'echarts') {
+    throw Error('Multi-metric visualization is only supported with ECharts rendering');
+  }
+
+  // Get the main value field
+  const valueMapping = axisColumnMappings?.[AxisRole.Value];
+  if (!valueMapping || valueMapping.schema !== VisFieldType.Numerical) {
+    throw Error('Metric visualization requires a numerical value field');
+  }
+
+  // Get the split by (categorical) field for faceting
+  const splitByMapping = axisColumnMappings?.[AxisRole.FACET];
+  if (!splitByMapping || splitByMapping.schema !== VisFieldType.Categorical) {
+    throw Error('Multi-metric visualization requires a categorical field for splitting');
+  }
+
+  // For multi-metric, we split the data by the categorical field
+  const splitByField = splitByMapping.column;
+
+  // Group data by the split by field (categorical)
+  const groupedData = new Map<string, any[]>();
+  transformedData.forEach((row) => {
+    const groupValue = row[splitByField];
+    if (!groupedData.has(groupValue)) {
+      groupedData.set(groupValue, []);
+    }
+    groupedData.get(groupValue)!.push(row);
+  });
+
+  const specs: RendererSpecConfig[] = [];
+  for (const [key, value] of groupedData) {
+    const result = createSingleMetric(
+      value,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styles,
+      axisColumnMappings
+    );
+    if (result && 'spec' in result) {
+      specs.push({ spec: result.spec, name: key, data: value });
+    }
+  }
+
+  return specs;
 };

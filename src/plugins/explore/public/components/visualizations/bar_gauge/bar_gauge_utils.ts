@@ -242,7 +242,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
     value === null
       ? '-'
       : selectedUnit && selectedUnit?.display
-      ? selectedUnit?.display(value, selectedUnit?.symbol)
+      ? String(selectedUnit.display(value, selectedUnit?.symbol).label)
       : `${Math.round(value * 100) / 100} ${selectedUnit?.symbol ?? ''}`
   );
 
