@@ -167,4 +167,25 @@ describe('TracesTable', () => {
     expect(headerTexts).toContain('Status');
     expect(headerTexts).toContain('Latency');
   });
+
+  it('passes default sort params to useAgentTraces', () => {
+    render(<TracesTable />);
+    expect(mockUseAgentTraces).toHaveBeenCalledWith(0, 50, 'startTime', 'desc');
+  });
+
+  it('renders sortable column headers as buttons', () => {
+    render(<TracesTable />);
+    const headers = document.querySelectorAll('th');
+    const sortableHeaders = Array.from(headers).filter((h) => h.querySelector('button'));
+    const sortableTexts = sortableHeaders.map((h) => h.textContent);
+    expect(sortableTexts).toContain('Time');
+    expect(sortableTexts).toContain('Name');
+    expect(sortableTexts).toContain('Status');
+    expect(sortableTexts).toContain('Latency');
+    expect(sortableTexts).toContain('Tokens');
+    // Kind, Input, Output should not be sortable
+    expect(sortableTexts).not.toContain('Kind');
+    expect(sortableTexts).not.toContain('Input');
+    expect(sortableTexts).not.toContain('Output');
+  });
 });

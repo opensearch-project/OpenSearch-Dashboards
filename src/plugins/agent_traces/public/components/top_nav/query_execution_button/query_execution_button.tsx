@@ -86,7 +86,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
       needsUpdate={needsUpdate}
       isDisabled={isDisabled}
       onClick={onClick || (() => {})}
-      data-test-subj="agentTracesQueryExecutionButton"
+      data-test-subj="querySubmitButton"
       aria-label={i18n.translate('agentTraces.topNav.queryExecutionButton.ariaLabel', {
         defaultMessage: 'Submit query: {buttonText}',
         values: { buttonText },

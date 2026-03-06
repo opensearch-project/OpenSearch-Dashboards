@@ -10,6 +10,7 @@ import { loadQueryActionCreator } from '../../../application/utils/state_managem
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
+import { setDateRange } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 
 export const PPL_QUERY_EXECUTION_TIMEOUT_MS = 10000;
 export const PPL_QUERY_POLL_INTERVAL_MS = 1000;
@@ -18,6 +19,8 @@ interface PPLExecuteQueryArgs {
   query: string;
   autoExecute?: boolean;
   description?: string;
+  from?: string;
+  to?: string;
 }
 
 const NOOP_ASSISTANT_ACTION_HOOK = (_action: any) => {};
@@ -111,13 +114,14 @@ export function usePPLExecuteQueryAction(
 
   useAssistantAction<PPLExecuteQueryArgs>({
     name: 'execute_ppl_query',
-    description: 'Update the query bar with a PPL query and optionally execute it',
+    description:
+      'Update the query bar with a PPL query, optionally set the time range, and execute it. The query should NOT contain time filters - use the from/to parameters to specify the time range instead.',
     parameters: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'The PPL query to set in the query bar',
+          description: 'The PPL query to set in the query bar (without time filters)',
         },
         autoExecute: {
           type: 'boolean',
@@ -127,6 +131,16 @@ export function usePPLExecuteQueryAction(
           type: 'string',
           description: 'Optional description of what the query does',
         },
+        from: {
+          type: 'string',
+          description:
+            'Start time for the time range (e.g., "now-1h", "now-7d", "2024-01-01"). If provided, the time range will be updated.',
+        },
+        to: {
+          type: 'string',
+          description:
+            'End time for the time range (e.g., "now", "2024-01-31"). If provided along with from, the time range will be updated.',
+        },
       },
       required: ['query'],
     },
@@ -134,6 +148,18 @@ export function usePPLExecuteQueryAction(
       try {
         // Check if we should auto-execute
         const shouldExecute = args.autoExecute !== false; // Default to true
+
+        // Update time range if both from and to are provided
+        if (args.from && args.to) {
+          // Update Redux state
+          dispatch(setDateRange({ from: args.from, to: args.to }));
+
+          // Update timefilter for UI sync
+          services.data.query.timefilter.timefilter.setTime({
+            from: args.from,
+            to: args.to,
+          });
+        }
 
         if (shouldExecute) {
           // Get the current query state to determine the cache key
@@ -183,21 +209,27 @@ export function usePPLExecuteQueryAction(
           }
 
           // Query succeeded
+          const timeRangeMessage =
+            args.from && args.to ? ` Time range set to ${args.from} - ${args.to}.` : '';
           return {
             success: true,
             executed: true,
             query: args.query,
-            message: 'Query updated and executed successfully',
+            timeRange: args.from && args.to ? { from: args.from, to: args.to } : undefined,
+            message: `Query updated and executed successfully.${timeRangeMessage}`,
           };
         } else {
           // Just update the editor without executing
           setEditorTextWithQuery(args.query);
 
+          const timeRangeMessage =
+            args.from && args.to ? ` Time range set to ${args.from} - ${args.to}.` : '';
           return {
             success: true,
             executed: false,
             query: args.query,
-            message: 'Query updated',
+            timeRange: args.from && args.to ? { from: args.from, to: args.to } : undefined,
+            message: `Query updated.${timeRangeMessage}`,
           };
         }
       } catch (error) {
