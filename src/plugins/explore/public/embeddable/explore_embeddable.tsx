@@ -35,7 +35,7 @@ import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
-import { VisColumn } from '../components/visualizations/types';
+import { VisColumn, AxisRole, VisualizationRule } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
@@ -54,6 +54,8 @@ import { normalizeResultRows } from '../components/visualizations/utils/normaliz
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
+import { VisData } from '../components/visualizations/visualization_builder.types';
+import { RenderChartConfig } from '../components/visualizations/types';
 
 export interface SearchProps {
   description?: string;
@@ -91,6 +93,13 @@ export interface SearchProps {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
   };
+
+  visData?: VisData;
+  visConfig?: RenderChartConfig;
+  axesMapping?: Partial<Record<AxisRole, VisColumn>>;
+  matchedRule?: VisualizationRule | undefined;
+  containerSize?: { width: number; height: number };
+  onContainerSizeChange?: (size: { width: number; height: number }) => void;
 }
 
 interface ExploreEmbeddableConfig {
@@ -188,6 +197,7 @@ export class ExploreEmbeddable
       isLoading: false,
       displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedExplore.title,
+      containerSize: { width: 0, height: 0 },
     };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
@@ -300,6 +310,13 @@ export class ExploreEmbeddable
       });
     };
 
+    searchProps.onContainerSizeChange = (size: { width: number; height: number }) => {
+      if (!isEqual(searchProps.containerSize, size)) {
+        searchProps.containerSize = size;
+        this.updateHandler(searchProps);
+      }
+    };
+
     this.updateHandler(searchProps);
   }
 
@@ -334,6 +351,29 @@ export class ExploreEmbeddable
       }
     } else if (searchProps) {
       this.searchProps = searchProps;
+    }
+
+    if (
+      this.searchProps?.matchedRule &&
+      this.searchProps.matchedRule.toSpec &&
+      this.searchProps.visData &&
+      this.searchProps.searchContext &&
+      this.searchProps.styleOptions
+    ) {
+      const spec = this.searchProps.matchedRule.toSpec(
+        this.searchProps.visData.transformedData,
+        this.searchProps.visData.numericalColumns,
+        this.searchProps.visData.categoricalColumns,
+        this.searchProps.visData.dateColumns,
+        this.searchProps.styleOptions,
+        this.searchProps.chartType,
+        this.searchProps.axesMapping,
+        this.searchProps.searchContext.timeRange,
+        this.searchProps.containerSize
+      );
+      this.searchProps.spec = spec;
+      const exp = toExpression(this.searchProps.searchContext, spec);
+      this.searchProps.expression = exp;
     }
     if (this.node && this.searchProps) {
       this.renderComponent(this.node, this.searchProps);
@@ -394,6 +434,7 @@ export class ExploreEmbeddable
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
+    this.searchProps.visData = visualizationData;
     if (uiState.activeTab !== 'logs' && visualizationData) {
       const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
       const allColumns = [
@@ -411,6 +452,7 @@ export class ExploreEmbeddable
           };
         } else {
           const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          this.searchProps.axesMapping = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
             visualization.axesMapping,
             allColumns
@@ -420,6 +462,7 @@ export class ExploreEmbeddable
               `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
             );
           }
+          this.searchProps.matchedRule = matchedRule;
           const searchContext = {
             query: this.input.query,
             filters: this.input.filters,
@@ -438,20 +481,6 @@ export class ExploreEmbeddable
             styles = mergeStyles(vis.ui.style.defaults, styles);
           }
           this.searchProps.styleOptions = styles;
-
-          const spec = matchedRule.toSpec(
-            visualizationData.transformedData,
-            numericalColumns,
-            categoricalColumns,
-            dateColumns,
-            styles || styleOptions,
-            selectedChartType,
-            axesMapping,
-            searchContext.timeRange
-          );
-          this.searchProps.spec = spec;
-          const exp = toExpression(searchContext, spec);
-          this.searchProps.expression = exp;
         }
       }
     }

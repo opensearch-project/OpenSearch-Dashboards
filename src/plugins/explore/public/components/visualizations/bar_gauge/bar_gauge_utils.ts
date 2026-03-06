@@ -223,10 +223,12 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   styles,
   categoryField,
   valueField,
+  containerSize,
 }: {
   styles: BarGaugeChartStyle;
   categoryField: string;
   valueField: string;
+  containerSize?: { width: number; height: number };
 }): PipelineFn<T> => (state: EChartsSpecState<T>) => {
   const { transformedData, axisColumnMappings } = state;
   const newState = { ...state };
@@ -254,8 +256,14 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   let maxBase = styles?.max ?? Math.max(maxNumber, 0);
   let minBase = styles?.min ?? Math.min(minNumber, 0);
 
+  const containerFactor =
+    containerSize?.height && containerSize?.width
+      ? Math.min(containerSize?.height, containerSize?.width)
+      : 400;
+
   const fontFactor =
-    barNumbers * displayValues.reduce((acc, display) => Math.max(acc, String(display).length), 0);
+    containerFactor /
+    (barNumbers * displayValues.reduce((acc, display) => Math.max(acc, String(display).length), 8));
 
   // text color only display the corresponding threshold color and ignore min/max control
   const fontColors = values.map((value) => {
@@ -313,6 +321,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
       tooltip: {
         show: false,
       },
+      animation: false,
       data: displayValues.map((_, i) => ({
         value: !invalidCase
           ? styles?.exclusive.showUnfilledArea
@@ -325,7 +334,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
           show: true,
           position: 'top',
           color: fontColors[i],
-          fontSize: Math.max(10, Math.min(25, 100 / Math.sqrt(fontFactor))), // font size between 10px  and 25px
+          fontSize: fontFactor, // font size between 10px  and 25px
           formatter: displayValues[i],
         },
       })),
@@ -387,6 +396,7 @@ const createBarSeries = ({
         {
           type: 'bar',
           data: gradients,
+          animation: false,
           ...tooltipFormatter(),
         },
       ];
@@ -406,6 +416,7 @@ const createBarSeries = ({
           itemStyle: {
             color: allThresholds[i].color,
           },
+          animation: false,
           ...tooltipFormatter(),
           data: values.map((v) => Math.max(Math.min(v, upper) - lower, 0)),
         });
@@ -423,6 +434,7 @@ const createBarSeries = ({
       return [
         {
           type: 'bar',
+          animation: false,
           data: values.map((value) => {
             const applicableThresholds = allThresholds.filter((t) => t.value <= value);
             const color =
@@ -613,10 +625,17 @@ const getAxesStyleConfig = (
   };
 };
 
-export const assembleBarGaugeSpec = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
+export const assembleBarGaugeSpec = ({
+  containerSize,
+}: {
+  containerSize?: { width: number; height: number };
+}) => <T extends BaseChartStyle>(state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series } = state;
+
+  const containerFactor =
+    containerSize?.height && containerSize?.width
+      ? Math.min(containerSize?.height, containerSize?.width)
+      : 400;
 
   const spec = {
     ...baseConfig,
@@ -624,7 +643,7 @@ export const assembleBarGaugeSpec = <T extends BaseChartStyle>(
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     series,
-    grid: { top: 50, right: 30, bottom: 40, left: 30 },
+    grid: { top: containerFactor / 10, right: 30, bottom: 40, left: 30 },
   };
 
   return { ...state, spec };
