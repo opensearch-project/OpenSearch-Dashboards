@@ -51,3 +51,27 @@ export function attachPPLValidationContext(
     modelChangeSubscription.dispose();
   };
 }
+
+export function attachPPLGrammarRefresh(
+  editor: monaco.editor.IStandaloneCodeEditor,
+  getContext: () => PPLValidationContext,
+  subscribeToGrammarUpdates: (
+    listener: (event: { dataSourceId?: string; grammarHash: string }) => void
+  ) => () => void,
+  revalidateModel: (model: monaco.editor.ITextModel) => Promise<void> | void
+): () => void {
+  return subscribeToGrammarUpdates((event) => {
+    const model = editor.getModel();
+    const context = getContext();
+
+    if (!model || !context.useRuntimeGrammar) {
+      return;
+    }
+
+    if ((context.dataSourceId ?? undefined) !== event.dataSourceId) {
+      return;
+    }
+
+    void revalidateModel(model);
+  });
+}
