@@ -164,22 +164,34 @@ describe('ChatMessages', () => {
       expect(queryByTestId('message-row')).toBeNull();
     });
 
-    it('should render loading message for empty streaming assistant message', () => {
-      const timeline: Message[] = [{ id: '1', role: 'assistant', content: '' }];
+    it('should render loading message when streaming without startResponse', () => {
+      const timeline: Message[] = [{ id: '1', role: 'user', content: 'Hello' }];
 
       const { getByText } = render(
-        <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+        <ChatMessages
+          {...defaultProps}
+          timeline={timeline}
+          isStreaming={true}
+          startResponse={false}
+        />
       );
 
       expect(getByText('Thinking...')).toBeTruthy();
     });
 
-    it('should render loading message for messages with loading- prefix', () => {
-      const timeline: Message[] = [{ id: 'loading-123', role: 'assistant', content: '' }];
+    it('should not render loading message when startResponse is true', () => {
+      const timeline: Message[] = [{ id: '1', role: 'user', content: 'Hello' }];
 
-      const { getByText } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { queryByText } = render(
+        <ChatMessages
+          {...defaultProps}
+          timeline={timeline}
+          isStreaming={true}
+          startResponse={true}
+        />
+      );
 
-      expect(getByText('Thinking...')).toBeTruthy();
+      expect(queryByText('Thinking...')).toBeNull();
     });
   });
 
