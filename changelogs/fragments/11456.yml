@@ -1,0 +1,2 @@
+fix:
+- Fix open link in new tab from table field ([#11456](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11456))
