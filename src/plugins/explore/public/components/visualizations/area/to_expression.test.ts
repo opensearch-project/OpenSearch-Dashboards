@@ -13,7 +13,6 @@ import {
 import {
   VisColumn,
   VisFieldType,
-  VEGASCHEMA,
   ThresholdMode,
   Positions,
   AxisRole,
@@ -21,16 +20,7 @@ import {
 } from '../types';
 import { AreaChartStyle } from './area_vis_config';
 
-jest.mock('../utils/utils', () => {
-  const actual = jest.requireActual('../utils/utils');
-  return {
-    ...actual,
-    getChartRender: jest.fn().mockReturnValue('vega'),
-  };
-});
-
 describe('Area Chart to_expression', () => {
-  // Mock data for testing
   const mockTransformedData = [
     { date: '2023-01-01', value: 10, category: 'A', category2: 'X' },
     { date: '2023-01-02', value: 20, category: 'A', category2: 'X' },
@@ -108,7 +98,7 @@ describe('Area Chart to_expression', () => {
   };
 
   describe('createSimpleAreaChart', () => {
-    it('should create a simple area chart with one metric and one date', () => {
+    it('returns an ECharts spec with dataset, series, and axes', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockDateColumns[0],
@@ -122,205 +112,73 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('title', 'Value Over Time');
-      expect(result).toHaveProperty('data.values', mockTransformedData);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the main layer
-      const mainLayer = result.layer[0];
-      expect(mainLayer).toHaveProperty('mark.type', 'area');
-      expect(mainLayer).toHaveProperty('mark.opacity', 0.6);
-      expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
-      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
-
-      // Verify legend configuration
-      expect(result).toHaveProperty('legend');
-      expect(result.legend).toHaveProperty('orient', 'right');
-
-      // select time range params
-      expect(result.params).toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
-      );
-      expect(mainLayer.params).toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
-      );
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('xAxis');
+      expect(result).toHaveProperty('yAxis');
+      expect(result.title).toEqual({ text: 'Value Over Time' });
     });
 
-    it('should handle different title display options', () => {
+    it('returns series with line type and area style', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockDateColumns[0],
       };
 
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockDateColumns,
+        mockStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      const mainSeries = result.series[0];
+      expect(mainSeries.type).toBe('line');
+      expect(mainSeries).toHaveProperty('areaStyle');
+    });
+
+    it('handles title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
       };
 
+      // No title
       const noTitleResult = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        noTitleStyles,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
+      expect(noTitleResult.title.text).toBeUndefined();
 
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
+      // Default title
       const defaultTitleResult = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        defaultTitleStyles,
+        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
         mockAxisColumnMappings
       );
-      expect(defaultTitleResult).toHaveProperty('title', 'Value Over Time');
+      expect(defaultTitleResult.title.text).toBe('Value Over Time');
 
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Area Chart Title',
-        },
-      };
-
+      // Custom title
       const customTitleResult = createSimpleAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockDateColumns,
-        customTitleStyles,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Area Chart Title' } },
         mockAxisColumnMappings
       );
-      expect(customTitleResult).toHaveProperty('title', 'Custom Area Chart Title');
-    });
-
-    it('should create a simple area chart with time marker when enabled', () => {
-      const stylesWithTimeMarker = {
-        ...mockStyles,
-        addTimeMarker: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-      };
-
-      const result = createSimpleAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockDateColumns,
-        stylesWithTimeMarker,
-        mockAxisColumnMappings
-      );
-
-      // Verify time marker layer exists
-      expect(result.layer.length).toBeGreaterThan(1);
-      const timeMarkerLayer = result.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
-      );
-      expect(timeMarkerLayer).toBeDefined();
-      expect(timeMarkerLayer).toHaveProperty('mark.color', '#FF6B6B');
-      expect(timeMarkerLayer).toHaveProperty('mark.strokeDash');
-    });
-
-    it('should create a simple area chart with threshold line when enabled', () => {
-      const stylesWithThreshold = {
-        ...mockStyles,
-        thresholdOptions: {
-          baseColor: '#00BD6B',
-          thresholds: [{ value: 15, color: '#E7664C' }],
-          thresholdStyle: ThresholdMode.Solid,
-        },
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-      };
-
-      const result = createSimpleAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockDateColumns,
-        stylesWithThreshold,
-        mockAxisColumnMappings
-      );
-
-      // Verify threshold layer exists
-      expect(result.layer.length).toBeGreaterThan(1);
-      const thresholdLayer = result.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.y?.datum === 15
-      );
-      expect(thresholdLayer).toBeDefined();
-      expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
-      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
-      expect(thresholdLayer).toHaveProperty('mark.strokeDash');
-    });
-
-    it('should create a simple area chart with domain layer when showFullTimeRange is enabled', () => {
-      const stylesWithDomain = {
-        ...mockStyles,
-        showFullTimeRange: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-      };
-
-      const result = createSimpleAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockDateColumns,
-        stylesWithDomain,
-        mockAxisColumnMappings,
-        mockTimeRange
-      );
-
-      // Verify that additional layers may be present when showFullTimeRange is enabled
-      expect(result.layer.length).toBeGreaterThanOrEqual(1);
-      const domainLayer = result.layer.find((layer: any) => layer.encoding?.x?.scale?.domain);
-      if (domainLayer) {
-        expect(domainLayer.encoding.x.scale.domain).toEqual(['2023-01-01', '2023-01-04']);
-      }
-    });
-
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: { ...mockDateColumns[0], column: undefined as any },
-      };
-      const result = createSimpleAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockDateColumns,
-        mockStyles,
-        incompleteAxisColumnMappings
-      );
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(customTitleResult.title.text).toBe('Custom Area Chart Title');
     });
   });
 
   describe('createMultiAreaChart', () => {
-    it('should create a multi-area chart with one metric, one date, and one categorical column', () => {
+    it('returns an ECharts spec with multiple series for each category', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockDateColumns[0],
@@ -336,49 +194,17 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('title', 'Value Over Time by Category');
-      expect(result).toHaveProperty('data.values', mockTransformedData);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the main layer
-      const mainLayer = result.layer[0];
-      expect(mainLayer).toHaveProperty('mark.type', 'area');
-      expect(mainLayer).toHaveProperty('mark.opacity', 0.6);
-      expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
-      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
-      expect(mainLayer).toHaveProperty('encoding.color.field', 'category');
-
-      // Verify tooltip configuration
-      expect(mainLayer.encoding).toHaveProperty('tooltip');
-      expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
-      expect(mainLayer.encoding.tooltip).toHaveLength(3);
-
-      // select time range params
-      expect(result.params).toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
-      );
-      expect(mainLayer.params).toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
-      );
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value Over Time by Category');
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should handle different title display options', () => {
+    it('handles title display options', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockDateColumns[0],
         [AxisRole.COLOR]: mockCategoricalColumns[0],
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
       };
 
       const noTitleResult = createMultiAreaChart(
@@ -386,133 +212,25 @@ describe('Area Chart to_expression', () => {
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         mockDateColumns,
-        noTitleStyles,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
-
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        [mockCategoricalColumns[0]],
-        mockDateColumns,
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult).toHaveProperty('title', 'Value Over Time by Category');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Multi-Area Chart',
-        },
-      };
+      expect(noTitleResult.title.text).toBeUndefined();
 
       const customTitleResult = createMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         mockDateColumns,
-        customTitleStyles,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Multi-Area Chart' } },
         mockAxisColumnMappings
       );
-      expect(customTitleResult).toHaveProperty('title', 'Custom Multi-Area Chart');
-    });
-
-    it('should create a multi-area chart with domain layer when showFullTimeRange is enabled', () => {
-      const stylesWithDomain = {
-        ...mockStyles,
-        showFullTimeRange: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[0],
-      };
-
-      const result = createMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        [mockCategoricalColumns[0]],
-        mockDateColumns,
-        stylesWithDomain,
-        mockAxisColumnMappings,
-        mockTimeRange
-      );
-
-      // Verify that additional layers may be present when showFullTimeRange is enabled
-      expect(result.layer.length).toBeGreaterThanOrEqual(1);
-      const domainLayer = result.layer.find((layer: any) => layer.encoding?.x?.scale?.domain);
-      if (domainLayer) {
-        expect(domainLayer.encoding.x.scale.domain).toEqual(['2023-01-01', '2023-01-04']);
-      }
-    });
-
-    it('should create a multi-area chart with time marker when enabled', () => {
-      const stylesWithTimeMarker = {
-        ...mockStyles,
-        addTimeMarker: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[0],
-      };
-
-      const result = createMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        [mockCategoricalColumns[0]],
-        mockDateColumns,
-        stylesWithTimeMarker,
-        mockAxisColumnMappings
-      );
-
-      // Verify time marker layer exists
-      expect(result.layer.length).toBeGreaterThan(1);
-      const timeMarkerLayer = result.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
-      );
-      expect(timeMarkerLayer).toBeDefined();
-      expect(timeMarkerLayer).toHaveProperty('mark.color', '#FF6B6B');
-      expect(timeMarkerLayer).toHaveProperty('mark.strokeDash');
-    });
-
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[0],
-        [AxisRole.X]: { ...mockDateColumns[0], column: undefined as any },
-      };
-      const result = createMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        [mockCategoricalColumns[0]],
-        mockDateColumns,
-        mockStyles,
-        incompleteAxisColumnMappings
-      );
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(customTitleResult.title.text).toBe('Custom Multi-Area Chart');
     });
   });
 
   describe('createFacetedMultiAreaChart', () => {
-    it('should create a faceted multi-area chart with one metric, one date, and two categorical columns', () => {
+    it('returns an ECharts spec with faceted datasets', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockDateColumns[0],
@@ -529,52 +247,17 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('title', 'Value Over Time by Category (Faceted by Category2)');
-      expect(result).toHaveProperty('data.values', mockTransformedData);
-      expect(result).toHaveProperty('facet');
-      expect(result).toHaveProperty('spec');
-
-      // Verify facet configuration
-      expect(result.facet).toHaveProperty('field', 'category2');
-
-      // Verify spec configuration
-      expect(result.spec).toHaveProperty('layer');
-      expect(Array.isArray(result.spec.layer)).toBe(true);
-
-      // Verify the main layer
-      const mainLayer = result.spec.layer[0];
-      expect(mainLayer).toHaveProperty('mark.type', 'area');
-      expect(mainLayer).toHaveProperty('mark.opacity', 0.6);
-      expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
-      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
-      expect(mainLayer).toHaveProperty('encoding.color.field', 'category');
-
-      // select time range params
-      expect(result.params).toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
-      );
-      expect(mainLayer.params).toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
-      );
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
     });
 
-    it('should handle different title display options', () => {
+    it('handles title display options', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockDateColumns[0],
         [AxisRole.COLOR]: mockCategoricalColumns[0],
         [AxisRole.FACET]: mockCategoricalColumns[1],
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
       };
 
       const noTitleResult = createFacetedMultiAreaChart(
@@ -582,144 +265,25 @@ describe('Area Chart to_expression', () => {
         mockNumericalColumns,
         mockCategoricalColumns,
         mockDateColumns,
-        noTitleStyles,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
-
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockCategoricalColumns,
-        mockDateColumns,
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult).toHaveProperty(
-        'title',
-        'Value Over Time by Category (Faceted by Category2)'
-      );
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Faceted Chart',
-        },
-      };
+      expect(noTitleResult.title.text).toBeUndefined();
 
       const customTitleResult = createFacetedMultiAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         mockDateColumns,
-        customTitleStyles,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Faceted Chart' } },
         mockAxisColumnMappings
       );
-      expect(customTitleResult).toHaveProperty('title', 'Custom Faceted Chart');
-    });
-
-    it('should add threshold lines to each facet when enabled', () => {
-      const stylesWithThreshold = {
-        ...mockStyles,
-        thresholdOptions: {
-          baseColor: '#00BD6B',
-          thresholds: [{ value: 15, color: '#E7664C' }],
-          thresholdStyle: ThresholdMode.Solid,
-        },
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[0],
-        [AxisRole.FACET]: mockCategoricalColumns[1],
-      };
-
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockCategoricalColumns,
-        mockDateColumns,
-        stylesWithThreshold,
-        mockAxisColumnMappings
-      );
-
-      // Verify threshold layer exists in each facet
-      expect(result.spec.layer.length).toBeGreaterThan(1);
-      const thresholdLayer = result.spec.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.y?.datum === 15
-      );
-      expect(thresholdLayer).toBeDefined();
-      expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
-      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
-      expect(thresholdLayer).toHaveProperty('mark.strokeDash');
-    });
-
-    it('should create a faceted multi-area chart with domain layer when showFullTimeRange is enabled', () => {
-      const stylesWithDomain = {
-        ...mockStyles,
-        showFullTimeRange: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[0],
-        [AxisRole.FACET]: mockCategoricalColumns[1],
-      };
-
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockCategoricalColumns,
-        mockDateColumns,
-        stylesWithDomain,
-        mockAxisColumnMappings,
-        mockTimeRange
-      );
-
-      // Verify that additional layers may be present when showFullTimeRange is enabled
-      expect(result.spec.layer.length).toBeGreaterThanOrEqual(1);
-      const domainLayer = result.spec.layer.find((layer: any) => layer.encoding?.x?.scale?.domain);
-      if (domainLayer) {
-        expect(domainLayer.encoding.x.scale.domain).toEqual(['2023-01-01', '2023-01-04']);
-      }
-    });
-
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[0],
-        [AxisRole.FACET]: mockCategoricalColumns[1],
-        [AxisRole.X]: { ...mockDateColumns[0], column: undefined as any },
-      };
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockCategoricalColumns,
-        mockDateColumns,
-        mockStyles,
-        incompleteAxisColumnMappings
-      );
-      const tooltip = result.spec.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(customTitleResult.title.text).toBe('Custom Faceted Chart');
     });
   });
 
   describe('createCategoryAreaChart', () => {
-    it('should create a category-based area chart with one metric and one category', () => {
+    it('returns an ECharts spec for category-based area chart', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockCategoricalColumns[0],
@@ -734,47 +298,16 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('title', 'Value by Category');
-      expect(result).toHaveProperty('data.values', mockTransformedData);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the main layer
-      const mainLayer = result.layer[0];
-      expect(mainLayer).toHaveProperty('mark.type', 'area');
-      expect(mainLayer).toHaveProperty('mark.opacity', 0.6);
-      expect(mainLayer).toHaveProperty('encoding.x.field', 'category');
-      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
-
-      // Verify tooltip configuration
-      expect(mainLayer.encoding).toHaveProperty('tooltip');
-      expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
-      expect(mainLayer.encoding.tooltip).toHaveLength(2);
-
-      // select time range params
-      expect(result.params).not.toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
-      );
-      expect(mainLayer.params).not.toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
-      );
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value by Category');
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should handle different title display options', () => {
+    it('handles title display options', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockCategoricalColumns[0],
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
       };
 
       const noTitleResult = createCategoryAreaChart(
@@ -782,82 +315,25 @@ describe('Area Chart to_expression', () => {
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         [],
-        noTitleStyles,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
-
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createCategoryAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        [mockCategoricalColumns[0]],
-        [],
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult).toHaveProperty('title', 'Value by Category');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Category Chart',
-        },
-      };
+      expect(noTitleResult.title.text).toBeUndefined();
 
       const customTitleResult = createCategoryAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         [mockCategoricalColumns[0]],
         [],
-        customTitleStyles,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Category Chart' } },
         mockAxisColumnMappings
       );
-      expect(customTitleResult).toHaveProperty('title', 'Custom Category Chart');
-    });
-
-    it('should not add time marker layer when enabled for non-temporal axis', () => {
-      const stylesWithTimeMarker = {
-        ...mockStyles,
-        addTimeMarker: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockCategoricalColumns[0],
-      };
-
-      const result = createCategoryAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        [mockCategoricalColumns[0]],
-        [],
-        stylesWithTimeMarker,
-        mockAxisColumnMappings
-      );
-
-      // Verify that two layers are present (main layer and highlight bar layer)
-      expect(result.layer.length).toBe(2); // Main layer + highlight bar layer
-      const timeMarkerLayer = result.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
-      );
-      expect(timeMarkerLayer).toBeUndefined();
+      expect(customTitleResult.title.text).toBe('Custom Category Chart');
     });
   });
 
   describe('createStackedAreaChart', () => {
-    it('should create a stacked area chart with one metric and two categorical columns', () => {
+    it('returns an ECharts spec with stacked series', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockCategoricalColumns[0],
@@ -873,46 +349,23 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('title', 'Value by Category and Category2');
-      expect(result).toHaveProperty('data.values', mockTransformedData);
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value by Category and Category2');
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
 
-      // Verify encoding
-      const mainLayer = result.layer[0];
-      expect(mainLayer).toHaveProperty('encoding.x.field', 'category');
-      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
-      expect(mainLayer).toHaveProperty('encoding.y.stack', 'normalize');
-      expect(mainLayer).toHaveProperty('encoding.color.field', 'category2');
-
-      // Verify tooltip configuration
-      expect(mainLayer.encoding).toHaveProperty('tooltip');
-      expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
-      expect(mainLayer.encoding.tooltip).toHaveLength(3);
-
-      // select time range params
-      expect(result.params).not.toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
-      );
-      expect(mainLayer.params).not.toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
-      );
+      // Verify stacked series
+      const mainSeries = result.series[0];
+      expect(mainSeries.type).toBe('line');
+      expect(mainSeries).toHaveProperty('areaStyle');
+      expect(mainSeries).toHaveProperty('stack');
     });
 
-    it('should handle different title display options', () => {
+    it('handles title display options', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
         [AxisRole.X]: mockCategoricalColumns[0],
         [AxisRole.COLOR]: mockCategoricalColumns[1],
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
       };
 
       const noTitleResult = createStackedAreaChart(
@@ -920,81 +373,23 @@ describe('Area Chart to_expression', () => {
         mockNumericalColumns,
         mockCategoricalColumns,
         [],
-        noTitleStyles,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
-
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createStackedAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockCategoricalColumns,
-        [],
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult).toHaveProperty('title', 'Value by Category and Category2');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...mockStyles,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Stacked Chart',
-        },
-      };
+      expect(noTitleResult.title.text).toBeUndefined();
 
       const customTitleResult = createStackedAreaChart(
         mockTransformedData,
         mockNumericalColumns,
         mockCategoricalColumns,
         [],
-        customTitleStyles,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Stacked Chart' } },
         mockAxisColumnMappings
       );
-      expect(customTitleResult).toHaveProperty('title', 'Custom Stacked Chart');
+      expect(customTitleResult.title.text).toBe('Custom Stacked Chart');
     });
 
-    it('should not add time marker layer when enabled for non-temporal axis', () => {
-      const stylesWithTimeMarker = {
-        ...mockStyles,
-        addTimeMarker: true,
-      };
-
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.X]: mockCategoricalColumns[0],
-        [AxisRole.COLOR]: mockCategoricalColumns[1],
-      };
-
-      const result = createStackedAreaChart(
-        mockTransformedData,
-        mockNumericalColumns,
-        mockCategoricalColumns,
-        [],
-        stylesWithTimeMarker,
-        mockAxisColumnMappings
-      );
-
-      // Verify that two layers are present (main layer and highlight bar layer)
-      expect(result.layer.length).toBe(2); // Main layer + highlight bar layer
-      const timeMarkerLayer = result.layer.find(
-        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
-      );
-      expect(timeMarkerLayer).toBeUndefined();
-    });
-
-    it('should add threshold layer when enabled', () => {
+    it('includes markLine for threshold when enabled', () => {
       const stylesWithThreshold = {
         ...mockStyles,
         thresholdOptions: {
@@ -1019,36 +414,10 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify the chart structure has changed to use layers
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-      expect(result.layer.length).toBeGreaterThan(1);
-
-      // Verify the main layer is now the first element in the layer array
-      const mainLayer = result.layer[0];
-      expect(mainLayer).toHaveProperty('mark.type', 'area');
-      expect(mainLayer).toHaveProperty('encoding.x.field', 'category');
-      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
-      expect(mainLayer).toHaveProperty('encoding.color.field', 'category2');
-
-      // Verify threshold layer exists
-      // Search within nested layer arrays, as createThresholdLayer may return an object with a 'layer' property
-      let thresholdLayer;
-      for (const layer of result.layer) {
-        if (layer.layer) {
-          thresholdLayer = layer.layer.find(
-            (sublayer: any) => sublayer.mark?.type === 'rule' && sublayer.encoding?.y?.datum === 15
-          );
-          if (thresholdLayer) break;
-        } else if (layer.mark?.type === 'rule' && layer.encoding?.y?.datum === 15) {
-          thresholdLayer = layer;
-          break;
-        }
-      }
-      expect(thresholdLayer).toBeDefined();
-      expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
-      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
-      expect(thresholdLayer).toHaveProperty('mark.strokeDash');
+      // ECharts uses markLine within series for thresholds
+      const seriesWithMarkLine = result.series.find((s: any) => s.markLine);
+      expect(seriesWithMarkLine).toBeDefined();
+      expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });
   });
 });

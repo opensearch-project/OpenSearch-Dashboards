@@ -273,8 +273,6 @@ export interface ThresholdOptions {
   thresholdStyle?: ThresholdMode;
 }
 
-export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
-
 export type PercentageColor = 'standard' | 'inverted';
 
 export enum FilterOperator {
