@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Router, Route, Switch } from 'react-router-dom';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -21,6 +21,7 @@ import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
+import { useCurrentExploreId } from './utils/hooks/use_current_explore_id';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -56,6 +57,68 @@ const ExplorePageContextProvider: React.FC<{
   return <>{children}</>;
 };
 
+// Main component that handles saved search redirects
+const ExploreMainRoute = (props: { flavor: ExploreFlavor } & ExploreComponentProps) => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const exploreId = useCurrentExploreId();
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isChecking, setIsChecking] = useState(!!exploreId); // Only check if there's an ID
+
+  // Check saved object type and redirect if it's a classic discover saved search
+  useEffect(() => {
+    const checkAndRedirect = async () => {
+      if (!exploreId) {
+        setShouldRender(true);
+        setIsChecking(false);
+        return;
+      }
+
+      try {
+        // Try to load as explore saved object
+        const savedObject = await services.getSavedExploreById(exploreId);
+
+        // Check if this is actually a saved search (old discover format)
+        if (savedObject.getOpenSearchType() === 'search') {
+          // Redirect old saved search to classic discover
+          services.core.application.navigateToApp('discover', {
+            path: `#/view/${exploreId}`,
+            replace: true,
+          });
+          return; // Don't render the page
+        }
+
+        // It's a valid explore object, render the page
+        setShouldRender(true);
+      } catch (error) {
+        // If error loading, might be a saved search type, try redirecting to discover
+        // This handles the case where getSavedExploreById only looks for 'explore' type
+        services.core.application.navigateToApp('discover', {
+          path: `#/view/${exploreId}`,
+          replace: true,
+        });
+        return; // Don't render the page
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAndRedirect();
+  }, [exploreId, services]);
+
+  // Show loading while checking, don't render page until we confirm it's safe
+  if (isChecking) {
+    return <div>Checking saved object type...</div>;
+  }
+
+  // If we're not supposed to render (redirect happened), return null
+  if (!shouldRender && exploreId) {
+    return null;
+  }
+
+  // Render the appropriate flavor
+  return renderExploreFlavor(props.flavor, props);
+};
+
 const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps) => {
   switch (flavor) {
     case ExploreFlavor.Logs:
@@ -71,11 +134,6 @@ const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps
       return `Unexpected explore flavor id: ${invalidId}`;
   }
 };
-
-// View route for saved searches
-const ViewRoute = (props: ExploreComponentProps) => (
-  <LogsPage setHeaderActionMenu={props.setHeaderActionMenu} />
-);
 
 export const renderApp = (
   { element, history, setHeaderActionMenu }: AppMountParameters,
@@ -99,12 +157,6 @@ export const renderApp = (
               <services.core.i18n.Context>
                 <ExplorePageContextProvider>
                   <Switch>
-                    {/* View route for saved searches */}
-                    {/* TODO: Do we need this? We might not need to, please revisit */}
-                    <Route path="/view/:id" exact>
-                      <ViewRoute {...mainRouteProps} />
-                    </Route>
-
                     {flavor === ExploreFlavor.Traces && (
                       <Route path="/traceDetails" exact={false}>
                         <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
@@ -112,7 +164,7 @@ export const renderApp = (
                     )}
 
                     <Route path={[`/`]} exact={false}>
-                      {renderExploreFlavor(flavor, mainRouteProps)}
+                      <ExploreMainRoute flavor={flavor} {...mainRouteProps} />
                     </Route>
                   </Switch>
                 </ExplorePageContextProvider>

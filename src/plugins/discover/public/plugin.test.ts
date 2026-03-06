@@ -31,6 +31,6 @@ describe('DiscoverPlugin', () => {
         },
       })
     ).not.toThrow();
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(5);
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(4);
   });
 });
