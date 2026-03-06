@@ -78,6 +78,11 @@ function buildRuleNameToIndex(parserRuleNames: string[]): Map<string, number> {
  * a different PPL grammar version. Uses LRU eviction to bound memory.
  */
 class PPLGrammarCache {
+  /** Subscribers notified when a grammar bundle is successfully cached */
+  private grammarUpdateListeners: Set<
+    (event: { dataSourceId?: string; grammarHash: string }) => void
+  > = new Set();
+
   /** Grammar cache: datasourceId → deserialized grammar */
   private grammarCache: Map<string, CachedGrammar> = new Map();
 
@@ -287,6 +292,15 @@ class PPLGrammarCache {
     this.failedVersionFetches.clear();
   }
 
+  subscribeToGrammarUpdates(
+    listener: (event: { dataSourceId?: string; grammarHash: string }) => void
+  ): () => void {
+    this.grammarUpdateListeners.add(listener);
+    return () => {
+      this.grammarUpdateListeners.delete(listener);
+    };
+  }
+
   private async warmUpGrammarForDatasource(
     http: HttpSetup,
     savedObjectsClient: SavedObjectsClientContract | undefined,
@@ -413,6 +427,7 @@ class PPLGrammarCache {
       }
 
       this.grammarCache.set(cacheKey, entry);
+      this.notifyGrammarUpdate(cacheKey, entry);
       return entry;
     } catch (error) {
       // Fetch or deserialization failed — caller should fall back to compiled grammar
@@ -434,6 +449,16 @@ class PPLGrammarCache {
 
     if (oldestKey) {
       this.grammarCache.delete(oldestKey);
+    }
+  }
+
+  private notifyGrammarUpdate(cacheKey: string, entry: CachedGrammar): void {
+    const dataSourceId = cacheKey === DEFAULT_CACHE_KEY ? undefined : cacheKey;
+    for (const listener of this.grammarUpdateListeners) {
+      listener({
+        dataSourceId,
+        grammarHash: entry.grammarHash,
+      });
     }
   }
 }
