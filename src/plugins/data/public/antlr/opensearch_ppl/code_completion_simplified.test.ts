@@ -951,6 +951,49 @@ describe('ppl code_completion', () => {
         }
       });
 
+      it('should filter runtime punctuation-noise tokens while keeping operator tokens', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammar = buildRuntimeGrammar();
+        const dotToken = grammar.runtimeSymbolicNameToTokenType.get('DOT');
+        const singleQuoteToken = grammar.runtimeSymbolicNameToTokenType.get('SINGLE_QUOTE');
+        const equalToken = grammar.runtimeSymbolicNameToTokenType.get('EQUAL');
+        const leftParenToken = grammar.runtimeSymbolicNameToTokenType.get('LT_PRTHS');
+        const rightParenToken = grammar.runtimeSymbolicNameToTokenType.get('RT_PRTHS');
+
+        if (
+          dotToken === undefined ||
+          singleQuoteToken === undefined ||
+          equalToken === undefined ||
+          leftParenToken === undefined ||
+          rightParenToken === undefined
+        ) {
+          throw new Error('Required token types are not in test grammar.');
+        }
+
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([
+            [dotToken, []],
+            [singleQuoteToken, []],
+            [equalToken, []],
+            [leftParenToken, []],
+            [rightParenToken, []],
+          ]),
+          rules: new Map<number, { startTokenIndex: number; ruleList: number[] }>(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | where ',
+          runtimeIndexPattern
+        );
+
+        expect(result.some((s) => s.text === '.')).toBeFalsy();
+        expect(result.some((s) => s.text === "'")).toBeFalsy();
+        expect(result.some((s) => s.text === '=')).toBeTruthy();
+        expect(result.some((s) => s.text === '(')).toBeFalsy();
+        expect(result.some((s) => s.text === ')')).toBeFalsy();
+      });
+
       it('should fall back to compiled suggestions when runtime grammar cache is missing', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(null);
