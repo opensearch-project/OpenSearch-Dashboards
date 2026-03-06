@@ -3,39 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
-import {
-  ReactFlow,
-  Background,
-  MiniMap,
-  useNodesState,
-  useEdgesState,
-  BackgroundVariant,
-  Node,
-  ReactFlowInstance,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import {
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { i18n } from '@osd/i18n';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { CelestialMap, AgentCardNode } from '@osd/apm-topology';
+import type { NodeProps } from '@xyflow/react';
 
 import { TraceRow } from '../hooks/use_agent_traces';
-import {
-  categorizeSpanTree,
-  CategorizedSpan,
-  getCategoryMeta,
-  SpanCategory,
-} from '../../../../services/span_categorization';
+import { categorizeSpanTree, CategorizedSpan } from '../../../../services/span_categorization';
 import { spansToFlow } from '../../../../services/flow_transform';
-import { nodeTypes } from './node_types';
 import './trace_flow_view.scss';
 
 interface TraceFlowViewProps {
@@ -47,94 +23,109 @@ interface TraceFlowViewProps {
   loadError?: string;
 }
 
-const minimapNodeColor = (node: Node): string => {
-  const data = node.data as Record<string, unknown> | undefined;
-  const span = data?.span as { category?: SpanCategory } | undefined;
-  const category = span?.category;
-  return getCategoryMeta(category || 'OTHER').color;
+// Context for passing span selection handler to custom node components
+interface TraceFlowContextValue {
+  onSelectSpan: (span: TraceRow | null) => void;
+  spanMap: Map<string, CategorizedSpan>;
+}
+
+const TraceFlowContext = createContext<TraceFlowContextValue>({
+  onSelectSpan: () => {},
+  spanMap: new Map(),
+});
+
+/**
+ * Custom wrapper around AgentCardNode that intercepts clicks to:
+ * 1. Call onSelectSpan with the corresponding span
+ * 2. Prevent CelestialMap's default viewport reset behavior via stopPropagation
+ */
+const TraceAgentCardNode = (props: NodeProps<any>) => {
+  const { onSelectSpan, spanMap } = useContext(TraceFlowContext);
+
+  const selectSpan = useCallback(() => {
+    const span = spanMap.get(props.data.id);
+    if (span) {
+      onSelectSpan(span);
+    }
+  }, [onSelectSpan, spanMap, props.data.id]);
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      selectSpan();
+    },
+    [selectSpan]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.stopPropagation();
+        selectSpan();
+      }
+    },
+    [selectSpan]
+  );
+
+  return (
+    <div onClick={handleClick} onKeyDown={handleKeyDown} role="presentation">
+      <AgentCardNode {...props} />
+    </div>
+  );
 };
+
+const NODE_TYPES = { agentCard: TraceAgentCardNode };
 
 export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
   spanTree,
-  totalDuration,
+  totalDuration: _totalDuration,
   selectedSpan: _selectedSpan,
   onSelectSpan,
   isLoading,
   loadError,
 }) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const reactFlowInstance = useRef<ReactFlowInstance | null>(null);
-  const [showMinimap, setShowMinimap] = useState(true);
-
-  // Categorize spans and convert to flow
+  // Categorize spans and build CelestialMap data
   const categorizedTree = useMemo(() => categorizeSpanTree(spanTree), [spanTree]);
 
-  // Transform to React Flow nodes/edges
-  useEffect(() => {
+  const { mapData, spanMap } = useMemo(() => {
     if (categorizedTree.length === 0) {
-      setNodes([]);
-      setEdges([]);
-      return;
+      return {
+        mapData: { root: { nodes: [] as any[], edges: [] as any[] } },
+        spanMap: new Map<string, CategorizedSpan>(),
+      };
     }
 
-    const { nodes: flowNodes, edges: flowEdges } = spansToFlow(categorizedTree, totalDuration, {
-      direction: 'TB',
-    });
+    const { nodes, edges } = spansToFlow(categorizedTree);
+    const map = new Map<string, CategorizedSpan>();
 
-    setNodes(flowNodes);
-    setEdges(flowEdges);
-
-    // Fit view after nodes are set
-    setTimeout(() => {
-      if (reactFlowInstance.current) {
-        reactFlowInstance.current.fitView({ padding: 0.1, maxZoom: 1 });
+    const collectSpans = (spans: CategorizedSpan[]) => {
+      for (const span of spans) {
+        map.set(span.spanId || span.id, span);
+        if (span.children && span.children.length > 0) {
+          collectSpans(span.children as CategorizedSpan[]);
+        }
       }
-    }, 100);
-  }, [categorizedTree, totalDuration, setNodes, setEdges]);
+    };
+    collectSpans(categorizedTree);
 
-  // Handle React Flow initialization
-  const onInit = useCallback((instance: ReactFlowInstance) => {
-    reactFlowInstance.current = instance;
-    setTimeout(() => {
-      instance.fitView({ padding: 0.1, maxZoom: 1 });
-    }, 100);
-  }, []);
+    return { mapData: { root: { nodes, edges } }, spanMap: map };
+  }, [categorizedTree]);
 
-  // Handle node click
-  const onNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      const data = node.data as { span?: CategorizedSpan } | undefined;
-      if (data?.span) {
-        onSelectSpan(data.span);
+  const contextValue = useMemo<TraceFlowContextValue>(() => ({ onSelectSpan, spanMap }), [
+    onSelectSpan,
+    spanMap,
+  ]);
+
+  // Deselect when clicking the ReactFlow background pane
+  const handleContainerClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.react-flow__pane')) {
+        onSelectSpan(null);
       }
     },
     [onSelectSpan]
   );
-
-  // Handle background click (deselect)
-  const onPaneClick = useCallback(() => {
-    onSelectSpan(null);
-  }, [onSelectSpan]);
-
-  // Zoom controls
-  const handleZoomIn = useCallback(() => {
-    reactFlowInstance.current?.zoomIn();
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    reactFlowInstance.current?.zoomOut();
-  }, []);
-
-  // Fit view
-  const handleFitView = useCallback(() => {
-    reactFlowInstance.current?.fitView({ padding: 0.1, maxZoom: 1 });
-  }, []);
-
-  // Minimap toggle
-  const handleToggleMinimap = useCallback(() => {
-    setShowMinimap((prev) => !prev);
-  }, []);
 
   if (isLoading) {
     return (
@@ -185,103 +176,22 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
   }
 
   return (
-    <div className="agentTracesFlow__container">
-      {/* Floating controls */}
-      <div className="agentTracesFlow__controls">
-        <EuiPanel paddingSize="none" className="agentTracesFlow__controlButton">
-          <EuiButtonIcon
-            size="s"
-            iconType="plusInCircle"
-            onClick={handleZoomIn}
-            aria-label={i18n.translate('agentTraces.flowView.zoomIn', {
-              defaultMessage: 'Zoom in',
-            })}
-            display="base"
-          />
-        </EuiPanel>
-        <EuiPanel paddingSize="none" className="agentTracesFlow__controlButton">
-          <EuiButtonIcon
-            size="s"
-            iconType="minusInCircle"
-            onClick={handleZoomOut}
-            aria-label={i18n.translate('agentTraces.flowView.zoomOut', {
-              defaultMessage: 'Zoom out',
-            })}
-            display="base"
-          />
-        </EuiPanel>
-        <EuiPanel paddingSize="none" className="agentTracesFlow__controlButton">
-          <EuiButtonIcon
-            size="s"
-            iconType="expand"
-            onClick={handleFitView}
-            aria-label={i18n.translate('agentTraces.flowView.fitView', {
-              defaultMessage: 'Fit view',
-            })}
-            display="base"
-          />
-        </EuiPanel>
-        <EuiPanel paddingSize="none" className="agentTracesFlow__controlButton">
-          <EuiButtonIcon
-            size="s"
-            iconType="mapMarker"
-            onClick={handleToggleMinimap}
-            aria-label={
-              showMinimap
-                ? i18n.translate('agentTraces.flowView.hideMinimap', {
-                    defaultMessage: 'Hide minimap',
-                  })
-                : i18n.translate('agentTraces.flowView.showMinimap', {
-                    defaultMessage: 'Show minimap',
-                  })
-            }
-            display="base"
-            color={showMinimap ? 'primary' : 'text'}
-          />
-        </EuiPanel>
-      </div>
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
-        onPaneClick={onPaneClick}
-        onInit={onInit}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{
-          padding: 0.1,
-          minZoom: 0.1,
-          maxZoom: 1,
-        }}
-        minZoom={0.1}
-        maxZoom={2}
-        defaultEdgeOptions={{
-          type: 'smoothstep',
-        }}
-        proOptions={{ hideAttribution: true }}
+    <TraceFlowContext.Provider value={contextValue}>
+      <div
+        className="agentTracesFlow__container"
+        role="presentation"
+        onClick={handleContainerClick}
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={16}
-          size={1}
-          color={euiThemeVars.euiColorLightShade}
+        <CelestialMap
+          map={mapData}
+          nodeTypes={NODE_TYPES}
+          layoutOptions={{ direction: 'TB' }}
+          legend={false}
+          breadcrumbs={[]}
+          showMinimap
+          topN={Infinity}
         />
-        {showMinimap && (
-          <MiniMap
-            nodeColor={minimapNodeColor}
-            maskColor={euiThemeVars.euiColorLightestShade}
-            style={{
-              backgroundColor: euiThemeVars.euiColorEmptyShade,
-              border: `1px solid ${euiThemeVars.euiColorLightShade}`,
-            }}
-            pannable
-            zoomable
-          />
-        )}
-      </ReactFlow>
-    </div>
+      </div>
+    </TraceFlowContext.Provider>
   );
 };
