@@ -25,9 +25,6 @@ interface ExploreEmbeddableProps {
 
 export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddableProps) => {
   const services = getServices();
-  const {
-    expressions: { ReactExpressionRenderer },
-  } = services;
 
   // Get docViewsRegistry for DataTable
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
@@ -118,22 +115,13 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       );
     }
 
-    if (searchProps.spec && !searchProps.spec.$schema) {
+    if (searchProps.spec) {
       return (
         <EchartsRender spec={searchProps.spec} onSelectTimeRange={searchProps.onSelectTimeRange} />
       );
     }
 
-    return (
-      <ReactExpressionRenderer
-        expression={searchProps.expression ?? ''}
-        searchContext={searchProps.searchContext}
-        key={JSON.stringify(searchProps.searchContext) + searchProps.expression}
-        onEvent={(e) => {
-          searchProps.onExpressionEvent?.(e);
-        }}
-      />
-    );
+    return null;
   };
 
   return (
