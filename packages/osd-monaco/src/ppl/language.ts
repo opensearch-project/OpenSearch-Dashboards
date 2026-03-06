@@ -176,6 +176,10 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
   }
 };
 
+export const revalidatePPLModel = async (model: monaco.editor.IModel) => {
+  await processSyntaxHighlighting(model);
+};
+
 /**
  * Set up PPL document range formatting provider
  */

@@ -33,6 +33,7 @@ export { XJsonLang } from './xjson';
 export {
   clearPPLValidationContext,
   PPLLang,
+  revalidatePPLModel,
   registerPPLValidationProvider,
   resolvePPLValidationResult,
   setPPLValidationContext,

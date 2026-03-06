@@ -4,7 +4,11 @@
  */
 
 import { clearPPLValidationContext, setPPLValidationContext } from '@osd/monaco';
-import { attachPPLValidationContext, syncPPLValidationContext } from './validation_context';
+import {
+  attachPPLGrammarRefresh,
+  attachPPLValidationContext,
+  syncPPLValidationContext,
+} from './validation_context';
 
 jest.mock('@osd/monaco', () => ({
   setPPLValidationContext: jest.fn(),
@@ -74,5 +78,39 @@ describe('query editor validation context', () => {
 
     expect(clearPPLValidationContext).toHaveBeenCalledWith(secondModel);
     expect(dispose).toHaveBeenCalled();
+  });
+
+  it('revalidates the current model when the matching datasource grammar becomes available', () => {
+    const model = {} as any;
+    const editor = {
+      getModel: jest.fn().mockReturnValue(model),
+    } as any;
+    const revalidate = jest.fn();
+    let listener: ((event: { dataSourceId?: string; grammarHash: string }) => void) | undefined;
+    const unsubscribe = jest.fn();
+    const subscribeToGrammarUpdates = jest.fn((cb) => {
+      listener = cb;
+      return unsubscribe;
+    });
+
+    const detach = attachPPLGrammarRefresh(
+      editor,
+      () => ({
+        useRuntimeGrammar: true,
+        dataSourceId: 'ds-1',
+        dataSourceVersion: '3.6.0',
+      }),
+      subscribeToGrammarUpdates,
+      revalidate
+    );
+
+    listener?.({ dataSourceId: 'ds-2', grammarHash: 'sha256:other' });
+    expect(revalidate).not.toHaveBeenCalled();
+
+    listener?.({ dataSourceId: 'ds-1', grammarHash: 'sha256:match' });
+    expect(revalidate).toHaveBeenCalledWith(model);
+
+    detach();
+    expect(unsubscribe).toHaveBeenCalled();
   });
 });

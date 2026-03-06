@@ -153,7 +153,9 @@ describe('ppl_grammar_cache', () => {
 
   it('should deserialize ATN with verification enabled', async () => {
     const verifyFlags: boolean[] = [];
-    (ATNDeserializer.prototype.deserialize as jest.Mock).mockImplementation(function (this: unknown) {
+    (ATNDeserializer.prototype.deserialize as jest.Mock).mockImplementation(function (
+      this: unknown
+    ) {
       const options = (this as {
         deserializationOptions?: {
           verifyATN?: boolean;
@@ -390,6 +392,29 @@ describe('ppl_grammar_cache', () => {
     expect(cached1?.grammarHash).toBe('sha256:cache-hit');
     expect(cached2?.grammarHash).toBe('sha256:cache-hit');
     expect(http.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('should notify listeners when a grammar bundle is cached', async () => {
+    const http = ({
+      get: jest.fn().mockResolvedValue(createBundle('sha256:notify')),
+    } as unknown) as HttpSetup;
+    const listener = jest.fn();
+    const unsubscribe = pplGrammarCache.subscribeToGrammarUpdates(listener);
+
+    pplGrammarCache.warmUp(http, undefined, 'ds-notify', '3.6.0');
+    await flushPromises();
+
+    expect(listener).toHaveBeenCalledWith({
+      dataSourceId: 'ds-notify',
+      grammarHash: 'sha256:notify',
+    });
+
+    unsubscribe();
+    pplGrammarCache.invalidate('ds-notify');
+    pplGrammarCache.warmUp(http, undefined, 'ds-notify', '3.6.0');
+    await flushPromises();
+
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 
   it('should clear caches and allow refetch', async () => {
