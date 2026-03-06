@@ -72,11 +72,11 @@ export class ChatService {
     workspaces?: WorkspacesStart,
     http?: HttpSetup
   ) {
-    // Pass http client for basePath handling in dev mode
-    this.agent = new AgUiAgent(CHAT_PROXY_PATH, http);
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
+    // Pass http client for basePath handling in dev mode
+    this.agent = new AgUiAgent(CHAT_PROXY_PATH, http);
 
     // Initialize conversation history service
     if (!coreChatService) {
