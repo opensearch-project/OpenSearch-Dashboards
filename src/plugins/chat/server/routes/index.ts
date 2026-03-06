@@ -196,6 +196,13 @@ export function defineRoutes(
     }
   );
 
+  /**
+   * Body parser limit for the proxy route. Applies to the entire request body
+   * (conversation history + attachments), not just new attachments.
+   * Formula: max attachments × max size per file × base64 overhead (~1.4×).
+   * Operators should consider memory and DoS implications when configuring very
+   * high limits.
+   */
   const proxyMaxBytes =
     maxFileUploadBytes !== undefined
       ? Math.ceil(maxFileUploadBytes * maxFileAttachments * BASE64_OVERHEAD_FACTOR)

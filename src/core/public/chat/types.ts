@@ -179,8 +179,7 @@ export interface ChatImplementationFunctions {
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   // Window operations
-  /** May return a window instance; callers receive the value if they await it. */
-  openWindow: () => Promise<void | unknown>;
+  openWindow: () => Promise<void>;
   closeWindow: () => Promise<void>;
 }
 

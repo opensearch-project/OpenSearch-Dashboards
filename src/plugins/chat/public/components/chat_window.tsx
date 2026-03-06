@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
-import { EuiBadg, EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -463,17 +463,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [pendingConfirmation, confirmationService]);
 
+  /** Reads files sequentially to limit peak memory (one FileReader in flight at a time). */
   const handleFilesSelected = useCallback(async (files: File[]) => {
-    const settled = await Promise.allSettled(files.map(readFileAsBase64));
-    const succeeded = settled
-      .filter((r): r is PromiseFulfilledResult<FileAttachment> => r.status === 'fulfilled')
-      .map((r) => r.value);
+    const succeeded: FileAttachment[] = [];
+    let failedCount = 0;
+    for (const file of files) {
+      try {
+        const attachment = await readFileAsBase64(file);
+        succeeded.push(attachment);
+      } catch {
+        failedCount += 1;
+      }
+    }
     if (succeeded.length > 0) {
       setFileAttachments((prev) => [...prev, ...succeeded]);
     }
-    const failed = settled.filter((r) => r.status === 'rejected');
-    if (failed.length > 0) {
-      console.error(`Failed to read ${failed.length} file(s)`);
+    if (failedCount > 0) {
+      console.error(`Failed to read ${failedCount} file(s)`);
     }
   }, []);
 
