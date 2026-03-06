@@ -31,15 +31,48 @@
 import { i18n } from '@osd/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { getServices } from '../../opensearch_dashboards_services';
+import { clearSavedSearch, updateIndexPattern } from '../utils/state_management';
+import type { DiscoverViewServices } from '../../build_services';
+import { LAST_INDEX_PATTERN_KEY } from './constants';
 
-export function getRootBreadcrumbs(): EuiBreadcrumb[] {
-  const { core } = getServices();
-  return [
-    {
-      text: i18n.translate('discover.rootBreadcrumb', {
-        defaultMessage: 'Discover',
-      }),
-      onClick: () => core.application.navigateToApp('data-explorer', { path: 'discover' }),
-    },
-  ];
+/**
+ * When viewing a saved search, clicking the Discover breadcrumb should return to
+ * Discover root with a fresh state (no saved search) and restore the previous index pattern.
+ * Using navigateToApp to the same app does not remount, so Redux state (savedSearch) persists unless we clear it.
+ *
+ * When services with store and scopedHistory are provided (e.g. from Discover canvas),
+ * we clear filters, restore the last index pattern (from sessionStorage), clear query,
+ * replace the URL, and clear savedSearch.
+ * When services are not provided (e.g. doc views mounted outside data-explorer), we fall back to
+ * full app navigation.
+ */
+export function getRootBreadcrumbs(services?: DiscoverViewServices): EuiBreadcrumb[] {
+  const { core, filterManager, data } = getServices();
+  const store = services?.store;
+  const scopedHistory = services?.scopedHistory;
+  const isOnDiscoverRoot = store && scopedHistory && !store.getState().discover?.savedSearch;
+
+  const discoverBreadcrumb: EuiBreadcrumb = {
+    text: i18n.translate('discover.rootBreadcrumb', {
+      defaultMessage: 'Discover',
+    }),
+    ...(isOnDiscoverRoot
+      ? {}
+      : {
+          onClick: () => {
+            filterManager.setAppFilters([]);
+            data.query.queryString.setQuery({ query: '' }, false, true);
+            if (store && scopedHistory) {
+              const savedId = sessionStorage.getItem(LAST_INDEX_PATTERN_KEY);
+              if (savedId) store.dispatch(updateIndexPattern(savedId));
+              store.dispatch(clearSavedSearch());
+              scopedHistory.replace('/discover#/');
+            } else {
+              core.application.navigateToApp('data-explorer', { path: 'discover' });
+            }
+          },
+        }),
+  };
+
+  return [discoverBreadcrumb];
 }

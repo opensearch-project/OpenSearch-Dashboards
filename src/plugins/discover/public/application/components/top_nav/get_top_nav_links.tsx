@@ -116,7 +116,7 @@ const getLegacyTopNavLinks = (
               history().push(`/view/${encodeURIComponent(id)}`);
             } else {
               chrome.docTitle.change(savedSearch.lastSavedTitle);
-              chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
+              chrome.setBreadcrumbs([...getRootBreadcrumbs(services), { text: savedSearch.title }]);
             }
 
             // set App state to clean
@@ -400,7 +400,7 @@ export const getTopNavLinks = (
                 history().push(`/view/${encodeURIComponent(id)}`);
               } else {
                 chrome.docTitle.change(savedSearch.lastSavedTitle);
-                chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
+                chrome.setBreadcrumbs([...getRootBreadcrumbs(services), { text: savedSearch.title }]);
               }
 
               // set App state to clean
