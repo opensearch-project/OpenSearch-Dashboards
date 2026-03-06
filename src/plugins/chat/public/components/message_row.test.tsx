@@ -63,6 +63,8 @@ describe('MessageRow', () => {
     });
 
     it('should render image/svg+xml as file badge to prevent XSS (SVG can contain scripts)', () => {
+      // Base64 payload decodes to <script>alert('XSS')</script> — intentional XSS test vector
+      // to verify SVG is NOT rendered as <img>. Code under test correctly blocks it.
       const message: Message = {
         id: 'msg-svg',
         role: 'user',
