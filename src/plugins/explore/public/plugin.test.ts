@@ -340,11 +340,22 @@ describe('ExplorePlugin', () => {
     it('should register all nav links during setup', () => {
       plugin.setup(coreSetup, setupDeps);
 
-      // Verify navGroup.addNavLinksToGroup was called with all 4 links
+      // Verify navGroup.addNavLinksToGroup was called with all 4 links for observability
       expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.objectContaining({ id: 'observability' }),
         expect.arrayContaining([
           expect.objectContaining({ id: 'explore' }),
+          expect.objectContaining({ id: 'explore/logs' }),
+          expect.objectContaining({ id: 'explore/traces' }),
+          expect.objectContaining({ id: 'explore/metrics' }),
+        ])
+      );
+
+      // Verify navGroup.addNavLinksToGroup was called with all 4 links for analytics with different order
+      expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'all' }),
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'explore', title: 'Explorer' }),
           expect.objectContaining({ id: 'explore/logs' }),
           expect.objectContaining({ id: 'explore/traces' }),
           expect.objectContaining({ id: 'explore/metrics' }),
