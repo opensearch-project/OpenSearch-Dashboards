@@ -221,6 +221,25 @@ function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
   return symbolicName;
 }
 
+// Generic runtime suggestion sanitation:
+// Keep operator-like tokens (including single and multi-char operators), while filtering
+// delimiter-like tokens and punctuation fragments that are unlikely intended user inputs
+// (e.g. standalone dot/quotes/parens/brackets noise).
+function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
+  const value = (sk.value || '').trim();
+  if (!value) return false;
+
+  const hasWordLike = /[A-Za-z0-9_]/.test(value);
+  if (hasWordLike) return false;
+
+  // Remove tokens that are just delimiter/punctuation wrappers, regardless of context.
+  if (/^[(){}[\]'"`.,]+$/.test(value)) return true;
+
+  // If this is a non-word token made of known operators, keep it.
+  // This remains grammar-adaptive because it is based on character class, not fixed token names.
+  return !/^[=!<>+*\/%&|~^\\-]+$/.test(value);
+}
+
 /**
  * Sentinel for "rule not found". Rule indices are 0-based (rule 0 = root),
  * so Token.INVALID_TYPE (0) would collide with root. -1 is safe here because
@@ -971,21 +990,23 @@ function tryRuntimeGrammarSuggestions(
       const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
       const symbolicName = parser.vocabulary.getSymbolicName(tokenType);
       if (!literalName && !symbolicName) return;
-
-      const fallbackValue = deriveKeywordFromSymbolicName(symbolicName);
-      const keywordValue = literalName || fallbackValue;
-      if (!keywordValue && skipSymbolicKeywords) return;
-      const followsOpeningParen =
-        openingParenToken > Token.INVALID_TYPE &&
-        Array.isArray(followingTokens) &&
-        followingTokens.includes(openingParenToken);
-      suggestKeywords.push({
-        value: keywordValue,
+      const candidate: KeywordSuggestion = {
+        value: literalName || '',
         symbolicName: (!skipSymbolicKeywords && symbolicName) || '',
-        followsOpeningParen,
+        followsOpeningParen:
+          openingParenToken > Token.INVALID_TYPE &&
+          Array.isArray(followingTokens) &&
+          followingTokens.includes(openingParenToken),
         inRuntimeFunctionContext,
         id: tokenType,
-      });
+      };
+
+      const fallbackValue = deriveKeywordFromSymbolicName(symbolicName);
+      candidate.value = candidate.value || fallbackValue;
+      if (!candidate.value) return;
+      if (isRuntimeNoisySuggestion({ ...candidate, symbolicName })) return;
+
+      suggestKeywords.push(candidate);
     });
 
     const baseResult: AutocompleteResultBase = {
