@@ -35,6 +35,7 @@ import { modifyUrl } from '@osd/std';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 import { getGotoPath } from '../../common/short_url_routes';
+import { processUrlForShortUrlResolution } from './lib/expand_hashed_url';
 
 export const createGotoRoute = ({
   router,
@@ -60,9 +61,9 @@ export const createGotoRoute = ({
 
       const uiSettings = context.core.uiSettings.client;
       const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
-      if (!stateStoreInSessionStorage) {
-        const basePath = http.basePath.get(request);
+      const basePath = http.basePath.get(request);
 
+      if (!stateStoreInSessionStorage) {
         const prependedUrl = modifyUrl(url, (parts) => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
             parts.pathname = `${basePath}${parts.pathname}`;
@@ -75,7 +76,24 @@ export const createGotoRoute = ({
         });
       }
 
-      return response.renderCoreApp();
+      // When stateStoreInSessionStorage is enabled, check if the URL contains
+      // hashed state references that won't be available in the new session.
+      // Process the URL to prevent "Unable to completely restore the URL" errors.
+      const processedUrl = processUrlForShortUrlResolution(url);
+
+      const prependedUrl = modifyUrl(processedUrl, (parts) => {
+        if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
+          parts.pathname = `${basePath}${parts.pathname}`;
+        }
+      });
+
+      // Instead of rendering the core app with potentially broken hash references,
+      // redirect to the processed URL which will handle state restoration gracefully
+      return response.redirected({
+        headers: {
+          location: prependedUrl,
+        },
+      });
     })
   );
 };
