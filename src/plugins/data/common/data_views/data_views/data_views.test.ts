@@ -353,4 +353,133 @@ describe('DataViews', () => {
       expect(result.id).toBe('test-id');
     });
   });
+
+  describe('convertToDataset', () => {
+    test('fetches actual data source title instead of using reference name', async () => {
+      const mockDataView = {
+        id: 'test-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: '@timestamp',
+        displayName: 'Test Logs',
+        description: 'Test description',
+        dataSourceRef: {
+          id: 'datasource-123',
+          name: 'dataSource', // This is the reference name, not the actual title
+          type: 'data-source',
+        },
+      } as DataView;
+
+      const mockDataSource = {
+        id: 'datasource-123',
+        attributes: {
+          title: 'DockerTest', // This is the actual data source title
+          dataSourceVersion: '2.0.0',
+        },
+      };
+
+      // Mock getDataSource to return the actual data source
+      jest.spyOn(dataViews, 'getDataSource').mockResolvedValue(mockDataSource as any);
+
+      const dataset = await dataViews.convertToDataset(mockDataView);
+
+      // Verify that getDataSource was called with the correct ID
+      expect(dataViews.getDataSource).toHaveBeenCalledWith('datasource-123');
+
+      // Verify the dataset has the actual data source title, not "dataSource"
+      expect(dataset.dataSource?.title).toBe('DockerTest');
+      expect(dataset.dataSource?.id).toBe('datasource-123');
+      expect(dataset.dataSource?.version).toBe('2.0.0');
+      expect(dataset.dataSource?.type).toBe('data-source');
+
+      // Verify other dataset properties are preserved
+      expect(dataset.id).toBe('test-id');
+      expect(dataset.title).toBe('logs-*');
+      expect(dataset.timeFieldName).toBe('@timestamp');
+      expect(dataset.displayName).toBe('Test Logs');
+      expect(dataset.description).toBe('Test description');
+    });
+
+    test('falls back to data source ID when fetch fails', async () => {
+      const mockDataView = {
+        id: 'test-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        dataSourceRef: {
+          id: 'datasource-456',
+          name: 'dataSource',
+          type: 'data-source',
+        },
+      } as DataView;
+
+      // Mock getDataSource to throw an error
+      jest.spyOn(dataViews, 'getDataSource').mockRejectedValue(new Error('Not found'));
+
+      const dataset = await dataViews.convertToDataset(mockDataView);
+
+      // Should fall back to using the ID as title
+      expect(dataset.dataSource?.title).toBe('datasource-456');
+      expect(dataset.dataSource?.id).toBe('datasource-456');
+      expect(dataset.dataSource?.version).toBe('');
+    });
+
+    test('falls back to data source ID when fetch returns null', async () => {
+      const mockDataView = {
+        id: 'test-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        dataSourceRef: {
+          id: 'datasource-789',
+          name: 'dataSource',
+          type: 'data-source',
+        },
+      } as DataView;
+
+      // Mock getDataSource to return null
+      jest.spyOn(dataViews, 'getDataSource').mockResolvedValue(null as any);
+
+      const dataset = await dataViews.convertToDataset(mockDataView);
+
+      // Should fall back to using the ID as title
+      expect(dataset.dataSource?.title).toBe('datasource-789');
+      expect(dataset.dataSource?.id).toBe('datasource-789');
+      expect(dataset.dataSource?.version).toBe('');
+      expect(dataset.dataSource?.type).toBe('data-source');
+    });
+
+    test('handles data view without data source', async () => {
+      const mockDataView = {
+        id: 'test-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: '@timestamp',
+      } as DataView;
+
+      const dataset = await dataViews.convertToDataset(mockDataView);
+
+      // Should not have dataSource property
+      expect(dataset.dataSource).toBeUndefined();
+      expect(dataset.id).toBe('test-id');
+      expect(dataset.title).toBe('logs-*');
+    });
+
+    test('uses toDataset method when available on dataView', async () => {
+      const mockDataset = {
+        id: 'custom-id',
+        title: 'custom-title',
+        type: 'CUSTOM_TYPE',
+      };
+
+      const mockDataView = {
+        id: 'test-id',
+        title: 'logs-*',
+        toDataset: jest.fn().mockResolvedValue(mockDataset),
+      } as any;
+
+      const dataset = await dataViews.convertToDataset(mockDataView);
+
+      expect(mockDataView.toDataset).toHaveBeenCalled();
+      expect(dataset).toEqual(mockDataset);
+    });
+  });
 });

@@ -1,0 +1,2 @@
+fix:
+- Fix dataset selector not displaying correct information ([#11392](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11392))
