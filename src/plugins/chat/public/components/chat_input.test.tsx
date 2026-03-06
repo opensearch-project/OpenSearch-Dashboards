@@ -486,11 +486,11 @@ describe('ChatInput', () => {
       );
 
       const good = new File(['hello'], 'notes.txt', { type: 'text/plain' });
-      const bad = new File(['binary'], 'photo.jpg', { type: 'image/jpeg' });
+      const bad = new File(['binary'], 'script.exe', { type: 'application/x-msdownload' });
       selectFiles(container, [good, bad]);
 
       expect(onFilesSelected).toHaveBeenCalledWith([good]);
-      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('photo.jpg'));
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('script.exe'));
     });
 
     it('should truncate file list to remaining capacity', () => {

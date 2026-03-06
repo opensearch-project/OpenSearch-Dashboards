@@ -479,9 +479,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setFileAttachments((prev) => [...prev, ...succeeded]);
     }
     if (failedCount > 0) {
-      console.error(`Failed to read ${failedCount} file(s)`);
+      toasts?.addWarning(
+        i18n.translate('chat.window.fileReadFailed', {
+          defaultMessage:
+            'Failed to read {count, plural, one {# file} other {# files}}. They were not attached.',
+          values: { count: failedCount },
+        })
+      );
     }
-  }, []);
+  }, [toasts]);
 
   const handleRemoveFile = useCallback((index: number) => {
     setFileAttachments((prev) => {
