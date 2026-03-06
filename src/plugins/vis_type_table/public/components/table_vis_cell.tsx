@@ -31,7 +31,10 @@ export const getTableVisCellValue = (
 
   dompurify.addHook('afterSanitizeElements', (node) => {
     if (node instanceof Element && node.tagName?.toUpperCase() === 'A') {
-      node.setAttribute('rel', 'noopener noreferrer');
+      const target = node.getAttribute('target');
+      if (target && target !== '_self') {
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
     }
   });
   const formattedContent = (
