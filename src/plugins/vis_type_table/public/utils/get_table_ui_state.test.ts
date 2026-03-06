@@ -42,15 +42,15 @@ describe('getTableUIState', () => {
     expect(uiState.emit).toHaveBeenCalledWith('reload');
   });
 
-  it('should set and emit width values for a new column', () => {
+  it('should set width values for a new column without emitting reload', () => {
     const newWidth: ColumnWidth = { colIndex: 1, width: 150 };
     tableUiState.setWidth(newWidth);
 
     expect(uiState.set).toHaveBeenCalledWith('vis.columnsWidth', [newWidth]);
-    expect(uiState.emit).toHaveBeenCalledWith('reload');
+    expect(uiState.emit).not.toHaveBeenCalled();
   });
 
-  it('should update and emit width values for an existing column', () => {
+  it('should update width values for an existing column without emitting reload', () => {
     const initialWidth: ColumnWidth[] = [{ colIndex: 0, width: 100 }];
     (uiState.get as jest.Mock).mockReturnValue(initialWidth);
 
@@ -61,6 +61,6 @@ describe('getTableUIState', () => {
 
     const expectedWidths = [{ colIndex: 0, width: 150 }];
     expect(uiState.set).toHaveBeenCalledWith('vis.columnsWidth', expectedWidths);
-    expect(uiState.emit).toHaveBeenCalledWith('reload');
+    expect(uiState.emit).not.toHaveBeenCalled();
   });
 });
