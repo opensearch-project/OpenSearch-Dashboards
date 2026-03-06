@@ -547,6 +547,47 @@ describe('ChatService', () => {
 
       expect(response.toolMessage.content).toBe(JSON.stringify(objectResult));
     });
+
+    it('should only pass tool message when memory provider does not include full history', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-456';
+      const result = { success: true };
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'Previous user message' },
+        { id: 'msg-2', role: 'assistant', content: 'Previous assistant message' },
+      ];
+
+      const response = await chatService.sendToolResult(toolCallId, result, messages);
+
+      // Verify that only the tool message is passed, not the full history
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        {
+          threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+          runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
+          messages: [response.toolMessage], // Only tool message, not [...messages, toolMessage]
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      );
+
+      // Verify the tool message structure
+      expect(response.toolMessage).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'tool',
+        content: JSON.stringify(result),
+        toolCallId,
+      });
+    });
   });
 
   describe('abort', () => {
@@ -591,25 +632,9 @@ describe('ChatService', () => {
   });
 
   describe('newThread', () => {
-    let mockSessionStorage: { [key: string]: string };
     let mockContextStore: any;
 
     beforeEach(() => {
-      // Mock sessionStorage behavior
-      mockSessionStorage = {};
-      const sessionStorageMock = {
-        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
-        setItem: jest.fn((key: string, value: string) => {
-          mockSessionStorage[key] = value;
-        }),
-        removeItem: jest.fn((key: string) => {
-          delete mockSessionStorage[key];
-        }),
-      };
-
-      // Update the global sessionStorage mock
-      (global as any).sessionStorage = sessionStorageMock;
-
       // Mock context store
       mockContextStore = {
         getAllContexts: jest.fn(() => [
@@ -634,32 +659,6 @@ describe('ChatService', () => {
       const newThreadId = chatService.getThreadId();
       expect(newThreadId).not.toBe(originalThreadId);
       expect(newThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
-    });
-
-    it('should clear current messages', () => {
-      // Set some messages
-      (chatService as any).currentMessages = [
-        { id: '1', role: 'user', content: 'test' } as Message,
-        { id: '2', role: 'assistant', content: 'response' } as Message,
-      ];
-
-      chatService.newThread();
-
-      expect((chatService as any).currentMessages).toEqual([]);
-    });
-
-    it('should clear sessionStorage', () => {
-      // Set some data in sessionStorage
-      mockSessionStorage['chat.currentState'] = JSON.stringify({
-        threadId: 'old-thread',
-        messages: [{ id: '1', role: 'user', content: 'test' }],
-      });
-
-      const removeItemSpy = (global as any).sessionStorage.removeItem;
-
-      chatService.newThread();
-
-      expect(removeItemSpy).toHaveBeenCalledWith('chat.currentState');
     });
 
     it('should clear dynamic context from global store', () => {
@@ -1496,6 +1495,107 @@ describe('ChatService', () => {
     });
   });
 
+  describe('restoreLatestConversation', () => {
+    it('should restore the latest conversation with messages', async () => {
+      const mockMessages = [
+        { id: 'msg-1', role: 'user', content: 'Hello' },
+        { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
+      ];
+
+      const mockThreadId = 'thread-12345';
+
+      // Mock the conversation history service
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            threadId: mockThreadId,
+            title: 'Test Conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+      });
+
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: mockMessages,
+          timestamp: Date.now(),
+        },
+      ]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).not.toBeNull();
+      expect(result?.threadId).toBe(mockThreadId);
+      expect(result?.messages).toEqual(mockMessages);
+      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
+    });
+
+    it('should return null when no conversations exist', async () => {
+      // Mock empty conversation list
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [],
+        total: 0,
+      });
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when conversation has no MESSAGES_SNAPSHOT event', async () => {
+      const mockThreadId = 'thread-12345';
+
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            threadId: mockThreadId,
+            title: 'Test Conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+      });
+
+      // Return events without MESSAGES_SNAPSHOT
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+        {
+          type: 'OTHER_EVENT',
+          timestamp: Date.now(),
+        },
+      ]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when getConversation returns null', async () => {
+      const mockThreadId = 'thread-12345';
+
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            threadId: mockThreadId,
+            title: 'Test Conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+      });
+
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+    });
+  });
+
   describe('getWorkspaceAwareDataSourceId with page context priority', () => {
     let mockWorkspaces: any;
 
@@ -1631,79 +1731,6 @@ describe('ChatService', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
-    });
-  });
-
-  describe('removeTrailingErrorMessages', () => {
-    it('should remove trailing network error messages', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
-        { id: 'error-123', role: 'system', content: 'Error: network error' },
-        { id: 'error-456', role: 'system', content: 'Error: network error' },
-      ];
-
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-
-      expect(result).toEqual([
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
-      ]);
-    });
-
-    it('should preserve other system messages', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'system', content: 'Connection restored' },
-        { id: 'error-123', role: 'system', content: 'Error: network error' },
-      ];
-
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-
-      expect(result).toEqual([
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'system', content: 'Connection restored' },
-      ]);
-    });
-
-    it('should preserve other error messages', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
-        { id: 'error-456', role: 'system', content: 'Error: network error' },
-      ];
-
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-
-      expect(result).toEqual([
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
-      ]);
-    });
-
-    it('should handle empty message array', () => {
-      const result = (chatService as any).removeTrailingErrorMessages([]);
-      expect(result).toEqual([]);
-    });
-
-    it('should handle messages with no trailing errors', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
-      ];
-
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-      expect(result).toEqual(messages);
-    });
-
-    it('should handle all messages being network errors', () => {
-      const messages = [
-        { id: 'error-123', role: 'system', content: 'Error: network error' },
-        { id: 'error-456', role: 'system', content: 'Error: network error' },
-      ];
-
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-      expect(result).toEqual([]);
     });
   });
 });

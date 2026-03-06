@@ -220,6 +220,7 @@
     "@osd/analytics": "1.0.0",
     "@osd/antlr-grammar": "1.0.0",
     "@osd/apm-config-loader": "1.0.0",
+    "@osd/apm-topology": "1.0.0",
     "@osd/config": "1.0.0",
     "@osd/config-schema": "1.0.0",
     "@osd/cross-platform": "1.0.0",
