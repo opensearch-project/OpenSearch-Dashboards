@@ -74,7 +74,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const loadingAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
-  const [toolCallStates, setToolCallStates] = useState<Map<string, any>>(new Map());
+  const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
 
@@ -397,7 +397,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setInput('');
 
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
-  }, [timeline, subscribeToMessageStream]);
+  }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
 
   const handleNewChat = useCallback(() => {
     chatService.newThread();
@@ -450,7 +450,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       toolCallStates,
       getActionRenderer: service.getActionRenderer,
     };
-  }, [toolCallStates, service]);
+  }, [toolCallStates, service.getActionRenderer]);
 
   // Get conversation name from first user message with text content
   const conversationName = useMemo(() => {
