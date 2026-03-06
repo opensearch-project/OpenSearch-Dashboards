@@ -668,14 +668,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             </h3>
             <p>{restoreError}</p>
           </EuiText>
-          <EuiButton
-            onClick={handleRetryRestore}
-            iconType="refresh"
-          >
-            {i18n.translate('chat.window.retryButton', {
-              defaultMessage: 'Retry',
-            })}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={handleRetryRestore} iconType="refresh">
+                {i18n.translate('chat.window.retryButton', {
+                  defaultMessage: 'Retry',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={handleNewChat} iconType="documentEdit">
+                {i18n.translate('chat.window.newChatButton', {
+                  defaultMessage: 'New chat',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       ) : showHistory ? (
         <ConversationHistoryPanel
