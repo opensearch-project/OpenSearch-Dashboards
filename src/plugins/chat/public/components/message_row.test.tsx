@@ -62,6 +62,27 @@ describe('MessageRow', () => {
       expect(img).toHaveAttribute('alt', 'Visualization');
     });
 
+    it('should render image/svg+xml as file badge to prevent XSS (SVG can contain scripts)', () => {
+      const message: Message = {
+        id: 'msg-svg',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/svg+xml',
+            data: 'PHN2Zz48c2NyaXB0PmFsZXJ0KCdYU1MnKTwvc2NyaXB0Pjwvc3ZnPg==',
+          },
+        ],
+      };
+
+      render(<MessageRow message={message} />);
+
+      // Must NOT render as img (would allow SVG script execution)
+      expect(screen.queryByRole('img')).not.toBeInTheDocument();
+      // Must render as file badge instead
+      expect(screen.getByText('image/svg+xml')).toBeInTheDocument();
+    });
+
     it('should render image with custom filename', () => {
       const message: Message = {
         id: 'msg-4',

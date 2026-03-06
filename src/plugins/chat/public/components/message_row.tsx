@@ -10,6 +10,20 @@ import { Markdown } from '../../../opensearch_dashboards_react/public';
 import type { Message } from '../../common/types';
 import './message_row.scss';
 
+/**
+ * Raster image MIME types safe to render as <img> data URIs.
+ * Excludes image/svg+xml because SVGs can contain scripts that execute in the browser context.
+ */
+const SAFE_IMAGE_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/gif',
+  'image/webp',
+  'image/bmp',
+  'image/avif',
+]);
+
 interface MessageRowProps {
   message: Message;
   isStreaming?: boolean;
@@ -55,13 +69,15 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       return (
         <>
           {content.map((block: any, index: number) => {
-            // Render binary content — images as <img>, other files as badges
+            // Render binary content — safe raster images as <img>, other files as badges
+            // SVG (image/svg+xml) is excluded: it can contain scripts and poses XSS risk
             if (block.type === 'binary' && block.data) {
-              if (block.mimeType?.startsWith('image/')) {
+              const mime = block.mimeType || 'image/jpeg';
+              if (SAFE_IMAGE_MIME_TYPES.has(mime)) {
                 return (
                   <img
                     key={index}
-                    src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
+                    src={`data:${mime};base64,${block.data}`}
                     alt={block.filename || 'Visualization'}
                     className="msgRow__image"
                   />

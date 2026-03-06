@@ -16,6 +16,7 @@ export const config: PluginConfigDescriptor<ChatConfigType> = {
     enabled: true,
     agUiUrl: true,
     maxFileUploadBytes: true,
+    maxFileAttachments: true,
   },
 };
 
