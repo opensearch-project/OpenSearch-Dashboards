@@ -4,7 +4,9 @@
  */
 
 import { AgUiAgent, EventType } from './ag_ui_agent';
+import { CHAT_PROXY_PATH } from '../../common';
 import { RunAgentInput } from '../../common/types';
+import { HttpSetup } from '../../../../core/public';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -536,6 +538,194 @@ describe('AgUiAgent', () => {
       }).not.toThrow();
 
       subscription.unsubscribe();
+    });
+  });
+
+  describe('basePath handling', () => {
+    const mockInput: RunAgentInput = {
+      threadId: 'test-thread',
+      runId: 'test-run',
+      messages: [],
+      tools: [],
+      context: [],
+      state: {},
+      forwardedProps: {},
+    };
+
+    it('should use path as-is in production mode when http is undefined', (done) => {
+      // Production mode: no http client provided
+      const productionAgent = new AgUiAgent(CHAT_PROXY_PATH, undefined);
+
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = productionAgent.runAgent(mockInput);
+
+      observable.subscribe({
+        complete: () => {
+          // Should use the path as-is without basePath prepending
+          expect(mockFetch).toHaveBeenCalledWith(
+            CHAT_PROXY_PATH,
+            expect.objectContaining({
+              method: 'POST',
+            })
+          );
+          done();
+        },
+      });
+    });
+
+    it('should prepend basePath in development mode when http is provided', (done) => {
+      // Development mode: http client with basePath.prepend
+      const mockHttp: Partial<HttpSetup> = {
+        basePath: {
+          prepend: jest.fn((path: string) => `/dev-basepath${path}`),
+        } as any,
+      };
+
+      const devAgent = new AgUiAgent(CHAT_PROXY_PATH, mockHttp as HttpSetup);
+
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = devAgent.runAgent(mockInput);
+
+      observable.subscribe({
+        complete: () => {
+          // Should prepend basePath in development mode
+          expect(mockHttp.basePath!.prepend).toHaveBeenCalledWith(CHAT_PROXY_PATH);
+          expect(mockFetch).toHaveBeenCalledWith(
+            `/dev-basepath${CHAT_PROXY_PATH}`,
+            expect.objectContaining({
+              method: 'POST',
+            })
+          );
+          done();
+        },
+      });
+    });
+
+    it('should handle dataSourceId query parameter with basePath prepending', (done) => {
+      const mockHttp: Partial<HttpSetup> = {
+        basePath: {
+          prepend: jest.fn((path: string) => `/dev-basepath${path}`),
+        } as any,
+      };
+
+      const devAgent = new AgUiAgent(CHAT_PROXY_PATH, mockHttp as HttpSetup);
+
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = devAgent.runAgent(mockInput, 'test-datasource-id');
+
+      observable.subscribe({
+        complete: () => {
+          // Should prepend basePath and then add query parameter
+          expect(mockHttp.basePath!.prepend).toHaveBeenCalledWith(CHAT_PROXY_PATH);
+          expect(mockFetch).toHaveBeenCalledWith(
+            `/dev-basepath${CHAT_PROXY_PATH}?dataSourceId=test-datasource-id`,
+            expect.objectContaining({
+              method: 'POST',
+            })
+          );
+          done();
+        },
+      });
+    });
+
+    it('should fallback to path as-is if basePath.prepend is missing', (done) => {
+      // Edge case: http provided but basePath.prepend is missing
+      const mockHttp: Partial<HttpSetup> = {
+        basePath: {} as any, // basePath exists but prepend is missing
+      };
+
+      const fallbackAgent = new AgUiAgent(CHAT_PROXY_PATH, mockHttp as HttpSetup);
+
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = fallbackAgent.runAgent(mockInput);
+
+      observable.subscribe({
+        complete: () => {
+          // Should fallback to using path as-is
+          expect(mockFetch).toHaveBeenCalledWith(
+            CHAT_PROXY_PATH,
+            expect.objectContaining({
+              method: 'POST',
+            })
+          );
+          done();
+        },
+      });
+    });
+
+    it('should work correctly with default proxyUrl in production mode', (done) => {
+      // Test default constructor parameter
+      const productionAgent = new AgUiAgent();
+
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = productionAgent.runAgent(mockInput);
+
+      observable.subscribe({
+        complete: () => {
+          expect(mockFetch).toHaveBeenCalledWith(
+            CHAT_PROXY_PATH,
+            expect.objectContaining({
+              method: 'POST',
+            })
+          );
+          done();
+        },
+      });
     });
   });
 });
