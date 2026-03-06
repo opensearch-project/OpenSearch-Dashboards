@@ -31,53 +31,53 @@ jest.mock('../utils/utils', () => {
   };
 });
 
+const mockNumericalColumn: VisColumn = {
+  id: 1,
+  name: 'Count',
+  column: 'count',
+  schema: VisFieldType.Numerical,
+  validValuesCount: 100,
+  uniqueValuesCount: 50,
+};
+
+const mockCategoricalColumn: VisColumn = {
+  id: 2,
+  name: 'Category',
+  column: 'category',
+  schema: VisFieldType.Categorical,
+  validValuesCount: 100,
+  uniqueValuesCount: 10,
+};
+
+const mockCategoricalColumn2: VisColumn = {
+  id: 3,
+  name: 'Category2',
+  column: 'category2',
+  schema: VisFieldType.Categorical,
+  validValuesCount: 100,
+  uniqueValuesCount: 10,
+};
+
+const mockDateColumn: VisColumn = {
+  id: 4,
+  name: 'Date',
+  column: 'date',
+  schema: VisFieldType.Date,
+  validValuesCount: 100,
+  uniqueValuesCount: 50,
+};
+
+// Sample data for testing
+const mockData = [
+  { count: 10, category: 'A', category2: 'X', date: '2023-01-01' },
+  { count: 20, category: 'B', category2: 'Y', date: '2023-01-02' },
+  { count: 30, category: 'C', category2: 'Z', date: '2023-01-03' },
+];
+
 describe('bar to_expression', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  // Create mock VisColumn objects
-  const mockNumericalColumn: VisColumn = {
-    id: 1,
-    name: 'Count',
-    column: 'count',
-    schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
-  };
-
-  const mockCategoricalColumn: VisColumn = {
-    id: 2,
-    name: 'Category',
-    column: 'category',
-    schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
-  };
-
-  const mockCategoricalColumn2: VisColumn = {
-    id: 3,
-    name: 'Category2',
-    column: 'category2',
-    schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
-  };
-
-  const mockDateColumn: VisColumn = {
-    id: 4,
-    name: 'Date',
-    column: 'date',
-    schema: VisFieldType.Date,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
-  };
-
-  // Sample data for testing
-  const mockData = [
-    { count: 10, category: 'A', category2: 'X', date: '2023-01-01' },
-    { count: 20, category: 'B', category2: 'Y', date: '2023-01-02' },
-    { count: 30, category: 'C', category2: 'Z', date: '2023-01-03' },
-  ];
 
   describe('createBarSpec', () => {
     test('creates a basic bar chart spec', () => {
@@ -1105,6 +1105,290 @@ describe('bar to_expression', () => {
       );
 
       expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+    });
+  });
+});
+
+describe('bar to_expression in Echarts', () => {
+  beforeEach(() => {
+    (Utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+  });
+
+  describe('createSimpleBarChart in echarts rendering', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockCategoricalColumn,
+      [AxisRole.Y]: mockNumericalColumn,
+    };
+    it('should create a simple bar chart with one metric and one category', () => {
+      const spec = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+      expect(spec).toHaveProperty('series');
+      expect(spec).toHaveProperty('dataset');
+      expect(spec).toHaveProperty('series');
+      expect(spec.xAxis.type).toBe('category');
+      expect(spec.yAxis.type).toBe('value');
+    });
+
+    it('should handle different title display', () => {
+      const noTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: { show: false, titleName: '' },
+      };
+      const result = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result.title).toMatchObject({ text: undefined });
+
+      const defultTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: { show: true, titleName: '' },
+      };
+      const result1 = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        defultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(result1.title).toMatchObject({ text: 'Count by Category' });
+
+      const customTitleStyles = {
+        ...defaultBarChartStyles,
+        titleOptions: { show: true, titleName: 'Custom Simple Bar Chart' },
+      };
+      const result2 = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(result2.title).toMatchObject({ text: 'Custom Simple Bar Chart' });
+    });
+  });
+
+  describe('createStackedBarSpec in echarts rendering', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockCategoricalColumn,
+      [AxisRole.Y]: mockNumericalColumn,
+      [AxisRole.COLOR]: mockCategoricalColumn2,
+    };
+
+    it('creates a stacked bar chart spec', () => {
+      const result = createStackedBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.yAxis.type).toBe('value');
+      expect(result.xAxis.type).toBe('category');
+      expect(result.series).toHaveLength(3);
+      expect(result.series[0].type).toBe('bar');
+      expect(result.series[1].type).toBe('bar');
+      expect(result.series[2].type).toBe('bar');
+      expect(result.series[0].encode.y).toBe('X');
+      expect(result.series[1].encode.y).toBe('Y');
+      expect(result.series[2].encode.y).toBe('Z');
+    });
+
+    it('adds threshold line when enabled', () => {
+      const customStyles = {
+        ...defaultBarChartStyles,
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
+
+      const result = createStackedBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [],
+        customStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.yAxis.type).toBe('value');
+      expect(result.xAxis.type).toBe('category');
+      expect(result.series).toHaveLength(3);
+
+      expect(result.series[0]).toHaveProperty('markLine');
+      expect(result.series[1]).not.toHaveProperty('markLine');
+      expect(result.series[2]).not.toHaveProperty('markLine');
+    });
+  });
+
+  describe('createTimeBarChart in echarts rendering', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockDateColumn,
+      [AxisRole.Y]: mockNumericalColumn,
+    };
+
+    it('creates a basic time bar chart spec', () => {
+      const result = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.yAxis.type).toBe('value');
+      expect(result.xAxis.type).toBe('time');
+    });
+  });
+
+  describe('createGroupedTimeBarChart in echarts rendering', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockDateColumn,
+      [AxisRole.Y]: mockNumericalColumn,
+      [AxisRole.COLOR]: mockCategoricalColumn2,
+    };
+    it('creates a grouped time bar chart spec', () => {
+      const result = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.yAxis.type).toBe('value');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.series).toHaveLength(3);
+      expect(result.series[0].type).toBe('bar');
+      expect(result.series[1].type).toBe('bar');
+      expect(result.series[2].type).toBe('bar');
+      expect(result.series[0].encode.y).toBe('X');
+      expect(result.series[1].encode.y).toBe('Y');
+      expect(result.series[2].encode.y).toBe('Z');
+    });
+
+    it('adds threshold line when enabled', () => {
+      const customStyles = {
+        ...defaultBarChartStyles,
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
+
+      const result = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        customStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.yAxis.type).toBe('value');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.series).toHaveLength(3);
+
+      expect(result.series[0]).toHaveProperty('markLine');
+      expect(result.series[1]).not.toHaveProperty('markLine');
+      expect(result.series[2]).not.toHaveProperty('markLine');
+    });
+  });
+
+  describe('createFacetedTimeBarChart in echarts rendering', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockDateColumn,
+      [AxisRole.Y]: mockNumericalColumn,
+      [AxisRole.COLOR]: mockCategoricalColumn,
+      [AxisRole.FACET]: mockCategoricalColumn2,
+    };
+
+    it('should create a faceted stack bar chart', () => {
+      const result = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.dataset).toHaveLength(3);
+      expect(result.xAxis).toHaveLength(3);
+      expect(result.yAxis).toHaveLength(3);
+      expect(result.series).toHaveLength(3);
+      expect(result.grid).toHaveLength(3);
+      expect(result.series[1].type).toBe('bar');
+      expect(result.series[0].type).toBe('bar');
+    });
+
+    it('adds threshold line when enabled for each facet', () => {
+      const customStyles = {
+        ...defaultBarChartStyles,
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
+      const result = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        customStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(result.series[0].markLine).toMatchObject({
+        animation: false,
+        data: [{ itemStyle: { color: '#00FF00' }, yAxis: 15 }],
+        lineStyle: { type: 'solid', width: 2 },
+        symbol: 'none',
+      });
+
+      expect(result.series[1].markLine).toMatchObject({
+        animation: false,
+        data: [{ itemStyle: { color: '#00FF00' }, yAxis: 15 }],
+        lineStyle: { type: 'solid', width: 2 },
+        symbol: 'none',
+      });
+
+      expect(result.series[2].markLine).toMatchObject({
+        animation: false,
+        data: [{ itemStyle: { color: '#00FF00' }, yAxis: 15 }],
+        lineStyle: { type: 'solid', width: 2 },
+        symbol: 'none',
+      });
     });
   });
 });
