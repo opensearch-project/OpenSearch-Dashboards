@@ -13,14 +13,15 @@ import React from 'react';
 
 export interface EmptyTableCellProps {
   colName: string;
+  wrapCellText?: boolean;
 }
 
-export const EmptyTableCell: React.FC<EmptyTableCellProps> = ({ colName }) => {
+export const EmptyTableCell: React.FC<EmptyTableCellProps> = ({ colName, wrapCellText }) => {
   return (
     <td
       key={colName}
       data-test-subj="docTableField"
-      className="exploreDocTableCell eui-textTruncate"
+      className={`exploreDocTableCell${wrapCellText ? '' : ' eui-textTruncate'}`}
     >
       <span>-</span>
     </td>

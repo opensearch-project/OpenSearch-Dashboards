@@ -26,7 +26,7 @@ describe('pplSearchStrategyProvider', () => {
   let logger: Logger;
   let client: ILegacyClusterClient;
   let usage: SearchUsage;
-  const emptyRequestHandlerContext = ({} as unknown) as RequestHandlerContext;
+  let mockRequestHandlerContext: RequestHandlerContext;
 
   beforeEach(() => {
     config$ = of({} as SharedGlobalConfig);
@@ -38,6 +38,15 @@ describe('pplSearchStrategyProvider', () => {
       trackSuccess: jest.fn(),
       trackError: jest.fn(),
     } as SearchUsage;
+    mockRequestHandlerContext = ({
+      core: {
+        uiSettings: {
+          client: {
+            get: jest.fn().mockResolvedValue(500),
+          },
+        },
+      },
+    } as unknown) as RequestHandlerContext;
   });
 
   it('should return an object with a search method', () => {
@@ -72,7 +81,7 @@ describe('pplSearchStrategyProvider', () => {
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
-      emptyRequestHandlerContext,
+      mockRequestHandlerContext,
       ({
         body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
       } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
@@ -112,7 +121,7 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
-        emptyRequestHandlerContext,
+        mockRequestHandlerContext,
         ({
           body: { query: { query: 'source = table' } },
         } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
@@ -131,7 +140,7 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
-        emptyRequestHandlerContext,
+        mockRequestHandlerContext,
         ({
           body: { query: { query: 'source = table' } },
         } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
@@ -152,7 +161,7 @@ describe('pplSearchStrategyProvider', () => {
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
-        emptyRequestHandlerContext,
+        mockRequestHandlerContext,
         ({
           body: { query: { query: 'source = table' } },
         } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
@@ -161,6 +170,39 @@ describe('pplSearchStrategyProvider', () => {
     ).rejects.toThrowError();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(mockError.message));
     expect(usage.trackError).toHaveBeenCalled();
+  });
+
+  it('should read fetchSize from discover:sampleSize UI setting', async () => {
+    (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(200);
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = ({
+      describeQuery: mockDescribeQuery,
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      ({
+        body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(mockRequestHandlerContext.core.uiSettings.client.get).toHaveBeenCalledWith(
+      'discover:sampleSize'
+    );
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBe(200);
   });
 
   it('should handle empty search response', async () => {
@@ -186,7 +228,7 @@ describe('pplSearchStrategyProvider', () => {
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
-      emptyRequestHandlerContext,
+      mockRequestHandlerContext,
       ({
         body: { query: { query: 'source = empty_table', dataset: { id: 'empty-dataset' } } },
       } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
@@ -238,7 +280,7 @@ describe('pplSearchStrategyProvider', () => {
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
-      emptyRequestHandlerContext,
+      mockRequestHandlerContext,
       ({
         body: {
           query: { query: 'source = empty_table', dataset: { id: 'empty-dataset' } },
@@ -322,7 +364,7 @@ describe('pplSearchStrategyProvider', () => {
 
     const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
-      emptyRequestHandlerContext,
+      mockRequestHandlerContext,
       ({
         body: {
           query: { query: 'source = empty_table', dataset: { id: 'empty-dataset' } },

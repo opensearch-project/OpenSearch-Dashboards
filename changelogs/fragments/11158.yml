@@ -1,2 +1,0 @@
-fix:
-- Support content-encoding in `HttpAmazonESConnector` ([#11158](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11158))

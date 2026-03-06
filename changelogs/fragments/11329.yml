@@ -1,0 +1,2 @@
+feat:
+- Use html2canvas-pro to support csp nonce ([#11329](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11329))

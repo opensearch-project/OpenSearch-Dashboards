@@ -9,6 +9,7 @@ exports[`Table editing should show a save button 1`] = `
   >
     <EuiButtonIcon
       aria-label="Edit"
+      disabled={false}
       iconType="pencil"
       onClick={[Function]}
       size="s"
@@ -22,6 +23,7 @@ exports[`Table editing should show a save button 1`] = `
     <EuiButtonIcon
       aria-label="Delete"
       color="danger"
+      disabled={false}
       iconType="trash"
       onClick={[Function]}
       size="s"

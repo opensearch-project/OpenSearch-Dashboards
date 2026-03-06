@@ -1,0 +1,2 @@
+fix:
+- Improve chatbot input and message bubble layout ([#11327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11327))

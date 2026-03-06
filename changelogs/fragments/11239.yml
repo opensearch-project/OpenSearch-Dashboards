@@ -1,2 +1,0 @@
-fix:
-- Use URL param filters with saved search as fallback ([#11239](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11239))

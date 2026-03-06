@@ -1,0 +1,2 @@
+feat:
+- [Chat]Group consecutive completed tool calls ([#11332](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11332))

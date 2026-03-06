@@ -4,7 +4,6 @@
  */
 
 import { AggregationType } from '../../types';
-import { inferBucketSize } from '../../bar/bar_chart_utils';
 import { aggregateValues } from './utils/aggregation';
 
 interface BinConfig {
@@ -62,7 +61,7 @@ const getNiceNumber = (rawStep: number): number => {
  * @param options.aggregationField - Optional field to aggregate (if not provided, counts records)
  * @param options.aggregationType - Type of aggregation (defaults to COUNT if aggregationField not provided)
  *
- * @returns Function that takes data array and returns array of binned objects
+ * @returns Function that takes data array and returns array of binned objects with start, end, and value properties
  *
  * @example
  * // Example 1: Simple histogram (count occurrences)
@@ -82,9 +81,9 @@ const getNiceNumber = (rawStep: number): number => {
  *
  * // Output:
  * [
- *   { bucket: "0-10", value: 1 },
- *   { bucket: "10-20", value: 2 },
- *   { bucket: "20-30", value: 1 }
+ *   { start: 0, end: 10, value: 1 },
+ *   { start: 10, end: 20, value: 2 },
+ *   { start: 20, end: 30, value: 1 }
  * ]
  *
  * @example
@@ -107,9 +106,8 @@ const getNiceNumber = (rawStep: number): number => {
  *
  * // Output:
  * [
- *   { bucket: "5-12", value: 100 },
- *   { bucket: "12-18", value: 350 },
- *   { bucket: "18-25", value: 120 }
+ *   { start: 5, end: 25, value: 100 },
+ *   { start: 25, end: 45, value: 470 }
  * ]
  */
 export const bin = (options: {
@@ -152,7 +150,8 @@ export const bin = (options: {
 
     return [
       {
-        bucket: `${min}-${max}`,
+        start: min,
+        end: max,
         value: aggregatedValue,
       },
     ];
@@ -168,9 +167,8 @@ export const bin = (options: {
     const rawStep = (max - min) / binConfig.count;
     step = getNiceNumber(rawStep);
   } else {
-    // Priority 3: Infer from data and round to nice number
-    const inferredSize = inferBucketSize(data, binField);
-    const rawStep = inferredSize || (max - min) / 30; // fallback to 30 bins
+    // Priority 3: get step with default bucket count 30 and round to nice number
+    const rawStep = (max - min) / 30; // fallback to 30 bins
     step = getNiceNumber(rawStep);
   }
 
@@ -227,11 +225,9 @@ export const bin = (options: {
         aggregatedValue = aggregateValues(AggregationType.COUNT, binRange.values) ?? 0;
       }
 
-      // Format bucket as "start-end"
-      const bucket = `${binRange.start}-${binRange.end}`;
-
       return {
-        bucket,
+        start: binRange.start,
+        end: binRange.end,
         value: aggregatedValue,
       };
     });

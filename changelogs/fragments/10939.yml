@@ -1,2 +1,0 @@
-fix:
-- Fix wildcard pattern validation ([#10939](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10939))

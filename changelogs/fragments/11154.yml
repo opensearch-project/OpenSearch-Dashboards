@@ -1,2 +1,0 @@
-feat:
-- Remove MDS support for Prometheus connections ([#11154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11154))

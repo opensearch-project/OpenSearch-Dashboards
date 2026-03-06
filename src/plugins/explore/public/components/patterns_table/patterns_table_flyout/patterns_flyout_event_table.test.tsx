@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import moment from 'moment';
 import { PatternsFlyoutEventTable } from './patterns_flyout_event_table';
 import { useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -17,6 +18,19 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
   withOpenSearchDashboards: jest.fn((Component) => Component),
+}));
+
+jest.mock('../../../../../data/public', () => ({
+  UI_SETTINGS: {
+    DATE_FORMAT: 'dateFormat',
+  },
+}));
+
+jest.mock('../utils/utils', () => ({
+  createSearchPatternQueryWithSlice: jest.fn(
+    (_query, _field, _regex, pattern, _time, size, offset) =>
+      `mock query | where patterns_field = '${pattern}' | head ${size} from ${offset}`
+  ),
 }));
 
 describe('PatternsFlyoutEventTable', () => {
@@ -71,7 +85,10 @@ describe('PatternsFlyoutEventTable', () => {
       },
     },
     uiSettings: {
-      get: jest.fn().mockReturnValue(10),
+      get: jest.fn().mockImplementation((key: string) => {
+        if (key === 'dateFormat') return 'MMMM Do YYYY, HH:mm:ss.SSS';
+        return 10;
+      }),
     },
   };
 
@@ -111,9 +128,10 @@ describe('PatternsFlyoutEventTable', () => {
       expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
     });
 
-    expect(screen.getByText('2023-01-01T00:00:00Z')).toBeInTheDocument();
+    const dateFormat = 'MMMM Do YYYY, HH:mm:ss.SSS';
+    expect(screen.getByText(moment('2023-01-01T00:00:00Z').format(dateFormat))).toBeInTheDocument();
     expect(screen.getByText('Test message 1')).toBeInTheDocument();
-    expect(screen.getByText('2023-01-01T00:01:00Z')).toBeInTheDocument();
+    expect(screen.getByText(moment('2023-01-01T00:01:00Z').format(dateFormat))).toBeInTheDocument();
     expect(screen.getByText('Test message 2')).toBeInTheDocument();
   });
 
@@ -179,21 +197,17 @@ describe('PatternsFlyoutEventTable', () => {
     expect(lastSetFieldsCall.query.query).toContain(mockPatternString);
   });
 
-  it('throws an error when dataset or patterns field is missing', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
+  it('renders error callout when dataset or patterns field is missing', () => {
     (useSelector as jest.Mock).mockImplementation(() => undefined);
 
-    expect(() => {
-      render(
-        <PatternsFlyoutEventTable
-          patternString={mockPatternString}
-          totalItemCount={mockTotalItemCount}
-        />
-      );
-    }).toThrow('Dataset or patterns field is not appearing for event table');
+    render(
+      <PatternsFlyoutEventTable
+        patternString={mockPatternString}
+        totalItemCount={mockTotalItemCount}
+      />
+    );
 
-    consoleErrorSpy.mockRestore();
+    expect(screen.getByText('Missing dataset or patterns field')).toBeInTheDocument();
   });
 
   it('renders error callout when fetch fails', async () => {

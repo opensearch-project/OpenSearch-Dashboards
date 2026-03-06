@@ -11,7 +11,10 @@ import {
   ChatImplementationFunctions,
   Message,
   ChatWindowState,
+  ConversationMemoryProvider,
 } from './types';
+import { ChatScreenshotService } from './screenshot_service';
+import { LocalStorageMemoryProvider } from './local_storage_memory_provider';
 
 /**
  * Core chat service - manages infrastructure state
@@ -19,6 +22,8 @@ import {
 export class ChatService implements CoreService<ChatServiceSetup, ChatServiceStart> {
   private implementation?: ChatImplementationFunctions;
   private suggestedActionsService?: { registerProvider(provider: any): void };
+  private screenshotService: ChatScreenshotService;
+  private memoryProvider: ConversationMemoryProvider;
 
   // Core-managed infrastructure state
   private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
@@ -29,6 +34,12 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   });
   private windowOpenCallbacks = new Set<() => void>();
   private windowCloseCallbacks = new Set<() => void>();
+
+  constructor() {
+    this.screenshotService = new ChatScreenshotService();
+    // Initialize with default LocalStorage provider
+    this.memoryProvider = new LocalStorageMemoryProvider();
+  }
 
   private generateThreadId(): string {
     const timestamp = Date.now();
@@ -47,6 +58,20 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       },
 
       suggestedActionsService: this.suggestedActionsService,
+
+      setScreenshotPageContainerElement: (element: HTMLElement) => {
+        this.screenshotService.setPageContainerElement(element);
+      },
+
+      screenshot: this.screenshotService,
+
+      setMemoryProvider: (provider: ConversationMemoryProvider) => {
+        this.memoryProvider = provider;
+      },
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
     };
   }
 
@@ -157,6 +182,18 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       get suggestedActionsService() {
         return chatServiceInstance.suggestedActionsService;
       },
+
+      // Screenshot page container element (deprecated)
+      get screenshotPageContainerElement() {
+        return chatServiceInstance.screenshotService.getPageContainerElement();
+      },
+
+      // Screenshot service
+      screenshot: this.screenshotService,
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
     };
   }
 
@@ -165,5 +202,6 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
     this.suggestedActionsService = undefined;
     this.windowOpenCallbacks.clear();
     this.windowCloseCallbacks.clear();
+    this.screenshotService.stop();
   }
 }

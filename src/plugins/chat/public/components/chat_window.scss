@@ -1,0 +1,46 @@
+.chatWindow__screenshotRow {
+  padding: 8px;
+  background-color: $euiColorLightestShade;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  grid-area: screenshot;
+  margin-bottom: 8px;
+  height: 60px;
+  box-sizing: content-box;
+  overflow: hidden;
+
+  &.capturing {
+    grid-template-columns: auto;
+    place-items: center;
+  }
+
+  img {
+    width: 103px;
+    height: 60px;
+    object-fit: contain;
+    display: block;
+    background-color: white;
+  }
+
+  &__right {
+    display: grid;
+    grid-template-rows: auto auto;
+    align-content: space-between;
+
+    &__pageTitle {
+      /* stylelint-disable value-no-vendor-prefix */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      /* stylelint-enable value-no-vendor-prefix */
+      overflow: hidden;
+    }
+
+    &__timeAndButtons {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      justify-content: space-between;
+    }
+  }
+}

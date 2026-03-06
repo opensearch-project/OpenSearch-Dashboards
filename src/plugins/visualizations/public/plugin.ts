@@ -100,6 +100,8 @@ import { DashboardStart } from '../../dashboard/public';
 import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
 import { DocLinksStart } from '../../../core/public';
 import { createNewVisActions } from './wizard/new_vis_actions';
+import { AskAIVisualizeEmbeddableAction } from './actions/ask_ai_embeddable_action';
+import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -138,6 +140,7 @@ export interface VisualizationsStartDeps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
+  contextProvider?: import('../../context_provider/public').ContextProviderStart;
 }
 
 /**
@@ -184,7 +187,14 @@ export class VisualizationsPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
+    {
+      data,
+      expressions,
+      uiActions,
+      embeddable,
+      dashboard,
+      contextProvider,
+    }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
     const savedAugmentVisLoader = createSavedAugmentVisLoader({
@@ -204,6 +214,10 @@ export class VisualizationsPlugin
       application: core.application,
       savedObjects: core.savedObjects,
     });
+
+    // Register Ask AI action for visualizations
+    const askAIAction = new AskAIVisualizeEmbeddableAction(core, contextProvider);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIAction);
 
     setDataStart(data);
     setSavedAugmentVisLoader(savedAugmentVisLoader);

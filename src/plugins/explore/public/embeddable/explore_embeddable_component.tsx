@@ -146,6 +146,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       direction="column"
       responsive={false}
       data-test-subj="embeddedSavedExplore"
+      style={{ overflowX: 'auto' }}
     >
       <EuiFlexItem style={{ minHeight: 0 }} data-test-subj="osdExploreContainer">
         {getEmbeddableContent()}

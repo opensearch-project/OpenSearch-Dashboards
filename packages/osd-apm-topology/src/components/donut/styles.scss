@@ -1,0 +1,42 @@
+.celDonut {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.celDonutIcon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--osd-color-icon);
+
+  /* Ensure icon stays inside the donut */
+  z-index: 1;
+
+  /* Constrain <img> icons to fit within the icon container */
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+/* In dark mode, invert black SVG icons loaded via <img> to white.
+   The SVGs use fill="currentColor" which defaults to black in <img> context.
+   The .celestial--dark class is toggled on :root by the Celestial component. */
+:root.celestial--dark .celDonutIcon img {
+  filter: brightness(0) invert(1);
+}
+
+.celDonutInverted {
+  fill: var(--osd-color-container-default);
+
+  :is(path, line, circle, g, rect) {
+    fill: var(--osd-color-container-default);
+  }
+}

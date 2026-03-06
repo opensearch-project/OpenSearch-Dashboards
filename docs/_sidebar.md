@@ -127,6 +127,7 @@
     - [Osd ace](../packages/osd-ace/README.md)
     - [Osd agents](../packages/osd-agents/README.md)
     - [Osd apm config loader](../packages/osd-apm-config-loader/README.md)
+    - [Osd apm topology](../packages/osd-apm-topology/README.md)
     - [Osd babel preset](../packages/osd-babel-preset/README.md)
     - [Osd config](../packages/osd-config/README.md)
     - [Osd config schema](../packages/osd-config-schema/README.md)
@@ -211,6 +212,7 @@
     - [Opensearch dashboards.release notes 3.2.0](../release-notes/opensearch-dashboards.release-notes-3.2.0.md)
     - [Opensearch dashboards.release notes 3.3.0](../release-notes/opensearch-dashboards.release-notes-3.3.0.md)
     - [Opensearch dashboards.release notes 3.4.0](../release-notes/opensearch-dashboards.release-notes-3.4.0.md)
+    - [Opensearch dashboards.release notes 3.5.0](../release-notes/opensearch-dashboards.release-notes-3.5.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)

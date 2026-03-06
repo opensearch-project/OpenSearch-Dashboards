@@ -4,61 +4,92 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonIcon, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ChatLayoutMode } from './chat_header_button';
+import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import './chat_header.scss';
 
 interface ChatHeaderProps {
-  layoutMode: ChatLayoutMode;
+  conversationName?: string;
   isStreaming: boolean;
-  onToggleLayout?: () => void;
   onNewChat: () => void;
   onClose: () => void;
+  onShowHistory?: () => void;
+  showBackButton?: boolean;
+  onBack?: () => void;
+  title?: string;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  layoutMode,
+  conversationName = '',
   isStreaming,
-  onToggleLayout,
   onNewChat,
   onClose,
+  onShowHistory,
+  showBackButton = false,
+  onBack,
+  title,
 }) => {
+  const displayTitle = title || conversationName;
+
   return (
     <div className="chatHeader">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+        className="chatHeader__titleGroup"
+      >
         <EuiFlexItem grow={false}>
-          <EuiText size="m">
-            <h3>Ask AI</h3>
-          </EuiText>
+          {showBackButton && onBack ? (
+            <EuiButtonIcon
+              iconType="arrowLeft"
+              onClick={onBack}
+              aria-label={i18n.translate('chat.header.goBackAriaLabel', {
+                defaultMessage: 'Go back',
+              })}
+              size="m"
+              color="text"
+            />
+          ) : (
+            <EuiButtonIcon
+              iconType="chatLeft"
+              onClick={onShowHistory}
+              aria-label={i18n.translate('chat.header.showHistoryAriaLabel', {
+                defaultMessage: 'Show conversation history',
+              })}
+              size="m"
+              color="text"
+            />
+          )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning" className="chatHeader__experimentalBadge">
-            Experimental
-          </EuiBadge>
-        </EuiFlexItem>
+        {displayTitle && (
+          <EuiFlexItem grow={true} className="chatHeader__titleContainer">
+            <EuiText size="m">
+              <h3 className="chatHeader__title">{displayTitle}</h3>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <div className="chatHeader__buttons">
-        {onToggleLayout && (
-          <EuiButtonIcon
-            iconType={layoutMode === ChatLayoutMode.FULLSCREEN ? 'minimize' : 'fullScreen'}
-            onClick={onToggleLayout}
-            disabled={isStreaming}
-            aria-label={
-              layoutMode === ChatLayoutMode.FULLSCREEN
-                ? 'Switch to sidecar'
-                : 'Switch to fullscreen'
-            }
-            size="m"
-          />
-        )}
         <EuiButtonIcon
-          iconType="plus"
+          iconType="documentEdit"
           onClick={onNewChat}
           disabled={isStreaming}
-          aria-label="New chat"
+          aria-label={i18n.translate('chat.header.newChatAriaLabel', {
+            defaultMessage: 'New chat',
+          })}
           size="m"
+          color="text"
         />
-        <EuiButtonIcon iconType="cross" onClick={onClose} aria-label="Close chatbot" size="m" />
+        <EuiButtonIcon
+          iconType="cross"
+          onClick={onClose}
+          aria-label={i18n.translate('chat.header.closeChatAriaLabel', {
+            defaultMessage: 'Close chatbot',
+          })}
+          size="m"
+          color="text"
+        />
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ interface Props {
 }
 
 const DEFAULT_GRID = {
-  top: 50,
+  top: 15,
   right: 30,
   bottom: 50,
   left: 40,
