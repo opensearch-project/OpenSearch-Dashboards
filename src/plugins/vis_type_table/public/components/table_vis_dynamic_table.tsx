@@ -20,6 +20,22 @@ import {
 } from '@elastic/eui';
 import dompurify from 'dompurify';
 import { orderBy } from 'lodash';
+
+dompurify.addHook('uponSanitizeAttribute', (node, event) => {
+  if (event.attrName === 'target') {
+    event.forceKeepAttr = true;
+  }
+});
+
+dompurify.addHook('afterSanitizeElements', (node) => {
+  if (node instanceof Element && node.tagName?.toUpperCase() === 'A') {
+    const target = node.getAttribute('target');
+    if (target && target !== '_self') {
+      node.setAttribute('rel', 'noopener noreferrer');
+    }
+  }
+});
+
 import { i18n } from '@osd/i18n';
 import './table_vis_dynamic_table.scss';
 import { FormattedTableContext } from '../table_vis_response_handler';
