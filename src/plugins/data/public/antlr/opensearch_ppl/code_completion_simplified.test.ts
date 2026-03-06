@@ -623,6 +623,20 @@ describe('ppl code_completion', () => {
         });
       });
 
+      it('should not suggest pipe-only commands at the empty root runtime position', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern(' ', runtimeIndexPattern);
+
+        checkSuggestionsContain(result, {
+          text: 'SOURCE',
+          type: monaco.languages.CompletionItemKind.Function,
+        });
+        checkSuggestionsShouldNotContain(result, { text: 'WHERE' });
+        checkSuggestionsShouldNotContain(result, { text: 'MVCOMBINE' });
+      });
+
       it('should honor backend pipeStartRuleIndex when provided', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
         const parseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
@@ -693,6 +707,18 @@ describe('ppl code_completion', () => {
         const result = await getSimpleSuggestionsForIndexPattern('source ', runtimeIndexPattern);
 
         expect(result.some((s) => s.text === '=')).toBeTruthy();
+      });
+
+      it('should suggest fields after where in pipe-first runtime path', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern('| where ', runtimeIndexPattern);
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
       });
 
       it('should suggest equals after rex field on runtime path', async () => {

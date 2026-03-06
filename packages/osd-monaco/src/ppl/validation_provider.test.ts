@@ -1,0 +1,99 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { PPLValidationResult } from './ppl_language_analyzer';
+import {
+  __resetPPLValidationProviderForTests,
+  clearPPLValidationContext,
+  registerPPLValidationProvider,
+  resolvePPLValidationResult,
+  setPPLValidationContext,
+} from './validation_provider';
+
+describe('PPL validation provider bridge', () => {
+  const model = {} as any;
+  const fallbackResult: PPLValidationResult = { isValid: true, errors: [] };
+
+  beforeEach(() => {
+    __resetPPLValidationProviderForTests();
+  });
+
+  it('should use the registered provider result when available', async () => {
+    const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
+    const runtimeResult: PPLValidationResult = {
+      isValid: false,
+      errors: [{ message: 'runtime error', line: 1, column: 2 }],
+    };
+
+    setPPLValidationContext(model, {
+      useRuntimeGrammar: true,
+      dataSourceId: 'ds-1',
+      dataSourceVersion: '3.6.0',
+    });
+    registerPPLValidationProvider(async ({ context, content }) => {
+      expect(content).toBe('| where status = 200');
+      expect(context?.dataSourceId).toBe('ds-1');
+      return runtimeResult;
+    });
+
+    await expect(
+      resolvePPLValidationResult(model, '| where status = 200', fallbackValidate)
+    ).resolves.toEqual(runtimeResult);
+    expect(fallbackValidate).not.toHaveBeenCalled();
+  });
+
+  it('should fall back when no provider is registered', async () => {
+    const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
+
+    await expect(
+      resolvePPLValidationResult(model, 'source=logs', fallbackValidate)
+    ).resolves.toEqual(fallbackResult);
+    expect(fallbackValidate).toHaveBeenCalledWith('source=logs');
+  });
+
+  it('should fall back when provider returns null', async () => {
+    const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
+
+    registerPPLValidationProvider(async () => null);
+
+    await expect(
+      resolvePPLValidationResult(model, 'source=logs', fallbackValidate)
+    ).resolves.toEqual(fallbackResult);
+    expect(fallbackValidate).toHaveBeenCalledWith('source=logs');
+  });
+
+  it('should fall back when provider throws', async () => {
+    const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
+
+    registerPPLValidationProvider(async () => {
+      throw new Error('runtime failed');
+    });
+
+    await expect(
+      resolvePPLValidationResult(model, 'source=logs', fallbackValidate)
+    ).resolves.toEqual(fallbackResult);
+    expect(fallbackValidate).toHaveBeenCalledWith('source=logs');
+  });
+
+  it('should clear model context', async () => {
+    const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
+    const provider = jest.fn().mockResolvedValue(null);
+
+    setPPLValidationContext(model, {
+      useRuntimeGrammar: true,
+      dataSourceId: 'ds-1',
+    });
+    clearPPLValidationContext(model);
+    registerPPLValidationProvider(provider);
+
+    await resolvePPLValidationResult(model, 'source=logs', fallbackValidate);
+
+    expect(provider).toHaveBeenCalledWith({
+      content: 'source=logs',
+      model,
+      context: undefined,
+    });
+  });
+});
