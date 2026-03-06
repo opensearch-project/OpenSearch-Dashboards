@@ -586,14 +586,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       />
 
       {isLoading ? (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          gap: '16px'
-        }}>
+        <div className="chatWindow__loadingContainer">
           <EuiLoadingSpinner size="xl" />
           <EuiText color="subdued">
             {i18n.translate('chat.window.loadingMessage', {
@@ -602,15 +595,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           </EuiText>
         </div>
       ) : restoreError ? (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          gap: '16px',
-          padding: '24px'
-        }}>
+        <div className="chatWindow__errorContainer">
           <EuiText color="danger" textAlign="center">
             <h3>
               {i18n.translate('chat.window.restoreErrorTitle', {
