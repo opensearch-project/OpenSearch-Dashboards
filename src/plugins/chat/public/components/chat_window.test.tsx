@@ -460,8 +460,10 @@ describe('ChatWindow', () => {
       // Get the last call to ChatEventHandler constructor
       const lastCall = ChatEventHandler.mock.calls[ChatEventHandler.mock.calls.length - 1];
 
-      // The confirmationService should be the 6th argument (index 5)
-      expect(lastCall[5]).toBe(mockConfirmationService);
+      // The constructor now takes a single config object as the first argument
+      const config = lastCall[0];
+      expect(config).toBeDefined();
+      expect(config.confirmationService).toBe(mockConfirmationService);
     });
 
     it('should subscribe to confirmationService pending confirmations on mount', () => {

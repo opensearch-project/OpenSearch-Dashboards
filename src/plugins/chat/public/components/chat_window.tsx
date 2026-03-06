@@ -71,11 +71,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
-  const loadingMessageIdRef = useRef<string | null>(null);
   const loadingAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
+  const [startResponse, setStartResponse] = useState(false);
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -104,14 +104,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   // Create the event handler using useMemo
   const eventHandler = useMemo(
     () =>
-      new ChatEventHandler(
-        service,
+      new ChatEventHandler({
+        assistantActionService: service,
         chatService,
-        setTimeline,
-        setIsStreaming,
-        () => timelineRef.current,
-        confirmationService
-      ),
+        confirmationService,
+        callbacks: {
+          onTimelineUpdate: setTimeline,
+          onStreamingStateChange: setIsStreaming,
+          onStartResponse: setStartResponse,
+          getTimeline: () => timelineRef.current,
+        },
+      }),
     [service, chatService, confirmationService]
   );
 
@@ -243,6 +246,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   ) => {
     isStreamingRef.current = true;
     setIsStreaming(true);
+    setStartResponse(false);
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
@@ -257,18 +261,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,  // For regular messages, raw and content are the same
       };
 
-      // Add loading assistant message
-      const loadingMessageId = `loading-${Date.now()}`;
-      loadingMessageIdRef.current = loadingMessageId;
-      const loadingMessage: Message = {
-        id: loadingMessageId,
-        role: 'assistant',
-        content: '',
-      };
-
-      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
-
-      let firstResponseReceived = false;
+      setTimeline((prev) => [...prev, timelineUserMessage]);
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -278,30 +271,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(event.runId);
           }
 
-          // Remove loading message on first response
-          if (!firstResponseReceived) {
-            firstResponseReceived = true;
-            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-            loadingMessageIdRef.current = null;
-          }
-
           // Handle all events through the event handler service
           await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
-          // Remove loading message on error
-          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          loadingMessageIdRef.current = null;
           isStreamingRef.current = false;
+          setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
         },
         complete: () => {
-          // Remove loading message if still present
-          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          loadingMessageIdRef.current = null;
           isStreamingRef.current = false;
+          setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
@@ -427,13 +409,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleStop = useCallback(() => {
     // Abort the current streaming request
     chatService.abort();
-
-    // Remove loading message if it exists
-    if (loadingMessageIdRef.current) {
-      setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageIdRef.current));
-      loadingMessageIdRef.current = null;
-    }
-
     // Unsubscribe from current observable if exists
     if (currentSubscriptionRef.current) {
       currentSubscriptionRef.current.unsubscribe();
@@ -443,6 +418,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
+    setStartResponse(false);
   }, [chatService]);
 
   const handleApproveConfirmation = useCallback(() => {
@@ -610,14 +586,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       />
 
       {isLoading ? (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          gap: '16px'
-        }}>
+        <div className="chatWindow__loadingContainer">
           <EuiLoadingSpinner size="xl" />
           <EuiText color="subdued">
             {i18n.translate('chat.window.loadingMessage', {
@@ -626,15 +595,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           </EuiText>
         </div>
       ) : restoreError ? (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          gap: '16px',
-          padding: '24px'
-        }}>
+        <div className="chatWindow__errorContainer">
           <EuiText color="danger" textAlign="center">
             <h3>
               {i18n.translate('chat.window.restoreErrorTitle', {
@@ -668,6 +629,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
             {...enhancedProps}
+            startResponse={startResponse}
           />
 
           {

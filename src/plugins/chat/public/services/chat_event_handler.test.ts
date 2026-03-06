@@ -44,6 +44,7 @@ describe('ChatEventHandler', () => {
   let chatEventHandler: ChatEventHandler;
   let mockOnTimelineUpdate: jest.Mock;
   let mockOnStreamingStateChange: jest.Mock;
+  let mockOnStartResponse: jest.Mock;
   let mockGetTimeline: jest.Mock;
   let timeline: Message[];
 
@@ -61,16 +62,20 @@ describe('ChatEventHandler', () => {
       timeline = updater(timeline);
     });
     mockOnStreamingStateChange = jest.fn();
+    mockOnStartResponse = jest.fn();
     mockGetTimeline = jest.fn(() => timeline);
 
-    chatEventHandler = new ChatEventHandler(
-      mockAssistantActionService,
-      mockChatService,
-      mockOnTimelineUpdate,
-      mockOnStreamingStateChange,
-      mockGetTimeline,
-      mockConfirmationService
-    );
+    chatEventHandler = new ChatEventHandler({
+      assistantActionService: mockAssistantActionService,
+      chatService: mockChatService,
+      confirmationService: mockConfirmationService,
+      callbacks: {
+        onTimelineUpdate: mockOnTimelineUpdate,
+        onStreamingStateChange: mockOnStreamingStateChange,
+        onStartResponse: mockOnStartResponse,
+        getTimeline: mockGetTimeline,
+      },
+    });
   });
 
   describe('handleEvent', () => {
@@ -676,6 +681,143 @@ describe('ChatEventHandler', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith('Tool call not found: non-existent-tool');
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe('onStartResponse callback', () => {
+    it('should call onStartResponse(true) when TEXT_MESSAGE_START event is handled', async () => {
+      const messageId = 'msg-123';
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId,
+      } as TextMessageStartEvent);
+
+      // Verify onStartResponse was called with true
+      expect(mockOnStartResponse).toHaveBeenCalledWith(true);
+    });
+
+    it('should call onStartResponse(true) when TOOL_CALL_START event is handled', async () => {
+      const toolCallId = 'tool-123';
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      // Verify onStartResponse was called with true
+      expect(mockOnStartResponse).toHaveBeenCalledWith(true);
+    });
+
+    it('should call onStartResponse(false) when tool result response completes', async () => {
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      // Mock sendToolResult to return observable that completes
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      let completeCallback: any;
+      const mockObservable = {
+        subscribe: jest.fn((callbacks) => {
+          completeCallback = callbacks.complete;
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      // Trigger tool call flow
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Clear previous calls to focus on the completion callback
+      mockOnStartResponse.mockClear();
+
+      // Trigger completion
+      completeCallback();
+
+      // Verify onStartResponse was called with false on completion
+      expect(mockOnStartResponse).toHaveBeenCalledWith(false);
+    });
+
+    it('should call onStartResponse(false) when tool result response errors', async () => {
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      // Mock sendToolResult to return observable that errors
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      let errorCallback: any;
+      const mockObservable = {
+        subscribe: jest.fn((callbacks) => {
+          errorCallback = callbacks.error;
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      // Trigger tool call flow
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Clear previous calls to focus on the error callback
+      mockOnStartResponse.mockClear();
+
+      // Trigger error
+      errorCallback(new Error('Test error'));
+
+      // Verify onStartResponse was called with false on error
+      expect(mockOnStartResponse).toHaveBeenCalledWith(false);
     });
   });
 
