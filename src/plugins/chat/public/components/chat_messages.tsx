@@ -225,7 +225,7 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
   return result;
 };
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({
+const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
   isStreaming,
@@ -453,3 +453,5 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     </>
   );
 };
+
+export const ChatMessages = React.memo(ChatMessagesComponent);

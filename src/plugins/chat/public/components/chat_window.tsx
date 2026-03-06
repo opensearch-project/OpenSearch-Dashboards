@@ -74,6 +74,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const loadingAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
+  const [toolCallStates, setToolCallStates] = useState<Map<string, any>>(new Map());
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
 
@@ -125,6 +126,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         // Store tools for when we send messages
         (chatService as any).availableTools = state.toolDefinitions;
       }
+      // Update tool call states
+      setToolCallStates(state.toolCallStates);
     });
 
     return () => subscription.unsubscribe();
@@ -354,7 +357,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   };
 
-  const handleResendMessage = async (message: Message) => {
+  const handleResendMessage = useCallback(async (message: Message) => {
     // Use ref for immediate check since React 18 batches state updates
     if (isStreamingRef.current) return;
 
@@ -394,7 +397,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setInput('');
 
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
-  };
+  }, [timeline, subscribeToMessageStream]);
 
   const handleNewChat = useCallback(() => {
     chatService.newThread();
@@ -442,11 +445,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   }, [capturePageContainer]);
 
-  const currentState = service.getCurrentState();
-  const enhancedProps = {
-    toolCallStates: currentState.toolCallStates,
-    getActionRenderer: service.getActionRenderer,
-  };
+  const enhancedProps = useMemo(() => {
+    return {
+      toolCallStates,
+      getActionRenderer: service.getActionRenderer,
+    };
+  }, [toolCallStates, service]);
 
   // Get conversation name from first user message with text content
   const conversationName = useMemo(() => {
