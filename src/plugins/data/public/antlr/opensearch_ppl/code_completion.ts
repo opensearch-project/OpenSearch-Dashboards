@@ -421,9 +421,26 @@ function getRuntimeRerunRules(
   const rerun: number[] = [];
   const spaceToken = resolveSpaceToken(grammar);
 
+  const ruleLogicalExpression = ruleIndex(grammar, 'logicalExpression');
+  const rulePplCommands = ruleIndex(grammar, 'pplCommands');
   const ruleSearchCommand = ruleIndex(grammar, 'searchCommand');
   const ruleSearchComparisonOperator = ruleIndex(grammar, 'searchComparisonOperator');
   const ruleComparisonOperator = ruleIndex(grammar, 'comparisonOperator');
+
+  // Mirror compiled behavior: when logicalExpression appears via pipeline commands
+  // (not via pplCommands/search start), rerun without this preferred rule so C3
+  // can expose descendants like fieldExpression/qualifiedName.
+  if (
+    ruleLogicalExpression !== INVALID_RULE_INDEX &&
+    rules.has(ruleLogicalExpression) &&
+    rulePplCommands !== INVALID_RULE_INDEX
+  ) {
+    const logicalRule = rules.get(ruleLogicalExpression) as { ruleList?: number[] } | undefined;
+    const parentRuleList = logicalRule?.ruleList ?? [];
+    if (!parentRuleList.includes(rulePplCommands)) {
+      rerun.push(ruleLogicalExpression);
+    }
+  }
 
   // searchCommand: rerun to expand SEARCH/SOURCE/INDEX tokens
   // (unless the context is DESCRIBE/SHOW which has its own path)
@@ -521,6 +538,7 @@ function enrichRuntimeResult(
 
   // Resolve rule indices by name
   const ruleStatsFunction = ruleIndex(grammar, 'statsFunction');
+  const rulePplCommands = ruleIndex(grammar, 'pplCommands');
   const ruleFieldList = ruleIndex(grammar, 'fieldList');
   const ruleWcFieldList = ruleIndex(grammar, 'wcFieldList');
   const ruleSortField = ruleIndex(grammar, 'sortField');
@@ -553,7 +571,6 @@ function enrichRuntimeResult(
       case 'positionFunctionName':
       case 'integerLiteral':
       case 'decimalLiteral':
-      case 'searchableKeyWord':
       case 'keywordsCanBeId':
       case 'takeAggFunction':
         break;
@@ -566,6 +583,36 @@ function enrichRuntimeResult(
       case 'searchComparisonOperator':
         // Handled by rerun logic — no enrichment flags needed
         break;
+
+      case 'logicalExpression': {
+        // Runtime fallback: if completion is inside pipeline logical expressions
+        // (e.g. `| where `), prefer schema-field suggestions even when C3 only
+        // returns expression/function tokens.
+        if (rulePplCommands !== INVALID_RULE_INDEX && !parentRuleList.includes(rulePplCommands)) {
+          const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
+          if (!lastToken || ![ID, BQUOTA, DOT].includes(lastToken.token.type)) {
+            shouldSuggestColumns = true;
+          }
+        }
+        break;
+      }
+
+      case 'searchableKeyWord': {
+        // Runtime fallback: some grammar/version combinations surface only
+        // searchableKeyWord at command-argument boundaries (e.g. `| where `).
+        // When the cursor is at the first argument token position in a segment,
+        // ensure fields are available without relying on command-specific names.
+        const isFirstArgumentPosition = isAtFirstArgumentPositionInSegmentRT(
+          tokenStream,
+          cursorTokenIndex,
+          spaceToken,
+          PIPE
+        );
+        if (isFirstArgumentPosition) {
+          shouldSuggestColumns = true;
+        }
+        break;
+      }
 
       case 'searchCommand': {
         // Handled by rerun logic
@@ -772,6 +819,40 @@ function findFirstNonSpaceTokenAfterPipeRT(
   }
 
   return firstNonSpaceToken;
+}
+
+/**
+ * Returns true when the cursor is at the first argument position within the
+ * current query segment (after the most recent pipe, if any).
+ *
+ * Example:
+ * - `| where ` -> true (one non-space token in segment: `where`)
+ * - `| where field` -> false
+ */
+function isAtFirstArgumentPositionInSegmentRT(
+  tokenStream: TokenStream,
+  cursorIndex: number,
+  spaceToken: number,
+  pipeToken: number
+): boolean {
+  let segmentStart = 0;
+  for (let i = cursorIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (token?.type === pipeToken) {
+      segmentStart = i + 1;
+      break;
+    }
+  }
+
+  let nonSpaceTokenCount = 0;
+  for (let i = segmentStart; i < cursorIndex; i++) {
+    const token = tokenStream.get(i);
+    if (!token || token.type === spaceToken || token.type === Token.EOF) continue;
+    nonSpaceTokenCount++;
+    if (nonSpaceTokenCount > 1) return false;
+  }
+
+  return nonSpaceTokenCount === 1;
 }
 
 /** Cache for runtime operator token sets, keyed by grammarHash */
