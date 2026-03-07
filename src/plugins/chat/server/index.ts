@@ -15,6 +15,8 @@ export const config: PluginConfigDescriptor<ChatConfigType> = {
   exposeToBrowser: {
     enabled: true,
     agUiUrl: true,
+    maxFileUploadBytes: true,
+    maxFileAttachments: true,
   },
 };
 

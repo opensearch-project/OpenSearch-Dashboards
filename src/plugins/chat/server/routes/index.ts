@@ -9,12 +9,21 @@ import {
   IRouter,
   Logger,
   OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponseFactory,
   Capabilities,
 } from '../../../../core/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
 import { getMemoryContainerId } from './utils/get_memory_container_id';
+import {
+  CHAT_ALLOWED_FILE_TYPES,
+  CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
+} from '../../common';
+
+const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
+/** Base64 encoding increases payload size by ~33%; 1.4 provides margin. */
+const BASE64_OVERHEAD_FACTOR = 1.4;
 
 /**
  * Forward request to external AG-UI server
@@ -22,12 +31,14 @@ import { getMemoryContainerId } from './utils/get_memory_container_id';
 async function forwardToAgUI(
   agUiUrl: string,
   request: OpenSearchDashboardsRequest,
-  response: any,
+  response: OpenSearchDashboardsResponseFactory,
   dataSourceId?: string,
   logger?: Logger
 ) {
   // Prepare request body - include dataSourceId if provided
-  const requestBody = dataSourceId ? { ...(request.body || {}), dataSourceId } : request.body;
+  const requestBody = dataSourceId
+    ? { ...((request.body as Record<string, unknown>) || {}), dataSourceId }
+    : request.body;
 
   logger?.debug('Forwarding to external AG-UI', { agUiUrl, dataSourceId });
 
@@ -88,7 +99,9 @@ export function defineRoutes(
     | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
     | undefined,
   mlCommonsAgentId?: string,
-  observabilityAgentId?: string
+  observabilityAgentId?: string,
+  maxFileUploadBytes?: number,
+  maxFileAttachments: number = DEFAULT_MAX_FILE_ATTACHMENTS
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -183,6 +196,18 @@ export function defineRoutes(
     }
   );
 
+  /**
+   * Body parser limit for the proxy route. Applies to the entire request body
+   * (conversation history + attachments), not just new attachments.
+   * Formula: max attachments × max size per file × base64 overhead (~1.4×).
+   * Operators should consider memory and DoS implications when configuring very
+   * high limits.
+   */
+  const proxyMaxBytes =
+    maxFileUploadBytes !== undefined
+      ? Math.ceil(maxFileUploadBytes * maxFileAttachments * BASE64_OVERHEAD_FACTOR)
+      : undefined;
+
   // Proxy route for AG-UI requests
   router.post(
     {
@@ -203,11 +228,48 @@ export function defineRoutes(
           })
         ),
       },
+      options: {
+        body: {
+          ...(proxyMaxBytes ? { maxBytes: proxyMaxBytes } : {}),
+        },
+      },
     },
     async (context, request, response) => {
       const dataSourceId = request.query?.dataSourceId;
 
       try {
+        // Validate MIME types across all messages
+        for (const msg of request.body.messages) {
+          const parts = Array.isArray(msg.content) ? msg.content : [];
+          for (const part of parts) {
+            if (part.type === 'binary' && !ALLOWED_MIME_TYPES.has(part.mimeType)) {
+              return response.badRequest({
+                body: {
+                  message: `File type '${part.mimeType}' is not allowed. Allowed types: ${[
+                    ...ALLOWED_MIME_TYPES,
+                  ].join(', ')}`,
+                },
+              });
+            }
+          }
+        }
+
+        // Enforce attachment limit on the newest user message only (not full history)
+        const messages = request.body.messages;
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].role === 'user' && Array.isArray(messages[i].content)) {
+            const binaryCount = messages[i].content.filter((p: any) => p.type === 'binary').length;
+            if (binaryCount > maxFileAttachments) {
+              return response.badRequest({
+                body: {
+                  message: `Too many file attachments (${binaryCount}). Maximum allowed: ${maxFileAttachments}`,
+                },
+              });
+            }
+            break;
+          }
+        }
+
         // Inject server-side system prompt if present
         injectSystemPrompt(request.body.messages, request.body.forwardedProps?.queryAssistLanguage);
 

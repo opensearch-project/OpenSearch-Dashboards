@@ -64,6 +64,9 @@ describe('ChatPlugin', () => {
       uiSettings: {},
       chat: {},
       workspaces: {},
+      http: {
+        basePath: { prepend: jest.fn((path: string) => path) },
+      },
     };
 
     // Mock dependencies
@@ -106,11 +109,12 @@ describe('ChatPlugin', () => {
     it('should initialize chat service when enabled', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      // ChatService is called with uiSettings, core chat service, and workspaces
+      // ChatService is called with uiSettings, core chat service, workspaces, and http
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.http
       );
     });
 
@@ -137,11 +141,12 @@ describe('ChatPlugin', () => {
 
       const startContract = testPlugin.start(mockCoreStart, mockDeps);
 
-      // ChatService should still be created with uiSettings, core chat service, and workspaces
+      // ChatService should still be created with uiSettings, core chat service, workspaces, and http
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.http
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -153,7 +158,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.http
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -216,7 +222,8 @@ describe('ChatPlugin', () => {
         expect(ChatService).toHaveBeenCalledWith(
           mockCoreStart.uiSettings,
           mockCoreStart.chat,
-          mockCoreStart.workspaces
+          mockCoreStart.workspaces,
+          mockCoreStart.http
         );
       });
     });
