@@ -270,7 +270,7 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATIONS.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
