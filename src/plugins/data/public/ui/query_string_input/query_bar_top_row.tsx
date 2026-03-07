@@ -139,7 +139,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     }),
     keys: 'r',
     execute: () => {
-      onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
+      onClickSubmitButton({ preventDefault: () => { } } as React.MouseEvent<HTMLButtonElement>);
     },
   });
 
@@ -251,6 +251,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       <EuiFlexItem>
         <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
+          registerKeyboardShortcut={true}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={props.query!}
