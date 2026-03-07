@@ -17,7 +17,6 @@ function applyValidationContext(
   if (!model) {
     return;
   }
-
   setPPLValidationContext(model, context);
 }
 
@@ -72,6 +71,10 @@ export function attachPPLGrammarRefresh(
       return;
     }
 
+    // Sync the latest context to the model before revalidating.
+    // The context may have changed since it was first attached (e.g. useRuntimeGrammar
+    // was false at mount time because the grammar wasn't cached yet).
+    setPPLValidationContext(model, context);
     void revalidateModel(model);
   });
 }

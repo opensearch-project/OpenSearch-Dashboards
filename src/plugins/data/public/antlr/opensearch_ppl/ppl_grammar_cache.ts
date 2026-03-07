@@ -72,6 +72,86 @@ function buildRuleNameToIndex(parserRuleNames: string[]): Map<string, number> {
   return map;
 }
 
+function isFiniteInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && Number.isFinite(value);
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isStringOrNullArray(value: unknown): value is Array<string | null> {
+  return Array.isArray(value) && value.every((item) => item === null || typeof item === 'string');
+}
+
+function isNumberArray(value: unknown): value is number[] {
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === 'number' && Number.isFinite(item))
+  );
+}
+
+function isRecordOfNumbers(value: unknown): value is Record<string, number> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((item) => typeof item === 'number' && Number.isFinite(item))
+  );
+}
+
+function isValidBundleShape(bundle: unknown): bundle is PPLArtifactBundle {
+  if (typeof bundle !== 'object' || bundle === null) {
+    return false;
+  }
+
+  const candidate = bundle as Partial<PPLArtifactBundle>;
+
+  if (
+    !isNumberArray(candidate.lexerSerializedATN) ||
+    !isNumberArray(candidate.parserSerializedATN) ||
+    !isStringArray(candidate.lexerRuleNames) ||
+    !isStringArray(candidate.parserRuleNames) ||
+    !isStringArray(candidate.channelNames) ||
+    !isStringArray(candidate.modeNames) ||
+    !isStringOrNullArray(candidate.literalNames) ||
+    !isStringOrNullArray(candidate.symbolicNames) ||
+    !isFiniteInteger(candidate.startRuleIndex) ||
+    typeof candidate.grammarHash !== 'string'
+  ) {
+    return false;
+  }
+
+  if (
+    candidate.startRuleIndex < 0 ||
+    candidate.startRuleIndex >= candidate.parserRuleNames.length
+  ) {
+    return false;
+  }
+
+  if (
+    candidate.pipeStartRuleIndex !== undefined &&
+    (!isFiniteInteger(candidate.pipeStartRuleIndex) ||
+      candidate.pipeStartRuleIndex < 0 ||
+      candidate.pipeStartRuleIndex >= candidate.parserRuleNames.length)
+  ) {
+    return false;
+  }
+
+  if (candidate.tokenDictionary !== undefined && !isRecordOfNumbers(candidate.tokenDictionary)) {
+    return false;
+  }
+
+  if (candidate.ignoredTokens !== undefined && !isNumberArray(candidate.ignoredTokens)) {
+    return false;
+  }
+
+  if (candidate.rulesToVisit !== undefined && !isNumberArray(candidate.rulesToVisit)) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * In-memory cache for PPL grammar artifacts, keyed by datasource ID.
  * Supports multi-datasource environments where each backend may have
@@ -384,7 +464,7 @@ class PPLGrammarCache {
         clearTimeout(timeout);
       }
 
-      if (!bundle || !bundle.lexerSerializedATN || !bundle.parserSerializedATN) {
+      if (!isValidBundleShape(bundle)) {
         return null;
       }
 
@@ -414,9 +494,9 @@ class PPLGrammarCache {
         grammarHash: bundle.grammarHash,
         lastUsed: Date.now(),
         backendVersion: this.versionCache.get(cacheKey) || '',
-        tokenDictionary: bundle.tokenDictionary,
-        ignoredTokens: bundle.ignoredTokens,
-        rulesToVisit: bundle.rulesToVisit,
+        tokenDictionary: (bundle.tokenDictionary ?? {}) as TokenDictionary,
+        ignoredTokens: bundle.ignoredTokens ?? [],
+        rulesToVisit: bundle.rulesToVisit ?? [],
         runtimeSymbolicNameToTokenType: buildSymbolicNameToTokenType(bundle.symbolicNames),
         runtimeRuleNameToIndex: buildRuleNameToIndex(bundle.parserRuleNames),
       };
@@ -465,3 +545,21 @@ class PPLGrammarCache {
 
 /** Singleton grammar cache instance */
 export const pplGrammarCache = new PPLGrammarCache();
+
+/**
+ * Determine whether runtime grammar validation should be enabled for a given datasource.
+ * Returns false only when the datasource version is explicitly known to be below 3.6.0.
+ * When the version is unknown, returns true — the runtime validation provider will
+ * gracefully fall back to the compiled grammar if no cached grammar is available.
+ */
+export function shouldUseRuntimeGrammar(
+  _dataSourceId?: string,
+  dataSourceVersion?: string
+): boolean {
+  if (dataSourceVersion) {
+    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion);
+  }
+  // No explicit version — allow runtime path. The runtime provider returns null
+  // when no grammar is cached, which triggers the compiled grammar fallback.
+  return true;
+}

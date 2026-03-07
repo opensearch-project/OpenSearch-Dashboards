@@ -56,7 +56,19 @@ jest.mock('../../../../application/hooks', () => ({
 }));
 
 jest.mock('../../../../application/context');
-jest.mock('../../../../../../data/public');
+jest.mock('../../../../../../data/public', () => {
+  const actual = jest.createMockFromModule<any>('../../../../../../data/public');
+  return {
+    ...actual,
+    attachPPLValidationContext: jest.fn(() => jest.fn()),
+    attachPPLGrammarRefresh: jest.fn(() => jest.fn()),
+    syncPPLValidationContext: jest.fn(),
+    shouldUseRuntimeGrammar: jest.fn(() => false),
+    pplGrammarCache: {
+      subscribeToGrammarUpdates: jest.fn(() => jest.fn()),
+    },
+  };
+});
 jest.mock('../../../../application/utils/state_management/actions/query_editor');
 jest.mock('../../../../application/utils/state_management/slices');
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
@@ -64,6 +76,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectPromptModeIsAvailable: jest.fn((state) => state.promptModeIsAvailable),
   selectQueryLanguage: jest.fn((state) => state.queryLanguage),
   selectQueryString: jest.fn((state) => state.queryString),
+  selectDataset: jest.fn((state) => state.dataset),
 }));
 jest.mock('../../../../application/utils/state_management/types', () => ({
   EditorMode: {
@@ -115,7 +128,11 @@ jest.mock('@osd/monaco', () => ({
       },
     },
   },
+  setPPLValidationContext: jest.fn(),
+  clearPPLValidationContext: jest.fn(),
+  revalidatePPLModel: jest.fn(),
 }));
+
 
 // Now import after mocking
 import { act } from '@testing-library/react';
@@ -137,6 +154,7 @@ import {
   selectQueryLanguage,
   selectQueryString,
   selectIsQueryEditorDirty,
+  selectDataset,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
@@ -255,6 +273,7 @@ describe('useQueryPanelEditor', () => {
       if (selectorString.includes('selectIsPromptEditorMode')) return false;
       if (selectorString.includes('selectQueryString')) return '';
       if (selectorString.includes('selectIsQueryEditorDirty')) return false;
+      if (selectorString.includes('selectDataset')) return undefined;
       return '';
     });
 

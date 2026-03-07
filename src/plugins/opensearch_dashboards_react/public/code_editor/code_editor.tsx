@@ -66,10 +66,6 @@ function getProviderRegistrationKey(props: Props): string {
   ].join('|');
 }
 
-export function __resetCodeEditorProviderRegistryForTests() {
-  sharedProviderRegistrations.clear();
-}
-
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;

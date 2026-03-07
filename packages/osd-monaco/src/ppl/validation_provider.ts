@@ -24,14 +24,34 @@ export type PPLValidationProvider =
     ) => Promise<PPLValidationResult | null> | PPLValidationResult | null)
   | undefined;
 
-let pplValidationProvider: PPLValidationProvider;
-let pplValidationContexts = new WeakMap<monaco.editor.IModel, PPLValidationContext>();
+interface PPLValidationGlobalState {
+  provider: PPLValidationProvider;
+  contexts: WeakMap<monaco.editor.IModel, PPLValidationContext>;
+}
+
+const PPL_VALIDATION_GLOBAL_STATE_KEY = '__osdPPLValidationGlobalState';
+
+function getGlobalValidationState(): PPLValidationGlobalState {
+  const globalScope = globalThis as typeof globalThis & {
+    [PPL_VALIDATION_GLOBAL_STATE_KEY]?: PPLValidationGlobalState;
+  };
+
+  if (!globalScope[PPL_VALIDATION_GLOBAL_STATE_KEY]) {
+    globalScope[PPL_VALIDATION_GLOBAL_STATE_KEY] = {
+      provider: undefined,
+      contexts: new WeakMap<monaco.editor.IModel, PPLValidationContext>(),
+    };
+  }
+
+  return globalScope[PPL_VALIDATION_GLOBAL_STATE_KEY]!;
+}
 
 export function registerPPLValidationProvider(provider?: PPLValidationProvider): () => void {
-  pplValidationProvider = provider;
+  const state = getGlobalValidationState();
+  state.provider = provider;
   return () => {
-    if (pplValidationProvider === provider) {
-      pplValidationProvider = undefined;
+    if (state.provider === provider) {
+      state.provider = undefined;
     }
   };
 }
@@ -40,11 +60,11 @@ export function setPPLValidationContext(
   model: monaco.editor.IModel,
   context: PPLValidationContext
 ): void {
-  pplValidationContexts.set(model, context);
+  getGlobalValidationState().contexts.set(model, context);
 }
 
 export function clearPPLValidationContext(model: monaco.editor.IModel): void {
-  pplValidationContexts.delete(model);
+  getGlobalValidationState().contexts.delete(model);
 }
 
 export async function resolvePPLValidationResult(
@@ -52,12 +72,13 @@ export async function resolvePPLValidationResult(
   content: string,
   fallbackValidate: (content: string) => Promise<PPLValidationResult>
 ): Promise<PPLValidationResult> {
-  if (pplValidationProvider) {
+  const state = getGlobalValidationState();
+  if (state.provider) {
     try {
-      const runtimeResult = await pplValidationProvider({
+      const runtimeResult = await state.provider({
         content,
         model,
-        context: pplValidationContexts.get(model),
+        context: state.contexts.get(model),
       });
       if (runtimeResult) {
         return runtimeResult;
@@ -68,9 +89,4 @@ export async function resolvePPLValidationResult(
   }
 
   return fallbackValidate(content);
-}
-
-export function __resetPPLValidationProviderForTests(): void {
-  pplValidationProvider = undefined;
-  pplValidationContexts = new WeakMap<monaco.editor.IModel, PPLValidationContext>();
 }
