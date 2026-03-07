@@ -19,7 +19,7 @@ const table1 = {
     rows: [],
     formattedColumns: [],
   } as Table,
-  title: '',
+  title: 'table1',
 } as TableGroup;
 
 const table2 = {
@@ -28,7 +28,7 @@ const table2 = {
     rows: [],
     formattedColumns: [],
   } as Table,
-  title: '',
+  title: 'table2',
 } as TableGroup;
 
 const tableUiStateMock = {
@@ -50,7 +50,7 @@ describe('TableVisApp', () => {
       />
     );
     expect(queryAllByText('TableVisComponent')).toHaveLength(0);
-    expect(container.outerHTML.includes('visTable__group')).toBe(false);
+    expect(container.querySelector('[data-test-subj^="visTableGroup"]')).toBeNull();
   });
 
   it('should render table component 2 times', () => {
@@ -64,6 +64,6 @@ describe('TableVisApp', () => {
       />
     );
     expect(queryAllByText('TableVisComponent')).toHaveLength(2);
-    expect(container.outerHTML.includes('visTable__group')).toBe(true);
+    expect(container.querySelectorAll('[data-test-subj^="visTableGroup"]').length).toBe(2);
   });
 });
