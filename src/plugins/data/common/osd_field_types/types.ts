@@ -77,6 +77,13 @@ export enum OPENSEARCH_FIELD_TYPES {
   MURMUR3 = 'murmur3',
 
   HISTOGRAM = 'histogram',
+
+  INTEGER_RANGE = 'integer_range',
+  FLOAT_RANGE = 'float_range',
+  LONG_RANGE = 'long_range',
+  DOUBLE_RANGE = 'double_range',
+  DATE_RANGE = 'date_range',
+  IP_RANGE = 'ip_range',
 }
 
 /** @public **/
@@ -96,6 +103,7 @@ export enum OSD_FIELD_TYPES {
   OBJECT = 'object',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
+  RANGE = 'range',
 }
 
 // Types from opensearch-project/sql/docs/user/ppl/general/datatypes.md

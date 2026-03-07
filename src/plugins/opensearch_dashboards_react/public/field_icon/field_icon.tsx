@@ -42,6 +42,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'ip'
     | 'murmur3'
     | 'number'
+    | 'range'
     | '_source'
     | 'string'
     | string
@@ -64,6 +65,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   // is a plugin's data type https://opensearch.org/docs/latest/opensearch/install/plugins/#available-plugins
   murmur3: { iconType: 'tokenFile' },
   number: { iconType: 'tokenNumber' },
+  range: { iconType: 'tokenRange' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
   nested: { iconType: 'tokenNested' },

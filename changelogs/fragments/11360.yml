@@ -1,0 +1,2 @@
+feat:
+- Support all range field types (integer_range, float_range, long_range, double_range, date_range, ip_range) in index patterns and Discover ([#11360](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11360))
