@@ -235,6 +235,21 @@ describe('ppl_grammar_cache', () => {
     expect(pplGrammarCache.getCachedGrammar('ds-bad-atn')).toBeNull();
   });
 
+  it('should return null when the bundle shape is invalid', async () => {
+    const invalidBundle = {
+      ...createBundle('sha256:invalid-shape'),
+      startRuleIndex: 2,
+    };
+    const http = ({
+      get: jest.fn().mockResolvedValue(invalidBundle),
+    } as unknown) as HttpSetup;
+
+    const grammar = await pplGrammarCache.getOrFetchGrammar(http, 'ds-invalid-shape');
+
+    expect(grammar).toBeNull();
+    expect(pplGrammarCache.getCachedGrammar('ds-invalid-shape')).toBeNull();
+  });
+
   it('should abort grammar fetch on timeout and return null', async () => {
     jest.useFakeTimers();
     try {

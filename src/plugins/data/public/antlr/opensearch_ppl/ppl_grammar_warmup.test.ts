@@ -33,7 +33,7 @@ describe('ppl_grammar_warmup', () => {
     expect(cache.warmUp).not.toHaveBeenCalled();
   });
 
-  it('should skip warm-up when PPL query has no selected dataset', () => {
+  it('should warm up for local cluster when PPL query has no dataset', () => {
     const cache = createCacheMock();
     const handler = createPplGrammarWarmupHandler(http, savedObjectsClient, cache);
 
@@ -41,8 +41,8 @@ describe('ppl_grammar_warmup', () => {
       language: 'PPL',
     });
 
-    expect(cache.invalidate).not.toHaveBeenCalled();
-    expect(cache.warmUp).not.toHaveBeenCalled();
+    expect(cache.warmUp).toHaveBeenCalledTimes(1);
+    expect(cache.warmUp).toHaveBeenCalledWith(http, savedObjectsClient, undefined, undefined);
   });
 
   it('should warm up once for the first selected datasource', () => {
@@ -59,8 +59,6 @@ describe('ppl_grammar_warmup', () => {
       },
     });
 
-    expect(cache.invalidate).toHaveBeenCalledTimes(1);
-    expect(cache.invalidate).toHaveBeenCalledWith('ds-1');
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
     expect(cache.warmUp).toHaveBeenCalledWith(http, savedObjectsClient, 'ds-1', '3.6.0');
   });
@@ -82,7 +80,6 @@ describe('ppl_grammar_warmup', () => {
     handler(selected);
     handler(selected);
 
-    expect(cache.invalidate).toHaveBeenCalledTimes(1);
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
   });
 
@@ -102,7 +99,6 @@ describe('ppl_grammar_warmup', () => {
     handler(selected);
     handler(selected);
 
-    expect(cache.invalidate).toHaveBeenCalledTimes(1);
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
     expect(cache.warmUp).toHaveBeenCalledWith(http, savedObjectsClient, 'ds-1', undefined);
   });
@@ -130,7 +126,6 @@ describe('ppl_grammar_warmup', () => {
       },
     });
 
-    expect(cache.invalidate).toHaveBeenCalledTimes(2);
     expect(cache.warmUp).toHaveBeenCalledTimes(2);
     expect(cache.warmUp).toHaveBeenLastCalledWith(http, savedObjectsClient, 'ds-1', '3.7.0');
   });
@@ -158,7 +153,6 @@ describe('ppl_grammar_warmup', () => {
       },
     });
 
-    expect(cache.invalidate).toHaveBeenCalledTimes(2);
     expect(cache.warmUp).toHaveBeenCalledTimes(2);
     expect(cache.warmUp).toHaveBeenLastCalledWith(http, savedObjectsClient, 'ds-2', '3.6.0');
   });

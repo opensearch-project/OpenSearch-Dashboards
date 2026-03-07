@@ -5,7 +5,6 @@
 
 import type { PPLValidationResult } from './ppl_language_analyzer';
 import {
-  __resetPPLValidationProviderForTests,
   clearPPLValidationContext,
   registerPPLValidationProvider,
   resolvePPLValidationResult,
@@ -13,11 +12,18 @@ import {
 } from './validation_provider';
 
 describe('PPL validation provider bridge', () => {
-  const model = {} as any;
+  let model: any;
+  let unregisterProvider: (() => void) | undefined;
   const fallbackResult: PPLValidationResult = { isValid: true, errors: [] };
 
   beforeEach(() => {
-    __resetPPLValidationProviderForTests();
+    model = {};
+    unregisterProvider = undefined;
+  });
+
+  afterEach(() => {
+    unregisterProvider?.();
+    clearPPLValidationContext(model);
   });
 
   it('should use the registered provider result when available', async () => {
@@ -32,7 +38,7 @@ describe('PPL validation provider bridge', () => {
       dataSourceId: 'ds-1',
       dataSourceVersion: '3.6.0',
     });
-    registerPPLValidationProvider(async ({ context, content }) => {
+    unregisterProvider = registerPPLValidationProvider(async ({ context, content }) => {
       expect(content).toBe('| where status = 200');
       expect(context?.dataSourceId).toBe('ds-1');
       return runtimeResult;
@@ -56,7 +62,7 @@ describe('PPL validation provider bridge', () => {
   it('should fall back when provider returns null', async () => {
     const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
 
-    registerPPLValidationProvider(async () => null);
+    unregisterProvider = registerPPLValidationProvider(async () => null);
 
     await expect(
       resolvePPLValidationResult(model, 'source=logs', fallbackValidate)
@@ -67,7 +73,7 @@ describe('PPL validation provider bridge', () => {
   it('should fall back when provider throws', async () => {
     const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
 
-    registerPPLValidationProvider(async () => {
+    unregisterProvider = registerPPLValidationProvider(async () => {
       throw new Error('runtime failed');
     });
 
@@ -86,7 +92,7 @@ describe('PPL validation provider bridge', () => {
       dataSourceId: 'ds-1',
     });
     clearPPLValidationContext(model);
-    registerPPLValidationProvider(provider);
+    unregisterProvider = registerPPLValidationProvider(provider);
 
     await resolvePPLValidationResult(model, 'source=logs', fallbackValidate);
 
@@ -95,5 +101,50 @@ describe('PPL validation provider bridge', () => {
       model,
       context: undefined,
     });
+  });
+
+  it('should share provider state across isolated module instances', async () => {
+    const fallbackValidate = jest.fn().mockResolvedValue(fallbackResult);
+    const runtimeResult: PPLValidationResult = {
+      isValid: false,
+      errors: [{ message: 'runtime error', line: 1, column: 2 }],
+    };
+    const sharedModel = {};
+
+    let unregisterFromFirstModule: (() => void) | undefined;
+    let clearFromFirstModule: ((model: any) => void) | undefined;
+
+    jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const firstModule = require('./validation_provider');
+      clearFromFirstModule = firstModule.clearPPLValidationContext;
+      firstModule.setPPLValidationContext(sharedModel, {
+        useRuntimeGrammar: true,
+        dataSourceId: 'ds-1',
+      });
+      unregisterFromFirstModule = firstModule.registerPPLValidationProvider(
+        async ({ context }: any) => {
+          expect(context?.dataSourceId).toBe('ds-1');
+          return runtimeResult;
+        }
+      );
+    });
+
+    try {
+      let resolveFromSecondModule: any;
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const secondModule = require('./validation_provider');
+        resolveFromSecondModule = secondModule.resolvePPLValidationResult;
+      });
+
+      await expect(
+        resolveFromSecondModule(sharedModel, '| where status = 200', fallbackValidate)
+      ).resolves.toEqual(runtimeResult);
+      expect(fallbackValidate).not.toHaveBeenCalled();
+    } finally {
+      unregisterFromFirstModule?.();
+      clearFromFirstModule?.(sharedModel);
+    }
   });
 });

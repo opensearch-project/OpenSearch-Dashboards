@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { CodeEditor, __resetCodeEditorProviderRegistryForTests } from './code_editor';
+import { CodeEditor } from './code_editor';
 import { monaco } from '@osd/monaco';
 import { shallow } from 'enzyme';
 
@@ -52,12 +52,7 @@ const simpleLogLang: monaco.languages.IMonarchLanguage = {
 monaco.languages.register({ id: 'loglang' });
 monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
 
-beforeEach(() => {
-  __resetCodeEditorProviderRegistryForTests();
-});
-
 afterEach(() => {
-  __resetCodeEditorProviderRegistryForTests();
   jest.restoreAllMocks();
 });
 
@@ -73,6 +68,7 @@ test('is rendered', () => {
   );
 
   expect(component).toMatchSnapshot();
+  component.unmount();
 });
 
 test('editor mount setup', () => {
@@ -186,6 +182,7 @@ test('providers are registered only once across multiple renders', () => {
 
   // Provider should only be registered once despite multiple renders
   expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+  wrapper.unmount();
 });
 
 test('providers are disposed on unmount', () => {
@@ -299,4 +296,5 @@ test('suggest controller details visibility is set on editor mount', () => {
 
   expect(mockEditor.getContribution).toHaveBeenCalledWith('editor.contrib.suggestController');
   expect(mockSuggestController.widget.value._setDetailsVisible).toHaveBeenCalledWith(true);
+  component.unmount();
 });

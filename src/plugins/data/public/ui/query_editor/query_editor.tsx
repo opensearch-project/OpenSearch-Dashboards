@@ -36,7 +36,10 @@ import { getQueryService, getIndexPatterns } from '../../services';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { getEffectiveLanguageForAutoComplete } from './utils';
-import { pplGrammarCache } from '../../antlr/opensearch_ppl/ppl_grammar_cache';
+import {
+  pplGrammarCache,
+  shouldUseRuntimeGrammar,
+} from '../../antlr/opensearch_ppl/ppl_grammar_cache';
 import {
   attachPPLGrammarRefresh,
   attachPPLValidationContext,
@@ -119,11 +122,15 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   }, []);
 
-  const getValidationContext = (): PPLValidationContext => ({
-    useRuntimeGrammar: true,
-    dataSourceId: queryRef.current.dataset?.dataSource?.id,
-    dataSourceVersion: queryRef.current.dataset?.dataSource?.version,
-  });
+  const getValidationContext = (): PPLValidationContext => {
+    const dsId = queryRef.current.dataset?.dataSource?.id;
+    const dsVersion = queryRef.current.dataset?.dataSource?.version;
+    return {
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      dataSourceId: dsId,
+      dataSourceVersion: dsVersion,
+    };
+  };
 
   useEffect(
     () => () => {
@@ -142,10 +149,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   }, [services.application?.currentAppId$]);
 
   useEffect(() => {
+    const dsId = query.dataset?.dataSource?.id;
+    const dsVersion = query.dataset?.dataSource?.version;
     syncPPLValidationContext(inputRef.current, {
-      useRuntimeGrammar: true,
-      dataSourceId: query.dataset?.dataSource?.id,
-      dataSourceVersion: query.dataset?.dataSource?.version,
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      dataSourceId: dsId,
+      dataSourceVersion: dsVersion,
     });
 
     const model = inputRef.current?.getModel();
@@ -363,6 +372,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
         revalidatePPLModel
       );
+      const editorModel = editor.getModel();
+      if (editorModel) {
+        void revalidatePPLModel(editorModel);
+      }
       // eslint-disable-next-line no-bitwise
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
         const newQuery = {
@@ -437,6 +450,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
         revalidatePPLModel
       );
+      const singleLineModel = editor.getModel();
+      if (singleLineModel) {
+        void revalidatePPLModel(singleLineModel);
+      }
 
       editor.addCommand(monaco.KeyCode.Enter, () => {
         const newQuery = {

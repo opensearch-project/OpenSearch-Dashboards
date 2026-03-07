@@ -321,10 +321,11 @@ export class DataPublicPlugin
     setQueryService(query);
 
     // Subscribe to dataset changes to pre-fetch PPL grammar.
-    // This runs at app startup so grammar is fetched on dataset selection/switch, not on keystroke.
+    // The handler fires for both local cluster and remote datasources when the
+    // query language is PPL and the dataset changes.  The initial fire with the
+    // current query covers the page-load case; the subscription covers subsequent
+    // dataset switches.
     const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(http, savedObjects.client);
-
-    // Warm current query state once at startup and then on subsequent query updates.
     maybeWarmUpPplGrammar(query.queryString.getQuery());
     this.pplGrammarWarmupSubscription = query.queryString
       .getUpdates$()

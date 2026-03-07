@@ -43,18 +43,14 @@ export function createPplGrammarWarmupHandler(
     // In explore autocomplete, PPL uses PPL_Simplified. Both should warm runtime grammar.
     if (!language.startsWith('PPL')) return;
 
-    const dataset = query?.dataset;
-    if (!dataset) return;
-
-    const datasourceId = dataset.dataSource?.id;
-    const datasourceVersion = dataset.dataSource?.version;
+    const datasourceId = query?.dataset?.dataSource?.id;
+    const datasourceVersion = query?.dataset?.dataSource?.version;
     const selectionKey = getWarmupSelectionKey(datasourceId, datasourceVersion);
     if (selectionKey === lastSelectionKey) {
       return;
     }
 
     lastSelectionKey = selectionKey;
-    grammarCache.invalidate(datasourceId);
     grammarCache.warmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
   };
 }
