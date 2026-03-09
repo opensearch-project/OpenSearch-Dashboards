@@ -43,8 +43,6 @@ import { defaultPreparePplQuery } from '../../languages';
 import {
   HistogramConfig,
   buildPPLHistogramQuery,
-  buildPPLTotalCountQuery,
-  stripHeadFromQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
 } from './utils';
@@ -110,13 +108,6 @@ export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): 
   return hasBreakdown
     ? `histogram:breakdown:${defaultPrepareQueryString(query)}`
     : `histogram:${defaultPrepareQueryString(query)}`;
-};
-
-/**
- * Prepare cache key for total count queries (head-stripped histogram for true total)
- */
-export const prepareTotalCountCacheKey = (query: Query): string => {
-  return `totalCount:${defaultPrepareQueryString(query)}`;
 };
 
 /**
@@ -269,19 +260,12 @@ export const executeQueries = createAsyncThunk<
   const dataTableCacheKey = defaultCacheKey;
   const breakdownField = state.queryEditor.breakdownField;
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
-  // Only fire a separate total count query when the query has a head clause,
-  // since head limits the histogram total. Without head, the histogram already
-  // provides the correct total and no extra query is needed.
   const queryString = defaultPrepareQueryString(query);
-  const queryHasHead = query.language === 'PPL' && stripHeadFromQuery(queryString) !== queryString;
-  const totalCountCacheKey = prepareTotalCountCacheKey(query);
 
   // Check what needs execution for core queries
   // If results exist but query status is UNINITIALIZED (after cancel), we need to re-execute
   const dataTableQueryStatus = state.queryEditor.queryStatusMap[dataTableCacheKey];
   const histogramQueryStatus = state.queryEditor.queryStatusMap[histogramCacheKey];
-  const totalCountQueryStatus = state.queryEditor.queryStatusMap[totalCountCacheKey];
-
   // Early exit if query should be skipped
   if (shouldSkipQueryExecution(query)) {
     return;
@@ -294,11 +278,6 @@ export const executeQueries = createAsyncThunk<
     query.language !== 'PROMQL' &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
-  const needsTotalCountQuery =
-    queryHasHead &&
-    (!results[totalCountCacheKey] ||
-      totalCountQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
-
   const promises = [];
   // Execute query without aggregations
   if (needsDataTableQuery) {
@@ -320,20 +299,6 @@ export const executeQueries = createAsyncThunk<
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,
-        queryString,
-        interval,
-      })
-    );
-  }
-
-  // Execute total count query in background (non-blocking)
-  // Only fires when query has head clause — strips head to get true total.
-  if (needsTotalCountQuery) {
-    const interval = state.legacy?.interval;
-    dispatch(
-      executeTotalCountQuery({
-        services,
-        cacheKey: totalCountCacheKey,
         queryString,
         interval,
       })
@@ -487,7 +452,6 @@ const executeQueryBase = async (
     interval?: string;
     avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
     isHistogramQuery?: boolean;
-    isTotalCountQuery?: boolean;
   },
   thunkAPI: {
     getState: () => RootState;
@@ -502,7 +466,6 @@ const executeQueryBase = async (
     interval,
     avoidDispatchingError,
     isHistogramQuery,
-    isTotalCountQuery,
   } = params;
   const { getState, dispatch } = thunkAPI;
 
@@ -564,17 +527,13 @@ const executeQueryBase = async (
 
     // Create histogram config once for use in both query building and result processing
     let histogramConfig: HistogramConfig | null = null;
-    if (isHistogramQuery || isTotalCountQuery) {
+    if (isHistogramQuery) {
       histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
     }
 
     let effectiveQuery = queryString;
-    if (query.language === 'PPL' && histogramConfig) {
-      if (isTotalCountQuery) {
-        effectiveQuery = buildPPLTotalCountQuery(queryString, histogramConfig);
-      } else if (isHistogramQuery) {
-        effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
-      }
+    if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
+      effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
     }
 
     const preparedQueryObject = {
@@ -639,7 +598,7 @@ const executeQueryBase = async (
       fieldSchema: searchSource.getDataFrame()?.schema,
     };
 
-    if ((isHistogramQuery || isTotalCountQuery) && histogramConfig) {
+    if (isHistogramQuery && histogramConfig) {
       rawResultsWithMeta = processRawResultsForHistogram(
         queryString,
         rawResultsWithMeta,
@@ -808,32 +767,6 @@ export const executeHistogramQuery = createAsyncThunk<
       includeHistogram: false,
       queryString,
       isHistogramQuery: true,
-    },
-    thunkAPI
-  );
-});
-
-/**
- * Execute total count query - head-stripped histogram query for true total hit count.
- * When no head is present, the query is identical to the histogram query and gets deduped.
- */
-export const executeTotalCountQuery = createAsyncThunk<
-  any,
-  {
-    services: ExploreServices;
-    cacheKey: string;
-    queryString: string;
-    interval?: string;
-  },
-  { state: RootState }
->('query/executeTotalCountQuery', async (params, thunkAPI) => {
-  const { queryString } = params;
-  return executeQueryBase(
-    {
-      ...params,
-      includeHistogram: false,
-      queryString,
-      isTotalCountQuery: true,
     },
     thunkAPI
   );

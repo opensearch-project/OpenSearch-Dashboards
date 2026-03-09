@@ -5,6 +5,7 @@
 import React, { memo, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
+import { useSelector as useReduxSelector } from 'react-redux';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -14,7 +15,9 @@ import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
 import { useHistogramResults } from '../../../application/utils/hooks/use_histogram_results';
-import { useTotalCountResults } from '../../../application/utils/hooks/use_total_count_results';
+import { RootState } from '../../../application/utils/state_management/store';
+import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
+import { queryEndsWithHead } from '../../../application/utils/state_management/actions/utils';
 
 interface ActionBarProps {
   filteredRowsCount?: number;
@@ -29,7 +32,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
   const { results: histogramResults } = useHistogramResults();
-  const { results: totalCountResults } = useTotalCountResults();
+  const query = useReduxSelector((state: RootState) => state.query);
   const { core, inspector, inspectorAdapters, slotRegistry } = services;
   const savedSearch = useSelector(selectSavedSearch);
 
@@ -47,8 +50,10 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   };
 
   const rows = results?.hits?.hits || [];
-  // Use total count results (head-stripped) for true total, fallback to histogram total
-  const totalHits = totalCountResults?.hits?.total ?? histogramResults?.hits.total;
+  // When query has head command, just show row count (no "X of Y" total)
+  const queryString = query.language === 'PPL' ? defaultPrepareQueryString(query) : '';
+  const hasHead = query.language === 'PPL' && queryEndsWithHead(queryString);
+  const totalHits = hasHead ? undefined : histogramResults?.hits.total;
   const elapsedMs = results?.elapsedMs;
 
   return (
