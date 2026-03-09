@@ -46,6 +46,8 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   const contentRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef(0);
   const PAGE_SIZE = 20;
+  const isLoadingRef = useRef(isLoading);
+  isLoadingRef.current = isLoading;
 
   const hideDeleteAction = useMemo(
     () => conversationHistoryService.getMemoryProvider() instanceof AgenticMemoryProvider,
@@ -54,7 +56,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
   const loadConversations = useCallback(
     async (currentPage: number, append: boolean = false) => {
-      if (isLoading) return;
+      if (isLoadingRef.current) return;
 
       setIsLoading(true);
       setError(null);
@@ -66,7 +68,14 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
         if (append) {
           // Append new conversations
-          setConversations((prevConversations) => [...prevConversations, ...result.conversations]);
+          setConversations((prevConversations) => [
+            ...prevConversations,
+            ...result.conversations.filter((conversation) =>
+              prevConversations.every(
+                (previousConversation) => previousConversation.id !== conversation.id
+              )
+            ),
+          ]);
         } else {
           setConversations(result.conversations);
         }
@@ -86,7 +95,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
         setIsLoading(false);
       }
     },
-    [conversationHistoryService, isLoading]
+    [conversationHistoryService]
   );
 
   useEffect(() => {
@@ -128,7 +137,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   }, [loadConversations]);
 
   const handleScroll = useCallback(() => {
-    if (!contentRef.current || !hasMore || isLoading || error) return;
+    if (!contentRef.current || !hasMore || isLoadingRef.current || error) return;
 
     const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
     // Load more when scrolled within 100px of the bottom
@@ -138,7 +147,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
       setPage((prev) => prev + 1);
       loadConversations(nextPage, true);
     }
-  }, [hasMore, isLoading, loadConversations, error]);
+  }, [hasMore, loadConversations, error]);
 
   useEffect(() => {
     const container = contentRef.current;
