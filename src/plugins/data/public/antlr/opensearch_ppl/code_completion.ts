@@ -36,10 +36,7 @@ import {
   parseQuery,
   removePotentialBackticks,
 } from '../shared/utils';
-import {
-  getParseTree,
-  openSearchPplAutocompleteData as simplifiedPplAutocompleteData,
-} from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
+import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
 import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
 import { getAvailableFieldsForAutocomplete } from './simplified_ppl_grammar/symbol_table_parser';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
@@ -188,10 +185,7 @@ function isLikelyExpressionFunctionKeyword(sk: KeywordSuggestion): boolean {
   if (!sk.value) return false;
   if (!/^[A-Z][A-Z0-9_]*$/.test(sk.value)) return false;
   if (sk.value.length <= 2) return false;
-  if (['AS', 'BY', 'ON', 'IN', 'OR', 'AND', 'NOT', 'TRUE', 'FALSE'].includes(sk.value)) {
-    return false;
-  }
-  return true;
+  return !['AS', 'BY', 'ON', 'IN', 'OR', 'AND', 'NOT', 'TRUE', 'FALSE'].includes(sk.value);
 }
 
 function isRuntimeFunctionRuleContext(
@@ -200,7 +194,7 @@ function isRuntimeFunctionRuleContext(
 ): boolean {
   for (const ruleIdx of rules.keys()) {
     const ruleName = grammar.parserRuleNames[ruleIdx];
-    if (typeof ruleName === 'string' && ruleName.toLowerCase().includes('function')) {
+    if (ruleName?.toLowerCase().includes('function')) {
       return true;
     }
   }
@@ -354,7 +348,7 @@ function resolveToken(grammar: CachedGrammar, symbolicName: string, dictKey?: st
  */
 class RuntimeCompletionContext extends ParserRuleContext {
   constructor(private readonly syntheticRuleIndex: number, startToken?: Token) {
-    super(undefined, -1);
+    super(null, -1);
     if (startToken) {
       (this as any).start = startToken;
     }
@@ -1139,7 +1133,9 @@ function tryRuntimeGrammarSuggestions(
       const fallbackValue = deriveKeywordFromSymbolicName(symbolicName);
       candidate.value = candidate.value || fallbackValue;
       if (!candidate.value) return;
-      if (isRuntimeNoisySuggestion({ ...candidate, symbolicName })) return;
+      if (isRuntimeNoisySuggestion({ ...candidate, symbolicName: symbolicName ?? undefined })) {
+        return;
+      }
 
       suggestKeywords.push(candidate);
     });
@@ -1261,7 +1257,7 @@ export const getDefaultSuggestions = async ({
 
     if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
-        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
+        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af]) => ({
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Function,
           insertText: af + ' ',
@@ -1584,7 +1580,7 @@ export const getSimplifiedOpenSearchPplAutoCompleteSuggestions = (
   query: string,
   cursor: CursorPosition
 ): OpenSearchPplAutocompleteResult => {
-  const res = parseQuery({
+  return parseQuery({
     Lexer: simplifiedPplAutocompleteData.Lexer,
     Parser: simplifiedPplAutocompleteData.Parser,
     tokenDictionary: simplifiedPplAutocompleteData.tokenDictionary,
@@ -1596,5 +1592,4 @@ export const getSimplifiedOpenSearchPplAutoCompleteSuggestions = (
     cursor,
     skipSymbolicKeywords: false,
   });
-  return res;
 };
