@@ -1,0 +1,30 @@
+.ateApp {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ateDetailsPanel {
+  flex: 1;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.ateEventLogPanel {
+  flex: 1;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ateLogEntries {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ateLogEntry {
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  border-left: 3px solid $euiColorPrimary;
+}

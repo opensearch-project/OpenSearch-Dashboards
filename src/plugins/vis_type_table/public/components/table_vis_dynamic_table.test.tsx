@@ -372,4 +372,77 @@ describe('TableVisDynamicTable', () => {
       }),
     });
   });
+
+  it('should sanitize HTML content using dompurify', () => {
+    const tableWithLink: FormattedTableContext = {
+      ...mockTable,
+      rows: [{ col1: 'link', col2: 10 }],
+      formattedColumns: [
+        {
+          id: 'col1',
+          title: 'Column 1',
+          formatter: {
+            convert: () => '<a href="http://example.com" target="_blank">Link</a>',
+          } as any,
+          filterable: false,
+        },
+        {
+          id: 'col2',
+          title: 'Column 2',
+          formatter: { convert: (v: any) => v } as any,
+          filterable: false,
+        },
+      ],
+    };
+
+    const { container } = render(
+      <TableVisDynamicTable
+        table={tableWithLink}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={mockUiState}
+      />
+    );
+
+    const anchorElement = container.querySelector('a');
+    expect(anchorElement).toHaveAttribute('href', 'http://example.com');
+    expect(anchorElement).toHaveAttribute('target', '_blank');
+    expect(anchorElement).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('should handle unsafe HTML content gracefully', () => {
+    const tableWithUnsafeHtml: FormattedTableContext = {
+      ...mockTable,
+      rows: [{ col1: 'unsafe', col2: 10 }],
+      formattedColumns: [
+        {
+          id: 'col1',
+          title: 'Column 1',
+          formatter: {
+            convert: () => '<img src="x" onerror="alert(1)">',
+          } as any,
+          filterable: false,
+        },
+        {
+          id: 'col2',
+          title: 'Column 2',
+          formatter: { convert: (v: any) => v } as any,
+          filterable: false,
+        },
+      ],
+    };
+
+    const { container } = render(
+      <TableVisDynamicTable
+        table={tableWithUnsafeHtml}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={mockUiState}
+      />
+    );
+
+    const imgElement = container.querySelector('img');
+    expect(imgElement).toHaveAttribute('src', 'x');
+    expect(imgElement).not.toHaveAttribute('onerror');
+  });
 });
