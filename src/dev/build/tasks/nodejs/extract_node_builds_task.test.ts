@@ -130,7 +130,7 @@ it('runs expected fs operations', async () => {
           Object {
             "strip": 1,
           },
-        ]
+        ],
       ],
       "unzip": Array [
         Array [

@@ -162,7 +162,7 @@ it('downloads node builds for each platform', async () => {
           "sha256": "win32:sha256",
           "url": "win32:url",
         },
-      ]
+      ],
     ]
   `);
   expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
