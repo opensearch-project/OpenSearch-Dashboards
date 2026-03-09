@@ -191,33 +191,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
                 />
               </EuiFormRow>
-              {/* <EuiFormRow>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('explore.stylePanel.metric.title', {
-                    defaultMessage: 'Show title',
-                  })}
-                  checked={styleOptions.showTitle}
-                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                  data-test-subj="showTitleSwitch"
-                />
-              </EuiFormRow> */}
-
-              {/* {styleOptions.showTitle && (
-                <EuiFormRow
-                  label={i18n.translate('explore.vis.metric.title', {
-                    defaultMessage: 'Title',
-                  })}
-                >
-                  <DebouncedFieldText
-                    value={styleOptions.title || ''}
-                    placeholder={i18n.translate('explore.vis.metric.defaultTitle', {
-                      defaultMessage: 'Default title',
-                    })}
-                    onChange={(text) => updateStyleOption('title', text)}
-                  />
-                </EuiFormRow>
-              )} */}
             </StyleAccordion>
           </EuiFlexItem>
 

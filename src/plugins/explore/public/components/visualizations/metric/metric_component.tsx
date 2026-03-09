@@ -273,18 +273,19 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     const element = containerRef.current;
     if (!element) return;
 
-    const resizeObserver = new ResizeObserver(
-      debounce((entries) => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect;
-          setContainerDimensions({ width, height });
-        }
-      }, 100)
-    );
+    const handler = debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100);
+
+    const resizeObserver = new ResizeObserver(handler);
 
     resizeObserver.observe(element);
 
     return () => {
+      handler.cancel();
       resizeObserver.disconnect();
     };
   }, []);
@@ -360,18 +361,19 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     const element = overlayRef.current;
     if (!element) return;
 
-    const resizeObserver = new ResizeObserver(
-      debounce((entries) => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect;
-          setContainerDimensions({ width, height });
-        }
-      }, 100)
-    );
+    const handler = debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100);
+
+    const resizeObserver = new ResizeObserver(handler);
 
     resizeObserver.observe(element);
 
     return () => {
+      handler.cancel();
       resizeObserver.disconnect();
     };
   }, []);
