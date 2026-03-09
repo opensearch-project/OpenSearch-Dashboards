@@ -1058,22 +1058,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                     >
                       <EuiDelayRender
                         delay={500}
-                      >
-                        <EuiI18n
-                          default="This table contains {itemCount} rows out of {totalItemCount} rows; Page {page} of {pageCount}."
-                          token="euiBasicTable.tableAutoCaptionWithPagination"
-                          values={
-                            Object {
-                              "itemCount": 4,
-                              "page": 1,
-                              "pageCount": 1,
-                              "totalItemCount": 4,
-                            }
-                          }
-                        >
-                          This table contains 4 rows out of 4 rows; Page 1 of 1.
-                        </EuiI18n>
-                      </EuiDelayRender>
+                      />
                     </caption>
                   </EuiScreenReaderOnly>
                   <EuiTableHeader>
