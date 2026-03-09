@@ -25,8 +25,7 @@ function tokenTypeBySymbolic(grammar: CachedGrammar, symbolicName: string): numb
 }
 
 function resolveSpaceToken(grammar: CachedGrammar): number {
-  const dict = grammar.tokenDictionary as Record<string, unknown>;
-  const dictionaryValue = dict?.WHITESPACE ?? dict?.SPACE;
+  const dictionaryValue = grammar.tokenDictionary.WHITESPACE ?? grammar.tokenDictionary.SPACE;
   if (typeof dictionaryValue === 'number' && dictionaryValue > Token.INVALID_TYPE) {
     return dictionaryValue;
   }
@@ -50,10 +49,7 @@ function resolveSpaceToken(grammar: CachedGrammar): number {
 }
 
 function getRuleIndex(grammar: CachedGrammar, ruleName: string): number {
-  if (grammar.runtimeRuleNameToIndex?.size) {
-    return grammar.runtimeRuleNameToIndex.get(ruleName) ?? -1;
-  }
-  return grammar.parserRuleNames.indexOf(ruleName);
+  return grammar.runtimeRuleNameToIndex.get(ruleName) ?? -1;
 }
 
 function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
