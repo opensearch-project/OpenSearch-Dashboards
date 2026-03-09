@@ -293,7 +293,7 @@ export const createMultiMetric = (
     if (!groupedData.has(groupKey)) {
       groupedData.set(groupKey, []);
     }
-    groupedData.get(splitByValue)!.push(row);
+    groupedData.get(groupKey)!.push(row);
   });
 
   const specs: RendererSpecConfig[] = [];
