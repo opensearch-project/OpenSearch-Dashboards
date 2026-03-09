@@ -352,17 +352,24 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         return;
       }
 
+      // FALLBACK: Dataset not in list (e.g., from URL, saved query, or non-index-pattern type)
+      // Only fetch if initial load is complete to avoid race with fetchDatasets()
+      if (!hasCompletedInitialLoad.current) {
+        return;
+      }
+
+      // For non-index-pattern datasets (e.g., PROMETHEUS), try to enrich with DataView details
+      // Use onlyCheckCache=true for non-index-pattern types since they may not have DataViews
       const onlyCheckCache = currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
       const dataView = await dataViews.get(currentDataset.id, onlyCheckCache);
 
-      // If dataView is not in cache (onlyCheckCache returns undefined), fallback to currentDataset
+      // If dataView is not in cache (onlyCheckCache returns undefined), use currentDataset as-is
       if (!dataView) {
         setSelectedDataset(currentDataset as DetailedDataset);
         return;
       }
 
-      // Merge currentDataset with dataView, preferring currentDataset for displayName/description
-      // This preserves display names from URL state over potentially stale cached data
+      // Enrich the dataset with DataView details
       const detailedDataset = {
         ...currentDataset,
         description: currentDataset.description || dataView.description,
@@ -413,11 +420,12 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
     try {
       const datasetIds = await dataViews.getIds(true);
+      // Deduplicate IDs to prevent duplicate fetches and error notifications
+      const uniqueDatasetIds = [...new Set(datasetIds)];
       const fetchedDatasets: DetailedDataset[] = [];
 
-      for (const id of datasetIds) {
-        const dataView = await dataViews.get(id);
-        const dataset = await dataViews.convertToDataset(dataView);
+      // Fetch all DataViews in parallel using bulkGet optimization
+      const dataViewsArray = await dataViews.getMultiple(uniqueDatasetIds);
 
         // convertToDataset already includes description, displayName from the saved object
         // Just ensure signalType is set from dataView if not already present
@@ -426,6 +434,19 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           signalType: dataset.signalType || dataView.signalType,
         });
       }
+      // Convert all DataViews to datasets in parallel
+      const datasetPromises = dataViewsArray.map(async (dataView) => {
+        const dataset = await dataViews.convertToDataset(dataView);
+        return {
+          ...dataset,
+          description: dataView.description,
+          displayName: dataView.displayName,
+          signalType: dataView.signalType,
+        };
+      });
+
+      const convertedDatasets = await Promise.all(datasetPromises);
+      fetchedDatasets.push(...convertedDatasets);
 
       // Check if we need to fetch from dataset types that do not use data views (e.g., PROMETHEUS)
       // These types have their own fetch mechanism via the type config

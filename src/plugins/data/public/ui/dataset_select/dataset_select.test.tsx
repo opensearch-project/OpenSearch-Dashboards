@@ -69,6 +69,14 @@ describe('DatasetSelect', () => {
         id,
       });
     }),
+    getMultiple: jest.fn().mockImplementation((ids) => {
+      return Promise.resolve(
+        ids.map((id: string) => ({
+          ...mockDataViewData,
+          id,
+        }))
+      );
+    }),
     getDefault: jest.fn().mockResolvedValue(mockDataViewData),
     convertToDataset: jest.fn().mockImplementation((dataView) => {
       return Promise.resolve({
@@ -136,7 +144,7 @@ describe('DatasetSelect', () => {
     renderWithContext();
 
     await waitFor(() => {
-      expect(mockDataViews.get).toHaveBeenCalled();
+      expect(mockDataViews.getMultiple).toHaveBeenCalled();
     });
 
     expect(screen.getByText('Test Index Pattern Display Name')).toBeInTheDocument();
@@ -288,6 +296,14 @@ describe('DatasetSelect', () => {
     });
 
     mockDataViews.getIds = jest.fn().mockResolvedValue(['all-apps-id']);
+    mockDataViews.getMultiple = jest.fn().mockResolvedValue([
+      {
+        id: 'all-apps-id',
+        title: 'all-apps-dataset',
+        displayName: 'All Apps Dataset',
+        type: 'all-apps-type',
+      },
+    ]);
     mockDataViews.get = jest.fn().mockResolvedValue({
       id: 'all-apps-id',
       title: 'all-apps-dataset',
@@ -312,7 +328,7 @@ describe('DatasetSelect', () => {
 
     await waitFor(() => {
       expect(mockDataViews.getIds).toHaveBeenCalled();
-      expect(mockDataViews.get).toHaveBeenCalled();
+      expect(mockDataViews.getMultiple).toHaveBeenCalled();
     });
 
     const button = screen.getByTestId('datasetSelectButton');
@@ -344,6 +360,26 @@ describe('DatasetSelect', () => {
 
     // Create two datasets: one with metrics signal type, one with logs
     mockDataViews.getIds = jest.fn().mockResolvedValue(['metrics-id', 'logs-id']);
+    mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
+      return Promise.resolve(
+        ids.map((id: string) => {
+          if (id === 'metrics-id') {
+            return {
+              id: 'metrics-id',
+              title: 'metrics-dataset',
+              displayName: 'Metrics Dataset',
+              signalType: CORE_SIGNAL_TYPES.METRICS,
+            };
+          }
+          return {
+            id: 'logs-id',
+            title: 'logs-dataset',
+            displayName: 'Logs Dataset',
+            signalType: CORE_SIGNAL_TYPES.LOGS,
+          };
+        })
+      );
+    });
     mockDataViews.get = jest.fn().mockImplementation((id) => {
       if (id === 'metrics-id') {
         return Promise.resolve({
@@ -424,7 +460,33 @@ describe('DatasetSelect', () => {
     // Mock getIds to return both datasets
     mockDataViews.getIds = jest.fn().mockResolvedValue(['trace-id', 'log-id']);
 
-    // Mock get to return the correct dataset based on ID
+    // Mock getMultiple to return the correct datasets based on IDs
+    mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
+      return Promise.resolve(
+        ids
+          .map((id: string) => {
+            if (id === 'trace-id') {
+              return {
+                id: 'trace-id',
+                title: 'trace-dataset',
+                displayName: 'Trace Dataset',
+                signalType: CORE_SIGNAL_TYPES.TRACES,
+              };
+            } else if (id === 'log-id') {
+              return {
+                id: 'log-id',
+                title: 'log-dataset',
+                displayName: 'Log Dataset',
+                signalType: CORE_SIGNAL_TYPES.LOGS,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean)
+      );
+    });
+
+    // Mock get for fallback cases
     mockDataViews.get = jest.fn().mockImplementation((id) => {
       if (id === 'trace-id') {
         return Promise.resolve({
@@ -574,7 +636,7 @@ describe('DatasetSelect', () => {
 
     await waitFor(() => {
       expect(mockDataViews.getIds).toHaveBeenCalled();
-      expect(mockDataViews.get).toHaveBeenCalled();
+      expect(mockDataViews.getMultiple).toHaveBeenCalled();
     });
 
     // Verify dataset was loaded and component rendered
@@ -852,6 +914,16 @@ describe('DatasetSelect', () => {
       });
 
       mockDataViews.getIds = jest.fn().mockResolvedValue(['with-time-id', 'no-time-id']);
+      mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
+        return Promise.resolve(
+          ids.map((id: string) => {
+            if (id === 'with-time-id') {
+              return datasetWithTimeField;
+            }
+            return datasetWithoutTimeField;
+          })
+        );
+      });
       mockDataViews.get = jest.fn().mockImplementation((id) => {
         if (id === 'with-time-id') {
           return Promise.resolve(datasetWithTimeField);
@@ -887,8 +959,7 @@ describe('DatasetSelect', () => {
       // Since we can't easily check the filtered results in the DOM due to virtualization,
       // we can verify the mocks were called correctly and check that the filtering logic worked
       expect(mockGetType).toHaveBeenCalled();
-      expect(mockDataViews.get).toHaveBeenCalledWith('with-time-id');
-      expect(mockDataViews.get).toHaveBeenCalledWith('no-time-id');
+      expect(mockDataViews.getMultiple).toHaveBeenCalledWith(['with-time-id', 'no-time-id']);
 
       // The test passes if the component renders without error and the filtering logic is applied
       const button = screen.getByTestId('datasetSelectButton');
@@ -929,6 +1000,16 @@ describe('DatasetSelect', () => {
       });
 
       mockDataViews.getIds = jest.fn().mockResolvedValue(['with-time-id', 'no-time-id']);
+      mockDataViews.getMultiple = jest.fn().mockImplementation((ids) => {
+        return Promise.resolve(
+          ids.map((id: string) => {
+            if (id === 'with-time-id') {
+              return datasetWithTimeField;
+            }
+            return datasetWithoutTimeField;
+          })
+        );
+      });
       mockDataViews.get = jest.fn().mockImplementation((id) => {
         if (id === 'with-time-id') {
           return Promise.resolve(datasetWithTimeField);
@@ -962,8 +1043,7 @@ describe('DatasetSelect', () => {
 
       // Verify that both datasets were processed
       expect(mockGetType).toHaveBeenCalled();
-      expect(mockDataViews.get).toHaveBeenCalledWith('with-time-id');
-      expect(mockDataViews.get).toHaveBeenCalledWith('no-time-id');
+      expect(mockDataViews.getMultiple).toHaveBeenCalledWith(['with-time-id', 'no-time-id']);
 
       // The test passes if the component renders without error and both datasets are included
       const button = screen.getByTestId('datasetSelectButton');
@@ -980,6 +1060,7 @@ describe('DatasetSelect', () => {
       };
 
       mockDataViews.getIds = jest.fn().mockResolvedValue(['no-time-id']);
+      mockDataViews.getMultiple = jest.fn().mockResolvedValue([datasetWithoutTimeField]);
       mockDataViews.get = jest.fn().mockResolvedValue(datasetWithoutTimeField);
       mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
         id: 'no-time-id',
@@ -1093,6 +1174,114 @@ describe('DatasetSelect', () => {
 
       // Verify that the modal was opened
       expect(mockCore.overlays.openModal).toHaveBeenCalled();
+    });
+  });
+
+  describe('Dataset ID deduplication', () => {
+    it('deduplicates dataset IDs before fetching to prevent duplicate error notifications', async () => {
+      // Mock getIds to return duplicate IDs
+      mockDataViews.getIds = jest
+        .fn()
+        .mockResolvedValue(['duplicate-id', 'duplicate-id', 'unique-id']);
+
+      // Mock getMultiple to track what IDs are actually fetched
+      const getMultipleSpy = jest.fn().mockImplementation((ids) => {
+        return Promise.resolve(
+          ids.map((id: string) => ({
+            id,
+            title: `Dataset ${id}`,
+            displayName: `Dataset ${id}`,
+            timeFieldName: '@timestamp',
+          }))
+        );
+      });
+      mockDataViews.getMultiple = getMultipleSpy;
+
+      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
+        return Promise.resolve({
+          id: dataView.id,
+          title: dataView.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        });
+      });
+
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+        expect(getMultipleSpy).toHaveBeenCalled();
+      });
+
+      // Verify that getMultiple was called with deduplicated IDs
+      // Should only have 2 unique IDs instead of 3
+      const calledIds = getMultipleSpy.mock.calls[0][0];
+      expect(calledIds).toHaveLength(2);
+      expect(calledIds).toContain('duplicate-id');
+      expect(calledIds).toContain('unique-id');
+
+      // Verify no duplicate IDs were passed
+      const uniqueIds = [...new Set(calledIds)];
+      expect(calledIds.length).toBe(uniqueIds.length);
+    });
+
+    it('handles empty array from getIds', async () => {
+      mockDataViews.getIds = jest.fn().mockResolvedValue([]);
+      mockDataViews.getMultiple = jest.fn().mockResolvedValue([]);
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+      });
+
+      // Should not call getMultiple with empty array
+      expect(mockDataViews.getMultiple).toHaveBeenCalledWith([]);
+      expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
+    });
+
+    it('handles all duplicate IDs correctly', async () => {
+      // All IDs are the same
+      mockDataViews.getIds = jest.fn().mockResolvedValue(['same-id', 'same-id', 'same-id']);
+
+      const getMultipleSpy = jest.fn().mockImplementation((ids) => {
+        return Promise.resolve(
+          ids.map((id: string) => ({
+            id,
+            title: 'Same Dataset',
+            displayName: 'Same Dataset',
+            timeFieldName: '@timestamp',
+          }))
+        );
+      });
+      mockDataViews.getMultiple = getMultipleSpy;
+
+      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
+        return Promise.resolve({
+          id: dataView.id,
+          title: dataView.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        });
+      });
+
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+        expect(getMultipleSpy).toHaveBeenCalled();
+      });
+
+      // Should only fetch once for the single unique ID
+      const calledIds = getMultipleSpy.mock.calls[0][0];
+      expect(calledIds).toHaveLength(1);
+      expect(calledIds[0]).toBe('same-id');
     });
   });
 });

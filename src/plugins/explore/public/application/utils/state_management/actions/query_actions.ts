@@ -516,7 +516,13 @@ const executeQueryBase = async (
     });
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
-    await services.data.dataViews.ensureDefaultDataView();
+    // Only ensure default data view exists if no dataset is selected
+    // When a dataset is already selected (normal case), this check is redundant
+    // as DatasetSelect component already handles default selection during initialization
+    if (!query.dataset) {
+      await services.data.dataViews.ensureDefaultDataView();
+    }
+
     const dataView = query.dataset
       ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
       : await services.data.dataViews.getDefault();
