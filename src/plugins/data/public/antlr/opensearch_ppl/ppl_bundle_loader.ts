@@ -10,7 +10,7 @@ import { Vocabulary } from 'antlr4ng';
  * Endpoint: /_plugins/_ppl/_grammar
  * (proxied through OSD at /api/enhancements/ppl/grammar)
  */
-export interface PPLArtifactBundle {
+export interface PPLGrammarBundle {
   language: string;
   bundleVersion: string;
   grammarHash: string;
@@ -87,7 +87,7 @@ export interface PPLArtifacts {
   modeNames: string[];
   vocabulary: Vocabulary;
   startRuleIndex: number;
-  catalogs: PPLArtifactBundle['catalogs'];
+  catalogs: PPLGrammarBundle['catalogs'];
   grammarHash: string;
 }
 
@@ -96,7 +96,7 @@ export interface PPLArtifacts {
  * Creates the ANTLR Vocabulary from literal/symbolic name arrays.
  * Does NOT deserialize ATN objects — that is handled by PPLGrammarCache.
  */
-export function deserializeArtifacts(bundle: PPLArtifactBundle): PPLArtifacts {
+export function deserializeArtifacts(bundle: PPLGrammarBundle): PPLArtifacts {
   const literalNames = (bundle.literalNames || []).map((n) => (n === '' ? null : n));
   const symbolicNames = (bundle.symbolicNames || []).map((n) => (n === '' ? null : n));
   const vocabulary = new Vocabulary(literalNames, symbolicNames);

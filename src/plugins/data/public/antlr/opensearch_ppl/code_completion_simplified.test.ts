@@ -257,6 +257,20 @@ describe('ppl code_completion', () => {
       });
     });
 
+    it('should not suggest fields after | where field on compiled path', async () => {
+      const result = await getSimpleSuggestions('source = test-index | where field1 ');
+
+      expect(result.some((s) => s.text === '=')).toBeTruthy();
+      checkSuggestionsShouldNotContain(result, {
+        text: 'field1',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+      checkSuggestionsShouldNotContain(result, {
+        text: 'field2',
+        type: monaco.languages.CompletionItemKind.Field,
+      });
+    });
+
     it('should always suggest columns when we have a fieldList command', async () => {
       const result = await getSimpleSuggestions('source = test-index | fields field1, ');
 
@@ -686,7 +700,6 @@ describe('ppl code_completion', () => {
       it('should use cached runtime grammar when datasource version metadata is missing', async () => {
         const parseSpy = jest.spyOn(ParserInterpreter.prototype, 'parse');
         const shouldFetchSpy = jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend');
-        jest.spyOn(pplGrammarCache, 'getCachedVersion').mockReturnValue(undefined);
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
 
         const indexPatternWithoutVersion = ({
@@ -865,12 +878,9 @@ describe('ppl code_completion', () => {
         expect(result.some((s) => s.text === '=')).toBeTruthy();
       });
 
-      it('should still expose command tokens when backend preferred rules include commands', async () => {
+      it('should expose command tokens for pipe-first queries', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
         const grammar = buildRuntimeGrammar();
-        const commandsRule = grammar.runtimeRuleNameToIndex.get('commands');
-        grammar.rulesToVisit =
-          typeof commandsRule === 'number' ? [commandsRule] : grammar.rulesToVisit;
         jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
 
         const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
@@ -1031,6 +1041,73 @@ describe('ppl code_completion', () => {
         checkSuggestionsContain(result, {
           text: 'WHERE',
           type: monaco.languages.CompletionItemKind.Function,
+        });
+      });
+
+      it('should suggest fields after | where using runtime grammar', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | where ',
+          runtimeIndexPattern
+        );
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should not suggest fields after | where field on runtime grammar', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | where field1 ',
+          runtimeIndexPattern
+        );
+
+        // Should suggest operators, not fields
+        expect(result.some((s) => s.text === '=')).toBeTruthy();
+        checkSuggestionsShouldNotContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+        checkSuggestionsShouldNotContain(result, {
+          text: 'field2',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should not suggest fields after | where field in pipe-first mode', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          '| where field1 ',
+          runtimeIndexPattern
+        );
+
+        expect(result.some((s) => s.text === '=')).toBeTruthy();
+        checkSuggestionsShouldNotContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      it('should suggest fields after | stats COUNT() BY using runtime grammar', async () => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | stats COUNT() BY ',
+          runtimeIndexPattern
+        );
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
         });
       });
 
