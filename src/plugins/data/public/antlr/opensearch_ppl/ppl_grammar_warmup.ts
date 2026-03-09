@@ -16,41 +16,35 @@ interface QueryLike {
   };
 }
 
-type GrammarCacheLike = Pick<typeof pplGrammarCache, 'invalidate' | 'warmUp'>;
-
-const DEFAULT_DATASOURCE_KEY = '__default__';
-const UNKNOWN_VERSION_KEY = '__unknown__';
-
-function getWarmupSelectionKey(datasourceId?: string, datasourceVersion?: string): string {
-  return `${datasourceId || DEFAULT_DATASOURCE_KEY}:${datasourceVersion || UNKNOWN_VERSION_KEY}`;
-}
+type GrammarCacheLike = Pick<typeof pplGrammarCache, 'warmUp'>;
 
 /**
  * Creates a query update handler that pre-fetches PPL grammar bundles only when:
  * - query language is PPL/PPL_Simplified
  * - a dataset is selected
- * - selected datasource identity (id + version) changes
+ *
+ * The cache itself handles datasource switching (auto-clears when the
+ * datasource ID changes) and version gating (>= 3.6), so this handler
+ * only needs to gate on language/dataset presence and forward.
  */
 export function createPplGrammarWarmupHandler(
   http: HttpSetup,
   savedObjectsClient: SavedObjectsClientContract,
   grammarCache: GrammarCacheLike = pplGrammarCache
 ) {
-  let lastSelectionKey: string | undefined;
-
   return (query: QueryLike) => {
     const language = (query?.language ?? '').toUpperCase();
-    // In explore autocomplete, PPL uses PPL_Simplified. Both should warm runtime grammar.
     if (!language.startsWith('PPL')) return;
 
-    const datasourceId = query?.dataset?.dataSource?.id;
-    const datasourceVersion = query?.dataset?.dataSource?.version;
-    const selectionKey = getWarmupSelectionKey(datasourceId, datasourceVersion);
-    if (selectionKey === lastSelectionKey) {
-      return;
-    }
+    // No dataset selected — nothing to warm up.
+    if (!query?.dataset) return;
 
-    lastSelectionKey = selectionKey;
+    const datasourceId = query.dataset.dataSource?.id;
+    const datasourceVersion = query.dataset.dataSource?.version;
+
+    // Always forward to warmUp so the cache can detect datasource changes
+    // and clear stale entries. The version gate (>= 3.6) lives inside the
+    // cache's doWarmUp — unsupported versions won't trigger a network fetch.
     grammarCache.warmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
   };
 }

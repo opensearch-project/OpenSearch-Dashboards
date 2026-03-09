@@ -403,6 +403,67 @@ function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
 // grammar version changes — no code changes required on the frontend.
 
 /**
+ * Preferred rule names for C3, resolved against the runtime grammar.
+ *
+ * These fall into three categories:
+ *
+ * 1. **Leaf concepts** — stable field/table/function/literal rules that new
+ *    commands compose.  Adding a new PPL command that uses `qualifiedName`
+ *    works automatically.
+ *
+ * 2. **Noise suppression** — rules whose children expand to hundreds of
+ *    keyword tokens (e.g. `searchableKeyWord`, `keywordsCanBeId`).  Without
+ *    these as preferred rules, C3 floods with ~400 keyword tokens instead of
+ *    returning the parent rule for enrichment.
+ *
+ * 3. **Structural rules** — rules that control token scoping (e.g.
+ *    `searchCommand` controls root vs. pipe positions).
+ *
+ * Each name is resolved against `grammar.parserRuleNames` at runtime; names
+ * that don't exist in the current grammar version are silently skipped.
+ */
+const PREFERRED_RULE_NAMES: readonly string[] = [
+  // ── Leaf concepts ──
+  'qualifiedName',
+  'wcQualifiedName',
+  'tableQualifiedName',
+  'statsFunctionName',
+  'renameClasue',
+  'stringLiteral',
+  'integerLiteral',
+  'decimalLiteral',
+  // ── Expression rule that gates field suggestions ──
+  'fieldExpression',
+  // ── Noise suppression ──
+  'keywordsCanBeId',
+  'searchableKeyWord',
+  'takeAggFunction',
+  'positionFunctionName',
+  'sqlLikeJoinType',
+  // ── Structural rules ──
+  'searchCommand',
+  'comparisonOperator',
+  'searchComparisonOperator',
+];
+
+/**
+ * Build the C3 preferredRules set from the runtime grammar's rule names.
+ * Includes stable leaf concepts plus structural rules needed for correct
+ * token scoping.  New commands work automatically as long as they compose
+ * existing leaf concepts (qualifiedName, etc.).
+ */
+function buildRuntimePreferredRules(grammar: CachedGrammar): Set<number> {
+  const rules = new Set<number>();
+  for (const name of PREFERRED_RULE_NAMES) {
+    const idx = ruleIndex(grammar, name);
+    if (idx !== INVALID_RULE_INDEX) {
+      rules.add(idx);
+    }
+  }
+  return rules;
+}
+
+/**
  * Determine which preferred rules should be removed for a C3 rerun.
  * Mirrors the compiled processVisitedRules rerun logic, but uses rule names.
  *
@@ -538,7 +599,6 @@ function enrichRuntimeResult(
 
   // Resolve rule indices by name
   const ruleStatsFunction = ruleIndex(grammar, 'statsFunction');
-  const rulePplCommands = ruleIndex(grammar, 'pplCommands');
   const ruleFieldList = ruleIndex(grammar, 'fieldList');
   const ruleWcFieldList = ruleIndex(grammar, 'wcFieldList');
   const ruleSortField = ruleIndex(grammar, 'sortField');
@@ -581,27 +641,11 @@ function enrichRuntimeResult(
 
       case 'comparisonOperator':
       case 'searchComparisonOperator':
-        // Handled by rerun logic — no enrichment flags needed
+      case 'searchCommand':
+        // Structural stop-points — enrichment is handled by rerun logic
         break;
-
-      case 'logicalExpression': {
-        // Runtime fallback: if completion is inside pipeline logical expressions
-        // (e.g. `| where `), prefer schema-field suggestions even when C3 only
-        // returns expression/function tokens.
-        if (rulePplCommands !== INVALID_RULE_INDEX && !parentRuleList.includes(rulePplCommands)) {
-          const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
-          if (!lastToken || ![ID, BQUOTA, DOT].includes(lastToken.token.type)) {
-            shouldSuggestColumns = true;
-          }
-        }
-        break;
-      }
 
       case 'searchableKeyWord': {
-        // Runtime fallback: some grammar/version combinations surface only
-        // searchableKeyWord at command-argument boundaries (e.g. `| where `).
-        // When the cursor is at the first argument token position in a segment,
-        // ensure fields are available without relying on command-specific names.
         const isFirstArgumentPosition = isAtFirstArgumentPositionInSegmentRT(
           tokenStream,
           cursorTokenIndex,
@@ -614,8 +658,11 @@ function enrichRuntimeResult(
         break;
       }
 
-      case 'searchCommand': {
-        // Handled by rerun logic
+      case 'fieldExpression': {
+        const lastFieldToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
+        if (!lastFieldToken || ![ID, BQUOTA, DOT].includes(lastFieldToken.token.type)) {
+          shouldSuggestColumns = true;
+        }
         break;
       }
 
@@ -634,17 +681,24 @@ function enrichRuntimeResult(
         );
         if (lastTokenResult?.token.type === SOURCE) break;
 
-        // In field list context: suggest field only if last token is not ID
+        // In field list context: suggest field only if last token is not an identifier
         if (parentRuleList.some((parentRule) => fieldRules.includes(parentRule))) {
           const lastNonSpace = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
-          if (lastNonSpace?.token.type === ID) break;
+          if (
+            lastNonSpace &&
+            (lastNonSpace.token.type === ID || lastNonSpace.token.type === BQUOTA)
+          )
+            break;
           shouldSuggestColumns = true;
           break;
         }
 
-        // When last non-operator token is ID, don't suggest columns
-        // (unless second-last is SOURCE, for "source = tablename <field>")
-        if (lastNonOperatorToken?.token.type === ID) {
+        // When last non-operator token is an identifier (plain or backtick-quoted),
+        // don't suggest columns (unless second-last is SOURCE, for "source = tablename <field>")
+        if (
+          lastNonOperatorToken?.token.type === ID ||
+          lastNonOperatorToken?.token.type === BQUOTA
+        ) {
           const secondLast = findLastNonSpaceOperatorTokenRT(
             tokenStream,
             lastNonOperatorToken.index,
@@ -737,6 +791,17 @@ function enrichRuntimeResult(
   const isInBackQuote = currentToken?.type === BQUOTA;
   const isInQuote = currentToken?.type === DQUOTA || currentToken?.type === SQUOTA;
 
+  // TODO: Remove diagnostic logging after field suggestion investigation
+  const ruleNames = [...rules.keys()].map((id) => grammar.parserRuleNames[id] || `?${id}`);
+  // eslint-disable-next-line no-console
+  console.log('[PPL-AC-ENRICH]', {
+    shouldSuggestColumns,
+    ruleNames,
+    lastNonOp: lastNonOperatorToken
+      ? { type: lastNonOperatorToken.token.type, text: lastNonOperatorToken.token.text }
+      : null,
+  });
+
   return {
     ...baseResult,
     suggestSourcesOrTables,
@@ -754,6 +819,18 @@ function enrichRuntimeResult(
 
 // ─── Runtime token-stream helpers (name-based, no compiled constants) ─────────
 
+/**
+ * Check if a token is effectively whitespace. The runtime LexerInterpreter may
+ * tokenize spaces as ERROR_RECOGNITION or other non-WHITESPACE types when mode
+ * transitions don't match compiled behaviour. Checking the token text catches
+ * these edge cases so skip-space helpers work consistently.
+ */
+function isEffectivelyWhitespace(token: Token, spaceToken: number): boolean {
+  if (token.type === spaceToken || token.type === Token.EOF) return true;
+  const text = token.text;
+  return typeof text === 'string' && text.length > 0 && text.trim().length === 0;
+}
+
 function findLastNonSpaceTokenRT(
   tokenStream: TokenStream,
   currentIndex: number,
@@ -761,7 +838,7 @@ function findLastNonSpaceTokenRT(
 ): { token: Token; index: number } | null {
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
-    if (token.type !== spaceToken && token.type !== Token.EOF) {
+    if (!isEffectivelyWhitespace(token, spaceToken)) {
       return { token, index: i };
     }
   }
@@ -778,12 +855,7 @@ function findLastNonSpaceOperatorTokenRT(
   const operators = getRuntimeOperatorTokens(grammar);
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
-    if (
-      token &&
-      token.type !== spaceToken &&
-      token.type !== Token.EOF &&
-      !operators.has(token.type)
-    ) {
+    if (token && !isEffectivelyWhitespace(token, spaceToken) && !operators.has(token.type)) {
       return { token, index: i };
     }
   }
@@ -802,14 +874,14 @@ function findFirstNonSpaceTokenAfterPipeRT(
     const token = tokenStream.get(i);
     if (!token) continue;
 
-    if (token.type !== spaceToken && token.type !== Token.EOF) {
+    if (!isEffectivelyWhitespace(token, spaceToken)) {
       firstNonSpaceToken = { token, index: i };
 
       if (token.type === pipeToken) {
         for (let j = i + 1; j < tokenStream.size; j++) {
           const nextToken = tokenStream.get(j);
           if (!nextToken) break;
-          if (nextToken.type !== spaceToken && nextToken.type !== Token.EOF) {
+          if (!isEffectivelyWhitespace(nextToken, spaceToken)) {
             return { token: nextToken, index: j };
           }
         }
@@ -847,7 +919,7 @@ function isAtFirstArgumentPositionInSegmentRT(
   let nonSpaceTokenCount = 0;
   for (let i = segmentStart; i < cursorIndex; i++) {
     const token = tokenStream.get(i);
-    if (!token || token.type === spaceToken || token.type === Token.EOF) continue;
+    if (!token || isEffectivelyWhitespace(token, spaceToken)) continue;
     nonSpaceTokenCount++;
     if (nonSpaceTokenCount > 1) return false;
   }
@@ -914,17 +986,10 @@ function tryRuntimeGrammarSuggestions(
   try {
     const currentQuery = services?.data?.query?.queryString?.getQuery?.();
     const dataSourceId = indexPattern?.dataSourceRef?.id ?? currentQuery?.dataset?.dataSource?.id;
+
     const grammar = pplGrammarCache.getCachedGrammar(dataSourceId);
     if (!grammar) return null;
 
-    const version =
-      indexPattern?.dataSourceRef?.version ||
-      currentQuery?.dataset?.dataSource?.version ||
-      pplGrammarCache.getCachedVersion(dataSourceId);
-
-    // Grammar cache is the source of truth for runtime path. If grammar has already
-    // been fetched and cached from backend, use it regardless of datasource version
-    // metadata so runtime autocomplete remains dynamic for backported/new bundles.
     // ─── Normalize token dictionary ──────────────────────────────────────────
     const spaceToken = resolveSpaceToken(grammar);
 
@@ -995,7 +1060,7 @@ function tryRuntimeGrammarSuggestions(
     // ─── Collect C3 candidates ────────────────────────────────────────────
     const core = new CodeCompletionCore(parser);
     core.ignoredTokens = getSafeRuntimeIgnoredTokens(grammar);
-    core.preferredRules = new Set(grammar.rulesToVisit);
+    core.preferredRules = buildRuntimePreferredRules(grammar);
     const cursorTokenIndex = findCursorTokenIndex(tokenStream, effectiveCursor, spaceToken);
     if (cursorTokenIndex === undefined) return null;
 
@@ -1299,6 +1364,16 @@ export const getSimplifiedPPLSuggestions = async ({
     const preferColumnSuggestionsOnly =
       suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
     const shouldSuggestColumns = Boolean(suggestions.suggestColumns || isRexFieldEqualsContext);
+
+    // TODO: Remove diagnostic logging after field suggestion investigation
+    // eslint-disable-next-line no-console
+    console.log('[PPL-AC-DIAG]', {
+      query: query.slice(0, 80),
+      isRuntimeGrammar,
+      suggestColumns: !!suggestions.suggestColumns,
+      isRexFieldEqualsContext,
+      shouldSuggestColumns,
+    });
 
     if (shouldSuggestColumns && (isInBackQuote || !isInQuotes)) {
       const initialFields = indexPattern.fields;
