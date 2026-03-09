@@ -3,21 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Bucket } from './types';
 import { DataViewField } from '../../../../data/public';
 import { shortenDottedString } from '../../application/legacy/discover/application/helpers';
+import { wrapOnDot } from '../../../../opensearch_dashboards_react/public';
 import './discover_field.scss';
 import './facet_value.scss';
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
-}
 
 export interface FacetValueProps {
   /**
@@ -55,13 +49,19 @@ export const FacetValue = ({ field, bucket, onAddFilter, useShortDots }: FacetVa
     }
   );
 
+  const wrappedDisplay = useMemo(
+    () =>
+      useShortDots ? wrapOnDot(shortenDottedString(bucket.display)) : wrapOnDot(bucket.display),
+    [bucket.display, useShortDots]
+  );
+
   const displayValue = (
     <EuiToolTip delay="long" content={bucket.display}>
       <span
         data-test-subj={`field-${bucket.display}`}
         className="exploreSidebarField__name eui-textBreakWord"
       >
-        {useShortDots ? wrapOnDot(shortenDottedString(bucket.display)) : wrapOnDot(bucket.display)}
+        {wrappedDisplay}
       </span>
     </EuiToolTip>
   );
