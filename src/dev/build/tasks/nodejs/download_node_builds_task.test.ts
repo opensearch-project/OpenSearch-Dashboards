@@ -213,8 +213,6 @@ it('rejects if any download fails', async () => {
   await expect(DownloadNodeBuilds.run(config, log, [])).rejects.toMatchInlineSnapshot(
     `[Error: Download failed for reasons]`
   );
-  /* ToDo [NODE14]: Replace when Node.js 14 support is removed
-   * expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
-   */
-  expect(testWriter.messages).toMatchSnapshot();
+
+  expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
 });
