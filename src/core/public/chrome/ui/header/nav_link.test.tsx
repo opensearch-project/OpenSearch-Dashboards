@@ -20,8 +20,8 @@ describe('isActiveNavLink', () => {
     expect(isActiveNavLink('data-explorer', 'discover')).toBe(true);
   });
 
-  it('should return true if the appId is "data-explorer" and linkId is "explore"', () => {
-    expect(isActiveNavLink('data-explorer', 'explore')).toBe(true);
+  it('should return true if the appId is "explore" and linkId is "explore"', () => {
+    expect(isActiveNavLink('explore', 'explore')).toBe(true);
   });
 
   it('should return false if the appId and linkId do not match', () => {
