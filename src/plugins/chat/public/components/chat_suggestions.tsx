@@ -121,7 +121,10 @@ export const ChatSuggestions = ({
     return null;
   }
   return (
-    <div aria-label="chat suggestions" style={{ marginLeft: '8px', marginBottom: '5px' }}>
+    <div
+      aria-label="chat suggestions"
+      style={{ paddingLeft: 8, paddingBottom: 5, overflow: 'hidden' }}
+    >
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
         <small>Available suggestions</small>
       </EuiText>
