@@ -133,7 +133,6 @@ jest.mock('@osd/monaco', () => ({
   revalidatePPLModel: jest.fn(),
 }));
 
-
 // Now import after mocking
 import { act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
