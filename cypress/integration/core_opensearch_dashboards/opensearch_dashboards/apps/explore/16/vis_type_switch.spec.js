@@ -29,6 +29,7 @@ export const runVisTypeSwitchTests = () => {
     };
 
     const verifyVisualizationCreated = () => {
+      cy.get('#explore_visualization_tab').click();
       cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
       cy.get('.exploreVisContainer canvas').should('be.visible');

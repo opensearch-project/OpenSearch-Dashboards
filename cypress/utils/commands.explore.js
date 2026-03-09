@@ -564,6 +564,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
+  cy.get('#explore_visualization_tab').click();
   cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
