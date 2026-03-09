@@ -427,13 +427,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       // Fetch all DataViews in parallel using bulkGet optimization
       const dataViewsArray = await dataViews.getMultiple(uniqueDatasetIds);
 
-        // convertToDataset already includes description, displayName from the saved object
-        // Just ensure signalType is set from dataView if not already present
-        fetchedDatasets.push({
-          ...dataset,
-          signalType: dataset.signalType || dataView.signalType,
-        });
-      }
       // Convert all DataViews to datasets in parallel
       const datasetPromises = dataViewsArray.map(async (dataView) => {
         const dataset = await dataViews.convertToDataset(dataView);
