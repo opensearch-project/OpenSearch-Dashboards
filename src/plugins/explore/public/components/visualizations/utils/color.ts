@@ -22,6 +22,12 @@ export function normalizeHexColor(color: string): string {
 export function darkenHexColor(hexColor: string, factor: number = 0.6): string {
   const normalized = normalizeHexColor(hexColor);
 
+  // Ensure hex color string, return original input if not a valid hex color string,
+  // (e.g., it's an rgb() string, a named color, or an empty string)
+  if (!/^#[0-9a-f]{6}$/i.test(normalized)) {
+    return hexColor;
+  }
+
   // Parse RGB values
   const r = parseInt(normalized.slice(1, 3), 16);
   const g = parseInt(normalized.slice(3, 5), 16);

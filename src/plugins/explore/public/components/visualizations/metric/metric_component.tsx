@@ -268,20 +268,21 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
 }) => {
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const handlerRef = useRef(
+    debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100)
+  );
 
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
 
-    const handler = debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100);
-
+    const handler = handlerRef.current;
     const resizeObserver = new ResizeObserver(handler);
-
     resizeObserver.observe(element);
 
     return () => {
@@ -348,6 +349,14 @@ export const MetricChart: React.FC<MetricChartProps> = ({
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
+  const handlerRef = useRef(
+    debounce((entries: ResizeObserverEntry[]) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setContainerDimensions({ width, height });
+      }
+    }, 100)
+  );
 
   // Calculate text data with memoization
   const textData = useMemo(() => {
@@ -361,13 +370,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     const element = overlayRef.current;
     if (!element) return;
 
-    const handler = debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setContainerDimensions({ width, height });
-      }
-    }, 100);
-
+    const handler = handlerRef.current;
     const resizeObserver = new ResizeObserver(handler);
 
     resizeObserver.observe(element);

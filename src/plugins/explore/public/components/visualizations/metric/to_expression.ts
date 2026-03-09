@@ -287,11 +287,13 @@ export const createMultiMetric = (
   // Group data by the split by field (categorical)
   const groupedData = new Map<string, any[]>();
   transformedData.forEach((row) => {
-    const groupValue = row[splitByField];
-    if (!groupedData.has(groupValue)) {
-      groupedData.set(groupValue, []);
+    const splitByValue = row[splitByField];
+    if (splitByValue === undefined || splitByValue === null) return;
+    const groupKey = String(splitByValue);
+    if (!groupedData.has(groupKey)) {
+      groupedData.set(groupKey, []);
     }
-    groupedData.get(groupValue)!.push(row);
+    groupedData.get(splitByValue)!.push(row);
   });
 
   const specs: RendererSpecConfig[] = [];
