@@ -1134,6 +1134,351 @@ describe('ppl code_completion', () => {
       });
     });
 
+    describe('runtime grammar evolution (backend adds/removes/renames)', () => {
+      const runtimeIndexPattern = ({
+        ...mockIndexPattern,
+        dataSourceRef: { id: 'runtime-ds', version: '3.6.0' },
+      } as unknown) as IndexPattern;
+
+      const setupRuntimeGrammar = (overrides: Partial<CachedGrammar> = {}) => {
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        const grammar = buildRuntimeGrammar(overrides);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar);
+        return grammar;
+      };
+
+      const hasText = (result: QuerySuggestion[], text: string) =>
+        result.some((s) => s.text === text);
+
+      // ─── New command added on backend ────────────────────────────────────
+
+      it('should surface a new command keyword added by backend grammar', async () => {
+        const grammar = setupRuntimeGrammar();
+        const newCommandTokenType = grammar.vocabulary.maxTokenType + 500;
+
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) =>
+          t === newCommandTokenType ? "'FILLNULL'" : originalVocab.getLiteralName(t);
+        patchedVocab.getSymbolicName = (t: number) =>
+          t === newCommandTokenType ? 'FILLNULL' : originalVocab.getSymbolicName(t);
+        grammar.vocabulary = patchedVocab;
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[newCommandTokenType, []]]),
+          rules: new Map<number, { startTokenIndex: number; ruleList: number[] }>(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(hasText(result, 'FILLNULL')).toBeTruthy();
+      });
+
+      it('should surface multiple new commands added in a single grammar update', async () => {
+        const grammar = setupRuntimeGrammar();
+        const baseType = grammar.vocabulary.maxTokenType + 600;
+        const newCommands = ['TRENDLINE', 'EXPAND', 'FILLNULL'];
+
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) => {
+          const idx = t - baseType;
+          if (idx >= 0 && idx < newCommands.length) return `'${newCommands[idx]}'`;
+          return originalVocab.getLiteralName(t);
+        };
+        patchedVocab.getSymbolicName = (t: number) => {
+          const idx = t - baseType;
+          if (idx >= 0 && idx < newCommands.length) return newCommands[idx];
+          return originalVocab.getSymbolicName(t);
+        };
+        grammar.vocabulary = patchedVocab;
+
+        const tokenMap = new Map<number, number[]>();
+        newCommands.forEach((_, i) => tokenMap.set(baseType + i, []));
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: tokenMap,
+          rules: new Map(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        for (const cmd of newCommands) {
+          expect(hasText(result, cmd)).toBeTruthy();
+        }
+      });
+
+      // ─── New function added on backend ───────────────────────────────────
+
+      it('should surface a new function keyword from backend grammar', async () => {
+        const grammar = setupRuntimeGrammar();
+        const newFuncTokenType = grammar.vocabulary.maxTokenType + 700;
+        const funcRuleIndex = grammar.runtimeRuleNameToIndex.get('collectionFunctionName') ?? 0;
+
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) =>
+          t === newFuncTokenType ? "'mvexpand'" : originalVocab.getLiteralName(t);
+        patchedVocab.getSymbolicName = (t: number) =>
+          t === newFuncTokenType ? 'MVEXPAND' : originalVocab.getSymbolicName(t);
+        grammar.vocabulary = patchedVocab;
+
+        const openingParen = grammar.runtimeSymbolicNameToTokenType.get('LT_PRTHS') ?? 0;
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[newFuncTokenType, [openingParen]]]),
+          rules: new Map<number, { startTokenIndex: number; ruleList: number[] }>([
+            [funcRuleIndex, { startTokenIndex: 0, ruleList: [funcRuleIndex] }],
+          ]),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | eval ',
+          runtimeIndexPattern
+        );
+
+        const funcSuggestion = result.find((s) => s.text === 'mvexpand()');
+        expect(funcSuggestion).toBeTruthy();
+        expect(funcSuggestion?.type).toBe(monaco.languages.CompletionItemKind.Module);
+      });
+
+      // ─── Keyword removed on backend ──────────────────────────────────────
+
+      it('should not suggest a command that was removed from backend grammar', async () => {
+        const grammar = setupRuntimeGrammar();
+        const newCmdA = grammar.vocabulary.maxTokenType + 900;
+        const newCmdB = grammar.vocabulary.maxTokenType + 901;
+
+        // Patch vocabulary to add two synthetic commands (KEEPCMD / DROPCMD)
+        // and return only KEEPCMD from C3 — DROPCMD should be absent.
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) => {
+          if (t === newCmdA) return "'KEEPCMD'";
+          if (t === newCmdB) return "'DROPCMD'";
+          return originalVocab.getLiteralName(t);
+        };
+        patchedVocab.getSymbolicName = (t: number) => {
+          if (t === newCmdA) return 'KEEPCMD';
+          if (t === newCmdB) return 'DROPCMD';
+          return originalVocab.getSymbolicName(t);
+        };
+        grammar.vocabulary = patchedVocab;
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[newCmdA, []]]),
+          rules: new Map(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(hasText(result, 'KEEPCMD')).toBeTruthy();
+        expect(hasText(result, 'DROPCMD')).toBeFalsy();
+      });
+
+      it('should not suggest a function that was removed from backend grammar', async () => {
+        const grammar = setupRuntimeGrammar();
+        const keptFunc = grammar.vocabulary.maxTokenType + 910;
+        const removedFunc = grammar.vocabulary.maxTokenType + 911;
+        const funcRuleIndex = grammar.runtimeRuleNameToIndex.get('collectionFunctionName') ?? 0;
+        const openParen = grammar.runtimeSymbolicNameToTokenType.get('LT_PRTHS') ?? 0;
+
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) => {
+          if (t === keptFunc) return "'kept_func'";
+          if (t === removedFunc) return "'removed_func'";
+          return originalVocab.getLiteralName(t);
+        };
+        patchedVocab.getSymbolicName = (t: number) => {
+          if (t === keptFunc) return 'KEPT_FUNC';
+          if (t === removedFunc) return 'REMOVED_FUNC';
+          return originalVocab.getSymbolicName(t);
+        };
+        grammar.vocabulary = patchedVocab;
+
+        // Only keptFunc returned by C3, removedFunc absent
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[keptFunc, [openParen]]]),
+          rules: new Map<number, { startTokenIndex: number; ruleList: number[] }>([
+            [funcRuleIndex, { startTokenIndex: 0, ruleList: [funcRuleIndex] }],
+          ]),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern(
+          'source = test-index | eval ',
+          runtimeIndexPattern
+        );
+
+        expect(result.some((s) => s.text === 'kept_func()')).toBeTruthy();
+        expect(result.some((s) => s.text === 'removed_func()')).toBeFalsy();
+      });
+
+      // ─── Keyword renamed on backend ──────────────────────────────────────
+
+      it('should reflect a renamed command keyword from backend grammar', async () => {
+        const grammar = setupRuntimeGrammar();
+        const renamedTokenType = grammar.vocabulary.maxTokenType + 800;
+
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) =>
+          t === renamedTokenType ? "'FILTER'" : originalVocab.getLiteralName(t);
+        patchedVocab.getSymbolicName = (t: number) =>
+          t === renamedTokenType ? 'FILTER' : originalVocab.getSymbolicName(t);
+        grammar.vocabulary = patchedVocab;
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[renamedTokenType, []]]),
+          rules: new Map(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(hasText(result, 'FILTER')).toBeTruthy();
+        expect(hasText(result, 'WHERE')).toBeFalsy();
+      });
+
+      // ─── Token type IDs renumbered on backend ────────────────────────────
+
+      it('should handle token type renumbering across grammar versions', async () => {
+        const grammar = setupRuntimeGrammar({
+          grammarHash: 'renumbered-grammar',
+        });
+        // Use synthetic tokens with custom IDs to simulate renumbering
+        const tokenA = grammar.vocabulary.maxTokenType + 920;
+        const tokenB = grammar.vocabulary.maxTokenType + 921;
+
+        const originalVocab = grammar.vocabulary;
+        const patchedVocab = Object.create(originalVocab);
+        patchedVocab.getLiteralName = (t: number) => {
+          if (t === tokenA) return "'CMDONE'";
+          if (t === tokenB) return "'CMDTWO'";
+          return originalVocab.getLiteralName(t);
+        };
+        patchedVocab.getSymbolicName = (t: number) => {
+          if (t === tokenA) return 'CMDONE';
+          if (t === tokenB) return 'CMDTWO';
+          return originalVocab.getSymbolicName(t);
+        };
+        grammar.vocabulary = patchedVocab;
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([
+            [tokenA, []],
+            [tokenB, []],
+          ]),
+          rules: new Map(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        expect(hasText(result, 'CMDONE')).toBeTruthy();
+        expect(hasText(result, 'CMDTWO')).toBeTruthy();
+      });
+
+      // ─── Empty grammar (edge case) ──────────────────────────────────────
+
+      it('should return empty keyword suggestions when grammar has no token candidates', async () => {
+        setupRuntimeGrammar();
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>(),
+          rules: new Map(),
+        } as any);
+
+        const result = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+
+        const keywordSuggestions = result.filter(
+          (s) =>
+            s.type === monaco.languages.CompletionItemKind.Keyword ||
+            s.type === monaco.languages.CompletionItemKind.Function
+        );
+        expect(keywordSuggestions).toHaveLength(0);
+      });
+
+      // ─── New rule from backend triggers field suggestions ────────────────
+
+      it('should suggest fields when backend grammar surfaces qualifiedName rule', async () => {
+        const grammar = setupRuntimeGrammar();
+        const qualifiedNameRule = grammar.runtimeRuleNameToIndex.get('qualifiedName');
+        const whereToken = grammar.runtimeSymbolicNameToTokenType.get('WHERE');
+
+        if (qualifiedNameRule === undefined) {
+          throw new Error('qualifiedName rule not found in test grammar');
+        }
+
+        // Include a token alongside qualifiedName so rerun doesn't wipe it out
+        const tokenMap = new Map<number, number[]>();
+        if (whereToken !== undefined) tokenMap.set(whereToken, []);
+
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: tokenMap,
+          rules: new Map<number, { startTokenIndex: number; ruleList: number[] }>([
+            [qualifiedNameRule, { startTokenIndex: 0, ruleList: [] }],
+          ]),
+        } as any);
+
+        // Use `| where ` so the last non-operator token is WHERE (not an ID)
+        const result = await getSimpleSuggestionsForIndexPattern('| where ', runtimeIndexPattern);
+
+        checkSuggestionsContain(result, {
+          text: 'field1',
+          type: monaco.languages.CompletionItemKind.Field,
+        });
+      });
+
+      // ─── Grammar version change produces different suggestion set ────────
+
+      it('should produce different suggestions when grammar hash changes', async () => {
+        const grammar1 = buildRuntimeGrammar({ grammarHash: 'grammar-v1' });
+        const cmdV1 = grammar1.vocabulary.maxTokenType + 950;
+
+        const origVocab1 = grammar1.vocabulary;
+        const patched1 = Object.create(origVocab1);
+        patched1.getLiteralName = (t: number) =>
+          t === cmdV1 ? "'V1CMD'" : origVocab1.getLiteralName(t);
+        patched1.getSymbolicName = (t: number) =>
+          t === cmdV1 ? 'V1CMD' : origVocab1.getSymbolicName(t);
+        grammar1.vocabulary = patched1;
+
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar1);
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[cmdV1, []]]),
+          rules: new Map(),
+        } as any);
+
+        const result1 = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+        expect(hasText(result1, 'V1CMD')).toBeTruthy();
+        expect(hasText(result1, 'V2CMD')).toBeFalsy();
+
+        // Second grammar: different command set
+        jest.restoreAllMocks();
+        jest.spyOn(querySnippets, 'getPPLQuerySnippetForSuggestions').mockResolvedValue([]);
+        const grammar2 = buildRuntimeGrammar({ grammarHash: 'grammar-v2' });
+        const cmdV2 = grammar2.vocabulary.maxTokenType + 960;
+
+        const origVocab2 = grammar2.vocabulary;
+        const patched2 = Object.create(origVocab2);
+        patched2.getLiteralName = (t: number) =>
+          t === cmdV2 ? "'V2CMD'" : origVocab2.getLiteralName(t);
+        patched2.getSymbolicName = (t: number) =>
+          t === cmdV2 ? 'V2CMD' : origVocab2.getSymbolicName(t);
+        grammar2.vocabulary = patched2;
+
+        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
+        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(grammar2);
+        jest.spyOn(CodeCompletionCore.prototype, 'collectCandidates').mockReturnValue({
+          tokens: new Map<number, number[]>([[cmdV2, []]]),
+          rules: new Map(),
+        } as any);
+
+        const result2 = await getSimpleSuggestionsForIndexPattern('| ', runtimeIndexPattern);
+        expect(hasText(result2, 'V2CMD')).toBeTruthy();
+        expect(hasText(result2, 'V1CMD')).toBeFalsy();
+      });
+    });
+
     describe('extractQueryTillCursor behavior', () => {
       it('should handle single line queries correctly', async () => {
         const query = 'source = test-index | where field1 = "value" ';
