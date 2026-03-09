@@ -68,7 +68,7 @@ const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
   isFunction: true,
 };
 
-// ─── Fix A: C3 follow-set cache isolation for runtime grammars ───────────────
+// ─── C3 follow-set cache isolation for runtime grammars ──────────────────────
 // CodeCompletionCore.followSetsByATN caches by parser.constructor.name.
 // All ParserInterpreter instances share "ParserInterpreter" as the key, so
 // different runtime grammars can pollute each other. Keep one follow-set bucket
@@ -284,7 +284,7 @@ function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number> {
 
 // ─── Lazy-cached name→index lookups ──────────────────────────────────────────
 // runtimeRuleNameToIndex / runtimeSymbolicNameToTokenType are Maps built
-// client-side in PPLGrammarCache.fetchAndCache. But if for any reason
+// client-side in PPLGrammarCache.doFetch. But if for any reason
 // the CachedGrammar comes from a code path that didn't build them (e.g.
 // raw JSON), these lazy caches rebuild from the arrays / vocabulary
 // directly, keyed by grammarHash so they're built at most once per grammar.
@@ -1026,7 +1026,7 @@ function tryRuntimeGrammarSuggestions(
     parser.interpreter.predictionMode = PredictionMode.SLL;
 
     // ─── Parse using the selected start rule (non-fatal) ───────────────────
-    // Gotcha 3: ParserInterpreter can throw on malformed/partial inputs.
+    // ParserInterpreter can throw on malformed/partial inputs.
     // Completion should still work even if parse fails — C3 can use a
     // synthetic context when no parse tree is available.
     const errorListener = new GeneralErrorListener(spaceToken);
@@ -1047,7 +1047,7 @@ function tryRuntimeGrammarSuggestions(
     const cursorTokenIndex = findCursorTokenIndex(tokenStream, effectiveCursor, spaceToken);
     if (cursorTokenIndex === undefined) return null;
 
-    // Fix A: switch C3 follow-set cache bucket to the current runtime grammar.
+    // Switch C3 follow-set cache bucket to the current runtime grammar.
     isolateC3CacheForRuntimeGrammar(grammar.grammarHash, parser);
 
     // For empty pipe-first (`|`) use a synthetic context anchored at the
@@ -1066,7 +1066,7 @@ function tryRuntimeGrammarSuggestions(
 
     const { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
 
-    // ─── Fix B (generalized): rerun without preferred rules that hide tokens ─
+    // ─── Rerun without preferred rules that hide tokens ────────────────────
     // When a preferred rule appears at the cursor, C3 returns it as a rule
     // candidate and does NOT return the tokens inside it. The compiled path
     // handles this via processVisitedRules + parseQuery's rerun loop.
@@ -1114,7 +1114,7 @@ function tryRuntimeGrammarSuggestions(
     const inRuntimeFunctionContext = isRuntimeFunctionRuleContext(grammar, rules);
     const openingParenToken = tokenTypeBySymbolic(grammar, 'LT_PRTHS');
     tokens.forEach((followingTokens, tokenType) => {
-      // Fix C: Skip EOF and junk tokens where vocab can't resolve the ID.
+      // Skip EOF and junk tokens where vocab can't resolve the ID.
       if (tokenType === Token.EOF) return;
       const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
       const symbolicName = parser.vocabulary.getSymbolicName(tokenType);
