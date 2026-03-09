@@ -162,49 +162,10 @@ it('downloads node builds for each platform', async () => {
           "sha256": "win32:sha256",
           "url": "win32:url",
         },
-      ],
-      Array [
-        Object {
-          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-linux-x64.tar.gz",
-          "log": <ToolingLog>,
-          "retries": 3,
-          "sha256": undefined,
-          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-linux-x64.tar.gz",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-linux-arm64.tar.gz",
-          "log": <ToolingLog>,
-          "retries": 3,
-          "sha256": undefined,
-          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-linux-arm64.tar.gz",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-darwin-x64.tar.gz",
-          "log": <ToolingLog>,
-          "retries": 3,
-          "sha256": undefined,
-          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-darwin-x64.tar.gz",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "/mocked/path/.node_binaries/14.21.3/node-v14.21.3-win32-x64.tar.gz",
-          "log": <ToolingLog>,
-          "retries": 3,
-          "sha256": undefined,
-          "url": "https://mirrors.nodejs.org/dist/v14.21.3/node-v14.21.3-win32-x64.tar.gz",
-        },
-      ],
+      ]
     ]
   `);
-  /* ToDo [NODE14]: Replace when Node.js 14 support is removed
-   * expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
-   */
-  expect(testWriter.messages).toMatchSnapshot();
+  expect(testWriter.messages).toMatchInlineSnapshot(`Array []`);
 });
 
 it('rejects if any download fails', async () => {

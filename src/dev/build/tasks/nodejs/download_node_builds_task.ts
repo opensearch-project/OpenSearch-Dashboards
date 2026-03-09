@@ -30,10 +30,7 @@
 
 import { download, GlobalTask } from '../../lib';
 import { getNodeShasums } from './node_shasums';
-import {
-  getNodeDownloadInfo,
-  getRequiredVersion,
-} from './node_download_info';
+import { getNodeDownloadInfo, getRequiredVersion } from './node_download_info';
 
 export const DownloadNodeBuilds: GlobalTask = {
   global: true,

@@ -29,9 +29,7 @@
  */
 
 import { untar, unzip, GlobalTask } from '../../lib';
-import {
-  getNodeDownloadInfo
-} from './node_download_info';
+import { getNodeDownloadInfo } from './node_download_info';
 
 export const ExtractNodeBuilds: GlobalTask = {
   global: true,
