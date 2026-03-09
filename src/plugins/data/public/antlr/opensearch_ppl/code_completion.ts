@@ -791,17 +791,6 @@ function enrichRuntimeResult(
   const isInBackQuote = currentToken?.type === BQUOTA;
   const isInQuote = currentToken?.type === DQUOTA || currentToken?.type === SQUOTA;
 
-  // TODO: Remove diagnostic logging after field suggestion investigation
-  const ruleNames = [...rules.keys()].map((id) => grammar.parserRuleNames[id] || `?${id}`);
-  // eslint-disable-next-line no-console
-  console.log('[PPL-AC-ENRICH]', {
-    shouldSuggestColumns,
-    ruleNames,
-    lastNonOp: lastNonOperatorToken
-      ? { type: lastNonOperatorToken.token.type, text: lastNonOperatorToken.token.text }
-      : null,
-  });
-
   return {
     ...baseResult,
     suggestSourcesOrTables,
@@ -1364,16 +1353,6 @@ export const getSimplifiedPPLSuggestions = async ({
     const preferColumnSuggestionsOnly =
       suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
     const shouldSuggestColumns = Boolean(suggestions.suggestColumns || isRexFieldEqualsContext);
-
-    // TODO: Remove diagnostic logging after field suggestion investigation
-    // eslint-disable-next-line no-console
-    console.log('[PPL-AC-DIAG]', {
-      query: query.slice(0, 80),
-      isRuntimeGrammar,
-      suggestColumns: !!suggestions.suggestColumns,
-      isRexFieldEqualsContext,
-      shouldSuggestColumns,
-    });
 
     if (shouldSuggestColumns && (isInBackQuote || !isInQuotes)) {
       const initialFields = indexPattern.fields;
