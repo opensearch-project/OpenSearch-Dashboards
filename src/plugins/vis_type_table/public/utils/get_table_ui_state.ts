@@ -33,7 +33,6 @@ export function getTableUIState(uiState: PersistedState): TableUiState {
     }
 
     uiState.set('vis.columnsWidth', nextState);
-    uiState.emit('reload');
   };
 
   return { sort, setSort, colWidth, setWidth };
