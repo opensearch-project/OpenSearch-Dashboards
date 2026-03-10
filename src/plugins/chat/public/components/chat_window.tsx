@@ -22,7 +22,7 @@ import type {
   Message,
   UserMessage,
 } from '../../common/types';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';

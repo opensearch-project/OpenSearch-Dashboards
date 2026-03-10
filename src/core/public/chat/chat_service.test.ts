@@ -23,8 +23,6 @@ describe('ChatService', () => {
         observable: null,
         userMessage: { id: '1', role: 'user', content: 'test' },
       }),
-      openWindow: jest.fn().mockResolvedValue(undefined),
-      closeWindow: jest.fn().mockResolvedValue(undefined),
     };
   });
 
@@ -192,12 +190,12 @@ describe('ChatService', () => {
       );
     });
 
-    it('should throw error when opening window without implementation', async () => {
+    it('should allow opening window without implementation', async () => {
       const startContract = service.start();
 
-      await expect(startContract.openWindow()).rejects.toThrow(
-        'Chat service is not available. Please ensure the chat plugin is enabled.'
-      );
+      // openWindow now just updates state, doesn't require implementation
+      await expect(startContract.openWindow()).resolves.not.toThrow();
+      expect(startContract.isWindowOpen()).toBe(true);
     });
 
     it('should provide screenshot service', () => {
