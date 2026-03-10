@@ -285,7 +285,16 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     }
 
     const dataset = queryString.getQuery().dataset;
-    const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
+    let indexPattern;
+    if (dataset) {
+      try {
+        indexPattern = await getIndexPatterns().get(dataset.id);
+      } catch {
+        // INDEXES datasets use a cached temporary index pattern that may not
+        // exist as a saved object. Gracefully degrade — keyword suggestions
+        // still work without an index pattern.
+      }
+    }
 
     const language = getEffectiveLanguageForAutoComplete(queryRef.current.language, currentAppId);
 
