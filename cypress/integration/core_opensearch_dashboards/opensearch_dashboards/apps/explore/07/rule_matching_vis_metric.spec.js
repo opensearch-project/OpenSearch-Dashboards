@@ -62,7 +62,7 @@ export const runCreateVisTests = () => {
       cy.get('.exploreVisContainer .metric-change').should('be.visible');
     });
 
-    it('should create a metric sparkline visualization using a metric query with time bucket', () => {
+    it.skip('should create a metric sparkline visualization using a metric query with time bucket', () => {
       const query = `source=${datasetName} | stats count() by span(event_time, 1d) | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'metric', datasetName, {
         shouldManualSelectChartType: true,

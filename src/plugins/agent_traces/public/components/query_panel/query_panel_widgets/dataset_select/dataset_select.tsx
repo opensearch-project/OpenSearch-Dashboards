@@ -29,50 +29,8 @@ export const DatasetSelectWidget = () => {
     data: {
       ui: { DatasetSelect },
       query: { queryString },
-      dataViews,
     },
   } = services;
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const handleDataset = async () => {
-      if (currentQuery.dataset) {
-        const dataView = await dataViews.get(
-          currentQuery.dataset.id,
-          currentQuery.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-        );
-
-        if (!dataView) {
-          await queryString.getDatasetService().cacheDataset(
-            currentQuery.dataset,
-            {
-              uiSettings: services.uiSettings,
-              savedObjects: services.savedObjects,
-              notifications: services.notifications,
-              http: services.http,
-              data: services.data,
-            },
-            false
-          );
-        }
-      }
-    };
-
-    try {
-      handleDataset();
-    } catch (error) {
-      if (isMounted) {
-        services.notifications?.toasts.addWarning(
-          `Error fetching dataset: ${(error as Error).message}`
-        );
-      }
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentQuery, dataViews, queryString, services]);
 
   const handleDatasetSelect = useCallback(
     async (dataset: Dataset | undefined) => {

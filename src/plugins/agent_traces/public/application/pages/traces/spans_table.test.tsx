@@ -167,4 +167,24 @@ describe('SpansTable', () => {
     expect(headerTexts).toContain('Input');
     expect(headerTexts).toContain('Output');
   });
+
+  it('passes default sort params to useAgentSpans', () => {
+    render(<SpansTable />);
+    expect(mockUseAgentSpans).toHaveBeenCalledWith(0, 50, 'startTime', 'desc');
+  });
+
+  it('renders sortable column headers as buttons', () => {
+    render(<SpansTable />);
+    const headers = document.querySelectorAll('th');
+    const sortableHeaders = Array.from(headers).filter((h) => h.querySelector('button'));
+    const sortableTexts = sortableHeaders.map((h) => h.textContent);
+    expect(sortableTexts).toContain('Time');
+    expect(sortableTexts).toContain('Name');
+    expect(sortableTexts).toContain('Status');
+    expect(sortableTexts).toContain('Latency');
+    expect(sortableTexts).toContain('Tokens');
+    expect(sortableTexts).not.toContain('Kind');
+    expect(sortableTexts).not.toContain('Input');
+    expect(sortableTexts).not.toContain('Output');
+  });
 });

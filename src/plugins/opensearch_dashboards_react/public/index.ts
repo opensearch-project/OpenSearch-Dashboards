@@ -45,7 +45,7 @@ export * from './notifications';
 export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
-export { toMountPoint, MountPointPortal } from './util';
+export { toMountPoint, MountPointPortal, wrapOnDot } from './util';
 export { RedirectAppLinks } from './app_links';
 import { Branding } from 'opensearch-dashboards/public';
 

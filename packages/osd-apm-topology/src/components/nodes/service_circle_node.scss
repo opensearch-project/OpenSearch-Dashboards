@@ -1,0 +1,65 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.celServiceCircle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  &__container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: box-shadow 0.2s ease;
+
+    &--selected {
+      /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+      box-shadow:
+        0 0 24px 6px var(--osd-node-glow-color, rgba(59, 130, 246, 60%)),
+        0 0 0 2px var(--osd-node-glow-color, rgba(59, 130, 246, 60%));
+    }
+
+    &:hover:not(&--selected) {
+      /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+      box-shadow: 0 0 20px 4px var(--osd-node-glow-color, rgba(59, 130, 246, 40%));
+    }
+
+    &--no-metrics {
+      /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+      border: 2px solid var(--osd-color-border-default, #d3dae6);
+      /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+      background: var(--osd-color-container-default, #fff);
+    }
+  }
+
+  &__interior {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  &__interior img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  &__label {
+    text-align: center;
+    max-width: 120px;
+  }
+}
+
+/* Dark mode: invert black SVG icons to white inside circle nodes.
+   Same approach as .celDonutIcon img and .celIcon. */
+:root.celestial--dark .celServiceCircle__interior img {
+  filter: brightness(0) invert(1);
+}
