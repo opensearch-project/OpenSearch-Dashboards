@@ -47,6 +47,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     const { suggestions } = this.state;
     const { values, intl, onChange } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
+
     return (
       <EuiCompressedFormRow
         fullWidth={true}
@@ -55,22 +56,36 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           defaultMessage: 'Values',
         })}
       >
-        <StringComboBox
-          placeholder={intl.formatMessage({
-            id: 'data.filter.filterEditor.valuesSelectPlaceholder',
-            defaultMessage: 'Select values',
-          })}
-          fullWidth={true}
-          options={options}
-          getLabel={(option) => option}
-          selectedOptions={values || []}
-          onSearchChange={this.onSearchChange}
-          onCreateOption={(option: string) => onChange([...(values || []), option])}
-          onChange={onChange}
-          isClearable={false}
-          data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
-          delimiter=","
-        />
+        <div
+          onPaste={(e: React.ClipboardEvent) => {
+            const pasted = e.clipboardData.getData('text');
+            if (pasted.includes(',')) {
+              e.preventDefault();
+              const newValues = pasted
+                .split(',')
+                .map((v) => v.trim())
+                .filter((v) => v.length > 0);
+              onChange([...(values || []), ...newValues]);
+            }
+          }}
+        >
+          <StringComboBox
+            placeholder={intl.formatMessage({
+              id: 'data.filter.filterEditor.valuesSelectPlaceholder',
+              defaultMessage: 'Select values',
+            })}
+            fullWidth={true}
+            options={options}
+            getLabel={(option) => option}
+            selectedOptions={values || []}
+            onSearchChange={this.onSearchChange}
+            onCreateOption={(option: string) => onChange([...(values || []), option])}
+            onChange={onChange}
+            isClearable={false}
+            data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
+            delimiter=","
+          />
+        </div>
       </EuiCompressedFormRow>
     );
   }
