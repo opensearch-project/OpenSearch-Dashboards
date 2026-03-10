@@ -151,6 +151,7 @@
     - [Opensearch dashboards.release notes 2.11.0](../release-notes/opensearch-dashboards.release-notes-2.11.0.md)
     - [Opensearch dashboards.release notes 2.11.1](../release-notes/opensearch-dashboards.release-notes-2.11.1.md)
     - [Opensearch dashboards.release notes 2.12.0](../release-notes/opensearch-dashboards.release-notes-2.12.0.md)
+    - [Opensearch dashboards.release notes 2.19.5](../release-notes/opensearch-dashboards.release-notes-2.19.5.md)
     - [Opensearch dashboards.release notes 2.2.0](../release-notes/opensearch-dashboards.release-notes-2.2.0.md)
     - [Opensearch dashboards.release notes 2.2.1](../release-notes/opensearch-dashboards.release-notes-2.2.1.md)
     - [Opensearch dashboards.release notes 2.3.0](../release-notes/opensearch-dashboards.release-notes-2.3.0.md)

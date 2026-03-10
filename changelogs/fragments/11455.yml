@@ -1,2 +1,0 @@
-fix:
-- Prevent query re-execution on table column resize ([#11455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11455))
