@@ -1,0 +1,2 @@
+fix:
+- [Chat] - fix chat input typing will trigger chat message re-render ([#11467](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11467))

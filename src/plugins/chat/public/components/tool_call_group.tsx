@@ -24,7 +24,8 @@ export const ToolCallGroup = ({ toolCalls }: { toolCalls: TimelineToolCall[] }) 
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('chat.toolCallGroup.buttonLabel', {
-              defaultMessage: '{toolCount} tasks performed',
+              defaultMessage:
+                '{toolCount, plural, one {# task performed} other {# tasks performed}}',
               values: {
                 toolCount: toolCalls.length,
               },

@@ -8,34 +8,45 @@ import { RootState } from '../../store';
 import { setActiveTab } from '../../slices';
 import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
-import { normalizeResultRows } from '../../../../../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
-import { prepareQueryForLanguage } from '../../../languages';
+import { FIELD_TYPE_MAP } from '../../../../../components/visualizations/constants';
+import { VisColumn, VisFieldType } from '../../../../../components/visualizations/types';
 import { Query } from '../../../../../../../data/common';
 import { QueryExecutionStatus } from '../../types';
 import { EXPLORE_LOGS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../../common';
 
 /**
- * Determine if results can be visualized
+ * Determine if results can be visualized.
+ * Classifies columns from fieldSchema only — does not iterate over row data.
  */
 const canResultsBeVisualized = (results: any): boolean => {
   if (!results?.hits?.hits || !results?.fieldSchema || results.hits.hits.length === 0) {
     return false;
   }
 
-  const rows = results.hits.hits;
-  const fieldSchema = results.fieldSchema;
-  const { numericalColumns, categoricalColumns, dateColumns } = normalizeResultRows(
-    rows,
-    fieldSchema
-  );
-  const matchedRule = visualizationRegistry.findBestMatch(
-    numericalColumns,
-    categoricalColumns,
-    dateColumns
-  );
+  const rowCount = results.hits.hits.length;
+  const numericalColumns: VisColumn[] = [];
+  const categoricalColumns: VisColumn[] = [];
+  const dateColumns: VisColumn[] = [];
 
-  return !!matchedRule;
+  results.fieldSchema.forEach((field: { type?: string; name?: string }, index: number) => {
+    const schema = FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown;
+    const column: VisColumn = {
+      id: index,
+      schema,
+      name: field.name || '',
+      column: `field-${index}`,
+      // Use rowCount as a conservative upper bound — rules checking uniqueValuesCount
+      // thresholds (e.g. >= 7) will pass correctly when there are enough rows.
+      validValuesCount: rowCount,
+      uniqueValuesCount: rowCount,
+    };
+    if (schema === VisFieldType.Numerical) numericalColumns.push(column);
+    else if (schema === VisFieldType.Categorical) categoricalColumns.push(column);
+    else if (schema === VisFieldType.Date) dateColumns.push(column);
+  });
+
+  return !!visualizationRegistry.findBestMatch(numericalColumns, categoricalColumns, dateColumns);
 };
 
 /**
@@ -43,7 +54,7 @@ const canResultsBeVisualized = (results: any): boolean => {
  * Use visualization tab if we can find a visualization type
  * Otherwise, fallback to logs tab
  */
-const determineOptimalTab = (results: any, services: ExploreServices): string => {
+const determineOptimalTab = (results: any, _services: ExploreServices): string => {
   if (canResultsBeVisualized(results)) {
     return EXPLORE_VISUALIZATION_TAB_ID || EXPLORE_LOGS_TAB_ID;
   }

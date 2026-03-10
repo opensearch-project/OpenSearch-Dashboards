@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
+import { FieldIcon, wrapOnDot } from '../../../../opensearch_dashboards_react/public';
 import { FieldDetails } from './types';
 import { DataViewField, DataView } from '../../../../data/public';
 import { shortenDottedString } from '../../application/legacy/discover/application/helpers';
@@ -136,17 +136,16 @@ export const DiscoverField = ({
     }
   };
 
-  function wrapOnDot(str?: string) {
-    // u200B is a non-width white-space character, which allows
-    // the browser to efficiently word-wrap right after the dot
-    // without us having to draw a lot of extra DOM elements, etc
-    return str ? str.replace(/\./g, '.\u200B') : '';
-  }
+  const wrappedName = useMemo(
+    () =>
+      useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName),
+    [field.name, field.displayName, useShortDots]
+  );
 
   const fieldName = (
     <EuiToolTip delay="long" content={field.name}>
       <span data-test-subj={`field-${field.name}`} className="exploreSidebarField__name">
-        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+        {wrappedName}
       </span>
     </EuiToolTip>
   );

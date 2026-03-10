@@ -1,0 +1,25 @@
+{
+  "id": "agentTraces",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "embeddable",
+    "home",
+    "inspector",
+    "navigation",
+    "opensearchDashboardsLegacy",
+    "savedObjects",
+    "uiActions",
+    "urlForwarding",
+    "usageCollection",
+    "visualizations",
+    "expressions"
+  ],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dataImporter"],
+  "optionalPlugins": ["home", "share", "contextProvider", "datasetManagement", "dataImporter", "dataSource", "dataSourceManagement"],
+  "configPath": ["agentTraces"]
+}

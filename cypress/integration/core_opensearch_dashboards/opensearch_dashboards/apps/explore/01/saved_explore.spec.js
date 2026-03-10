@@ -71,7 +71,7 @@ const runSavedExploreTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
-      cy.wait(1000);
+      cy.wait(5000);
 
       // Navigate to logs tab
       cy.getElementByTestId('exploreTabs').should('be.visible');
@@ -118,7 +118,7 @@ const runSavedExploreTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
-      cy.wait(1000);
+      cy.wait(5000);
 
       // Navigate to logs tab
       cy.getElementByTestId('exploreTabs').should('be.visible');
