@@ -652,7 +652,6 @@ const oneMetricRule: VisualizationRule = {
     { ...CHART_METADATA.metric, priority: 100 },
     { ...CHART_METADATA.gauge, priority: 80 },
     { ...CHART_METADATA.histogram, priority: 60 },
-    { ...CHART_METADATA.bar, priority: 40 },
   ],
   toSpec: (
     transformedData,
