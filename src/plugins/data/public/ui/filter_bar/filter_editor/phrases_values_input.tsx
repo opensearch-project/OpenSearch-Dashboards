@@ -80,6 +80,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
             selectedOptions={values || []}
             onSearchChange={this.onSearchChange}
             onCreateOption={(option: string) => onChange([...(values || []), option])}
+            onPasteValues={(pasted: string) => onChange([...(values || []), ...pasted])}
             onChange={onChange}
             isClearable={false}
             data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
