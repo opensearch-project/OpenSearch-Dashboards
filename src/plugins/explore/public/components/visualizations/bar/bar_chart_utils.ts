@@ -242,10 +242,7 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
         [encodeX]: categoryField,
         [encodeY]: seriesField,
       },
-      // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
       barWidth,
-      barCategoryGap:
-        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
       ...(index === 0 && thresholdLines),
       ...(styles?.showBarBorder && {
         itemStyle: {
@@ -254,9 +251,7 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
         },
       }),
       // Apply stack configuration based on stackMode
-      ...(options.kind === 'bar' &&
-        'stackMode' in styles &&
-        styles.stackMode === 'total' && { stack: 'total' }),
+      ...('stackMode' in styles && styles.stackMode === 'total' && { stack: 'total' }),
     };
 
     return seriesConfig as BarSeriesOption;
@@ -310,8 +305,6 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
         },
         barWidth:
           styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-        barCategoryGap:
-          styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
         ...(styles.showBarBorder && {
           itemStyle: {
             borderWidth: styles.barBorderWidth,
