@@ -46,19 +46,23 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   const contentRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef(0);
   const PAGE_SIZE = 20;
-  const isLoadingRef = useRef(isLoading);
-  isLoadingRef.current = isLoading;
+  const isLoadingRef = useRef(false);
 
   const hideDeleteAction = useMemo(
     () => conversationHistoryService.getMemoryProvider() instanceof AgenticMemoryProvider,
     [conversationHistoryService]
   );
 
+  const setIsLoadingWithRef = useCallback((value: boolean) => {
+    isLoadingRef.current = value;
+    setIsLoading(value);
+  }, []);
+
   const loadConversations = useCallback(
     async (currentPage: number, append: boolean = false) => {
       if (isLoadingRef.current) return;
 
-      setIsLoading(true);
+      setIsLoadingWithRef(true);
       setError(null);
       try {
         const result = await conversationHistoryService.getConversations({
@@ -68,14 +72,13 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
         if (append) {
           // Append new conversations
-          setConversations((prevConversations) => [
-            ...prevConversations,
-            ...result.conversations.filter((conversation) =>
-              prevConversations.every(
-                (previousConversation) => previousConversation.id !== conversation.id
-              )
-            ),
-          ]);
+          setConversations((prevConversations) => {
+            const existingIds = new Set(prevConversations.map((c) => c.id));
+            return [
+              ...prevConversations,
+              ...result.conversations.filter((conversation) => !existingIds.has(conversation.id)),
+            ];
+          });
         } else {
           setConversations(result.conversations);
         }
@@ -92,10 +95,10 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
               })
         );
       } finally {
-        setIsLoading(false);
+        setIsLoadingWithRef(false);
       }
     },
-    [conversationHistoryService]
+    [conversationHistoryService, setIsLoadingWithRef]
   );
 
   useEffect(() => {
@@ -108,6 +111,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
       await conversationHistoryService.deleteConversation(threadId);
       pageRef.current = 0;
       setPage(0);
+      setIsLoadingWithRef(false);
       await loadConversations(0, false);
       setPopoverOpenForId(null);
     } catch (err) {
