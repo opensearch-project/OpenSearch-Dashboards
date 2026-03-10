@@ -14,7 +14,7 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields, throwFacetError } from '../../common/utils';
+import { getFields, queryEndsWithHead, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
@@ -41,8 +41,11 @@ export const pplSearchStrategyProvider = (
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
 
-        const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
-        request.body = { ...request.body, fetchSize };
+        const hasHead = typeof query.query === 'string' && queryEndsWithHead(query.query);
+        if (!hasHead) {
+          const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+          request.body = { ...request.body, fetchSize };
+        }
 
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 

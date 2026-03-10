@@ -1,0 +1,36 @@
+{
+  "name": "@osd/apm-topology",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/node/index.js",
+  "browser": "./target/web/index.js",
+  "scripts": {
+    "build:css:tailwind": "npx @tailwindcss/cli -i src/celestial.css -o src/_celestial.generated.scss --minify",
+    "build:css:strip": "node scripts/strip-layers.js",
+    "build:css": "yarn build:css:tailwind && yarn build:css:strip",
+    "build:babel:node": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --quiet",
+    "build:babel:web": "babel src --env-name web --out-dir target/web --extensions .ts,.tsx --copy-files --quiet",
+    "build:babel": "yarn build:babel:node && yarn build:babel:web",
+    "build:clean": "rimraf target/node/celestial.css target/web/celestial.css",
+    "build": "yarn build:css && yarn build:babel && yarn build:clean",
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --watch"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^1.1.5",
+    "@osd/i18n": "1.0.0",
+    "@xyflow/react": "^12.8.2",
+    "ramda": "^0.30.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.17",
+    "@types/ramda": "^0.30.1",
+    "rimraf": "^6.1.2",
+    "tailwindcss": "^4.0.17"
+  }
+}

@@ -17,6 +17,7 @@ import {
   hitsToAgentSpans,
   formatTimestamp,
 } from './tree_utils';
+import { buildPplSortClause } from '../table_shared';
 
 export interface SpanRow extends BaseRow {
   children?: SpanRow[];
@@ -39,7 +40,9 @@ export interface UseAgentSpansResult {
 
 export const useAgentSpans = (
   pageIndex: number = 0,
-  pageSize: number = 50
+  pageSize: number = 50,
+  sortField: string = 'startTime',
+  sortDirection: 'asc' | 'desc' = 'desc'
 ): UseAgentSpansResult => {
   const { services, pplService, datasetParam, baseQueryString } = usePPLQueryDeps();
   const fetchVersion = useSelector((state: RootState) => state.queryEditor.fetchVersion);
@@ -103,7 +106,8 @@ export const useAgentSpans = (
 
       try {
         const offset = pageIndex * pageSize;
-        const pplQuery = `${baseQueryString} | where isnotnull(\`attributes.gen_ai.operation.name\`) | sort - startTime | head ${pageSize} from ${offset}`;
+        const sortClause = buildPplSortClause(sortField, sortDirection);
+        const pplQuery = `${baseQueryString} | where isnotnull(\`attributes.gen_ai.operation.name\`) ${sortClause} | head ${pageSize} from ${offset}`;
         const response = await pplService.executeQuery(datasetParam, pplQuery);
 
         if (cancelled) return;
@@ -135,6 +139,8 @@ export const useAgentSpans = (
     baseQueryString,
     pageIndex,
     pageSize,
+    sortField,
+    sortDirection,
     refreshCounter,
     timeVersion,
     timezone,

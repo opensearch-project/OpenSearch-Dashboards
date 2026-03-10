@@ -47,13 +47,7 @@ describe('BarExclusiveVisOptions', () => {
     // Check if the bar width input exists with correct value
     const barWidthInput = screen.getByTestId('barWidthInput');
     expect(barWidthInput).toBeInTheDocument();
-    expect(barWidthInput).toHaveValue(0.7);
-
-    // Check if the bar padding input exists with correct value
-    const barPaddingInput = screen.getByTestId('barPaddingInput');
-    expect(barPaddingInput).toBeInTheDocument();
-    expect(barPaddingInput).toHaveValue(0.1);
-
+    expect(barWidthInput).toHaveValue(70);
     // Check if the bar border switch exists
     const barBorderSwitch = screen.getByTestId('barBorderSwitch');
     expect(barBorderSwitch).toBeInTheDocument();
@@ -85,21 +79,10 @@ describe('BarExclusiveVisOptions', () => {
 
     // Get the bar width input and change its value
     const barWidthInput = screen.getByTestId('barWidthInput');
-    fireEvent.change(barWidthInput, { target: { value: '0.8' } });
+    fireEvent.change(barWidthInput, { target: { value: '80' } });
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarWidthChange).toHaveBeenCalledWith(0.8);
-  });
-
-  test('calls onBarPaddingChange when bar padding is changed', () => {
-    render(<BarExclusiveVisOptions {...defaultProps} />);
-
-    // Get the bar padding input and change its value
-    const barPaddingInput = screen.getByTestId('barPaddingInput');
-    fireEvent.change(barPaddingInput, { target: { value: '0.2' } });
-
-    // Check if the callback was called with the correct value
-    expect(defaultProps.onBarPaddingChange).toHaveBeenCalledWith(0.2);
   });
 
   test('calls onShowBarBorderChange when show bar border is toggled', () => {
@@ -138,17 +121,13 @@ describe('BarExclusiveVisOptions', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Check if help text is rendered for bar width
-    expect(screen.getByText('Value between 0.1 and 1')).toBeInTheDocument();
-
-    // Check if help text is rendered for bar padding
-    expect(screen.getByText('Value between 0 and 0.5')).toBeInTheDocument();
+    expect(screen.getByText('Percentage Value between 1 and 100')).toBeInTheDocument();
   });
 
   test('renders form labels correctly', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     expect(screen.getByText('Width')).toBeInTheDocument();
-    expect(screen.getByText('Padding')).toBeInTheDocument();
     expect(screen.getByText('Show border')).toBeInTheDocument();
   });
 
