@@ -56,37 +56,23 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           defaultMessage: 'Values',
         })}
       >
-        <div
-          onPaste={(e: React.ClipboardEvent) => {
-            const pasted = e.clipboardData.getData('text');
-            if (pasted.includes(',')) {
-              e.preventDefault();
-              const newValues = pasted
-                .split(',')
-                .map((v) => v.trim())
-                .filter((v) => v.length > 0);
-              onChange([...(values || []), ...newValues]);
-            }
-          }}
-        >
-          <StringComboBox
-            placeholder={intl.formatMessage({
-              id: 'data.filter.filterEditor.valuesSelectPlaceholder',
-              defaultMessage: 'Select values',
-            })}
-            fullWidth={true}
-            options={options}
-            getLabel={(option) => option}
-            selectedOptions={values || []}
-            onSearchChange={this.onSearchChange}
-            onCreateOption={(option: string) => onChange([...(values || []), option])}
-            onPasteValues={(pasted: string) => onChange([...(values || []), ...pasted])}
-            onChange={onChange}
-            isClearable={false}
-            data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
-            delimiter=","
-          />
-        </div>
+        <StringComboBox
+          placeholder={intl.formatMessage({
+            id: 'data.filter.filterEditor.valuesSelectPlaceholder',
+            defaultMessage: 'Select values',
+          })}
+          fullWidth={true}
+          options={options}
+          getLabel={(option) => option}
+          selectedOptions={values || []}
+          onSearchChange={this.onSearchChange}
+          onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onPasteValues={(pasted: string) => onChange([...(values || []), ...pasted])}
+          onChange={onChange}
+          isClearable={false}
+          data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
+          delimiter=","
+        />
       </EuiCompressedFormRow>
     );
   }
