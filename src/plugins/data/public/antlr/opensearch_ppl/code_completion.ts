@@ -973,14 +973,14 @@ function tryRuntimeGrammarSuggestions(
     const grammar = pplGrammarCache.getCachedGrammar(dataSourceId);
     if (!grammar) return null;
 
-    // ─── Normalize token dictionary ──────────────────────────────────────────
+    // Normalize token dictionary
     const spaceToken = resolveSpaceToken(grammar);
 
-    // ─── Pick start rule based on query shape ─────────────────────────────
+    // Pick start rule based on query shape
     const isPipeFirst = query.trimStart().startsWith('|');
     const startRuleIndex = pickStartRuleIndex(query, grammar);
 
-    // ─── Pipe-first: strip leading pipe so token stream matches start rule ─
+    // Pipe-first: strip leading pipe so token stream matches start rule
     let effectiveQuery = query;
     let effectiveCursor = cursor;
 
@@ -1001,7 +1001,7 @@ function tryRuntimeGrammarSuggestions(
       };
     }
 
-    // ─── Create lexer + parser ────────────────────────────────────────────
+    // Create lexer + parser
     const lexer = new LexerInterpreter(
       'PPL',
       grammar.vocabulary,
@@ -1025,7 +1025,7 @@ function tryRuntimeGrammarSuggestions(
 
     parser.interpreter.predictionMode = PredictionMode.SLL;
 
-    // ─── Parse using the selected start rule (non-fatal) ───────────────────
+    // Parse using the selected start rule (non-fatal)
     // ParserInterpreter can throw on malformed/partial inputs.
     // Completion should still work even if parse fails — C3 can use a
     // synthetic context when no parse tree is available.
@@ -1040,7 +1040,7 @@ function tryRuntimeGrammarSuggestions(
       // Parse failed — keep errors from listener, continue with completion
     }
 
-    // ─── Collect C3 candidates ────────────────────────────────────────────
+    // Collect C3 candidates
     const core = new CodeCompletionCore(parser);
     core.ignoredTokens = getSafeRuntimeIgnoredTokens(grammar);
     core.preferredRules = buildRuntimePreferredRules(grammar);
@@ -1066,7 +1066,7 @@ function tryRuntimeGrammarSuggestions(
 
     const { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
 
-    // ─── Rerun without preferred rules that hide tokens ────────────────────
+    // Rerun without preferred rules that hide tokens
     // When a preferred rule appears at the cursor, C3 returns it as a rule
     // candidate and does NOT return the tokens inside it. The compiled path
     // handles this via processVisitedRules + parseQuery's rerun loop.
@@ -1212,6 +1212,18 @@ function getInsertText(
   }
 }
 
+function hasActionableContent(result: AutocompleteResultBase): boolean {
+  if (result.suggestKeywords && result.suggestKeywords.length > 0) return true;
+  const r = result as OpenSearchPplAutocompleteResult;
+  return !!(
+    r.suggestColumns ||
+    r.suggestSourcesOrTables ||
+    r.suggestValuesForColumn ||
+    r.suggestAggregateFunctions ||
+    r.suggestRenameAs
+  );
+}
+
 export const getDefaultSuggestions = async ({
   selectionStart,
   selectionEnd,
@@ -1230,9 +1242,13 @@ export const getDefaultSuggestions = async ({
       column: column || selectionEnd,
     };
 
+    const runtimeResult = tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, true);
+    // Fall back to compiled grammar when the runtime path returns an empty result.
+    // A non-null but empty result would suppress the compiled grammar otherwise.
     const suggestions =
-      tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, true) ||
-      getDefaultOpenSearchPplAutoCompleteSuggestions(query, cursor);
+      runtimeResult && hasActionableContent(runtimeResult)
+        ? runtimeResult
+        : getDefaultOpenSearchPplAutoCompleteSuggestions(query, cursor);
 
     const finalSuggestions: QuerySuggestion[] = [];
 
