@@ -24,6 +24,8 @@ import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
+import { useFlavorId } from '../../../helpers/use_flavor_id';
+import { CORE_SIGNAL_TYPES } from '../../../../../data/common';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -31,67 +33,123 @@ export const useInitPage = () => {
   const exploreId = useCurrentExploreId();
   const { savedExplore, error } = useSavedExplore(exploreId);
   const setEditorText = useSetEditorText();
-  const { chrome, data } = services;
+  const { chrome, data, application } = services;
   const visualizationBuilder = getVisualizationBuilder();
+  const currentFlavor = useFlavorId();
 
   useEffect(() => {
-    if (savedExplore && !error) {
-      if (savedExplore.id) {
-        // Deserialize state from saved object
-        const { title } = savedExplore;
+    if (savedExplore && !error && savedExplore.id) {
+      // Check if saved explore's flavor matches current page flavor
+      const savedFlavor = savedExplore.type ?? ExploreFlavor.Logs;
 
-        // Update browser title and breadcrumbs
-        chrome.docTitle.change(title);
-        chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: title }]);
+      // If flavors don't match, redirect to BASE page of CURRENT flavor instead of loading incompatible viz
+      // This prevents traces saved viz from loading on logs page
+      if (currentFlavor && currentFlavor !== savedFlavor) {
+        // Clear the incompatible query from URL state before redirecting
+        if (services.osdUrlStateStorage) {
+          services.osdUrlStateStorage.set('_q', null);
+          services.osdUrlStateStorage.set('_a', null);
+          services.osdUrlStateStorage.set('_v', null);
 
-        // Sync query from saved object to data plugin (explore doesn't use filters)
-        const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
-        const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
-        if (searchSourceFields?.searchSourceJSON) {
-          const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
-          const queryFromSavedSearch = searchSource.query;
-          const query = {
-            ...queryFromSavedSearch,
-            ...queryFromUrl,
-            query: queryFromUrl.query || queryFromSavedSearch.query,
-          };
-          if (query) {
-            dispatch(setQueryState(query));
-            setEditorText(query.query);
+          // Also clear query from _g (global state)
+          const globalState = services.osdUrlStateStorage.get('_g') as any;
+          if (globalState) {
+            delete globalState.query;
+            services.osdUrlStateStorage.set('_g', globalState);
+          }
+
+          services.osdUrlStateStorage.flush();
+        }
+
+        // Use window.location to navigate since application service might not be available
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+
+        // Extract _g parameter from hash (format: #/?_q=...&_g=...&_a=...)
+        const hashParams = currentHash.includes('?') ? currentHash.split('?')[1] : '';
+        const params = new URLSearchParams(hashParams);
+        let gParam = params.get('_g');
+
+        // Parse and clean _g parameter to remove query
+        if (gParam) {
+          try {
+            // Decode the RISON-encoded parameter
+            const decodedG = decodeURIComponent(gParam);
+            // Remove the query field from _g by rebuilding without it
+            const cleanedG = decodedG
+              .replace(/,?query:\([^)]*\),?/g, ',')
+              .replace(/,,/g, ',')
+              .replace(/\(,/g, '(')
+              .replace(/,\)/g, ')');
+            gParam = encodeURIComponent(cleanedG);
+          } catch (e) {
+            // Failed to clean _g parameter, use as-is
           }
         }
 
-        // Update savedSearch to store just the ID (like discover)
-        // TODO: remove this once legacy state is not consumed any more
-        dispatch(setSavedSearch(savedExplore.id));
+        // Build clean URL with only time/filters, no query/app state
+        const newHash = gParam ? `#/?_g=${gParam}` : '#/';
+        const baseUrl =
+          currentPath.replace(/\/explore\/[^/]+/, `/explore/${currentFlavor}`) + newHash;
 
-        // Init vis state and ui state
-        const visualization = savedExplore.visualization;
-        const uiState = savedExplore.uiState;
-        if (visualization) {
-          const { chartType, params, axesMapping } = JSON.parse(visualization);
-          visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
-        }
-        if (uiState) {
-          const { activeTab } = JSON.parse(uiState);
-          dispatch(setActiveTab(activeTab));
-        }
-
-        // Add to recently accessed
-        chrome.recentlyAccessed.add(
-          `/app/explore/${savedExplore.type ?? ExploreFlavor.Logs}#/view/${savedExplore.id}`,
-          title,
-          savedExplore.id,
-          { type: 'explore' }
-        );
-
-        dispatch(clearLastExecutedData());
-        dispatch(setEditorMode(EditorMode.Query));
-        dispatch(clearResults());
-        dispatch(clearQueryStatusMap());
-        dispatch(setUsingRegexPatterns(false));
-        dispatch(executeQueries({ services }));
+        window.location.href = baseUrl;
+        return;
       }
+
+      // Deserialize state from saved object
+      const { title } = savedExplore;
+
+      // Update browser title and breadcrumbs
+      chrome.docTitle.change(title);
+      chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: title }]);
+
+      // Sync query from saved object to data plugin (explore doesn't use filters)
+      const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
+      const queryFromUrl = services.osdUrlStateStorage?.get('_q') ?? {};
+      if (searchSourceFields?.searchSourceJSON) {
+        const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
+        const queryFromSavedSearch = searchSource.query;
+        const query = {
+          ...queryFromSavedSearch,
+          ...queryFromUrl,
+          query: queryFromUrl.query || queryFromSavedSearch.query,
+        };
+        if (query) {
+          dispatch(setQueryState(query));
+          setEditorText(query.query);
+        }
+      }
+
+      // Update savedSearch to store just the ID (like discover)
+      // TODO: remove this once legacy state is not consumed any more
+      dispatch(setSavedSearch(savedExplore.id));
+
+      // Init vis state and ui state
+      const visualization = savedExplore.visualization;
+      const uiState = savedExplore.uiState;
+      if (visualization) {
+        const { chartType, params, axesMapping } = JSON.parse(visualization);
+        visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
+      }
+      if (uiState) {
+        const { activeTab } = JSON.parse(uiState);
+        dispatch(setActiveTab(activeTab));
+      }
+
+      // Add to recently accessed
+      chrome.recentlyAccessed.add(
+        `/app/explore/${savedExplore.type ?? ExploreFlavor.Logs}#/view/${savedExplore.id}`,
+        title,
+        savedExplore.id,
+        { type: 'explore' }
+      );
+
+      dispatch(clearLastExecutedData());
+      dispatch(setEditorMode(EditorMode.Query));
+      dispatch(clearResults());
+      dispatch(clearQueryStatusMap());
+      dispatch(setUsingRegexPatterns(false));
+      dispatch(executeQueries({ services }));
     }
     if (error) {
       // Navigate to management page for invalid IDs
@@ -109,6 +167,8 @@ export const useInitPage = () => {
     services,
     setEditorText,
     visualizationBuilder,
+    currentFlavor,
+    application,
   ]);
 
   const pageContext = { savedExplore };

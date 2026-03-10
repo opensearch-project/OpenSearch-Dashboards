@@ -67,9 +67,128 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       return await getPreloadedState(services);
     }
 
+    // Determine current flavor to detect cross-flavor navigation
+    const currentAppId = await getCurrentAppId(services);
+    const currentFlavor = getFlavorFromAppId(currentAppId);
+    const currentRequiredSignalType =
+      currentFlavor === ExploreFlavor.Traces
+        ? CORE_SIGNAL_TYPES.TRACES
+        : currentFlavor === ExploreFlavor.Metrics
+        ? CORE_SIGNAL_TYPES.METRICS
+        : undefined; // Logs
+
     // Get URL state
-    const queryState = services.osdUrlStateStorage.get('_q') as QueryState | null;
+    let queryState = services.osdUrlStateStorage.get('_q') as QueryState | null;
     const appState = services.osdUrlStateStorage.get('_a') as AppState | null;
+
+    // Check if we're loading a saved search (view route)
+    const isViewRoute = window.location.hash.includes('/view/');
+
+    // If on a view route, check if the saved search's flavor matches current flavor
+    if (isViewRoute && queryState?.dataset) {
+      const urlSignalType = queryState.dataset.signalType;
+      const isIncompatibleForView =
+        (currentRequiredSignalType &&
+          urlSignalType &&
+          urlSignalType !== currentRequiredSignalType) ||
+        (!currentRequiredSignalType &&
+          (urlSignalType === CORE_SIGNAL_TYPES.TRACES ||
+            urlSignalType === CORE_SIGNAL_TYPES.METRICS));
+
+      if (isIncompatibleForView) {
+        // Navigate to base page instead of trying to load incompatible saved viz
+        const baseUrl = services.application?.getUrlForApp(`explore/${currentFlavor}`, {
+          path: '#/',
+        });
+        if (baseUrl && services.application) {
+          services.application.navigateToUrl(baseUrl);
+          // Return a basic state to prevent further processing
+          return await getPreloadedState(services);
+        }
+      }
+    }
+
+    // Get the default dataset to check if we should prefer it over URL cached dataset
+    const defaultDataset =
+      currentFlavor === ExploreFlavor.Metrics
+        ? undefined
+        : services.data?.query?.queryString?.getDatasetService()?.getDefault();
+
+    // If URL has query state and we're NOT on a view route, check if we need a better dataset
+    let replacementDataset: Dataset | undefined;
+    if (!isViewRoute && queryState?.dataset) {
+      // Fetch full dataset from dataViews to get signalType if not already present
+      let urlSignalType = queryState.dataset.signalType;
+      if (!urlSignalType) {
+        try {
+          const fullDataset = await services.data?.dataViews?.get(queryState.dataset.id);
+          urlSignalType = fullDataset?.signalType;
+        } catch (error) {
+          // If fetch fails, continue with undefined signalType
+        }
+      }
+
+      // Check if dataset is incompatible OR suboptimal
+      const isIncompatible =
+        (currentRequiredSignalType && urlSignalType !== currentRequiredSignalType) ||
+        (!currentRequiredSignalType &&
+          (urlSignalType === CORE_SIGNAL_TYPES.TRACES ||
+            urlSignalType === CORE_SIGNAL_TYPES.METRICS));
+
+      // For Logs flavor, also check if we should find a better dataset with explicit 'logs' signalType
+      const shouldFindBetter =
+        !currentRequiredSignalType && // Logs flavor
+        urlSignalType !== CORE_SIGNAL_TYPES.LOGS && // Current dataset doesn't have explicit 'logs'
+        urlSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+        urlSignalType !== CORE_SIGNAL_TYPES.METRICS; // But is technically compatible
+
+      // Check if there's a default dataset that's PERFECT match (not just compatible)
+      const shouldPreferDefault =
+        defaultDataset &&
+        defaultDataset.id !== queryState.dataset.id && // Different from URL dataset
+        ((currentRequiredSignalType && defaultDataset.signalType === currentRequiredSignalType) || // Exact match for Traces/Metrics
+          (!currentRequiredSignalType && defaultDataset.signalType === CORE_SIGNAL_TYPES.LOGS)); // Perfect match for Logs (explicit logs signalType)
+
+      if (isIncompatible || shouldFindBetter || shouldPreferDefault) {
+        // If we should prefer default and it's a PERFECT match, use it directly
+        if (shouldPreferDefault && defaultDataset) {
+          replacementDataset = defaultDataset;
+        } else {
+          // Proactively fetch a compatible dataset for the current flavor
+          try {
+            await services.data.dataViews.ensureDefaultDataView();
+            replacementDataset = await fetchFirstAvailableDataset(
+              services,
+              currentFlavor,
+              currentRequiredSignalType
+            );
+
+            // If no compatible dataset found, fall back to default dataset
+            if (!replacementDataset && defaultDataset) {
+              replacementDataset = defaultDataset;
+            }
+
+            // Last resort: fall back to any default dataview
+            if (!replacementDataset) {
+              try {
+                const defaultDataView = await services.data.dataViews.getDefault();
+                if (defaultDataView) {
+                  replacementDataset = services.data.dataViews.convertToDataset(defaultDataView);
+                }
+              } catch (err) {
+                // Continue without replacement dataset
+              }
+            }
+          } catch (error) {
+            // Continue even if fetch fails
+          }
+        }
+
+        // Clear the incompatible query state from URL
+        services.osdUrlStateStorage.set('_q', null, { replace: true });
+        queryState = null;
+      }
+    }
 
     // Query state handling - always resolve dataset to ensure SignalType validation
     let urlDataset: Dataset | undefined;
@@ -86,24 +205,45 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       };
     }
 
+    // If we found a replacement dataset due to incompatibility, use that instead
+    if (replacementDataset) {
+      urlDataset = replacementDataset;
+    }
+
     // Always call getPreloadedQueryState to ensure SignalType validation runs
     const resolvedQueryState = await getPreloadedQueryState(services, urlDataset);
 
-    // Use the resolved dataset but preserve other query state from URL if available
-    // When the dataset changes (due to signal type filtering), also update the language
+    // If queryState was cleared above (due to incompatibility), just use the resolved state
+    // Also check if dataset changed - if so, clear the query as it's likely incompatible
     const datasetChanged =
-      queryState?.dataset?.id !== resolvedQueryState.dataset?.id ||
-      queryState?.dataset?.type !== resolvedQueryState.dataset?.type;
+      queryState?.dataset?.id &&
+      resolvedQueryState.dataset?.id &&
+      queryState.dataset.id !== resolvedQueryState.dataset.id;
 
     const finalQueryState: QueryState = queryState
       ? {
           ...queryState,
           dataset: resolvedQueryState.dataset,
-          language: datasetChanged ? resolvedQueryState.language : queryState.language,
-          query: datasetChanged ? '' : queryState.query,
+          // Keep language and query from URL if dataset is compatible and hasn't changed
+          // If dataset changed or was replaced, clear the query
+          language:
+            datasetChanged || replacementDataset
+              ? resolvedQueryState.language
+              : queryState.language || resolvedQueryState.language,
+          query: datasetChanged || replacementDataset ? '' : queryState.query || '',
         }
       : resolvedQueryState;
-    services.data.query.queryString.setQuery(finalQueryState);
+
+    // If no dataset was resolved, ensure query is empty
+    if (!finalQueryState.dataset) {
+      finalQueryState.query = '';
+    }
+
+    // Force update QueryStringManager to ensure UI components (like DatasetSelect) re-render
+    // Use force=true if we replaced the dataset due to incompatibility or dataset changed
+    const forceUpdate = !!replacementDataset || datasetChanged;
+    services.data.query.queryString.setQuery(finalQueryState, forceUpdate);
+
     const timefilter = services?.data?.query?.timefilter?.timefilter;
     if (timefilter) {
       services.data.query.queryString.addToQueryHistory(finalQueryState, timefilter.getTime());
@@ -207,6 +347,14 @@ const fetchFirstAvailableDataset = async (
 
     // Filter by SignalType compatibility
     if (fetchedDatasets.length > 0) {
+      // Get default dataset ID to prefer it if found in the list
+      const defaultDataset = services.data?.query?.queryString?.getDatasetService()?.getDefault();
+      const defaultDatasetId = defaultDataset?.id;
+
+      // For Logs flavor, prefer datasets with explicit 'logs' signalType
+      let fallbackDataset: Dataset | undefined;
+      let perfectMatchDataset: Dataset | undefined;
+
       for (const dataset of fetchedDatasets) {
         try {
           const dataView = await services.data?.dataViews?.get(
@@ -220,16 +368,34 @@ const fetchFirstAvailableDataset = async (
           // If requiredSignalType is specified, dataset must match it
           if (requiredSignalType) {
             if (effectiveSignalType === requiredSignalType) {
-              return dataset;
+              // Check if this is the default dataset
+              if (defaultDatasetId && dataset.id === defaultDatasetId) {
+                return dataset;
+              }
+              // Save as perfect match but continue checking for default
+              if (!perfectMatchDataset) {
+                perfectMatchDataset = dataset;
+              }
             }
           } else {
             // If requiredSignalType is not specified (i.e., Logs flavor),
-            // dataset should not have signalType equal to Traces or Metrics
-            if (
+            // Prefer datasets with explicit 'logs' signalType, but accept any non-traces/non-metrics
+            if (effectiveSignalType === CORE_SIGNAL_TYPES.LOGS) {
+              // Check if this is the default dataset
+              if (defaultDatasetId && dataset.id === defaultDatasetId) {
+                return dataset;
+              }
+              // Save as perfect match but continue checking for default
+              if (!perfectMatchDataset) {
+                perfectMatchDataset = dataset;
+              }
+            } else if (
               effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
-              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS &&
+              !fallbackDataset
             ) {
-              return dataset;
+              // Compatible but not explicitly logs - save as fallback
+              fallbackDataset = dataset;
             }
           }
         } catch (error) {
@@ -237,6 +403,16 @@ const fetchFirstAvailableDataset = async (
           continue;
         }
       }
+
+      // Return in priority order: perfect match > fallback > undefined
+      if (perfectMatchDataset) {
+        return perfectMatchDataset;
+      }
+
+      if (fallbackDataset) {
+        return fallbackDataset;
+      }
+
       return undefined; // No compatible dataset found
     }
 
@@ -262,43 +438,103 @@ const resolveDataset = async (
       ? CORE_SIGNAL_TYPES.METRICS
       : undefined;
 
-  // Get existing dataset from QueryStringManager or use preferred dataset
+  // Get datasets from QueryStringManager and DatasetService
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery =
+  const cachedDataset = queryStringQuery?.dataset;
+
+  // Get the actual default dataset from DatasetService (not from getDefaultQuery)
+  // This is the dataset marked with "Default" badge in the UI
+  const defaultDataset =
     flavorFromAppId === ExploreFlavor.Metrics
       ? undefined
-      : services.data?.query?.queryString?.getDefaultQuery();
-  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
+      : services.data?.query?.queryString?.getDatasetService()?.getDefault();
 
-  // If we have an existing dataset, validate SignalType compatibility
-  if (existingDataset) {
+  // Priority: preferredDataset > defaultDataset (if compatible) > cachedDataset (if compatible) > fetch
+
+  // If we have a preferred dataset, use it immediately
+  if (preferredDataset) {
+    return preferredDataset;
+  }
+
+  // Check if default dataset is compatible - ALWAYS PREFER DEFAULT if it exists and is compatible
+  if (defaultDataset) {
     try {
-      // Read signalType directly from the Dataset.
-      const effectiveSignalType = existingDataset.signalType || preferredDataset?.signalType;
+      const effectiveSignalType = defaultDataset.signalType;
 
-      // If requiredSignalType is specified, dataset must match it
-      if (requiredSignalType) {
-        if (effectiveSignalType === requiredSignalType) {
-          return existingDataset;
-        }
-      } else {
-        // If requiredSignalType is not specified (i.e., Logs flavor),
-        // dataset should not have signalType equal to Traces or Metrics
-        if (
-          effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
-          effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
-        ) {
-          return existingDataset;
-        }
+      // For Traces/Metrics - accept default if it has exact signalType match
+      if (requiredSignalType && effectiveSignalType === requiredSignalType) {
+        return defaultDataset;
+      }
+
+      // For Logs - ONLY accept default if it has explicit 'logs' signalType
+      // Don't accept if it just has no signalType - we want to fetch a better one with explicit logs signalType
+      if (!requiredSignalType && effectiveSignalType === CORE_SIGNAL_TYPES.LOGS) {
+        return defaultDataset;
       }
     } catch (error) {
-      // Silently continue to fetch a new dataset if validation fails
-      // This is expected behavior when datasets are incompatible with current flavor
+      // Continue to check cached dataset
+    }
+  }
+
+  // Check cached dataset only if default wasn't available or compatible
+  if (cachedDataset) {
+    try {
+      // Fetch full dataset from dataViews to get signalType if not already present
+      const fullDataset = cachedDataset.signalType
+        ? cachedDataset
+        : await services.data?.dataViews?.get(cachedDataset.id);
+
+      const effectiveSignalType = fullDataset?.signalType;
+
+      // For Traces/Metrics - accept cached if exact match
+      if (requiredSignalType && effectiveSignalType === requiredSignalType) {
+        return cachedDataset;
+      }
+
+      // For Logs - accept cached if explicit 'logs'
+      if (!requiredSignalType && effectiveSignalType === CORE_SIGNAL_TYPES.LOGS) {
+        return cachedDataset;
+      }
+
+      // For Logs - cached is compatible if it has no signalType (fallback)
+      if (!requiredSignalType && !effectiveSignalType) {
+        return cachedDataset;
+      }
+
+      // For Logs - cached is compatible but not optimal (no explicit signalType)
+      // Don't return yet - continue to fetch to find better option
+    } catch (error) {
+      // If fetch fails, continue to try fetching new dataset
     }
   }
 
   // Fetch first available dataset with required SignalType
-  return await fetchFirstAvailableDataset(services, flavorFromAppId, requiredSignalType);
+  const compatibleDataset = await fetchFirstAvailableDataset(
+    services,
+    flavorFromAppId,
+    requiredSignalType
+  );
+
+  if (compatibleDataset) {
+    return compatibleDataset;
+  }
+
+  // If no compatible dataset found with signalType filtering, try to get any available dataset as fallback
+  if (!compatibleDataset && requiredSignalType === undefined) {
+    // For Logs flavor, if no dataset without signalType found, try to get a default dataset
+    try {
+      const fallbackDefaultDataset = services.data?.query?.queryString
+        ?.getDatasetService()
+        ?.getDefault();
+      if (fallbackDefaultDataset) {
+        return fallbackDefaultDataset;
+      }
+    } catch (error) {
+      // Continue to return undefined
+    }
+  }
+
+  return compatibleDataset;
 };
 
 /**

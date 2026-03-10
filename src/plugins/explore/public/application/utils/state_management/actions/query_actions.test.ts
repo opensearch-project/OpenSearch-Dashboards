@@ -342,14 +342,54 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(result).toBe('processed-ppl-query');
     });
 
-    it('should throw error for unsupported language', () => {
-      const unsupportedQuery: Query = {
+    it('should handle kuery language queries', () => {
+      const kueryQuery: Query = {
+        query: 'status:200 AND method:GET',
+        language: 'kuery',
+      };
+
+      const result = defaultPrepareQueryString(kueryQuery);
+      expect(result).toBe('status:200 AND method:GET');
+    });
+
+    it('should handle DQL language queries', () => {
+      const dqlQuery: Query = {
+        query: 'status:200',
+        language: 'DQL',
+      };
+
+      const result = defaultPrepareQueryString(dqlQuery);
+      expect(result).toBe('status:200');
+    });
+
+    it('should handle SQL language queries', () => {
+      const sqlQuery: Query = {
         query: 'SELECT * FROM table',
         language: 'SQL',
       };
 
+      const result = defaultPrepareQueryString(sqlQuery);
+      expect(result).toBe('SELECT * FROM table');
+    });
+
+    it('should handle lucene language queries', () => {
+      const luceneQuery: Query = {
+        query: 'status:200 AND method:GET',
+        language: 'lucene',
+      };
+
+      const result = defaultPrepareQueryString(luceneQuery);
+      expect(result).toBe('status:200 AND method:GET');
+    });
+
+    it('should throw error for unsupported language', () => {
+      const unsupportedQuery: Query = {
+        query: 'some query',
+        language: 'UNSUPPORTED_LANG',
+      };
+
       expect(() => defaultPrepareQueryString(unsupportedQuery)).toThrow(
-        'defaultPrepareQueryString encountered unhandled language: SQL'
+        'defaultPrepareQueryString encountered unhandled language: UNSUPPORTED_LANG'
       );
     });
 

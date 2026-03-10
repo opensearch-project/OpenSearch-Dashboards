@@ -53,6 +53,7 @@ describe('redux_persistence', () => {
                 fetch: jest.fn(() => Promise.resolve({ children: [] })),
                 toDataset: jest.fn(),
               })),
+              getDefault: jest.fn(() => null),
             })),
             getInitialQueryByDataset: jest.fn((dataset) => ({
               query: 'initial query',
@@ -229,7 +230,10 @@ describe('redux_persistence', () => {
 
       expect(result.query).toEqual(mockQueryState);
       expect(result.ui).toEqual(mockAppState.ui);
-      expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith(mockQueryState);
+      expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith(
+        mockQueryState,
+        false
+      );
     });
 
     it('should fallback to preloaded state when URL storage is not available', async () => {
@@ -326,6 +330,7 @@ describe('redux_persistence', () => {
           ),
           toDataset: jest.fn(() => mockDataset),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(mockServices);
@@ -518,6 +523,7 @@ describe('redux_persistence', () => {
           fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
           toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(tracesServices);
@@ -541,6 +547,7 @@ describe('redux_persistence', () => {
           fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
           toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(tracesServices);
@@ -564,6 +571,7 @@ describe('redux_persistence', () => {
           fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
           toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(logsServices);
@@ -587,6 +595,7 @@ describe('redux_persistence', () => {
           fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'test' }] })),
           toDataset: jest.fn(() => ({ id: 'test', title: 'test', type: 'INDEX_PATTERN' })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(logsServices);
@@ -773,6 +782,7 @@ describe('redux_persistence', () => {
             type: 'INDEX_PATTERN',
           })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       // Mock dataViews.get for the fetched traces dataset
@@ -833,6 +843,7 @@ describe('redux_persistence', () => {
             type: 'INDEX_PATTERN',
           })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await loadReduxState(logsServices);
@@ -903,6 +914,7 @@ describe('redux_persistence', () => {
             signalType: CORE_SIGNAL_TYPES.METRICS,
           })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(metricsServices);
@@ -931,6 +943,7 @@ describe('redux_persistence', () => {
             type: 'INDEX_PATTERN',
           })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(metricsServices);
@@ -959,6 +972,7 @@ describe('redux_persistence', () => {
             signalType: CORE_SIGNAL_TYPES.METRICS,
           })),
         })),
+        getDefault: jest.fn(() => null),
       });
 
       const result = await getPreloadedState(logsServices);

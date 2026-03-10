@@ -79,6 +79,10 @@ export const defaultPrepareQueryString = (query: Query): string => {
     case 'PPL':
       return defaultPreparePplQuery(query).query;
     case 'PROMQL':
+    case 'kuery':
+    case 'DQL':
+    case 'SQL':
+    case 'lucene':
       return query.query as string;
     default:
       throw new Error(

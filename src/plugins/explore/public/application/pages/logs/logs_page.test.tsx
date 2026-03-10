@@ -112,6 +112,10 @@ jest.mock('../../../application/utils/hooks/use_page_initialization', () => ({
   }),
 }));
 
+jest.mock('../../hooks', () => ({
+  useSetEditorText: jest.fn().mockReturnValue(jest.fn()),
+}));
+
 describe('LogsPage', () => {
   const createTestStore = (
     status = QueryExecutionStatus.UNINITIALIZED,

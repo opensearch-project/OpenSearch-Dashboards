@@ -5,13 +5,15 @@
 
 import '../explore_page.scss';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
+import { RootState } from '../../utils/state_management/store';
+import { useSetEditorText } from '../../hooks';
 import { QueryPanel } from '../../../components/query_panel';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
@@ -77,6 +79,16 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     keys: 'shift+v',
     execute: () => dispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID)),
   });
+
+  // Explicitly clear editor text if query is empty (e.g., after flavor switch redirect)
+  const queryText = useSelector((state: RootState) => state.query.query);
+  const setEditorText = useSetEditorText();
+
+  useEffect(() => {
+    if (queryText === '' || !queryText) {
+      setEditorText('');
+    }
+  }, [queryText, setEditorText]);
 
   useInitialQueryExecution(services);
   useUrlStateSync(services);
