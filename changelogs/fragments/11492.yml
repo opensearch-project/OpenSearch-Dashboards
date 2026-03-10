@@ -1,0 +1,2 @@
+fix:
+- Fix dataset selection and query persistence when navigating between Explore flavors ([#11492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11492))
