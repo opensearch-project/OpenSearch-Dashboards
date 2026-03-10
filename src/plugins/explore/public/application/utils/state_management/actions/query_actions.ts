@@ -264,12 +264,12 @@ export const executeQueries = createAsyncThunk<
   const dataTableCacheKey = defaultCacheKey;
   const breakdownField = state.queryEditor.breakdownField;
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
+  const queryString = defaultPrepareQueryString(query);
 
   // Check what needs execution for core queries
   // If results exist but query status is UNINITIALIZED (after cancel), we need to re-execute
   const dataTableQueryStatus = state.queryEditor.queryStatusMap[dataTableCacheKey];
   const histogramQueryStatus = state.queryEditor.queryStatusMap[histogramCacheKey];
-
   // Early exit if query should be skipped
   if (shouldSkipQueryExecution(query)) {
     return;
@@ -282,7 +282,6 @@ export const executeQueries = createAsyncThunk<
     query.language !== 'PROMQL' &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
-
   const promises = [];
   // Execute query without aggregations
   if (needsDataTableQuery) {
@@ -291,7 +290,7 @@ export const executeQueries = createAsyncThunk<
         executeDataTableQuery({
           services,
           cacheKey: dataTableCacheKey,
-          queryString: defaultPrepareQueryString(query),
+          queryString,
         })
       )
     );
@@ -304,7 +303,7 @@ export const executeQueries = createAsyncThunk<
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,
-        queryString: defaultPrepareQueryString(query),
+        queryString,
         interval,
       })
     );
@@ -542,13 +541,15 @@ const executeQueryBase = async (
       histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
     }
 
+    let effectiveQuery = queryString;
+    if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
+      effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
+    }
+
     const preparedQueryObject = {
       ...query,
       dataset,
-      query:
-        query.language === 'PPL' && isHistogramQuery && histogramConfig
-          ? buildPPLHistogramQuery(queryString, histogramConfig)
-          : queryString,
+      query: effectiveQuery,
     };
 
     let searchSource;

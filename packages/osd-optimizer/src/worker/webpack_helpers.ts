@@ -31,13 +31,29 @@
 import { Stats } from '@rspack/core';
 
 export function isFailureStats(stats: Stats) {
-  if (stats.hasErrors()) {
-    return true;
+  const { warnings, errors } = stats.toJson({ all: false, warnings: true, errors: true });
+
+  // Log warnings if present
+  if (warnings && warnings.length > 0) {
+    // eslint-disable-next-line no-console
+    console.warn(`[Webpack] ${warnings.length} warning(s) found:`);
+    warnings.forEach((warning, index) => {
+      // eslint-disable-next-line no-console
+      console.warn(`  Warning ${index + 1}: ${warning.message || warning}`);
+    });
   }
 
-  const { warnings } = stats.toJson({ all: false, warnings: true });
+  // Log errors if present
+  if (errors && errors.length > 0) {
+    // eslint-disable-next-line no-console
+    console.error(`[Webpack] ${errors.length} error(s) found:`);
+    errors.forEach((error, index) => {
+      // eslint-disable-next-line no-console
+      console.error(`  Error ${index + 1}: ${error.message || error}`);
+    });
+  }
 
-  return warnings !== undefined && warnings.length > 0;
+  return stats.hasErrors();
 }
 
 export const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join(''));
@@ -141,6 +157,10 @@ export interface WebpackExternalModule {
 
 export function isExternalModule(module: any): module is WebpackExternalModule {
   return module?.constructor?.name === 'ExternalModule';
+}
+
+export function isContextModule(module: any): module is WebpackExternalModule {
+  return module?.constructor?.name === 'ContextModule';
 }
 
 /** module replacing imports for webpack externals */
