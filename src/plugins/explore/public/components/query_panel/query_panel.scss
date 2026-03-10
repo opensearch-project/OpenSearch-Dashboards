@@ -6,21 +6,13 @@
 .exploreQueryPanel.exploreQueryPanel {
   border-top: 0;
   padding-bottom: $ouiSizeXXS;
-  height: 100%;
+  height: 100%; // Take full height of resizable container
   display: flex;
   flex-direction: column;
 
-  // Inside vertical layout, fill the entire space
-  .exploreVerticalLayout__queryPanel & {
-    height: 100%;
-    margin: 0;
-    padding-bottom: 0;
-  }
-
   .exploreQueryPanel__editorsWrapper {
-    flex: 1;
+    flex: 1; // Allow editor wrapper to expand
     display: flex;
     flex-direction: column;
-    min-height: 0;
   }
 }

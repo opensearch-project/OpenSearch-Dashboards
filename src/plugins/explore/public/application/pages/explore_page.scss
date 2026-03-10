@@ -23,10 +23,6 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     & .globalQueryEditor {
       display: none;
     }
-
-    display: flex;
-    flex-direction: column;
-    height: 100%;
   }
 
   &__canvas {
@@ -35,16 +31,48 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   &>.euiResizableContainer {
-    gap: $euiSizeXS;
+    gap: $ouiSizeXS;
+  }
+
+  &__vertical-resizable {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: $ouiSizeXXS;
+
+    // Style the vertical resizer button
+    .euiResizableButton {
+      background-color: $ouiBorderColor;
+      transition: background-color 0.2s ease;
+      height: 4px; // Make vertical resizer more visible
+
+      &:hover {
+        background-color: $ouiColorPrimary;
+        height: 6px;
+      }
+    }
   }
 
   &__bottom-panel {
     flex: 1;
     min-height: 0;
-    gap: $euiSizeXS;
+    gap: $ouiSizeXS;
 
     .resizable-panel-right {
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    // Improve resizer button visibility and behavior
+    .euiResizableButton {
+      background-color: $ouiBorderColor;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: $ouiColorPrimary;
+      }
     }
   }
 
@@ -76,6 +104,10 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   // Ensure proper spacing and layout
   .dscCanvas__queryPanel {
     margin-bottom: $ouiSizeXXS;
+    display: flex;
+    flex-direction: column;
+    height: 100%; // Allow it to fill the resizable panel
+    overflow: visible; // Ensure suggestions aren't clipped
   }
 
   .dscCanvas__tabBar {
@@ -100,7 +132,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   &_results {
     border: none;
     border-top: $ouiBorderThin;
-    margin-left: $euiSizeM;
+    margin-left: $ouiSizeM;
     position: relative;
   }
 
@@ -149,48 +181,3 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 .explore-chart-panel {
   flex-grow: initial;
 }
-
-// Vertical resizable layout for query panel and results
-.exploreVerticalLayout {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiResizableContainer {
-    height: 100%;
-  }
-
-  &__queryPanel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-
-    .dscCanvas__queryPanel {
-      height: 100%;
-      margin-bottom: 0 !important;
-      display: flex;
-      flex-direction: column;
-    }
-  }
-
-  &__resizeButton {
-    background-color: $ouiColorLightShade;
-    border-color: $ouiColorMediumShade;
-
-    &:hover {
-      background-color: $ouiColorMediumShade;
-    }
-  }
-
-  // &__resultsPanel {
-  //   display: flex;
-  //   flex-direction: column;
-  //   height: 100%;
-  //   min-height: 300px;
-  //   overflow: hidden;
-  // }
-}
-
-// Height adjustments for expanded header are no longer needed with flex layout

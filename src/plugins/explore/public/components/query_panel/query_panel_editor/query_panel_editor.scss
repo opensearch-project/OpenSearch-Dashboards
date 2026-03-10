@@ -12,58 +12,9 @@
   cursor: text;
   padding: $ouiSizeS $ouiSizeXS;
   position: relative;
-  flex: 1;
+  flex: 1; // Allow editor to expand in flex container
   display: flex;
   flex-direction: column;
-
-  // Ensure the CodeEditor fills the available space
-  .react-monaco-editor-container {
-    flex: 1;
-    min-height: 0;
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-
-    .monaco-editor {
-      flex: 1 !important;
-      height: 100% !important;
-      min-height: 0 !important;
-    }
-  }
-
-  // Override Monaco's internal height calculations - be more aggressive
-  .monaco-editor {
-    .overflow-guard {
-      position: relative !important;
-      height: 100% !important;
-      display: flex !important;
-      flex-direction: column !important;
-    }
-
-    .monaco-scrollable-element {
-      height: 100% !important;
-      flex: 1 !important;
-    }
-
-    .view-lines {
-      height: auto !important;
-    }
-
-    // Target the main editor area containers
-    .editor-container {
-      height: 100% !important;
-    }
-
-    .monaco-editor-viewport {
-      height: 100% !important;
-    }
-
-    // Ensure line numbers and content area expand together
-    .margin,
-    .monaco-editor-background {
-      height: 100% !important;
-    }
-  }
 
   &--focused {
     border-bottom-width: 2px;
@@ -73,15 +24,20 @@
 
   &__placeholder {
     position: absolute;
-    left: 45px; // hard-code to match where the text is in editor
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: $ouiFontSizeXS;
+    left: calc($ouiSizeS + 4px); // Account for Monaco editor's text offset from container edge
+    top: calc($ouiSizeS + 1px); // Fine-tune vertical alignment with Monaco's first line
+    font-size: 12px; // Match Monaco editor's font size instead of $ouiFontSizeXS
     color: $ouiColorDisabledText;
+    line-height: 18px; // Match Monaco editor's line height
+    pointer-events: none; // Ensure clicks pass through to editor
   }
 
   &--promptMode {
     padding-left: 27px; // hard-coding to match the start position of query mode. There must be a better way
+
+    .exploreQueryPanelEditor__placeholder {
+      left: calc(27px + 4px); // Match prompt mode's left padding plus Monaco offset
+    }
 
     &.exploreQueryPanelEditor--focused {
       border-bottom-color: transparent;
@@ -140,4 +96,30 @@
     font-size: 10px;
     color: $ouiColorPrimary;
   }
+}
+
+// Ensure Monaco editor suggestions and popups are not clipped
+.exploreQueryPanelEditor {
+  // Allow suggestions to overflow the container
+  overflow: visible !important;
+
+  .monaco-editor {
+    overflow: visible !important;
+    flex: 1; // Allow monaco editor to fill available space
+    min-height: 26px; // Minimum single line height
+
+    // Ensure suggestions widget appears above other elements and is not clipped
+    .suggest-widget,
+    .parameter-hints-widget,
+    .monaco-hover {
+      z-index: 10000 !important;
+    }
+  }
+}
+
+// Ensure container allows overflow for suggestions
+.exploreQueryPanel .exploreQueryPanel__editorsWrapper {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1;
 }

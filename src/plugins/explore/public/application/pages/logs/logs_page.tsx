@@ -91,38 +91,36 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            {/* Vertical resizable container for query panel and results */}
-            <div className="exploreVerticalLayout">
-              <EuiResizableContainer direction="vertical">
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel
-                      id="query"
-                      initialSize={10}
-                      minSize="5%"
-                      paddingSize="none"
-                      className="exploreVerticalLayout__queryPanel"
-                    >
-                      <div className="dscCanvas__queryPanel">
-                        <QueryPanel />
-                      </div>
-                    </EuiResizablePanel>
-
-                    <EuiResizableButton className="exploreVerticalLayout__resizeButton" />
-
-                    <EuiResizablePanel
-                      id="results"
-                      initialSize={90}
-                      minSize="40%"
-                      paddingSize="none"
-                      className="exploreVerticalLayout__resultsPanel"
-                    >
-                      <BottomContainer />
-                    </EuiResizablePanel>
-                  </>
-                )}
-              </EuiResizableContainer>
-            </div>
+            {/* Vertical resizable container between QueryPanel and main content */}
+            <EuiResizableContainer
+              direction="vertical"
+              className="explore-layout__vertical-resizable"
+            >
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    id="query-panel"
+                    initialSize={15}
+                    minSize="10%"
+                    paddingSize="none"
+                  >
+                    <div className="dscCanvas__queryPanel">
+                      <QueryPanel />
+                    </div>
+                  </EuiResizablePanel>
+                  <EuiResizableButton />
+                  <EuiResizablePanel
+                    id="main-content"
+                    initialSize={85}
+                    minSize="60%"
+                    paddingSize="none"
+                  >
+                    {/* Main content area with resizable panels */}
+                    <BottomContainer />
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
           </EuiPageBody>
         </EuiPage>
       </div>

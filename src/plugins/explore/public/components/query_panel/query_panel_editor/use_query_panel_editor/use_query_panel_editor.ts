@@ -300,39 +300,91 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       // Apply multi-query decorations on mount
       updateDecorations(editor, queryLanguageRef.current);
 
+      // Set initial editor height to single line regardless of container size
+      const lineHeight = 18; // Match the shared editor options line height
+      const initialHeight = lineHeight + 8; // Add some padding for better visual appearance
+      editor.layout({
+        width: editor.getLayoutInfo().width,
+        height: initialHeight,
+      });
+
+      // Ensure editor starts empty and clean
+      if (!editor.getValue()) {
+        editor.setValue('');
+      }
+
       // Update decorations when content changes
       const contentChangeDisposable = editor.onDidChangeModelContent(() => {
         updateDecorations(editor, queryLanguageRef.current);
       });
 
-      editor.onDidContentSizeChange(() => {
-        const contentHeight = editor.getContentHeight();
-        const editorContainer = editor.getContainerDomNode();
-        const isInResizableLayout = editorContainer?.closest('.exploreVerticalLayout__queryPanel');
+      // Add ResizeObserver to handle container size changes when dragging
+      let resizeObserver: ResizeObserver | null = null;
+      const editorElement = editor.getDomNode();
 
-        if (isInResizableLayout) {
-          // In resizable layout, let the editor use available space
-          editor.updateOptions({
-            scrollBeyondLastLine: false,
-            scrollbar: {
-              vertical: 'auto',
-            },
-          });
-        } else {
-          // Original behavior for other contexts
-          const maxHeight = 100;
-          const finalHeight = Math.min(contentHeight, maxHeight);
+      if (editorElement && window.ResizeObserver) {
+        resizeObserver = new ResizeObserver(() => {
+          // Allow the editor to fill the available container space when resizing
+          const containerRect = editorElement.getBoundingClientRect();
+          const availableHeight = containerRect.height;
+          const contentHeight = editor.getContentHeight();
+
+          // Use either content height or available container height, whichever is appropriate
+          const finalHeight =
+            contentHeight > 0 ? Math.max(contentHeight, 26) : availableHeight || 26;
 
           editor.layout({
-            width: editor.getLayoutInfo().width,
+            width: containerRect.width,
             height: finalHeight,
           });
+        });
+
+        // Observe the parent container instead of just the editor element
+        const queryPanelContainer = editorElement.closest('.dscCanvas__queryPanel');
+        if (queryPanelContainer) {
+          resizeObserver.observe(queryPanelContainer);
+        } else {
+          resizeObserver.observe(editorElement);
+        }
+      }
+
+      let layoutTimeout: ReturnType<typeof setTimeout> | null = null;
+
+      editor.onDidContentSizeChange(() => {
+        // Debounce layout updates to prevent rapid changes during paste operations
+        if (layoutTimeout) {
+          clearTimeout(layoutTimeout);
+        }
+
+        layoutTimeout = setTimeout(() => {
+          const contentHeight = editor.getContentHeight();
+          const lineHeight = 18; // Match the shared editor options line height
+          const minHeight = lineHeight + 8; // Minimum one line height with padding
+
+          // Get the available container height
+          const editorElement = editor.getDomNode();
+          const containerRect = editorElement?.getBoundingClientRect();
+          const availableHeight = containerRect?.height || contentHeight;
+
+          // Allow editor to use either content height or available space, whichever makes more sense
+          const finalHeight = Math.max(minHeight, Math.min(contentHeight, availableHeight));
+
+          // Only update layout if height actually changed
+          const currentHeight = editor.getLayoutInfo().height;
+          if (Math.abs(currentHeight - finalHeight) > 1) {
+            editor.layout({
+              width: editor.getLayoutInfo().width,
+              height: finalHeight,
+            });
+          }
 
           editor.updateOptions({
             scrollBeyondLastLine: false,
             scrollbar: {
-              vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
+              vertical: contentHeight > finalHeight ? 'visible' : 'hidden',
+              horizontal: 'auto', // Allow horizontal scrolling for long lines
             },
+            wordWrap: 'on', // Enable word wrapping for better UX with long content
           });
 
           // Automatically scroll to the bottom when new lines are added
@@ -351,10 +403,16 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
               }
             }
           }
-        }
+        }, 50); // 50ms debounce
       });
 
       return () => {
+        if (layoutTimeout) {
+          clearTimeout(layoutTimeout);
+        }
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
         focusDisposable.dispose();
         blurDisposable.dispose();
         contentChangeDisposable.dispose();
