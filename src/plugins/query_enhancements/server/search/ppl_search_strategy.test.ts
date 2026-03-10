@@ -172,6 +172,114 @@ describe('pplSearchStrategyProvider', () => {
     expect(usage.trackError).toHaveBeenCalled();
   });
 
+  it('should not send fetchSize when query ends with head', async () => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = ({
+      describeQuery: mockDescribeQuery,
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      ({
+        body: { query: { query: 'source = table | head 600', dataset: { id: 'test-dataset' } } },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(mockRequestHandlerContext.core.uiSettings.client.get).not.toHaveBeenCalled();
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBeUndefined();
+  });
+
+  it('should send fetchSize when head is followed by other commands', async () => {
+    (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(500);
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = ({
+      describeQuery: mockDescribeQuery,
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      ({
+        body: {
+          query: {
+            query: 'source = table | head 600 | sort name ASC',
+            dataset: { id: 'test-dataset' },
+          },
+        },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(mockRequestHandlerContext.core.uiSettings.client.get).toHaveBeenCalledWith(
+      'discover:sampleSize'
+    );
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBe(500);
+  });
+
+  it('should send fetchSize when head is only inside a subquery', async () => {
+    (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(500);
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [{ name: 'field1', type: 'long' }],
+        datarows: [[1]],
+      },
+      took: 100,
+    };
+    const mockDescribeQuery = jest.fn().mockResolvedValue(mockResponse);
+    const mockFacet = ({
+      describeQuery: mockDescribeQuery,
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([{ name: 'field1', type: 'long' }]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    await strategy.search(
+      mockRequestHandlerContext,
+      ({
+        body: {
+          query: {
+            query:
+              'source=state_country | inner join left=a, right=b ON a.name = b.name' +
+              ' [source=state_country | sort name | head 3] | sort a.name | fields a.name, a.age',
+            dataset: { id: 'test-dataset' },
+          },
+        },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(mockRequestHandlerContext.core.uiSettings.client.get).toHaveBeenCalledWith(
+      'discover:sampleSize'
+    );
+    const requestArg = mockDescribeQuery.mock.calls[0][1];
+    expect(requestArg.body.fetchSize).toBe(500);
+  });
+
   it('should read fetchSize from discover:sampleSize UI setting', async () => {
     (mockRequestHandlerContext.core.uiSettings.client.get as jest.Mock).mockResolvedValue(200);
     const mockResponse = {

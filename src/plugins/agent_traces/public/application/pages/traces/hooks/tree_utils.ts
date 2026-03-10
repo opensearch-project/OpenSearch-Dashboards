@@ -31,6 +31,7 @@ export interface BaseRow {
   startTime: string;
   endTime: string;
   latency: string;
+  durationNanos: number;
   totalTokens: number | string;
   totalCost: string;
   isExpandable?: boolean;
@@ -73,6 +74,7 @@ export const spanToRow = (
   startTime: formatTs(span.startTime),
   endTime: formatTs(span.endTime),
   latency: formatDuration(span.durationNanos),
+  durationNanos: span.durationNanos,
   totalTokens:
     span.genAiTotalTokens ??
     (span.genAiInputTokens != null || span.genAiOutputTokens != null
