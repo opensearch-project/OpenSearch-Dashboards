@@ -29,7 +29,7 @@
  */
 
 import { EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 export interface GenericComboBoxProps<T> {
   options: T[];
@@ -46,7 +46,27 @@ export interface GenericComboBoxProps<T> {
  * selected objects, rather than an option object.
  */
 export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
-  const { options, selectedOptions, getLabel, onChange, ...otherProps } = props;
+  const { options, selectedOptions, getLabel, onChange, onPasteValues, ...otherProps } = props;
+
+  const onPasteValuesRef = useRef(onPasteValues);
+  useEffect(() => {
+    onPasteValuesRef.current = onPasteValues;
+  }, [onPasteValues]);
+  const handleInputRef = useCallback((inputEl: HTMLInputElement | null) => {
+    if (!inputEl) return;
+    inputEl.addEventListener('paste', (e: ClipboardEvent) => {
+      const pasted = e.clipboardData?.getData('text');
+      if (pasted?.includes(',') && onPasteValuesRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        const newValues = pasted
+          .split(',')
+          .map((v) => v.trim())
+          .filter((v) => v.length > 0);
+        onPasteValuesRef.current(newValues);
+      }
+    });
+  }, []);
 
   const labels = options.map(getLabel);
   const euiOptions: EuiComboBoxOptionOption[] = labels.map((label) => ({ label }));
@@ -70,6 +90,7 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}
+      inputRef={handleInputRef}
       sortMatchesBy="startsWith"
       {...otherProps}
     />
