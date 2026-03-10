@@ -120,7 +120,11 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
 
     if (searchProps.spec && !searchProps.spec.$schema) {
       return (
-        <EchartsRender spec={searchProps.spec} onSelectTimeRange={searchProps.onSelectTimeRange} />
+        <EchartsRender
+          spec={searchProps.spec}
+          onSelectTimeRange={searchProps.onSelectTimeRange}
+          onContainerSizeChange={searchProps.onContainerSizeChange}
+        />
       );
     }
 

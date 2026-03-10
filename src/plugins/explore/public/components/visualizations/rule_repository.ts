@@ -581,7 +581,9 @@ const oneMetricOneCateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'pie',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string },
+    containerSize?: { width: number; height: number }
   ) => {
     switch (chartType) {
       case 'bar_gauge':
@@ -591,7 +593,8 @@ const oneMetricOneCateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as BarGaugeChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          containerSize
         );
       case 'bar':
         return createBarSpec(
