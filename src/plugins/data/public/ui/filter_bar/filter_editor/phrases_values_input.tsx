@@ -47,6 +47,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     const { suggestions } = this.state;
     const { values, intl, onChange } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
+
     return (
       <EuiCompressedFormRow
         fullWidth={true}
@@ -66,6 +67,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           selectedOptions={values || []}
           onSearchChange={this.onSearchChange}
           onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onPasteValues={(pasted: string) => onChange([...(values || []), ...pasted])}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
