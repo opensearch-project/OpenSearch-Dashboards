@@ -10,23 +10,13 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
-import {
-  LexerInterpreter,
-  ParserInterpreter,
-  CharStream,
-  CommonTokenStream,
-  ParserRuleContext,
-  PredictionMode,
-  Token,
-  TokenStream,
-} from 'antlr4ng';
-import { CodeCompletionCore } from 'antlr4-c3';
+import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
 import {
   CursorPosition,
   OpenSearchPplAutocompleteResult,
   SourceOrTableSuggestion,
   TableContextSuggestion,
+  AutocompleteResultBase,
 } from '../shared/types';
 import {
   fetchColumnValues,
@@ -49,11 +39,6 @@ import {
 } from './constants';
 import { Documentation } from './ppl_documentation';
 import { getPPLQuerySnippetForSuggestions } from '../../query_snippet_suggestions/ppl/suggestions';
-import { pplGrammarCache, CachedGrammar } from './ppl_grammar_cache';
-import { findCursorTokenIndex } from '../shared/cursor';
-import { GeneralErrorListener } from '../shared/general_error_listerner';
-import { KeywordSuggestion, AutocompleteResultBase } from '../shared/types';
-import { quotesRegex } from '../shared/constants';
 import {
   tryRuntimeGrammarSuggestions,
   resolveKeywordSuggestionDetails,
@@ -61,16 +46,8 @@ import {
   isCommandPositionInCurrentSegment,
   isLikelyCommandKeyword,
   isLikelyExpressionFunctionKeyword,
-  isRuntimeFunctionRuleContext,
   INFERRED_RUNTIME_FUNCTION_DETAILS,
 } from './runtime_ppl_grammar/opensearch_ppl_autocomplete';
-
-interface KeywordSuggestionDetails {
-  importance: string;
-  type: string;
-  isFunction: boolean;
-  optionalParam?: boolean;
-}
 
 
 // Utility function to extract query text up to cursor position
