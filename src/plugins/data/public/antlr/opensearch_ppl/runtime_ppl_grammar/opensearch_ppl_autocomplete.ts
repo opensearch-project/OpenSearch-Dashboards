@@ -25,10 +25,7 @@ import {
 } from '../../shared/types';
 import { removePotentialBackticks } from '../../shared/utils';
 import { SuggestionItemDetailsTags } from '../../shared/constants';
-import {
-  PPL_SUGGESTION_IMPORTANCE,
-  SUPPORTED_NON_LITERAL_KEYWORDS,
-} from '../constants';
+import { PPL_SUGGESTION_IMPORTANCE, SUPPORTED_NON_LITERAL_KEYWORDS } from '../constants';
 import { pplGrammarCache, CachedGrammar } from '../ppl_grammar_cache';
 import { findCursorTokenIndex } from '../../shared/cursor';
 import { GeneralErrorListener } from '../../shared/general_error_listerner';
@@ -1105,6 +1102,4 @@ export function tryRuntimeGrammarSuggestions(
   }
 }
 
-export {
-  INFERRED_RUNTIME_FUNCTION_DETAILS,
-};
+export { INFERRED_RUNTIME_FUNCTION_DETAILS };

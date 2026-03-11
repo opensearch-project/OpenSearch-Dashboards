@@ -14,8 +14,6 @@ import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
 import {
   CursorPosition,
   OpenSearchPplAutocompleteResult,
-  SourceOrTableSuggestion,
-  TableContextSuggestion,
   AutocompleteResultBase,
 } from '../shared/types';
 import {
@@ -24,7 +22,6 @@ import {
   formatFieldsToSuggestions,
   formatValuesToSuggestions,
   parseQuery,
-  removePotentialBackticks,
 } from '../shared/utils';
 import { openSearchPplAutocompleteData as simplifiedPplAutocompleteData } from './simplified_ppl_grammar/opensearch_ppl_autocomplete';
 import { openSearchPplAutocompleteData as defaultPplAutocompleteData } from './default_ppl_grammar/opensearch_ppl_autocomplete';
@@ -48,7 +45,6 @@ import {
   isLikelyExpressionFunctionKeyword,
   INFERRED_RUNTIME_FUNCTION_DETAILS,
 } from './runtime_ppl_grammar/opensearch_ppl_autocomplete';
-
 
 // Utility function to extract query text up to cursor position
 const extractQueryTillCursor = (
