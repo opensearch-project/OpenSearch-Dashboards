@@ -53,13 +53,13 @@ describe('data_table_helper', () => {
       });
     });
 
-    it('should use sortable from osdFieldOverrides when provided', () => {
+    it('should always be sortable regardless of osdFieldOverrides', () => {
       const timeFieldName = '@timestamp';
       const osdFieldOverrides = { sortable: false };
 
       const result = getTimeColumn(timeFieldName, osdFieldOverrides);
 
-      expect(result.isSortable).toBe(false);
+      expect(result.isSortable).toBe(true);
     });
 
     it('should default to true when sortable is not provided', () => {
@@ -165,7 +165,7 @@ describe('data_table_helper', () => {
       expect(result[0].displayName).toBe('field...dots');
     });
 
-    it('should handle field sortability from indexPattern when osdFieldOverrides.sortable is undefined', () => {
+    it('should mark any field present in the index pattern as sortable', () => {
       const columns = ['field1'];
       mockGetOsdFieldOverrides.mockReturnValue({});
       (mockIndexPattern.getFieldByName as jest.Mock).mockReturnValue({
@@ -174,7 +174,17 @@ describe('data_table_helper', () => {
 
       const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
 
-      expect(result[0].isSortable).toBe(false); // Should use field.sortable when osdFieldOverrides.sortable is undefined
+      expect(result[0].isSortable).toBe(true); // PPL can sort any field
+    });
+
+    it('should mark columns without an index pattern field as not sortable', () => {
+      const columns = ['virtualColumn'];
+      mockGetOsdFieldOverrides.mockReturnValue({});
+      (mockIndexPattern.getFieldByName as jest.Mock).mockReturnValue(undefined);
+
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
+
+      expect(result[0].isSortable).toBe(false);
     });
 
     it('should handle _source column removability correctly', () => {
@@ -207,7 +217,7 @@ describe('data_table_helper', () => {
 
       const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
 
-      expect(result[0].displayName).toBe('Service Identifier');
+      expect(result[0].displayName).toBe('Name');
       expect(result[1].displayName).toBe('Duration');
       expect(result[2].displayName).toBe('Duration');
       expect(result[3].displayName).toBe('Service');

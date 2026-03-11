@@ -13,6 +13,9 @@ import {
   setSavedSearch,
   setQueryState,
   setActiveTab,
+  setIsInitialized,
+  setSort,
+  setColumns,
   clearResults,
   clearQueryStatusMap,
   clearLastExecutedData,
@@ -51,7 +54,7 @@ export const useInitPage = () => {
           const query = {
             ...queryFromSavedSearch,
             ...queryFromUrl,
-            query: queryFromUrl.query || queryFromSavedSearch.query,
+            query: queryFromUrl.query ?? queryFromSavedSearch.query,
           };
           if (query) {
             dispatch(setQueryState(query));
@@ -63,13 +66,6 @@ export const useInitPage = () => {
         // TODO: remove this once legacy state is not consumed any more
         dispatch(setSavedSearch(savedAgentTraces.id));
 
-        // Init ui state
-        const uiState = savedAgentTraces.uiState;
-        if (uiState) {
-          const { activeTab } = JSON.parse(uiState);
-          dispatch(setActiveTab(activeTab));
-        }
-
         // Add to recently accessed
         chrome.recentlyAccessed.add(
           `/app/agentTraces/${savedAgentTraces.type ?? AgentTracesFlavor.Traces}#/view/${
@@ -80,12 +76,38 @@ export const useInitPage = () => {
           { type: 'agentTraces' }
         );
 
+        // Restore sort and columns from saved search so the executeQueries
+        // cache key matches what useTabResults will compute once the table
+        // component mounts and sets its own defaults.
+        if (savedAgentTraces.sort && savedAgentTraces.sort.length > 0) {
+          dispatch(setSort(savedAgentTraces.sort));
+        }
+        if (savedAgentTraces.columns && savedAgentTraces.columns.length > 0) {
+          dispatch(setColumns(savedAgentTraces.columns));
+        }
+
         dispatch(clearLastExecutedData());
         dispatch(setEditorMode(EditorMode.Query));
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
         dispatch(executeQueries({ services }));
+
+        // Restore active tab from saved search AFTER executeQueries so queries
+        // run with activeTabId="" (all tabs get results). The dataset_change_middleware
+        // clears activeTabId when setQueryState fires; dispatching setActiveTab before
+        // executeQueries would limit execution to one tab whose results may not match
+        // the currently visible tab.
+        const uiState = savedAgentTraces.uiState;
+        if (uiState) {
+          const { activeTab } = JSON.parse(uiState);
+          dispatch(setActiveTab(activeTab));
+        }
+
+        // Mark as initialized so the table moves past the loading gate.
+        // useInitialQueryExecution skips when agentTracesId is present, so
+        // this hook is responsible for the flag on the saved-search path.
+        dispatch(setIsInitialized(true));
       }
     }
     if (error) {

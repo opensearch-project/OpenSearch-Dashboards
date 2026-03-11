@@ -54,7 +54,15 @@ export async function saveSavedAgentTraces({
   const searchSourceInstance = savedAgentTraces.searchSourceFields;
 
   if (searchSourceInstance) {
-    searchSourceInstance.query = searchContext.query as Query;
+    // Use the Redux query state (the user's original query) instead of
+    // searchContext.query, which may reflect internal metrics/aggregation queries
+    // set by background PPL executions via data.query.queryString.setQuery().
+    const queryState = store.getState().query;
+    searchSourceInstance.query = {
+      query: queryState.query,
+      language: queryState.language,
+      dataset: queryState.dataset,
+    } as Query;
     searchSourceInstance.filter = searchContext.filters;
   }
   try {

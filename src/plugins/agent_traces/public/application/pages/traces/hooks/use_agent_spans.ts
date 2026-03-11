@@ -17,7 +17,7 @@ import {
   hitsToAgentSpans,
   formatTimestamp,
 } from './tree_utils';
-import { buildPplSortClause } from '../table_shared';
+import { buildPplSortClause, splitPplWhereAndTail } from '../table_shared';
 
 export interface SpanRow extends BaseRow {
   children?: SpanRow[];
@@ -107,7 +107,8 @@ export const useAgentSpans = (
       try {
         const offset = pageIndex * pageSize;
         const sortClause = buildPplSortClause(sortField, sortDirection);
-        const pplQuery = `${baseQueryString} | where isnotnull(\`attributes.gen_ai.operation.name\`) ${sortClause} | head ${pageSize} from ${offset}`;
+        const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQueryString);
+        const pplQuery = `${whereQuery} | where isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands} ${sortClause} | head ${pageSize} from ${offset}`;
         const response = await pplService.executeQuery(datasetParam, pplQuery);
 
         if (cancelled) return;

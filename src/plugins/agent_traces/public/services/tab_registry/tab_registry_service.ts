@@ -8,6 +8,7 @@ import { QueryState } from '../../application/utils/state_management/slices';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { Query } from '../../../../data/common';
 import { AgentTracesFlavor } from '../../../common';
+import { SortOrder } from '../../types/saved_agent_traces_types';
 
 /**
  * Props passed to tab components
@@ -32,8 +33,9 @@ export interface TabDefinition {
   // Language-aware query handling
   supportedLanguages: string[];
 
-  // Transform query string for cache key generation
-  prepareQuery?: (query: Query) => string;
+  // Transform query string for cache key generation.
+  // When sort is provided, it is appended as a PPL sort clause.
+  prepareQuery?: (query: Query, sort?: SortOrder[]) => string;
 
   /**
    * @experimental Callback for errors from query

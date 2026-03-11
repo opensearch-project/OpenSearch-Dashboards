@@ -40,6 +40,43 @@ export const formatDuration = (nanos: number): string => {
   return `${seconds.toFixed(2)}s`;
 };
 
+/**
+ * Unflatten a flat dotted-key _source object into a nested structure.
+ * OpenSearch _source documents use flat keys like "attributes.gen_ai.operation.name"
+ * while TraceHit expects nested objects like { attributes: { gen_ai: { operation: { name } } } }.
+ * Top-level keys that already exist as non-primitive values (objects) are preserved.
+ */
+export const unflattenSource = (source: Record<string, any>): Record<string, any> => {
+  const result: Record<string, any> = {};
+
+  for (const key of Object.keys(source)) {
+    const parts = key.split('.');
+    if (parts.length === 1) {
+      // Top-level key — preserve as-is
+      result[key] = source[key];
+    } else {
+      // Dotted key — build nested structure
+      let current = result;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (current[part] === undefined || current[part] === null) {
+          current[part] = {};
+        } else if (typeof current[part] !== 'object' || Array.isArray(current[part])) {
+          // Don't overwrite existing primitive or array values
+          break;
+        }
+        current = current[part];
+      }
+      const lastPart = parts[parts.length - 1];
+      if (current[lastPart] === undefined) {
+        current[lastPart] = source[key];
+      }
+    }
+  }
+
+  return result;
+};
+
 export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => ({
   spanId: hit.spanId || `span-${index}`,
   traceId: hit.traceId || '',
@@ -50,7 +87,7 @@ export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => 
   startTime: hit.startTime || '',
   endTime: hit.endTime || '',
   durationNanos: hit.durationInNanos || 0,
-  statusCode: hit['status.code'] ?? 0,
+  statusCode: hit['status.code'] ?? hit.status?.code ?? 0,
   statusMessage: hit.status?.message || '',
   serviceName: hit.serviceName || '',
   genAiSystem: hit.attributes?.gen_ai?.system || '',

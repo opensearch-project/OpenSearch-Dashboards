@@ -22,6 +22,7 @@ export interface NonFilterableTableCellProps {
   index?: number;
   rowData?: OpenSearchSearchHit<Record<string, unknown>>;
   columnId: string;
+  wrapCellText?: boolean;
 }
 
 export const NonFilterableTableCell: React.FC<NonFilterableTableCellProps> = ({

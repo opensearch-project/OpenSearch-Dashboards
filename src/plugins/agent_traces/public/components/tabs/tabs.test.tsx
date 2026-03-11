@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { AgentTracesTabs } from './tabs';
@@ -12,6 +12,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dash
 import { uiReducer } from '../../application/utils/state_management/slices';
 import { queryReducer } from '../../application/utils/state_management/slices';
 import { resultsReducer } from '../../application/utils/state_management/slices';
+import { legacyReducer } from '../../application/utils/state_management/slices/legacy/legacy_slice';
 import {
   setActiveTab,
   clearQueryStatusMapByKey,
@@ -89,6 +90,7 @@ describe('AgentTracesTabsComponent', () => {
         ui: uiReducer,
         query: queryReducer,
         results: resultsReducer,
+        legacy: legacyReducer,
       },
       preloadedState: {
         ui: {
@@ -101,6 +103,11 @@ describe('AgentTracesTabsComponent', () => {
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
         results: {},
+        legacy: {
+          columns: [],
+          sort: [],
+          interval: 'auto',
+        },
         ...initialState,
       },
     });
@@ -126,6 +133,7 @@ describe('AgentTracesTabsComponent', () => {
   });
 
   it('should dispatch setActiveTab and executeTabQuery when tab is clicked and results not cached', () => {
+    jest.useFakeTimers();
     const store = createMockStore({
       ui: {
         activeTabId: 'traces',
@@ -145,12 +153,20 @@ describe('AgentTracesTabsComponent', () => {
     const visualizationTab = screen.getByText('Visualization');
     fireEvent.click(visualizationTab);
 
+    // Redux dispatch is deferred via double-requestAnimationFrame to let the
+    // browser paint the CSS visibility toggle before processing re-renders.
+    act(() => {
+      jest.runAllTimers();
+    });
+
     expect(mockSetActiveTab).toHaveBeenCalledWith('agent_traces_visualization_tab');
     expect(mockClearQueryStatusMapByKey).toHaveBeenCalled();
     expect(mockExecuteTabQuery).toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   it('should not execute query when tab is clicked and results are already cached', () => {
+    jest.useFakeTimers();
     const store = createMockStore({
       ui: {
         activeTabId: 'traces',
@@ -175,9 +191,14 @@ describe('AgentTracesTabsComponent', () => {
     const visualizationTab = screen.getByText('Visualization');
     fireEvent.click(visualizationTab);
 
+    act(() => {
+      jest.runAllTimers();
+    });
+
     expect(mockSetActiveTab).toHaveBeenCalledWith('agent_traces_visualization_tab');
     expect(mockClearQueryStatusMapByKey).not.toHaveBeenCalled();
     expect(mockExecuteTabQuery).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   it('should render selected tab content when activeTabId is set', () => {

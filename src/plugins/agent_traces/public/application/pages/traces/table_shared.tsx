@@ -3,101 +3,68 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import {
-  EuiHealth,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiCallOut,
-} from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../utils/state_management/store';
-
-export const PAGE_SIZE_OPTIONS = [10, 25, 50];
-export const DEFAULT_PAGE_SIZE = 50;
-
-export interface SortState {
-  field: string;
-  direction: 'asc' | 'desc';
-}
+import React from 'react';
 
 /** Maps UI column field names to PPL index field names */
 export const PPL_SORT_FIELDS: Record<string, string> = {
   startTime: 'startTime',
+  kind: '`attributes.gen_ai.operation.name`',
   latency: 'durationInNanos',
-  totalTokens: '`attributes.gen_ai.usage.output_tokens`',
   name: 'name',
   status: '`status.code`',
 };
 
-export const DEFAULT_SORT: SortState = { field: 'startTime', direction: 'desc' };
-
 /** Build a PPL sort clause from UI sort state */
 export const buildPplSortClause = (field: string, direction: 'asc' | 'desc'): string => {
-  const pplField = PPL_SORT_FIELDS[field] || 'startTime';
+  const pplField = PPL_SORT_FIELDS[field] || (field.includes('.') ? `\`${field}\`` : field);
   const prefix = direction === 'desc' ? '- ' : '';
   return `| sort ${prefix}${pplField}`;
 };
 
-/** Shared hook for table pagination and sorting with query-change reset */
-export const useTablePagination = (totalItemCount: number) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [sortState, setSortState] = useState<SortState>(DEFAULT_SORT);
+/**
+ * Splits a PPL query string into the source+where portion and remaining
+ * non-where commands (head, sort, dedup, eval, etc.).
+ *
+ * This ensures user-entered non-where commands (like `| head 1`) are placed
+ * after hardcoded where clauses when assembling the final query.
+ */
+export const splitPplWhereAndTail = (
+  queryString: string
+): { whereQuery: string; tailCommands: string } => {
+  const parts = queryString.split(/\s*\|\s*/);
+  const whereParts: string[] = [];
+  const tailParts: string[] = [];
 
-  const query = useSelector((state: RootState) => state.query);
-  const prevQueryRef = useRef(query);
-  useEffect(() => {
-    if (query !== prevQueryRef.current) {
-      prevQueryRef.current = query;
-      setPageIndex(0);
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+
+    const lower = trimmed.toLowerCase();
+    if (lower.startsWith('source') || lower.startsWith('where')) {
+      whereParts.push(trimmed);
+    } else {
+      tailParts.push(trimmed);
     }
-  }, [query]);
+  }
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount,
-      pageSizeOptions: PAGE_SIZE_OPTIONS,
-    }),
-    [pageIndex, pageSize, totalItemCount]
-  );
-
-  const onTableChange = useCallback(
-    ({ page, sort }: { page?: { index: number; size: number }; sort?: SortState }) => {
-      if (sort && (sort.field !== sortState.field || sort.direction !== sortState.direction)) {
-        setSortState(sort);
-        setPageIndex(0);
-        return;
-      }
-      if (page) {
-        if (page.size !== pageSize) {
-          setPageSize(page.size);
-          setPageIndex(0);
-        } else {
-          setPageIndex(page.index);
-        }
-      }
-    },
-    [pageSize, sortState]
-  );
-
-  return { pageIndex, pageSize, pagination, onTableChange, sortState };
+  return {
+    whereQuery: whereParts.join(' | '),
+    tailCommands: tailParts.length > 0 ? '| ' + tailParts.join(' | ') : '',
+  };
 };
 
-/** Shared status column renderer */
-export const renderStatus = (status: string) => (
-  <EuiHealth color={status === 'success' ? 'success' : 'danger'}>
-    {status === 'success'
-      ? i18n.translate('agentTraces.table.statusSuccess', { defaultMessage: 'Success' })
-      : i18n.translate('agentTraces.table.statusError', { defaultMessage: 'Error' })}
-  </EuiHealth>
-);
+/**
+ * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
+ * Subquery brackets [...] are masked so that head inside subqueries is ignored.
+ *
+ * Aligned with the explore plugin's queryEndsWithHead implementation.
+ */
+export const queryEndsWithHead = (queryString: string): boolean => {
+  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  return /\|\s*head\b(\s+\d+)?(\s+from\s+\d+)?\s*(\|\s*where\b.*)?\s*$/i.test(masked);
+};
 
 /** Shared loading state */
 export const TableLoadingState: React.FC<{ message: React.ReactNode }> = ({ message }) => (
@@ -114,9 +81,7 @@ export const TableLoadingState: React.FC<{ message: React.ReactNode }> = ({ mess
 /** Shared empty state */
 export const TableEmptyState: React.FC<{
   title: React.ReactNode;
-  onRefresh: () => void;
-  refreshLabel: React.ReactNode;
-}> = ({ title, onRefresh, refreshLabel }) => (
+}> = ({ title }) => (
   <EuiEmptyPrompt
     iconType="apmTrace"
     title={<h3>{title}</h3>}
@@ -132,25 +97,5 @@ export const TableEmptyState: React.FC<{
         />
       </p>
     }
-    actions={
-      <EuiButton onClick={onRefresh} iconType="refresh">
-        {refreshLabel}
-      </EuiButton>
-    }
   />
-);
-
-/** Shared error state */
-export const TableErrorState: React.FC<{
-  title: string;
-  error: string;
-  onRetry: () => void;
-  retryLabel: React.ReactNode;
-}> = ({ title, error, onRetry, retryLabel }) => (
-  <EuiCallOut title={title} color="danger" iconType="alert">
-    <p>{error}</p>
-    <EuiButton onClick={onRetry} color="danger" size="s">
-      {retryLabel}
-    </EuiButton>
-  </EuiCallOut>
 );

@@ -33,6 +33,8 @@ jest.mock('@osd/i18n', () => ({
 const mockMetrics: TraceMetrics = {
   totalTraces: 1500,
   totalSpans: 2500000,
+  filteredTraces: 1500,
+  filteredSpans: 2500000,
   totalTokens: 500,
   latencyP50Nanos: 250_000_000,
   latencyP99Nanos: 3_500_000_000,
@@ -51,7 +53,7 @@ describe('TraceMetricsBar', () => {
   });
 
   it('renders metric values when loaded', () => {
-    render(<TraceMetricsBar metrics={mockMetrics} loading={false} />);
+    render(<TraceMetricsBar metrics={mockMetrics} />);
     expect(screen.getByText('1.5K')).toBeInTheDocument();
     expect(screen.getByText('2.50M')).toBeInTheDocument();
     expect(screen.getByText('500')).toBeInTheDocument();
@@ -60,7 +62,7 @@ describe('TraceMetricsBar', () => {
   });
 
   it('renders labels', () => {
-    render(<TraceMetricsBar metrics={mockMetrics} loading={false} />);
+    render(<TraceMetricsBar metrics={mockMetrics} />);
     expect(screen.getByText('Total Traces')).toBeInTheDocument();
     expect(screen.getByText('Total Spans')).toBeInTheDocument();
     expect(screen.getByText('Total Tokens')).toBeInTheDocument();
@@ -89,25 +91,25 @@ describe('TraceMetricsBar', () => {
 
   it('formats small latency as ms', () => {
     const metrics = { ...mockMetrics, latencyP50Nanos: 5_000_000 };
-    render(<TraceMetricsBar metrics={metrics} loading={false} />);
+    render(<TraceMetricsBar metrics={metrics} />);
     expect(screen.getByText('5ms')).toBeInTheDocument();
   });
 
   it('formats sub-ms latency with decimals', () => {
     const metrics = { ...mockMetrics, latencyP50Nanos: 500_000 };
-    render(<TraceMetricsBar metrics={metrics} loading={false} />);
+    render(<TraceMetricsBar metrics={metrics} />);
     expect(screen.getByText('0.50ms')).toBeInTheDocument();
   });
 
   it('formats zero latency as dash', () => {
     const metrics = { ...mockMetrics, latencyP50Nanos: 0 };
-    render(<TraceMetricsBar metrics={metrics} loading={false} />);
+    render(<TraceMetricsBar metrics={metrics} />);
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
   it('formats large numbers with K suffix', () => {
     const metrics = { ...mockMetrics, totalTraces: 15000 };
-    render(<TraceMetricsBar metrics={metrics} loading={false} />);
+    render(<TraceMetricsBar metrics={metrics} />);
     expect(screen.getByText('15K')).toBeInTheDocument();
   });
 

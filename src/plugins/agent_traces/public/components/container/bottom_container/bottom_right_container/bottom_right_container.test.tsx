@@ -47,12 +47,12 @@ jest.mock('./resizable_vis_control_and_tabs', () => ({
   ),
 }));
 
-jest.mock('../../../../application/pages/traces/traces_table', () => ({
-  TracesTable: () => <div data-test-subj="traces-table">Traces Table</div>,
+jest.mock('../../../../application/pages/traces/traces_data_table', () => ({
+  TracesDataTable: () => <div data-test-subj="traces-table">Traces Table</div>,
 }));
 
-jest.mock('../../../../application/pages/traces/spans_table', () => ({
-  SpansTable: () => <div data-test-subj="spans-table">Spans Table</div>,
+jest.mock('../../../../application/pages/traces/spans_data_table', () => ({
+  SpansDataTable: () => <div data-test-subj="spans-table">Spans Table</div>,
 }));
 
 jest.mock('../../../trace_auto_detect_callout', () => ({

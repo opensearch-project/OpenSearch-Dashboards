@@ -9,10 +9,13 @@ import { PPLService } from '../trace_details/data_fetching/ppl_request_helpers';
 import { Dataset } from '../../../../../../data/common';
 import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
 import { RootState } from '../../../utils/state_management/store';
+import { splitPplWhereAndTail } from '../table_shared';
 
 export interface TraceMetrics {
   totalTraces: number;
   totalSpans: number;
+  filteredTraces: number;
+  filteredSpans: number;
   totalTokens: number;
   latencyP50Nanos: number;
   latencyP99Nanos: number;
@@ -171,7 +174,6 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
   }, [fetchMetrics, refreshCounter, timeVersion, fetchVersion]);
 
   const refresh = useCallback(() => {
-    setMetrics(null);
     pendingMetrics = null;
     setRefreshCounter((c) => c + 1);
   }, []);

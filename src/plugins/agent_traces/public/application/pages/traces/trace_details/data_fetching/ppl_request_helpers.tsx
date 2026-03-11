@@ -17,20 +17,21 @@ export interface PPLQueryRequest {
     index: string;
     body: {
       query: {
-        query: string;
-        language: string;
-        format: string;
-        dataset: {
-          id: string;
-          title: string;
-          type: string;
-          timeFieldName?: string;
-          dataSource?: {
+        queries: Array<{
+          query: string;
+          language: string;
+          dataset: {
             id: string;
             title: string;
             type: string;
+            timeFieldName?: string;
+            dataSource?: {
+              id: string;
+              title: string;
+              type: string;
+            };
           };
-        };
+        }>;
       };
       aggConfig?: any; // For external data source aggregations
     };
@@ -66,10 +67,13 @@ export const buildPPLQueryRequest = (
       index: dataset.title, // Use the dataset title as the index
       body: {
         query: {
-          query: pplQuery,
-          language: 'PPL',
-          format: 'jdbc',
-          dataset: buildPPLDataset(dataset),
+          queries: [
+            {
+              query: pplQuery,
+              language: 'PPL',
+              dataset: buildPPLDataset(dataset),
+            },
+          ],
         },
       },
     },
@@ -90,7 +94,6 @@ export const executePPLQuery = async (
     throw new Error('Data service is not available');
   }
 
-  dataService.query.queryString.setQuery(request.params.body.query);
   const response = await dataService.search.search(request, {}).toPromise();
 
   return response;

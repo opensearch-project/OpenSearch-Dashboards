@@ -33,6 +33,8 @@ export interface BaseRow {
   latency: string;
   durationNanos: number;
   totalTokens: number | string;
+  inputTokens: number | null;
+  outputTokens: number | null;
   totalCost: string;
   isExpandable?: boolean;
   isExpanded?: boolean;
@@ -80,6 +82,8 @@ export const spanToRow = (
     (span.genAiInputTokens != null || span.genAiOutputTokens != null
       ? (span.genAiInputTokens ?? 0) + (span.genAiOutputTokens ?? 0)
       : '—'),
+  inputTokens: span.genAiInputTokens,
+  outputTokens: span.genAiOutputTokens,
   totalCost: '—',
   level: 0,
   children: [],

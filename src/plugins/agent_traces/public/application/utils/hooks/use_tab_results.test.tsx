@@ -28,6 +28,7 @@ import {
   queryEditorReducer,
   queryEditorInitialState,
 } from '../state_management/slices/query_editor/query_editor_slice';
+import { legacyReducer } from '../state_management/slices/legacy/legacy_slice';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { AgentTracesServices } from '../../../types';
 
@@ -66,6 +67,7 @@ interface MockRootState {
     logs: {};
   };
   queryEditor?: any;
+  legacy?: any;
 }
 
 // Helper function to create a mock store
@@ -97,8 +99,16 @@ const createMockStore = (initialState: MockRootState) => {
       results: resultsReducer,
       tab: tabReducer,
       queryEditor: queryEditorReducer,
+      legacy: legacyReducer,
     },
-    preloadedState,
+    preloadedState: {
+      ...preloadedState,
+      legacy: initialState.legacy || {
+        columns: [],
+        sort: [],
+        interval: 'auto',
+      },
+    },
   });
 };
 
@@ -156,7 +166,8 @@ describe('useTabResults', () => {
 
     expect(result.current.results).toEqual({ data: 'test data' });
     expect(mockTab.prepareQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'test query' })
+      expect.objectContaining({ query: 'test query' }),
+      [] // sort state
     );
   });
 
@@ -182,7 +193,8 @@ describe('useTabResults', () => {
 
     expect(result.current.results).toBeUndefined();
     expect(mockTab.prepareQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'test query' })
+      expect.objectContaining({ query: 'test query' }),
+      [] // sort state
     );
   });
 
@@ -207,7 +219,8 @@ describe('useTabResults', () => {
 
     expect(result.current.results).toEqual({ data: 'default data' });
     expect(mockDefaultPrepareQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'test query' })
+      expect.objectContaining({ query: 'test query' }),
+      [] // sort state
     );
   });
 });

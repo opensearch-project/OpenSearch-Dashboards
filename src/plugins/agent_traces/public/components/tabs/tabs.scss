@@ -20,14 +20,14 @@
   }
 
   // Container for all tab panels, stacked on top of each other.
-  // Using visibility:hidden instead of display:none keeps each panel's
-  // layout tree intact so switching tabs avoids a full reflow (~224 ms).
   &__panels {
     position: relative;
     min-height: 0;
     flex-grow: 1;
   }
 
+  // Hidden panels use visibility:hidden (not display:none) to keep each
+  // panel's layout tree intact so switching avoids a full reflow.
   &__panel {
     position: absolute;
     inset: 0;

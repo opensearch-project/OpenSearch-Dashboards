@@ -18,6 +18,7 @@ export interface PPLQueryDeps {
   pplService: TracePPLService | undefined;
   datasetParam: Dataset | null;
   baseQueryString: string | null;
+  sourceOnlyQueryString: string | null;
 }
 
 /**
@@ -60,7 +61,15 @@ export const usePPLQueryDeps = (): PPLQueryDeps => {
     }
   }, [query]);
 
-  return { services, pplService, datasetParam, baseQueryString };
+  const sourceOnlyQueryString = useMemo(() => {
+    try {
+      return defaultPrepareQueryString({ ...query, query: '' });
+    } catch {
+      return null;
+    }
+  }, [query]);
+
+  return { services, pplService, datasetParam, baseQueryString, sourceOnlyQueryString };
 };
 
 /**
