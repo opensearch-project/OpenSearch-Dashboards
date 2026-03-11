@@ -282,49 +282,12 @@ function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number> {
   return safe;
 }
 
-// ─── Lazy-cached name→index lookups ──────────────────────────────────────────
-// runtimeRuleNameToIndex / runtimeSymbolicNameToTokenType are Maps built
-// client-side in PPLGrammarCache.doFetch. But if for any reason
-// the CachedGrammar comes from a code path that didn't build them (e.g.
-// raw JSON), these lazy caches rebuild from the arrays / vocabulary
-// directly, keyed by grammarHash so they're built at most once per grammar.
-
-const _lazyRuleIndexCache = new Map<string, Map<string, number>>();
 function ruleIndex(grammar: CachedGrammar, name: string): number {
-  // Fast path: use the pre-built map if available
-  if (grammar.runtimeRuleNameToIndex?.size > 0) {
-    return grammar.runtimeRuleNameToIndex.get(name) ?? INVALID_RULE_INDEX;
-  }
-  // Lazy rebuild from parserRuleNames array
-  let m = _lazyRuleIndexCache.get(grammar.grammarHash);
-  if (!m) {
-    m = new Map(grammar.parserRuleNames.map((n, i) => [n, i]));
-    _lazyRuleIndexCache.set(grammar.grammarHash, m);
-  }
-  return m.get(name) ?? INVALID_RULE_INDEX;
+  return grammar.runtimeRuleNameToIndex.get(name) ?? INVALID_RULE_INDEX;
 }
 
-const _lazyTokenTypeCache = new Map<string, Map<string, number>>();
 function tokenTypeBySymbolic(grammar: CachedGrammar, symName: string): number {
-  // Fast path: use the pre-built map if available
-  if (grammar.runtimeSymbolicNameToTokenType?.size > 0) {
-    return grammar.runtimeSymbolicNameToTokenType.get(symName) ?? Token.INVALID_TYPE;
-  }
-  // Lazy rebuild from vocabulary (API-safe: handle both property and method)
-  let m = _lazyTokenTypeCache.get(grammar.grammarHash);
-  if (!m) {
-    m = new Map<string, number>();
-    const vocab = grammar.vocabulary;
-    const max =
-      (vocab as any).maxTokenType ??
-      (typeof (vocab as any).getMaxTokenType === 'function' ? (vocab as any).getMaxTokenType() : 0);
-    for (let i = 0; i <= max; i++) {
-      const sym = vocab.getSymbolicName(i);
-      if (sym) m.set(sym, i);
-    }
-    _lazyTokenTypeCache.set(grammar.grammarHash, m);
-  }
-  return m.get(symName) ?? Token.INVALID_TYPE;
+  return grammar.runtimeSymbolicNameToTokenType.get(symName) ?? Token.INVALID_TYPE;
 }
 
 /**
