@@ -66,6 +66,7 @@ describe('ChatMountService', () => {
           onWindowCloseCallback = callback;
           return jest.fn(); // Return unsubscribe function
         }),
+        isWindowOpen: jest.fn(() => false),
       },
     };
 
@@ -145,13 +146,12 @@ describe('ChatMountService', () => {
           config: {
             dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
             paddingSize: 400,
-            isHidden: false, // Chrome is visible by default
           },
         })
       );
     });
 
-    it('should open sidecar with isHidden=true when chrome is not visible', () => {
+    it('should not open sidecar when chrome is not visible', () => {
       // Set chrome to not visible before starting
       mockChromeVisible$.next(false);
 
@@ -164,14 +164,7 @@ describe('ChatMountService', () => {
 
       contract.open();
 
-      expect(mockCore.overlays.sidecar.open).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          config: expect.objectContaining({
-            isHidden: true, // Chrome is not visible
-          }),
-        })
-      );
+      expect(mockCore.overlays.sidecar.open).not.toHaveBeenCalled();
     });
 
     it('should not open sidecar if already open', () => {
@@ -317,10 +310,7 @@ describe('ChatMountService', () => {
       expect(mockCore.overlays.sidecar.show).not.toHaveBeenCalled();
     });
 
-    it('should show sidecar when chrome becomes visible', () => {
-      // Start with chrome invisible
-      mockChromeVisible$.next(false);
-
+    it('should show sidecar when chrome becomes visible and sidecar exists', () => {
       const contract = chatMountService.start({
         core: mockCore,
         chatService: mockChatService,
@@ -328,16 +318,19 @@ describe('ChatMountService', () => {
         confirmationService: mockConfirmationService,
       });
 
-      // Open the sidecar (it will be hidden initially)
+      // Open the sidecar while chrome is visible
       contract.open();
+
+      // Make chrome invisible first
+      mockChromeVisible$.next(false);
 
       // Clear previous calls
       jest.clearAllMocks();
 
-      // Make chrome visible
+      // Make chrome visible again
       mockChromeVisible$.next(true);
 
-      // Sidecar should be shown
+      // Sidecar should be shown (not opened again)
       expect(mockCore.overlays.sidecar.show).toHaveBeenCalled();
       expect(mockCore.overlays.sidecar.hide).not.toHaveBeenCalled();
     });
@@ -361,32 +354,69 @@ describe('ChatMountService', () => {
       expect(mockCore.overlays.sidecar.hide).not.toHaveBeenCalled();
     });
 
-    it('should prevent flash by opening with correct initial visibility', () => {
-      // Set chrome to invisible before starting
+    it('should open sidecar when chrome becomes visible and window state is open', () => {
+      // Start with chrome invisible
       mockChromeVisible$.next(false);
 
-      const contract = chatMountService.start({
+      // Mock isWindowOpen to return true
+      mockCore.chat.isWindowOpen = jest.fn(() => true);
+
+      // Mock requestAnimationFrame
+      const rafCallback = jest.fn();
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        rafCallback.mockImplementation(cb);
+        return 1;
+      });
+
+      chatMountService.start({
         core: mockCore,
         chatService: mockChatService,
         suggestedActionsService: mockSuggestedActionsService,
         confirmationService: mockConfirmationService,
       });
 
-      // Open the sidecar
-      contract.open();
+      // Make chrome visible
+      mockChromeVisible$.next(true);
 
-      // Verify sidecar was opened with isHidden=true (no flash)
-      expect(mockCore.overlays.sidecar.open).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          config: expect.objectContaining({
-            isHidden: true,
-          }),
-        })
-      );
+      // requestAnimationFrame should have been called
+      expect(window.requestAnimationFrame).toHaveBeenCalled();
 
-      // Verify hide was not called separately (would cause flash)
-      expect(mockCore.overlays.sidecar.hide).not.toHaveBeenCalled();
+      // Execute the deferred callback
+      rafCallback();
+
+      // Sidecar should be opened
+      expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
+    });
+
+    it('should cancel pending openSidecar when chrome visibility changes rapidly', () => {
+      // Start with chrome invisible
+      mockChromeVisible$.next(false);
+
+      // Mock isWindowOpen to return true
+      mockCore.chat.isWindowOpen = jest.fn(() => true);
+
+      // Mock requestAnimationFrame and cancelAnimationFrame
+      const cancelSpy = jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 123);
+
+      chatMountService.start({
+        core: mockCore,
+        chatService: mockChatService,
+        suggestedActionsService: mockSuggestedActionsService,
+        confirmationService: mockConfirmationService,
+      });
+
+      // Make chrome visible (schedules openSidecar)
+      mockChromeVisible$.next(true);
+
+      // Quickly make chrome invisible again (should cancel the pending open)
+      mockChromeVisible$.next(false);
+
+      // cancelAnimationFrame should have been called
+      expect(cancelSpy).toHaveBeenCalledWith(123);
+
+      // Sidecar should not have been opened
+      expect(mockCore.overlays.sidecar.open).not.toHaveBeenCalled();
     });
   });
 

@@ -6,10 +6,13 @@
 import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { Subscription } from 'rxjs';
+
+import { distinctUntilChanged } from 'rxjs/operators';
+
 import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
+import { ContextProviderStart } from '../../../context_provider/public';
 
 import { ChatService } from '../services/chat_service';
-import { ContextProviderStart } from '../../../context_provider/public';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
 import { ChatMount } from '../components/chat_mount';
@@ -26,7 +29,8 @@ export class ChatMountService {
   private unsubscribeWindowOpen?: () => void;
   private unsubscribeWindowClose?: () => void;
   private chromeVisibilitySubscription?: Subscription;
-  private isChromeVisible: boolean = true;
+  private isChromeVisible: boolean = false;
+  private pendingOpenSidecarFrame?: number;
 
   start(options: {
     core: CoreStart;
@@ -53,12 +57,16 @@ export class ChatMountService {
         return; // Already open
       }
 
+      // Don't open sidecar if chrome is not visible
+      if (!this.isChromeVisible) {
+        return;
+      }
+
       this.sideCar = core.overlays.sidecar.open(this.chatMountPoint!, {
         className: 'chat-sidecar chat-sidecar--sidecar',
         config: {
           dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
           paddingSize: chatService.getPaddingSize(),
-          isHidden: !this.isChromeVisible, // Hide immediately if chrome is not visible
         },
       });
     };
@@ -90,22 +98,36 @@ export class ChatMountService {
     });
 
     // Subscribe to chrome visibility changes to control sidecar visibility
-    // without affecting the isWindowOpen state
-    this.chromeVisibilitySubscription = core.chrome.getIsVisible$().subscribe((isVisible) => {
-      // Track chrome visibility state
-      this.isChromeVisible = isVisible;
+    this.chromeVisibilitySubscription = core.chrome
+      .getIsVisible$()
+      .pipe(distinctUntilChanged())
+      .subscribe((isVisible) => {
+        // Update visibility state immediately so openSidecar guard works correctly
+        this.isChromeVisible = isVisible;
 
-      // Only control visibility if sidecar is open
-      if (this.sideCar) {
+        // Clear any pending openSidecar call
+        if (this.pendingOpenSidecarFrame) {
+          cancelAnimationFrame(this.pendingOpenSidecarFrame);
+          this.pendingOpenSidecarFrame = undefined;
+        }
+
         if (isVisible) {
-          // Chrome is visible, show the sidecar
-          core.overlays.sidecar.show();
-        } else {
-          // Chrome is not visible, hide the sidecar temporarily
+          if (this.sideCar) {
+            // Chrome is visible and sidecar exists, show it immediately
+            core.overlays.sidecar.show();
+          } else if (core.chat.isWindowOpen()) {
+            // Chrome became visible, sidecar not initialized, but window state is open
+            // Defer openSidecar to next frame to avoid flicker during fast navigation
+            this.pendingOpenSidecarFrame = requestAnimationFrame(() => {
+              this.pendingOpenSidecarFrame = undefined;
+              openSidecar();
+            });
+          }
+        } else if (this.sideCar) {
+          // Chrome is not visible, hide the sidecar immediately
           core.overlays.sidecar.hide();
         }
-      }
-    });
+      });
 
     return {
       open: openSidecar,
@@ -115,6 +137,10 @@ export class ChatMountService {
   }
 
   stop() {
+    if (this.pendingOpenSidecarFrame) {
+      cancelAnimationFrame(this.pendingOpenSidecarFrame);
+      this.pendingOpenSidecarFrame = undefined;
+    }
     if (this.sideCar) {
       this.sideCar.close();
       this.sideCar = undefined;
