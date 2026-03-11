@@ -22,7 +22,7 @@ import {
 import { QueryService, QueryStart } from '../query_service';
 import { TimefilterContract } from '../timefilter';
 import { ISearchInterceptor } from '../../search';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useSyncQueryStateWithUrl } from './use_sync_state_with_url';
 import * as SyncQueryStateWithUrl from './sync_state_with_url';
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { useDiscoverContext } from '../../view_components/context';
 import {

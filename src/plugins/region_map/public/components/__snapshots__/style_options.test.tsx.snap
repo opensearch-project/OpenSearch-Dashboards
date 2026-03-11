@@ -51,9 +51,7 @@ exports[`style_options renders the Style options comprising of style settings, c
               disabled={true}
               hidden={true}
               value="EMPTY_VALUE"
-            >
-              
-            </option>
+            />
           </select>
           <div
             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"

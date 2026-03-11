@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useCancelButtonTiming } from './use_cancel_button_timing';
 
 describe('useCancelButtonTiming', () => {

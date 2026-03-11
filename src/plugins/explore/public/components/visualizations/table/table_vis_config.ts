@@ -37,7 +37,7 @@ export interface TableChartStyleOptions {
 export type TableChartStyle = Required<TableChartStyleOptions>;
 
 export const defaultTableChartStyles: TableChartStyle = {
-  pageSize: 10,
+  pageSize: 50,
   globalAlignment: 'left',
   showColumnFilter: false,
   showFooter: false,

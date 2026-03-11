@@ -36,7 +36,7 @@ export const runBuildVisTests = () => {
 
     const verifyVisualizationGenerated = () => {
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
-      cy.get('.visualization').should('be.visible');
+      cy.get('.exploreVisContainer canvas').should('be.visible');
     };
 
     before(() => {

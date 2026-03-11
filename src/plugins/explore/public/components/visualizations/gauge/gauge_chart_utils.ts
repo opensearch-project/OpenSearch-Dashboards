@@ -124,6 +124,7 @@ export const createGaugeSeries = ({
       z: 5,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       progress: {
         show: true,
         width: fontSizeFactor + 2,
@@ -175,6 +176,7 @@ export const createGaugeSeries = ({
       z: 10,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       itemStyle: {
         color: valueArcColor,
       },
@@ -236,7 +238,7 @@ export const createGaugeSeries = ({
           y: height * 0.6,
           children: [
             {
-              type: 'text',
+              type: 'text' as const,
               style: {
                 x: 0,
                 y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
@@ -244,20 +246,24 @@ export const createGaugeSeries = ({
                 textAlign: 'center',
                 fontSize: valueFontSize,
                 fontWeight: 'bold',
-                fill: textColor,
+                fill: styles?.useThresholdColor ? textColor : getColors().text,
               },
             },
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: styles?.title || seriesDisplayName,
-                textAlign: 'center',
-                fontSize: titleFontSize,
-                fill: getColors().text,
-              },
-            },
+            ...(styles.showTitle
+              ? [
+                  {
+                    type: 'text' as const,
+                    style: {
+                      x: 0,
+                      y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
+                      text: styles?.title || seriesDisplayName,
+                      textAlign: 'center',
+                      fontSize: titleFontSize,
+                      fill: getColors().text,
+                    },
+                  },
+                ]
+              : []),
           ],
         };
       },

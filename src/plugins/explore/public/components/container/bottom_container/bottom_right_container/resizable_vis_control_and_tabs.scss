@@ -4,18 +4,19 @@
  */
 
 .visStylePanelOuter {
-  padding-left: $ouiSizeXXS;
+  padding-left: $ouiSizeS;
 }
 
 .visStylePanelInner {
-  padding-left: $ouiSizeXXS;
+  padding-left: $ouiSizeXS;
   border-left: $euiBorderThin;
   min-height: 100%;
 }
 
 .visStylePanelTitle {
   padding-bottom: $euiSizeXS;
-  padding-top: $ouiSizeXXS;
+  padding-top: $ouiSizeXS;
+  padding-left: $ouiSizeXS;
   border-bottom: $euiBorderThin;
 }
 

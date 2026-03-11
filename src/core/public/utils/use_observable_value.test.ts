@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import { useObservableValue } from './use_observable_value';
 
@@ -21,7 +21,9 @@ describe('useObservableValue', () => {
     const { result } = renderHook(() => useObservableValue(observableFunction, initialValue));
 
     const emitValue = () => {};
-    observableFunction.next(emitValue);
+    act(() => {
+      observableFunction.next(emitValue);
+    });
     expect(result.current).toBe(emitValue);
   });
 });

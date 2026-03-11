@@ -161,7 +161,7 @@ export const ChartTypeSelector = <T extends ChartType>({
   if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} color="subdued" paddingSize="s">
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       <EuiFormRow
         key="ChartTypeSelector"
         label={i18n.translate('explore.chartTypeSwitcher.title', {

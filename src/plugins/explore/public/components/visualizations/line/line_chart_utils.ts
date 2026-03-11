@@ -303,7 +303,7 @@ const getLineInterpolation = (lineMode: LineMode) => {
 const generateLineStyles = (styles: LineChartStyle) => {
   const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
   return {
-    ...(styles.lineStyle === 'line' ? { symbol: 'none' } : {}),
+    ...(styles.lineStyle === 'line' ? { showSymbol: false } : {}),
     lineStyle: {
       width: lineWidth,
     },
@@ -376,7 +376,6 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
 }): PipelineFn<T> => (state) => {
   const { xAxisConfig, yAxisConfig } = state;
   const newState = { ...state };
-  const newYAxisConfig = { ...yAxisConfig };
 
   if (styles.addTimeMarker) {
     {
@@ -386,16 +385,6 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
       newState.xAxisConfig = newxAxisConfig;
     }
   }
-
-  // add one more y axis for bar
-  newState.yAxisConfig = [
-    newYAxisConfig,
-    {
-      type: 'value',
-      name: value2Field?.name,
-      position: 'right',
-    },
-  ];
 
   const series = [
     {

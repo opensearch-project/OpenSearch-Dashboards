@@ -15,7 +15,7 @@ import { ChartConfig } from '../../../visualizations/visualization_builder.types
 
 const mockStore = configureMockStore([]);
 const initialState = {
-  ui: { activeTabId: 'logs' },
+  ui: { activeTabId: 'logs', wrapCellText: false },
 };
 const store = mockStore(initialState);
 
@@ -142,6 +142,46 @@ describe('ResultsActionBar', () => {
     );
     expect(screen.getByTestId('discoverDownloadCsvButton')).toBeInTheDocument();
     expect(screen.getByTestId('saveAndAddButtonWithModal')).toBeInTheDocument();
+  });
+
+  test('should render wrap cell text toggle on logs tab', () => {
+    render(
+      <Provider store={store}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.getByTestId('exploreWrapCellTextSwitch')).toBeInTheDocument();
+  });
+
+  test('should not render wrap cell text toggle on non-logs tabs', () => {
+    const vizStore = mockStore({
+      ui: { activeTabId: 'explore_visualization_tab', wrapCellText: false },
+    });
+    render(
+      <Provider store={vizStore}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    expect(screen.queryByTestId('exploreWrapCellTextSwitch')).not.toBeInTheDocument();
+  });
+
+  test('should dispatch setWrapCellText when toggle is clicked', () => {
+    const logsStore = mockStore({
+      ui: { activeTabId: 'logs', wrapCellText: false },
+    });
+    render(
+      <Provider store={logsStore}>
+        <DiscoverResultsActionBar {...props} />
+      </Provider>
+    );
+    fireEvent.click(screen.getByTestId('exploreWrapCellTextSwitch'));
+    const actions = logsStore.getActions();
+    expect(actions).toContainEqual(
+      expect.objectContaining({
+        type: 'ui/setWrapCellText',
+        payload: true,
+      })
+    );
   });
 
   test('should render and toggle the show raw data switch for non-table visualizations', () => {

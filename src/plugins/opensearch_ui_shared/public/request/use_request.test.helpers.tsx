@@ -29,7 +29,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import sinon from 'sinon';
 

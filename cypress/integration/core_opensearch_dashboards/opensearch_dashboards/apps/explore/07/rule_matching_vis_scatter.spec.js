@@ -47,14 +47,14 @@ export const runCreateVisTests = () => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
     it('should create a scatter plot visualization using a query with two metrics and one category', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
+      const query = `source=${datasetName} | fields bytes_transferred, status_code | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
     });
     it('should change axes style of scatter chart and reflect immediatly to the scatter visualization', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
+      const query = `source=${datasetName} | fields bytes_transferred, status_code | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -64,16 +64,16 @@ export const runCreateVisTests = () => {
       // turn off show y axis
       cy.getElementByTestId('showAxisSwitch').eq(1).click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
     });
     it('should change point style of scatter chart and reflect immediatly to the scatter visualization', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
+      const query = `source=${datasetName} | fields bytes_transferred, status_code | head 100`;
       cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -81,7 +81,7 @@ export const runCreateVisTests = () => {
       // turn off show y axis
       cy.getElementByTestId('pointFilledSwitch').click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });

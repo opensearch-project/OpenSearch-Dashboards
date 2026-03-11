@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, act, waitFor } from '@testing-library/react';
 import { DevToolsIcon } from './dev_tools_icon';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from 'src/plugins/url_forwarding/public/mocks';
@@ -121,11 +121,16 @@ describe('<DevToolsIcon />', () => {
       fireEvent.click(getByTestId('openDevToolsModal'));
       await findByText('Dev tools title');
 
-      // Execute the ESC shortcut
+      // Execute the ESC shortcut - wrap in act() because it causes state updates
       const registerCall = mockKeyboardShortcut.register.mock.calls[0][0];
-      registerCall.execute();
+      await act(async () => {
+        registerCall.execute();
+      });
 
-      expect(queryByLabelText('close modal')).not.toBeInTheDocument();
+      // Wait for the modal to close
+      await waitFor(() => {
+        expect(queryByLabelText('close modal')).not.toBeInTheDocument();
+      });
     });
 
     it('should unregister ESC shortcut when modal closes', async () => {

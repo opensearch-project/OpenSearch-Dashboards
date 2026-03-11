@@ -29,7 +29,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { MarkdownVisRenderValue } from './markdown_fn';
@@ -37,20 +37,32 @@ import { MarkdownVisRenderValue } from './markdown_fn';
 // @ts-ignore
 const MarkdownVisComponent = lazy(() => import('./markdown_vis_controller'));
 
+// Use WeakMap to store roots per DOM node to support multiple instances
+const rootsMap = new WeakMap<HTMLElement, Root>();
+
 export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderValue> = {
   name: 'markdown_vis',
   displayName: 'markdown visualization',
   reuseDomNode: true,
   render: async (domNode, { visParams }, handlers) => {
+    let root = rootsMap.get(domNode);
+    if (!root) {
+      root = createRoot(domNode);
+      rootsMap.set(domNode, root);
+    }
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      const existingRoot = rootsMap.get(domNode);
+      if (existingRoot) {
+        existingRoot.unmount();
+        rootsMap.delete(domNode);
+      }
     });
 
-    render(
+    root!.render(
       <VisualizationContainer className="markdownVis">
         <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
-      </VisualizationContainer>,
-      domNode
+      </VisualizationContainer>
     );
   },
 };

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigureS3DatasourcePanelWithRouter } from './configure_amazon_s3_data_source';

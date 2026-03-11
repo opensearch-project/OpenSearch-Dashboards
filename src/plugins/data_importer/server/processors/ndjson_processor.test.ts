@@ -75,6 +75,29 @@ describe('NDJSONProcessor', () => {
         }
       }
     );
+
+    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
+      'should inject lookup field when lookupId and lookupField are provided',
+      async ({ rawString, expected }) => {
+        const lookupId = 'test-lookup-id';
+        const lookupField = '__lookup';
+
+        await processor.ingestText(rawString.join('\n'), {
+          client: clientMock,
+          indexName: 'foo',
+          lookupId,
+          lookupField,
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+
+        // Verify each indexed document includes the lookup field
+        clientMock.index.mock.calls.forEach((call) => {
+          const callArgs = call[0];
+          expect(callArgs.body).toHaveProperty(lookupField, lookupId);
+        });
+      }
+    );
   });
 
   describe('ingestFile()', () => {
@@ -120,6 +143,30 @@ describe('NDJSONProcessor', () => {
         if (expected.length > 2) {
           expect(response.failedRows).toContain(3);
         }
+      }
+    );
+
+    it.each<NDJSONTestCaseFormat>(VALID_NDJSON_TEST_CASES)(
+      'should inject lookup field when lookupId and lookupField are provided',
+      async ({ rawString, expected }) => {
+        const lookupId = 'test-lookup-id';
+        const lookupField = '__lookup';
+        const validNDJSONFileStream = Readable.from(rawString.join('\n'));
+
+        await processor.ingestFile(validNDJSONFileStream, {
+          client: clientMock,
+          indexName: 'foo',
+          lookupId,
+          lookupField,
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+
+        // Verify each indexed document includes the lookup field
+        clientMock.index.mock.calls.forEach((call) => {
+          const callArgs = call[0];
+          expect(callArgs.body).toHaveProperty(lookupField, lookupId);
+        });
       }
     );
 

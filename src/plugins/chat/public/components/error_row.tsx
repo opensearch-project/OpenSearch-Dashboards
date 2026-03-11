@@ -21,7 +21,7 @@ export const ErrorRow: React.FC<ErrorRowProps> = ({ error }) => {
       <div className="errorRow__content">
         <div className="errorRow__info">
           <EuiText size="s" style={{ fontWeight: 600, color: '#BD271E' }}>
-            System Error
+            Something went wrong
           </EuiText>
         </div>
         <div className="errorRow__message">

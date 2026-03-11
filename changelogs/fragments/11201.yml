@@ -1,2 +1,0 @@
-feat:
-- Change PromQL generation to use ag-ui agent ([#11201](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11201))

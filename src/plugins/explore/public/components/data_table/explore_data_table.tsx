@@ -16,7 +16,10 @@ import { DocViewFilterFn } from '../../types/doc_views_types';
 import { DataTable } from './data_table';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { ExploreServices } from '../../types';
-import { selectSavedSearch } from '../../application/utils/state_management/selectors';
+import {
+  selectSavedSearch,
+  selectWrapCellText,
+} from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../application/hooks';
@@ -31,6 +34,7 @@ const ExploreDataTableComponent = () => {
 
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
+  const wrapCellText = useSelector(selectWrapCellText);
   const { dataset } = useDatasetContext();
 
   // Get rows for the DataTable (hook handles column processing)
@@ -109,6 +113,7 @@ const ExploreDataTableComponent = () => {
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             expandedTableHeader={expandedTableHeader}
+            wrapCellText={wrapCellText}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

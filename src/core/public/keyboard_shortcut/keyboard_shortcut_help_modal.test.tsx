@@ -5,9 +5,14 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, IntlProvider as IntlProviderType } from 'react-intl';
 import { KeyboardShortcutHelpModal } from './keyboard_shortcut_help_modal';
 import { ShortcutDefinition } from './types';
+
+// Cast IntlProvider to accept children prop for React 18 compatibility
+const TypedIntlProvider = IntlProvider as React.ComponentType<
+  React.ComponentProps<typeof IntlProviderType> & { children?: React.ReactNode }
+>;
 
 jest.mock('./key_parser', () => ({
   KeyStringParser: jest.fn().mockImplementation(() => ({
@@ -38,9 +43,9 @@ jest.mock('react-dom', () => ({
 }));
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <IntlProvider locale="en" messages={{}}>
+  <TypedIntlProvider locale="en" messages={{}}>
     {children}
-  </IntlProvider>
+  </TypedIntlProvider>
 );
 
 describe('KeyboardShortcutHelpModal', () => {

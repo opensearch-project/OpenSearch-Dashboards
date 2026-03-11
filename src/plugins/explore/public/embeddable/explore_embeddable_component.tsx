@@ -119,7 +119,9 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
     }
 
     if (searchProps.spec && !searchProps.spec.$schema) {
-      return <EchartsRender spec={searchProps.spec} />;
+      return (
+        <EchartsRender spec={searchProps.spec} onSelectTimeRange={searchProps.onSelectTimeRange} />
+      );
     }
 
     return (
@@ -140,7 +142,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       direction="column"
       responsive={false}
       data-test-subj="embeddedSavedExplore"
-      className="eui-xScrollWithShadows eui-yScrollWithShadows"
+      style={{ overflowX: 'auto' }}
     >
       <EuiFlexItem style={{ minHeight: 0 }} data-test-subj="osdExploreContainer">
         {getEmbeddableContent()}

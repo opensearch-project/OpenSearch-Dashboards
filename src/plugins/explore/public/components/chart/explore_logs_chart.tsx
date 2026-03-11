@@ -12,6 +12,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { DataPublicPluginStart, search } from '../../../../data/public';
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
@@ -224,6 +225,18 @@ export const ExploreLogsChart = ({
                 chartType={'HistogramBar'}
                 timefilterUpdateHandler={timefilterUpdateHandler}
                 services={services}
+                customChartsTheme={{
+                  colors: {
+                    vizColors: [euiThemeVars.euiColorVis0],
+                  },
+                  axes: {
+                    gridLine: {
+                      horizontal: { visible: false },
+                      vertical: { visible: false },
+                    },
+                  },
+                }}
+                useSmartDateFormat
               />
             </div>
           </section>

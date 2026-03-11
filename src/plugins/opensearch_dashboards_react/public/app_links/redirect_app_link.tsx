@@ -38,6 +38,7 @@ interface RedirectCrossAppLinksProps {
   application: ApplicationStart;
   className?: string;
   'data-test-subj'?: string;
+  children?: React.ReactNode;
 }
 
 /**

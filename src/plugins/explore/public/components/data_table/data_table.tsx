@@ -34,6 +34,7 @@ export interface DataTableProps {
   onClose?: () => void;
   scrollToTop?: () => void;
   expandedTableHeader?: string;
+  wrapCellText?: boolean;
 }
 
 // ToDo: These would need to be read from an upcoming config panel
@@ -57,6 +58,7 @@ const DataTableUI = ({
   onClose,
   scrollToTop,
   expandedTableHeader,
+  wrapCellText,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
 
@@ -171,7 +173,10 @@ const DataTableUI = ({
           sampleSize={sampleSize}
         />
       ) : null}
-      <table data-test-subj="docTable" className="explore-table table">
+      <table
+        data-test-subj="docTable"
+        className={`explore-table table${wrapCellText ? ' explore-table--wrap' : ''}`}
+      >
         <thead>
           <TableHeader displayedColumns={columns} onRemoveColumn={onRemoveColumn} />
         </thead>
@@ -192,6 +197,7 @@ const DataTableUI = ({
                   isShortDots={isShortDots}
                   docViewsRegistry={docViewsRegistry}
                   expandedTableHeader={expandedTableHeader}
+                  wrapCellText={wrapCellText}
                 />
               );
             }

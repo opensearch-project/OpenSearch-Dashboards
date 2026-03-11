@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { FeatureCards, FeatureCardsProps } from './components/feature_cards/feature_cards';
@@ -16,7 +16,8 @@ export const renderApp = ({
   mountElement: AppMountParameters['element'];
   props: FeatureCardsProps;
 }) => {
-  ReactDOM.render(<FeatureCards {...props} />, mountElement);
+  const root = createRoot(mountElement);
+  root.render(<FeatureCards {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(mountElement);
+  return () => root.unmount();
 };

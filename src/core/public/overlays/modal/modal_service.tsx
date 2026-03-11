@@ -33,7 +33,8 @@
 import { i18n as t } from '@osd/i18n';
 import { EuiModal, EuiConfirmModal, EuiConfirmModalProps, EuiModalProps } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
@@ -126,6 +127,7 @@ interface StartDeps {
 export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
+  private modalRoot?: Root;
 
   public start({ i18n, targetDomElement }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
@@ -149,13 +151,13 @@ export class ModalService {
 
         this.activeModal = modal;
 
-        render(
+        this.modalRoot = createRoot(targetDomElement);
+        this.modalRoot.render(
           <i18n.Context>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="osdOverlayMountWrapper" />
             </EuiModal>
-          </i18n.Context>,
-          targetDomElement
+          </i18n.Context>
         );
 
         return modal;
@@ -209,11 +211,11 @@ export class ModalService {
               }),
           };
 
-          render(
+          this.modalRoot = createRoot(targetDomElement);
+          this.modalRoot.render(
             <i18n.Context>
               <EuiConfirmModal {...props} />
-            </i18n.Context>,
-            targetDomElement
+            </i18n.Context>
           );
         });
       },
@@ -228,8 +230,11 @@ export class ModalService {
    * depend on unmounting for cleanup behaviour.
    */
   private cleanupDom(): void {
+    if (this.modalRoot) {
+      this.modalRoot.unmount();
+      this.modalRoot = undefined;
+    }
     if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.innerHTML = '';
     }
     this.activeModal = null;

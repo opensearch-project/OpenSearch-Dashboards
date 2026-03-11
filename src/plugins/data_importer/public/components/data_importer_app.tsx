@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 import { extname } from 'path';
 import {
@@ -95,6 +96,7 @@ export const DataImporterPluginApp = ({
   const [visibleRows, setVisibleRows] = useState<number>(ROWS_COUNT);
   const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
   const [createMode, setCreateMode] = useState<boolean>(false);
+  const [importIdentifier, setImportIdentifier] = useState<string>('');
 
   const onImportTypeChange = (type: ImportChoices) => {
     if (type === IMPORT_CHOICE_FILE) {
@@ -228,6 +230,7 @@ export const DataImporterPluginApp = ({
           delimiter,
           selectedDataSourceId: dataSourceId,
           mapping: filePreviewData.predictedMapping,
+          importIdentifier,
         });
       } else if (importType === IMPORT_CHOICE_TEXT) {
         response = await importText({
@@ -239,6 +242,7 @@ export const DataImporterPluginApp = ({
           delimiter,
           selectedDataSourceId: dataSourceId,
           mapping: filePreviewData.predictedMapping,
+          importIdentifier,
         });
       }
     } catch (error) {
@@ -407,6 +411,28 @@ export const DataImporterPluginApp = ({
             selectedOptions={indexName ? [{ label: indexName }] : []}
             onChange={onIndexNameChange}
             onCreateOption={onCreateIndexName}
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="s" />
+        <EuiTitle size="xs">
+          <span>
+            {i18n.translate('dataImporter.importIdentifier', {
+              defaultMessage: 'Upload alias (optional)',
+            })}
+          </span>
+        </EuiTitle>
+        <EuiFormRow
+          helpText={i18n.translate('dataImporter.importIdentifierHelp', {
+            defaultMessage:
+              'Create a filtered alias for this dataset to easily reference it later.',
+          })}
+        >
+          <EuiFieldText
+            placeholder="Alias name"
+            value={importIdentifier}
+            onChange={(e) => setImportIdentifier(e.target.value)}
+            data-test-subj="importIdentifierInput"
           />
         </EuiFormRow>
 

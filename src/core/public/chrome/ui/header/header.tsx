@@ -197,7 +197,7 @@ export function Header({
   const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
 
   const setIsNavOpen = useCallback(
-    (value) => {
+    (value: boolean) => {
       /**
        * When use updated header, we will regard the lock state as source of truth
        */

@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useEffectOnce, useUnmount } from 'react-use';
 import { EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart, SIDECAR_DOCKED_MODE } from '../../../../core/public';
-import { ChatWindow, ChatWindowInstance } from './chat_window';
+import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
@@ -47,22 +47,12 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
   ) => {
     // Use ChatService as source of truth for window state
     const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
-    const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
     const sideCarRef = useRef<{ close: () => void }>();
-    const chatWindowRef = useRef<ChatWindowInstance>(null);
     const flyoutMountPoint = useRef(null);
 
     const setMountPoint = useCallback((mountPoint) => {
       flyoutMountPoint.current = mountPoint;
     }, []);
-
-    // Register ChatWindow ref with ChatService for external access
-    useEffect(() => {
-      chatService.setChatWindowRef(chatWindowRef);
-      return () => {
-        chatService.clearChatWindowRef();
-      };
-    }, [chatService]);
 
     const openSidecar = useCallback(() => {
       if (!flyoutMountPoint.current) {
@@ -71,12 +61,9 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
 
       try {
         sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
-          className: `chat-sidecar chat-sidecar--${layoutMode}`,
+          className: 'chat-sidecar chat-sidecar--sidecar',
           config: {
-            dockedMode:
-              layoutMode === ChatLayoutMode.FULLSCREEN
-                ? SIDECAR_DOCKED_MODE.TAKEOVER
-                : SIDECAR_DOCKED_MODE.RIGHT,
+            dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
             paddingSize: chatService.getPaddingSize(),
             isHidden: false,
           },
@@ -87,7 +74,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
 
       // Notify ChatService that window is now open
       chatService.setWindowState({ isWindowOpen: true });
-    }, [core.overlays, layoutMode, chatService]);
+    }, [core.overlays, chatService]);
 
     const closeSidecar = useCallback(() => {
       if (sideCarRef.current) {
@@ -106,51 +93,13 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
       }
     }, [isOpen, openSidecar, closeSidecar]);
 
-    const toggleLayoutMode = useCallback(() => {
-      const newLayoutMode =
-        layoutMode === ChatLayoutMode.SIDECAR ? ChatLayoutMode.FULLSCREEN : ChatLayoutMode.SIDECAR;
-
-      setLayoutMode(newLayoutMode);
-
-      // Update sidecar config dynamically if currently open
-      if (isOpen && sideCarRef.current) {
-        core.overlays.sidecar.setSidecarConfig({
-          dockedMode:
-            newLayoutMode === ChatLayoutMode.FULLSCREEN
-              ? SIDECAR_DOCKED_MODE.TAKEOVER
-              : SIDECAR_DOCKED_MODE.RIGHT,
-          paddingSize: newLayoutMode === ChatLayoutMode.FULLSCREEN ? window.innerHeight - 50 : 400,
-          isHidden: false,
-        });
-      }
-
-      // Update ChatService with new layout mode
-      chatService.setWindowState({ windowMode: newLayoutMode });
-    }, [layoutMode, isOpen, chatService, core.overlays.sidecar]);
-
-    const startNewConversation = useCallback<ChatHeaderButtonInstance['startNewConversation']>(
-      async ({ content }) => {
-        openSidecar();
-        chatWindowRef.current?.startNewChat();
-        chatWindowRef.current?.sendMessage({ content });
-      },
-      [openSidecar]
-    );
-
-    useImperativeHandle(ref, () => ({ startNewConversation }), [startNewConversation]);
-
     // Listen to ChatService window state changes and sync local state
     useEffect(() => {
-      const unsubscribe = chatService.onWindowStateChange(
-        ({ isWindowOpen, windowMode }, changed) => {
-          if (changed.isWindowOpen) {
-            setIsOpen(isWindowOpen);
-          }
-          if (changed.windowMode) {
-            setLayoutMode(windowMode as ChatLayoutMode);
-          }
+      const unsubscribe = chatService.onWindowStateChange(({ isWindowOpen }, changed) => {
+        if (changed.isWindowOpen) {
+          setIsOpen(isWindowOpen);
         }
-      );
+      });
       return () => {
         unsubscribe();
       };
@@ -243,12 +192,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
                     suggestedActionsService={suggestedActionsService}
                     confirmationService={confirmationService}
                   >
-                    <ChatWindow
-                      layoutMode={layoutMode}
-                      onToggleLayout={toggleLayoutMode}
-                      ref={chatWindowRef}
-                      onClose={closeSidecar}
-                    />
+                    <ChatWindow layoutMode={ChatLayoutMode.SIDECAR} onClose={closeSidecar} />
                   </ChatProvider>
                 </GlobalAssistantProvider>
               </OpenSearchDashboardsContextProvider>

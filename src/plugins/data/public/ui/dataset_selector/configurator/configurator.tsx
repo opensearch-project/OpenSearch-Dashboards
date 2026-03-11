@@ -177,14 +177,14 @@ export const Configurator = ({
         <EuiModalHeaderTitle>
           <h1>
             <FormattedMessage
-              id="data.explorer.datasetSelector.advancedSelector.configurator.title"
+              id="data.explorer.datasetSelector.advancedSelector.configurator.data.title"
               defaultMessage="Step 2: Configure data"
             />
           </h1>
           <EuiText>
             <p>
               <FormattedMessage
-                id="data.explorer.datasetSelector.advancedSelector.configurator.description"
+                id="data.explorer.datasetSelector.advancedSelector.configurator.data.description"
                 defaultMessage="Configure selected data based on parameters available."
               />
             </p>
@@ -345,7 +345,7 @@ export const Configurator = ({
           data-test-subj="advancedSelectorConfirmButton"
         >
           <FormattedMessage
-            id="data.explorer.datasetSelector.advancedSelector.confirm"
+            id="data.explorer.datasetSelector.advancedSelector.data.confirm"
             defaultMessage="Select Data"
           />
         </EuiButton>

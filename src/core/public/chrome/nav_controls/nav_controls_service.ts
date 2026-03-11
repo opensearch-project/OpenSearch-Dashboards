@@ -45,10 +45,13 @@ export interface ChromeNavControl {
  * @example
  * Register a left-side nav control rendered with React.
  * ```jsx
+ * import { createRoot } from 'react-dom/client';
+ *
  * chrome.navControls.registerLeft({
  *   mount(targetDomElement) {
- *     ReactDOM.mount(<MyControl />, targetDomElement);
- *     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+ *     const root = createRoot(targetDomElement);
+ *     root.render(<MyControl />);
+ *     return () => root.unmount();
  *   }
  * })
  * ```
