@@ -3,39 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CustomSeriesOption, LineSeriesOption } from 'echarts';
+import { LineSeriesOption } from 'echarts';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 import { MetricChartStyle } from './metric_vis_config';
-import { DEFAULT_GREY, getColors } from '../theme/default_colors';
-import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { Threshold } from '../types';
-
-function targetFillColor(
-  useThresholdColor: boolean,
-  threshold?: Threshold[],
-  baseColor?: string,
-  calculatedValue?: number
-) {
-  const colorPalette = getColors();
-  const newThreshold = threshold ?? [];
-
-  if (calculatedValue === undefined) {
-    return useThresholdColor ? DEFAULT_GREY : colorPalette.text;
-  }
-
-  let textColor = baseColor ?? getColors().statusGreen;
-
-  for (let i = 0; i < newThreshold.length; i++) {
-    const { value, color } = newThreshold[i];
-    if (calculatedValue >= value) textColor = color;
-  }
-
-  const fillColor = useThresholdColor ? textColor : colorPalette.text;
-
-  return fillColor;
-}
+import { getColors } from '../theme/default_colors';
+import { calculateValue } from '../utils/calculation';
 
 export const createMetricChartSeries = ({
   seriesFields,
@@ -44,153 +17,70 @@ export const createMetricChartSeries = ({
 }: {
   seriesFields: string[];
   styles: MetricChartStyle;
-  dateField?: string;
+  dateField: string;
 }): PipelineFn => (state) => {
   const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
-
   const colorPalette = getColors();
 
-  const series: Array<LineSeriesOption | CustomSeriesOption> = [];
+  const series: LineSeriesOption[] = [];
   seriesFields.forEach((item: string) => {
     if (!transformedData.length || !Array.isArray(transformedData[0])) {
       // No dataset/header row available; keep rendering stable.
       return;
     }
 
+    const headers = transformedData[0] ?? [];
+    const dataColumnIndex = headers.indexOf(item);
+    const numericalValues: unknown[] = [];
+    transformedData.forEach((d, i) => {
+      if (i >= 1) {
+        numericalValues.push(d[dataColumnIndex]);
+      }
+    });
+
+    let sparklineColor: string;
+    if (styles.colorMode === 'background_solid' || styles.colorMode === 'background_gradient') {
+      sparklineColor = 'rgba(255, 255, 255, 0.7)';
+    } else {
+      if (
+        styles.useThresholdColor &&
+        (styles.colorMode === 'value' || styles.colorMode === 'none')
+      ) {
+        const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
+        const thresholds = styles.thresholdOptions?.thresholds ?? [];
+        let thresholdColor = styles.thresholdOptions?.baseColor ?? colorPalette.statusGreen;
+
+        if (calculatedValue !== undefined) {
+          for (let i = 0; i < thresholds.length; i++) {
+            const { value, color } = thresholds[i];
+            if (calculatedValue >= value) thresholdColor = color;
+          }
+        }
+        sparklineColor = thresholdColor;
+      } else {
+        sparklineColor = colorPalette.categories[0];
+      }
+    }
+
     const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
 
-    const numericalValues: number[] = [];
-    const seriesIndex = transformedData[0].indexOf(item);
-    if (seriesIndex < 0) return;
-
-    for (let i = 1; i < transformedData.length; i++) {
-      numericalValues.push(transformedData[i][seriesIndex]);
-    }
-
-    const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
-    const isValidNumber =
-      calculatedValue !== undefined &&
-      typeof calculatedValue === 'number' &&
-      !isNaN(calculatedValue);
-
-    const selectedUnit = getUnitById(styles?.unitId);
-
-    const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
-
-    const fillColor = targetFillColor(
-      styles.useThresholdColor ?? false,
-      styles.thresholdOptions?.thresholds,
-      styles.thresholdOptions?.baseColor,
-      calculatedValue
-    );
-
-    let changeText = '';
-    let changeColor = colorPalette.text;
-    if (styles.showPercentage) {
-      const percentage = calculatePercentage(numericalValues);
-      if (percentage === undefined) {
-        changeText = '-';
-      } else {
-        changeText = `${percentage > 0 ? '+' : ''}${(percentage * 100).toFixed(2)}%`;
-      }
-
-      if (percentage !== undefined && percentage > 0) {
-        if (styles.percentageColor === 'standard') {
-          changeColor = colorPalette.statusGreen;
-        } else if (styles.percentageColor === 'inverted') {
-          changeColor = colorPalette.statusRed;
-        } else {
-          changeColor = colorPalette.statusGreen;
-        }
-      }
-      if (percentage !== undefined && percentage < 0) {
-        if (styles.percentageColor === 'standard') {
-          changeColor = colorPalette.statusRed;
-        } else if (styles.percentageColor === 'inverted') {
-          changeColor = colorPalette.statusGreen;
-        } else {
-          changeColor = colorPalette.statusRed;
-        }
-      }
-    }
-
-    // If date field is set, it will display a sparkline
-    if (dateField) {
-      series.push({
-        name: seriesDisplayName,
-        type: 'line' as const,
-        z: 1,
-        encode: {
-          x: dateField,
-          y: item,
-        },
-        symbol: 'none',
-        areaStyle: {
-          opacity: 0.5,
-        },
-      });
-    }
-
     series.push({
-      type: 'custom',
-      ...(dateField && { encode: { x: dateField } }),
-      z: 10,
-      renderItem(params, api) {
-        const width = api.getWidth();
-        const height = api.getHeight();
-
-        const textSize = Math.min(width, height) / 20;
-
-        // Dynamic font sizes based on chart dimensions
-        const titleFontSize = styles.titleSize ? styles.titleSize : 1.5 * textSize;
-        const valueFontSize = styles.fontSize
-          ? styles.fontSize
-          : 5 * textSize * (selectedUnit?.fontScale ?? 1);
-        const changeFontSize = styles.percentageSize ? styles.percentageSize : 2 * textSize;
-
-        return {
-          type: 'group',
-          x: width / 2,
-          y: height * 0.1,
-          children: [
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: 0,
-                text: styles.showTitle ? styles.title || seriesDisplayName : '',
-                fontSize: titleFontSize,
-                fontWeight: 'normal',
-                fill: colorPalette.text,
-                textAlign: 'center',
-              },
-            },
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: titleFontSize + 5,
-                text: displayValue,
-                fontSize: valueFontSize,
-                fontWeight: 'bold',
-                fill: fillColor,
-                textAlign: 'center',
-              },
-            },
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: titleFontSize + valueFontSize + 10,
-                text: changeText,
-                fontSize: changeFontSize,
-                fill: changeColor,
-                textAlign: 'center',
-              },
-            },
-          ],
-        };
+      name: seriesDisplayName,
+      type: 'line' as const,
+      z: 1,
+      encode: {
+        x: dateField,
+        y: item,
+      },
+      symbol: 'none',
+      areaStyle: {
+        color: sparklineColor,
+        opacity: 0.5,
+      },
+      lineStyle: {
+        width: 1,
+        color: sparklineColor,
       },
     });
   });
@@ -213,7 +103,7 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
     grid: {
       left: 0,
       right: 0,
-      top: '50%',
+      top: 0,
       bottom: 0,
     },
     xAxis,
@@ -229,3 +119,77 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
   };
   return { ...state, spec };
 };
+
+/**
+ * Options for constraining font size based on container width and text length
+ */
+export interface ConstrainFontSizeOptions {
+  /** Width of the container in pixels */
+  containerWidth: number;
+  /** Text content to display */
+  text: string;
+  /** Desired font size in pixels */
+  fontSize: number;
+  /** Minimum allowed font size (default: 10) */
+  minSize?: number;
+  /** Maximum allowed font size (default: 100) */
+  maxSize?: number;
+  /** Percentage of width reserved for padding (default: 0.15) */
+  paddingRatio?: number;
+  /** Average character width relative to font size (default: 0.6) */
+  charWidthRatio?: number;
+}
+
+/**
+ * Constrains a font size based on container width and text length to prevent overflow.
+ *
+ * This utility calculates the maximum font size that allows the text to fit within
+ * the container width, considering padding and average character width. It then
+ * returns the smaller of the desired font size and the width-constrained size,
+ * ensuring the result stays within the specified min/max bounds.
+ *
+ * @param options - Configuration options for font size constraint
+ * @returns The constrained font size in pixels
+ *
+ * @example
+ * ```typescript
+ * const fontSize = constrainFontSizeByWidth({
+ *   containerWidth: 300,
+ *   text: "Hello World",
+ *   fontSize: 48,
+ *   minSize: 12,
+ *   maxSize: 60,
+ * });
+ * // Returns a font size that fits "Hello World" in 300px width
+ * ```
+ */
+export function constrainFontSizeByWidth(options: ConstrainFontSizeOptions): number {
+  const {
+    containerWidth,
+    text,
+    fontSize,
+    minSize = 10,
+    maxSize = 100,
+    paddingRatio = 0.15,
+    charWidthRatio = 0.6,
+  } = options;
+
+  // If no text or invalid width, return the desired size within bounds
+  if (text.length === 0 || containerWidth <= 0) {
+    return Math.max(minSize, Math.min(maxSize, fontSize));
+  }
+
+  // Calculate available width after padding
+  const availableWidth = containerWidth * (1 - paddingRatio);
+
+  // Calculate maximum font size that fits the text within available width
+  const maxSizeByWidth = availableWidth / (text.length * charWidthRatio);
+
+  // Use the smaller of desired size and width-constrained size
+  let constrainedSize = Math.min(fontSize, maxSizeByWidth);
+
+  // Apply min/max bounds
+  constrainedSize = Math.max(minSize, Math.min(maxSize, constrainedSize));
+
+  return constrainedSize;
+}

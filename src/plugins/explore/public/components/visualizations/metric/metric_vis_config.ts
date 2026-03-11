@@ -18,6 +18,9 @@ import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 
 export type TextAlignment = 'auto' | 'center';
+export type LayoutType = 'horizontal' | 'vertical' | 'auto';
+export type TextMode = 'value' | 'name' | 'value_and_name' | 'none';
+export type ColorMode = 'none' | 'value' | 'background_gradient' | 'background_solid';
 
 export interface MetricChartStyleOptions {
   showTitle?: boolean;
@@ -45,6 +48,9 @@ export interface MetricChartStyleOptions {
   min?: number;
   max?: number;
   useThresholdColor?: boolean;
+  layoutType?: LayoutType;
+  textMode?: TextMode;
+  colorMode?: ColorMode;
 }
 
 export type MetricChartStyle = Required<
@@ -59,11 +65,22 @@ export type MetricChartStyle = Required<
     | 'useColor'
     | 'min'
     | 'max'
+    | 'layoutType'
+    | 'textMode'
+    | 'colorMode'
   >
 > &
   Pick<
     MetricChartStyleOptions,
-    'fontSize' | 'titleSize' | 'percentageSize' | 'unitId' | 'min' | 'max'
+    | 'fontSize'
+    | 'titleSize'
+    | 'percentageSize'
+    | 'unitId'
+    | 'min'
+    | 'max'
+    | 'layoutType'
+    | 'textMode'
+    | 'colorMode'
   >;
 
 export const defaultMetricChartStyles: MetricChartStyle = {
@@ -81,6 +98,8 @@ export const defaultMetricChartStyles: MetricChartStyle = {
     thresholds: [],
   },
   useThresholdColor: false,
+  textMode: 'value_and_name',
+  colorMode: 'none',
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({
@@ -98,6 +117,15 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
       {
         [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Time]: { type: VisFieldType.Date, index: 0 },
+      },
+      {
+        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Time]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 0 },
       },
     ],
   },
