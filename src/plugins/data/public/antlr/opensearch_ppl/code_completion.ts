@@ -209,7 +209,15 @@ export const getDefaultSuggestions = async ({
       );
     }
 
-    return finalSuggestions;
+    // Deduplicate suggestions by text
+    const seen = new Map<string, QuerySuggestion>();
+    for (const suggestion of finalSuggestions) {
+      const key = suggestion.text || suggestion.insertText || '';
+      if (!seen.has(key)) {
+        seen.set(key, suggestion);
+      }
+    }
+    return Array.from(seen.values());
   } catch (e) {
     return [];
   }
@@ -463,7 +471,16 @@ export const getSimplifiedPPLSuggestions = async ({
 
     const querySnippetSuggestions = await getPPLQuerySnippetForSuggestions(queryTillCursor);
 
-    return [...finalSuggestions, ...querySnippetSuggestions];
+    // Deduplicate suggestions by text to prevent runtime grammar duplication issues
+    const allSuggestions = [...finalSuggestions, ...querySnippetSuggestions];
+    const seen = new Map<string, QuerySuggestion>();
+    for (const suggestion of allSuggestions) {
+      const key = suggestion.text || suggestion.insertText || '';
+      if (!seen.has(key)) {
+        seen.set(key, suggestion);
+      }
+    }
+    return Array.from(seen.values());
   } catch (e) {
     return [];
   }
