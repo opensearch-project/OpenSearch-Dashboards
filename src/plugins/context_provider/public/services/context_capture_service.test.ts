@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { ContextCaptureService } from './context_capture_service';
 import { AssistantContextStoreImpl } from './assistant_context_store';
 import { CoreSetup, CoreStart } from '../../../../core/public';
@@ -22,6 +23,26 @@ jest.mock('./assistant_context_store', () => ({
   })),
 }));
 
+function createMockCoreStart(overrides?: {
+  currentAppId?: string;
+  apps?: Map<string, { title: string }>;
+  breadcrumbs?: Array<{ text: string }>;
+}) {
+  const currentAppId$ = new BehaviorSubject<string | undefined>(overrides?.currentAppId);
+  const applications$ = new BehaviorSubject<ReadonlyMap<string, any>>(overrides?.apps || new Map());
+  const breadcrumbs$ = new BehaviorSubject<Array<{ text: string }>>(overrides?.breadcrumbs || []);
+
+  return {
+    coreStart: ({
+      application: { currentAppId$, applications$ },
+      chrome: { getBreadcrumbs$: () => breadcrumbs$ },
+    } as unknown) as CoreStart,
+    currentAppId$,
+    applications$,
+    breadcrumbs$,
+  };
+}
+
 describe('ContextCaptureService', () => {
   let service: ContextCaptureService;
   let mockCoreSetup: jest.Mocked<CoreSetup>;
@@ -33,7 +54,7 @@ describe('ContextCaptureService', () => {
   beforeEach(() => {
     // Create mock objects
     mockCoreSetup = {} as jest.Mocked<CoreSetup>;
-    mockCoreStart = {} as jest.Mocked<CoreStart>;
+    mockCoreStart = createMockCoreStart().coreStart as jest.Mocked<CoreStart>;
     mockPluginsSetup = {} as jest.Mocked<ContextProviderSetupDeps>;
     mockPluginsStart = {} as jest.Mocked<ContextProviderStartDeps>;
 
@@ -54,6 +75,7 @@ describe('ContextCaptureService', () => {
 
     // Clear window object
     delete (window as any).assistantContextStore;
+    delete (window as any).__defaultPageContextControl;
 
     service = new ContextCaptureService(mockCoreSetup, mockPluginsSetup);
   });
@@ -61,6 +83,7 @@ describe('ContextCaptureService', () => {
   afterEach(() => {
     jest.clearAllMocks();
     delete (window as any).assistantContextStore;
+    delete (window as any).__defaultPageContextControl;
   });
 
   describe('constructor', () => {
@@ -329,6 +352,187 @@ describe('ContextCaptureService', () => {
       // Verify global reference is completely removed
       expect((window as any).assistantContextStore).toBeUndefined();
       expect('assistantContextStore' in window).toBe(false);
+    });
+  });
+
+  describe('default page context', () => {
+    it('should register default context when currentAppId$ emits an app ID', () => {
+      const apps = new Map([['dashboard', { title: 'Dashboard' }]]);
+      const { coreStart, currentAppId$ } = createMockCoreStart({
+        apps,
+        breadcrumbs: [{ text: 'Dashboard' }],
+      });
+
+      service.start(coreStart, mockPluginsStart);
+
+      // Emit an app ID
+      currentAppId$.next('dashboard');
+
+      expect(mockAssistantContextStore.addContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'default-page-context',
+          description: expect.stringContaining('Page context for'),
+          categories: ['page', 'static'],
+          value: {
+            appId: 'dashboard',
+            breadcrumbs: ['Dashboard'],
+          },
+        })
+      );
+
+      service.stop();
+    });
+
+    it('should update context when breadcrumbs change', () => {
+      const apps = new Map([['dashboard', { title: 'Dashboard' }]]);
+      const { coreStart, breadcrumbs$ } = createMockCoreStart({
+        currentAppId: 'dashboard',
+        apps,
+        breadcrumbs: [{ text: 'Dashboard' }],
+      });
+
+      service.start(coreStart, mockPluginsStart);
+      mockAssistantContextStore.addContext.mockClear();
+
+      // Update breadcrumbs
+      breadcrumbs$.next([{ text: 'Dashboard' }, { text: 'Sales Overview' }]);
+
+      expect(mockAssistantContextStore.addContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'default-page-context',
+          value: {
+            appId: 'dashboard',
+            breadcrumbs: ['Dashboard', 'Sales Overview'],
+          },
+        })
+      );
+
+      service.stop();
+    });
+
+    it('should not register context when currentAppId$ is undefined', () => {
+      const { coreStart } = createMockCoreStart();
+
+      service.start(coreStart, mockPluginsStart);
+
+      // No app ID emitted, so no default context should be added
+      expect(mockAssistantContextStore.addContext).not.toHaveBeenCalled();
+
+      service.stop();
+    });
+
+    it('should suppress default context and prevent re-registration', () => {
+      const apps = new Map([['dashboard', { title: 'Dashboard' }]]);
+      const { coreStart, breadcrumbs$ } = createMockCoreStart({
+        currentAppId: 'dashboard',
+        apps,
+        breadcrumbs: [{ text: 'Dashboard' }],
+      });
+
+      service.start(coreStart, mockPluginsStart);
+
+      // Default context should have been registered
+      expect(mockAssistantContextStore.addContext).toHaveBeenCalledTimes(1);
+
+      // Suppress
+      (window as any).__defaultPageContextControl.suppress();
+
+      expect(mockAssistantContextStore.removeContextById).toHaveBeenCalledWith(
+        'default-page-context'
+      );
+
+      mockAssistantContextStore.addContext.mockClear();
+
+      // Breadcrumbs update should not re-register while suppressed
+      breadcrumbs$.next([{ text: 'Dashboard' }, { text: 'New Crumb' }]);
+
+      expect(mockAssistantContextStore.addContext).not.toHaveBeenCalled();
+
+      service.stop();
+    });
+
+    it('should unsuppress and re-register default context', () => {
+      const apps = new Map([['dashboard', { title: 'Dashboard' }]]);
+      const { coreStart } = createMockCoreStart({
+        currentAppId: 'dashboard',
+        apps,
+        breadcrumbs: [{ text: 'Dashboard' }],
+      });
+
+      service.start(coreStart, mockPluginsStart);
+
+      // Suppress then unsuppress
+      (window as any).__defaultPageContextControl.suppress();
+      mockAssistantContextStore.addContext.mockClear();
+
+      (window as any).__defaultPageContextControl.unsuppress();
+
+      expect(mockAssistantContextStore.addContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'default-page-context',
+          value: {
+            appId: 'dashboard',
+            breadcrumbs: ['Dashboard'],
+          },
+        })
+      );
+
+      service.stop();
+    });
+
+    it('should clean up subscription on stop', () => {
+      const apps = new Map([['dashboard', { title: 'Dashboard' }]]);
+      const { coreStart, currentAppId$ } = createMockCoreStart({
+        currentAppId: 'dashboard',
+        apps,
+      });
+
+      service.start(coreStart, mockPluginsStart);
+
+      service.stop();
+      mockAssistantContextStore.addContext.mockClear();
+
+      // Emitting after stop should not register context
+      currentAppId$.next('visualize');
+
+      expect(mockAssistantContextStore.addContext).not.toHaveBeenCalled();
+    });
+
+    it('should expose __defaultPageContextControl on window', () => {
+      service.start(mockCoreStart, mockPluginsStart);
+
+      const control = (window as any).__defaultPageContextControl;
+      expect(control).toBeDefined();
+      expect(typeof control.suppress).toBe('function');
+      expect(typeof control.unsuppress).toBe('function');
+
+      service.stop();
+    });
+
+    it('should remove __defaultPageContextControl on stop', () => {
+      service.start(mockCoreStart, mockPluginsStart);
+      expect((window as any).__defaultPageContextControl).toBeDefined();
+
+      service.stop();
+      expect((window as any).__defaultPageContextControl).toBeUndefined();
+    });
+
+    it('should use appId as label fallback when title is not found', () => {
+      const { coreStart } = createMockCoreStart({
+        currentAppId: 'unknown_app',
+        apps: new Map(),
+      });
+
+      service.start(coreStart, mockPluginsStart);
+
+      expect(mockAssistantContextStore.addContext).toHaveBeenCalledWith(
+        expect.objectContaining({
+          label: 'Page: unknown_app',
+          description: expect.stringContaining('Page context for'),
+        })
+      );
+
+      service.stop();
     });
   });
 });
