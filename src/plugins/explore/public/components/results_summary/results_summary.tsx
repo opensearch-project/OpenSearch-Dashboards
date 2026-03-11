@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { isEmpty } from 'lodash';
@@ -18,6 +18,7 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { ResultStatus } from '../../../../data/public';
 import { defaultPreparePplQuery } from '../../application/utils/languages';
+import { resultsCache } from '../../application/utils/state_management/slices';
 
 const SUMMARY_REQUEST_SAMPLE_SIZE = 10;
 
@@ -40,12 +41,16 @@ export const ResultsSummary: React.FC<ResultsSummaryProps> = ({
     (state: RootState) => state.queryEditor.lastExecutedPrompt
   );
   const dataSetState = useSelector(selectDataset);
-  const queryResults = useSelector(
-    (state: RootState) =>
-      state.results[state.query.query as string]?.hits?.hits ||
-      state.results[defaultPreparePplQuery(state.query).query]?.hits?.hits // default query results
-  );
   const queryStatus = useSelector(selectQueryStatus);
+
+  const cacheKey1 = queryState.query as string;
+  const cacheKey2 = defaultPreparePplQuery(queryState).query;
+  const metadata1 = useSelector((state: RootState) => state.results[cacheKey1]);
+  const metadata2 = useSelector((state: RootState) => state.results[cacheKey2]);
+  const queryResults = useMemo(() => {
+    return resultsCache.get(cacheKey1)?.hits?.hits || resultsCache.get(cacheKey2)?.hits?.hits;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metadata1, metadata2, cacheKey1, cacheKey2]);
 
   const [loading, setLoading] = useState(false); // track loading state
 

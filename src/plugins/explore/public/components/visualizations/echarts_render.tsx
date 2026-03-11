@@ -196,7 +196,7 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
         });
       }
     }
-  }, [spec, instance]);
+  }, [spec, instance, onSelectTimeRange]);
 
   return (
     <div

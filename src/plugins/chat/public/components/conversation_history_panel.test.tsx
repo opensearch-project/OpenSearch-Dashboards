@@ -191,47 +191,6 @@ describe('ConversationHistoryPanel', () => {
     });
   });
 
-  describe('Conversation grouping', () => {
-    it('should group conversations by date', async () => {
-      const now = Date.now();
-      const recentConv: SavedConversation = {
-        id: 'conv-recent',
-        threadId: 'thread-recent',
-        name: 'Recent Conversation',
-        messages: [],
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      const oldConv: SavedConversation = {
-        id: 'conv-old',
-        threadId: 'thread-old',
-        name: 'Old Conversation',
-        messages: [],
-        createdAt: now - 8 * 24 * 60 * 60 * 1000, // 8 days ago
-        updatedAt: now - 8 * 24 * 60 * 60 * 1000,
-      };
-
-      mockService.getConversations.mockResolvedValue({
-        conversations: [recentConv, oldConv],
-        hasMore: false,
-        total: 1,
-      });
-
-      render(
-        <ConversationHistoryPanel
-          conversationHistoryService={mockService}
-          onSelectConversation={mockOnSelectConversation}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Last 7 days')).toBeInTheDocument();
-        expect(screen.getByText('Older')).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Conversation selection', () => {
     it('should call onSelectConversation when conversation is clicked', async () => {
       const mockConversations = createMockConversations(2);

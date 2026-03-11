@@ -28,7 +28,7 @@ import {
   createTwoMetricOneCateScatter,
   createThreeMetricOneCateScatter,
 } from './scatter/to_expression';
-import { createSingleMetric } from './metric/to_expression';
+import { createSingleMetric, createMultiMetric } from './metric/to_expression';
 import {
   createBarSpec,
   createStackedBarSpec,
@@ -264,6 +264,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
+    { ...CHART_METADATA.metric, priority: 50 },
     { ...CHART_METADATA.state_timeline, priority: 40 },
   ],
   toSpec: (
@@ -307,6 +308,15 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           styleOptions as BarChartStyle,
           axisColumnMappings,
           timeRange
+        );
+      case 'metric':
+        return createMultiMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as MetricChartStyle,
+          axisColumnMappings
         );
       case 'state_timeline':
         return createNumericalStateTimeline(
@@ -571,6 +581,7 @@ const oneMetricOneCateRule: VisualizationRule = {
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.bar_gauge, priority: 80 },
     { ...CHART_METADATA.pie, priority: 60 },
+    { ...CHART_METADATA.metric, priority: 50 },
     { ...CHART_METADATA.line, priority: 40 },
     { ...CHART_METADATA.area, priority: 20 },
   ],
@@ -629,6 +640,15 @@ const oneMetricOneCateRule: VisualizationRule = {
           styleOptions as AreaChartStyle,
           axisColumnMappings
         );
+      case 'metric':
+        return createMultiMetric(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as MetricChartStyle,
+          axisColumnMappings
+        );
       default:
         return createBarSpec(
           transformedData,
@@ -652,7 +672,6 @@ const oneMetricRule: VisualizationRule = {
     { ...CHART_METADATA.metric, priority: 100 },
     { ...CHART_METADATA.gauge, priority: 80 },
     { ...CHART_METADATA.histogram, priority: 60 },
-    { ...CHART_METADATA.bar, priority: 40 },
   ],
   toSpec: (
     transformedData,

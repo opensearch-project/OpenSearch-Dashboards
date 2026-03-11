@@ -14,8 +14,12 @@ import { defaultPrepareQueryString } from '../query_actions';
 import { VisualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
 import { QueryExecutionStatus } from '../../types';
 import { EXPLORE_LOGS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../../common';
+import { resultsCache, clearResultsCache } from '../../slices';
 
-jest.mock('../../slices');
+jest.mock('../../slices', () => ({
+  ...jest.requireActual('../../slices'),
+  setActiveTab: jest.fn(),
+}));
 jest.mock('../query_actions');
 jest.mock('../../../../../components/visualizations/utils/use_visualization_types');
 
@@ -28,6 +32,23 @@ describe('detect_optimal_tab', () => {
   let mockServices: ExploreServices;
   let mockDispatch: jest.Mock;
   let mockGetState: jest.Mock;
+
+  const fullTestResult = {
+    hits: {
+      hits: [
+        { _source: { timestamp: '2023-01-01', level: 'info' } },
+        { _source: { timestamp: '2023-01-02', level: 'error' } },
+      ],
+    },
+    fieldSchema: [
+      { name: 'timestamp', type: 'date' },
+      { name: 'level', type: 'keyword' },
+    ],
+    elapsedMs: 0,
+    took: 0,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -46,24 +67,13 @@ describe('detect_optimal_tab', () => {
       },
     } as any;
 
-    // Mock store state
+    // Mock store state — results slice now holds only metadata; full results in resultsCache
     const mockState = {
       query: {
         query: 'SELECT * FROM logs',
       },
       results: {
-        'test-cache-key': {
-          hits: {
-            hits: [
-              { _source: { timestamp: '2023-01-01', level: 'info' } },
-              { _source: { timestamp: '2023-01-02', level: 'error' } },
-            ],
-          },
-          fieldSchema: [
-            { name: 'timestamp', type: 'date' },
-            { name: 'level', type: 'keyword' },
-          ],
-        },
+        'test-cache-key': { total: 2, elapsedMs: 0, hasResults: true },
       },
       queryEditor: {
         queryStatusMap: {
@@ -76,12 +86,19 @@ describe('detect_optimal_tab', () => {
 
     mockGetState.mockReturnValue(mockState);
 
+    // Populate cache with full result for the default test case
+    resultsCache.set('test-cache-key', fullTestResult as any);
+
     // Mock tab registry
     (mockServices.tabRegistry!.getTab as jest.Mock).mockReturnValue({
       prepareQuery: undefined,
     });
 
     mockDefaultPrepareQueryString.mockReturnValue('test-cache-key');
+  });
+
+  afterEach(() => {
+    clearResultsCache();
   });
 
   describe('canResultsBeVisualized', () => {
@@ -204,6 +221,9 @@ describe('detect_optimal_tab', () => {
     });
 
     it('should not set tab as empty when no results are available', async () => {
+      // Clear the cache set by beforeEach so no results are available
+      clearResultsCache();
+
       const mockStateWithoutResults = {
         query: { query: 'SELECT * FROM logs' },
         results: {},
@@ -226,14 +246,19 @@ describe('detect_optimal_tab', () => {
     });
 
     it('should not set tab as empty when results have no hits', async () => {
+      // Overwrite cache with empty hits
+      resultsCache.set('test-cache-key', {
+        hits: { hits: [] },
+        fieldSchema: [{ name: 'test', type: 'string' }],
+        elapsedMs: 0,
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
+
       const mockStateWithEmptyResults = {
         query: { query: 'SELECT * FROM logs' },
-        results: {
-          'test-cache-key': {
-            hits: { hits: [] },
-            fieldSchema: [{ name: 'test', type: 'string' }],
-          },
-        },
+        results: { 'test-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
         queryEditor: {
           queryStatusMap: {
             'test-cache-key': {
@@ -303,14 +328,19 @@ describe('detect_optimal_tab', () => {
     });
 
     it('should set visualization tab when query has error status', async () => {
+      // Overwrite cache with empty hits so only the error-status path triggers
+      resultsCache.set('test-cache-key', {
+        hits: { hits: [] },
+        fieldSchema: [{ name: 'test', type: 'string' }],
+        elapsedMs: 0,
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
+
       const mockStateWithError = {
         query: { query: 'SELECT * FROM logs' },
-        results: {
-          'test-cache-key': {
-            hits: { hits: [] },
-            fieldSchema: [{ name: 'test', type: 'string' }],
-          },
-        },
+        results: { 'test-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
         queryEditor: {
           queryStatusMap: {
             'test-cache-key': {

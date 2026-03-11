@@ -181,7 +181,8 @@ export const runBuildVisTests = () => {
 
       selectFieldFromComboBox('Value', 0, 'bytes_transferred');
 
-      verifyVisualizationGenerated();
+      cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
+      cy.get('.metric-value-number').should('not.be.empty');
     });
   });
 };

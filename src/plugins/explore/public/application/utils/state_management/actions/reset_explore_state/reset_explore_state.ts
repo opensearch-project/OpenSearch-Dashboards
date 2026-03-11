@@ -4,10 +4,10 @@
  */
 
 import {
+  clearResults,
   setLegacyState,
   setQueryEditorState,
   setQueryState,
-  setResultsState,
   setTabState,
   setUiState,
 } from '../../slices';
@@ -30,7 +30,7 @@ export const resetExploreStateActionCreator = (
 
   clearEditors();
   dispatch(setUiState(state.ui));
-  dispatch(setResultsState(state.results));
+  dispatch(clearResults());
   dispatch(setTabState(state.tab));
   dispatch(setLegacyState(state.legacy));
   dispatch(setQueryState(state.query));

@@ -18,23 +18,6 @@
     text-align: center;
   }
 
-  &__group {
-    margin-bottom: $euiSizeM;
-  }
-
-  &__groupTitle {
-    color: $euiColorDarkShade;
-    font-weight: $euiFontWeightMedium;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: $euiSizeS;
-
-    h3 {
-      margin: 0;
-      font-size: $euiFontSizeXS;
-    }
-  }
-
   &__list {
     display: flex;
     flex-direction: column;
