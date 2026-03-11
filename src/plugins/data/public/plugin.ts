@@ -321,16 +321,28 @@ export class DataPublicPlugin
     setQueryService(query);
 
     // Subscribe to dataset changes to pre-fetch PPL grammar.
-    // The handler fires for both local cluster and remote datasources when the
-    // query language is PPL and the dataset changes.  The initial fire with the
-    // current query covers the page-load case; the subscription covers subsequent
-    // dataset switches.
-    const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(http, savedObjects.client);
-    maybeWarmUpPplGrammar(query.queryString.getQuery());
-    this.pplGrammarWarmupSubscription = query.queryString
-      .getUpdates$()
-      .subscribe(maybeWarmUpPplGrammar);
-    this.unregisterPplValidationProvider = registerPPLValidationProvider(validateRuntimePPLQuery);
+    // The handler fires when the query language is PPL and the dataset changes.
+    // The initial fire with the current query covers the page-load case.
+    // the subscription covers subsequent dataset switches.
+    // Gated by query:enhancements:runtimePplGrammar setting (default: true).
+    const isRuntimePplGrammarEnabled = (() => {
+      try {
+        return uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR) !== false;
+      } catch {
+        return true;
+      }
+    })();
+
+    if (isRuntimePplGrammarEnabled) {
+      const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(http, savedObjects.client);
+      maybeWarmUpPplGrammar(query.queryString.getQuery());
+      this.pplGrammarWarmupSubscription = query.queryString
+        .getUpdates$()
+        .subscribe(maybeWarmUpPplGrammar);
+      this.unregisterPplValidationProvider = registerPPLValidationProvider(
+        validateRuntimePPLQuery
+      );
+    }
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);

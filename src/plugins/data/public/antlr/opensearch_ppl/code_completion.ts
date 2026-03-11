@@ -967,6 +967,13 @@ function tryRuntimeGrammarSuggestions(
   skipSymbolicKeywords: boolean
 ): OpenSearchPplAutocompleteResult | null {
   try {
+    // Check feature flag — when disabled, skip runtime grammar entirely.
+    try {
+      if (services?.uiSettings?.get('query:enhancements:runtimePplGrammar') === false) return null;
+    } catch {
+      // Setting may not be declared (e.g. explore plugin not installed). Default to enabled.
+    }
+
     const currentQuery = services?.data?.query?.queryString?.getQuery?.();
     const dataSourceId = indexPattern?.dataSourceRef?.id ?? currentQuery?.dataset?.dataSource?.id;
 
