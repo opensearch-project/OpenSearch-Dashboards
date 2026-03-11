@@ -1,0 +1,2 @@
+infra:
+- Add logging to compiler step, allow warnings, and allow contextModules ([#11479](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11479))
