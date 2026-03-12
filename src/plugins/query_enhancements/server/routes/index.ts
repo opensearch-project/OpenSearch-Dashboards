@@ -89,6 +89,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             ),
             timeRange: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            highlight: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           }),
         },
       },

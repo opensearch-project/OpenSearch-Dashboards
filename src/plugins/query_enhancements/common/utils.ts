@@ -7,6 +7,7 @@ import { Query } from 'src/plugins/data/common';
 import { from, timer } from 'rxjs';
 import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
 import { stringify } from '@osd/std';
+import { getHighlightRequest } from '../../data/common';
 import {
   EnhancedFetchContext,
   QueryAggConfig,
@@ -70,11 +71,13 @@ export const throwFacetError = (response: any) => {
 
 export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
   const { http, path, signal } = context;
+  const highlight = isPPLSearchQuery(query) ? getHighlightRequest(query.query, true) : undefined;
   const body = stringify({
     query: { ...query, format: 'jdbc' },
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
     timeRange: context.body?.timeRange,
+    ...(highlight && { highlight }),
   });
 
   return from(

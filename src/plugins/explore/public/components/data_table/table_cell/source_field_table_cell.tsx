@@ -12,6 +12,7 @@
 import './source_field_table_cell.scss';
 
 import React, { Fragment } from 'react';
+import dompurify from 'dompurify';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
@@ -31,7 +32,7 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
   isShortDots,
   wrapCellText,
 }) => {
-  const formattedRow = dataset.formatHit(row, 'text');
+  const formattedRow = dataset.formatHit(row);
   const metaFields = dataset.metaFields || [];
   const rawKeys = Object.keys(formattedRow).filter((key) => !metaFields.includes(key));
   const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
@@ -51,9 +52,14 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
               <span className="source__key" data-test-subj="sourceFieldKey">
                 {key}:
               </span>
-              <span className="source__value" data-test-subj="sourceFieldValue">
-                {formattedRow[rawKeys[index]]}
-              </span>
+              <span
+                className="source__value"
+                data-test-subj="sourceFieldValue"
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{
+                  __html: dompurify.sanitize(formattedRow[rawKeys[index]]),
+                }}
+              />
               {index !== keys.length - 1 && ' '}
             </Fragment>
           ))}
