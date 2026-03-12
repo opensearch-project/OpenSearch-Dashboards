@@ -5,10 +5,10 @@
 
 import { resetExploreStateActionCreator } from './reset_explore_state';
 import {
+  clearResults,
   setLegacyState,
   setQueryEditorState,
   setQueryState,
-  setResultsState,
   setTabState,
   setUiState,
 } from '../../slices';
@@ -28,7 +28,7 @@ describe('resetExploreStateActionCreator', () => {
 
   const preloadedState = {
     ui: { theme: 'dark' },
-    results: { data: [] },
+    results: {},
     tab: { active: 1 },
     legacy: { foo: 'bar' },
     query: { q: 'test' },
@@ -39,7 +39,7 @@ describe('resetExploreStateActionCreator', () => {
     jest.clearAllMocks();
     (getPreloadedState as jest.Mock).mockResolvedValue(preloadedState);
     ((setUiState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_UI' });
-    ((setResultsState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_RESULTS' });
+    ((clearResults as unknown) as jest.Mock).mockReturnValue({ type: 'CLEAR_RESULTS' });
     ((setTabState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_TAB' });
     ((setLegacyState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_LEGACY' });
     ((setQueryState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
@@ -56,7 +56,7 @@ describe('resetExploreStateActionCreator', () => {
     expect(getPreloadedState).toHaveBeenCalledWith(services);
     expect(clearEditors).toHaveBeenCalled();
     expect(mockDispatch).toHaveBeenNthCalledWith(1, { type: 'SET_UI' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(2, { type: 'SET_RESULTS' });
+    expect(mockDispatch).toHaveBeenNthCalledWith(2, { type: 'CLEAR_RESULTS' });
     expect(mockDispatch).toHaveBeenNthCalledWith(3, { type: 'SET_TAB' });
     expect(mockDispatch).toHaveBeenNthCalledWith(4, { type: 'SET_LEGACY' });
     expect(mockDispatch).toHaveBeenNthCalledWith(5, { type: 'SET_QUERY' });

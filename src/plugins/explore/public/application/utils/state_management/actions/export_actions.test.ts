@@ -7,6 +7,7 @@ import { exportToCsv, exportMaxSizeCsv } from './export_actions';
 import { ExploreServices } from '../../../../types';
 import { saveAs } from 'file-saver';
 import { AppDispatch, RootState } from '../store';
+import { resultsCache, clearResultsCache } from '../slices';
 
 jest.mock('file-saver', () => ({
   saveAs: jest.fn(),
@@ -64,32 +65,12 @@ describe('export_actions', () => {
         language: 'PPL',
         dataset: undefined,
       },
+      // Results slice now holds only metadata; full results live in resultsCache
       results: {
         'source = test': {
-          hits: {
-            total: 2,
-            max_score: 1.0,
-            hits: [
-              {
-                _index: 'test-index',
-                _type: '_doc',
-                _id: '1',
-                _score: 1.0,
-                _source: { field1: 'value1', field2: 'value2' },
-              },
-              {
-                _index: 'test-index',
-                _type: '_doc',
-                _id: '2',
-                _score: 1.0,
-                _source: { field1: 'value3', field2: 'value4' },
-              },
-            ],
-          },
+          total: 2,
           elapsedMs: 100,
-          took: 100,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hasResults: true,
         },
       },
       legacy: {
@@ -132,8 +113,41 @@ describe('export_actions', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    clearResultsCache();
+  });
+
+  // Full ISearchResult fixture for cache population
+  const fullSearchResult = {
+    hits: {
+      total: 2,
+      max_score: 1.0,
+      hits: [
+        {
+          _index: 'test-index',
+          _type: '_doc',
+          _id: '1',
+          _score: 1.0,
+          _source: { field1: 'value1', field2: 'value2' },
+        },
+        {
+          _index: 'test-index',
+          _type: '_doc',
+          _id: '2',
+          _score: 1.0,
+          _source: { field1: 'value3', field2: 'value4' },
+        },
+      ],
+    },
+    elapsedMs: 100,
+    took: 100,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  };
+
   describe('exportToCsv', () => {
     it('should export CSV with existing results', () => {
+      resultsCache.set('source = test', fullSearchResult as any);
       const action = exportToCsv({ services: mockServices, fileName: 'test.csv' });
       action(mockDispatch, mockGetState);
 
@@ -141,6 +155,7 @@ describe('export_actions', () => {
     });
 
     it('should use default filename when not provided', () => {
+      resultsCache.set('source = test', fullSearchResult as any);
       const action = exportToCsv({ services: mockServices });
       action(mockDispatch, mockGetState);
 
@@ -159,25 +174,14 @@ describe('export_actions', () => {
     });
 
     it('should throw error when no results available', () => {
-      mockGetState.mockReturnValue({
-        ...mockState,
-        results: {},
-      });
-
+      // Cache is empty (afterEach clears it, and this test does not populate it)
       const action = exportToCsv({ services: mockServices });
 
       expect(() => action(mockDispatch, mockGetState)).toThrow('No results available for export');
     });
 
     it('should throw error when results have no hits', () => {
-      mockGetState.mockReturnValue({
-        ...mockState,
-        results: {
-          'source = test': {
-            hits: null,
-          } as any,
-        },
-      });
+      resultsCache.set('source = test', { hits: null } as any);
 
       const action = exportToCsv({ services: mockServices });
 
@@ -190,30 +194,25 @@ describe('export_actions', () => {
         prepareQuery: mockPrepareQuery,
       });
 
-      mockGetState.mockReturnValue({
-        ...mockState,
-        results: {
-          'PREPARED QUERY': {
-            hits: {
-              total: 1,
-              max_score: 1.0,
-              hits: [
-                {
-                  _index: 'test-index',
-                  _type: '_doc',
-                  _id: '1',
-                  _score: 1.0,
-                  _source: { field1: 'value1' },
-                },
-              ],
+      resultsCache.set('PREPARED QUERY', {
+        hits: {
+          total: 1,
+          max_score: 1.0,
+          hits: [
+            {
+              _index: 'test-index',
+              _type: '_doc',
+              _id: '1',
+              _score: 1.0,
+              _source: { field1: 'value1' },
             },
-            elapsedMs: 100,
-            took: 100,
-            timed_out: false,
-            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          },
+          ],
         },
-      });
+        elapsedMs: 100,
+        took: 100,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
 
       const action = exportToCsv({ services: mockServices });
       action(mockDispatch, mockGetState);
@@ -223,6 +222,7 @@ describe('export_actions', () => {
     });
 
     it('should use all fields when no columns specified', () => {
+      resultsCache.set('source = test', fullSearchResult as any);
       mockGetState.mockReturnValue({
         ...mockState,
         legacy: {
@@ -246,30 +246,25 @@ describe('export_actions', () => {
         field2: 'normal value',
       });
 
-      mockGetState.mockReturnValue({
-        ...mockState,
-        results: {
-          'source = test': {
-            hits: {
-              total: 1,
-              max_score: 1.0,
-              hits: [
-                {
-                  _index: 'test-index',
-                  _type: '_doc',
-                  _id: '1',
-                  _score: 1.0,
-                  _source: { field1: 'value with "quotes"', field2: 'normal value' },
-                },
-              ],
+      resultsCache.set('source = test', {
+        hits: {
+          total: 1,
+          max_score: 1.0,
+          hits: [
+            {
+              _index: 'test-index',
+              _type: '_doc',
+              _id: '1',
+              _score: 1.0,
+              _source: { field1: 'value with "quotes"', field2: 'normal value' },
             },
-            elapsedMs: 100,
-            took: 100,
-            timed_out: false,
-            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          },
+          ],
         },
-      });
+        elapsedMs: 100,
+        took: 100,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
 
       const action = exportToCsv({ services: mockServices });
       action(mockDispatch, mockGetState);
