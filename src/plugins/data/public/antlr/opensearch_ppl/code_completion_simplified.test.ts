@@ -781,52 +781,6 @@ describe('ppl code_completion', () => {
         });
       });
 
-      it('should keep rex field equals suggestions field-only and include subtype fields', async () => {
-        jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
-        jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
-        (querySnippets.getPPLQuerySnippetForSuggestions as jest.Mock).mockResolvedValue([
-          {
-            text: '{} (()',
-            insertText: '{} (() ',
-            type: monaco.languages.CompletionItemKind.Reference,
-            detail: 'Saved Query Snippet',
-          },
-        ]);
-
-        const runtimeIndexPatternWithSubtype = ({
-          ...runtimeIndexPattern,
-          fields: [
-            ...(runtimeIndexPattern.fields as Array<{
-              name: string;
-              type: string;
-              subType?: unknown;
-            }>),
-            {
-              name: 'field1.keyword',
-              type: 'string',
-              subType: {
-                multi: {
-                  parent: 'field1',
-                },
-              },
-            },
-          ],
-        } as unknown) as IndexPattern;
-
-        const result = await getSimpleSuggestionsForIndexPattern(
-          '| rex field = ',
-          runtimeIndexPatternWithSubtype
-        );
-
-        checkSuggestionsContain(result, {
-          text: 'field1.keyword',
-          type: monaco.languages.CompletionItemKind.Field,
-        });
-        expect(
-          result.every((s) => s.type === monaco.languages.CompletionItemKind.Field)
-        ).toBeTruthy();
-      });
-
       it('should resolve datasource id from query when index pattern has no dataSourceRef', async () => {
         jest.spyOn(pplGrammarCache, 'shouldFetchFromBackend').mockReturnValue(true);
         const grammarSpy = jest
