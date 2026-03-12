@@ -130,7 +130,7 @@ export const runSharedLinksTests = () => {
             // Test surrounding documents link
             cy.get('tbody tr')
               .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
+              .find('[data-test-subj="docTableExpandToggleColumn"]')
               .click();
 
             // Verify surrounding documents link exists and has correct text
@@ -146,7 +146,7 @@ export const runSharedLinksTests = () => {
             // Verify no document links for SQL/PPL
             cy.get('tbody tr')
               .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
+              .find('[data-test-subj="docTableExpandToggleColumn"]')
               .click();
             cy.getElementByTestId('docTableRowAction-0').should('not.exist');
             cy.getElementByTestId('docTableRowAction-1').should('not.exist');
