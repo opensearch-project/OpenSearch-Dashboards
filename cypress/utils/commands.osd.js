@@ -426,7 +426,8 @@ cy.osd.add('deleteSavedObjectsByType', (workspaceId, type, search) => {
 
   const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
-  return cy.request(url)
+  return cy
+    .request(url)
     .then((response) => {
       if (!response?.body?.saved_objects) {
         throw new Error(`Failed to find saved objects of type ${type}`);
@@ -1026,7 +1027,9 @@ cy.osd.add('setupEnvAndGetDataSource', (dataSourceName, fixturesNeeded = null) =
   cy.log(`CYPRESS_RUNTIME_ENV: ${Cypress.env('CYPRESS_RUNTIME_ENV')}`);
 
   if (fixturesNeeded !== null) {
-    cy.log(`Selective fixture loading enabled. Fixtures to load: ${JSON.stringify(fixturesNeeded)}`);
+    cy.log(
+      `Selective fixture loading enabled. Fixtures to load: ${JSON.stringify(fixturesNeeded)}`
+    );
   } else {
     cy.log(`Loading all ${AVAILABLE_FIXTURE_INDICES.length} available fixtures`);
   }
@@ -1144,9 +1147,7 @@ cy.osd.add('uploadSelectiveFixtureIndices', (datasourceUrl, fixtureNames) => {
   }
 
   // Log which fixtures are being loaded
-  const notFound = fixtureNames.filter(
-    (name) => !selectedFixtures.find((f) => f.name === name)
-  );
+  const notFound = fixtureNames.filter((name) => !selectedFixtures.find((f) => f.name === name));
   if (notFound.length > 0) {
     cy.log(`Warning: Some requested fixtures not found: ${notFound.join(', ')}`);
   }

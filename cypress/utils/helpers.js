@@ -181,7 +181,10 @@ export const createWorkspaceAndDatasetUsingEndpoint = (
       });
     })
     .catch((error) => {
-      cy.log(`Error in createWorkspaceAndDatasetUsingEndpoint for ${workspaceName}:`, error.message);
+      cy.log(
+        `Error in createWorkspaceAndDatasetUsingEndpoint for ${workspaceName}:`,
+        error.message
+      );
       throw error;
     });
 };
