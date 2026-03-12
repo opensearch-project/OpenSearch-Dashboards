@@ -425,6 +425,20 @@ describe('ChatInput', () => {
       expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('big.txt'));
     });
 
+    it('should skip empty files and show warning', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const empty = new File([''], 'empty.txt', { type: 'text/plain' });
+      const valid = new File(['hello'], 'valid.txt', { type: 'text/plain' });
+      selectFiles(container, [empty, valid]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([valid]);
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('empty.txt'));
+    });
+
     it('should reject all files when attachment limit is reached', () => {
       const onFilesSelected = jest.fn();
       const { container } = render(

@@ -25,6 +25,8 @@ import {
 const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
 /** Base64 encoding increases payload size by ~33%; 1.4 provides margin. */
 const BASE64_OVERHEAD_FACTOR = 1.4;
+/** RFC 4648 strict base64 alphabet (no whitespace, correct padding). */
+const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 
 /**
  * Forward request to external AG-UI server
@@ -251,6 +253,19 @@ export function defineRoutes(
                   message: `File type '${part.mimeType}' is not allowed. Allowed types: ${[
                     ...ALLOWED_MIME_TYPES,
                   ].join(', ')}`,
+                },
+              });
+            }
+
+            // Reject payloads that are not valid base64 before forwarding downstream
+            if (
+              typeof part.data === 'string' &&
+              (part.data.length === 0 || part.data.length % 4 !== 0 || !BASE64_RE.test(part.data))
+            ) {
+              const filename = part.filename ?? 'attachment';
+              return response.badRequest({
+                body: {
+                  message: `File '${filename}' contains invalid base64 data`,
                 },
               });
             }

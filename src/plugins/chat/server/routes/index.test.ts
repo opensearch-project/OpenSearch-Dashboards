@@ -532,6 +532,174 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('Base64 data validation', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should reject binary attachments with invalid base64 characters', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithBadBase64 = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: '!!!not-base64!!!',
+                  filename: 'bad.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithBadBase64)
+          .expect(400);
+
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(response.body.message).toContain('bad.txt');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject base64 with incorrect padding length', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithBadPadding = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  // Valid chars but length not a multiple of 4
+                  data: 'abc',
+                  filename: 'padded.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithBadPadding)
+          .expect(400);
+
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow valid base64 data', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithValidBase64 = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'good.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithValidBase64)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should use fallback filename when filename is not provided', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestNoFilename = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: '$$invalid$$',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestNoFilename)
+          .expect(400);
+
+        expect(response.body.message).toContain('attachment');
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject empty base64 data', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithEmptyData = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: '',
+                  filename: 'empty.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithEmptyData)
+          .expect(400);
+
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(response.body.message).toContain('empty.txt');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+    });
+
     describe('File size validation', () => {
       const mockSuccessfulAgUiResponse = () => {
         mockFetch.mockResolvedValue({

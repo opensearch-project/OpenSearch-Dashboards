@@ -134,8 +134,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       return;
     }
 
-    const valid = typeAllowed.filter((f) => f.size <= maxFileUploadBytes);
-    const oversized = typeAllowed.filter((f) => f.size > maxFileUploadBytes);
+    const nonEmpty = typeAllowed.filter((f) => f.size > 0);
+    const emptyFiles = typeAllowed.filter((f) => f.size === 0);
+
+    if (emptyFiles.length > 0) {
+      const names = emptyFiles.map((f) => f.name).join(', ');
+      notifications.toasts.addWarning(
+        i18n.translate('chat.input.emptyFilesSkipped', {
+          defaultMessage: 'Empty file(s) were skipped: {names}',
+          values: { names },
+        })
+      );
+    }
+
+    const valid = nonEmpty.filter((f) => f.size <= maxFileUploadBytes);
+    const oversized = nonEmpty.filter((f) => f.size > maxFileUploadBytes);
 
     if (oversized.length > 0) {
       const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
