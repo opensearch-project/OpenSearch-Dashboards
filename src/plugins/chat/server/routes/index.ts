@@ -19,6 +19,7 @@ import { getMemoryContainerId } from './utils/get_memory_container_id';
 import {
   CHAT_ALLOWED_FILE_TYPES,
   CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
+  ONE_MB,
 } from '../../common';
 
 const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
@@ -238,11 +239,13 @@ export function defineRoutes(
       const dataSourceId = request.query?.dataSourceId;
 
       try {
-        // Validate MIME types across all messages
+        // Validate MIME types and per-file size across all messages
         for (const msg of request.body.messages) {
           const parts = Array.isArray(msg.content) ? msg.content : [];
           for (const part of parts) {
-            if (part.type === 'binary' && !ALLOWED_MIME_TYPES.has(part.mimeType)) {
+            if (part.type !== 'binary') continue;
+
+            if (!ALLOWED_MIME_TYPES.has(part.mimeType)) {
               return response.badRequest({
                 body: {
                   message: `File type '${part.mimeType}' is not allowed. Allowed types: ${[
@@ -250,6 +253,20 @@ export function defineRoutes(
                   ].join(', ')}`,
                 },
               });
+            }
+
+            // Defense-in-depth; client also enforces this
+            if (maxFileUploadBytes !== undefined && typeof part.data === 'string') {
+              const decodedSize = Buffer.from(part.data, 'base64').length;
+              if (decodedSize > maxFileUploadBytes) {
+                const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
+                const filename = part.filename ?? 'attachment';
+                return response.badRequest({
+                  body: {
+                    message: `File '${filename}' exceeds the ${limitMB} MB size limit`,
+                  },
+                });
+              }
             }
           }
         }

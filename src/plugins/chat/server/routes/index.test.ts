@@ -532,6 +532,133 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('File size validation', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should reject binary attachments exceeding maxFileUploadBytes', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // maxFileUploadBytes=100; base64 decodes to 112 bytes (exceeds limit).
+        // proxyMaxBytes=1400 so the request body passes the parser.
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          100
+        );
+
+        const oversizedBase64 = Buffer.from('x'.repeat(112)).toString('base64');
+        const requestWithOversizedFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: oversizedBase64,
+                  filename: 'large.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithOversizedFile)
+          .expect(400);
+
+        expect(response.body.message).toContain('exceeds the');
+        expect(response.body.message).toContain('size limit');
+        expect(response.body.message).toContain('large.txt');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow binary attachments within maxFileUploadBytes', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // maxFileUploadBytes=20; "aGVsbG8=" decodes to "hello" (5 bytes)
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          20
+        );
+
+        const requestWithValidFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/csv',
+                  data: 'bmFtZSxhZ2U=',
+                  filename: 'data.csv',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithValidFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should not validate file size when maxFileUploadBytes is undefined', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // No maxFileUploadBytes - size check is skipped
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithLargeFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8gd29ybGQ=',
+                  filename: 'large.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithLargeFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+    });
+
     describe('File attachment count limit', () => {
       // Use a large maxFileUploadBytes so the payload size limit (413) doesn't
       // trigger before our count validation (400) runs.
