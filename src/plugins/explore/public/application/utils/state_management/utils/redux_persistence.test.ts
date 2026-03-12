@@ -75,6 +75,7 @@ describe('redux_persistence', () => {
               signalType: CORE_SIGNAL_TYPES.LOGS,
             })
           ),
+          ensureDefaultDataView: jest.fn(() => Promise.resolve()),
         },
       },
       uiSettings: {
@@ -887,6 +888,373 @@ describe('redux_persistence', () => {
         language: undefined,
         signalType: undefined,
       });
+    });
+  });
+
+  describe('loadReduxState dataset replacement logic', () => {
+    it('should return preloaded state when view route has incompatible dataset', async () => {
+      // Mock window.location.hash to simulate a view route
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/view/saved-search-id' },
+        writable: true,
+      });
+
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'logs-dataset',
+          title: 'Logs Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.LOGS, // Incompatible with traces
+        },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock).mockReturnValue(mockQueryState);
+
+      const result = await loadReduxState(tracesServices);
+
+      // Should clear incompatible URL state
+      expect(tracesServices.osdUrlStateStorage.set).toHaveBeenCalledWith('_q', null, {
+        replace: true,
+      });
+      expect(tracesServices.osdUrlStateStorage.set).toHaveBeenCalledWith('_a', null, {
+        replace: true,
+      });
+
+      // Should return preloaded state
+      expect(result).toBeDefined();
+      expect(result.query.query).toBe('');
+
+      // Reset window.location
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+    });
+
+    it('should replace dataset when URL dataset is incompatible with current flavor', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'logs-dataset', title: 'Logs Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      // Mock dataViews.get to return LOGS signal type (incompatible with traces)
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'logs-dataset',
+        title: 'Logs Dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      // Mock dataset service to return a traces dataset
+      (tracesServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'traces-dataset' }] })),
+          toDataset: jest.fn(() => ({
+            id: 'traces-dataset',
+            title: 'Traces Dataset',
+            type: 'INDEX_PATTERN',
+          })),
+        })),
+        getDefault: jest.fn(() => null),
+      });
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
+        if (id === 'traces-dataset') {
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
+        }
+        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
+      });
+
+      const result = await loadReduxState(tracesServices);
+
+      // Should replace with compatible dataset
+      expect(result.query.dataset?.id).toBe('traces-dataset');
+
+      // Should clear incompatible URL query state
+      expect(tracesServices.osdUrlStateStorage.set).toHaveBeenCalledWith('_q', null, {
+        replace: true,
+      });
+    });
+
+    it('should prefer default dataset over URL dataset when default is a perfect match', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=generic-dataset',
+        language: 'PPL',
+        dataset: {
+          id: 'generic-dataset',
+          title: 'Generic Dataset',
+          type: 'INDEX_PATTERN',
+          // No signalType - technically compatible but not perfect
+        },
+      };
+
+      const defaultDataset = {
+        id: 'default-logs-dataset',
+        title: 'Default Logs Dataset',
+        type: 'INDEX_PATTERN',
+        signalType: CORE_SIGNAL_TYPES.LOGS, // Perfect match for logs flavor
+      };
+
+      (logsServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      // Mock default dataset
+      (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(),
+          toDataset: jest.fn(),
+        })),
+        getDefault: jest.fn(() => defaultDataset),
+      });
+
+      (logsServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
+        if (id === 'generic-dataset') {
+          return Promise.resolve({ signalType: undefined });
+        }
+        if (id === 'default-logs-dataset') {
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
+        }
+        return Promise.resolve({});
+      });
+
+      const result = await loadReduxState(logsServices);
+
+      // Should prefer default dataset over URL dataset
+      expect(result.query.dataset?.id).toBe('default-logs-dataset');
+      expect(result.query.dataset?.signalType).toBe(CORE_SIGNAL_TYPES.LOGS);
+    });
+
+    it('should clear query when dataset changes due to replacement', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const originalQuery = 'source=logs | head 10';
+      const mockQueryState = {
+        query: originalQuery,
+        language: 'PPL',
+        dataset: { id: 'logs-dataset', title: 'Logs Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      (tracesServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'traces-dataset' }] })),
+          toDataset: jest.fn(() => ({
+            id: 'traces-dataset',
+            title: 'Traces Dataset',
+            type: 'INDEX_PATTERN',
+          })),
+        })),
+        getDefault: jest.fn(() => null),
+      });
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
+        if (id === 'traces-dataset') {
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
+        }
+        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
+      });
+
+      const result = await loadReduxState(tracesServices);
+
+      // Query should be cleared when dataset changes
+      expect(result.query.query).toBe('');
+      expect(result.query.query).not.toBe(originalQuery);
+    });
+
+    it('should keep query when dataset is compatible and unchanged', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+      } as any;
+
+      const originalQuery = 'source=logs | head 10';
+      const mockQueryState = {
+        query: originalQuery,
+        language: 'PPL',
+        dataset: {
+          id: 'logs-dataset',
+          title: 'Logs Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.LOGS,
+        },
+      };
+
+      (logsServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      (logsServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'logs-dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(),
+        getDefault: jest.fn(() => null),
+      });
+
+      const result = await loadReduxState(logsServices);
+
+      // Query should be preserved when dataset is compatible and unchanged
+      expect(result.query.query).toBe(originalQuery);
+      expect(result.query.dataset?.id).toBe('logs-dataset');
+    });
+
+    it('should call setQuery with forceUpdate=true when dataset was replaced', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'logs-dataset', title: 'Logs Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      (tracesServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'traces-dataset' }] })),
+          toDataset: jest.fn(() => ({
+            id: 'traces-dataset',
+            title: 'Traces Dataset',
+            type: 'INDEX_PATTERN',
+          })),
+        })),
+        getDefault: jest.fn(() => null),
+      });
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
+        if (id === 'traces-dataset') {
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
+        }
+        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
+      });
+
+      await loadReduxState(tracesServices);
+
+      // setQuery should be called with forceUpdate=true when dataset was replaced
+      expect(tracesServices.data.query.queryString.setQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataset: expect.objectContaining({
+            id: 'traces-dataset',
+          }),
+        }),
+        true // forceUpdate should be true
+      );
+    });
+
+    it('should call setQuery with forceUpdate=false when dataset is unchanged', async () => {
+      Object.defineProperty(window, 'location', {
+        value: { hash: '#/' },
+        writable: true,
+      });
+
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: {
+          id: 'logs-dataset',
+          title: 'Logs Dataset',
+          type: 'INDEX_PATTERN',
+          signalType: CORE_SIGNAL_TYPES.LOGS,
+        },
+      };
+
+      (logsServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(null);
+
+      (logsServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(),
+        getDefault: jest.fn(() => null),
+      });
+
+      await loadReduxState(logsServices);
+
+      // setQuery should be called with forceUpdate=false when dataset is unchanged
+      expect(logsServices.data.query.queryString.setQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataset: expect.objectContaining({
+            id: 'logs-dataset',
+          }),
+        }),
+        false // forceUpdate should be false
+      );
     });
   });
 

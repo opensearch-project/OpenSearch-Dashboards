@@ -8,6 +8,11 @@ import { EditorMode } from './types';
 export const DEFAULT_EDITOR_MODE = EditorMode.Query;
 
 /**
+ * Query languages that can be passed through as-is without additional processing
+ */
+export const PASSTHROUGH_LANGUAGES = ['kuery', 'DQL', 'SQL', 'lucene', 'PROMQL'] as const;
+
+/**
  * Target bucket count for Traces charts
  * Uses ~15 buckets for 3 charts vs default 50 for Logs (1 chart)
  * Lower target pushes TimeBuckets to choose larger intervals (e.g., 2d instead of 1d)

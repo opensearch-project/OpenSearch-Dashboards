@@ -5,6 +5,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import rison from 'rison-node';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useSavedExplore } from './use_saved_explore';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -25,7 +26,6 @@ import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 import { useFlavorId } from '../../../helpers/use_flavor_id';
-import { CORE_SIGNAL_TYPES } from '../../../../../data/common';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ export const useInitPage = () => {
   const exploreId = useCurrentExploreId();
   const { savedExplore, error } = useSavedExplore(exploreId);
   const setEditorText = useSetEditorText();
-  const { chrome, data, application } = services;
+  const { chrome, data, application, http } = services;
   const visualizationBuilder = getVisualizationBuilder();
   const currentFlavor = useFlavorId();
 
@@ -61,11 +61,8 @@ export const useInitPage = () => {
           services.osdUrlStateStorage.flush();
         }
 
-        // Use window.location to navigate since application service might not be available
-        const currentPath = window.location.pathname;
-        const currentHash = window.location.hash;
-
         // Extract _g parameter from hash (format: #/?_q=...&_g=...&_a=...)
+        const currentHash = window.location.hash;
         const hashParams = currentHash.includes('?') ? currentHash.split('?')[1] : '';
         const params = new URLSearchParams(hashParams);
         let gParam = params.get('_g');
@@ -73,26 +70,21 @@ export const useInitPage = () => {
         // Parse and clean _g parameter to remove query
         if (gParam) {
           try {
-            // Decode the RISON-encoded parameter
-            const decodedG = decodeURIComponent(gParam);
-            // Remove the query field from _g by rebuilding without it
-            const cleanedG = decodedG
-              .replace(/,?query:\([^)]*\),?/g, ',')
-              .replace(/,,/g, ',')
-              .replace(/\(,/g, '(')
-              .replace(/,\)/g, ')');
-            gParam = encodeURIComponent(cleanedG);
+            const decoded = rison.decode(decodeURIComponent(gParam)) as Record<string, unknown>;
+            delete decoded.query;
+            gParam = encodeURIComponent(rison.encode(decoded));
           } catch (e) {
             // Failed to clean _g parameter, use as-is
           }
         }
 
         // Build clean URL with only time/filters, no query/app state
+        const basePath = http?.basePath?.get() ?? '';
+        const flavorPath = `/app/explore/${currentFlavor}`;
         const newHash = gParam ? `#/?_g=${gParam}` : '#/';
-        const baseUrl =
-          currentPath.replace(/\/explore\/[^/]+/, `/explore/${currentFlavor}`) + newHash;
 
-        window.location.href = baseUrl;
+        // Use application service for SPA navigation instead of full page reload
+        application?.navigateToUrl(`${basePath}${flavorPath}${newHash}`);
         return;
       }
 
@@ -158,13 +150,14 @@ export const useInitPage = () => {
         chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: 'Error' }]);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     chrome,
     data.query.queryString,
     dispatch,
     error,
     savedExplore,
-    services,
+    services, // http is accessed via services.http
     setEditorText,
     visualizationBuilder,
     currentFlavor,

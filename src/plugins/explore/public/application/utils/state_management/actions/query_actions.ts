@@ -48,7 +48,7 @@ import {
 } from './utils';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { ExploreFlavor } from '../../../../../common';
-import { TRACES_CHART_BAR_TARGET } from '../constants';
+import { TRACES_CHART_BAR_TARGET, PASSTHROUGH_LANGUAGES } from '../constants';
 import { createTraceAggregationConfig } from './trace_aggregation_builder';
 import {
   prepareTraceCacheKeys,
@@ -75,20 +75,17 @@ export const abortAllActiveQueries = () => {
  * Default query preparation for tabs
  */
 export const defaultPrepareQueryString = (query: Query): string => {
-  switch (query.language) {
-    case 'PPL':
-      return defaultPreparePplQuery(query).query;
-    case 'PROMQL':
-    case 'kuery':
-    case 'DQL':
-    case 'SQL':
-    case 'lucene':
-      return query.query as string;
-    default:
-      throw new Error(
-        `defaultPrepareQueryString encountered unhandled language: ${query.language}`
-      );
+  // Handle PPL specially as it requires transformation
+  if (query.language === 'PPL') {
+    return defaultPreparePplQuery(query).query;
   }
+
+  // Passthrough languages that don't need processing
+  if (PASSTHROUGH_LANGUAGES.includes(query.language as any)) {
+    return query.query as string;
+  }
+
+  throw new Error(`defaultPrepareQueryString encountered unhandled language: ${query.language}`);
 };
 
 /**
@@ -316,12 +313,11 @@ export const executeQueries = createAsyncThunk<
   const flavorId = await getCurrentFlavor(services);
 
   if (flavorId === ExploreFlavor.Traces) {
-    // Get the latest results from state after the data table query has completed
-    const latestState = getState();
-    const dataTableResults = latestState.results[dataTableCacheKey];
+    // For traces, we always want to show RED metrics, even with no filter query
+    // The base query will aggregate over all traces in the dataset
 
-    // Only execute RED metrics queries if we have table results with data
-    if (dataTableResults && dataTableResults.hits?.hits?.length > 0) {
+    // Check if we have a valid dataset
+    if (query.dataset) {
       const dataset = query.dataset
         ? await services.data.dataViews.get(
             query.dataset.id,
@@ -330,7 +326,8 @@ export const executeQueries = createAsyncThunk<
         : await services.data.dataViews.getDefault();
 
       if (dataset?.timeFieldName) {
-        const rawInterval = latestState.legacy?.interval || 'auto';
+        const currentState = getState();
+        const rawInterval = currentState.legacy?.interval || 'auto';
 
         const histogramConfig = createHistogramConfigWithInterval(
           dataset,

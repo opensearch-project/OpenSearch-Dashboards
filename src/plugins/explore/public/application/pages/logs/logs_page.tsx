@@ -85,7 +85,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   const setEditorText = useSetEditorText();
 
   useEffect(() => {
-    if (queryText === '' || !queryText) {
+    if (!queryText) {
       setEditorText('');
     }
   }, [queryText, setEditorText]);

@@ -57,10 +57,109 @@ export const persistReduxState = (state: RootState, services: ExploreServices) =
   }
 };
 
+const resolveSignalType = async (
+  services: ExploreServices,
+  dataset: Dataset
+): Promise<string | undefined> => {
+  if (dataset.signalType) {
+    return dataset.signalType;
+  }
+
+  try {
+    const fullDataset = await services.data?.dataViews?.get(dataset.id);
+    return fullDataset?.signalType;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const isDatasetIncompatible = (
+  urlSignalType: string | undefined,
+  currentRequiredSignalType: string | undefined
+): boolean => {
+  // If flavor requires a specific signal type, check for exact match
+  if (currentRequiredSignalType) {
+    return urlSignalType !== currentRequiredSignalType;
+  }
+
+  // For Logs flavor (no required signal type), reject traces/metrics datasets
+  return urlSignalType === CORE_SIGNAL_TYPES.TRACES || urlSignalType === CORE_SIGNAL_TYPES.METRICS;
+};
+
+const shouldPreferDefault = (
+  defaultDataset: Dataset | undefined,
+  urlDataset: Dataset,
+  currentRequiredSignalType: string | undefined,
+  urlSignalType: string | undefined
+): boolean => {
+  if (!defaultDataset || defaultDataset.id === urlDataset.id) {
+    return false;
+  }
+
+  // Only prefer default if URL dataset is NOT already a perfect match
+  if (currentRequiredSignalType) {
+    // For Traces/Metrics: only prefer default if URL dataset doesn't match required type
+    // but default does
+    return (
+      urlSignalType !== currentRequiredSignalType &&
+      defaultDataset.signalType === currentRequiredSignalType
+    );
+  } else {
+    // For Logs: only prefer default if URL dataset doesn't have explicit 'logs' signalType
+    // but default does
+    return (
+      urlSignalType !== CORE_SIGNAL_TYPES.LOGS &&
+      defaultDataset.signalType === CORE_SIGNAL_TYPES.LOGS
+    );
+  }
+};
+
+const findReplacementDataset = async (
+  services: ExploreServices,
+  currentFlavor: ExploreFlavor,
+  currentRequiredSignalType: string | undefined,
+  defaultDataset: Dataset | undefined
+): Promise<Dataset | undefined> => {
+  try {
+    await services.data.dataViews.ensureDefaultDataView();
+    let replacement = await fetchFirstAvailableDataset(
+      services,
+      currentFlavor,
+      currentRequiredSignalType,
+      defaultDataset
+    );
+
+    // If no compatible dataset found, fall back to default dataset
+    if (!replacement && defaultDataset) {
+      replacement = defaultDataset;
+    }
+
+    // Last resort: fall back to any default dataview
+    if (!replacement) {
+      try {
+        const defaultDataView = await services.data.dataViews.getDefault();
+        if (defaultDataView) {
+          replacement = services.data.dataViews.convertToDataset(defaultDataView);
+        }
+      } catch (err) {
+        // Continue without replacement dataset
+      }
+    }
+
+    return replacement;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 /**
  * Loads Redux state from URL or returns default state
  */
 export const loadReduxState = async (services: ExploreServices): Promise<RootState> => {
+  // Fetch default dataset once at the top (outside try block so it's available in catch)
+  // Will be undefined for Metrics flavor
+  let defaultDataset: Dataset | undefined;
+
   try {
     // Use the osdUrlStateStorage from services
     if (!services.osdUrlStateStorage) {
@@ -96,20 +195,17 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
             urlSignalType === CORE_SIGNAL_TYPES.METRICS));
 
       if (isIncompatibleForView) {
-        // Navigate to base page instead of trying to load incompatible saved viz
-        const baseUrl = services.application?.getUrlForApp(`explore/${currentFlavor}`, {
-          path: '#/',
-        });
-        if (baseUrl && services.application) {
-          services.application.navigateToUrl(baseUrl);
-          // Return a basic state to prevent further processing
-          return await getPreloadedState(services);
-        }
+        // Clear incompatible URL state so useInitPage gets a clean slate
+        // useInitPage will handle the redirect - redux_persistence.ts is only responsible for state
+        services.osdUrlStateStorage.set('_q', null, { replace: true });
+        services.osdUrlStateStorage.set('_a', null, { replace: true });
+        return await getPreloadedState(services);
       }
     }
 
-    // Get the default dataset to check if we should prefer it over URL cached dataset
-    const defaultDataset =
+    // Get the default dataset once to check if we should prefer it over URL cached dataset
+    // Fetch it once here and pass it down to avoid redundant getDefault() calls
+    defaultDataset =
       currentFlavor === ExploreFlavor.Metrics
         ? undefined
         : services.data?.query?.queryString?.getDatasetService()?.getDefault();
@@ -117,23 +213,9 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     // If URL has query state and we're NOT on a view route, check if we need a better dataset
     let replacementDataset: Dataset | undefined;
     if (!isViewRoute && queryState?.dataset) {
-      // Fetch full dataset from dataViews to get signalType if not already present
-      let urlSignalType = queryState.dataset.signalType;
-      if (!urlSignalType) {
-        try {
-          const fullDataset = await services.data?.dataViews?.get(queryState.dataset.id);
-          urlSignalType = fullDataset?.signalType;
-        } catch (error) {
-          // If fetch fails, continue with undefined signalType
-        }
-      }
+      const urlSignalType = await resolveSignalType(services, queryState.dataset);
 
-      // Check if dataset is incompatible OR suboptimal
-      const isIncompatible =
-        (currentRequiredSignalType && urlSignalType !== currentRequiredSignalType) ||
-        (!currentRequiredSignalType &&
-          (urlSignalType === CORE_SIGNAL_TYPES.TRACES ||
-            urlSignalType === CORE_SIGNAL_TYPES.METRICS));
+      const isIncompatible = isDatasetIncompatible(urlSignalType, currentRequiredSignalType);
 
       // For Logs flavor, also check if we should find a better dataset with explicit 'logs' signalType
       const shouldFindBetter =
@@ -142,46 +224,24 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
         urlSignalType !== CORE_SIGNAL_TYPES.TRACES &&
         urlSignalType !== CORE_SIGNAL_TYPES.METRICS; // But is technically compatible
 
-      // Check if there's a default dataset that's PERFECT match (not just compatible)
-      const shouldPreferDefault =
-        defaultDataset &&
-        defaultDataset.id !== queryState.dataset.id && // Different from URL dataset
-        ((currentRequiredSignalType && defaultDataset.signalType === currentRequiredSignalType) || // Exact match for Traces/Metrics
-          (!currentRequiredSignalType && defaultDataset.signalType === CORE_SIGNAL_TYPES.LOGS)); // Perfect match for Logs (explicit logs signalType)
+      const preferDefault = shouldPreferDefault(
+        defaultDataset,
+        queryState.dataset,
+        currentRequiredSignalType,
+        urlSignalType
+      );
 
-      if (isIncompatible || shouldFindBetter || shouldPreferDefault) {
+      if (isIncompatible || shouldFindBetter || preferDefault) {
         // If we should prefer default and it's a PERFECT match, use it directly
-        if (shouldPreferDefault && defaultDataset) {
+        if (preferDefault && defaultDataset) {
           replacementDataset = defaultDataset;
         } else {
-          // Proactively fetch a compatible dataset for the current flavor
-          try {
-            await services.data.dataViews.ensureDefaultDataView();
-            replacementDataset = await fetchFirstAvailableDataset(
-              services,
-              currentFlavor,
-              currentRequiredSignalType
-            );
-
-            // If no compatible dataset found, fall back to default dataset
-            if (!replacementDataset && defaultDataset) {
-              replacementDataset = defaultDataset;
-            }
-
-            // Last resort: fall back to any default dataview
-            if (!replacementDataset) {
-              try {
-                const defaultDataView = await services.data.dataViews.getDefault();
-                if (defaultDataView) {
-                  replacementDataset = services.data.dataViews.convertToDataset(defaultDataView);
-                }
-              } catch (err) {
-                // Continue without replacement dataset
-              }
-            }
-          } catch (error) {
-            // Continue even if fetch fails
-          }
+          replacementDataset = await findReplacementDataset(
+            services,
+            currentFlavor,
+            currentRequiredSignalType,
+            defaultDataset
+          );
         }
 
         // Clear the incompatible query state from URL
@@ -211,7 +271,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     }
 
     // Always call getPreloadedQueryState to ensure SignalType validation runs
-    const resolvedQueryState = await getPreloadedQueryState(services, urlDataset);
+    const resolvedQueryState = await getPreloadedQueryState(services, urlDataset, defaultDataset);
 
     // If queryState was cleared above (due to incompatibility), just use the resolved state
     // Also check if dataset changed - if so, clear the query as it's likely incompatible
@@ -283,15 +343,18 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       meta: finalMetaState,
     };
   } catch (err) {
-    return await getPreloadedState(services); // Fallback to full preload
+    return await getPreloadedState(services, defaultDataset); // Fallback to full preload
   }
 };
 
 /**
  * Get preloaded state for each slice
  */
-export const getPreloadedState = async (services: ExploreServices): Promise<RootState> => {
-  const queryState = await getPreloadedQueryState(services);
+export const getPreloadedState = async (
+  services: ExploreServices,
+  defaultDataset?: Dataset
+): Promise<RootState> => {
+  const queryState = await getPreloadedQueryState(services, undefined, defaultDataset);
   const uiState = getPreloadedUIState(services);
   const resultsState = getPreloadedResultsState(services);
   const tabState = getPreloadedTabState(services);
@@ -316,7 +379,8 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
 const fetchFirstAvailableDataset = async (
   services: ExploreServices,
   flavor: ExploreFlavor | null,
-  requiredSignalType?: string
+  requiredSignalType?: string,
+  defaultDataset?: Dataset
 ): Promise<Dataset | undefined> => {
   try {
     const datasetService = services.data?.query?.queryString?.getDatasetService();
@@ -347,8 +411,7 @@ const fetchFirstAvailableDataset = async (
 
     // Filter by SignalType compatibility
     if (fetchedDatasets.length > 0) {
-      // Get default dataset ID to prefer it if found in the list
-      const defaultDataset = services.data?.query?.queryString?.getDatasetService()?.getDefault();
+      // Use provided default dataset ID to prefer it if found in the list
       const defaultDatasetId = defaultDataset?.id;
 
       // For Logs flavor, prefer datasets with explicit 'logs' signalType
@@ -427,7 +490,8 @@ const fetchFirstAvailableDataset = async (
  */
 const resolveDataset = async (
   services: ExploreServices,
-  preferredDataset?: Dataset
+  preferredDataset?: Dataset,
+  defaultDataset?: Dataset
 ): Promise<Dataset | undefined> => {
   const currentAppId = await getCurrentAppId(services);
   const flavorFromAppId = getFlavorFromAppId(currentAppId);
@@ -442,14 +506,8 @@ const resolveDataset = async (
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const cachedDataset = queryStringQuery?.dataset;
 
-  // Get the actual default dataset from DatasetService (not from getDefaultQuery)
-  // This is the dataset marked with "Default" badge in the UI
-  const defaultDataset =
-    flavorFromAppId === ExploreFlavor.Metrics
-      ? undefined
-      : services.data?.query?.queryString?.getDatasetService()?.getDefault();
-
   // Priority: preferredDataset > defaultDataset (if compatible) > cachedDataset (if compatible) > fetch
+  // Note: defaultDataset is now passed as a parameter to avoid redundant getDefault() calls
 
   // If we have a preferred dataset, use it immediately
   if (preferredDataset) {
@@ -509,32 +567,12 @@ const resolveDataset = async (
   }
 
   // Fetch first available dataset with required SignalType
-  const compatibleDataset = await fetchFirstAvailableDataset(
+  return await fetchFirstAvailableDataset(
     services,
     flavorFromAppId,
-    requiredSignalType
+    requiredSignalType,
+    defaultDataset
   );
-
-  if (compatibleDataset) {
-    return compatibleDataset;
-  }
-
-  // If no compatible dataset found with signalType filtering, try to get any available dataset as fallback
-  if (!compatibleDataset && requiredSignalType === undefined) {
-    // For Logs flavor, if no dataset without signalType found, try to get a default dataset
-    try {
-      const fallbackDefaultDataset = services.data?.query?.queryString
-        ?.getDatasetService()
-        ?.getDefault();
-      if (fallbackDefaultDataset) {
-        return fallbackDefaultDataset;
-      }
-    } catch (error) {
-      // Continue to return undefined
-    }
-  }
-
-  return compatibleDataset;
 };
 
 /**
@@ -542,10 +580,11 @@ const resolveDataset = async (
  */
 const getPreloadedQueryState = async (
   services: ExploreServices,
-  preferredDataset?: Dataset
+  preferredDataset?: Dataset,
+  defaultDataset?: Dataset
 ): Promise<QueryState> => {
   // Always resolve the dataset to ensure SignalType validation runs
-  const selectedDataset = await resolveDataset(services, preferredDataset);
+  const selectedDataset = await resolveDataset(services, preferredDataset, defaultDataset);
 
   // Use toDataset method if available, otherwise extract minimal properties
   let minimalDataset: Dataset | undefined;

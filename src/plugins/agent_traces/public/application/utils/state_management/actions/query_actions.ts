@@ -23,6 +23,11 @@ import { getFieldValueCounts } from '../../../../components/fields_selector/lib/
 import { ChartData, DefaultDataProcessor, ProcessedSearchResults } from '../../interfaces';
 import { defaultPreparePplQuery } from '../../languages';
 
+/**
+ * Query languages that can be passed through as-is without additional processing
+ */
+const PASSTHROUGH_LANGUAGES = ['kuery', 'DQL', 'SQL', 'lucene', 'PROMQL'] as const;
+
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
@@ -41,20 +46,17 @@ export const abortAllActiveQueries = () => {
  * Default query preparation for tabs
  */
 export const defaultPrepareQueryString = (query: Query): string => {
-  switch (query.language) {
-    case 'PPL':
-      return defaultPreparePplQuery(query).query;
-    case 'PROMQL':
-    case 'kuery':
-    case 'DQL':
-    case 'SQL':
-    case 'lucene':
-      return query.query as string;
-    default:
-      throw new Error(
-        `defaultPrepareQueryString encountered unhandled language: ${query.language}`
-      );
+  // Handle PPL specially as it requires transformation
+  if (query.language === 'PPL') {
+    return defaultPreparePplQuery(query).query;
   }
+
+  // Passthrough languages that don't need processing
+  if (PASSTHROUGH_LANGUAGES.includes(query.language as any)) {
+    return query.query as string;
+  }
+
+  throw new Error(`defaultPrepareQueryString encountered unhandled language: ${query.language}`);
 };
 
 /**
