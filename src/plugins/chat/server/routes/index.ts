@@ -29,6 +29,16 @@ const BASE64_OVERHEAD_FACTOR = 1.4;
 const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
 
 /**
+ * Compute decoded byte length of base64 string without allocating a buffer.
+ * Use after structure validation (length % 4, BASE64_RE) so padding is valid.
+ * Avoids Buffer.from() DoS: decoding large strings into memory for every request.
+ */
+function getBase64DecodedLength(encoded: string): number {
+  const padding = encoded.endsWith('==') ? 2 : encoded.endsWith('=') ? 1 : 0;
+  return Math.floor(((encoded.length - padding) * 3) / 4);
+}
+
+/**
  * Forward request to external AG-UI server
  */
 async function forwardToAgUI(
@@ -274,10 +284,8 @@ export function defineRoutes(
             if (maxFileUploadBytes !== undefined && typeof part.data === 'string') {
               // Fail fast before decoding: base64 encodes 3 bytes → 4 chars (padded to 4-char blocks)
               const maxEncodedLength = 4 * Math.ceil(maxFileUploadBytes / 3);
-              if (
-                part.data.length > maxEncodedLength ||
-                Buffer.from(part.data, 'base64').length > maxFileUploadBytes
-              ) {
+              const decodedLength = getBase64DecodedLength(part.data);
+              if (part.data.length > maxEncodedLength || decodedLength > maxFileUploadBytes) {
                 const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
                 const filename = part.filename ?? 'attachment';
                 return response.badRequest({

@@ -124,14 +124,14 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     // Always initialize chat service - core service handles enablement.
     // Pass core.http so the proxy URL includes basePath (required in dev when OSD uses a random basePath).
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces, core.http);
-
-    if (chatConfig.maxFileUploadBytes !== undefined) {
-      this.chatService.maxFileUploadBytes = chatConfig.maxFileUploadBytes;
-    }
-    if (chatConfig.maxFileAttachments !== undefined) {
-      this.chatService.maxFileAttachments = chatConfig.maxFileAttachments;
-    }
+    this.chatService = new ChatService(
+      core.uiSettings,
+      core.chat,
+      core.workspaces,
+      core.http,
+      chatConfig.maxFileUploadBytes ?? 3145728,
+      chatConfig.maxFileAttachments ?? 10
+    );
 
     if (!isEnabled) {
       return {
@@ -145,7 +145,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-        openWindow: this.chatService.openWindow.bind(this.chatService),
+        openWindow: async () => {
+          await this.chatService!.openWindow();
+        },
         closeWindow: this.chatService.closeWindow.bind(this.chatService),
       });
     }

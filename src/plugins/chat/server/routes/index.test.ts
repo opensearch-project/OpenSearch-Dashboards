@@ -24,7 +24,8 @@ describe('Chat Proxy Routes', () => {
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
     mlCommonsAgentId?: string,
     observabilityAgentId?: string,
-    maxFileUploadBytes?: number
+    maxFileUploadBytes?: number,
+    maxFileAttachments?: number
   ) => {
     const { server: testServer, httpSetup } = await setupServer();
     const router = httpSetup.createRouter('');
@@ -37,7 +38,8 @@ describe('Chat Proxy Routes', () => {
       getCapabilitiesResolver,
       mlCommonsAgentId,
       observabilityAgentId,
-      maxFileUploadBytes
+      maxFileUploadBytes,
+      maxFileAttachments
     );
 
     // Mock dynamicConfigService required by server.start()
@@ -909,6 +911,90 @@ describe('Chat Proxy Routes', () => {
         await supertest(httpSetup.server.listener)
           .post('/api/chat/proxy')
           .send(requestWithTenFiles)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should enforce custom maxFileAttachments when configured', async () => {
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          largeMaxBytes,
+          5
+        );
+
+        const sixFiles = Array.from({ length: 6 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithSixFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: sixFiles,
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithSixFiles)
+          .expect(400);
+
+        expect(response.body.message).toContain('Too many file attachments (6)');
+        expect(response.body.message).toContain('Maximum allowed: 5');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow exactly maxFileAttachments when custom limit is set', async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          largeMaxBytes,
+          5
+        );
+
+        const fiveFiles = Array.from({ length: 5 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithFiveFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: fiveFiles,
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithFiveFiles)
           .expect(200);
 
         expect(mockFetch).toHaveBeenCalled();

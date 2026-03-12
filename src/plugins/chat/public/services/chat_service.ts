@@ -65,16 +65,18 @@ export class ChatService {
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
 
-  // Max file upload size in bytes (set from plugin config)
-  public maxFileUploadBytes: number = 3145728; // 3MB default
-  // Max number of file attachments per message (set from plugin config)
-  public maxFileAttachments: number = 10;
+  /** Max file upload size in bytes (injected from plugin config, immutable). */
+  public readonly maxFileUploadBytes: number;
+  /** Max number of file attachments per message (injected from plugin config, immutable). */
+  public readonly maxFileAttachments: number;
 
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
     workspaces?: WorkspacesStart,
-    http?: HttpSetup
+    http?: HttpSetup,
+    maxFileUploadBytes: number = 3145728, // 3MB default
+    maxFileAttachments: number = 10
   ) {
     // Use basePath.prepend so the proxy URL works when OSD runs with a basePath (e.g. dev mode).
     const proxyUrl = http ? http.basePath.prepend('/api/chat/proxy') : '/api/chat/proxy';
@@ -94,6 +96,9 @@ export class ChatService {
     this.toolSubscription = assistantActionService.getState$().subscribe((state) => {
       this.availableTools = state.toolDefinitions;
     });
+
+    this.maxFileUploadBytes = maxFileUploadBytes;
+    this.maxFileAttachments = maxFileAttachments;
   }
 
   public getThreadId = () => {
