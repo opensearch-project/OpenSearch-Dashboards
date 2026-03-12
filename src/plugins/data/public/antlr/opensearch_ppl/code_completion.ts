@@ -291,25 +291,18 @@ export const getSimplifiedPPLSuggestions = async ({
     const isInBackQuote = suggestions.isInBackQuote || false;
     const isRuntimeGrammar = Boolean(runtimeSuggestions);
 
-    // Runtime-specific context detection and early exit logic
+    // Runtime-specific context detection
     if (isRuntimeGrammar) {
       const isCommandPosition = isCommandPositionInCurrentSegment(queryTillCursor);
-      const isRexFieldEqualsContext = /(?:^|\|)\s*rex\s+field\s*=\s*$/i.test(queryTillCursor);
-      const preferColumnSuggestionsOnly =
-        suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
-      const shouldSuggestColumns = Boolean(suggestions.suggestColumns || isRexFieldEqualsContext);
 
-      if (shouldSuggestColumns && (isInBackQuote || !isInQuotes)) {
+      if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
         const initialFields = indexPattern.fields;
         const cursorPosition = queryTillCursor.length;
-        const fieldFilter = preferColumnSuggestionsOnly
-          ? undefined
-          : (field: { subType?: unknown }) => !field?.subType;
         const availableFields = getAvailableFieldsForAutocomplete(
           query,
           cursorPosition,
           initialFields,
-          fieldFilter
+          (field: { subType?: unknown }) => !field?.subType
         );
 
         finalSuggestions.push(
@@ -340,11 +333,6 @@ export const getSimplifiedPPLSuggestions = async ({
             isInQuotes
           ))
         );
-      }
-
-      // Early return for column-only mode (before keywords)
-      if (preferColumnSuggestionsOnly) {
-        return finalSuggestions;
       }
 
       // Runtime grammar keyword processing (with heuristics)
@@ -495,22 +483,14 @@ export const getSimplifiedPPLSuggestions = async ({
 
     } else {
       // Compiled grammar path - matching main branch exactly
-      // Check for rex field equals context even on compiled path
-      const isRexFieldEqualsContext = /(?:^|\|)\s*rex\s+field\s*=\s*$/i.test(queryTillCursor);
-      const preferColumnSuggestionsOnly =
-        suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
-
       if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
         const initialFields = indexPattern.fields;
         const cursorPosition = queryTillCursor.length;
-        const fieldFilter = preferColumnSuggestionsOnly
-          ? undefined
-          : (field: { subType?: unknown }) => !field?.subType;
         const availableFields = getAvailableFieldsForAutocomplete(
           query,
           cursorPosition,
           initialFields,
-          fieldFilter
+          (field: { subType?: unknown }) => !field?.subType
         );
 
         finalSuggestions.push(
@@ -541,11 +521,6 @@ export const getSimplifiedPPLSuggestions = async ({
             isInQuotes
           ))
         );
-      }
-
-      // Early return for column-only mode (compiled path)
-      if (preferColumnSuggestionsOnly) {
-        return finalSuggestions;
       }
 
       // Compiled grammar keyword processing (matching main branch)
