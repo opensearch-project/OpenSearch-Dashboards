@@ -910,7 +910,6 @@ export function tryRuntimeGrammarSuggestions(
   skipSymbolicKeywords: boolean
 ): OpenSearchPplAutocompleteResult | null {
   try {
-
     const currentQuery = services?.data?.query?.queryString?.getQuery?.();
     const dataSourceId = indexPattern?.dataSourceRef?.id ?? currentQuery?.dataset?.dataSource?.id;
 
