@@ -38,6 +38,7 @@ export interface ChatEventHandlerConfig {
     onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
     onStreamingStateChange: (isStreaming: boolean) => void;
     onStartResponse: (flag: boolean) => void;
+    onSendToolResultStateChange?: (isSending: boolean) => void;
     getTimeline: () => Message[];
   };
 }
@@ -58,6 +59,7 @@ export class ChatEventHandler {
   private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
   private onStreamingStateChange: (isStreaming: boolean) => void;
   private onStartResponse: (flag: boolean) => void;
+  private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
 
   constructor(config: ChatEventHandlerConfig) {
@@ -66,6 +68,7 @@ export class ChatEventHandler {
     this.onTimelineUpdate = config.callbacks.onTimelineUpdate;
     this.onStreamingStateChange = config.callbacks.onStreamingStateChange;
     this.onStartResponse = config.callbacks.onStartResponse;
+    this.onSendToolResultStateChange = config.callbacks.onSendToolResultStateChange;
     this.getTimeline = config.callbacks.getTimeline;
     this.toolExecutor = new ToolExecutor(config.assistantActionService, config.confirmationService);
   }
@@ -579,6 +582,9 @@ export class ChatEventHandler {
    */
   private async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
     try {
+      // Notify that we're starting to send tool result
+      this.onSendToolResultStateChange?.(true);
+
       const messages = this.getTimeline();
 
       const { observable, toolMessage } = await this.chatService.sendToolResult(
@@ -586,6 +592,9 @@ export class ChatEventHandler {
         result,
         messages
       );
+
+      // Notify that sending tool result is complete
+      this.onSendToolResultStateChange?.(false);
 
       this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
@@ -611,6 +620,7 @@ export class ChatEventHandler {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to send tool result:', error);
+      this.onSendToolResultStateChange?.(false);
       this.onStreamingStateChange(false);
     }
   }

@@ -516,6 +516,11 @@ export class ChatService {
       forwardedProps: {},
     };
 
+    // Add 2 seconds wait for tool call been synced to the agentic memory
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
+
     // Continue the conversation with the tool result
     const observable = this.agent.runAgent(runInput, dataSourceId);
 
