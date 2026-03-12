@@ -186,7 +186,7 @@ export function isRuntimeFunctionRuleContext(
   return false;
 }
 
-function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
+export function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
   if (!symbolicName) return '';
   if (!/^[A-Z][A-Z0-9_]*$/.test(symbolicName)) return '';
   if (/_STRING$/.test(symbolicName)) return '';
@@ -204,7 +204,7 @@ function deriveKeywordFromSymbolicName(symbolicName?: string | null): string {
 // Keep operator-like tokens (including single and multi-char operators), while filtering
 // delimiter-like tokens and punctuation fragments that are unlikely intended user inputs
 // (e.g. standalone dot/quotes/parens/brackets noise).
-function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
+export function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
   const value = (sk.value || '').trim();
   if (!value) return false;
 
@@ -226,7 +226,7 @@ function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
  * Backend sends WHITESPACE; compiled grammar uses SPACE. Normalize here.
  * Guards against backend sending ≤0 (which could be EOF=-1 or INVALID_TYPE=0).
  */
-function resolveSpaceToken(grammar: CachedGrammar): number {
+export function resolveSpaceToken(grammar: CachedGrammar): number {
   const dict = grammar.tokenDictionary as any;
   const v = dict?.WHITESPACE ?? dict?.SPACE;
   if (typeof v === 'number' && v > Token.INVALID_TYPE) return v;
@@ -247,7 +247,7 @@ function resolveSpaceToken(grammar: CachedGrammar): number {
  * that literal tokens (keywords/operators) are never suppressed by mistake.
  * Keep only valid non-literal token IDs from the backend ignore list.
  */
-function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number> {
+export function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number> {
   const safe = new Set<number>();
   const ignored = Array.isArray(grammar.ignoredTokens) ? grammar.ignoredTokens : [];
 
@@ -315,7 +315,7 @@ class RuntimeCompletionContext extends ParserRuleContext {
  * expect input *after* the pipe. `commands` is the strip-compatible choice;
  * `subPipeline` may expect the pipe token itself, so it's a secondary fallback.
  */
-function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
+export function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
   const trimmed = query.trimStart();
   if (trimmed.startsWith('|')) {
     // Prefer backend-declared pipe start rule if available
@@ -385,7 +385,7 @@ const PREFERRED_RULE_NAMES: readonly string[] = [
  * token scoping.  New commands work automatically as long as they compose
  * existing leaf concepts (qualifiedName, etc.).
  */
-function buildRuntimePreferredRules(grammar: CachedGrammar): Set<number> {
+export function buildRuntimePreferredRules(grammar: CachedGrammar): Set<number> {
   const rules = new Set<number>();
   for (const name of PREFERRED_RULE_NAMES) {
     const idx = ruleIndex(grammar, name);
@@ -510,13 +510,13 @@ function getGenericPreferredRuleReruns(
  * transitions don't match compiled behaviour. Checking the token text catches
  * these edge cases so skip-space helpers work consistently.
  */
-function isEffectivelyWhitespace(token: Token, spaceToken: number): boolean {
+export function isEffectivelyWhitespace(token: Token, spaceToken: number): boolean {
   if (token.type === spaceToken || token.type === Token.EOF) return true;
   const text = token.text;
   return typeof text === 'string' && text.length > 0 && text.trim().length === 0;
 }
 
-function findLastNonSpaceTokenRT(
+export function findLastNonSpaceTokenRT(
   tokenStream: TokenStream,
   currentIndex: number,
   spaceToken: number
@@ -586,7 +586,7 @@ function findFirstNonSpaceTokenAfterPipeRT(
  * - `| where ` -> true (one non-space token in segment: `where`)
  * - `| where field` -> false
  */
-function isAtFirstArgumentPositionInSegmentRT(
+export function isAtFirstArgumentPositionInSegmentRT(
   tokenStream: TokenStream,
   cursorIndex: number,
   spaceToken: number,
@@ -663,7 +663,7 @@ function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
  * When the grammar adds/removes/renumbers rules or tokens, this still works because
  * all lookups are by name from the grammar bundle.
  */
-function enrichRuntimeResult(
+export function enrichRuntimeResult(
   baseResult: AutocompleteResultBase,
   grammar: CachedGrammar,
   rules: Map<number, any>,
