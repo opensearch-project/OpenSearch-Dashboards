@@ -118,6 +118,30 @@ function hasActionableContent(result: AutocompleteResultBase): boolean {
   );
 }
 
+// Helper to format column value suggestions
+async function formatColumnValueSuggestions(
+  indexPatternTitle: string,
+  columnName: string,
+  services: any,
+  indexPattern: any,
+  datasetType: any,
+  isInQuotes: boolean
+): Promise<QuerySuggestion[]> {
+  return formatValuesToSuggestions(
+    await fetchColumnValues(
+      indexPatternTitle,
+      columnName,
+      services,
+      indexPattern,
+      datasetType
+    ).catch(() => []),
+    (val: any) => {
+      const isStringValue = typeof val === 'string';
+      return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
+    }
+  );
+}
+
 export const getDefaultSuggestions = async ({
   selectionStart,
   selectionEnd,
@@ -307,19 +331,14 @@ export const getSimplifiedPPLSuggestions = async ({
 
       if (suggestions.suggestValuesForColumn && (isInQuotes || !isInBackQuote)) {
         finalSuggestions.push(
-          ...formatValuesToSuggestions(
-            await fetchColumnValues(
-              indexPattern.title,
-              suggestions.suggestValuesForColumn,
-              services,
-              indexPattern,
-              datasetType
-            ).catch(() => []),
-            (val: any) => {
-              const isStringValue = typeof val === 'string';
-              return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
-            }
-          )
+          ...(await formatColumnValueSuggestions(
+            indexPattern.title,
+            suggestions.suggestValuesForColumn,
+            services,
+            indexPattern,
+            datasetType,
+            isInQuotes
+          ))
         );
       }
 
@@ -451,19 +470,14 @@ export const getSimplifiedPPLSuggestions = async ({
 
       if (suggestions.suggestValuesForColumn && (isInQuotes || !isInBackQuote)) {
         finalSuggestions.push(
-          ...formatValuesToSuggestions(
-            await fetchColumnValues(
-              indexPattern.title,
-              suggestions.suggestValuesForColumn,
-              services,
-              indexPattern,
-              datasetType
-            ).catch(() => []),
-            (val: any) => {
-              const isStringValue = typeof val === 'string';
-              return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
-            }
-          )
+          ...(await formatColumnValueSuggestions(
+            indexPattern.title,
+            suggestions.suggestValuesForColumn,
+            services,
+            indexPattern,
+            datasetType,
+            isInQuotes
+          ))
         );
       }
 
