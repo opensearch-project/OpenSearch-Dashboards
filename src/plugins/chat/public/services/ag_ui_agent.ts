@@ -4,6 +4,8 @@
  */
 
 import { Observable } from 'rxjs';
+import { HttpSetup } from '../../../../core/public';
+import { CHAT_PROXY_PATH } from '../../common';
 import { RunAgentInput } from '../../common/types';
 
 export interface BaseEvent {
@@ -24,8 +26,26 @@ export class AgUiAgent {
   private abortController?: AbortController;
   private sseBuffer: string = '';
   private activeConnection: boolean = false;
-  constructor(proxyUrl: string = '/api/chat/proxy') {
+  private http?: HttpSetup;
+
+  /**
+   * Get the full URL with basePath prepended.
+   * Uses OSD's http.basePath.prepend() if available, otherwise returns the path as-is.
+   * This ensures URLs work correctly in development mode where OSD uses a random basePath.
+   *
+   * @param path - API path (e.g., CHAT_PROXY_PATH)
+   * @returns Full URL with basePath prepended if available, or the original path
+   */
+  private getUrl(path: string): string {
+    if (this.http?.basePath?.prepend) {
+      return this.http.basePath.prepend(path);
+    }
+    return path;
+  }
+
+  constructor(proxyUrl: string = CHAT_PROXY_PATH, http?: HttpSetup) {
     this.proxyUrl = proxyUrl;
+    this.http = http;
   }
 
   public runAgent(input: RunAgentInput, dataSourceId?: string): Observable<BaseEvent> {
@@ -46,9 +66,10 @@ export class AgUiAgent {
       this.activeConnection = true;
 
       // Build URL with optional dataSourceId query parameter
+      const baseUrl = this.getUrl(this.proxyUrl);
       const url = dataSourceId
-        ? `${this.proxyUrl}?dataSourceId=${encodeURIComponent(dataSourceId)}`
-        : this.proxyUrl;
+        ? `${baseUrl}?dataSourceId=${encodeURIComponent(dataSourceId)}`
+        : baseUrl;
 
       fetch(url, {
         method: 'POST',

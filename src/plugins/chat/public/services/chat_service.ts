@@ -5,6 +5,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
+import { CHAT_PROXY_PATH } from '../../common';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -18,6 +19,7 @@ import {
   WorkspacesStart,
   Event,
   EventType,
+  HttpSetup,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
@@ -67,13 +69,14 @@ export class ChatService {
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
-    workspaces?: WorkspacesStart
+    workspaces?: WorkspacesStart,
+    http?: HttpSetup
   ) {
-    // No need to pass URL anymore - agent will use the proxy endpoint
-    this.agent = new AgUiAgent();
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
+    // Pass http client for basePath handling in dev mode
+    this.agent = new AgUiAgent(CHAT_PROXY_PATH, http);
 
     // Initialize conversation history service
     if (!coreChatService) {

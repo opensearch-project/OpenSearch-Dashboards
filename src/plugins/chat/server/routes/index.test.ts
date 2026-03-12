@@ -6,6 +6,7 @@
 import supertest from 'supertest';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
+import { CHAT_PROXY_PATH } from '../../common';
 import { defineRoutes } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
@@ -60,7 +61,7 @@ describe('Chat Proxy Routes', () => {
     }
   });
 
-  describe('POST /api/chat/proxy', () => {
+  describe(`POST ${CHAT_PROXY_PATH}`, () => {
     const validRequest = {
       threadId: 'thread-123',
       runId: 'run-456',
@@ -100,7 +101,7 @@ describe('Chat Proxy Routes', () => {
       const httpSetup = await testSetup('http://test-agui:3000');
 
       const response = await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send(validRequest)
         .expect(200);
 
@@ -125,7 +126,7 @@ describe('Chat Proxy Routes', () => {
       const httpSetup = await testSetup(); // No agUiUrl provided
 
       const response = await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send(validRequest)
         .expect(503);
 
@@ -149,7 +150,7 @@ describe('Chat Proxy Routes', () => {
       const httpSetup = await testSetup('http://test-agui:3000');
 
       const response = await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send(validRequest)
         .expect(500);
 
@@ -164,7 +165,7 @@ describe('Chat Proxy Routes', () => {
       const httpSetup = await testSetup('http://test-agui:3000');
 
       const response = await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send(validRequest)
         .expect(500);
 
@@ -179,19 +180,19 @@ describe('Chat Proxy Routes', () => {
 
       // Missing required fields
       await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send({ invalid: 'data' })
         .expect(400);
 
       // Missing threadId
       await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send({ runId: 'run-123', messages: [] })
         .expect(400);
 
       // Missing runId
       await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send({ threadId: 'thread-123', messages: [] })
         .expect(400);
 
@@ -215,7 +216,7 @@ describe('Chat Proxy Routes', () => {
       const httpSetup = await testSetup('http://test-agui:3000');
 
       await supertest(httpSetup.server.listener)
-        .post('/api/chat/proxy')
+        .post(CHAT_PROXY_PATH)
         .send(validRequest)
         .expect(200);
 
@@ -240,7 +241,7 @@ describe('Chat Proxy Routes', () => {
       // Stream errors during transmission will cause connection to close
       // This is expected behavior - we just verify the server doesn't crash
       try {
-        await supertest(httpSetup.server.listener).post('/api/chat/proxy').send(validRequest);
+        await supertest(httpSetup.server.listener).post(CHAT_PROXY_PATH).send(validRequest);
       } catch (error) {
         // Socket hang up or ECONNRESET is expected when stream fails
         expect(error.message).toMatch(/socket hang up|ECONNRESET|aborted/i);
@@ -277,7 +278,7 @@ describe('Chat Proxy Routes', () => {
         );
 
         await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(validRequest)
           .expect(200);
 
@@ -322,7 +323,7 @@ describe('Chat Proxy Routes', () => {
         );
 
         await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(validRequest)
           .expect(200);
 
@@ -366,7 +367,7 @@ describe('Chat Proxy Routes', () => {
         );
 
         await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(validRequest)
           .expect(200);
 
@@ -392,7 +393,7 @@ describe('Chat Proxy Routes', () => {
         );
 
         const response = await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(validRequest)
           .expect(503);
 
@@ -423,7 +424,7 @@ describe('Chat Proxy Routes', () => {
         );
 
         await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(validRequest)
           .expect(200);
 
@@ -456,7 +457,7 @@ describe('Chat Proxy Routes', () => {
         };
 
         await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(requestWithPromQL)
           .expect(200);
 
@@ -480,7 +481,7 @@ describe('Chat Proxy Routes', () => {
         const httpSetup = await testSetup('http://test-agui:3000');
 
         await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .post(CHAT_PROXY_PATH)
           .send(validRequest)
           .expect(200);
 
