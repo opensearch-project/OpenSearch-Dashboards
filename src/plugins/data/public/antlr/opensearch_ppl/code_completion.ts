@@ -136,7 +136,13 @@ export const getDefaultSuggestions = async ({
       column: column || selectionEnd,
     };
 
-    const runtimeResult = tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, true);
+    // Check feature flag for runtime grammar (defaults to enabled)
+    const runtimeGrammarEnabled =
+      services?.uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
+
+    const runtimeResult = runtimeGrammarEnabled
+      ? tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, true)
+      : null;
     // Fall back to compiled grammar when the runtime path returns an empty result.
     // A non-null but empty result would suppress the compiled grammar otherwise.
     const suggestions =
@@ -240,14 +246,13 @@ export const getSimplifiedPPLSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     };
+    // Check feature flag for runtime grammar (defaults to enabled)
+    const runtimeGrammarEnabled =
+      services?.uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
 
-    const runtimeSuggestions = tryRuntimeGrammarSuggestions(
-      query,
-      cursor,
-      services,
-      indexPattern,
-      false
-    );
+    const runtimeSuggestions = runtimeGrammarEnabled
+      ? tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false)
+      : null;
     const suggestions =
       runtimeSuggestions || getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
     const finalSuggestions: QuerySuggestion[] = [];
@@ -258,68 +263,276 @@ export const getSimplifiedPPLSuggestions = async ({
             column: position.column,
           })
         : query.slice(0, selectionEnd);
-    const isCommandPosition = isCommandPositionInCurrentSegment(queryTillCursor);
     const isInQuotes = suggestions.isInQuote || false;
     const isInBackQuote = suggestions.isInBackQuote || false;
     const isRuntimeGrammar = Boolean(runtimeSuggestions);
-    const isRexFieldEqualsContext =
-      isRuntimeGrammar && /(?:^|\|)\s*rex\s+field\s*=\s*$/i.test(queryTillCursor);
-    const preferColumnSuggestionsOnly =
-      suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
-    const shouldSuggestColumns = Boolean(suggestions.suggestColumns || isRexFieldEqualsContext);
 
-    if (shouldSuggestColumns && (isInBackQuote || !isInQuotes)) {
-      const initialFields = indexPattern.fields;
+    // Runtime-specific context detection and early exit logic
+    if (isRuntimeGrammar) {
+      const isCommandPosition = isCommandPositionInCurrentSegment(queryTillCursor);
+      const isRexFieldEqualsContext = /(?:^|\|)\s*rex\s+field\s*=\s*$/i.test(queryTillCursor);
+      const preferColumnSuggestionsOnly =
+        suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
+      const shouldSuggestColumns = Boolean(suggestions.suggestColumns || isRexFieldEqualsContext);
 
-      // Use absolute query length up to cursor (line/column safe for multiline).
-      const cursorPosition = queryTillCursor.length;
-      const fieldFilter = preferColumnSuggestionsOnly
-        ? undefined
-        : (field: { subType?: unknown }) => !field?.subType;
-      const availableFields = getAvailableFieldsForAutocomplete(
-        query,
-        cursorPosition,
-        initialFields,
-        fieldFilter
-      );
+      if (shouldSuggestColumns && (isInBackQuote || !isInQuotes)) {
+        const initialFields = indexPattern.fields;
+        const cursorPosition = queryTillCursor.length;
+        const fieldFilter = preferColumnSuggestionsOnly
+          ? undefined
+          : (field: { subType?: unknown }) => !field?.subType;
+        const availableFields = getAvailableFieldsForAutocomplete(
+          query,
+          cursorPosition,
+          initialFields,
+          fieldFilter
+        );
 
-      finalSuggestions.push(
-        ...formatAvailableFieldsToSuggestions(
-          availableFields,
-          (f: string) => {
-            if (suggestions.suggestFieldsInAggregateFunction) {
-              return getInsertText(f, 'field', true);
+        finalSuggestions.push(
+          ...formatAvailableFieldsToSuggestions(
+            availableFields,
+            (f: string) => {
+              if (suggestions.suggestFieldsInAggregateFunction) {
+                return getInsertText(f, 'field', true);
+              }
+              const needsBackticks = f.includes('.') || f.includes('@');
+              return getInsertText(f, 'field', isInBackQuote, { needsBackticks });
+            },
+            (f: string) => {
+              return f.startsWith('_') ? `99` : `3`;
             }
-            const needsBackticks = f.includes('.') || f.includes('@');
-            return getInsertText(f, 'field', isInBackQuote, { needsBackticks });
-          },
-          (f: string) => {
-            return f.startsWith('_') ? `99` : `3`; // This devalues all the Field Names that start _ so that appear further down the autosuggest wizard
-          }
-        )
-      );
-    }
+          )
+        );
+      }
 
-    if (suggestions.suggestValuesForColumn && (isInQuotes || !isInBackQuote)) {
-      finalSuggestions.push(
-        ...formatValuesToSuggestions(
-          await fetchColumnValues(
-            indexPattern.title,
-            suggestions.suggestValuesForColumn,
-            services,
-            indexPattern,
-            datasetType
-          ).catch(() => []),
-          (val: any) => {
-            const isStringValue = typeof val === 'string';
-            return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
-          }
-        )
-      );
-    }
+      if (suggestions.suggestValuesForColumn && (isInQuotes || !isInBackQuote)) {
+        finalSuggestions.push(
+          ...formatValuesToSuggestions(
+            await fetchColumnValues(
+              indexPattern.title,
+              suggestions.suggestValuesForColumn,
+              services,
+              indexPattern,
+              datasetType
+            ).catch(() => []),
+            (val: any) => {
+              const isStringValue = typeof val === 'string';
+              return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
+            }
+          )
+        );
+      }
 
-    if (preferColumnSuggestionsOnly) {
-      return finalSuggestions;
+      if (preferColumnSuggestionsOnly) {
+        return finalSuggestions;
+      }
+
+      // Runtime grammar keyword processing (with heuristics)
+      if (suggestions.suggestKeywords?.length) {
+        const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
+        finalSuggestions.push(
+          ...literalKeywords.map((sk) => {
+            const keywordDetails = resolveKeywordSuggestionDetails(sk);
+            const inferredFunctionDetails =
+              !keywordDetails &&
+              !isCommandPosition &&
+              (sk.followsOpeningParen ||
+                sk.inRuntimeFunctionContext ||
+                isLikelyExpressionFunctionKeyword(sk))
+                ? INFERRED_RUNTIME_FUNCTION_DETAILS
+                : null;
+            const functionDetails = keywordDetails?.isFunction
+              ? keywordDetails
+              : inferredFunctionDetails;
+            const shouldTreatAsCommand =
+              !keywordDetails && isCommandPosition && isLikelyCommandKeyword(sk);
+
+            if (functionDetails) {
+              const functionName = sk.value;
+              return {
+                text: `${functionName}()`,
+                type:
+                  KEYWORD_ITEM_KIND_MAP.get(functionDetails.type) ??
+                  monaco.languages.CompletionItemKind.Function,
+                insertText: getInsertText(functionName, 'function', isInQuotes, {
+                  hasOptionalParam: functionDetails?.optionalParam,
+                  isSnippet: true,
+                }),
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+                detail: functionDetails.type,
+                sortText: functionDetails.importance,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            } else if (keywordDetails && !keywordDetails.isFunction) {
+              return {
+                text: sk.value,
+                type:
+                  KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
+                  monaco.languages.CompletionItemKind.Keyword,
+                insertText: getInsertText(sk.value, 'keyword', isInQuotes),
+                detail: keywordDetails.type,
+                sortText: keywordDetails.importance,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            } else if (shouldTreatAsCommand) {
+              return {
+                text: sk.value,
+                type:
+                  KEYWORD_ITEM_KIND_MAP.get(SuggestionItemDetailsTags.Command) ??
+                  monaco.languages.CompletionItemKind.Function,
+                insertText: getInsertText(sk.value, 'keyword', isInQuotes),
+                detail: SuggestionItemDetailsTags.Command,
+                sortText: '98' + sk.value,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            } else {
+              return {
+                text: sk.value,
+                insertText: getInsertText(sk.value, 'keyword', isInQuotes),
+                type: monaco.languages.CompletionItemKind.Keyword,
+                detail: SuggestionItemDetailsTags.Keyword,
+                sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            }
+          })
+        );
+
+        const supportedSymbolicKeywords = suggestions.suggestKeywords
+          .filter((sk) => !sk.value)
+          .map((sk) => resolveSupportedNonLiteralKeywordDetails(sk))
+          .filter((details): details is { insertText: string; label: string; sortText: string } =>
+            Boolean(details)
+          );
+
+        if (supportedSymbolicKeywords.length > 0) {
+          finalSuggestions.push(
+            ...supportedSymbolicKeywords.map((details) => {
+              return {
+                text: details.label,
+                insertText: details.insertText,
+                type: monaco.languages.CompletionItemKind.Keyword,
+                detail: SuggestionItemDetailsTags.Keyword,
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+                sortText: details.sortText,
+              };
+            })
+          );
+        }
+      }
+    } else {
+      // Compiled grammar path - matching main branch exactly
+      if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
+        const initialFields = indexPattern.fields;
+        const cursorPosition = queryTillCursor.length;
+        const availableFields = getAvailableFieldsForAutocomplete(
+          query,
+          cursorPosition,
+          initialFields,
+          (field) => !field?.subType
+        );
+
+        finalSuggestions.push(
+          ...formatAvailableFieldsToSuggestions(
+            availableFields,
+            (f: string) => {
+              if (suggestions.suggestFieldsInAggregateFunction) {
+                return getInsertText(f, 'field', true);
+              }
+              const needsBackticks = f.includes('.') || f.includes('@');
+              return getInsertText(f, 'field', isInBackQuote, { needsBackticks });
+            },
+            (f: string) => {
+              return f.startsWith('_') ? `99` : `3`;
+            }
+          )
+        );
+      }
+
+      if (suggestions.suggestValuesForColumn && (isInQuotes || !isInBackQuote)) {
+        finalSuggestions.push(
+          ...formatValuesToSuggestions(
+            await fetchColumnValues(
+              indexPattern.title,
+              suggestions.suggestValuesForColumn,
+              services,
+              indexPattern,
+              datasetType
+            ).catch(() => []),
+            (val: any) => {
+              const isStringValue = typeof val === 'string';
+              return getInsertText(val?.toString() || '', 'value', isInQuotes, { isStringValue });
+            }
+          )
+        );
+      }
+
+      // Compiled grammar keyword processing (matching main branch)
+      if (suggestions.suggestKeywords?.length) {
+        const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
+        finalSuggestions.push(
+          ...literalKeywords.map((sk) => {
+            const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
+            if (keywordDetails && keywordDetails.isFunction) {
+              const functionName = sk.value;
+              return {
+                text: `${functionName}()`,
+                type:
+                  KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
+                  monaco.languages.CompletionItemKind.Function,
+                insertText: getInsertText(functionName, 'function', isInQuotes, {
+                  hasOptionalParam: keywordDetails?.optionalParam,
+                  isSnippet: true,
+                }),
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+                detail: keywordDetails.type,
+                sortText: keywordDetails.importance,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            } else if (keywordDetails && !keywordDetails.isFunction) {
+              return {
+                text: sk.value,
+                type:
+                  KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
+                  monaco.languages.CompletionItemKind.Keyword,
+                insertText: getInsertText(sk.value, 'keyword', isInQuotes),
+                detail: keywordDetails.type,
+                sortText: keywordDetails.importance,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            } else {
+              return {
+                text: sk.value,
+                insertText: getInsertText(sk.value, 'keyword', isInQuotes),
+                type: monaco.languages.CompletionItemKind.Keyword,
+                detail: SuggestionItemDetailsTags.Keyword,
+                sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value,
+                documentation: Documentation[sk.value.toUpperCase()] ?? '',
+              };
+            }
+          })
+        );
+
+        const supportedSymbolicKeywords = suggestions.suggestKeywords.filter(
+          (sk) => !sk.value && SUPPORTED_NON_LITERAL_KEYWORDS.has(sk.id)
+        );
+
+        if (supportedSymbolicKeywords) {
+          finalSuggestions.push(
+            ...supportedSymbolicKeywords.map((sk) => {
+              const details = SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
+              return {
+                text: details!.label,
+                insertText: details!.insertText,
+                type: monaco.languages.CompletionItemKind.Keyword,
+                detail: SuggestionItemDetailsTags.Keyword,
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+                sortText: details!.sortText,
+              };
+            })
+          );
+        }
+      }
     }
 
     if (suggestions.suggestAggregateFunctions) {
@@ -370,102 +583,6 @@ export const getSimplifiedPPLSuggestions = async ({
           insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
           sortText: singleQuoteDetails.sortText,
         });
-      }
-    }
-
-    // Fill in PPL keywords
-    if (suggestions.suggestKeywords?.length) {
-      const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
-      finalSuggestions.push(
-        ...literalKeywords.map((sk) => {
-          const keywordDetails = resolveKeywordSuggestionDetails(sk);
-          const inferredFunctionDetails =
-            !keywordDetails &&
-            isRuntimeGrammar &&
-            !isCommandPosition &&
-            (sk.followsOpeningParen ||
-              sk.inRuntimeFunctionContext ||
-              isLikelyExpressionFunctionKeyword(sk))
-              ? INFERRED_RUNTIME_FUNCTION_DETAILS
-              : null;
-          const functionDetails = keywordDetails?.isFunction
-            ? keywordDetails
-            : inferredFunctionDetails;
-          const shouldTreatAsCommand =
-            !keywordDetails && isCommandPosition && isLikelyCommandKeyword(sk);
-          if (functionDetails) {
-            const functionName = sk.value;
-            return {
-              text: `${functionName}()`,
-              type:
-                KEYWORD_ITEM_KIND_MAP.get(functionDetails.type) ??
-                monaco.languages.CompletionItemKind.Function,
-              insertText: getInsertText(functionName, 'function', isInQuotes, {
-                hasOptionalParam: functionDetails?.optionalParam,
-                isSnippet: true,
-              }),
-              insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
-              detail: functionDetails.type,
-              sortText: functionDetails.importance,
-              documentation: Documentation[sk.value.toUpperCase()] ?? '',
-            };
-          } else if (keywordDetails && !keywordDetails.isFunction) {
-            return {
-              text: sk.value,
-              type:
-                KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
-                monaco.languages.CompletionItemKind.Keyword,
-              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
-              detail: keywordDetails.type,
-              sortText: keywordDetails.importance,
-              documentation: Documentation[sk.value.toUpperCase()] ?? '',
-            };
-          } else if (shouldTreatAsCommand) {
-            return {
-              text: sk.value,
-              type:
-                KEYWORD_ITEM_KIND_MAP.get(SuggestionItemDetailsTags.Command) ??
-                monaco.languages.CompletionItemKind.Function,
-              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
-              detail: SuggestionItemDetailsTags.Command,
-              sortText: '98' + sk.value,
-              documentation: Documentation[sk.value.toUpperCase()] ?? '',
-            };
-          } else {
-            return {
-              text: sk.value,
-              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
-              type: monaco.languages.CompletionItemKind.Keyword,
-              detail: SuggestionItemDetailsTags.Keyword,
-              // sortText is the only option to sort suggestions, compares strings
-              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value, // '98' used to devalue every other suggestion
-              documentation: Documentation[sk.value.toUpperCase()] ?? '',
-            };
-          }
-        })
-      );
-
-      const supportedSymbolicKeywords = suggestions.suggestKeywords
-        .filter((sk) => !sk.value)
-        .map((sk) => resolveSupportedNonLiteralKeywordDetails(sk))
-        .filter((details): details is { insertText: string; label: string; sortText: string } =>
-          Boolean(details)
-        );
-
-      if (supportedSymbolicKeywords.length > 0) {
-        finalSuggestions.push(
-          ...supportedSymbolicKeywords.map((details) => {
-            return {
-              text: details.label,
-              insertText: details.insertText,
-              type: monaco.languages.CompletionItemKind.Keyword,
-              detail: SuggestionItemDetailsTags.Keyword,
-              insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
-              // sortText is the only option to sort suggestions, compares strings
-              sortText: details.sortText,
-            };
-          })
-        );
       }
     }
 
