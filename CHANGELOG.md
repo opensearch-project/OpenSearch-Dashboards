@@ -4,6 +4,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### 🛡 Security
+
 ## [3.5.0-2026-02-10](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.5.0)
 
 ### 💥 Breaking Changes
