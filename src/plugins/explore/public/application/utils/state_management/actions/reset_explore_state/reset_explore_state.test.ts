@@ -18,7 +18,6 @@ import { executeQueries } from '../query_actions';
 jest.mock('../../utils/redux_persistence');
 jest.mock('../../slices');
 jest.mock('../query_actions');
-jest.mock('../detect_optimal_tab');
 
 describe('resetExploreStateActionCreator', () => {
   const services = {} as any;
