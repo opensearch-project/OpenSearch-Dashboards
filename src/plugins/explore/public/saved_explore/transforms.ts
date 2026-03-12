@@ -46,7 +46,7 @@ export const saveStateToSavedObject = (
   });
 
   obj.uiState = JSON.stringify({
-    activeTab: activeTabId || tabDefinition?.id,
+    activeTab: activeTabId || tabDefinition?.id || 'logs',
   });
   obj.searchSourceFields = { index: dataset };
 
