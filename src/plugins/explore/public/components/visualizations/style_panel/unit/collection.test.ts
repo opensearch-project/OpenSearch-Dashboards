@@ -52,22 +52,22 @@ describe('UnitsCollection', () => {
 
   it('should format currency values using display function', () => {
     const dollarUnit = getUnitById('dollars');
-    expect(dollarUnit?.display?.(100, '$')).toBe('$ 100');
+    expect(dollarUnit?.display?.(100, '$').label).toBe('$ 100');
 
     const euroUnit = getUnitById('euro');
-    expect(euroUnit?.display?.(50.75, '€')).toBe('€ 50.75');
+    expect(euroUnit?.display?.(50.75, '€').label).toBe('€ 50.75');
 
     const yuanUnit = getUnitById('yuan');
-    expect(yuanUnit?.display?.(25.99, '¥')).toBe('¥ 25.99');
+    expect(yuanUnit?.display?.(25.99, '¥').label).toBe('¥ 25.99');
 
     const yenUnit = getUnitById('yen');
-    expect(yenUnit?.display?.(25.99, '¥')).toBe('¥ 25.99');
+    expect(yenUnit?.display?.(25.99, '¥').label).toBe('¥ 25.99');
 
     const poundUnit = getUnitById('pounds');
-    expect(poundUnit?.display?.(25.99, '£')).toBe('£ 25.99');
+    expect(poundUnit?.display?.(25.99, '£').label).toBe('£ 25.99');
 
     const rubleUnit = getUnitById('rubles');
-    expect(rubleUnit?.display?.(25.99, '₽')).toBe('₽ 25.99');
+    expect(rubleUnit?.display?.(25.99, '₽').label).toBe('₽ 25.99');
   });
 
   it('should have correct symbols for each currency', () => {
@@ -155,67 +155,67 @@ describe('UnitsCollection', () => {
 
   it('should add proper unit for misc values using display function', () => {
     const integerUnit = getUnitById('integer');
-    expect(integerUnit?.display?.(100.12)).toBe(100);
+    expect(integerUnit?.display?.(100.12).label).toBe(100);
 
     const shortUnit = getUnitById('short');
-    expect(shortUnit?.display?.(1000)).toBe('1 K');
+    expect(shortUnit?.display?.(1000).label).toBe('1 K');
   });
 
   it('should add proper unit for data values using display function', () => {
     const bits = getUnitById('bits');
-    expect(bits?.display?.(100.12, 'b')).toBe('12.52 B');
+    expect(bits?.display?.(100.12, 'b').label).toBe('12.52 B');
 
     const kbits = getUnitById('bytes');
-    expect(kbits?.display?.(100.12, 'B')).toBe('100.12 B');
+    expect(kbits?.display?.(100.12, 'B').label).toBe('100.12 B');
 
     const kilobytes = getUnitById('kilobytes');
-    expect(kilobytes?.display?.(100.12, 'kB')).toBe('97.77 KiB');
+    expect(kilobytes?.display?.(100.12, 'kB').label).toBe('97.77 KiB');
 
     const kibibytes = getUnitById('kibibytes');
-    expect(kibibytes?.display?.(100.12, 'KiB')).toBe('100.12 KiB');
+    expect(kibibytes?.display?.(100.12, 'KiB').label).toBe('100.12 KiB');
 
     const megabytes = getUnitById('megabytes');
-    expect(megabytes?.display?.(100.12, 'MB')).toBe('95.48 MiB');
+    expect(megabytes?.display?.(100.12, 'MB').label).toBe('95.48 MiB');
 
     const mebibytes = getUnitById('mebibytes');
-    expect(mebibytes?.display?.(100.12, 'MiB')).toBe('100.12 MiB');
+    expect(mebibytes?.display?.(100.12, 'MiB').label).toBe('100.12 MiB');
 
     const gigabytes = getUnitById('gigabytes');
-    expect(gigabytes?.display?.(100.12, 'GB')).toBe('93.24 GiB');
+    expect(gigabytes?.display?.(100.12, 'GB').label).toBe('93.24 GiB');
 
     const gibibytes = getUnitById('gibibytes');
-    expect(gibibytes?.display?.(100.12, 'GiB')).toBe('100.12 GiB');
+    expect(gibibytes?.display?.(100.12, 'GiB').label).toBe('100.12 GiB');
 
     const terabytes = getUnitById('terabytes');
-    expect(terabytes?.display?.(100.12, 'TB')).toBe('91.06 TiB');
+    expect(terabytes?.display?.(100.12, 'TB').label).toBe('91.06 TiB');
 
     const tebibytes = getUnitById('tebibytes');
-    expect(tebibytes?.display?.(100.12, 'TiB')).toBe('100.12 TiB');
+    expect(tebibytes?.display?.(100.12, 'TiB').label).toBe('100.12 TiB');
   });
 
   it('should add proper unit for time values using display function', () => {
     const year = getUnitById('year');
-    expect(year?.display?.(1000, 'years')).toBe('1000 years');
+    expect(year?.display?.(1000, 'years').label).toBe('1000 years');
 
     const month = getUnitById('month');
-    expect(month?.display?.(1000, 'months')).toBe('82.19 years');
+    expect(month?.display?.(1000, 'months').label).toBe('82.19 years');
 
     const week = getUnitById('week');
-    expect(week?.display?.(1000, 'weeks')).toBe('19.18 years');
+    expect(week?.display?.(1000, 'weeks').label).toBe('19.18 years');
 
     const day = getUnitById('day');
-    expect(day?.display?.(1000, 'days')).toBe('2.74 years');
+    expect(day?.display?.(1000, 'days').label).toBe('2.74 years');
 
     const hour = getUnitById('hour');
-    expect(hour?.display?.(1000, 'hours')).toBe('1.39 months');
+    expect(hour?.display?.(1000, 'hours').label).toBe('1.39 months');
 
     const minute = getUnitById('minute');
-    expect(minute?.display?.(1000, 'minutes')).toBe('16.67 hours');
+    expect(minute?.display?.(1000, 'minutes').label).toBe('16.67 hours');
 
     const second = getUnitById('second');
-    expect(second?.display?.(1000, 'seconds')).toBe('16.67 minutes');
+    expect(second?.display?.(1000, 'seconds').label).toBe('16.67 minutes');
     const millisecond = getUnitById('millisecond');
-    expect(millisecond?.display?.(1000, 'milliseconds')).toBe('1 seconds');
+    expect(millisecond?.display?.(1000, 'milliseconds').label).toBe('1 seconds');
   });
 });
 
@@ -280,12 +280,12 @@ describe('computingDate', () => {
   describe('ISO format', () => {
     it('should format timestamp as ISO string', () => {
       const result = computingDate(1640995200000, 'iso');
-      expect(result).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
+      expect(result.label).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
     });
 
     it('should handle different timestamps', () => {
       const result = computingDate(1609459200000, 'iso'); // 2021-01-01
-      expect(result).toBe('Fri, 01 Jan 2021 00:00:00 GMT');
+      expect(result.label).toBe('Fri, 01 Jan 2021 00:00:00 GMT');
     });
   });
 
@@ -300,59 +300,59 @@ describe('computingDate', () => {
 
     it('should show milliseconds ago for very recent times', () => {
       const result = computingDate(MOCK_TIMESTAMP - 500, 'fromNow');
-      expect(result).toBe('500 milliseconds ago');
+      expect(result.label).toBe('500 milliseconds ago');
     });
 
     it('should show seconds ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 5000, 'fromNow');
-      expect(result).toBe('5 seconds ago');
+      expect(result.label).toBe('5 seconds ago');
     });
 
     it('should show minutes ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 300000, 'fromNow');
-      expect(result).toBe('5 minutes ago');
+      expect(result.label).toBe('5 minutes ago');
     });
 
     it('should show hours ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 7200000, 'fromNow');
-      expect(result).toBe('2 hours ago');
+      expect(result.label).toBe('2 hours ago');
     });
 
     it('should show days ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 172800000, 'fromNow');
-      expect(result).toBe('2 days ago');
+      expect(result.label).toBe('2 days ago');
     });
 
     it('should show weeks ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 1209600000, 'fromNow');
-      expect(result).toBe('2 weeks ago');
+      expect(result.label).toBe('2 weeks ago');
     });
 
     it('should show months ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 5184000000, 'fromNow');
-      expect(result).toBe('2 months ago');
+      expect(result.label).toBe('2 months ago');
     });
 
     it('should show years ago', () => {
       const result = computingDate(MOCK_TIMESTAMP - 31536000000, 'fromNow');
-      expect(result).toBe('1 years ago');
+      expect(result.label).toBe('1 years ago');
     });
 
     it('should show future times with "after"', () => {
       const result = computingDate(MOCK_TIMESTAMP + 3600000, 'fromNow');
-      expect(result).toBe('1 hours after');
+      expect(result.label).toBe('1 hours after');
     });
   });
 
   describe('default format', () => {
     it('should default to UTC string', () => {
       const result = computingDate(1640995200000);
-      expect(result).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
+      expect(result.label).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
     });
 
     it('should handle undefined symbol', () => {
       const result = computingDate(1640995200000, undefined);
-      expect(result).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
+      expect(result.label).toBe('Sat, 01 Jan 2022 00:00:00 GMT');
     });
   });
 });
@@ -360,26 +360,26 @@ describe('computingDate', () => {
 describe('currencyFormat', () => {
   it('should display currency symbol', () => {
     const result = currencyFormat(12, '$');
-    expect(result).toBe('$ 12');
+    expect(result.label).toBe('$ 12');
   });
 
   it('should round to 2 decimal places', () => {
     const result = currencyFormat(12.1234, '$');
-    expect(result).toBe('$ 12.12');
+    expect(result.label).toBe('$ 12.12');
   });
 
   it('should handle different currency symbols', () => {
-    expect(currencyFormat(100, '€')).toBe('€ 100');
-    expect(currencyFormat(50, '£')).toBe('£ 50');
-    expect(currencyFormat(75, '¥')).toBe('¥ 75');
-    expect(currencyFormat(75, '¥')).toBe('¥ 75');
-    expect(currencyFormat(200, '₽')).toBe('₽ 200');
+    expect(currencyFormat(100, '€').label).toBe('€ 100');
+    expect(currencyFormat(50, '£').label).toBe('£ 50');
+    expect(currencyFormat(75, '¥').label).toBe('¥ 75');
+    expect(currencyFormat(75, '¥').label).toBe('¥ 75');
+    expect(currencyFormat(200, '₽').label).toBe('₽ 200');
   });
 });
 
 describe('computing', () => {
   it('should compute the decent unit with the base unit', () => {
     const result = computing(1000, dataUnits, 'B');
-    expect(result).toBe('1 kB');
+    expect(result.label).toBe('1 kB');
   });
 });

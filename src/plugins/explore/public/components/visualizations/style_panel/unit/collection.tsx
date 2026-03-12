@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { Unit, UnitItem } from '../../types';
+import { Unit, UnitDisplay, UnitItem } from '../../types';
 
 export const dataUnits = [
   { symbol: 'b', value: 1 }, // 1 bit
@@ -61,18 +61,24 @@ export const shortNumber = (num: number) => {
   return `${Math.round(n * 100) / 100} ${units[unitIndex]}`;
 };
 
-export const currencyFormat = (num: number, symbol?: string) => {
-  return `${symbol ? symbol : ''} ${Math.round(num * 100) / 100}`;
+export const currencyFormat = (num: number, symbol?: string): UnitDisplay => {
+  return {
+    label: `${symbol ? symbol : ''} ${Math.round(num * 100) / 100}`,
+    segments: [
+      { type: 'unit', value: symbol || '' },
+      { type: 'value', value: Math.round(num * 100) / 100 },
+    ],
+  };
 };
 
 export const computing = (
   num: number,
   units: Array<{ symbol: string; value: number }>,
   symbol?: string
-) => {
+): UnitDisplay => {
   // target the base unit symbol
   const startUnit = symbol && units.find((u) => u.symbol === symbol);
-  if (!symbol || !startUnit) return `${Math.round(num * 100) / 100}`;
+  if (!symbol || !startUnit) return { label: `${Math.round(num * 100) / 100}` };
 
   const finalNum = num * startUnit.value;
   let i = units.findIndex((u) => u.symbol === symbol);
@@ -81,17 +87,23 @@ export const computing = (
     i++;
   }
   const displayNum = finalNum / units[i].value;
-  return `${Math.round(displayNum * 100) / 100} ${units[i].symbol}`;
+  return {
+    label: `${Math.round(displayNum * 100) / 100} ${units[i].symbol}`,
+    segments: [
+      { type: 'value', value: Math.round(displayNum * 100) / 100 },
+      { type: 'unit', value: units[i].symbol },
+    ],
+  };
 };
 
-export const computingDate = (num: number, symbol?: string) => {
+export const computingDate = (num: number, symbol?: string): UnitDisplay => {
   const numDate = new Date(num);
   const utcMillis = Date.now();
 
   switch (symbol) {
     case 'iso':
       const dateStr = numDate.toUTCString();
-      return dateStr;
+      return { label: dateStr };
     case 'fromNow':
       const diff = utcMillis - num;
       const absDiff = Math.abs(diff);
@@ -100,11 +112,11 @@ export const computingDate = (num: number, symbol?: string) => {
         const unit = timeUnits[i];
         const value = Math.floor(absDiff / unit.value);
         if (value >= 1) {
-          return `${value} ${unit.symbol} ${suffix}`;
+          return { label: `${value} ${unit.symbol} ${suffix}` };
         }
       }
     default:
-      return numDate.toUTCString();
+      return { label: numDate.toUTCString() };
   }
 };
 
@@ -119,7 +131,7 @@ export const UnitsCollection: Record<string, Unit> = {
       {
         id: 'integer',
         name: i18n.translate('explore.stylePanel.unit.integer', { defaultMessage: 'Integer' }),
-        display: (val: number) => Math.round(val),
+        display: (val: number) => ({ label: Math.round(val) }),
       },
       {
         id: 'percentage',
@@ -131,7 +143,7 @@ export const UnitsCollection: Record<string, Unit> = {
       {
         id: 'short',
         name: i18n.translate('explore.stylePanel.unit.short', { defaultMessage: 'Short' }),
-        display: (val: number) => shortNumber(val),
+        display: (val: number) => ({ label: shortNumber(val) }),
       },
     ],
   },
