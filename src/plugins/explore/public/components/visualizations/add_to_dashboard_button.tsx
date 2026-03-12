@@ -108,7 +108,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       flavorId ?? 'logs',
-      tabDefinition!,
+      tabDefinition,
       {
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,
