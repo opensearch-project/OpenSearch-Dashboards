@@ -87,6 +87,19 @@ jest.mock('../../../application/utils/hooks/use_histogram_results', () => ({
   }),
 }));
 
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: () => ({ language: 'PPL', query: 'source=logs', dataset: { id: 'test' } }),
+}));
+
+jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: () => 'source=logs',
+}));
+
+jest.mock('../../../application/utils/state_management/actions/utils', () => ({
+  queryEndsWithHead: () => false,
+}));
+
 describe('ActionBar', () => {
   test('should render the action bar component', () => {
     render(<ActionBar />);

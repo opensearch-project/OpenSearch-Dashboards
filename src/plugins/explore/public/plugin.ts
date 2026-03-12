@@ -431,13 +431,13 @@ export class ExplorePlugin
     );
     core.application.register(createExploreApp());
 
-    // Register all nav links during setup
-    // Visibility will be controlled by capabilities in the start lifecycle
-    const navLinks = [
+    // Register nav links for different workspaces
+    const navLinks = (isObservability: boolean) => [
       {
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        ...(isObservability ? {} : { title: 'Explorer' }),
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
@@ -459,7 +459,9 @@ export class ExplorePlugin
       },
     ];
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks(true));
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks(false));
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -584,6 +586,12 @@ export class ExplorePlugin
     // Always register Ask AI action - let isCompatible handle enablement logic
     const askAiAction = createAskAiAction(core.chat);
     logActionRegistry.registerAction(askAiAction);
+
+    if (core.chat && plugins.contextProvider) {
+      const askAIEmbeddableAction = new AskAIEmbeddableAction(core, plugins.contextProvider);
+      plugins.uiActions.registerAction(askAIEmbeddableAction);
+      plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
+    }
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
@@ -721,7 +729,9 @@ export class ExplorePlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }

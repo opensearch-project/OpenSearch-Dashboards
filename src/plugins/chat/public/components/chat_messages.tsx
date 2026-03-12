@@ -394,12 +394,37 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
 
+            const renderAssistantContent = () => {
+              if (!assistantMsg.content) {
+                return null;
+              }
+
+              if (Array.isArray(assistantMsg.content)) {
+                return assistantMsg.content
+                  .filter((content) => content.text?.trim())
+                  .map((content, contentIndex) => (
+                    <MessageRow
+                      key={`${assistantMsg.id}-${contentIndex}`}
+                      message={{
+                        role: 'assistant',
+                        content: content.text,
+                        id: `${assistantMsg.id}-${contentIndex}`,
+                      }}
+                    />
+                  ));
+              }
+
+              if (assistantMsg.content.trim()) {
+                return <MessageRow message={assistantMsg} />;
+              }
+
+              return null;
+            };
+
             return (
               <div key={message.id}>
                 {/* Assistant message content */}
-                {assistantMsg.content && assistantMsg.content.trim() && (
-                  <MessageRow message={assistantMsg} />
-                )}
+                {renderAssistantContent()}
 
                 {suggestionsEnabled && lastAssistantMessageIndex === index && (
                   <ChatSuggestions messages={timeline} currentMessage={message} />

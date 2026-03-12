@@ -126,7 +126,7 @@ export function NavGroups({
           <CollapsibleNavGroupsLabel
             label={props.name}
             storageKey={parentOpenKey}
-            collapsible={!categoryCollapsible}
+            collapsible
             onToggle={() => setRenderKey(Date.now())}
             data-test-subj={props['data-test-subj']}
           />

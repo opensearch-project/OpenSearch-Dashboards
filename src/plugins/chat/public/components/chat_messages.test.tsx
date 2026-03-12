@@ -145,6 +145,102 @@ describe('ChatMessages', () => {
       expect(getByText('Assistant message')).toBeTruthy();
     });
 
+    it('should render assistant messages with array content', () => {
+      const timeline: Message[] = [
+        ({
+          id: '1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'First part' },
+            { type: 'text', text: 'Second part' },
+          ],
+        } as unknown) as AssistantMessage, // Force type casting for the corner case.
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      const messageRows = getAllByTestId('message-row');
+      expect(messageRows).toHaveLength(2);
+      expect(messageRows[0].textContent).toBe('First part');
+      expect(messageRows[1].textContent).toBe('Second part');
+    });
+
+    it('should filter out empty text content from array assistant messages', () => {
+      const timeline: Message[] = [
+        {
+          id: '1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'Valid content' },
+            { type: 'text', text: '' },
+            { type: 'text', text: '   ' },
+            { type: 'text', text: 'Another valid' },
+          ],
+        } as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      const messageRows = getAllByTestId('message-row');
+      expect(messageRows).toHaveLength(2);
+      expect(messageRows[0].textContent).toBe('Valid content');
+      expect(messageRows[1].textContent).toBe('Another valid');
+    });
+
+    it('should not render assistant message with empty string content', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: '   ' },
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Only user message should be rendered
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
+    it('should not render assistant message with null/undefined content', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Hello' },
+        ({ id: '2', role: 'assistant', content: undefined } as unknown) as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Only user message should be rendered
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
+    it('should handle assistant message with empty array content', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Hello' },
+        ({ id: '2', role: 'assistant', content: [] } as unknown) as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Only user message should be rendered
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
+    it('should filter out array content with null/undefined text', () => {
+      const timeline: Message[] = [
+        {
+          id: '1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'Valid' },
+            { type: 'text', text: null } as any,
+            { type: 'text', text: undefined } as any,
+          ],
+        } as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
     it('should render system messages as errors', () => {
       const timeline: Message[] = [{ id: '1', role: 'system', content: 'Error message' }];
 

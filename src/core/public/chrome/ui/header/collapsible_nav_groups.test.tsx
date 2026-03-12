@@ -76,4 +76,37 @@ describe('<NavGroups />', () => {
     fireEvent.click(getByTestId('collapsibleNavAppLink-subLink'));
     expect(navigateToApp).toBeCalledWith('subLink');
   });
+
+  it('should keep parent nav links collapsible when categoryCollapsible is true', () => {
+    const navigateToApp = jest.fn();
+    const onNavItemClick = jest.fn();
+    const { getByTestId, queryByTestId } = render(
+      <NavGroups
+        navLinks={[
+          getMockedNavLink({
+            id: 'parent',
+            title: 'parent link',
+          }),
+          getMockedNavLink({
+            id: 'child',
+            title: 'child link',
+            parentNavLinkId: 'parent',
+          }),
+        ]}
+        navigateToApp={navigateToApp}
+        onNavItemClick={onNavItemClick}
+        categoryCollapsible
+      />
+    );
+    // Open by default
+    expect(getByTestId('collapsibleNavAppLink-child')).toBeTruthy();
+
+    // Collapse the parent
+    fireEvent.click(getByTestId('collapsibleNavAppLink-parent'));
+    expect(queryByTestId('collapsibleNavAppLink-child')).toBeNull();
+
+    // Expand again
+    fireEvent.click(getByTestId('collapsibleNavAppLink-parent'));
+    expect(getByTestId('collapsibleNavAppLink-child')).toBeTruthy();
+  });
 });

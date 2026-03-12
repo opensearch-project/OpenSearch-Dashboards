@@ -34,6 +34,7 @@ import type { SavedConversation } from '../services/conversation_history_service
 import { readFileAsBase64, clearAttachmentBase64, FileAttachment } from '../utils/read_file_as_base64';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
+import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
@@ -701,7 +702,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           onSelectConversation={handleSelectConversation}
         />
       ) : (
-        <>
+        <ChatSessionErrorBoundary onStartNewSession={handleNewChat}>
           <ChatMessages
             layoutMode={layoutMode}
             timeline={timeline}
@@ -783,7 +784,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             maxFileAttachments={chatService.maxFileAttachments}
             attachmentCount={fileAttachments.length + (screenshotData ? 1 : 0)}
           />
-        </>
+        </ChatSessionErrorBoundary>
       )}
     </ChatContainer>
   );

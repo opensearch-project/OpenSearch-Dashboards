@@ -14,6 +14,8 @@ import {
   queryReducer,
   resultsInitialState,
   resultsReducer,
+  resultsCache,
+  clearResultsCache,
 } from '../../application/utils/state_management/slices';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 
@@ -67,11 +69,20 @@ describe('ExploreMetricsDataTable', () => {
       ],
     };
 
+    // Populate the module-level cache with full results
+    resultsCache.set(cacheKey, mockSearchResult);
+
     const preloadedState = {
       query: queryObj,
       results: {
         ...resultsInitialState,
-        [cacheKey]: mockSearchResult,
+        // Store only metadata in Redux
+        [cacheKey]: {
+          total: 0,
+          elapsedMs: 10,
+          instantFieldSchema: mockSearchResult.instantFieldSchema,
+          hasResults: false,
+        },
       },
     };
 
@@ -83,6 +94,10 @@ describe('ExploreMetricsDataTable', () => {
       preloadedState,
     });
   };
+
+  afterEach(() => {
+    clearResultsCache();
+  });
 
   it('renders MetricsDataTable with search results from Redux store', () => {
     const store = createTestStore();
@@ -150,7 +165,9 @@ describe('ExploreMetricsDataTable', () => {
     const state = store.getState();
     const expectedCacheKey = defaultPrepareQueryString(state.query);
 
+    // Redux now holds metadata; full result lives in the module-level cache
     expect(state.results[expectedCacheKey]).toBeDefined();
+    expect(resultsCache.get(expectedCacheKey)).toBeDefined();
   });
 
   it('renders without crashing when results exist', () => {

@@ -6,7 +6,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiText,
-  EuiSpacer,
   EuiListGroup,
   EuiListGroupItem,
   EuiPopover,
@@ -26,11 +25,6 @@ import {
 import './conversation_history_panel.scss';
 import { AgenticMemoryProvider } from '../services/agentic_memory_provider';
 
-interface ConversationGroup {
-  title: string;
-  conversations: SavedConversation[];
-}
-
 interface ConversationHistoryPanelProps {
   conversationHistoryService: ConversationHistoryService;
   onSelectConversation: (conversation: SavedConversation) => void;
@@ -43,7 +37,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
   const toasts = services.core?.notifications?.toasts;
 
-  const [groups, setGroups] = useState<ConversationGroup[]>([]);
+  const [conversations, setConversations] = useState<SavedConversation[]>([]);
   const [popoverOpenForId, setPopoverOpenForId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -52,61 +46,23 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   const contentRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef(0);
   const PAGE_SIZE = 20;
+  const isLoadingRef = useRef(false);
 
   const hideDeleteAction = useMemo(
     () => conversationHistoryService.getMemoryProvider() instanceof AgenticMemoryProvider,
     [conversationHistoryService]
   );
 
-  /**
-   * Group conversations by date
-   */
-  const groupConversations = useCallback(
-    (conversations: SavedConversation[]): ConversationGroup[] => {
-      const now = Date.now();
-      const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const setIsLoadingWithRef = useCallback((value: boolean) => {
+    isLoadingRef.current = value;
+    setIsLoading(value);
+  }, []);
 
-      const recent: SavedConversation[] = [];
-      const older: SavedConversation[] = [];
-
-      conversations.forEach((conv) => {
-        if (conv.updatedAt >= sevenDaysAgo) {
-          recent.push(conv);
-        } else {
-          older.push(conv);
-        }
-      });
-
-      const result: ConversationGroup[] = [];
-
-      if (recent.length > 0) {
-        result.push({
-          title: i18n.translate('chat.conversationHistory.last7DaysLabel', {
-            defaultMessage: 'Last 7 days',
-          }),
-          conversations: recent,
-        });
-      }
-
-      if (older.length > 0) {
-        result.push({
-          title: i18n.translate('chat.conversationHistory.olderLabel', {
-            defaultMessage: 'Older',
-          }),
-          conversations: older,
-        });
-      }
-
-      return result;
-    },
-    []
-  );
-
-  const loadGroups = useCallback(
+  const loadConversations = useCallback(
     async (currentPage: number, append: boolean = false) => {
-      if (isLoading) return;
+      if (isLoadingRef.current) return;
 
-      setIsLoading(true);
+      setIsLoadingWithRef(true);
       setError(null);
       try {
         const result = await conversationHistoryService.getConversations({
@@ -115,20 +71,16 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
         });
 
         if (append) {
-          // Append new conversations and regroup
-          setGroups((prevGroups) => {
-            // Extract all existing conversations
-            const allConversations: SavedConversation[] = [];
-            prevGroups.forEach((group) => {
-              allConversations.push(...group.conversations);
-            });
-            // Add new conversations
-            allConversations.push(...result.conversations);
-            // Regroup all conversations
-            return groupConversations(allConversations);
+          // Append new conversations
+          setConversations((prevConversations) => {
+            const existingIds = new Set(prevConversations.map((c) => c.id));
+            return [
+              ...prevConversations,
+              ...result.conversations.filter((conversation) => !existingIds.has(conversation.id)),
+            ];
           });
         } else {
-          setGroups(groupConversations(result.conversations));
+          setConversations(result.conversations);
         }
 
         setHasMore(result.hasMore);
@@ -143,14 +95,14 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
               })
         );
       } finally {
-        setIsLoading(false);
+        setIsLoadingWithRef(false);
       }
     },
-    [conversationHistoryService, isLoading, groupConversations]
+    [conversationHistoryService, setIsLoadingWithRef]
   );
 
   useEffect(() => {
-    loadGroups(0, false);
+    loadConversations(0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationHistoryService]);
 
@@ -159,7 +111,8 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
       await conversationHistoryService.deleteConversation(threadId);
       pageRef.current = 0;
       setPage(0);
-      await loadGroups(0, false);
+      setIsLoadingWithRef(false);
+      await loadConversations(0, false);
       setPopoverOpenForId(null);
     } catch (err) {
       toasts?.addDanger({
@@ -180,15 +133,15 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
   const handleRetry = useCallback(() => {
     pageRef.current = 0;
     setPage(0);
-    loadGroups(0, false);
-  }, [loadGroups]);
+    loadConversations(0, false);
+  }, [loadConversations]);
 
   const handleRetryPagination = useCallback(() => {
-    loadGroups(pageRef.current, true);
-  }, [loadGroups]);
+    loadConversations(pageRef.current, true);
+  }, [loadConversations]);
 
   const handleScroll = useCallback(() => {
-    if (!contentRef.current || !hasMore || isLoading || error) return;
+    if (!contentRef.current || !hasMore || isLoadingRef.current || error) return;
 
     const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
     // Load more when scrolled within 100px of the bottom
@@ -196,9 +149,9 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
       pageRef.current += 1;
       const nextPage = pageRef.current;
       setPage((prev) => prev + 1);
-      loadGroups(nextPage, true);
+      loadConversations(nextPage, true);
     }
-  }, [hasMore, isLoading, loadGroups, error]);
+  }, [hasMore, loadConversations, error]);
 
   useEffect(() => {
     const container = contentRef.current;
@@ -222,7 +175,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
   return (
     <div className="conversationHistoryPanel__content" ref={contentRef}>
-      {error && groups.length === 0 ? (
+      {error && conversations.length === 0 ? (
         <EuiEmptyPrompt
           iconType="alert"
           color="danger"
@@ -246,7 +199,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
             </EuiButton>
           }
         />
-      ) : groups.length === 0 && isLoading ? (
+      ) : conversations.length === 0 && isLoading ? (
         <div className="conversationHistoryPanel__loading conversationHistoryPanel__loading--initial">
           <EuiLoadingSpinner size="l" />
           <EuiText color="subdued" size="s">
@@ -255,7 +208,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
             })}
           </EuiText>
         </div>
-      ) : groups.length === 0 ? (
+      ) : conversations.length === 0 ? (
         <div className="conversationHistoryPanel__empty">
           <EuiText color="subdued" size="s">
             {i18n.translate('chat.conversationHistory.emptyStateMessage', {
@@ -265,78 +218,70 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
         </div>
       ) : (
         <>
-          {groups.map((group, groupIndex) => (
-            <div key={groupIndex} className="conversationHistoryPanel__group">
-              <EuiText size="xs" className="conversationHistoryPanel__groupTitle">
-                <h3>{group.title}</h3>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiListGroup className="conversationHistoryPanel__list">
-                {group.conversations.map((conversation) => {
-                  if (hideDeleteAction) {
-                    return (
+          <EuiListGroup className="conversationHistoryPanel__list" maxWidth={false}>
+            {conversations.map((conversation) => {
+              if (hideDeleteAction) {
+                return (
+                  <EuiListGroupItem
+                    key={conversation.id}
+                    label={conversation.name}
+                    onClick={() => handleSelectConversation(conversation)}
+                    size="s"
+                  />
+                );
+              }
+              return (
+                <EuiPopover
+                  key={conversation.id}
+                  anchorClassName="conversationHistoryPanel__itemAnchor"
+                  button={
+                    <div>
                       <EuiListGroupItem
-                        key={conversation.id}
                         label={conversation.name}
                         onClick={() => handleSelectConversation(conversation)}
                         size="s"
+                        extraAction={{
+                          iconType: 'boxesHorizontal',
+                          'aria-label': i18n.translate(
+                            'chat.conversationHistory.actionsAriaLabel',
+                            {
+                              defaultMessage: 'Actions',
+                            }
+                          ),
+                          onClick: (e) => {
+                            e.stopPropagation();
+                            togglePopover(conversation.id);
+                          },
+                          alwaysShow: false,
+                        }}
                       />
-                    );
+                    </div>
                   }
-                  return (
-                    <EuiPopover
-                      key={conversation.id}
-                      anchorClassName="conversationHistoryPanel__itemAnchor"
-                      button={
-                        <div>
-                          <EuiListGroupItem
-                            label={conversation.name}
-                            onClick={() => handleSelectConversation(conversation)}
-                            size="s"
-                            extraAction={{
-                              iconType: 'boxesHorizontal',
-                              'aria-label': i18n.translate(
-                                'chat.conversationHistory.actionsAriaLabel',
-                                {
-                                  defaultMessage: 'Actions',
-                                }
-                              ),
-                              onClick: (e) => {
-                                e.stopPropagation();
-                                togglePopover(conversation.id);
-                              },
-                              alwaysShow: false,
-                            }}
-                          />
-                        </div>
-                      }
-                      isOpen={popoverOpenForId === conversation.id}
-                      closePopover={closePopover}
-                      panelPaddingSize="none"
-                      anchorPosition="downLeft"
-                    >
-                      <EuiContextMenuPanel
-                        size="s"
-                        items={[
-                          <EuiContextMenuItem
-                            key="delete"
-                            icon="trash"
-                            onClick={() => handleDelete(conversation.threadId)}
-                          >
-                            {i18n.translate('chat.conversationHistory.deleteButton', {
-                              defaultMessage: 'Delete',
-                            })}
-                          </EuiContextMenuItem>,
-                        ]}
-                      />
-                    </EuiPopover>
-                  );
-                })}
-              </EuiListGroup>
-            </div>
-          ))}
+                  isOpen={popoverOpenForId === conversation.id}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenuPanel
+                    size="s"
+                    items={[
+                      <EuiContextMenuItem
+                        key="delete"
+                        icon="trash"
+                        onClick={() => handleDelete(conversation.threadId)}
+                      >
+                        {i18n.translate('chat.conversationHistory.deleteButton', {
+                          defaultMessage: 'Delete',
+                        })}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              );
+            })}
+          </EuiListGroup>
 
-          {error && groups.length > 0 && (
+          {error && conversations.length > 0 && (
             <div className="conversationHistoryPanel__error">
               <EuiText color="danger" size="s">
                 {i18n.translate('chat.conversationHistory.paginationErrorMessage', {

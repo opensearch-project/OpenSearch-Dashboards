@@ -273,13 +273,8 @@ const resolveDataset = async (
   // If we have an existing dataset, validate SignalType compatibility
   if (existingDataset) {
     try {
-      const dataView = await services.data?.dataViews?.get(
-        existingDataset.id,
-        existingDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-      );
-
-      // Get effective signal type from dataView or preferredDataset (for Prometheus which sets signalType directly)
-      const effectiveSignalType = dataView?.signalType || preferredDataset?.signalType;
+      // Read signalType directly from the Dataset.
+      const effectiveSignalType = existingDataset.signalType || preferredDataset?.signalType;
 
       // If requiredSignalType is specified, dataset must match it
       if (requiredSignalType) {
