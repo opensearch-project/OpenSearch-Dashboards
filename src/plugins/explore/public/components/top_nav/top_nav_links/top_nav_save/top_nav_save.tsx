@@ -69,7 +69,7 @@ export const getSaveButtonRun = (
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
-      saveStateProps.tabDefinition!,
+      saveStateProps.tabDefinition,
       { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
       saveStateProps.dataset,
       saveStateProps.activeTabId

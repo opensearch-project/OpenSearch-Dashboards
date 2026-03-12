@@ -29,7 +29,7 @@ interface VisState {
 export const saveStateToSavedObject = (
   obj: SavedExplore,
   flavorId: string,
-  tabDefinition: TabDefinition,
+  tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
   activeTabId?: string
@@ -46,7 +46,7 @@ export const saveStateToSavedObject = (
   });
 
   obj.uiState = JSON.stringify({
-    activeTab: activeTabId || tabDefinition.id,
+    activeTab: activeTabId || tabDefinition?.id,
   });
   obj.searchSourceFields = { index: dataset };
 
