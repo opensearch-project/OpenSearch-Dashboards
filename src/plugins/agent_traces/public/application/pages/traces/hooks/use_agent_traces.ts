@@ -164,7 +164,8 @@ export const useAgentTraces = (
         const offset = pageIndex * pageSize;
         const sortClause = buildPplSortClause(sortField, sortDirection);
         const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQueryString);
-        const pplQuery = `${whereQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands} ${sortClause} | head ${pageSize} from ${offset}`;
+        const tailPart = tailCommands ? ` ${tailCommands}` : '';
+        const pplQuery = `${whereQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`)${tailPart} ${sortClause} | head ${pageSize} from ${offset}`;
         const response = await pplService.executeQuery(datasetParam, pplQuery);
 
         if (cancelled) return;

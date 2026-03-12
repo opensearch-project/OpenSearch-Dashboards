@@ -57,19 +57,23 @@ export const unflattenSource = (source: Record<string, any>): Record<string, any
     } else {
       // Dotted key — build nested structure
       let current = result;
+      let reachable = true;
       for (let i = 0; i < parts.length - 1; i++) {
         const part = parts[i];
         if (current[part] === undefined || current[part] === null) {
           current[part] = {};
         } else if (typeof current[part] !== 'object' || Array.isArray(current[part])) {
           // Don't overwrite existing primitive or array values
+          reachable = false;
           break;
         }
         current = current[part];
       }
-      const lastPart = parts[parts.length - 1];
-      if (current[lastPart] === undefined) {
-        current[lastPart] = source[key];
+      if (reachable) {
+        const lastPart = parts[parts.length - 1];
+        if (current[lastPart] === undefined) {
+          current[lastPart] = source[key];
+        }
       }
     }
   }

@@ -95,8 +95,8 @@ const DataTableUI = ({
   const prevRowCountRef = useRef(rows.length);
   useEffect(() => {
     const firstId = rows[0]?._id || (rows[0]?._source as any)?.spanId;
-    if (prevFirstRowIdRef.current !== firstId) {
-      // New query / sort: reset lazy loading
+    const isNewQuery = prevFirstRowIdRef.current !== firstId;
+    if (isNewQuery) {
       setRenderedRowCount(LAZY_LOAD_BATCH_SIZE);
     } else {
       // Expansion: grow rendered count to accommodate inserted children

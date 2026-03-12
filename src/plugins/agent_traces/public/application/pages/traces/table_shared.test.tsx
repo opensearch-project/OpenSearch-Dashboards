@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import {
   PPL_SORT_FIELDS,
@@ -13,6 +13,8 @@ import {
   queryEndsWithHead,
   TableLoadingState,
   TableEmptyState,
+  hitToBaseRow,
+  DataTableInfoBar,
 } from './table_shared';
 
 describe('table_shared', () => {
@@ -95,9 +97,9 @@ describe('table_shared', () => {
       const result = splitPplWhereAndTail(
         'source=idx | where a=1 | stats count() | where count > 5'
       );
-      // Note: where after stats gets grouped with other where clauses
-      expect(result.whereQuery).toBe('source=idx | where a=1 | where count > 5');
-      expect(result.tailCommands).toBe('| stats count()');
+      // Once a non-where command is encountered, all subsequent parts stay as tail
+      expect(result.whereQuery).toBe('source=idx | where a=1');
+      expect(result.tailCommands).toBe('| stats count() | where count > 5');
     });
 
     it('handles dedup and eval as tail commands', () => {
@@ -170,6 +172,127 @@ describe('table_shared', () => {
       expect(screen.getByText('No traces found')).toBeInTheDocument();
       expect(screen.getByText('otel-v1-apm-span-*')).toBeInTheDocument();
       expect(screen.getByText('gen_ai.operation.name')).toBeInTheDocument();
+    });
+  });
+
+  describe('hitToBaseRow', () => {
+    const formatTs = (ts: string) => ts;
+
+    const makeHit = (overrides: Record<string, any> = {}) => ({
+      _index: 'otel-v1-apm-span-000001',
+      _id: 'hit-1',
+      _score: null,
+      _source: {
+        spanId: 'span-abc',
+        traceId: 'trace-123',
+        parentSpanId: '',
+        name: 'test-span',
+        startTime: '2025-01-01T00:00:00Z',
+        endTime: '2025-01-01T00:00:01Z',
+        durationInNanos: 1000000000,
+        'status.code': 0,
+        ...overrides,
+      },
+    });
+
+    it('converts a hit to a BaseRow with level 0', () => {
+      const row = hitToBaseRow(makeHit(), formatTs);
+      expect(row.level).toBe(0);
+      expect(row.spanId).toBe('span-abc');
+      expect(row.traceId).toBe('trace-123');
+    });
+
+    it('sets isExpandable to false by default (no markExpandable)', () => {
+      const row = hitToBaseRow(makeHit(), formatTs);
+      expect(row.isExpandable).toBe(false);
+    });
+
+    it('sets isExpandable to false when markExpandable is false', () => {
+      const row = hitToBaseRow(makeHit(), formatTs, { markExpandable: false });
+      expect(row.isExpandable).toBe(false);
+    });
+
+    it('marks root spans as expandable when markExpandable is true', () => {
+      const row = hitToBaseRow(makeHit({ parentSpanId: '' }), formatTs, { markExpandable: true });
+      expect(row.isExpandable).toBe(true);
+    });
+
+    it('does not mark child spans as expandable when markExpandable is true', () => {
+      const row = hitToBaseRow(makeHit({ parentSpanId: 'parent-123' }), formatTs, {
+        markExpandable: true,
+      });
+      expect(row.isExpandable).toBe(false);
+    });
+
+    it('handles missing _source gracefully', () => {
+      const hit = { _index: '', _id: 'x', _score: null, _source: undefined as any };
+      const row = hitToBaseRow(hit, formatTs);
+      expect(row.level).toBe(0);
+      expect(row.isExpandable).toBe(false);
+    });
+  });
+
+  describe('DataTableInfoBar', () => {
+    const defaultProps = {
+      hasHead: false,
+      hitsCount: 50,
+      totalCount: 200,
+      elapsedMs: 123,
+      entityName: 'span' as const,
+      wrapCellText: false,
+      onWrapCellTextChange: jest.fn(),
+    };
+
+    it('renders count with total for spans', () => {
+      render(
+        <IntlProvider locale="en">
+          <DataTableInfoBar {...defaultProps} />
+        </IntlProvider>
+      );
+      expect(screen.getByText('50')).toBeInTheDocument();
+      expect(screen.getByText('200')).toBeInTheDocument();
+      expect(screen.getByText('123')).toBeInTheDocument();
+    });
+
+    it('renders count without total when hasHead is true', () => {
+      render(
+        <IntlProvider locale="en">
+          <DataTableInfoBar {...defaultProps} hasHead={true} />
+        </IntlProvider>
+      );
+      expect(screen.getByText('50')).toBeInTheDocument();
+      // Total should not be rendered when hasHead is true
+      expect(screen.queryByText('200')).not.toBeInTheDocument();
+    });
+
+    it('renders trace entity name', () => {
+      render(
+        <IntlProvider locale="en">
+          <DataTableInfoBar {...defaultProps} entityName="trace" />
+        </IntlProvider>
+      );
+      expect(screen.getByText('50')).toBeInTheDocument();
+    });
+
+    it('renders em dash when elapsedMs is undefined', () => {
+      render(
+        <IntlProvider locale="en">
+          <DataTableInfoBar {...defaultProps} elapsedMs={undefined} />
+        </IntlProvider>
+      );
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
+
+    it('toggles wrap cell text switch', () => {
+      const onWrapChange = jest.fn();
+      render(
+        <IntlProvider locale="en">
+          <DataTableInfoBar {...defaultProps} onWrapCellTextChange={onWrapChange} />
+        </IntlProvider>
+      );
+      const switchEl = screen.getByTestId('agentTracesWrapCellTextSwitch');
+      fireEvent.click(switchEl);
+      expect(onWrapChange).toHaveBeenCalledWith(true);
     });
   });
 });
