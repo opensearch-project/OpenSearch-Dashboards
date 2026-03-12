@@ -334,14 +334,16 @@ export class DataPublicPlugin
     })();
 
     if (isRuntimePplGrammarEnabled) {
-      const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(http, savedObjects.client);
+      const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjects.client
+      );
       maybeWarmUpPplGrammar(query.queryString.getQuery());
       this.pplGrammarWarmupSubscription = query.queryString
         .getUpdates$()
         .subscribe(maybeWarmUpPplGrammar);
-      this.unregisterPplValidationProvider = registerPPLValidationProvider(
-        validateRuntimePPLQuery
-      );
+      this.unregisterPplValidationProvider = registerPPLValidationProvider(validateRuntimePPLQuery);
     }
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });

@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import {
+  HttpSetup,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from 'opensearch-dashboards/public';
 import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
@@ -175,10 +179,18 @@ class PPLGrammarCache {
    */
   warmUp(
     http: HttpSetup,
+    uiSettings: IUiSettingsClient | undefined,
     savedObjectsClient?: SavedObjectsClientContract,
     datasourceId?: string,
     datasourceVersion?: string
   ): void {
+    // Check feature flag - if disabled, clear cache and skip warmup
+    const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
+    if (!runtimeGrammarEnabled) {
+      this.clear();
+      return;
+    }
+
     // Datasource changed — reset everything.
     if (datasourceId !== this.cachedDatasourceId) {
       this.reset();
