@@ -285,6 +285,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
+          setScreenshotData(undefined);
+          setFileAttachments((prev) => {
+            clearAttachmentBase64(prev);
+            return [];
+          });
         },
         complete: () => {
           isStreamingRef.current = false;
@@ -308,6 +313,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       isStreamingRef.current = false;
       setIsStreaming(false);
       currentSubscriptionRef.current = null;
+      setScreenshotData(undefined);
+      setFileAttachments((prev) => {
+        clearAttachmentBase64(prev);
+        return [];
+      });
     }
   }, [chatService, currentRunId, eventHandler]);
 
