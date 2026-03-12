@@ -257,8 +257,12 @@ export function defineRoutes(
 
             // Defense-in-depth; client also enforces this
             if (maxFileUploadBytes !== undefined && typeof part.data === 'string') {
-              const decodedSize = Buffer.from(part.data, 'base64').length;
-              if (decodedSize > maxFileUploadBytes) {
+              // Fail fast before decoding: base64 encodes 3 bytes → 4 chars (padded to 4-char blocks)
+              const maxEncodedLength = 4 * Math.ceil(maxFileUploadBytes / 3);
+              if (
+                part.data.length > maxEncodedLength ||
+                Buffer.from(part.data, 'base64').length > maxFileUploadBytes
+              ) {
                 const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
                 const filename = part.filename ?? 'attachment';
                 return response.badRequest({
