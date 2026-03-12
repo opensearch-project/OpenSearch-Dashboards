@@ -110,11 +110,16 @@ function hasActionableContent(result: AutocompleteResultBase): boolean {
   if (result.suggestKeywords && result.suggestKeywords.length > 0) return true;
   const r = result as OpenSearchPplAutocompleteResult;
   return !!(
+    result.suggestTemplates ||
     r.suggestColumns ||
+    (result.suggestColumnAliases && result.suggestColumnAliases.length > 0) ||
+    result.suggestDatabases ||
     r.suggestSourcesOrTables ||
     r.suggestValuesForColumn ||
     r.suggestAggregateFunctions ||
-    r.suggestRenameAs
+    r.suggestScalarFunctions ||
+    r.suggestRenameAs ||
+    r.suggestSingleQuotes
   );
 }
 
@@ -278,7 +283,10 @@ export const getSimplifiedPPLSuggestions = async ({
       ? tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, false)
       : null;
     const suggestions =
-      runtimeSuggestions || getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
+      runtimeSuggestions && hasActionableContent(runtimeSuggestions)
+        ? runtimeSuggestions
+        : getSimplifiedOpenSearchPplAutoCompleteSuggestions(query, cursor);
+
     const finalSuggestions: QuerySuggestion[] = [];
     const queryTillCursor =
       position && position.lineNumber && position.column
@@ -480,7 +488,6 @@ export const getSimplifiedPPLSuggestions = async ({
           });
         }
       }
-
     } else {
       // Compiled grammar path - matching main branch exactly
       if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
