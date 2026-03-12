@@ -88,13 +88,14 @@ export const buildPPLQueryRequest = (
 
 export const executePPLQuery = async (
   dataService: DataPublicPluginStart,
-  request: PPLQueryRequest
+  request: PPLQueryRequest,
+  signal?: AbortSignal
 ): Promise<any> => {
   if (!dataService) {
     throw new Error('Data service is not available');
   }
 
-  const response = await dataService.search.search(request, {}).toPromise();
+  const response = await dataService.search.search(request, { abortSignal: signal }).toPromise();
 
   return response;
 };

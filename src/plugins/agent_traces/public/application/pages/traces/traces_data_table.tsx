@@ -82,13 +82,27 @@ export const TracesDataTable: React.FC = () => {
   const [traceLoadingState, setTraceLoadingState] = useState<Map<string, LoadingState>>(new Map());
   const inFlightRef = useRef<Set<string>>(new Set());
   const traceSpansCacheRef = useRef<Map<string, BaseRow[]>>(new Map());
+  const abortControllerRef = useRef<AbortController | null>(null);
   const flyoutTraceIdRef = useRef<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const pendingScrollRestoreRef = useRef<number | null>(null);
 
-  // Reset tree expansion when hits change (e.g. sort re-query)
+  // Abort in-flight fetches on unmount
   useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  // Reset tree expansion and caches when hits change (e.g. sort re-query)
+  useEffect(() => {
+    abortControllerRef.current?.abort();
     setExpandedRows(new Set());
+    setChildHitsMap(new Map());
+    setChildMetaMap(new Map());
+    setTraceLoadingState(new Map());
+    traceSpansCacheRef.current.clear();
+    inFlightRef.current.clear();
   }, [hits]);
 
   // Sync full tree to flyout
@@ -118,6 +132,8 @@ export const TracesDataTable: React.FC = () => {
       if (!pplService || !datasetParam) return;
 
       inFlightRef.current.add(traceId);
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       setTraceLoadingState((prev) => {
         const next = new Map(prev);
         next.set(traceId, { loading: true, error: null });
@@ -125,11 +141,10 @@ export const TracesDataTable: React.FC = () => {
       });
 
       try {
-        const response = await pplService.fetchTraceSpans({
-          traceId,
-          dataset: datasetParam,
-          limit: 1000,
-        });
+        const response = await pplService.fetchTraceSpans(
+          { traceId, dataset: datasetParam, limit: 1000 },
+          controller.signal
+        );
 
         const traceHits = transformPPLDataToTraceHits(response);
         const agentSpans = hitsToAgentSpans(traceHits);
@@ -176,6 +191,7 @@ export const TracesDataTable: React.FC = () => {
           return next;
         });
       } catch (err) {
+        if ((err as DOMException).name === 'AbortError') return;
         setTraceLoadingState((prev) => {
           const next = new Map(prev);
           next.set(traceId, {
