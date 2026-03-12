@@ -59,12 +59,27 @@ export function getRootBreadcrumbs(services?: DiscoverViewServices): EuiBreadcru
     ...(isOnDiscoverRoot
       ? {}
       : {
-          onClick: () => {
+          onClick: async () => {
             filterManager.setAppFilters([]);
             data.query.queryString.setQuery({ query: '' }, false, true);
             if (store && scopedHistory) {
               const savedId = sessionStorage.getItem(LAST_INDEX_PATTERN_KEY);
-              if (savedId) store.dispatch(updateIndexPattern(savedId));
+              // Core does not currently expose analytics.reportEvent; this is a no-op until that API exists.
+              const analytics = (core as { analytics?: { reportEvent?: (name: string, payload?: object) => void } })
+                .analytics;
+              analytics?.reportEvent?.('discover_breadcrumb_navigation', {
+                from_saved_search: !!store.getState().discover?.savedSearch,
+                restored_index_pattern: !!savedId,
+              });
+              if (savedId) {
+                try {
+                  const pattern = await data.indexPatterns.get(savedId);
+                  if (pattern) store.dispatch(updateIndexPattern(savedId));
+                } catch (_) {
+                  // Pattern was deleted or invalid; skip restore so we don't dispatch a bad id.
+                  // User still lands on Discover root; state keeps previous id or use_index_pattern handles it.
+                }
+              }
               store.dispatch(clearSavedSearch());
               scopedHistory.replace('/discover#/');
             } else {

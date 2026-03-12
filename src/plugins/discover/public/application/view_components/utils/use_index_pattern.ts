@@ -82,9 +82,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           if (isMounted && newId) {
             store!.dispatch(updateIndexPattern(newId));
             const ip = await fetchIndexPatternDetails(newId);
-            if (isMounted && ip) {
-              setIndexPattern(ip);
-            }
+            if (isMounted && ip) setIndexPattern(ip);
           }
         } else {
           const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
