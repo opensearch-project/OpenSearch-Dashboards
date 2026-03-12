@@ -29,20 +29,14 @@ export const prepareTestSuite = (testSuiteName, runTestSuiteCallback) => {
       describe(`${testSuiteName} Test with ${name}`, () => {
         before(() => {
           cy.session(name, () => {
-            cy.task('getNewAwsCredentials')
-              .then((awsCredentials) => {
-                if (!awsCredentials) {
-                  throw new Error('Failed to get AWS credentials - received null or undefined');
-                }
-                Cypress.env('AWS_CREDENTIALS', awsCredentials);
-                // Chain the method call to ensure sequential execution
-                return cy[method]();
-              })
-              .catch((error) => {
-                cy.log('Error in credential loading:', error.message);
-                // Re-throw to fail the test properly
-                throw error;
-              });
+            cy.task('getNewAwsCredentials').then((awsCredentials) => {
+              if (!awsCredentials) {
+                throw new Error('Failed to get AWS credentials - received null or undefined');
+              }
+              Cypress.env('AWS_CREDENTIALS', awsCredentials);
+              // Chain the method call to ensure sequential execution
+              return cy[method]();
+            });
           });
         });
 
@@ -67,18 +61,13 @@ export const createWorkspaceWithDatasource = (
 ) => {
   cy.osd.getDataSourceId(datasourceName);
 
-  cy.get('@DATASOURCE_ID')
-    .then((datasourceId) => {
-      if (!datasourceId) {
-        throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
-      }
-      cy.osd.createWorkspaceWithDataSourceId(datasourceId, workspaceName, features, aliasName);
-      cy.wait(2000);
-    })
-    .catch((error) => {
-      cy.log(`Error in createWorkspaceWithDatasource for ${workspaceName}:`, error.message);
-      throw error;
-    });
+  cy.get('@DATASOURCE_ID').then((datasourceId) => {
+    if (!datasourceId) {
+      throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+    }
+    cy.osd.createWorkspaceWithDataSourceId(datasourceId, workspaceName, features, aliasName);
+    cy.wait(2000);
+  });
 };
 
 /**
@@ -102,28 +91,23 @@ export const createDatasetWithEndpoint = (
 ) => {
   cy.osd.getDataSourceId(datasourceName);
 
-  cy.get('@DATASOURCE_ID')
-    .then((datasourceId) => {
-      if (!datasourceId) {
-        throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+  cy.get('@DATASOURCE_ID').then((datasourceId) => {
+    if (!datasourceId) {
+      throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+    }
+    return cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
+      if (!workspaceId) {
+        throw new Error(`Failed to get workspace ID for: ${workspaceName}`);
       }
-      return cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
-        if (!workspaceId) {
-          throw new Error(`Failed to get workspace ID for: ${workspaceName}`);
-        }
-        cy.osd.createDatasetByEndpoint(
-          datasetId,
-          workspaceId,
-          datasourceId,
-          datasetConfig,
-          datasetAliasName
-        );
-      });
-    })
-    .catch((error) => {
-      cy.log(`Error in createDatasetWithEndpoint for ${datasetId}:`, error.message);
-      throw error;
+      cy.osd.createDatasetByEndpoint(
+        datasetId,
+        workspaceId,
+        datasourceId,
+        datasetConfig,
+        datasetAliasName
+      );
     });
+  });
 };
 
 /**
@@ -151,40 +135,32 @@ export const createWorkspaceAndDatasetUsingEndpoint = (
 ) => {
   cy.osd.getDataSourceId(datasourceName);
 
-  cy.get('@DATASOURCE_ID')
-    .then((datasourceId) => {
-      if (!datasourceId) {
-        throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+  cy.get('@DATASOURCE_ID').then((datasourceId) => {
+    if (!datasourceId) {
+      throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+    }
+    cy.osd.createWorkspaceWithDataSourceId(
+      datasourceId,
+      workspaceName,
+      features,
+      workspaceAliasName
+    );
+    cy.wait(2000);
+    return cy.get(`@${workspaceAliasName}`).then((workspaceId) => {
+      if (!workspaceId) {
+        throw new Error(`Failed to get workspace ID for: ${workspaceName}`);
       }
-      cy.osd.createWorkspaceWithDataSourceId(
+      cy.osd.createDatasetByEndpoint(
+        datasetId,
+        workspaceId,
         datasourceId,
-        workspaceName,
-        features,
-        workspaceAliasName
+        {
+          title: indexPattern,
+          signalType: signalType,
+          timestamp: timestampField,
+        },
+        datasetAliasName
       );
-      cy.wait(2000);
-      return cy.get(`@${workspaceAliasName}`).then((workspaceId) => {
-        if (!workspaceId) {
-          throw new Error(`Failed to get workspace ID for: ${workspaceName}`);
-        }
-        cy.osd.createDatasetByEndpoint(
-          datasetId,
-          workspaceId,
-          datasourceId,
-          {
-            title: indexPattern,
-            signalType: signalType,
-            timestamp: timestampField,
-          },
-          datasetAliasName
-        );
-      });
-    })
-    .catch((error) => {
-      cy.log(
-        `Error in createWorkspaceAndDatasetUsingEndpoint for ${workspaceName}:`,
-        error.message
-      );
-      throw error;
     });
+  });
 };
