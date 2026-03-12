@@ -342,6 +342,7 @@ export const getSimplifiedPPLSuggestions = async ({
         );
       }
 
+      // Early return for column-only mode (before keywords)
       if (preferColumnSuggestionsOnly) {
         return finalSuggestions;
       }
@@ -439,16 +440,77 @@ export const getSimplifiedPPLSuggestions = async ({
           );
         }
       }
+
+      // Process shared suggestion types (must come after keywords to maintain ordering)
+      if (suggestions.suggestAggregateFunctions) {
+        finalSuggestions.push(
+          ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
+            text: `${af}()`,
+            type: monaco.languages.CompletionItemKind.Module,
+            insertText: getInsertText(af, 'function', isInQuotes, {
+              hasOptionalParam: prop?.optionalParam,
+              isSnippet: true,
+            }),
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+            sortText: '67',
+            detail: SuggestionItemDetailsTags.AggregateFunction,
+          }))
+        );
+      }
+
+      if (suggestions.suggestSourcesOrTables) {
+        finalSuggestions.push({
+          text: indexPattern.title,
+          type: monaco.languages.CompletionItemKind.Struct,
+          insertText: getInsertText(indexPattern.title, 'table', isInQuotes),
+          detail: SuggestionItemDetailsTags.Table,
+        });
+      }
+
+      if (suggestions.suggestRenameAs) {
+        finalSuggestions.push({
+          text: 'as',
+          insertText: getInsertText('as', 'keyword', isInQuotes),
+          type: monaco.languages.CompletionItemKind.Keyword,
+          detail: SuggestionItemDetailsTags.Keyword,
+        });
+      }
+
+      // Handle single quote suggestions when suggestSingleQuotes flag is set
+      if (suggestions.suggestSingleQuotes) {
+        const singleQuoteDetails = SUPPORTED_NON_LITERAL_KEYWORDS.get(
+          SimplifiedOpenSearchPPLLexer.SQUOTA_STRING
+        );
+        if (singleQuoteDetails) {
+          finalSuggestions.push({
+            text: singleQuoteDetails.label,
+            insertText: singleQuoteDetails.insertText,
+            type: monaco.languages.CompletionItemKind.Keyword,
+            detail: SuggestionItemDetailsTags.Keyword,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+            sortText: singleQuoteDetails.sortText,
+          });
+        }
+      }
+
     } else {
       // Compiled grammar path - matching main branch exactly
+      // Check for rex field equals context even on compiled path
+      const isRexFieldEqualsContext = /(?:^|\|)\s*rex\s+field\s*=\s*$/i.test(queryTillCursor);
+      const preferColumnSuggestionsOnly =
+        suggestions.preferColumnSuggestionsOnly === true || isRexFieldEqualsContext;
+
       if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
         const initialFields = indexPattern.fields;
         const cursorPosition = queryTillCursor.length;
+        const fieldFilter = preferColumnSuggestionsOnly
+          ? undefined
+          : (field: { subType?: unknown }) => !field?.subType;
         const availableFields = getAvailableFieldsForAutocomplete(
           query,
           cursorPosition,
           initialFields,
-          (field) => !field?.subType
+          fieldFilter
         );
 
         finalSuggestions.push(
@@ -479,6 +541,11 @@ export const getSimplifiedPPLSuggestions = async ({
             isInQuotes
           ))
         );
+      }
+
+      // Early return for column-only mode (compiled path)
+      if (preferColumnSuggestionsOnly) {
+        return finalSuggestions;
       }
 
       // Compiled grammar keyword processing (matching main branch)
@@ -547,56 +614,57 @@ export const getSimplifiedPPLSuggestions = async ({
           );
         }
       }
-    }
 
-    if (suggestions.suggestAggregateFunctions) {
-      finalSuggestions.push(
-        ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
-          text: `${af}()`,
-          type: monaco.languages.CompletionItemKind.Module,
-          insertText: getInsertText(af, 'function', isInQuotes, {
-            hasOptionalParam: prop?.optionalParam,
-            isSnippet: true,
-          }),
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
-          sortText: '67',
-          detail: SuggestionItemDetailsTags.AggregateFunction,
-        }))
-      );
-    }
+      // Process shared suggestion types (compiled path)
+      if (suggestions.suggestAggregateFunctions) {
+        finalSuggestions.push(
+          ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
+            text: `${af}()`,
+            type: monaco.languages.CompletionItemKind.Module,
+            insertText: getInsertText(af, 'function', isInQuotes, {
+              hasOptionalParam: prop?.optionalParam,
+              isSnippet: true,
+            }),
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+            sortText: '67',
+            detail: SuggestionItemDetailsTags.AggregateFunction,
+          }))
+        );
+      }
 
-    if (suggestions.suggestSourcesOrTables) {
-      finalSuggestions.push({
-        text: indexPattern.title,
-        type: monaco.languages.CompletionItemKind.Struct,
-        insertText: getInsertText(indexPattern.title, 'table', isInQuotes),
-        detail: SuggestionItemDetailsTags.Table,
-      });
-    }
-
-    if (suggestions.suggestRenameAs) {
-      finalSuggestions.push({
-        text: 'as',
-        insertText: getInsertText('as', 'keyword', isInQuotes),
-        type: monaco.languages.CompletionItemKind.Keyword,
-        detail: SuggestionItemDetailsTags.Keyword,
-      });
-    }
-
-    // Handle single quote suggestions when suggestSingleQuotes flag is set
-    if (suggestions.suggestSingleQuotes) {
-      const singleQuoteDetails = SUPPORTED_NON_LITERAL_KEYWORDS.get(
-        SimplifiedOpenSearchPPLLexer.SQUOTA_STRING
-      );
-      if (singleQuoteDetails) {
+      if (suggestions.suggestSourcesOrTables) {
         finalSuggestions.push({
-          text: singleQuoteDetails.label,
-          insertText: singleQuoteDetails.insertText,
+          text: indexPattern.title,
+          type: monaco.languages.CompletionItemKind.Struct,
+          insertText: getInsertText(indexPattern.title, 'table', isInQuotes),
+          detail: SuggestionItemDetailsTags.Table,
+        });
+      }
+
+      if (suggestions.suggestRenameAs) {
+        finalSuggestions.push({
+          text: 'as',
+          insertText: getInsertText('as', 'keyword', isInQuotes),
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
-          insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
-          sortText: singleQuoteDetails.sortText,
         });
+      }
+
+      // Handle single quote suggestions when suggestSingleQuotes flag is set
+      if (suggestions.suggestSingleQuotes) {
+        const singleQuoteDetails = SUPPORTED_NON_LITERAL_KEYWORDS.get(
+          SimplifiedOpenSearchPPLLexer.SQUOTA_STRING
+        );
+        if (singleQuoteDetails) {
+          finalSuggestions.push({
+            text: singleQuoteDetails.label,
+            insertText: singleQuoteDetails.insertText,
+            type: monaco.languages.CompletionItemKind.Keyword,
+            detail: SuggestionItemDetailsTags.Keyword,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+            sortText: singleQuoteDetails.sortText,
+          });
+        }
       }
     }
 
