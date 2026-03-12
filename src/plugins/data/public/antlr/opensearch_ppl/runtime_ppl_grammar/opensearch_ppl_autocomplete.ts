@@ -44,12 +44,7 @@ const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
   isFunction: true,
 };
 
-/**
- * Sentinel for "rule not found". Rule indices are 0-based (rule 0 = root),
- * so Token.INVALID_TYPE (0) would collide with root. -1 is safe here because
- * EOF (-1) is a *token type* concept, not a rule index — they live in
- * different domains and are never compared.
- */
+/** Sentinel for "rule not found". -1 avoids collision with 0-based rule indices. */
 const INVALID_RULE_INDEX = -1;
 
 // ─── C3 cache isolation for runtime grammars ──────────────────────────────────
@@ -128,8 +123,7 @@ const _supportedNonLiteralBySymbolic = new Map<
 export function resolveKeywordSuggestionDetails(
   sk: KeywordSuggestion
 ): KeywordSuggestionDetails | null {
-  // Runtime grammar token IDs can drift from compiled IDs. Name-based lookup
-  // (literal/symbolic) is stable across grammar versions, so prefer it.
+  // Prefer name-based lookup (stable across grammar versions) over ID lookup.
   if (sk.value) {
     const detailsByLiteral = _keywordDetailsByLiteral.get(sk.value.toUpperCase());
     if (detailsByLiteral) return detailsByLiteral;
@@ -140,7 +134,7 @@ export function resolveKeywordSuggestionDetails(
     if (detailsBySymbolic) return detailsBySymbolic;
   }
 
-  // Keep ID lookup only as a last resort when no names are available.
+  // Fall back to ID lookup only when no names are available.
   if (!sk.value && !sk.symbolicName) {
     return PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
   }
@@ -200,10 +194,7 @@ export function deriveKeywordFromSymbolicName(symbolicName?: string | null): str
   return symbolicName;
 }
 
-// Generic runtime suggestion sanitation:
-// Keep operator-like tokens (including single and multi-char operators), while filtering
-// delimiter-like tokens and punctuation fragments that are unlikely intended user inputs
-// (e.g. standalone dot/quotes/parens/brackets noise).
+// Filter out delimiter/punctuation noise while keeping operator tokens.
 export function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
   const value = (sk.value || '').trim();
   if (!value) return false;
@@ -211,20 +202,17 @@ export function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
   const hasWordLike = /[A-Za-z0-9_]/.test(value);
   if (hasWordLike) return false;
 
-  // Remove tokens that are just delimiter/punctuation wrappers, regardless of context.
   if (/^[(){}[\]'"`.,]+$/.test(value)) return true;
 
-  // If this is a non-word token made of known operators, keep it.
-  // This remains grammar-adaptive because it is based on character class, not fixed token names.
+  // Keep operator-character tokens, filter everything else.
   return !/^[=!<>+*\/%&|~^\\-]+$/.test(value);
 }
 
 // ─── Grammar resolution helpers ────────────────────────────────────────────────
 
 /**
- * Resolve the SPACE/WHITESPACE token type from the grammar's tokenDictionary.
- * Backend sends WHITESPACE; compiled grammar uses SPACE. Normalize here.
- * Guards against backend sending ≤0 (which could be EOF=-1 or INVALID_TYPE=0).
+ * Resolve the whitespace token type from the grammar.
+ * Tries WHITESPACE, SPACE, and WS in order (backend vs compiled naming).
  */
 export function resolveSpaceToken(grammar: CachedGrammar): number {
   const dict = grammar.tokenDictionary as any;
@@ -243,9 +231,8 @@ export function resolveSpaceToken(grammar: CachedGrammar): number {
 }
 
 /**
- * Backend is source-of-truth for ignoredTokens, but runtime safety requires
- * that literal tokens (keywords/operators) are never suppressed by mistake.
- * Keep only valid non-literal token IDs from the backend ignore list.
+ * Filter backend ignoredTokens to keep only non-literal token IDs,
+ * ensuring keywords/operators are never accidentally suppressed.
  */
 export function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number> {
   const safe = new Set<number>();
@@ -271,9 +258,8 @@ function tokenTypeBySymbolic(grammar: CachedGrammar, symName: string): number {
 
 /**
  * Resolve a token type by symbolic name, with tokenDictionary fallback.
- * tokenDictionary uses friendly keys (e.g. BACKTICK_QUOTE), symbolic names
- * use ANTLR names (e.g. BQUOTA_STRING). We try both.
- * Guards against backend providing ≤0 values (e.g. -1 for missing tokens).
+ * tokenDictionary uses friendly keys (e.g. BACKTICK_QUOTE) while symbolic
+ * names use ANTLR names (e.g. BQUOTA_STRING), so we try both.
  */
 function resolveToken(grammar: CachedGrammar, symbolicName: string, dictKey?: string): number {
   if (dictKey) {
@@ -284,9 +270,8 @@ function resolveToken(grammar: CachedGrammar, symbolicName: string, dictKey?: st
 }
 
 /**
- * Synthetic parser context used for runtime C3 completion when a parse tree
- * is unavailable/unreliable (e.g. pipe-first stripped input).
- * ParserRuleContext.ruleIndex is getter-only, so we override it in a subclass.
+ * Synthetic parser context for C3 completion when no parse tree is available.
+ * Subclasses ParserRuleContext to override the getter-only ruleIndex.
  */
 class RuntimeCompletionContext extends ParserRuleContext {
   constructor(private readonly syntheticRuleIndex: number, startToken?: Token) {
@@ -302,18 +287,11 @@ class RuntimeCompletionContext extends ParserRuleContext {
 }
 
 /**
- * Pick the best start rule for C3 and parsing based on query shape.
- * - `|`-first queries (pipe-first, no source=): start from commands or subPipeline
- *   so pipeline commands (WHERE, SORT, FIELDS, etc.) become reachable candidates.
- * - Normal queries: use the grammar's default start rule (root).
- *
- * Prefers backend-provided pipeStartRuleIndex if available (future-proof:
- * backend is source of truth and knows the correct pipe-first entry for
- * its grammar version, avoiding coupling to specific rule names).
- *
- * Since the leading `|` is stripped before lexing, the selected entry rule must
- * expect input *after* the pipe. `commands` is the strip-compatible choice;
- * `subPipeline` may expect the pipe token itself, so it's a secondary fallback.
+ * Pick the start rule for C3/parsing based on query shape.
+ * Pipe-first queries (`|...`) use `commands` (or backend-provided pipeStartRuleIndex)
+ * so pipeline commands become reachable. Normal queries use the root rule.
+ * `commands` is preferred over `subPipeline` because the leading `|` is stripped
+ * before lexing, and `commands` expects input after the pipe.
  */
 export function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
   const trimmed = query.trimStart();
@@ -379,12 +357,7 @@ const PREFERRED_RULE_NAMES: readonly string[] = [
   'searchComparisonOperator',
 ];
 
-/**
- * Build the C3 preferredRules set from the runtime grammar's rule names.
- * Includes stable leaf concepts plus structural rules needed for correct
- * token scoping.  New commands work automatically as long as they compose
- * existing leaf concepts (qualifiedName, etc.).
- */
+/** Build the C3 preferredRules set by resolving PREFERRED_RULE_NAMES against the runtime grammar. */
 export function buildRuntimePreferredRules(grammar: CachedGrammar): Set<number> {
   const rules = new Set<number>();
   for (const name of PREFERRED_RULE_NAMES) {
@@ -397,13 +370,8 @@ export function buildRuntimePreferredRules(grammar: CachedGrammar): Set<number> 
 }
 
 /**
- * Determine which preferred rules should be removed for a C3 rerun.
- * Mirrors the compiled processVisitedRules rerun logic, but uses rule names.
- *
- * In pipe-first mode, search-oriented rules (searchCommand) are unreachable
- * from the commands entry point and should be skipped. However, command-local
- * reruns (e.g. comparisonOperator for `| where field `) are still useful and
- * should not be suppressed.
+ * Determine which preferred rules to remove for a C3 rerun, mirroring the
+ * compiled rerun logic but using rule names for grammar independence.
  */
 function getRuntimeRerunRules(
   grammar: CachedGrammar,
@@ -421,9 +389,7 @@ function getRuntimeRerunRules(
   const ruleSearchComparisonOperator = ruleIndex(grammar, 'searchComparisonOperator');
   const ruleComparisonOperator = ruleIndex(grammar, 'comparisonOperator');
 
-  // Mirror compiled behavior: when logicalExpression appears via pipeline commands
-  // (not via pplCommands/search start), rerun without this preferred rule so C3
-  // can expose descendants like fieldExpression/qualifiedName.
+  // Rerun without logicalExpression when it appears via pipeline (not search start).
   if (
     ruleLogicalExpression !== INVALID_RULE_INDEX &&
     rules.has(ruleLogicalExpression) &&
@@ -436,9 +402,7 @@ function getRuntimeRerunRules(
     }
   }
 
-  // searchCommand: rerun to expand SEARCH/SOURCE/INDEX tokens
-  // (unless the context is DESCRIBE/SHOW which has its own path)
-  // In pipe-first mode, searchCommand is unreachable — skip this rerun entirely.
+  // searchCommand: rerun to expand tokens (skip in pipe-first or DESCRIBE/SHOW context).
   if (!isPipeFirst && ruleSearchCommand !== INVALID_RULE_INDEX && rules.has(ruleSearchCommand)) {
     const DESCRIBE = tokenTypeBySymbolic(grammar, 'DESCRIBE');
     const SHOW = tokenTypeBySymbolic(grammar, 'SHOW');
@@ -455,9 +419,7 @@ function getRuntimeRerunRules(
     }
   }
 
-  // searchComparisonOperator / comparisonOperator: rerun when last token
-  // is an identifier (expression end), to get pipe/comma suggestions.
-  // This is useful in both normal and pipe-first mode (e.g. `| where field `).
+  // Rerun comparison operators when last token is an identifier, to expose pipe/comma tokens.
   if (
     ruleSearchComparisonOperator !== INVALID_RULE_INDEX &&
     rules.has(ruleSearchComparisonOperator)
@@ -479,10 +441,8 @@ function getRuntimeRerunRules(
 }
 
 /**
- * Generic rerun fallback:
- * if C3 returns preferred-rule candidates, rerun without those rules to expose
- * token candidates hidden behind them. This keeps runtime behavior robust when
- * backend grammar versions add/rename preferred rules.
+ * Generic rerun: remove any preferred rules that appeared as candidates,
+ * exposing token candidates hidden behind them.
  */
 function getGenericPreferredRuleReruns(
   grammar: CachedGrammar,
@@ -505,10 +465,8 @@ function getGenericPreferredRuleReruns(
 // ─── Runtime token-stream helpers (name-based, no compiled constants) ─────────
 
 /**
- * Check if a token is effectively whitespace. The runtime LexerInterpreter may
- * tokenize spaces as ERROR_RECOGNITION or other non-WHITESPACE types when mode
- * transitions don't match compiled behaviour. Checking the token text catches
- * these edge cases so skip-space helpers work consistently.
+ * Check if a token is effectively whitespace. Also matches tokens that
+ * LexerInterpreter may mis-classify (e.g. ERROR_RECOGNITION for spaces).
  */
 export function isEffectivelyWhitespace(token: Token, spaceToken: number): boolean {
   if (token.type === spaceToken || token.type === Token.EOF) return true;
@@ -536,7 +494,7 @@ function findLastNonSpaceOperatorTokenRT(
   spaceToken: number,
   grammar: CachedGrammar
 ): { token: Token; index: number } | null {
-  // Build the set of operator tokens to skip (same as compiled operatorsToInclude)
+  // Skip operator tokens (mirrors compiled operatorsToInclude)
   const operators = getRuntimeOperatorTokens(grammar);
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
@@ -615,11 +573,7 @@ export function isAtFirstArgumentPositionInSegmentRT(
 /** Cache for runtime operator token sets, keyed by grammarHash */
 const _operatorTokenCache = new Map<string, Set<number>>();
 
-/**
- * Build the set of operator token type IDs that should be skipped
- * when searching for the last non-space, non-operator token.
- * Uses symbolic names from the grammar — no compiled constants.
- */
+/** Build operator token set (by symbolic name) to skip in token scanning. */
 function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
   const cached = _operatorTokenCache.get(grammar.grammarHash);
   if (cached) return cached;
@@ -658,10 +612,9 @@ function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
 // ─── Runtime result enrichment ─────────────────────────────────────────────────
 
 /**
- * Name-based enrichment of autocomplete results using runtime grammar.
- * Replaces compiled enrichAutocompleteResult — no coupling to OpenSearchPPLParser constants.
- * When the grammar adds/removes/renumbers rules or tokens, this still works because
- * all lookups are by name from the grammar bundle.
+ * Enrich autocomplete results using runtime grammar rule/token names.
+ * All lookups are by name, so this works across grammar versions without
+ * coupling to compiled parser constants.
  */
 export function enrichRuntimeResult(
   baseResult: AutocompleteResultBase,
@@ -672,7 +625,7 @@ export function enrichRuntimeResult(
 ): OpenSearchPplAutocompleteResult {
   const spaceToken = resolveSpaceToken(grammar);
 
-  // Resolve token types by name (Token.INVALID_TYPE=0 for tokens, INVALID_RULE_INDEX=-1 for rules)
+  // Resolve token types and rule indices by name
   const ID = resolveToken(grammar, 'ID', 'ID');
   const SOURCE = resolveToken(grammar, 'SOURCE', 'SOURCE');
   const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
@@ -685,7 +638,6 @@ export function enrichRuntimeResult(
   const OPENING_BRACKET = resolveToken(grammar, 'LT_PRTHS', 'OPENING_BRACKET');
   const COMMA = resolveToken(grammar, 'COMMA', 'COMMA');
 
-  // Resolve rule indices by name
   const ruleStatsFunction = ruleIndex(grammar, 'statsFunction');
   const ruleFieldList = ruleIndex(grammar, 'fieldList');
   const ruleWcFieldList = ruleIndex(grammar, 'wcFieldList');
@@ -760,7 +712,7 @@ export function enrichRuntimeResult(
           ruleStatsFunction !== INVALID_RULE_INDEX && parentRuleList.includes(ruleStatsFunction);
         if (isInStatsFunction) suggestFieldsInAggregateFunction = true;
 
-        // Don't suggest columns when last token is SOURCE (should suggest table)
+        // After SOURCE token, suggest tables instead of columns
         const lastTokenResult = findLastNonSpaceOperatorTokenRT(
           tokenStream,
           cursorTokenIndex,
@@ -769,7 +721,7 @@ export function enrichRuntimeResult(
         );
         if (lastTokenResult?.token.type === SOURCE) break;
 
-        // In field list context: suggest field only if last token is not an identifier
+        // In field list context: only suggest if last token is not an identifier
         if (parentRuleList.some((parentRule) => fieldRules.includes(parentRule))) {
           const lastNonSpace = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
           if (
@@ -781,8 +733,7 @@ export function enrichRuntimeResult(
           break;
         }
 
-        // When last non-operator token is an identifier (plain or backtick-quoted),
-        // don't suggest columns (unless second-last is SOURCE, for "source = tablename <field>")
+        // Skip column suggestion after identifier, unless preceded by SOURCE
         if (
           lastNonOperatorToken?.token.type === ID ||
           lastNonOperatorToken?.token.type === BQUOTA
@@ -862,9 +813,7 @@ export function enrichRuntimeResult(
     }
   }
 
-  // Runtime fallback/context narrowing: when token context is `FIELD =`,
-  // force column suggestions and suppress generic keyword/snippet noise.
-  // This keeps `rex field =` focused on schema fields across grammar versions.
+  // When context is `FIELD =` (e.g. `rex field =`), force column suggestions.
   const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
   if (lastToken?.token.type === EQUAL) {
     const previousToken = findLastNonSpaceTokenRT(tokenStream, lastToken.index, spaceToken);
@@ -897,10 +846,8 @@ export function enrichRuntimeResult(
 // ─── Main entry point ──────────────────────────────────────────────────────────
 
 /**
- * Try runtime grammar suggestions using cached backend grammar.
- * Creates LexerInterpreter/ParserInterpreter instances directly (with tokenStream.fill()),
- * bypassing createParser which doesn't handle interpreter instances correctly.
- * Returns null if grammar not cached or version unsupported — caller falls through to compiled.
+ * Try runtime grammar suggestions using cached backend grammar metadata.
+ * Returns null if grammar is not cached — caller falls through to compiled grammar path.
  */
 export function tryRuntimeGrammarSuggestions(
   query: string,
@@ -968,10 +915,7 @@ export function tryRuntimeGrammarSuggestions(
 
     parser.interpreter.predictionMode = PredictionMode.SLL;
 
-    // Parse using the selected start rule (non-fatal)
-    // ParserInterpreter can throw on malformed/partial inputs.
-    // Completion should still work even if parse fails — C3 can use a
-    // synthetic context when no parse tree is available.
+    // Parse (non-fatal) — C3 uses a synthetic context if parse fails.
     const errorListener = new GeneralErrorListener(spaceToken);
     parser.removeErrorListeners();
     parser.addErrorListener(errorListener);
@@ -993,11 +937,8 @@ export function tryRuntimeGrammarSuggestions(
     // Switch C3 follow-set cache bucket to the current runtime grammar.
     isolateC3CacheForRuntimeGrammar(grammar.grammarHash, parser);
 
-    // For empty pipe-first (`|`) use a synthetic context anchored at the
-    // selected start rule so command discovery is not constrained by an empty
-    // recovery parse tree. Once there is actual command text after the pipe,
-    // prefer parse-tree context to preserve deep command semantics
-    // (e.g. `| rex field =` expecting a field/qualifiedName).
+    // Use synthetic context for empty pipe-first (`|`) or failed parses.
+    // With actual command text, prefer the parse tree for deeper semantics.
     let c3Context: ParserRuleContext;
     const hasPipeContent = isPipeFirst && effectiveQuery.trim().length > 0;
     if (!parseTree || (isPipeFirst && !hasPipeContent)) {
@@ -1009,13 +950,8 @@ export function tryRuntimeGrammarSuggestions(
 
     const { tokens, rules } = core.collectCandidates(cursorTokenIndex, c3Context);
 
-    // Rerun without preferred rules that hide tokens
-    // When a preferred rule appears at the cursor, C3 returns it as a rule
-    // candidate and does NOT return the tokens inside it. The compiled path
-    // handles this via processVisitedRules + parseQuery's rerun loop.
-    // Here we replicate the logic generically using rule names from the grammar.
-    // For pipe-first mode, only search-oriented reruns (searchCommand) are
-    // suppressed; command-local reruns still apply (e.g. comparisonOperator).
+    // Rerun C3 without preferred rules that hide token candidates behind them.
+    // Mirrors the compiled path's rerun loop, using rule names for grammar independence.
     const rerunRules = getRuntimeRerunRules(
       grammar,
       rules,
@@ -1057,7 +993,7 @@ export function tryRuntimeGrammarSuggestions(
     const inRuntimeFunctionContext = isRuntimeFunctionRuleContext(grammar, rules);
     const openingParenToken = tokenTypeBySymbolic(grammar, 'LT_PRTHS');
     tokens.forEach((followingTokens, tokenType) => {
-      // Skip EOF and junk tokens where vocab can't resolve the ID.
+      // Skip EOF and unresolvable tokens.
       if (tokenType === Token.EOF) return;
       const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
       const symbolicName = parser.vocabulary.getSymbolicName(tokenType);
