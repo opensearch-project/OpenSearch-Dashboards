@@ -6,8 +6,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
- - [CVE-2026-28292] Bump `simple-git` from 3.16.0 to 3.33.0 https://www.codeant.ai/security-research/simple-git-remote-code-execution-cve-2026-28292
-
 ## [3.5.0-2026-02-10](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.5.0)
 
 ### 💥 Breaking Changes
