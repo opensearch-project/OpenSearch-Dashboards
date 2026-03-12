@@ -585,6 +585,12 @@ export class ExplorePlugin
     const askAiAction = createAskAiAction(core.chat);
     logActionRegistry.registerAction(askAiAction);
 
+    if (core.chat && plugins.contextProvider) {
+      const askAIEmbeddableAction = new AskAIEmbeddableAction(core, plugins.contextProvider);
+      plugins.uiActions.registerAction(askAIEmbeddableAction);
+      plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
+    }
+
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: plugins.data.indexPatterns,
