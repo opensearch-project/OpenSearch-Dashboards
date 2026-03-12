@@ -59,10 +59,18 @@ cy.osd.add(
     cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
     cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
 
-    cy.wait('@createWorkspaceInterception').then((interception) => {
-      // save the created workspace ID as an alias
-      cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
-    });
+    cy.wait('@createWorkspaceInterception')
+      .then((interception) => {
+        if (!interception?.response?.body?.result?.id) {
+          throw new Error('Failed to create workspace - no ID returned in response');
+        }
+        // save the created workspace ID as an alias
+        cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
+      })
+      .catch((error) => {
+        cy.log('Error creating initial workspace:', error.message);
+        throw error;
+      });
     cy.contains(/successfully/);
     cy.osd.waitForSync();
   }
@@ -159,11 +167,19 @@ cy.osd.add('addDataSource', (options) => {
   cy.getElementByTestId('createDataSourceButton').click({ force: true });
 
   // Wait for successful creation
-  cy.wait('@createDataSourceRequest').then((interception) => {
-    expect(interception.response.statusCode).to.equal(200);
-    // save the created data source ID as an alias
-    cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
-  });
+  cy.wait('@createDataSourceRequest')
+    .then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+      if (!interception?.response?.body?.id) {
+        throw new Error('Failed to create datasource - no ID returned in response');
+      }
+      // save the created data source ID as an alias
+      cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
+    })
+    .catch((error) => {
+      cy.log('Error creating datasource:', error.message);
+      throw error;
+    });
 
   cy.osd.waitForSync();
 
@@ -188,29 +204,34 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
   cy.wait(WAIT_MS_LONG);
 
   // Check if data source exists before trying to delete
-  cy.get('body').then(($body) => {
-    // First check if we're in empty state
-    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
+  cy.get('body')
+    .then(($body) => {
+      // First check if we're in empty state
+      const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
 
-    if (hasEmptyState) {
-      cy.log(`No data sources exist - skipping deletion of ${dataSourceName}`);
-      return;
-    }
+      if (hasEmptyState) {
+        cy.log(`No data sources exist - skipping deletion of ${dataSourceName}`);
+        return;
+      }
 
-    // Then check if our specific data source exists
-    const dataSourceExists = $body.find(`a:contains("${dataSourceName}")`).length > 0;
+      // Then check if our specific data source exists
+      const dataSourceExists = $body.find(`a:contains("${dataSourceName}")`).length > 0;
 
-    if (!dataSourceExists) {
-      cy.log(`Data source ${dataSourceName} not found - skipping deletion`);
-      return;
-    }
+      if (!dataSourceExists) {
+        cy.log(`Data source ${dataSourceName} not found - skipping deletion`);
+        return;
+      }
 
-    // If we get here, the data source exists and we can delete it
-    cy.get('a').contains(dataSourceName).click();
-    cy.getElementByTestId('editDatasourceDeleteIcon').should('be.visible').click();
-    cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
-    cy.osd.waitForSync();
-  });
+      // If we get here, the data source exists and we can delete it
+      cy.get('a').contains(dataSourceName).click();
+      cy.getElementByTestId('editDatasourceDeleteIcon').should('be.visible').click();
+      cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+      cy.osd.waitForSync();
+    })
+    .catch((error) => {
+      cy.log(`Error deleting datasource ${dataSourceName}:`, error.message);
+      throw error;
+    });
 });
 
 // Deletes all data sources. This command should only be used for convenience during development
@@ -225,29 +246,34 @@ cy.osd.add('deleteAllDataSources', () => {
   cy.osd.waitForLoader(true);
   cy.wait(2000);
 
-  cy.get('body').then(($body) => {
-    const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
-    const hasDataSources = $body.find('[data-test-subj="checkboxSelectAll"]').length > 0;
-    cy.log('hasEmptyState');
-    cy.log(hasEmptyState);
-    cy.log('hasDataSources');
-    cy.log(hasDataSources);
+  cy.get('body')
+    .then(($body) => {
+      const hasEmptyState = $body.find('[data-test-subj="datasourceTableEmptyState"]').length > 0;
+      const hasDataSources = $body.find('[data-test-subj="checkboxSelectAll"]').length > 0;
+      cy.log('hasEmptyState');
+      cy.log(hasEmptyState);
+      cy.log('hasDataSources');
+      cy.log(hasDataSources);
 
-    if (hasEmptyState) {
-      cy.log('No data sources to delete');
-    } else if (hasDataSources) {
-      cy.log('Need to clean out data sources');
-      cy.getElementByTestId('checkboxSelectAll')
-        .should('exist')
-        .should('not.be.disabled')
-        .check({ force: true });
+      if (hasEmptyState) {
+        cy.log('No data sources to delete');
+      } else if (hasDataSources) {
+        cy.log('Need to clean out data sources');
+        cy.getElementByTestId('checkboxSelectAll')
+          .should('exist')
+          .should('not.be.disabled')
+          .check({ force: true });
 
-      cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
+        cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
 
-      cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
-      cy.osd.waitForSync();
-    }
-  });
+        cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+        cy.osd.waitForSync();
+      }
+    })
+    .catch((error) => {
+      cy.log('Error deleting all datasources:', error.message);
+      throw error;
+    });
 });
 
 // Navigates to the workspace HomePage of a given workspace
@@ -351,21 +377,26 @@ cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
 });
 
 cy.osd.add('grabIdsFromDiscoverPageUrl', () => {
-  cy.url().then(($url) => {
-    const workspaceIdMatch = $url.match(/\/w\/([^\/]+)\//);
-    const datasourceIdMatch = $url.match(/dataSource:\(id:'?([0-9a-f-]+)'?,/);
-    const indexPatternIdMatch = $url.match(/\),id:'?([0-9A-Za-z:_-]+)'?,/);
+  cy.url()
+    .then(($url) => {
+      const workspaceIdMatch = $url.match(/\/w\/([^\/]+)\//);
+      const datasourceIdMatch = $url.match(/dataSource:\(id:'?([0-9a-f-]+)'?,/);
+      const indexPatternIdMatch = $url.match(/\),id:'?([0-9A-Za-z:_-]+)'?,/);
 
-    if (workspaceIdMatch && workspaceIdMatch[1]) {
-      cy.wrap(workspaceIdMatch[1]).as('WORKSPACE_ID');
-    }
-    if (datasourceIdMatch && datasourceIdMatch[1]) {
-      cy.wrap(datasourceIdMatch[1]).as('DATASOURCE_ID');
-    }
-    if (indexPatternIdMatch && indexPatternIdMatch[1]) {
-      cy.wrap(indexPatternIdMatch[1]).as('INDEX_PATTERN_ID');
-    }
-  });
+      if (workspaceIdMatch && workspaceIdMatch[1]) {
+        cy.wrap(workspaceIdMatch[1]).as('WORKSPACE_ID');
+      }
+      if (datasourceIdMatch && datasourceIdMatch[1]) {
+        cy.wrap(datasourceIdMatch[1]).as('DATASOURCE_ID');
+      }
+      if (indexPatternIdMatch && indexPatternIdMatch[1]) {
+        cy.wrap(indexPatternIdMatch[1]).as('INDEX_PATTERN_ID');
+      }
+    })
+    .catch((error) => {
+      cy.log('Error grabbing IDs from Discover URL:', error.message);
+      throw error;
+    });
 });
 
 cy.osd.add('deleteSavedObject', (type, id, options = {}) => {
@@ -395,12 +426,20 @@ cy.osd.add('deleteSavedObjectsByType', (workspaceId, type, search) => {
 
   const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
-  return cy.request(url).then((response) => {
-    response.body.saved_objects.map(({ id }) => {
-      cy.osd.deleteSavedObject(type, id);
-      cy.osd.waitForSync();
+  return cy.request(url)
+    .then((response) => {
+      if (!response?.body?.saved_objects) {
+        throw new Error(`Failed to find saved objects of type ${type}`);
+      }
+      response.body.saved_objects.map(({ id }) => {
+        cy.osd.deleteSavedObject(type, id);
+        cy.osd.waitForSync();
+      });
+    })
+    .catch((error) => {
+      cy.log(`Error deleting saved objects of type ${type}:`, error.message);
+      throw error;
     });
-  });
 });
 
 cy.osd.add('deleteAllOldWorkspaces', () => {
@@ -437,19 +476,28 @@ cy.osd.add('deleteAllOldWorkspaces', () => {
           }
         }
       }
+    })
+    .catch((error) => {
+      cy.log('Error selecting old workspaces for deletion:', error.message);
+      throw error;
     });
 
-  cy.get('.application').then(($application) => {
-    const deleteButton = $application.find('[data-test-subj="multi-deletion-button"]');
-    if (deleteButton.length) {
-      cy.getElementByTestId('multi-deletion-button').click();
-      cy.getElementByTestId('delete-workspace-modal-input').type('delete');
-      cy.getElementByTestId('delete-workspace-modal-confirm').click();
+  cy.get('.application')
+    .then(($application) => {
+      const deleteButton = $application.find('[data-test-subj="multi-deletion-button"]');
+      if (deleteButton.length) {
+        cy.getElementByTestId('multi-deletion-button').click();
+        cy.getElementByTestId('delete-workspace-modal-input').type('delete');
+        cy.getElementByTestId('delete-workspace-modal-confirm').click();
 
-      // wait until modal is gone
-      cy.getElementByTestId('delete-workspace-modal-input').should('not.exist');
-    }
-  });
+        // wait until modal is gone
+        cy.getElementByTestId('delete-workspace-modal-input').should('not.exist');
+      }
+    })
+    .catch((error) => {
+      cy.log('Error executing deletion of old workspaces:', error.message);
+      throw error;
+    });
 });
 
 // this currently only works with data-logs-1. If we ever need data from data-logs-2, we should update this.
@@ -547,15 +595,20 @@ cy.osd.add('setTopNavDate', (start, end, submit = true) => {
   // due to automatic batching. Close any open popovers first by clicking outside them.
   // We do this by checking if any absolute tab is visible (meaning a popover is open)
   // and if so, pressing Escape to close it.
-  cy.get('body', opts).then(($body) => {
-    if ($body.find('[data-test-subj="superDatePickerAbsoluteTab"]').length > 0) {
-      cy.get('body').type('{esc}', opts);
-      // Wait for popover to close
-      cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', { timeout: 1000, ...opts }).should(
-        'not.exist'
-      );
-    }
-  });
+  cy.get('body', opts)
+    .then(($body) => {
+      if ($body.find('[data-test-subj="superDatePickerAbsoluteTab"]').length > 0) {
+        cy.get('body').type('{esc}', opts);
+        // Wait for popover to close
+        cy.get('[data-test-subj="superDatePickerAbsoluteTab"]', { timeout: 1000, ...opts }).should(
+          'not.exist'
+        );
+      }
+    })
+    .catch((error) => {
+      cy.log('Error closing date picker popover:', error.message);
+      // Don't re-throw, this is a cleanup step
+    });
 
   /* Find any one of the two buttons that change/open the date picker:
    *   * if `superDatePickerShowDatesButton` is found, it will switch the mode to dates
@@ -962,10 +1015,21 @@ cy.osd.add('createOpensearchDatasourceUsingEndpoint', (datasourceUrl, datasource
 
 /*
   Setup environment and get data source ID in proper sequence
+  @param {string} dataSourceName - The name of the data source to setup
+  @param {Array} [fixturesNeeded] - Optional array of fixture names to load.
+                                     If not provided, loads all available fixtures.
+                                     Each fixture name should match the 'name' property in AVAILABLE_FIXTURE_INDICES.
+                                     Example: ['data_logs_small_time_1', 'logs_otel_v1_000001']
 */
-cy.osd.add('setupEnvAndGetDataSource', (dataSourceName) => {
+cy.osd.add('setupEnvAndGetDataSource', (dataSourceName, fixturesNeeded = null) => {
   cy.log(`setupEnvAndGetDataSource called with: ${dataSourceName}`);
   cy.log(`CYPRESS_RUNTIME_ENV: ${Cypress.env('CYPRESS_RUNTIME_ENV')}`);
+
+  if (fixturesNeeded !== null) {
+    cy.log(`Selective fixture loading enabled. Fixtures to load: ${JSON.stringify(fixturesNeeded)}`);
+  } else {
+    cy.log(`Loading all ${AVAILABLE_FIXTURE_INDICES.length} available fixtures`);
+  }
 
   const datasourceUrl = PATHS.SECONDARY_ENGINE;
   const baseUrl = Cypress.config('baseUrl') || '';
@@ -1022,8 +1086,12 @@ cy.osd.add('setupEnvAndGetDataSource', (dataSourceName) => {
       });
     }
 
-    // Upload all available fixture indices to the data source
-    cy.osd.uploadAllFixtureIndices(datasourceUrl);
+    // Upload fixture indices to the data source (selective or all)
+    if (fixturesNeeded !== null) {
+      cy.osd.uploadSelectiveFixtureIndices(datasourceUrl, fixturesNeeded);
+    } else {
+      cy.osd.uploadAllFixtureIndices(datasourceUrl);
+    }
   });
 });
 
@@ -1042,6 +1110,57 @@ cy.osd.add('uploadAllFixtureIndices', (datasourceUrl = PATHS.SECONDARY_ENGINE) =
     datasourceUrl,
     AVAILABLE_FIXTURE_INDICES.map((index) => index.mappingPath),
     AVAILABLE_FIXTURE_INDICES.map((index) => index.dataPath)
+  );
+});
+
+/*
+  Upload only specific fixture indices to the data source
+  @param {string} datasourceUrl - The URL of the data source
+  @param {Array<string>} fixtureNames - Array of fixture names to upload (must match 'name' in AVAILABLE_FIXTURE_INDICES)
+*/
+cy.osd.add('uploadSelectiveFixtureIndices', (datasourceUrl, fixtureNames) => {
+  // This function should only run in OSD environment
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') !== 'osd') {
+    cy.log('Non-OSD environment - skipping index upload');
+    return;
+  }
+
+  if (!Array.isArray(fixtureNames) || fixtureNames.length === 0) {
+    cy.log('Warning: No fixtures specified for selective loading. Using all fixtures instead.');
+    cy.osd.uploadAllFixtureIndices(datasourceUrl);
+    return;
+  }
+
+  // Filter fixtures based on provided names
+  const selectedFixtures = AVAILABLE_FIXTURE_INDICES.filter((fixture) =>
+    fixtureNames.includes(fixture.name)
+  );
+
+  if (selectedFixtures.length === 0) {
+    throw new Error(
+      `No matching fixtures found for names: ${fixtureNames.join(', ')}. ` +
+        `Available fixtures: ${AVAILABLE_FIXTURE_INDICES.map((f) => f.name).join(', ')}`
+    );
+  }
+
+  // Log which fixtures are being loaded
+  const notFound = fixtureNames.filter(
+    (name) => !selectedFixtures.find((f) => f.name === name)
+  );
+  if (notFound.length > 0) {
+    cy.log(`Warning: Some requested fixtures not found: ${notFound.join(', ')}`);
+  }
+
+  cy.log(
+    `Selective fixture loading: Uploading ${selectedFixtures.length} of ${AVAILABLE_FIXTURE_INDICES.length} test indices`
+  );
+  cy.log(`Fixtures being loaded: ${selectedFixtures.map((f) => f.name).join(', ')}`);
+
+  // Upload only selected fixtures
+  cy.osd.setupTestData(
+    datasourceUrl,
+    selectedFixtures.map((index) => index.mappingPath),
+    selectedFixtures.map((index) => index.dataPath)
   );
 });
 
