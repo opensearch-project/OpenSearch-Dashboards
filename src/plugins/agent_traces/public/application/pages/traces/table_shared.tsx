@@ -46,10 +46,8 @@ import { useTraceMetricsContext } from './hooks/use_trace_metrics';
 
 /** Maps UI column field names to PPL index field names */
 export const PPL_SORT_FIELDS: Record<string, string> = {
-  startTime: 'startTime',
   kind: '`attributes.gen_ai.operation.name`',
   latency: 'durationInNanos',
-  name: 'name',
   status: '`status.code`',
 };
 
@@ -191,16 +189,12 @@ export const useDataTableCore = ({ defaultColumns }: DataTableCoreOptions) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const timeFieldName = dataset?.timeFieldName;
   const handleSortChange = useCallback(
     (newSort: SortOrder[]) => {
-      // When sort is cleared, fall back to default time desc
-      const effectiveSort =
-        newSort.length === 0 && timeFieldName ? [[timeFieldName, 'desc'] as SortOrder] : newSort;
-      dispatch(setSort(effectiveSort));
+      dispatch(setSort(newSort));
       dispatch(executeQueries({ services }) as any);
     },
-    [dispatch, services, timeFieldName]
+    [dispatch, services]
   );
 
   // Wrap cell text toggle
