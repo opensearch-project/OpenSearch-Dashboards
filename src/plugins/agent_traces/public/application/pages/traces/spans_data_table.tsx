@@ -19,7 +19,7 @@ import {
 } from './table_shared';
 import { getHitId } from '../../../components/data_table/table_cell/trace_utils/trace_utils';
 import { useTraceFlyout } from './flyout/trace_flyout_context';
-import { TraceRow } from './hooks/use_agent_traces';
+import { TraceRow } from './hooks/tree_utils';
 import { usePPLQueryDeps } from './hooks/use_ppl_query_deps';
 import { transformPPLDataToTraceHits } from './trace_details/traces/ppl_to_trace_hits';
 import { hitsToAgentSpans, buildFullSpanTree } from './hooks/tree_utils';

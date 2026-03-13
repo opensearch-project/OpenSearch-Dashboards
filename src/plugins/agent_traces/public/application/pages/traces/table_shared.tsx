@@ -46,10 +46,8 @@ import { useTraceMetricsContext } from './hooks/use_trace_metrics';
 
 /** Maps UI column field names to PPL index field names */
 export const PPL_SORT_FIELDS: Record<string, string> = {
-  startTime: 'startTime',
   kind: '`attributes.gen_ai.operation.name`',
   latency: 'durationInNanos',
-  name: 'name',
   status: '`status.code`',
 };
 

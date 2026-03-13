@@ -42,7 +42,7 @@
     align-items: center;
     gap: 4px;
     overflow: hidden;
-    border-right: 1px solid $ouiColorLightShade;
+    border-right: none;
     height: 100%;
     min-width: 0;
   }
@@ -107,7 +107,7 @@
     align-items: center;
     justify-content: flex-end;
     padding-right: $ouiSizeS;
-    border-left: 1px solid $ouiColorLightShade;
+    border-left: none;
     height: 100%;
   }
 

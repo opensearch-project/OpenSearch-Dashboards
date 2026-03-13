@@ -102,7 +102,11 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
                     const category = node.traceRow ? getSpanCategory(node.traceRow) : 'OTHER';
                     const meta = getCategoryMeta(category);
                     return (
-                      <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+                      <EuiBadge
+                        className="agentTraces__categoryBadge"
+                        color={meta.bgColor}
+                        style={{ color: meta.textColor }}
+                      >
                         {meta.label}
                       </EuiBadge>
                     );
@@ -112,12 +116,17 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
                 <span className="agentTracesFlyout__treeRowLabelText" title={node.label}>
                   <span className="agentTracesFlyout__treeRowLabelName">{node.label}</span>
                   {node.traceRow?.status === 'error' && (
-                    <EuiIcon
-                      type="alert"
-                      color="danger"
-                      size="m"
-                      className="agentTracesFlyout__treeRowErrorIcon"
-                    />
+                    <EuiToolTip
+                      content={`Span error: ${node.traceRow?.statusMessage || 'Unknown error'}`}
+                      position="top"
+                    >
+                      <EuiIcon
+                        type="alert"
+                        color="danger"
+                        size="m"
+                        className="agentTracesFlyout__treeRowErrorIcon"
+                      />
+                    </EuiToolTip>
                   )}
                 </span>
               </EuiFlexGroup>

@@ -269,7 +269,11 @@ const AgentTracesKindCell: React.FC<{ hitId: string }> = ({ hitId }) => {
       {!isExpandable && ctx.hasExpandableRows && (
         <span className="agentTracesTable__expandSpacer" />
       )}
-      <EuiBadge className="agentTraces__categoryBadge" color={catMeta.color}>
+      <EuiBadge
+        className="agentTraces__categoryBadge"
+        color={catMeta.bgColor}
+        style={{ color: catMeta.textColor }}
+      >
         {catMeta.label}
       </EuiBadge>
     </div>

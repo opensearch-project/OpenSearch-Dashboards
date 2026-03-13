@@ -13,7 +13,7 @@ import { useTraceFlyout } from './flyout/trace_flyout_context';
 import { BaseRow, LoadingState, buildFullSpanTree, hitsToAgentSpans } from './hooks/tree_utils';
 import { transformPPLDataToTraceHits } from './trace_details/traces/ppl_to_trace_hits';
 import { usePPLQueryDeps } from './hooks/use_ppl_query_deps';
-import { TraceRow } from './hooks/use_agent_traces';
+import { TraceRow } from './hooks/tree_utils';
 import {
   TableLoadingState,
   TableEmptyState,

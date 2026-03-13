@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('@osd/i18n', () => ({
   i18n: {

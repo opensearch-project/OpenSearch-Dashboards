@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FlyoutDetailPanel, formatJsonOrString } from './flyout_detail_panel';
 import { TreeNode } from './tree_helpers';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 describe('formatJsonOrString', () => {
   it('returns "(no data)" for empty or dash values', () => {
