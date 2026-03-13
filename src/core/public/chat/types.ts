@@ -131,8 +131,8 @@ export interface ChatServiceInterface {
   /**
    * Thread management - managed by core
    */
-  getThreadId$(): Observable<string>;
-  getThreadId(): string;
+  getThreadId$(): Observable<string | undefined>;
+  getThreadId(): string | undefined;
   setThreadId(threadId: string): void;
   newThread(): void;
 

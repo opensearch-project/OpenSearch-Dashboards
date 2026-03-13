@@ -269,17 +269,16 @@ export class ChatService {
     observable: any;
     userMessage: UserMessage;
   }> {
+    // Start new thread first to avoid restoring from latest conversation when window opens
+    if (options?.clearConversation) {
+      this.newThread();
+    }
     // Ensure window is open and get the window instance
     const chatWindowInstance = await this.openWindow();
 
-    // Clear conversation if requested (create new thread)
+    // Reset chat window UI to a fresh chat panel
     if (options?.clearConversation) {
-      this.newThread();
-
-      // If we have ChatWindow instance, also clear its conversation
-      if (chatWindowInstance) {
-        chatWindowInstance.startNewChat();
-      }
+      chatWindowInstance.startNewChat();
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -433,9 +432,14 @@ export class ChatService {
       description: ctx.description,
       value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
     }));
+    const threadId = this.getThreadId();
+
+    if (!threadId) {
+      throw new Error('Thread ID is required to send a message');
+    }
 
     const runInput: RunAgentInput = {
-      threadId: this.getThreadId(),
+      threadId,
       runId: this.generateRunId(),
       messages: this.conversationHistoryService.getMemoryProvider().includeFullHistory
         ? [...messages, userMessage]
@@ -558,8 +562,14 @@ export class ChatService {
       .includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, toolMessage] : [toolMessage];
 
+    const threadId = this.getThreadId();
+
+    if (!threadId) {
+      throw new Error('Thread ID is required to send a tool result');
+    }
+
     const runInput: RunAgentInput = {
-      threadId: this.getThreadId(),
+      threadId,
       runId: this.generateRunId(),
       messages: mappedMessages,
       tools: this.availableTools || [],
@@ -612,6 +622,9 @@ export class ChatService {
   public async saveConversation(messages: Message[]): Promise<void> {
     if (messages.length > 0) {
       const threadId = this.getThreadId();
+      if (!threadId) {
+        throw new Error('Thread ID is required to save conversation');
+      }
       await this.conversationHistoryService.saveConversation(threadId, messages);
     }
   }
@@ -650,11 +663,20 @@ export class ChatService {
   /**
    * Restore the latest conversation from agentic memory
    * Returns the messages and thread ID
+   * If thread ID is already set, skip restore (use existing thread)
+   * If no conversation can be restored, generate a new thread
    */
   public async restoreLatestConversation(): Promise<{
     threadId: string;
     messages: Message[];
   } | null> {
+    // Check if thread ID is already set - if so, skip restore and use existing thread
+    const currentThreadId = this.coreChatService?.getThreadId();
+    if (currentThreadId) {
+      // Thread already set, don't restore from latest conversation
+      return null;
+    }
+
     // Get the latest conversation summary from conversation history service
     const result = await this.conversationHistoryService.getConversations({
       page: 0,
@@ -671,6 +693,8 @@ export class ChatService {
       );
 
       if (!events) {
+        // No events found, generate a new thread
+        this.newThread();
         return null;
       }
 
@@ -688,7 +712,8 @@ export class ChatService {
       }
     }
 
-    // No snapshot event found
+    // No conversation found or no snapshot event, generate a new thread
+    this.newThread();
     return null;
   }
 

@@ -476,6 +476,52 @@ describe('usePageContext', () => {
     });
   });
 
+  describe('default page context suppression', () => {
+    let mockControl: { suppress: jest.Mock; unsuppress: jest.Mock };
+
+    beforeEach(() => {
+      mockControl = {
+        suppress: jest.fn(),
+        unsuppress: jest.fn(),
+      };
+      (window as any).__defaultPageContextControl = mockControl;
+    });
+
+    afterEach(() => {
+      delete (window as any).__defaultPageContextControl;
+    });
+
+    it('should call suppress on mount and unsuppress on unmount', () => {
+      const { unmount } = renderHook(() => usePageContext());
+
+      expect(mockControl.suppress).toHaveBeenCalledTimes(1);
+      expect(mockControl.unsuppress).not.toHaveBeenCalled();
+
+      unmount();
+
+      expect(mockControl.unsuppress).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call suppress when enabled is false', () => {
+      const { unmount } = renderHook(() => usePageContext({ enabled: false }));
+
+      expect(mockControl.suppress).not.toHaveBeenCalled();
+
+      unmount();
+
+      expect(mockControl.unsuppress).not.toHaveBeenCalled();
+    });
+
+    it('should not crash when __defaultPageContextControl is unavailable', () => {
+      delete (window as any).__defaultPageContextControl;
+
+      expect(() => {
+        const { unmount } = renderHook(() => usePageContext());
+        unmount();
+      }).not.toThrow();
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle empty URL hash', () => {
       (window as any).location.hash = '';
