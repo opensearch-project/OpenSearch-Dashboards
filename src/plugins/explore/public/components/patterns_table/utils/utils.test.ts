@@ -18,6 +18,10 @@ import {
 } from './utils';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
 import * as queryActions from '../../../application/utils/state_management/actions/query_actions';
+import {
+  resultsCache,
+  clearResultsCache,
+} from '../../../application/utils/state_management/slices';
 
 jest.mock('@osd/ui-shared-deps/theme', () => ({
   euiThemeVars: {
@@ -354,6 +358,10 @@ describe('utils', () => {
       mockGetState.mockReset();
     });
 
+    afterEach(() => {
+      clearResultsCache();
+    });
+
     it('should throw error when state is not provided', () => {
       mockGetState.mockReturnValue(undefined);
       const services = {
@@ -393,6 +401,7 @@ describe('utils', () => {
     });
 
     it('should throw error when there are no results', () => {
+      // Cache is empty (afterEach clears it); function reads from cache, not state.results
       const state = {
         query: { language: 'PPL' },
         results: {},
@@ -409,17 +418,17 @@ describe('utils', () => {
     });
 
     it('should throw error when there are no hits', () => {
+      resultsCache.set('default-query', {
+        fieldSchema: [
+          { name: 'field1', type: 'string' },
+          { name: 'field2', type: 'string' },
+        ],
+        hits: { hits: [] },
+      } as any);
+
       const state = {
         query: { language: 'PPL' },
-        results: {
-          'default-query': {
-            fieldSchema: [
-              { name: 'field1', type: 'string' },
-              { name: 'field2', type: 'string' },
-            ],
-            hits: { hits: [] },
-          },
-        },
+        results: {},
       } as any;
       mockGetState.mockReturnValue(state);
       const services = {
@@ -433,29 +442,29 @@ describe('utils', () => {
     });
 
     it('should find the field with the longest string value and dispatch action', () => {
+      resultsCache.set('default-query', {
+        fieldSchema: [
+          { name: 'field1', type: 'string' },
+          { name: 'field2', type: 'string' },
+          { name: 'field3', type: 'number' }, // Should be ignored as it's not a string
+        ],
+        hits: {
+          hits: [
+            {
+              _source: {
+                field1: 'short value',
+                field2: 'this is a longer value that should be selected',
+                field3: 123, // Should be ignored as it's not a string field
+                field4: 'ignored because not in fieldSchema',
+              },
+            },
+          ],
+        },
+      } as any);
+
       const state = {
         query: { language: 'PPL' },
-        results: {
-          'default-query': {
-            fieldSchema: [
-              { name: 'field1', type: 'string' },
-              { name: 'field2', type: 'string' },
-              { name: 'field3', type: 'number' }, // Should be ignored as it's not a string
-            ],
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    field1: 'short value',
-                    field2: 'this is a longer value that should be selected',
-                    field3: 123, // Should be ignored as it's not a string field
-                    field4: 'ignored because not in fieldSchema',
-                  },
-                },
-              ],
-            },
-          },
-        },
+        results: {},
       } as any;
       mockGetState.mockReturnValue(state);
       const services = {
@@ -471,26 +480,26 @@ describe('utils', () => {
     });
 
     it('should handle non-string values in _source correctly', () => {
+      resultsCache.set('default-query', {
+        fieldSchema: [
+          { name: 'field1', type: 'string' },
+          { name: 'field2', type: 'string' },
+        ],
+        hits: {
+          hits: [
+            {
+              _source: {
+                field1: 'valid string',
+                field2: null, // Non-string value
+              },
+            },
+          ],
+        },
+      } as any);
+
       const state = {
         query: { language: 'PPL' },
-        results: {
-          'default-query': {
-            fieldSchema: [
-              { name: 'field1', type: 'string' },
-              { name: 'field2', type: 'string' },
-            ],
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    field1: 'valid string',
-                    field2: null, // Non-string value
-                  },
-                },
-              ],
-            },
-          },
-        },
+        results: {},
       } as any;
       mockGetState.mockReturnValue(state);
       const services = {

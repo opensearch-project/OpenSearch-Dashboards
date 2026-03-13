@@ -27,7 +27,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   private memoryProvider: ConversationMemoryProvider;
 
   // Core-managed infrastructure state
-  private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
+  private threadId$ = new BehaviorSubject<string | undefined>(undefined);
   private windowState$ = new BehaviorSubject<ChatWindowState>({
     isWindowOpen: false,
     windowMode: 'sidecar',

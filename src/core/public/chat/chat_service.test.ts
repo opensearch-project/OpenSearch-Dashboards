@@ -123,19 +123,26 @@ describe('ChatService', () => {
     it('should manage thread ID in core', () => {
       const startContract = service.start();
 
+      // Initial thread ID should be undefined (lazy initialization)
       const initialThreadId = startContract.getThreadId();
-      expect(initialThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+      expect(initialThreadId).toBeUndefined();
 
-      // Test observable
+      // Test observable emits undefined initially
       let emittedThreadId: string | undefined;
       startContract.getThreadId$().subscribe((id) => (emittedThreadId = id));
-      expect(emittedThreadId).toBe(initialThreadId);
+      expect(emittedThreadId).toBeUndefined();
 
-      // Test setting new thread
+      // Test creating new thread generates a valid thread ID
       startContract.newThread();
       const newThreadId = startContract.getThreadId();
-      expect(newThreadId).not.toBe(initialThreadId);
       expect(newThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+      expect(emittedThreadId).toBe(newThreadId);
+
+      // Test creating another new thread generates a different ID
+      startContract.newThread();
+      const anotherThreadId = startContract.getThreadId();
+      expect(anotherThreadId).not.toBe(newThreadId);
+      expect(anotherThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
     });
 
     it('should manage window state in core', () => {
