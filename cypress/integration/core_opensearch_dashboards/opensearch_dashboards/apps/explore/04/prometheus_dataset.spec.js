@@ -333,6 +333,8 @@ const prometheusDatasetTestSuite = () => {
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
 
+          // Navigate to visualization tab
+          cy.get('#explore_visualization_tab').click();
           cy.get('body').should('contain.text', 'results in');
 
           cy.getElementByTestId('discoverSaveButton').should('be.visible').click();
@@ -365,6 +367,8 @@ const prometheusDatasetTestSuite = () => {
 
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
+          // Navigate to visualization tab
+          cy.get('#explore_visualization_tab').click();
           cy.get('body').should('contain.text', 'results in');
 
           cy.getElementByTestId('discoverSaveButton').should('be.visible').click();
