@@ -48,11 +48,6 @@
     // To fight intruding styles that conflict with OUI's
     & > tbody > tr > td {
       line-height: inherit;
-      border-top: 0;
-    }
-
-    & > thead > tr > th {
-      border-bottom: 0;
     }
 
     /**
@@ -149,13 +144,15 @@
       max-width: 400px;
     }
 
-    // Cell content truncation: handle nested structure
+    // Cell content layout
     td .agentTracesDocTableCell__content {
       display: flex;
       align-items: center;
       min-width: 0;
+    }
 
-      // Data field content: truncate with ellipsis
+    // Default: truncate cell text with ellipsis
+    &:not(.agentTraces-table--wrap) td .agentTracesDocTableCell__content {
       > span:first-child,
       .agentTracesDocTableCell__dataField {
         flex: 0 1 auto;
@@ -164,6 +161,34 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+    }
+
+    // Wrap mode: allow cell text to wrap and break words
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    &.agentTraces-table--wrap td:not(.eui-textNoWrap) {
+      word-break: break-word;
+      max-width: 400px;
+      vertical-align: top;
+    }
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    &.agentTraces-table--wrap td.eui-textNoWrap {
+      vertical-align: top;
+    }
+
+    &.agentTraces-table--wrap td .agentTracesDocTableCell__content {
+      display: block;
+      overflow: visible;
+
+      .agentTracesDocTableCell__dataField {
+        white-space: normal;
+        word-break: break-word;
+      }
+    }
+
+    // Give text-heavy columns (Input, Output) more horizontal space
+    td.agentTracesDocTableCell--wideText {
+      min-width: 200px;
     }
 
     // Allow expand/collapse column to be narrow

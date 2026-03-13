@@ -13,7 +13,13 @@ import {
   selectQuery,
   selectIsQueryEditorDirty,
 } from '../../../utils/state_management/selectors';
-import { DataViewField, IndexPatternField } from '../../../../../../data/common';
+import {
+  DataViewField,
+  Filter,
+  IndexPatternField,
+  IFieldType,
+  IIndexPattern,
+} from '../../../../../../data/common';
 import { opensearchFilters } from '../../../../../../data/public';
 import { useDatasetContext } from '../../../context';
 import { EditorMode } from '../../../utils/state_management/types';
@@ -38,18 +44,33 @@ export const useChangeQueryEditor = () => {
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
   const onAddFilter = useCallback(
-    (field: string | IndexPatternField | DataViewField, values: string, operation: '+' | '-') => {
+    (
+      field: string | IndexPatternField | DataViewField,
+      values: string | string[],
+      operation: '+' | '-'
+    ) => {
       if (!dataset) return;
       const languageConfig = queryString.getLanguageService().getLanguage(query.language);
       if (!languageConfig) return;
 
-      const newFilters = opensearchFilters.generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        dataset.id ?? ''
-      );
+      let newFilters: Filter[];
+      // Array values → build a single "phrases" filter (OR condition)
+      if (Array.isArray(values) && values.length > 1) {
+        const fieldObj = (typeof field === 'string' ? { name: field } : field) as IFieldType;
+        const indexPattern = { id: dataset.id ?? '' } as IIndexPattern;
+        const filter = opensearchFilters.buildPhrasesFilter(fieldObj, values, indexPattern);
+        filter.meta.negate = operation === '-';
+        newFilters = [filter];
+      } else {
+        const singleValue = Array.isArray(values) ? values[0] : values;
+        newFilters = opensearchFilters.generateFilters(
+          filterManager,
+          field,
+          singleValue,
+          operation,
+          dataset.id ?? ''
+        );
+      }
       setEditorText((text) => {
         const newText =
           editorMode === EditorMode.Prompt

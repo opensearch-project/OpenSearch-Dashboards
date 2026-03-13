@@ -274,7 +274,7 @@ export class AgentTracesPlugin
     // Register single Agent Traces application
     core.application.register(createAgentTracesApp());
 
-    // Register nav link - single entry
+    // Register nav links for observability and analytics workspaces
     const navLinks = [
       {
         id: PLUGIN_ID,
@@ -284,6 +284,7 @@ export class AgentTracesPlugin
     ];
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     return {
@@ -394,7 +395,9 @@ export class AgentTracesPlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }

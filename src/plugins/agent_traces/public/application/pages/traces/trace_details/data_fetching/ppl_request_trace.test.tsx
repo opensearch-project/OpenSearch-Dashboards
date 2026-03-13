@@ -78,9 +78,11 @@ describe('ppl_request_trace', () => {
         },
         'source = test-index | where traceId = "test-trace-id" | head 100'
       );
-      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
-        query: { query: 'mock-query' },
-      });
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(
+        mockDataService,
+        { query: { query: 'mock-query' } },
+        undefined
+      );
     });
 
     it('constructs query with single filter', async () => {
@@ -97,9 +99,11 @@ describe('ppl_request_trace', () => {
         },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | head 100'
       );
-      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
-        query: { query: 'mock-query' },
-      });
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(
+        mockDataService,
+        { query: { query: 'mock-query' } },
+        undefined
+      );
     });
 
     it('constructs query with multiple filters', async () => {
@@ -119,9 +123,11 @@ describe('ppl_request_trace', () => {
         },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test-service" | where status = "error" | head 100'
       );
-      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
-        query: { query: 'mock-query' },
-      });
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(
+        mockDataService,
+        { query: { query: 'mock-query' } },
+        undefined
+      );
     });
 
     it('escapes filter values correctly', async () => {
@@ -142,9 +148,11 @@ describe('ppl_request_trace', () => {
         },
         'source = test-index | where traceId = "test-trace-id" | where serviceName = "test\\"service" | where count = 123 | where active = true | head 100'
       );
-      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
-        query: { query: 'mock-query' },
-      });
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(
+        mockDataService,
+        { query: { query: 'mock-query' } },
+        undefined
+      );
     });
 
     it('uses custom limit', async () => {
@@ -161,9 +169,22 @@ describe('ppl_request_trace', () => {
         },
         'source = test-index | where traceId = "test-trace-id" | head 50'
       );
-      expect(mockExecutePPLQuery).toHaveBeenCalledWith(mockDataService, {
-        query: { query: 'mock-query' },
-      });
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(
+        mockDataService,
+        { query: { query: 'mock-query' } },
+        undefined
+      );
+    });
+
+    it('passes abort signal to executePPLQuery', async () => {
+      const controller = new AbortController();
+      await tracePPLService.fetchTraceSpans(defaultParams, controller.signal);
+
+      expect(mockExecutePPLQuery).toHaveBeenCalledWith(
+        mockDataService,
+        { query: { query: 'mock-query' } },
+        controller.signal
+      );
     });
 
     it('handles query execution error', async () => {

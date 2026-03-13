@@ -28,6 +28,7 @@ export interface ITableCellProps {
   rowData?: OpenSearchSearchHit<Record<string, unknown>>;
   isOnTracesPage: boolean;
   setIsRowSelected: (isRowSelected: boolean) => void;
+  wrapCellText?: boolean;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -41,6 +42,7 @@ export const TableCellUI = ({
   rowData,
   isOnTracesPage,
   setIsRowSelected,
+  wrapCellText,
 }: ITableCellProps) => {
   const { dataset } = useDatasetContext();
 
@@ -55,6 +57,10 @@ export const TableCellUI = ({
         data-test-subj="osdDocTableCellDataField"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
+        onMouseEnter={(e: React.MouseEvent<HTMLSpanElement>) => {
+          const el = e.currentTarget;
+          el.title = el.scrollWidth > el.clientWidth ? el.textContent || '' : '';
+        }}
       />
     );
 
@@ -105,6 +111,25 @@ export const TableCellUI = ({
             className="agentTracesDocTableCell__filterButton"
           />
         </EuiToolTip>
+        <EuiToolTip
+          content={i18n.translate('agentTraces.copyValue', {
+            defaultMessage: 'Copy value',
+          })}
+        >
+          <EuiButtonIcon
+            size="xs"
+            onClick={() => {
+              const textToCopy = sanitizedCellValue.replace(/<[^>]*>/g, '');
+              navigator.clipboard.writeText(textToCopy);
+            }}
+            iconType="copy"
+            aria-label={i18n.translate('agentTraces.copyValue', {
+              defaultMessage: 'Copy value',
+            })}
+            data-test-subj="copyValue"
+            className="agentTracesDocTableCell__filterButton"
+          />
+        </EuiToolTip>
       </span>
     </>
   );
@@ -112,7 +137,9 @@ export const TableCellUI = ({
   return (
     <td
       data-test-subj="docTableField"
-      className={`agentTracesDocTableCell ${isTimeField ? 'eui-textNoWrap' : 'eui-textTruncate'}`}
+      className={`agentTracesDocTableCell ${
+        isTimeField ? 'eui-textNoWrap' : wrapCellText ? '' : 'eui-textTruncate'
+      }`}
     >
       <div className="agentTracesDocTableCell__content">{content}</div>
     </td>

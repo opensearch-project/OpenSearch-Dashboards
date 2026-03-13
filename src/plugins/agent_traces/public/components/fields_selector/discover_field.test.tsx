@@ -112,6 +112,22 @@ function getProps({
 }
 
 describe('discover sidebar field', function () {
+  it('should allow selecting fields', async function () {
+    const props = getProps({});
+    render(<DiscoverField {...props} />);
+
+    await fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
+
+    expect(props.onAddField).toHaveBeenCalledWith('bytes');
+  });
+  it('should allow deselecting fields', async function () {
+    const props = getProps({ selected: true });
+    render(<DiscoverField {...props} />);
+
+    await fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
+
+    expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
+  });
   it('should trigger getDetails when showSummary is true', async function () {
     const props = getProps({ showSummary: true });
     render(<DiscoverField {...props} />);
@@ -125,6 +141,12 @@ describe('discover sidebar field', function () {
     render(<DiscoverField {...props} />);
 
     expect(screen.queryByTestId('field-bytes-showDetails')).toBeNull();
+  });
+  it('should not show remove button when nonRemovable is true', function () {
+    const props = getProps({ selected: true });
+    render(<DiscoverField {...props} nonRemovable />);
+
+    expect(screen.queryByTestId('fieldToggle-bytes')).toBeNull();
   });
   it('should not allow clicking on _source', function () {
     const field = {

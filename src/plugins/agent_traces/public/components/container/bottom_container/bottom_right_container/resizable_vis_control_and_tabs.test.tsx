@@ -30,6 +30,10 @@ jest.mock('../../../../application/pages/traces/trace_metrics_bar', () => ({
   TraceMetricsBar: () => <div data-test-subj="traceMetricsBar">Metrics Bar</div>,
 }));
 
+jest.mock('../../../../application/pages/traces/hooks/use_error_filter_click', () => ({
+  useErrorFilterClick: () => jest.fn(),
+}));
+
 jest.mock('../../../../application/pages/traces/flyout/trace_flyout_context', () => ({
   TraceFlyoutProvider: ({ children }: any) => <>{children}</>,
 }));
