@@ -24,11 +24,11 @@ import {
   WorkspaceAvailability,
 } from '../../../core/public';
 import {
+  createOsdUrlStateStorage,
   createOsdUrlTracker,
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { createFlavoredUrlStateStorage } from './utils/create_flavored_url_state_storage';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
@@ -251,13 +251,13 @@ export class ExplorePlugin
           this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
         appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
       }
-
+      const flavorSuffix = flavor ? `/${flavor}` : '';
+      const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
+      const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-        baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
+        baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
-        storageKey: flavor
-          ? `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}:${flavor}`
-          : `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
+        storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
         stateParams: [
@@ -357,12 +357,9 @@ export class ExplorePlugin
           );
 
           // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
-          // Use flavor-specific storage to isolate session storage between flavors
-          // FlavoredSessionStorage namespaces all storage keys with flavor prefix
-          services.osdUrlStateStorage = createFlavoredUrlStateStorage({
+          services.osdUrlStateStorage = createOsdUrlStateStorage({
             history: this.currentHistory,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            flavor,
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           });
 

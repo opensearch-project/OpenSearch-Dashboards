@@ -35,13 +35,11 @@ import { DEFAULT_EDITOR_MODE } from '../constants';
 
 /**
  * Persists Redux state to URL
- * Note: We always use '_q' and '_a' as URL parameter names, but each flavor
- * has its own osdUrlStateStorage instance that manages separate session storage
  */
 export const persistReduxState = (state: RootState, services: ExploreServices) => {
   if (!services.osdUrlStateStorage) return;
   try {
-    // Use standard keys - each flavor's osdUrlStateStorage instance handles isolation
+    // Sync up _q (Query state) to URL state
     services.osdUrlStateStorage.set('_q', state.query, { replace: true });
 
     // Sync up _a (Application state) to URL state
@@ -61,8 +59,6 @@ export const persistReduxState = (state: RootState, services: ExploreServices) =
 
 /**
  * Loads Redux state from URL or returns default state
- * Note: We always use '_q' and '_a' as URL parameter names, but each flavor
- * has its own osdUrlStateStorage instance that manages separate session storage
  */
 export const loadReduxState = async (services: ExploreServices): Promise<RootState> => {
   try {
@@ -71,7 +67,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
       return await getPreloadedState(services);
     }
 
-    // Get URL state using standard keys - flavor isolation is handled by separate storage instances
+    // Get URL state
     const queryState = services.osdUrlStateStorage.get('_q') as QueryState | null;
     const appState = services.osdUrlStateStorage.get('_a') as AppState | null;
 
