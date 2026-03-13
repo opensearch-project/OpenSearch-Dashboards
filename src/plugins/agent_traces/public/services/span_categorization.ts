@@ -35,6 +35,7 @@ function getCategoryColor(category: SpanCategory): string {
     case 'RETRIEVAL':
       return euiThemeVars.euiColorVis4;
     case 'OTHER':
+    default:
       return euiThemeVars.euiColorMediumShade;
   }
 }

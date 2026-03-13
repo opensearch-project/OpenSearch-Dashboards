@@ -191,16 +191,16 @@ export const useDataTableCore = ({ defaultColumns }: DataTableCoreOptions) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const timeFieldName = dataset?.timeFieldName;
   const handleSortChange = useCallback(
     (newSort: SortOrder[]) => {
       // When sort is cleared, fall back to default time desc
-      const timeField = dataset?.timeFieldName;
       const effectiveSort =
-        newSort.length === 0 && timeField ? [[timeField, 'desc'] as SortOrder] : newSort;
+        newSort.length === 0 && timeFieldName ? [[timeFieldName, 'desc'] as SortOrder] : newSort;
       dispatch(setSort(effectiveSort));
       dispatch(executeQueries({ services }) as any);
     },
-    [dispatch, services, dataset]
+    [dispatch, services, timeFieldName]
   );
 
   // Wrap cell text toggle
