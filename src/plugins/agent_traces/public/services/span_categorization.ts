@@ -4,7 +4,7 @@
  */
 
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { TraceRow } from '../application/pages/traces/hooks/use_agent_traces';
+import { TraceRow } from '../application/pages/traces/hooks/tree_utils';
 
 export type SpanCategory = 'AGENT' | 'LLM' | 'TOOL' | 'EMBEDDINGS' | 'RETRIEVAL' | 'OTHER';
 

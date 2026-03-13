@@ -20,7 +20,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { TreeNode } from './tree_helpers';
 
 export const formatJsonOrString = (value: string | undefined): string => {

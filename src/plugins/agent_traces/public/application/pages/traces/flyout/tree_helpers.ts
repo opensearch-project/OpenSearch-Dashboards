@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { parseLatencyMs, parseTimestampMs } from '../trace_details/utils/span_timerange_utils';
 import {
   getSpanCategory,

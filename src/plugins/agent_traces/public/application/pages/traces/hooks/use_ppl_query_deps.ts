@@ -23,7 +23,7 @@ export interface PPLQueryDeps {
 
 /**
  * Shared hook that provides the common PPL query dependencies
- * used by use_agent_traces, use_agent_spans, and use_trace_metrics.
+ * used by use_trace_metrics.
  */
 export const usePPLQueryDeps = (): PPLQueryDeps => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();

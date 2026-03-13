@@ -9,7 +9,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { CelestialMap, AgentCardNode } from '@osd/apm-topology';
 import type { NodeProps } from '@xyflow/react';
 
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { categorizeSpanTree, CategorizedSpan } from '../../../../services/span_categorization';
 import { spansToFlow } from '../../../../services/flow_transform';
 import './trace_flow_view.scss';

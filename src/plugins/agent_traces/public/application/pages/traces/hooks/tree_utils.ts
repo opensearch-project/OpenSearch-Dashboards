@@ -44,6 +44,11 @@ export interface BaseRow {
   rawDocument?: Record<string, unknown>;
 }
 
+export interface TraceRow extends BaseRow {
+  displayName?: string;
+  children?: TraceRow[];
+}
+
 export interface LoadingState {
   loading: boolean;
   error: string | null;

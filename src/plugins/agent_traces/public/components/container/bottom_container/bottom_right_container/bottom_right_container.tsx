@@ -65,11 +65,6 @@ export const BottomRightContainer = () => {
     );
   }
 
-  // All tabs manage their own data fetching (e.g. TracesTab uses useAgentTraces,
-  // SpansTab uses useAgentSpans, both with server-side pagination). Bypass Redux
-  // query status checks — the tab component handles its own loading / error / empty
-  // states internally. Tabs that also define prepareQuery use it only for the sidebar
-  // field details popover, not for the main content display.
   const activeTab = activeTabId ? services?.tabRegistry?.getTab(activeTabId) : null;
   if (activeTab) {
     return <ReadyContent />;
