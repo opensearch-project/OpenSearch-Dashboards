@@ -20,7 +20,10 @@ export interface TypeBadgeProps {
 export const TypeBadge: React.FC<TypeBadgeProps> = ({ label, color, icon, textColor }) => (
   <span
     className="osd:inline-flex osd:items-center osd:gap-1 osd:px-2 osd:py-0.5 osd:rounded-full osd:text-xs osd:font-semibold osd:leading-none"
-    style={{ backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`, color: textColor ?? color }}
+    style={{
+      backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+      color: textColor ?? color,
+    }}
   >
     {icon && <span className="osd:flex osd:items-center osd:w-3 osd:h-3">{icon}</span>}
     {label}
