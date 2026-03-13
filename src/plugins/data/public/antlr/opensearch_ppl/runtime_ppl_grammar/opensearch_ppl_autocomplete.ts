@@ -143,10 +143,12 @@ export function resolveKeywordSuggestionDetails(
 }
 
 export function resolveSupportedNonLiteralKeywordDetails(sk: KeywordSuggestion) {
-  const byId = SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
-  if (byId) return byId;
-  if (!sk.symbolicName) return undefined;
-  return _supportedNonLiteralBySymbolic.get(sk.symbolicName.toUpperCase());
+  // Prefer symbolic name (stable across grammar versions) over ID.
+  if (sk.symbolicName) {
+    const bySymbolic = _supportedNonLiteralBySymbolic.get(sk.symbolicName.toUpperCase());
+    if (bySymbolic) return bySymbolic;
+  }
+  return SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
 }
 
 export function isCommandPositionInCurrentSegment(queryTillCursor: string): boolean {
@@ -184,8 +186,10 @@ export function deriveKeywordFromSymbolicName(symbolicName?: string | null): str
   if (!symbolicName) return '';
   if (!/^[A-Z][A-Z0-9_]*$/.test(symbolicName)) return '';
   if (/_STRING$/.test(symbolicName)) return '';
+  // Exclude internal/structural token names that could leak as visible suggestions.
+  // These are tokens without literal names whose symbolic names look word-like.
   if (
-    /^(ID|WS|SPACE|EOF|ERROR_RECOGNITION|ERROR|UNRECOGNIZED|NUMBER|INTEGER|DECIMAL)$/.test(
+    /^(ID|WS|SPACE|EOF|ERROR_RECOGNITION|ERROR|UNRECOGNIZED|NUMBER|INTEGER|DECIMAL|DOT|COMMA|PIPE|EQUAL|NOT_EQUAL|LESS|GREATER|NOT_LESS|NOT_GREATER|LT_PRTHS|RT_PRTHS|LT_SQR_PRTHS|RT_SQR_PRTHS|STAR|PLUS|MINUS|DIV|MODULE|SINGLE_QUOTE|DOUBLE_QUOTE|BACKTICK)$/.test(
       symbolicName
     )
   ) {
@@ -314,24 +318,18 @@ export function pickStartRuleIndex(query: string, grammar: CachedGrammar): numbe
 // ─── C3 preferred rules logic ──────────────────────────────────────────────────
 
 /**
- * Preferred rule names for C3, resolved against the runtime grammar.
+ * C3 preferred rules: rules we want as rule candidates instead of exploding
+ * into many token candidates. Three categories:
  *
- * These fall into three categories:
+ * 1. **Leaf concepts** — field/table/function/literal rules that commands compose.
+ * 2. **Noise suppression** — rules whose children expand to hundreds of keywords
+ *    (e.g. `searchableKeyWord`, `keywordsCanBeId`).
+ * 3. **Structural rules** — rules that control completion scope (e.g. `searchCommand`).
  *
- * 1. **Leaf concepts** — stable field/table/function/literal rules that new
- *    commands compose.  Adding a new PPL command that uses `qualifiedName`
- *    works automatically.
- *
- * 2. **Noise suppression** — rules whose children expand to hundreds of
- *    keyword tokens (e.g. `searchableKeyWord`, `keywordsCanBeId`).  Without
- *    these as preferred rules, C3 floods with ~400 keyword tokens instead of
- *    returning the parent rule for enrichment.
- *
- * 3. **Structural rules** — rules that control token scoping (e.g.
- *    `searchCommand` controls root vs. pipe positions).
- *
- * Each name is resolved against `grammar.parserRuleNames` at runtime; names
- * that don't exist in the current grammar version are silently skipped.
+ * Missing names are silently skipped, so this stays compatible across grammar
+ * versions as long as equivalent concepts keep the same rule names. New commands
+ * that reuse these leaf rules get completion support automatically; commands
+ * that introduce new structural rules may need additions here.
  */
 const PREFERRED_RULE_NAMES: readonly string[] = [
   // ── Leaf concepts ──
@@ -340,6 +338,7 @@ const PREFERRED_RULE_NAMES: readonly string[] = [
   'tableQualifiedName',
   'statsFunctionName',
   'renameClasue',
+  'renameClause',
   'stringLiteral',
   'integerLiteral',
   'decimalLiteral',
@@ -505,6 +504,13 @@ function findLastNonSpaceOperatorTokenRT(
   return null;
 }
 
+/**
+ * Walk backward from cursor looking for the nearest pipe token. If found,
+ * return the first non-space token after that pipe. If no pipe is found,
+ * return the last non-space token encountered (i.e. nearest meaningful token
+ * before cursor) — so callers in root queries get the context token rather
+ * than null.
+ */
 function findFirstNonSpaceTokenAfterPipeRT(
   tokenStream: TokenStream,
   cursorIndex: number,
@@ -570,10 +576,14 @@ export function isAtFirstArgumentPositionInSegmentRT(
   return nonSpaceTokenCount === 1;
 }
 
-/** Cache for runtime operator token sets, keyed by grammarHash */
+/** Cache for runtime skip-backward token sets, keyed by grammarHash */
 const _operatorTokenCache = new Map<string, Set<number>>();
 
-/** Build operator token set (by symbolic name) to skip in token scanning. */
+/**
+ * Tokens to skip when walking backward for the last semantically meaningful token.
+ * Includes operators, parentheses, and structural tokens like SQUOTA_STRING.
+ * The name list is curated, not dynamically grammar-adaptive.
+ */
 function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
   const cached = _operatorTokenCache.get(grammar.grammarHash);
   if (cached) return cached;
@@ -758,7 +768,8 @@ export function enrichRuntimeResult(
         break;
       }
 
-      case 'renameClasue': {
+      case 'renameClasue':
+      case 'renameClause': {
         const expressionStart = rule.startTokenIndex;
         if (expressionStart === cursorTokenIndex) {
           shouldSuggestColumns = true;
@@ -977,9 +988,14 @@ export function tryRuntimeGrammarSuggestions(
 
       const second = core.collectCandidates(cursorTokenIndex, c3Context);
 
-      // Merge: add tokens/rules from second pass that first pass didn't have
+      // Merge: union follow lists so metadata like followsOpeningParen isn't lost
       second.tokens.forEach((followList, tokenType) => {
-        if (!tokens.has(tokenType)) tokens.set(tokenType, followList);
+        const existing = tokens.get(tokenType);
+        if (!existing) {
+          tokens.set(tokenType, followList);
+          return;
+        }
+        tokens.set(tokenType, [...new Set([...(existing ?? []), ...(followList ?? [])])]);
       });
       second.rules.forEach((ruleData, ruleIdx) => {
         if (!rules.has(ruleIdx)) rules.set(ruleIdx, ruleData);

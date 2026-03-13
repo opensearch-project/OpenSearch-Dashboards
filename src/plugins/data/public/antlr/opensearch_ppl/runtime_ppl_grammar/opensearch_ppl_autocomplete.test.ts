@@ -248,6 +248,24 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(deriveKeywordFromSymbolicName('DECIMAL')).toBe('');
     });
 
+    it('rejects internal structural/operator token names', () => {
+      expect(deriveKeywordFromSymbolicName('DOT')).toBe('');
+      expect(deriveKeywordFromSymbolicName('COMMA')).toBe('');
+      expect(deriveKeywordFromSymbolicName('PIPE')).toBe('');
+      expect(deriveKeywordFromSymbolicName('EQUAL')).toBe('');
+      expect(deriveKeywordFromSymbolicName('NOT_EQUAL')).toBe('');
+      expect(deriveKeywordFromSymbolicName('LESS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('GREATER')).toBe('');
+      expect(deriveKeywordFromSymbolicName('LT_PRTHS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('RT_PRTHS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('LT_SQR_PRTHS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('RT_SQR_PRTHS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('STAR')).toBe('');
+      expect(deriveKeywordFromSymbolicName('PLUS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('MINUS')).toBe('');
+      expect(deriveKeywordFromSymbolicName('BACKTICK')).toBe('');
+    });
+
     it('rejects lowercase or mixed-case names', () => {
       expect(deriveKeywordFromSymbolicName('where')).toBe('');
       expect(deriveKeywordFromSymbolicName('Where')).toBe('');
