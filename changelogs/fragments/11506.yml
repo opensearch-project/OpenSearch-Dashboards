@@ -1,0 +1,2 @@
+fix:
+- Fix share links when session storage is on ([#11506](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11506))

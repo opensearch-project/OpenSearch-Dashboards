@@ -22,7 +22,7 @@ describe('ChatService', () => {
   let chatService: ChatService;
   let mockAgent: jest.Mocked<AgUiAgent>;
   let mockCoreChatService: jest.Mocked<ChatServiceStart>;
-  let mockThreadId$: BehaviorSubject<string>;
+  let mockThreadId$: BehaviorSubject<string | undefined>;
   let mockUiSettings: any;
 
   beforeEach(() => {
@@ -50,13 +50,13 @@ describe('ChatService', () => {
       writable: true,
     });
 
-    // Create mock thread ID observable with proper format
+    // Create mock thread ID observable - starts as undefined
     const generateMockThreadId = () => {
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 11);
       return `thread-${timestamp}-${randomStr}`;
     };
-    mockThreadId$ = new BehaviorSubject<string>(generateMockThreadId());
+    mockThreadId$ = new BehaviorSubject<string | undefined>(undefined);
 
     // Create mock window state with proper state management
     const mockWindowState$ = new BehaviorSubject({
@@ -142,6 +142,8 @@ describe('ChatService', () => {
 
   describe('getThreadId$', () => {
     it('should return an observable that emits the current thread ID', (done) => {
+      // Initialize a thread first
+      chatService.newThread();
       const threadId$ = chatService.getThreadId$();
 
       threadId$.subscribe((threadId) => {
@@ -152,11 +154,15 @@ describe('ChatService', () => {
     });
 
     it('should emit new thread ID when newThread is called', (done) => {
+      // Initialize a thread first
+      chatService.newThread();
       const threadId$ = chatService.getThreadId$();
-      const emittedValues: string[] = [];
+      const emittedValues: Array<string | undefined> = [];
 
       threadId$.subscribe((threadId) => {
-        emittedValues.push(threadId);
+        if (threadId) {
+          emittedValues.push(threadId);
+        }
 
         if (emittedValues.length === 2) {
           // Verify we got two different thread IDs
@@ -174,6 +180,8 @@ describe('ChatService', () => {
     });
 
     it('should provide consistent thread ID across multiple subscriptions', () => {
+      // Initialize a thread first
+      chatService.newThread();
       const threadId$ = chatService.getThreadId$();
       let threadId1: string | undefined;
       let threadId2: string | undefined;
@@ -258,6 +266,8 @@ describe('ChatService', () => {
 
   describe('sendMessage', () => {
     beforeEach(() => {
+      // Initialize a thread first - required for sendMessage
+      chatService.newThread();
       // Mock window.assistantContextStore
       (global as any).window = {
         assistantContextStore: {
@@ -481,10 +491,24 @@ describe('ChatService', () => {
       expect(result.userMessage.content).toBe('User message');
       expect(Array.isArray(result.userMessage.content)).toBe(false);
     });
+
+    it('should throw error when thread ID is not set', async () => {
+      // Reset thread ID to undefined by creating a new service without calling newThread
+      const newService = new ChatService(mockUiSettings, mockCoreChatService);
+
+      // Mock getThreadId to return undefined
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
+
+      await expect(newService.sendMessage('test', [])).rejects.toThrow(
+        'Thread ID is required to send a message'
+      );
+    });
   });
 
   describe('sendToolResult', () => {
     beforeEach(() => {
+      // Initialize a thread first - required for sendToolResult
+      chatService.newThread();
       (global as any).window = {
         assistantContextStore: {
           getAllContexts: jest.fn().mockReturnValue([]),
@@ -588,6 +612,18 @@ describe('ChatService', () => {
         toolCallId,
       });
     });
+
+    it('should throw error when thread ID is not set', async () => {
+      // Create a new service without calling newThread
+      const newService = new ChatService(mockUiSettings, mockCoreChatService);
+
+      // Mock getThreadId to return undefined
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
+
+      await expect(newService.sendToolResult('tool-123', 'result', [])).rejects.toThrow(
+        'Thread ID is required to send a tool result'
+      );
+    });
   });
 
   describe('abort', () => {
@@ -684,6 +720,46 @@ describe('ChatService', () => {
       chatService.newThread();
 
       expect(mockAgent.resetConnection).toHaveBeenCalled();
+    });
+  });
+
+  describe('saveConversation', () => {
+    it('should throw error when thread ID is not set', async () => {
+      // Mock getThreadId to return undefined
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
+
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'test' }];
+
+      await expect(chatService.saveConversation(messages)).rejects.toThrow(
+        'Thread ID is required to save conversation'
+      );
+    });
+
+    it('should not throw when messages array is empty', async () => {
+      // Mock getThreadId to return undefined - but it shouldn't matter for empty messages
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
+
+      // Should not throw because empty messages array returns early
+      await expect(chatService.saveConversation([])).resolves.not.toThrow();
+    });
+
+    it('should save conversation when thread ID is set', async () => {
+      // Initialize a thread
+      chatService.newThread();
+
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'test' }];
+
+      // Mock the saveConversation method on conversationHistoryService
+      chatService.conversationHistoryService.saveConversation = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await chatService.saveConversation(messages);
+
+      expect(chatService.conversationHistoryService.saveConversation).toHaveBeenCalledWith(
+        expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+        messages
+      );
     });
   });
 
@@ -1241,6 +1317,60 @@ describe('ChatService', () => {
 
       expect(completed).toBe(true);
     });
+
+    it('should call newThread before openWindow when clearConversation is true', async () => {
+      const callOrder: string[] = [];
+
+      // Track newThread call
+      const originalNewThread = mockCoreChatService.newThread;
+      mockCoreChatService.newThread = jest.fn(() => {
+        callOrder.push('newThread');
+        originalNewThread();
+      });
+
+      // Track openWindow call
+      const originalOpenWindow = mockCoreChatService.openWindow;
+      mockCoreChatService.openWindow = jest.fn(async () => {
+        callOrder.push('openWindow');
+        await originalOpenWindow();
+      });
+
+      const mockInstance = {
+        sendMessage: jest.fn().mockResolvedValue(undefined),
+        startNewChat: jest.fn(),
+      };
+
+      chatService.onWindowOpenRequest(() => {
+        chatService.setChatWindowInstance(mockInstance as any);
+      });
+
+      await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
+
+      // Verify newThread is called before openWindow
+      expect(callOrder).toEqual(['newThread', 'openWindow']);
+    });
+
+    it('should call startNewChat on chatWindowInstance after window opens when clearConversation is true', async () => {
+      const mockStartNewChat = jest.fn();
+      const mockSendMessage = jest.fn().mockResolvedValue(undefined);
+
+      const mockInstance = {
+        sendMessage: mockSendMessage,
+        startNewChat: mockStartNewChat,
+      };
+
+      // Set up callback to provide instance when window opens
+      chatService.onWindowOpenRequest(() => {
+        chatService.setChatWindowInstance(mockInstance as any);
+      });
+
+      await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
+
+      // Verify startNewChat was called on the window instance
+      expect(mockStartNewChat).toHaveBeenCalled();
+      // Verify sendMessage was also called after startNewChat
+      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test', messages: [] });
+    });
   });
 
   describe('extractDataSourceIdFromPageContext', () => {
@@ -1411,7 +1541,7 @@ describe('ChatService', () => {
       expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
     });
 
-    it('should return null when no conversations exist', async () => {
+    it('should return null and generate new thread when no conversations exist', async () => {
       // Mock empty conversation list
       chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
         conversations: [],
@@ -1421,9 +1551,11 @@ describe('ChatService', () => {
       const result = await chatService.restoreLatestConversation();
 
       expect(result).toBeNull();
+      // Should generate a new thread
+      expect(mockCoreChatService.newThread).toHaveBeenCalled();
     });
 
-    it('should return null when conversation has no MESSAGES_SNAPSHOT event', async () => {
+    it('should return null and generate new thread when conversation has no MESSAGES_SNAPSHOT event', async () => {
       const mockThreadId = 'thread-12345';
 
       chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
@@ -1449,9 +1581,11 @@ describe('ChatService', () => {
       const result = await chatService.restoreLatestConversation();
 
       expect(result).toBeNull();
+      // Should generate a new thread
+      expect(mockCoreChatService.newThread).toHaveBeenCalled();
     });
 
-    it('should return null when getConversation returns null', async () => {
+    it('should return null and generate new thread when getConversation returns null', async () => {
       const mockThreadId = 'thread-12345';
 
       chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
@@ -1471,6 +1605,34 @@ describe('ChatService', () => {
       const result = await chatService.restoreLatestConversation();
 
       expect(result).toBeNull();
+      // Should generate a new thread
+      expect(mockCoreChatService.newThread).toHaveBeenCalled();
+    });
+
+    it('should return null and skip restore when thread ID is already set', async () => {
+      // Mock that thread ID is already set
+      mockCoreChatService.getThreadId.mockReturnValue('existing-thread-id');
+
+      // Mock conversation history (should not be called)
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [
+          {
+            threadId: 'thread-12345',
+            title: 'Test Conversation',
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        ],
+        total: 1,
+      });
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+      // Should not call getConversations since thread is already set
+      expect(chatService.conversationHistoryService.getConversations).not.toHaveBeenCalled();
+      // Should NOT generate a new thread - use existing one
+      expect(mockCoreChatService.newThread).not.toHaveBeenCalled();
     });
   });
 
