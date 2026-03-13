@@ -6,4 +6,13 @@
 .exploreQueryPanel.exploreQueryPanel {
   border-top: 0;
   padding-bottom: $ouiSizeXXS;
+  height: 100%; // Take full height of resizable container
+  display: flex;
+  flex-direction: column;
+
+  .exploreQueryPanel__editorsWrapper {
+    flex: 1; // Allow editor wrapper to expand
+    display: flex;
+    flex-direction: column;
+  }
 }

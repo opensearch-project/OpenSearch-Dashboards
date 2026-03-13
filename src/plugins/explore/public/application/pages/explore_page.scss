@@ -17,6 +17,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   &__page-body {
+
     // within Explore we do not use the globalQueryEditor
     // Although this element is empty the way we configure props, it contributes to extra padding
     & .globalQueryEditor {
@@ -29,17 +30,49 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiResizableContainer {
-    gap: $euiSizeXS;
+  &>.euiResizableContainer {
+    gap: $ouiSizeXS;
+  }
+
+  &__vertical-resizable {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    gap: $ouiSizeXXS;
+
+    // Style the vertical resizer button
+    .euiResizableButton {
+      background-color: $ouiBorderColor;
+      transition: background-color 0.2s ease;
+      height: 4px; // Make vertical resizer more visible
+
+      &:hover {
+        background-color: $ouiColorPrimary;
+        height: 6px;
+      }
+    }
   }
 
   &__bottom-panel {
     flex: 1;
     min-height: 0;
-    gap: $euiSizeXS;
+    gap: $ouiSizeXS;
 
     .resizable-panel-right {
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    // Improve resizer button visibility and behavior
+    .euiResizableButton {
+      background-color: $ouiBorderColor;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: $ouiColorPrimary;
+      }
     }
   }
 
@@ -67,9 +100,14 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 }
 
 .dscCanvas {
+
   // Ensure proper spacing and layout
   .dscCanvas__queryPanel {
     margin-bottom: $ouiSizeXXS;
+    display: flex;
+    flex-direction: column;
+    height: 100%; // Allow it to fill the resizable panel
+    overflow: visible; // Ensure suggestions aren't clipped
   }
 
   .dscCanvas__tabBar {
@@ -94,7 +132,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   &_results {
     border: none;
     border-top: $ouiBorderThin;
-    margin-left: $euiSizeM;
+    margin-left: $ouiSizeM;
     position: relative;
   }
 
@@ -113,7 +151,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
       flex-wrap: wrap;
 
       /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
-      & > .euiFlexItem {
+      &>.euiFlexItem {
         width: 100% !important;
 
         &:first-child {

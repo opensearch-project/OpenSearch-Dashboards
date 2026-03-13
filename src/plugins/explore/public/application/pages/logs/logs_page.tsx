@@ -6,7 +6,7 @@
 import '../explore_page.scss';
 
 import React from 'react';
-import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiErrorBoundary, EuiPage, EuiPageBody, EuiResizableContainer } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -91,12 +91,36 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <div className="dscCanvas__queryPanel">
-              <QueryPanel />
-            </div>
-
-            {/* Main content area with resizable panels under QueryPanel */}
-            <BottomContainer />
+            {/* Vertical resizable container between QueryPanel and main content */}
+            <EuiResizableContainer
+              direction="vertical"
+              className="explore-layout__vertical-resizable"
+            >
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    id="query-panel"
+                    initialSize={15}
+                    minSize="10%"
+                    paddingSize="none"
+                  >
+                    <div className="dscCanvas__queryPanel">
+                      <QueryPanel />
+                    </div>
+                  </EuiResizablePanel>
+                  <EuiResizableButton />
+                  <EuiResizablePanel
+                    id="main-content"
+                    initialSize={85}
+                    minSize="60%"
+                    paddingSize="none"
+                  >
+                    {/* Main content area with resizable panels */}
+                    <BottomContainer />
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
           </EuiPageBody>
         </EuiPage>
       </div>
