@@ -205,7 +205,11 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+            <EuiBadge
+              className="agentTraces__categoryBadge"
+              color={meta.bgColor}
+              style={{ color: meta.textColor }}
+            >
               {meta.label}
             </EuiBadge>
           </EuiFlexItem>

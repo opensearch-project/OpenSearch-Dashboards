@@ -13,16 +13,19 @@ describe('TypeBadge', () => {
     expect(screen.getByText('Service')).toBeInTheDocument();
   });
 
-  it('applies backgroundColor from color prop', () => {
+  it('renders a span element with style attribute', () => {
     const { container } = render(<TypeBadge label="Agent" color="#006BB4" />);
     const badge = container.firstChild as HTMLElement;
-    expect(badge.style.backgroundColor).toBe('rgb(0, 107, 180)');
+    // color-mix is not supported by jsdom, so backgroundColor is dropped;
+    // verify the element renders and text color falls back to the color prop
+    expect(badge.tagName).toBe('SPAN');
+    expect(badge.style.color).toBe('rgb(0, 107, 180)');
   });
 
-  it('defaults text color to white (#FFFFFF)', () => {
+  it('defaults text color to the color prop value', () => {
     const { container } = render(<TypeBadge label="Service" color="#006CE0" />);
     const badge = container.firstChild as HTMLElement;
-    expect(badge.style.color).toBe('rgb(255, 255, 255)');
+    expect(badge.style.color).toBe('rgb(0, 108, 224)');
   });
 
   it('applies custom textColor', () => {

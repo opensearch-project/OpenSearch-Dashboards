@@ -24,6 +24,7 @@ export interface BaseRow {
   traceId: string;
   parentSpanId: string | null;
   status: 'success' | 'error';
+  statusMessage?: string;
   kind: string;
   name: string;
   input: string;
@@ -69,6 +70,7 @@ export const spanToRow = (
   traceId: span.traceId,
   parentSpanId: span.parentSpanId,
   status: span.statusCode === 0 || span.statusCode === 1 ? 'success' : 'error',
+  statusMessage: span.statusMessage || undefined,
   kind: span.operationName || 'Other',
   name: span.name || span.operationName || 'Unknown',
   input: span.input || '—',

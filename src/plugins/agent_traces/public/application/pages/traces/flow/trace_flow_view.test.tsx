@@ -110,7 +110,11 @@ describe('TraceFlowView', () => {
 
     render(<TraceFlowView {...defaultProps} />);
 
-    expect(capturedMapProps.layoutOptions).toEqual({ direction: 'TB' });
+    expect(capturedMapProps.layoutOptions).toEqual({
+      direction: 'TB',
+      rankSeparation: 80,
+      nodeSeparation: 40,
+    });
     expect(capturedMapProps.legend).toBe(false);
     expect(capturedMapProps.showMinimap).toBe(true);
     expect(capturedMapProps.topN).toBe(Infinity);

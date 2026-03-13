@@ -18,6 +18,7 @@ export interface CategorizedSpan extends TraceRow {
 interface CategoryMeta {
   color: string;
   bgColor: string;
+  textColor: string;
   label: string;
 }
 
@@ -30,9 +31,9 @@ function getCategoryColor(category: SpanCategory): string {
     case 'EMBEDDINGS':
       return euiThemeVars.euiColorVis1;
     case 'TOOL':
-      return euiThemeVars.euiColorVis0;
+      return euiThemeVars.euiColorDarkShade;
     case 'RETRIEVAL':
-      return euiThemeVars.euiColorSecondary;
+      return euiThemeVars.euiColorVis4;
     case 'OTHER':
       return euiThemeVars.euiColorMediumShade;
   }
@@ -49,7 +50,12 @@ const CATEGORY_LABEL: Record<SpanCategory, string> = {
 
 export function getCategoryMeta(category: SpanCategory): CategoryMeta {
   const color = getCategoryColor(category);
-  return { color, bgColor: color, label: CATEGORY_LABEL[category] };
+  return {
+    color,
+    bgColor: hexToRgba(color, 0.12),
+    textColor: color,
+    label: CATEGORY_LABEL[category],
+  };
 }
 
 export function hexToRgba(hex: string, alpha: number): string {

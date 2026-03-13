@@ -185,7 +185,7 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
         <CelestialMap
           map={mapData}
           nodeTypes={NODE_TYPES}
-          layoutOptions={{ direction: 'TB' }}
+          layoutOptions={{ direction: 'TB', rankSeparation: 80, nodeSeparation: 40 }}
           legend={false}
           breadcrumbs={[]}
           showMinimap

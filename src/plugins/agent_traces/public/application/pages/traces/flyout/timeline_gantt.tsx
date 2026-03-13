@@ -131,7 +131,7 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                     {(() => {
                       const meta = getCategoryMeta(span.category);
                       return (
-                        <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+                        <EuiBadge className="agentTraces__categoryBadge" color={meta.bgColor} style={{ color: meta.textColor }}>
                           {meta.label}
                         </EuiBadge>
                       );
@@ -141,12 +141,17 @@ export const TimelineGantt: React.FC<TimelineGanttProps> = ({
                         {span.node.label}
                       </span>
                       {span.node.traceRow?.status === 'error' && (
-                        <EuiIcon
-                          type="alert"
-                          color="danger"
-                          size="m"
-                          className="agentTracesFlyout__timelineErrorIcon"
-                        />
+                        <EuiToolTip
+                          content={`Span error: ${span.node.traceRow?.statusMessage || 'Unknown error'}`}
+                          position="top"
+                        >
+                          <EuiIcon
+                            type="alert"
+                            color="danger"
+                            size="m"
+                            className="agentTracesFlyout__timelineErrorIcon"
+                          />
+                        </EuiToolTip>
                       )}
                     </span>
                   </div>
