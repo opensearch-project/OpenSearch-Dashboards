@@ -238,8 +238,7 @@ export const getDefaultSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
           // sortText is the only option to sort suggestions, compares strings
-          sortText:
-            resolveKeywordSuggestionDetails(sk)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+          sortText: resolveKeywordSuggestionDetails(sk)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
       );
     }
@@ -494,7 +493,7 @@ export const getSimplifiedPPLSuggestions = async ({
       // Compiled grammar path - matching main branch exactly
       if (suggestions.suggestColumns && (isInBackQuote || !isInQuotes)) {
         const initialFields = indexPattern.fields;
-        const cursorPosition = queryTillCursor.length;
+        const cursorPosition = position?.column || selectionEnd;
         const availableFields = getAvailableFieldsForAutocomplete(
           query,
           cursorPosition,
