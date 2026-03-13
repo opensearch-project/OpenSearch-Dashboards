@@ -295,12 +295,12 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
         "added-as-2",
       ],
       Array [
-        "order-3",
-        "added-as-4",
-      ],
-      Array [
         "order-4",
         "added-as-0",
+      ],
+      Array [
+        "order-3",
+        "added-as-4",
       ],
     ]
   `);
@@ -326,12 +326,12 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
         "started-as-2",
       ],
       Array [
-        "order-3",
-        "started-as-4",
-      ],
-      Array [
         "order-4",
         "started-as-0",
+      ],
+      Array [
+        "order-3",
+        "started-as-4",
       ],
     ]
   `);
@@ -412,8 +412,8 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
       "order-0",
       "order-1",
       "order-2",
-      "order-3",
       "order-4",
+      "order-3",
     ]
   `);
 });
@@ -511,6 +511,21 @@ describe('setup', () => {
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Setting up [2] plugins: [order-1,order-0]`);
   });
+
+  it('logs only server-side plugins with consistent order', async () => {
+    [
+      createPlugin('order-1'),
+      createPlugin('order-0'),
+      createPlugin('order-not-run', { server: false }),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.info).toHaveBeenCalledWith(`Setting up [2] plugins: [order-1,order-0]`);
+  });
 });
 
 describe('start', () => {
@@ -577,6 +592,23 @@ describe('start', () => {
     );
     expect(startingCalls.length).toBe(1);
     expect(startingCalls[0][0]).toBe(`Starting [2] plugins: [order-1,order-0]`);
+  });
+
+  it('logs only server-side plugins with consistent order', async () => {
+    // no matter the order pluginsSystem add plugin, the setup order and start order should always stable
+    [
+      createPlugin('order-1'),
+      createPlugin('order-not-run', { server: false }),
+      createPlugin('order-0'),
+    ].forEach((plugin, index) => {
+      jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+      jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+      pluginsSystem.addPlugin(plugin);
+    });
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 
   it('validates plugin start when opensearch dependency is fulfilled', async () => {
