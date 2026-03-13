@@ -184,10 +184,10 @@ class PPLGrammarCache {
     datasourceId?: string,
     datasourceVersion?: string
   ): void {
-    // Check feature flag - if disabled, clear cache and skip warmup
+    // Check feature flag - if disabled, reset cache state but keep subscribers
     const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
     if (!runtimeGrammarEnabled) {
-      this.clear();
+      this.reset();
       return;
     }
 
@@ -368,10 +368,15 @@ class PPLGrammarCache {
 
   private notifyGrammarUpdate(datasourceId: string | undefined, entry: CachedGrammar): void {
     for (const listener of this.grammarUpdateListeners) {
-      listener({
-        dataSourceId: datasourceId,
-        grammarHash: entry.grammarHash,
-      });
+      try {
+        listener({
+          dataSourceId: datasourceId,
+          grammarHash: entry.grammarHash,
+        });
+      } catch {
+        // A failing listener must not prevent other listeners from being notified
+        // or poison the grammar fetch promise chain.
+      }
     }
   }
 }
