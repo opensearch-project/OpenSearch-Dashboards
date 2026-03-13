@@ -121,7 +121,6 @@ const runHistogramInteractionTests = () => {
             .and('have.text', `${START_DATE} - ${END_DATE} per`);
           cy.getElementByTestId('docTableExpandToggleColumn')
             .eq(0)
-            .find('button')
             .click({ force: true });
           cy.getElementByTestId('tableDocViewRow-timestamp-value').then(($timestamp) => {
             const timestampTxt = $timestamp.text();
@@ -135,7 +134,6 @@ const runHistogramInteractionTests = () => {
           });
           cy.getElementByTestId('docTableExpandToggleColumn')
             .eq(0)
-            .find('button')
             .click({ force: true }); // reset state
         };
         cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
