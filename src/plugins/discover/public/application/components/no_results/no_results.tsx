@@ -182,7 +182,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
         setSavedQueries(
           savedQueryItems.filter(
-            (sq) => sq?.attributes?.query && query?.language === sq.attributes.query.language
+            (sq) => query?.language === sq.attributes.query.language
           )
         );
       } catch (error) {
