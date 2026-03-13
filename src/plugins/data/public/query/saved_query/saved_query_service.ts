@@ -53,10 +53,6 @@ export const createSavedQueryService = (
       throw new Error('Cannot create saved query without a title');
     }
 
-    if (!attributes.query?.query) {
-      throw new Error('Cannot create saved query without a valid query');
-    }
-
     const query: SerializedSavedQueryAttributes['query'] = {
       query:
         typeof attributes.query.query === 'string'
