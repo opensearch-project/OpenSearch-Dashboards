@@ -4,7 +4,11 @@
  */
 
 import { ATNDeserializer } from 'antlr4ng';
-import { HttpSetup, IUiSettingsClient, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import {
+  HttpSetup,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from 'opensearch-dashboards/public';
 import { pplGrammarCache } from './ppl_grammar_cache';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 

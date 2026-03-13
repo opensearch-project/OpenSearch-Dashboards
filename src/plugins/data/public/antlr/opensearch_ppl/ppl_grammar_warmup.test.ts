@@ -47,7 +47,13 @@ describe('ppl_grammar_warmup', () => {
     handler({ language: 'PPL', dataset: {} });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
-    expect(cache.warmUp).toHaveBeenCalledWith(http, uiSettings, savedObjectsClient, undefined, undefined);
+    expect(cache.warmUp).toHaveBeenCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      undefined,
+      undefined
+    );
   });
 
   it('should warm up for the first selected datasource', () => {
@@ -60,7 +66,13 @@ describe('ppl_grammar_warmup', () => {
     });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
-    expect(cache.warmUp).toHaveBeenCalledWith(http, uiSettings, savedObjectsClient, 'ds-1', '3.6.0');
+    expect(cache.warmUp).toHaveBeenCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-1',
+      '3.6.0'
+    );
   });
 
   it('should forward repeated calls for the same datasource (cache handles dedup)', () => {
@@ -93,7 +105,13 @@ describe('ppl_grammar_warmup', () => {
     });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(2);
-    expect(cache.warmUp).toHaveBeenLastCalledWith(http, uiSettings, savedObjectsClient, 'ds-2', '3.6.0');
+    expect(cache.warmUp).toHaveBeenLastCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-2',
+      '3.6.0'
+    );
   });
 
   it('should forward to warmUp even when version is old (cache handles version gating)', () => {
@@ -106,7 +124,13 @@ describe('ppl_grammar_warmup', () => {
     });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
-    expect(cache.warmUp).toHaveBeenCalledWith(http, uiSettings, savedObjectsClient, 'ds-old', '2.17.0');
+    expect(cache.warmUp).toHaveBeenCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-old',
+      '2.17.0'
+    );
   });
 
   it('should warm up when version is not provided (needs lookup)', () => {
@@ -119,7 +143,13 @@ describe('ppl_grammar_warmup', () => {
     });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
-    expect(cache.warmUp).toHaveBeenCalledWith(http, uiSettings, savedObjectsClient, 'ds-unknown', undefined);
+    expect(cache.warmUp).toHaveBeenCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-unknown',
+      undefined
+    );
   });
 
   // ─── Multi-datasource scenarios (AWS OpenSearch / Explore) ──────────────
@@ -135,10 +165,38 @@ describe('ppl_grammar_warmup', () => {
     handler({ language: 'PPL', dataset: {} }); // localhost
 
     expect(cache.warmUp).toHaveBeenCalledTimes(4);
-    expect(cache.warmUp).toHaveBeenNthCalledWith(1, http, uiSettings, savedObjectsClient, 'ds-1', '3.6.0');
-    expect(cache.warmUp).toHaveBeenNthCalledWith(2, http, uiSettings, savedObjectsClient, 'ds-2', '2.17.0');
-    expect(cache.warmUp).toHaveBeenNthCalledWith(3, http, uiSettings, savedObjectsClient, 'ds-3', '3.7.0');
-    expect(cache.warmUp).toHaveBeenNthCalledWith(4, http, uiSettings, savedObjectsClient, undefined, undefined);
+    expect(cache.warmUp).toHaveBeenNthCalledWith(
+      1,
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-1',
+      '3.6.0'
+    );
+    expect(cache.warmUp).toHaveBeenNthCalledWith(
+      2,
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-2',
+      '2.17.0'
+    );
+    expect(cache.warmUp).toHaveBeenNthCalledWith(
+      3,
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-3',
+      '3.7.0'
+    );
+    expect(cache.warmUp).toHaveBeenNthCalledWith(
+      4,
+      http,
+      uiSettings,
+      savedObjectsClient,
+      undefined,
+      undefined
+    );
   });
 
   it('should not call warmUp when language changes away from PPL', () => {
@@ -159,7 +217,13 @@ describe('ppl_grammar_warmup', () => {
     handler({ language: 'PPL', dataset: { dataSource: {} } });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(1);
-    expect(cache.warmUp).toHaveBeenCalledWith(http, uiSettings, savedObjectsClient, undefined, undefined);
+    expect(cache.warmUp).toHaveBeenCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      undefined,
+      undefined
+    );
   });
 
   it('should handle multiple datasets from the same remote datasource', () => {
@@ -222,6 +286,12 @@ describe('ppl_grammar_warmup', () => {
     });
 
     expect(cache.warmUp).toHaveBeenCalledTimes(2);
-    expect(cache.warmUp).toHaveBeenLastCalledWith(http, uiSettings, savedObjectsClient, 'ds-old', '2.17.0');
+    expect(cache.warmUp).toHaveBeenLastCalledWith(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      'ds-old',
+      '2.17.0'
+    );
   });
 });
