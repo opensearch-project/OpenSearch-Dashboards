@@ -14,6 +14,7 @@ import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
 import { AssistantActionService } from '../../../context_provider/public';
+import type { AssistantContextStore } from '../../../context_provider/public';
 
 /**
  * Determine tool status based on tool call and result
@@ -81,7 +82,7 @@ const CONTEXT_SUGGESTIONS: Record<string, SuggestionItem[]> = {
 };
 
 function getStarterSuggestions(): SuggestionItem[] {
-  const contextStore = (window as any).assistantContextStore;
+  const contextStore = (window as any).assistantContextStore as AssistantContextStore | undefined;
   if (contextStore) {
     const pageContexts = contextStore.getContextsByCategory('page');
     for (const ctx of pageContexts) {
@@ -281,7 +282,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>(getStarterSuggestions);
 
   useEffect(() => {
-    const contextStore = (window as any).assistantContextStore;
+    const contextStore = (window as any).assistantContextStore as AssistantContextStore | undefined;
     if (!contextStore) return;
     const unsubscribe = contextStore.subscribe(() => {
       setSuggestions(getStarterSuggestions());
