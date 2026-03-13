@@ -23,6 +23,7 @@ interface ChatInputProps {
   input: string;
   isCapturing: boolean;
   isStreaming: boolean;
+  isSendingToolResult?: boolean;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
@@ -36,6 +37,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   input,
   isCapturing,
   isStreaming,
+  isSendingToolResult = false,
   onInputChange,
   onSend,
   onStop,
@@ -111,6 +113,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             fullWidth
             resize="none"
             rows={2}
+            disabled={isSendingToolResult}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -131,7 +134,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing}
+          isDisabled={
+            (!isStreaming && input.trim().length === 0) || isCapturing || isSendingToolResult
+          }
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}
