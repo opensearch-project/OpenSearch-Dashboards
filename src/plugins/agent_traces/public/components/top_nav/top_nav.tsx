@@ -134,7 +134,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedAgentTraces }: Top
 
   useEffect(() => {
     setScreenTitle(
-      'Agent Traces' + (savedAgentTraces?.title ? `: ${savedAgentTraces?.title}` : '')
+      savedAgentTraces?.title ? `Agent Traces: ${savedAgentTraces.title}` : 'Agent Traces'
     );
   }, [savedAgentTraces?.title]);
 

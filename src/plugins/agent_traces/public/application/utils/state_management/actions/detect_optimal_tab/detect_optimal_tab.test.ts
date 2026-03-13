@@ -36,6 +36,7 @@ describe('detect_optimal_tab', () => {
       query: { query: 'source = otel-v1-apm-span' },
       results: {},
       queryEditor: { queryStatusMap: {} },
+      ui: { activeTabId: '' },
     });
   });
 
