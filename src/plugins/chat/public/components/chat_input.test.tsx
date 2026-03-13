@@ -30,6 +30,9 @@ jest.mock('../hooks/use_command_menu_keyboard', () => ({
   }),
 }));
 
+// Shared mock so tests can assert on toast calls
+const mockAddWarning = jest.fn();
+
 // Mock useOpenSearchDashboards hook
 jest.mock('../../../opensearch_dashboards_react/public', () => {
   const { BehaviorSubject } = jest.requireActual('rxjs');
@@ -46,6 +49,13 @@ jest.mock('../../../opensearch_dashboards_react/public', () => {
           chat: {
             screenshot: {
               getScreenshotButton$: () => mockScreenshotButton$,
+            },
+          },
+          notifications: {
+            toasts: {
+              addWarning: mockAddWarning,
+              addDanger: jest.fn(),
+              add: jest.fn(),
             },
           },
         },
@@ -66,6 +76,9 @@ describe('ChatInput', () => {
     onSend: jest.fn(),
     onStop: jest.fn(),
     onKeyDown: jest.fn(),
+    onFilesSelected: jest.fn(),
+    maxFileUploadBytes: 10 * 1024 * 1024,
+    attachmentCount: 0,
   };
 
   beforeEach(() => {
@@ -167,6 +180,15 @@ describe('ChatInput', () => {
 
       const button = getByLabelText('Send message') as HTMLButtonElement;
       expect(button.disabled).toBe(false);
+    });
+
+    it('should disable send button when input is empty even with attachments', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="" attachmentCount={1} />
+      );
+
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
     });
 
     it('should show sortUp icon when not streaming', () => {
@@ -348,6 +370,158 @@ describe('ChatInput', () => {
 
       // Should not throw when clicking with undefined callback
       expect(() => fireEvent.click(button)).not.toThrow();
+    });
+  });
+
+  describe('file validation', () => {
+    const createFileList = (files: File[]): FileList => {
+      const fileList = ({
+        length: files.length,
+        item: (i: number) => files[i] || null,
+        *[Symbol.iterator]() {
+          for (const f of files) yield f;
+        },
+      } as unknown) as FileList;
+      for (let i = 0; i < files.length; i++) {
+        (fileList as any)[i] = files[i];
+      }
+      return fileList;
+    };
+
+    const selectFiles = (container: HTMLElement, files: File[]) => {
+      const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+      Object.defineProperty(input, 'files', { value: createFileList(files), configurable: true });
+      fireEvent.change(input);
+    };
+
+    it('should call onFilesSelected with valid files', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const file = new File(['hello'], 'test.txt', { type: 'text/plain' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([file]);
+    });
+
+    it('should filter out oversized files and show warning', () => {
+      const onFilesSelected = jest.fn();
+      const maxBytes = 100;
+      const { container } = render(
+        <ChatInput
+          {...defaultProps}
+          onFilesSelected={onFilesSelected}
+          maxFileUploadBytes={maxBytes}
+        />
+      );
+
+      const small = new File(['hi'], 'small.txt', { type: 'text/plain' });
+      const big = new File(['x'.repeat(200)], 'big.txt', { type: 'text/plain' });
+      selectFiles(container, [small, big]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([small]);
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('big.txt'));
+    });
+
+    it('should skip empty files and show warning', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const empty = new File([''], 'empty.txt', { type: 'text/plain' });
+      const valid = new File(['hello'], 'valid.txt', { type: 'text/plain' });
+      selectFiles(container, [empty, valid]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([valid]);
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('empty.txt'));
+    });
+
+    it('should reject all files when attachment limit is reached', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} attachmentCount={10} />
+      );
+
+      const file = new File(['hello'], 'test.txt', { type: 'text/plain' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Remove a file before adding more')
+      );
+    });
+
+    it('should reject files with unsupported MIME types', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const exe = new File(['binary'], 'malware.exe', { type: 'application/x-msdownload' });
+      selectFiles(container, [exe]);
+
+      expect(onFilesSelected).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('malware.exe'));
+    });
+
+    it('should accept files matched by extension when MIME type is empty', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      // Linux browsers often report empty MIME type
+      const file = new File(['{"key":"val"}'], 'data.json', { type: '' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([file]);
+    });
+
+    it('should reject files with unsupported extension and empty MIME type', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const file = new File(['data'], 'image.png', { type: '' });
+      selectFiles(container, [file]);
+
+      expect(onFilesSelected).not.toHaveBeenCalled();
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('image.png'));
+    });
+
+    it('should keep valid files and reject unsupported files in a mixed selection', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} />
+      );
+
+      const good = new File(['hello'], 'notes.txt', { type: 'text/plain' });
+      const bad = new File(['binary'], 'script.exe', { type: 'application/x-msdownload' });
+      selectFiles(container, [good, bad]);
+
+      expect(onFilesSelected).toHaveBeenCalledWith([good]);
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('script.exe'));
+    });
+
+    it('should truncate file list to remaining capacity', () => {
+      const onFilesSelected = jest.fn();
+      const { container } = render(
+        <ChatInput {...defaultProps} onFilesSelected={onFilesSelected} attachmentCount={8} />
+      );
+
+      const files = Array.from(
+        { length: 5 },
+        (_, i) => new File(['data'], `file${i}.txt`, { type: 'text/plain' })
+      );
+      selectFiles(container, files);
+
+      // Only 2 remaining slots (10 - 8)
+      expect(onFilesSelected).toHaveBeenCalledWith(files.slice(0, 2));
+      expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('Only 2 of 5'));
     });
   });
 });

@@ -10,6 +10,8 @@ export const configSchema = schema.object({
   agUiUrl: schema.maybe(schema.string()),
   mlCommonsAgentId: schema.maybe(schema.string()),
   observabilityAgentId: schema.maybe(schema.string()),
+  maxFileUploadBytes: schema.number({ defaultValue: 3145728, min: 1 }), // 3MB default
+  maxFileAttachments: schema.number({ defaultValue: 10, min: 1, max: 50 }),
 });
 
 export type ChatConfigType = TypeOf<typeof configSchema>;

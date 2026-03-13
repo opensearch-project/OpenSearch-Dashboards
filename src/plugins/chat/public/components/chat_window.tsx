@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
-import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -31,6 +31,7 @@ import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
+import { readFileAsBase64, clearAttachmentBase64, FileAttachment } from '../utils/read_file_as_base64';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
 import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
@@ -75,6 +76,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const loadingAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
+  const [fileAttachments, setFileAttachments] = useState<FileAttachment[]>([]);
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
@@ -284,6 +286,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
+          setScreenshotData(undefined);
+          setFileAttachments((prev) => {
+            clearAttachmentBase64(prev);
+            return [];
+          });
         },
         complete: () => {
           isStreamingRef.current = false;
@@ -291,6 +298,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
+          setFileAttachments((prev) => {
+            clearAttachmentBase64(prev);
+            return [];
+          });
         },
       });
 
@@ -303,31 +314,50 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       isStreamingRef.current = false;
       setIsStreaming(false);
       currentSubscriptionRef.current = null;
+      setScreenshotData(undefined);
+      setFileAttachments((prev) => {
+        clearAttachmentBase64(prev);
+        return [];
+      });
     }
   }, [chatService, currentRunId, eventHandler]);
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
-    const messageContent = options?.input ?? input.trim();
-    // Use ref for immediate check since React 18 batches state updates
+    const messageContent = (options?.input ?? input.trim());
+    // Require non-empty text; use ref for immediate streaming check (React 18 batching)
     if (!messageContent || isStreamingRef.current) return;
 
     // Prepare additional messages for sending (but don't add to timeline yet)
     let additionalMessages = options?.messages ?? [];
 
-    // Only add screenshot data if messages not provided
-    if (!options?.messages && screenshotData) {
-        additionalMessages = [
-          {
-            role: 'user' as const,
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-            content: [
-              {
-                type: 'binary' as const,
-                mimeType: screenshotData.mimeType,
-                data: screenshotData.base64,
-              },
-            ],
-        }]
+    // Only add screenshot/file data if messages not provided
+    if (!options?.messages && (screenshotData || fileAttachments.length > 0)) {
+      const binaryContent: Array<{ type: 'binary'; mimeType: string; data: string; filename?: string }> = [];
+
+      if (screenshotData) {
+        binaryContent.push({
+          type: 'binary',
+          mimeType: screenshotData.mimeType,
+          data: screenshotData.base64,
+        });
+      }
+
+      for (const file of fileAttachments) {
+        binaryContent.push({
+          type: 'binary',
+          mimeType: file.mimeType,
+          data: file.base64,
+          filename: file.filename,
+        });
+      }
+
+      additionalMessages = [
+        {
+          role: 'user' as const,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          content: binaryContent,
+        },
+      ];
     }
 
     setInput('');
@@ -335,17 +365,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Merge additional messages with current timeline for sending
     const messagesToSend = [...timeline, ...additionalMessages];
 
-    // Check if this is a slash command
-    const commandResult = await slashCommandRegistry.execute(messageContent);
-    if (commandResult.handled) {
-      // If command was handled and returned a message, send it to the AI
-      if (commandResult.message) {
-        return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
+    // Check if this is a slash command (only when there's actual text input)
+    if (messageContent) {
+      const commandResult = await slashCommandRegistry.execute(messageContent);
+      if (commandResult.handled) {
+        // If command was handled and returned a message, send it to the AI
+        if (commandResult.message) {
+          return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
+        }
+        return;
       }
-      return;
     }
 
-    // Normal message flow
+    // Normal message flow — messageContent is guaranteed non-empty by guard above
     return subscribeToMessageStream(messageContent, messagesToSend);
   };
 
@@ -376,8 +408,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const additionalMessages: Message[] = [];
 
     if (Array.isArray(message.content)) {
-      const lastMessageContent =  message.content[message.content.length - 1];
-      if (lastMessageContent.type === "text") {
+      const lastMessageContent = message.content[message.content.length - 1];
+      if (lastMessageContent.type === 'text') {
         textContent = lastMessageContent.text;
         additionalMessages.push({
           ...message,
@@ -407,6 +439,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(false);
     setPendingConfirmation(null);
     setShowHistory(false);
+    setScreenshotData(undefined);
+    setFileAttachments((prev) => {
+      clearAttachmentBase64(prev);
+      return [];
+    });
     setRestoreError(null);
   }, [chatService]);
 
@@ -437,6 +474,39 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [pendingConfirmation, confirmationService]);
 
+  /** Reads files sequentially to limit peak memory (one FileReader in flight at a time). */
+  const handleFilesSelected = useCallback(async (files: File[]) => {
+    const succeeded: FileAttachment[] = [];
+    let failedCount = 0;
+    for (const file of files) {
+      try {
+        const attachment = await readFileAsBase64(file);
+        succeeded.push(attachment);
+      } catch {
+        failedCount += 1;
+      }
+    }
+    if (succeeded.length > 0) {
+      setFileAttachments((prev) => [...prev, ...succeeded]);
+    }
+    if (failedCount > 0) {
+      toasts?.addWarning(
+        i18n.translate('chat.window.fileReadFailed', {
+          defaultMessage:
+            'Failed to read {count, plural, one {# file} other {# files}}. They were not attached.',
+          values: { count: failedCount },
+        })
+      );
+    }
+  }, [toasts]);
+
+  const handleRemoveFile = useCallback((index: number) => {
+    setFileAttachments((prev) => {
+      clearAttachmentBase64([prev[index]].filter(Boolean));
+      return prev.filter((_, i) => i !== index);
+    });
+  }, []);
+
   const handleCaptureScreenshot = useCallback(async ()=>{
     setScreenshotData(undefined);
     const imageData = await capturePageContainer();
@@ -466,7 +536,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Handle array content - look for text content
       if (Array.isArray(msg.content)) {
-        const textContent = msg.content.find((item) => item.type === 'text');
+        const textContent = msg.content.find((item): item is Extract<typeof item, { type: 'text' }> => item.type === 'text');
         if (textContent?.text && textContent.text.trim()) {
           return textContent.text;
         }
@@ -609,14 +679,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             </h3>
             <p>{restoreError}</p>
           </EuiText>
-          <EuiButton
-            onClick={handleRetryRestore}
-            iconType="refresh"
-          >
-            {i18n.translate('chat.window.retryButton', {
-              defaultMessage: 'Retry',
-            })}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={handleRetryRestore} iconType="refresh">
+                {i18n.translate('chat.window.retryButton', {
+                  defaultMessage: 'Retry',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={handleNewChat} iconType="documentEdit">
+                {i18n.translate('chat.window.newChatButton', {
+                  defaultMessage: 'New chat',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       ) : showHistory ? (
         <ConversationHistoryPanel
@@ -636,6 +714,28 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             {...enhancedProps}
             startResponse={startResponse}
           />
+
+          {fileAttachments.length > 0 && (
+            <div className="chatWindow__fileAttachments" aria-label="Attached files">
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {fileAttachments.map((file, index) => (
+                  <EuiFlexItem grow={false} key={file.id}>
+                    <EuiBadge
+                      color="hollow"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => handleRemoveFile(index)}
+                      iconOnClickAriaLabel={`Remove ${file.filename}`}
+                      className="chatWindow__fileAttachment"
+                      isDisabled={isStreaming}
+                    >
+                      {file.filename}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </div>
+          )}
 
           {
             (isCapturing || screenshotData) && (
@@ -679,6 +779,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onKeyDown={handleKeyDown}
             includeScreenShotEnabled={screenshotFeatureEnabled}
             onCaptureScreenshot={handleCaptureScreenshot}
+            onFilesSelected={handleFilesSelected}
+            maxFileUploadBytes={chatService.maxFileUploadBytes}
+            maxFileAttachments={chatService.maxFileAttachments}
+            attachmentCount={fileAttachments.length + (screenshotData ? 1 : 0)}
           />
         </ChatSessionErrorBoundary>
       )}

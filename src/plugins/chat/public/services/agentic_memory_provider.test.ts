@@ -25,6 +25,7 @@ describe('AgenticMemoryProvider', () => {
       patch: jest.fn(),
       head: jest.fn(),
       options: jest.fn(),
+      basePath: { prepend: jest.fn((path: string) => path) },
     } as any;
 
     provider = new AgenticMemoryProvider(mockHttp);
@@ -157,7 +158,7 @@ describe('AgenticMemoryProvider', () => {
 
       const result = await provider.getConversation('thread-123');
 
-      expect(AgUiAgent).toHaveBeenCalledWith();
+      expect(AgUiAgent).toHaveBeenCalledWith('/api/chat/proxy');
       expect(mockRunAgent).toHaveBeenCalledWith({
         threadId: 'thread-123',
         runId: expect.stringMatching(/^restore-\d+$/),

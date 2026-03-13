@@ -32,7 +32,8 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
     typeof state === 'object' &&
     !!state &&
     typeof state.isWindowOpen === 'boolean' &&
-    [ChatLayoutMode.SIDECAR, ChatLayoutMode.FULLSCREEN].includes(state.windowMode) &&
+    (state.windowMode === ChatLayoutMode.SIDECAR ||
+      state.windowMode === ChatLayoutMode.FULLSCREEN) &&
     typeof state.paddingSize === 'number'
   );
 };
@@ -109,6 +110,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       enabled: boolean;
       agUiUrl?: string;
       mlCommonsAgentId?: string;
+      maxFileUploadBytes?: number;
+      maxFileAttachments?: number;
     }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
@@ -119,8 +122,16 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.application.capabilities
     );
 
-    // Always initialize chat service - core service handles enablement
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+    // Always initialize chat service - core service handles enablement.
+    // Pass core.http so the proxy URL includes basePath (required in dev when OSD uses a random basePath).
+    this.chatService = new ChatService(
+      core.uiSettings,
+      core.chat,
+      core.workspaces,
+      core.http,
+      chatConfig.maxFileUploadBytes ?? 3145728,
+      chatConfig.maxFileAttachments ?? 10
+    );
 
     if (!isEnabled) {
       return {
@@ -134,7 +145,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-        openWindow: this.chatService.openWindow.bind(this.chatService),
+        openWindow: async () => {
+          await this.chatService!.openWindow();
+        },
         closeWindow: this.chatService.closeWindow.bind(this.chatService),
       });
     }
