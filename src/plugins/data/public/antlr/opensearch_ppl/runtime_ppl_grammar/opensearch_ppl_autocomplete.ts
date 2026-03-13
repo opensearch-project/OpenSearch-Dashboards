@@ -1025,8 +1025,17 @@ export function tryRuntimeGrammarSuggestions(
 
       const fallbackValue = deriveKeywordFromSymbolicName(symbolicName);
       candidate.value = candidate.value || fallbackValue;
-      if (!candidate.value) return;
-      if (isRuntimeNoisySuggestion({ ...candidate, symbolicName: symbolicName ?? undefined })) {
+      // Keep supported symbolic-only tokens (e.g. SQUOTA_STRING) even without a value,
+      // so the renderer's supportedSymbolicKeywords branch can use them.
+      const isSupportedSymbolic =
+        !candidate.value &&
+        !!symbolicName &&
+        _supportedNonLiteralBySymbolic.has(symbolicName.toUpperCase());
+      if (!candidate.value && !isSupportedSymbolic) return;
+      if (
+        candidate.value &&
+        isRuntimeNoisySuggestion({ ...candidate, symbolicName: symbolicName ?? undefined })
+      ) {
         return;
       }
 

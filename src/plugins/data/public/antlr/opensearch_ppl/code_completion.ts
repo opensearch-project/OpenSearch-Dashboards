@@ -106,18 +106,18 @@ function getInsertText(
   }
 }
 
+// Check whether the result contains content that the renderers actually handle.
+// Flags like suggestTemplates, suggestColumnAliases, suggestDatabases, and
+// suggestScalarFunctions are not rendered by either provider, so they must not
+// gate the compiled fallback.
 function hasActionableContent(result: AutocompleteResultBase): boolean {
   if (result.suggestKeywords && result.suggestKeywords.length > 0) return true;
   const r = result as OpenSearchPplAutocompleteResult;
   return !!(
-    result.suggestTemplates ||
     r.suggestColumns ||
-    (result.suggestColumnAliases && result.suggestColumnAliases.length > 0) ||
-    result.suggestDatabases ||
     r.suggestSourcesOrTables ||
     r.suggestValuesForColumn ||
     r.suggestAggregateFunctions ||
-    r.suggestScalarFunctions ||
     r.suggestRenameAs ||
     r.suggestSingleQuotes
   );
@@ -239,7 +239,7 @@ export const getDefaultSuggestions = async ({
           detail: SuggestionItemDetailsTags.Keyword,
           // sortText is the only option to sort suggestions, compares strings
           sortText:
-            PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+            resolveKeywordSuggestionDetails(sk)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
       );
     }
@@ -297,7 +297,7 @@ export const getSimplifiedPPLSuggestions = async ({
         : query.slice(0, selectionEnd);
     const isInQuotes = suggestions.isInQuote || false;
     const isInBackQuote = suggestions.isInBackQuote || false;
-    const isRuntimeGrammar = Boolean(runtimeSuggestions);
+    const isRuntimeGrammar = runtimeSuggestions === suggestions;
 
     // Runtime-specific context detection
     if (isRuntimeGrammar) {
@@ -344,7 +344,9 @@ export const getSimplifiedPPLSuggestions = async ({
       }
 
       // Runtime grammar keyword processing (with heuristics)
-      if (suggestions.suggestKeywords?.length) {
+      // When preferColumnSuggestionsOnly is set (e.g. `rex field =`), suppress
+      // keyword and snippet noise so only field suggestions are shown.
+      if (suggestions.suggestKeywords?.length && !suggestions.preferColumnSuggestionsOnly) {
         const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
         finalSuggestions.push(
           ...literalKeywords.map((sk) => {
@@ -438,7 +440,7 @@ export const getSimplifiedPPLSuggestions = async ({
       }
 
       // Process shared suggestion types (must come after keywords to maintain ordering)
-      if (suggestions.suggestAggregateFunctions) {
+      if (suggestions.suggestAggregateFunctions && !suggestions.preferColumnSuggestionsOnly) {
         finalSuggestions.push(
           ...Object.entries(PPL_AGGREGATE_FUNCTIONS).map(([af, prop]) => ({
             text: `${af}()`,
@@ -650,7 +652,9 @@ export const getSimplifiedPPLSuggestions = async ({
       }
     }
 
-    const querySnippetSuggestions = await getPPLQuerySnippetForSuggestions(queryTillCursor);
+    const querySnippetSuggestions = suggestions.preferColumnSuggestionsOnly
+      ? []
+      : await getPPLQuerySnippetForSuggestions(queryTillCursor);
 
     // Deduplicate suggestions by text to prevent runtime grammar duplication issues
     const allSuggestions = [...finalSuggestions, ...querySnippetSuggestions];
