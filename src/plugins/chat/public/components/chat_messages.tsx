@@ -5,7 +5,7 @@
 
 import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { MessageRow } from './message_row';
 import { TimelineToolCall, ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
