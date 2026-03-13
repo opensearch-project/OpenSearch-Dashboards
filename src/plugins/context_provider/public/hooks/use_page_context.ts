@@ -71,6 +71,18 @@ export function usePageContext(options?: UsePageContextOptions): string {
     `page-context-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   );
 
+  // Suppress default page context when this hook provides custom context
+  useEffect(() => {
+    if (options?.enabled === false) return;
+
+    const control = (window as any).__defaultPageContextControl;
+    control?.suppress();
+
+    return () => {
+      control?.unsuppress();
+    };
+  }, [options?.enabled]);
+
   useEffect(() => {
     if (options?.enabled === false) return;
 
