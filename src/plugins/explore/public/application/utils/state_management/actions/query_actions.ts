@@ -309,7 +309,17 @@ export const executeQueries = createAsyncThunk<
   await Promise.all(promises);
 
   // After main queries complete, check if we should execute trace aggregation queries
-  const flavorId = await getCurrentFlavor(services);
+  // Read flavor directly from URL to avoid timing issues with observable
+  const urlPath = window.location.pathname;
+  const flavorFromPath = urlPath.includes('/explore/traces')
+    ? ExploreFlavor.Traces
+    : urlPath.includes('/explore/logs')
+    ? ExploreFlavor.Logs
+    : urlPath.includes('/explore/metrics')
+    ? ExploreFlavor.Metrics
+    : null;
+
+  const flavorId = flavorFromPath || (await getCurrentFlavor(services));
 
   if (flavorId === ExploreFlavor.Traces) {
     // Get the latest results from state after the data table query has completed
@@ -317,7 +327,18 @@ export const executeQueries = createAsyncThunk<
     const dataTableResults = latestState.results[dataTableCacheKey];
 
     // Only execute RED metrics queries if we have table results with data
-    if (dataTableResults && dataTableResults.hits?.hits?.length > 0) {
+    // Check for multiple formats:
+    // - DSL format: hits.hits
+    // - PPL format: datarows or body.fields
+    // - New format: hasResults flag
+    const hasData =
+      dataTableResults &&
+      (dataTableResults.hits?.hits?.length > 0 ||
+        (dataTableResults.datarows && dataTableResults.datarows.length > 0) ||
+        (dataTableResults.body?.fields && dataTableResults.body.fields.length > 0) ||
+        dataTableResults.hasResults === true);
+
+    if (hasData) {
       const dataset = query.dataset
         ? await services.data.dataViews.get(
             query.dataset.id,

@@ -29,7 +29,9 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
+import { createFlavoredUrlStateStorage } from './utils/create_flavored_url_state_storage';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { CORE_SIGNAL_TYPES } from '../../data/common';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -250,12 +252,18 @@ export class ExplorePlugin
         this.stateUpdaterByApp[flavor] =
           this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
         appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
+
+        // Force nav links to always point to clean URLs (no state carried over)
+        // This prevents cross-flavor state bleeding in navigation
+        appStateUpdater.next(() => ({ defaultPath: '#/' }));
       }
 
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
         defaultSubUrl: '#/',
-        storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
+        storageKey: flavor
+          ? `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}:${flavor}`
+          : `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
         stateParams: [
@@ -355,14 +363,60 @@ export class ExplorePlugin
           );
 
           // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
-          services.osdUrlStateStorage = createOsdUrlStateStorage({
+          // Use flavor-specific storage to isolate session storage between flavors
+          // FlavoredSessionStorage namespaces all storage keys with flavor prefix
+          services.osdUrlStateStorage = createFlavoredUrlStateStorage({
             history: this.currentHistory,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            flavor,
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           });
 
           // Add scopedHistory to services
           services.scopedHistory = this.currentHistory;
+
+          // Clear cross-flavor state: if URL has dataset with incompatible signalType, clear it
+          const currentHash = window.location.hash;
+          if (currentHash.includes('_q=')) {
+            try {
+              // Try to get query state from URL
+              const queryState = services.osdUrlStateStorage.get('_q') as any;
+
+              if (queryState?.dataset?.signalType) {
+                const requiredSignalType =
+                  flavor === ExploreFlavor.Traces
+                    ? CORE_SIGNAL_TYPES.TRACES
+                    : flavor === ExploreFlavor.Metrics
+                    ? CORE_SIGNAL_TYPES.METRICS
+                    : undefined;
+
+                const isCompatible = requiredSignalType
+                  ? queryState.dataset.signalType === requiredSignalType
+                  : queryState.dataset.signalType !== CORE_SIGNAL_TYPES.TRACES &&
+                    queryState.dataset.signalType !== CORE_SIGNAL_TYPES.METRICS;
+
+                if (!isCompatible) {
+                  // Dataset is incompatible - clear URL but preserve global state
+                  const queryStart = currentHash.indexOf('?');
+                  if (queryStart > 0) {
+                    const queryString = currentHash.substring(queryStart + 1);
+                    const urlParams = new URLSearchParams(queryString);
+                    const gParam = urlParams.get('_g');
+
+                    if (gParam) {
+                      this.currentHistory.replace(`#/?_g=${gParam}`);
+                    } else {
+                      this.currentHistory.replace('#/');
+                    }
+                  } else {
+                    this.currentHistory.replace('#/');
+                  }
+                }
+              }
+            } catch (error) {
+              // If we can't parse the state, ignore
+            }
+          }
 
           // Register tabs with the tab registry
           registerTabs(services, flavor);
