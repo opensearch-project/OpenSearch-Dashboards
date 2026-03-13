@@ -45,6 +45,13 @@ jest.mock('../actions/graph_timeseries_data_action', () => ({
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();
 
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 describe('ChatWindow', () => {
   let mockCore: ReturnType<typeof coreMock.createStart>;
   let mockContextProvider: any;
