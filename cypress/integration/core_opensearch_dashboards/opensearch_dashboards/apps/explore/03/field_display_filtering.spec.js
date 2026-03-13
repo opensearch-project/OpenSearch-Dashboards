@@ -96,10 +96,7 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-        cy.get('tbody tr')
-          .first()
-          .find('[data-test-subj="docTableExpandToggleColumn"] button')
-          .click();
+        cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"]').click();
 
         cy.wait(2000);
 
@@ -117,10 +114,7 @@ const fieldDisplayFilteringTestSuite = () => {
 
         cy.getElementByTestId('docTable').get('tbody tr').should('have.length.above', 3); // To ensure it waits until a full table is loaded into the DOM, instead of a bug where table only has 1 hit.
 
-        cy.get('tbody tr')
-          .first()
-          .find('[data-test-subj="docTableExpandToggleColumn"] button')
-          .click();
+        cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"]').click();
 
         cy.wait(2000);
 

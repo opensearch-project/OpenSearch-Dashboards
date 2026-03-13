@@ -60,6 +60,9 @@ cy.osd.add(
     cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
 
     cy.wait('@createWorkspaceInterception').then((interception) => {
+      if (!interception?.response?.body?.result?.id) {
+        throw new Error('Failed to create workspace - no ID returned in response');
+      }
       // save the created workspace ID as an alias
       cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
     });
@@ -161,6 +164,9 @@ cy.osd.add('addDataSource', (options) => {
   // Wait for successful creation
   cy.wait('@createDataSourceRequest').then((interception) => {
     expect(interception.response.statusCode).to.equal(200);
+    if (!interception?.response?.body?.id) {
+      throw new Error('Failed to create datasource - no ID returned in response');
+    }
     // save the created data source ID as an alias
     cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
   });
@@ -396,6 +402,9 @@ cy.osd.add('deleteSavedObjectsByType', (workspaceId, type, search) => {
   const url = `/api/opensearch-dashboards/management/saved_objects/_find?${searchParams.toString()}`;
 
   return cy.request(url).then((response) => {
+    if (!response?.body?.saved_objects) {
+      throw new Error(`Failed to find saved objects of type ${type}`);
+    }
     response.body.saved_objects.map(({ id }) => {
       cy.osd.deleteSavedObject(type, id);
       cy.osd.waitForSync();
@@ -962,10 +971,23 @@ cy.osd.add('createOpensearchDatasourceUsingEndpoint', (datasourceUrl, datasource
 
 /*
   Setup environment and get data source ID in proper sequence
+  @param {string} dataSourceName - The name of the data source to setup
+  @param {Array} [fixturesNeeded] - Optional array of fixture names to load.
+                                     If not provided, loads all available fixtures.
+                                     Each fixture name should match the 'name' property in AVAILABLE_FIXTURE_INDICES.
+                                     Example: ['data_logs_small_time_1', 'logs_otel_v1_000001']
 */
-cy.osd.add('setupEnvAndGetDataSource', (dataSourceName) => {
+cy.osd.add('setupEnvAndGetDataSource', (dataSourceName, fixturesNeeded = null) => {
   cy.log(`setupEnvAndGetDataSource called with: ${dataSourceName}`);
   cy.log(`CYPRESS_RUNTIME_ENV: ${Cypress.env('CYPRESS_RUNTIME_ENV')}`);
+
+  if (fixturesNeeded !== null) {
+    cy.log(
+      `Selective fixture loading enabled. Fixtures to load: ${JSON.stringify(fixturesNeeded)}`
+    );
+  } else {
+    cy.log(`Loading all ${AVAILABLE_FIXTURE_INDICES.length} available fixtures`);
+  }
 
   const datasourceUrl = PATHS.SECONDARY_ENGINE;
   const baseUrl = Cypress.config('baseUrl') || '';
@@ -1022,8 +1044,12 @@ cy.osd.add('setupEnvAndGetDataSource', (dataSourceName) => {
       });
     }
 
-    // Upload all available fixture indices to the data source
-    cy.osd.uploadAllFixtureIndices(datasourceUrl);
+    // Upload fixture indices to the data source (selective or all)
+    if (fixturesNeeded !== null) {
+      cy.osd.uploadSelectiveFixtureIndices(datasourceUrl, fixturesNeeded);
+    } else {
+      cy.osd.uploadAllFixtureIndices(datasourceUrl);
+    }
   });
 });
 
@@ -1042,6 +1068,55 @@ cy.osd.add('uploadAllFixtureIndices', (datasourceUrl = PATHS.SECONDARY_ENGINE) =
     datasourceUrl,
     AVAILABLE_FIXTURE_INDICES.map((index) => index.mappingPath),
     AVAILABLE_FIXTURE_INDICES.map((index) => index.dataPath)
+  );
+});
+
+/*
+  Upload only specific fixture indices to the data source
+  @param {string} datasourceUrl - The URL of the data source
+  @param {Array<string>} fixtureNames - Array of fixture names to upload (must match 'name' in AVAILABLE_FIXTURE_INDICES)
+*/
+cy.osd.add('uploadSelectiveFixtureIndices', (datasourceUrl, fixtureNames) => {
+  // This function should only run in OSD environment
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') !== 'osd') {
+    cy.log('Non-OSD environment - skipping index upload');
+    return;
+  }
+
+  if (!Array.isArray(fixtureNames) || fixtureNames.length === 0) {
+    cy.log('Warning: No fixtures specified for selective loading. Using all fixtures instead.');
+    cy.osd.uploadAllFixtureIndices(datasourceUrl);
+    return;
+  }
+
+  // Filter fixtures based on provided names
+  const selectedFixtures = AVAILABLE_FIXTURE_INDICES.filter((fixture) =>
+    fixtureNames.includes(fixture.name)
+  );
+
+  if (selectedFixtures.length === 0) {
+    throw new Error(
+      `No matching fixtures found for names: ${fixtureNames.join(', ')}. ` +
+        `Available fixtures: ${AVAILABLE_FIXTURE_INDICES.map((f) => f.name).join(', ')}`
+    );
+  }
+
+  // Log which fixtures are being loaded
+  const notFound = fixtureNames.filter((name) => !selectedFixtures.find((f) => f.name === name));
+  if (notFound.length > 0) {
+    cy.log(`Warning: Some requested fixtures not found: ${notFound.join(', ')}`);
+  }
+
+  cy.log(
+    `Selective fixture loading: Uploading ${selectedFixtures.length} of ${AVAILABLE_FIXTURE_INDICES.length} test indices`
+  );
+  cy.log(`Fixtures being loaded: ${selectedFixtures.map((f) => f.name).join(', ')}`);
+
+  // Upload only selected fixtures
+  cy.osd.setupTestData(
+    datasourceUrl,
+    selectedFixtures.map((index) => index.mappingPath),
+    selectedFixtures.map((index) => index.dataPath)
   );
 });
 

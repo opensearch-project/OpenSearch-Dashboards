@@ -81,10 +81,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
       {isOnTracesPage ? (
         <td />
       ) : (
-        <td
-          data-test-subj="docTableExpandToggleColumn"
-          className="exploreDocTableCell__toggleDetails"
-        >
+        <td className="exploreDocTableCell__toggleDetails">
           <EuiButtonIcon
             color="text"
             onClick={onToggleExpand}

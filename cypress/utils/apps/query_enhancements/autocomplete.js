@@ -550,7 +550,7 @@ export const generateAutocompleteTestConfigurations = (
  */
 export const validateQueryResults = (field, expectedValue, operator) => {
   // Expand the first row to view the field value
-  cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
+  cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"]').click();
   cy.getElementByTestId(`tableDocViewRow-${field}-value`).within(() => {
     cy.get('span')
       .invoke('text')
@@ -584,5 +584,5 @@ export const validateQueryResults = (field, expectedValue, operator) => {
       });
   });
   // Close the expanded row
-  cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"] button').click();
+  cy.get('tbody tr').first().find('[data-test-subj="docTableExpandToggleColumn"]').click();
 };
