@@ -96,7 +96,6 @@ export function TableHeaderColumn({
   onRemoveColumn,
   sortOrder = [],
 }: Props) {
-  const currentSortWithoutColumn = sortOrder.filter((pair) => pair[0] !== name);
   const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
   const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
 
@@ -107,14 +106,14 @@ export function TableHeaderColumn({
   const handleChangeSortOrder = () => {
     if (!onChangeSortOrder) return;
 
-    // Cycle: Unsorted → Asc → Desc → Unsorted (clears sorting)
+    // Single-column sort only. Cycle: Unsorted → Asc → Desc → Unsorted
     if (currentColumnSort === undefined) {
-      onChangeSortOrder([...currentSortWithoutColumn, [name, 'asc']]);
+      onChangeSortOrder([[name, 'asc']]);
     } else if (currentColumnSortDirection === 'asc') {
-      onChangeSortOrder([...currentSortWithoutColumn, [name, 'desc']]);
+      onChangeSortOrder([[name, 'desc']]);
     } else {
-      // desc → clear this column's sort (returns to natural order if last column)
-      onChangeSortOrder(currentSortWithoutColumn);
+      // desc → clear sorting (empty array triggers default time desc)
+      onChangeSortOrder([]);
     }
   };
 

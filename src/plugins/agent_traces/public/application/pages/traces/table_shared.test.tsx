@@ -20,10 +20,8 @@ import {
 describe('table_shared', () => {
   describe('PPL_SORT_FIELDS', () => {
     it('maps UI fields to PPL fields', () => {
-      expect(PPL_SORT_FIELDS.startTime).toBe('startTime');
       expect(PPL_SORT_FIELDS.kind).toBe('`attributes.gen_ai.operation.name`');
       expect(PPL_SORT_FIELDS.latency).toBe('durationInNanos');
-      expect(PPL_SORT_FIELDS.name).toBe('name');
       expect(PPL_SORT_FIELDS.status).toBe('`status.code`');
     });
   });

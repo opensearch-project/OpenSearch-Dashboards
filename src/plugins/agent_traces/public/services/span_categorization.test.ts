@@ -15,6 +15,8 @@ jest.mock('@osd/ui-shared-deps/theme', () => ({
     euiColorVis7: '#DA8B45',
     euiColorVis8: '#AA6556',
     euiColorMediumShade: '#98A2B3',
+    euiColorPrimary: '#006BB4',
+    euiColorDarkShade: '#69707D',
   },
 }));
 
@@ -56,7 +58,7 @@ describe('span_categorization', () => {
   });
 
   describe('getCategoryMeta', () => {
-    it('returns color, bgColor, and label for each category', () => {
+    it('returns color, bgColor, textColor, and label for each category', () => {
       const categories: SpanCategory[] = [
         'AGENT',
         'LLM',
@@ -69,8 +71,10 @@ describe('span_categorization', () => {
         const meta = getCategoryMeta(cat);
         expect(meta).toHaveProperty('color');
         expect(meta).toHaveProperty('bgColor');
+        expect(meta).toHaveProperty('textColor');
         expect(meta).toHaveProperty('label');
-        expect(meta.color).toBe(meta.bgColor);
+        expect(meta.textColor).toBe(meta.color);
+        expect(meta.bgColor).toBe(hexToRgba(meta.color, 0.12));
       }
     });
 

@@ -4,7 +4,7 @@
  */
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { TraceDetailsFlyout } from './trace_details_flyout';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { useSidebarPanel } from '../../../../components/container/bottom_container/sidebar_panel_context';
 
 interface FlyoutState {

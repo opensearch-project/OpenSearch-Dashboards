@@ -21,7 +21,7 @@ import {
   EuiResizableContainer,
   EuiBadge,
 } from '@elastic/eui';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { TraceFlowView } from '../flow/trace_flow_view';
 import { parseLatencyMs } from '../trace_details/utils/span_timerange_utils';
 import { getSpanCategory, getCategoryMeta } from '../../../../services/span_categorization';
@@ -205,7 +205,11 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+            <EuiBadge
+              className="agentTraces__categoryBadge"
+              color={meta.bgColor}
+              style={{ color: meta.textColor }}
+            >
               {meta.label}
             </EuiBadge>
           </EuiFlexItem>
