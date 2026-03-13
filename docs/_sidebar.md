@@ -11,6 +11,8 @@
     - [High_level_design](multi-datasource/high_level_design.md)
     - [User_stories](multi-datasource/user_stories.md)
   - [Openapi](openapi/README.md)
+  - Packages
+    - [Monaco_editor_migration_guide](packages/monaco_editor_migration_guide.md)
   - Plugins
     - data
       - datasets
