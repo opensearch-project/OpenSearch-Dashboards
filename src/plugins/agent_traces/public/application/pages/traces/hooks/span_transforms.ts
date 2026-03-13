@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TraceHit } from './trace_details/traces/ppl_to_trace_hits';
+import { TraceHit } from '../trace_details/traces/ppl_to_trace_hits';
 
 export interface AgentSpan {
   spanId: string;
