@@ -34,7 +34,7 @@ import { IUiSettingsClient } from '../../ui_settings';
 import { CoreService } from '../../../types';
 import { getNonce } from '../../utils';
 // @ts-expect-error
-import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
+import disableAnimationsCss from './disable_animations.css?raw';
 
 interface StartDeps {
   uiSettings: IUiSettingsClient;
