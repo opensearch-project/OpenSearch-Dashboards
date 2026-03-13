@@ -33,6 +33,7 @@ import { i18n } from '@osd/i18n';
 import { getFieldValueCounts } from './field_calculator';
 import { DataView, DataViewField } from '../../../../../data/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { AGENT_TRACES_VIRTUAL_COLUMN_SOURCE_FIELDS } from '../../../../common';
 
 export function getDetails(
   field: DataViewField,
@@ -56,11 +57,19 @@ export function getDetails(
       ),
     };
   }
+
+  // For virtual columns, resolve to the underlying source field so
+  // flattenHit can find the values in the raw _source document.
+  const sourceFieldName = AGENT_TRACES_VIRTUAL_COLUMN_SOURCE_FIELDS[field.name];
+  const effectiveField = sourceFieldName
+    ? new DataViewField({ ...field.spec, name: sourceFieldName }, field.displayName)
+    : field;
+
   const details = {
     ...defaultDetails,
     ...getFieldValueCounts({
       hits,
-      field,
+      field: effectiveField,
       dataSet,
       count: 5,
       grouped: false,
@@ -68,7 +77,7 @@ export function getDetails(
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {
-      bucket.display = dataSet.getFormatterForField(field).convert(bucket.value);
+      bucket.display = dataSet.getFormatterForField(effectiveField).convert(bucket.value);
     }
   }
 

@@ -70,7 +70,8 @@ const mockStore = configureStore({
   reducer: {
     query: () => ({}),
     results: () => ({}),
-    ui: () => ({ columns: [] }),
+    ui: () => ({ columns: [], activeTabId: '' }),
+    legacy: () => ({ sort: [] }),
   },
 });
 

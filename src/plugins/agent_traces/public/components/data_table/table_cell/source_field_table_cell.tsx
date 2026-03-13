@@ -22,6 +22,7 @@ export interface SourceFieldTableCellProps {
   dataset: IndexPattern | Dataset;
   row: OpenSearchSearchHit<Record<string, unknown>>;
   isShortDots: boolean;
+  wrapCellText?: boolean;
 }
 
 export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
@@ -29,6 +30,7 @@ export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
   dataset,
   row,
   isShortDots,
+  wrapCellText,
 }) => {
   const formattedRow = dataset.formatHit(row);
   const metaFields = dataset.metaFields || [];
@@ -38,7 +40,9 @@ export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
   return (
     <td
       key={colName}
-      className="agentTracesDocTableCell eui-textTruncate agentTracesDocTableCell__source"
+      className={`agentTracesDocTableCell${
+        wrapCellText ? '' : ' eui-textTruncate'
+      } agentTracesDocTableCell__source`}
       data-test-subj="docTableField"
     >
       <div className="agentTracesDocTableCell__content">

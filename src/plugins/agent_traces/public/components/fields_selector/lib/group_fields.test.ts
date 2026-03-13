@@ -109,21 +109,7 @@ describe('group_fields', function () {
             "type": "date",
           },
         ],
-        "facetedFields": Array [
-          Object {
-            "aggregatable": true,
-            "count": 1,
-            "displayName": "Service",
-            "esTypes": Array [
-              "keyword",
-            ],
-            "name": "resource.attributes.service.name",
-            "readFromDocValues": true,
-            "scripted": false,
-            "searchable": true,
-            "type": "string",
-          },
-        ],
+        "facetedFields": Array [],
         "queryFields": Array [
           Object {
             "aggregatable": true,
@@ -174,7 +160,7 @@ describe('group_fields', function () {
   it('should identify faceted fields correctly including invisible char removal', function () {
     const fields = [
       {
-        name: 'resource.attributes.service.name\u200b', // Contains invisible char
+        name: 'attributes.gen_ai.operation.name\u200b', // Contains invisible char
         type: 'string',
         esTypes: ['keyword'],
         count: 1,
@@ -182,18 +168,7 @@ describe('group_fields', function () {
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
-        displayName: 'Service',
-      },
-      {
-        name: 'attributes.http.status_code',
-        type: 'number',
-        esTypes: ['long'],
-        count: 1,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-        displayName: 'HTTP Status Code',
+        displayName: 'Operation Name',
       },
       {
         name: 'status.code',
@@ -221,8 +196,7 @@ describe('group_fields', function () {
 
     const columns: string[] = [];
     const fieldCounts = {
-      'resource.attributes.service.name\u200b': 1,
-      'attributes.http.status_code': 1,
+      'attributes.gen_ai.operation.name\u200b': 1,
       'status.code': 1,
       regularField: 1,
     };
@@ -232,11 +206,10 @@ describe('group_fields', function () {
 
     const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true);
 
-    expect(actual.facetedFields).toHaveLength(3);
+    expect(actual.facetedFields).toHaveLength(2);
     expect(actual.facetedFields.map((f) => f.name)).toContain(
-      'resource.attributes.service.name\u200b'
+      'attributes.gen_ai.operation.name\u200b'
     );
-    expect(actual.facetedFields.map((f) => f.name)).toContain('attributes.http.status_code');
     expect(actual.facetedFields.map((f) => f.name)).toContain('status.code');
     expect(actual.queryFields.map((f) => f.name)).toContain('regularField');
   });

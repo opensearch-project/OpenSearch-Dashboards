@@ -114,7 +114,7 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: $ouiSize;
+    padding: $ouiSizeS $ouiSize;
   }
 }
 
@@ -169,6 +169,11 @@
       flex-direction: column;
       overflow: hidden;
       min-height: 0;
+    }
+
+    // use block layout so children keep natural height
+    > .agentTracesFlyout__detailPanel {
+      display: block;
     }
   }
 

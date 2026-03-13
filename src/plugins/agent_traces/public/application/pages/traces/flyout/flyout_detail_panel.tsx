@@ -7,10 +7,10 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiTitle,
-  EuiText,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadge,
   EuiHealth,
   EuiCodeBlock,
   EuiPanel,
@@ -36,43 +36,6 @@ export const formatJsonOrString = (value: string | undefined): string => {
   }
 };
 
-const FieldGrid: React.FC<{
-  items: Array<{ label: string; value: React.ReactNode }>;
-}> = ({ items }) => {
-  const leftItems = items.filter((_, i) => i % 2 === 0);
-  const rightItems = items.filter((_, i) => i % 2 !== 0);
-  const rowCount = Math.max(leftItems.length, rightItems.length);
-
-  return (
-    <>
-      {Array.from({ length: rowCount }).map((_, i) => (
-        <EuiFlexGroup key={i} gutterSize="l" responsive={false}>
-          <EuiFlexItem>
-            {leftItems[i] && (
-              <div className="agentTracesFlyout__field">
-                <EuiText size="xs" color="subdued">
-                  {leftItems[i].label}
-                </EuiText>
-                <EuiText size="s">{leftItems[i].value}</EuiText>
-              </div>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {rightItems[i] && (
-              <div className="agentTracesFlyout__field">
-                <EuiText size="xs" color="subdued">
-                  {rightItems[i].label}
-                </EuiText>
-                <EuiText size="s">{rightItems[i].value}</EuiText>
-              </div>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-    </>
-  );
-};
-
 interface FlyoutDetailPanelProps {
   selectedNode: TreeNode | undefined;
   selectedTraceRow: TraceRow | undefined;
@@ -86,115 +49,6 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
 }) => {
   const row = selectedTraceRow;
 
-  const metadataFields = [
-    {
-      label: i18n.translate('agentTraces.detailPanel.operation', {
-        defaultMessage: 'OPERATION',
-      }),
-      value: row?.kind || '—',
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.duration', {
-        defaultMessage: 'DURATION',
-      }),
-      value: row?.latency || '—',
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.spanId', {
-        defaultMessage: 'SPAN ID',
-      }),
-      value: row?.spanId ? (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <code>{row.spanId}</code>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={row.spanId}>
-              {(copy) => (
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="copy"
-                  onClick={copy}
-                  aria-label={i18n.translate('agentTraces.detailPanel.copySpanId', {
-                    defaultMessage: 'Copy span ID',
-                  })}
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        '—'
-      ),
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.parentSpan', {
-        defaultMessage: 'PARENT SPAN',
-      }),
-      value: row?.parentSpanId ? (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => onSelectNode(row.parentSpanId!)}>{row.parentSpanId}</EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={row.parentSpanId}>
-              {(copy) => (
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="copy"
-                  onClick={copy}
-                  aria-label={i18n.translate('agentTraces.detailPanel.copyParentSpanId', {
-                    defaultMessage: 'Copy parent span ID',
-                  })}
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        i18n.translate('agentTraces.detailPanel.rootSpan', {
-          defaultMessage: '(root span)',
-        })
-      ),
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.status', {
-        defaultMessage: 'STATUS',
-      }),
-      value: (
-        <EuiHealth color={row?.status === 'success' ? 'success' : 'danger'}>
-          {row?.status === 'success'
-            ? i18n.translate('agentTraces.detailPanel.statusOk', {
-                defaultMessage: 'OK',
-              })
-            : i18n.translate('agentTraces.detailPanel.statusError', {
-                defaultMessage: 'ERROR',
-              })}
-        </EuiHealth>
-      ),
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.tokensUsed', {
-        defaultMessage: 'TOKENS USED',
-      }),
-      value: row?.totalTokens != null && row.totalTokens !== '—' ? String(row.totalTokens) : '—',
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.startTime', {
-        defaultMessage: 'START TIME',
-      }),
-      value: row?.startTime || '—',
-    },
-    {
-      label: i18n.translate('agentTraces.detailPanel.endTime', {
-        defaultMessage: 'END TIME',
-      }),
-      value: row?.endTime || '—',
-    },
-  ];
-
   return (
     <EuiPanel
       color="subdued"
@@ -202,9 +56,26 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
       borderRadius="none"
       className="agentTracesFlyout__detailPanel"
     >
-      <EuiTitle size="s">
-        <h3>{selectedNode?.label || '—'}</h3>
-      </EuiTitle>
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3 style={{ wordBreak: 'break-word' }}>{selectedNode?.label || '—'}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHealth color={row?.status === 'error' ? 'danger' : 'success'}>
+            {row?.status === 'error'
+              ? i18n.translate('agentTraces.detailPanel.statusError', {
+                  defaultMessage: 'Error',
+                })
+              : i18n.translate('agentTraces.detailPanel.statusSuccess', {
+                  defaultMessage: 'Success',
+                })}
+          </EuiHealth>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
@@ -220,10 +91,123 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
         initialIsOpen
         paddingSize="m"
       >
-        <FieldGrid items={metadataFields} />
+        <EuiFlexGroup gutterSize="s" wrap responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <span className="euiTextColor--subdued">
+                {i18n.translate('agentTraces.detailPanel.operation', {
+                  defaultMessage: 'Operation:',
+                })}
+              </span>{' '}
+              <strong>{row?.kind || '—'}</strong>
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <span className="euiTextColor--subdued">
+                {i18n.translate('agentTraces.detailPanel.duration', {
+                  defaultMessage: 'Duration:',
+                })}
+              </span>{' '}
+              <strong>{row?.latency || '—'}</strong>
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <span className="euiTextColor--subdued">
+                    {i18n.translate('agentTraces.detailPanel.spanId', {
+                      defaultMessage: 'Span ID:',
+                    })}
+                  </span>{' '}
+                  <strong>{row?.spanId || '—'}</strong>
+                </EuiBadge>
+              </EuiFlexItem>
+              {row?.spanId && (
+                <EuiFlexItem grow={false}>
+                  <EuiCopy textToCopy={row.spanId}>
+                    {(copy) => (
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType="copy"
+                        onClick={copy}
+                        aria-label={i18n.translate('agentTraces.detailPanel.copySpanId', {
+                          defaultMessage: 'Copy span ID',
+                        })}
+                      />
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <span className="euiTextColor--subdued">
+                    {i18n.translate('agentTraces.detailPanel.parentSpan', {
+                      defaultMessage: 'Parent span:',
+                    })}
+                  </span>{' '}
+                  {row?.parentSpanId ? (
+                    <strong>
+                      <EuiLink onClick={() => onSelectNode(row.parentSpanId!)}>
+                        {row.parentSpanId}
+                      </EuiLink>
+                    </strong>
+                  ) : (
+                    <span className="euiTextColor--subdued">
+                      {i18n.translate('agentTraces.detailPanel.rootSpan', {
+                        defaultMessage: 'Root span',
+                      })}
+                    </span>
+                  )}
+                </EuiBadge>
+              </EuiFlexItem>
+              {row?.parentSpanId && (
+                <EuiFlexItem grow={false}>
+                  <EuiCopy textToCopy={row.parentSpanId}>
+                    {(copy) => (
+                      <EuiButtonIcon
+                        size="xs"
+                        iconType="copy"
+                        onClick={copy}
+                        aria-label={i18n.translate('agentTraces.detailPanel.copyParentSpanId', {
+                          defaultMessage: 'Copy parent span ID',
+                        })}
+                      />
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <span className="euiTextColor--subdued">
+                {i18n.translate('agentTraces.detailPanel.startTime', {
+                  defaultMessage: 'Start time:',
+                })}
+              </span>{' '}
+              <strong>{row?.startTime || '—'}</strong>
+            </EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <span className="euiTextColor--subdued">
+                {i18n.translate('agentTraces.detailPanel.endTime', {
+                  defaultMessage: 'End time:',
+                })}
+              </span>{' '}
+              <strong>{row?.endTime || '—'}</strong>
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiAccordion>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiAccordion
         id="io-accordion"
@@ -276,7 +260,7 @@ export const FlyoutDetailPanel: React.FC<FlyoutDetailPanelProps> = ({
         </div>
       </EuiAccordion>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiAccordion
         id="raw-span-accordion"

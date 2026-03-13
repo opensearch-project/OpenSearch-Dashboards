@@ -33,7 +33,7 @@ const selectDatasetAndWaitForData = () => {
 
   cy.osd.setTopNavDate(AGENT_TRACES_START, AGENT_TRACES_END);
 
-  cy.get('.agentTracesTable__container .euiBasicTable tbody tr', { timeout: 15000 }).should(
+  cy.get('.agentTracesTable__container .agentTraces-table tbody tr', { timeout: 15000 }).should(
     'have.length.greaterThan',
     0
   );
@@ -79,7 +79,9 @@ const agentTracesTestSuite = () => {
       });
 
       cy.get('.agentTracesTable__container').should('be.visible');
-      cy.contains('Showing').should('be.visible');
+      cy.get('.agentTracesTable__container')
+        .contains(/\d+ of \d+/)
+        .should('be.visible');
 
       cy.get('.agentTraces__categoryBadge').contains('Agent').should('exist');
     });
@@ -97,7 +99,10 @@ const agentTracesTestSuite = () => {
 
       cy.get('.agentTracesTabs__panel--active', { timeout: 15000 }).within(() => {
         cy.get('.agentTracesTable__container').should('exist');
-        cy.get('.euiBasicTable tbody tr', { timeout: 15000 }).should('have.length.greaterThan', 0);
+        cy.get('.agentTraces-table tbody tr', { timeout: 15000 }).should(
+          'have.length.greaterThan',
+          0
+        );
       });
     });
     it('should expand a trace row to show child spans', () => {
@@ -121,7 +126,7 @@ const agentTracesTestSuite = () => {
     it('should open flyout when clicking a trace row', () => {
       selectDatasetAndWaitForData();
 
-      cy.get('.agentTracesTable__clickableRow').first().click();
+      cy.get('[data-test-subj="agentTracesTimeLink"]').first().click();
       cy.get('.agentTracesFlyout', { timeout: 15000 }).should('be.visible');
       cy.get('.agentTracesFlyout').within(() => {
         cy.get('#trace-details-flyout').should('contain.text', 'POST /plan');
@@ -139,9 +144,9 @@ const agentTracesTestSuite = () => {
 
         cy.get('.agentTracesFlyout__detailPanel').should('be.visible');
         cy.contains('Metadata').should('be.visible');
-        cy.contains('OPERATION').should('be.visible');
-        cy.contains('DURATION').should('be.visible');
-        cy.contains('SPAN ID').should('be.visible');
+        cy.contains('Operation:').should('be.visible');
+        cy.contains('Duration:').should('be.visible');
+        cy.contains('Span ID:').should('be.visible');
 
         cy.contains('Input / Output').should('be.visible');
       });
@@ -153,16 +158,16 @@ const agentTracesTestSuite = () => {
     it('should support column sorting on traces table', () => {
       selectDatasetAndWaitForData();
 
-      cy.get('.euiBasicTable thead').contains('th', 'Name').click();
+      cy.getElementByTestId('docTableHeaderFieldSort_name').click();
 
-      cy.get('.agentTracesTable__container .euiBasicTable tbody tr').should(
+      cy.get('.agentTracesTable__container .agentTraces-table tbody tr').should(
         'have.length.greaterThan',
         0
       );
 
-      cy.get('.euiBasicTable thead').contains('th', 'Name').click();
+      cy.getElementByTestId('docTableHeaderFieldSort_name').click();
 
-      cy.get('.agentTracesTable__container .euiBasicTable tbody tr').should(
+      cy.get('.agentTracesTable__container .agentTraces-table tbody tr').should(
         'have.length.greaterThan',
         0
       );

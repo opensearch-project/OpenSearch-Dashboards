@@ -74,6 +74,20 @@ const OPERATION_CATEGORY: Record<string, SpanCategory> = {
   create_agent: 'AGENT',
 };
 
+/** Reverse mapping: category → list of operation names that belong to it. */
+const CATEGORY_OPERATIONS: Record<SpanCategory, string[]> = (() => {
+  const map: Record<string, string[]> = {};
+  for (const [op, cat] of Object.entries(OPERATION_CATEGORY)) {
+    (map[cat] ??= []).push(op);
+  }
+  return map as Record<SpanCategory, string[]>;
+})();
+
+/** Get all operation names that map to a given category. */
+export function getOperationNamesForCategory(category: SpanCategory): string[] {
+  return CATEGORY_OPERATIONS[category] || [];
+}
+
 /**
  * Determine span category from the gen_ai.operation.name attribute.
  * The operation name is stored in TraceRow.kind.

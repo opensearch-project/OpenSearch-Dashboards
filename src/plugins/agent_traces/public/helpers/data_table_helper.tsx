@@ -34,6 +34,13 @@ import {
   DataView as Dataset,
 } from '../../../../plugins/data/public';
 import { shortenDottedString } from './shorten_dotted_string';
+import {
+  AGENT_TRACES_DEFAULT_COLUMNS,
+  AGENT_TRACES_COLUMN_DISPLAY_NAMES,
+  AGENT_TRACES_SORTABLE_COLUMNS,
+} from '../../common';
+
+export type SortOrder = [string, 'asc' | 'desc'];
 
 export interface LegacyDisplayedColumn {
   name: string;
@@ -49,18 +56,17 @@ export interface LegacyDisplayedColumn {
  * If it's an IndexPattern with timefield, the time column is
  * prepended, not moveable and removeable
  * @param timeFieldName
- * @param osdFieldOverrides
  */
 export function getTimeColumn(
   timeFieldName: string,
-  osdFieldOverrides: {
+  _osdFieldOverrides?: {
     [key: string]: any;
   }
 ): LegacyDisplayedColumn {
   return {
     name: timeFieldName,
     displayName: 'Time',
-    isSortable: osdFieldOverrides.sortable ?? true,
+    isSortable: true,
     isRemoveable: false,
     colLeftIdx: -1,
     colRightIdx: -1,
@@ -68,9 +74,11 @@ export function getTimeColumn(
 }
 
 function getColumnDisplayName(column: string): string {
+  // Check shared virtual-column display names first
+  const virtualName = AGENT_TRACES_COLUMN_DISPLAY_NAMES[column];
+  if (virtualName) return virtualName;
+
   switch (column) {
-    case 'name':
-      return 'Service Identifier';
     case 'durationNano':
     case 'durationInNanos':
       return 'Duration';
@@ -82,8 +90,6 @@ function getColumnDisplayName(column: string): string {
       return 'Status';
     case 'spanId':
       return 'SpanID';
-    case 'kind':
-      return 'Service Kind';
     default:
       return column;
   }
@@ -116,8 +122,10 @@ export function getLegacyDisplayedColumns(
     return {
       name: column,
       displayName: isShortDots ? shortenDottedString(columnDisplayName) : columnDisplayName,
-      isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
-      isRemoveable: column !== '_source' || columns.length > 1,
+      isSortable: AGENT_TRACES_SORTABLE_COLUMNS.has(column) || !!field,
+      isRemoveable:
+        !AGENT_TRACES_DEFAULT_COLUMNS.includes(column) &&
+        (column !== '_source' || columns.length > 1),
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };

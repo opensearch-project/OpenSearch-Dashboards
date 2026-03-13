@@ -9,25 +9,37 @@ import { RootState } from '../state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../../../types';
 import { defaultPrepareQueryString } from '../state_management/actions/query_actions';
-import { selectPatternsField } from '../state_management/selectors';
+import { selectPatternsField, selectSort } from '../state_management/selectors';
 import { selectQueryStatusMapByKey } from '../state_management/selectors/query_editor/query_editor';
+import { useOwnTabId } from '../../../components/tabs/tabs';
 
 /**
- * Hook for reading tab specific result from result slice
+ * Hook for reading tab specific result from result slice.
+ *
+ * Uses the tab's own ID from TabIdContext rather than the global activeTabId
+ * from Redux.  This prevents hidden tabs from re-rendering when the user
+ * switches tabs — their cache key stays the same so all downstream useMemo
+ * hooks return cached values and the React.memo DataTable skips re-render.
  */
 export const useTabResults = () => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
   const query = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
+  const ownTabId = useOwnTabId();
+  // When ownTabId is set (inside a tab panel), the selector returns a stable
+  // value regardless of activeTabId changes — useSelector sees no change and
+  // skips the re-render entirely.  Components outside tab panels (ownTabId='')
+  // fall back to the global activeTabId.
+  const tabId = useSelector((state: RootState) => ownTabId || state.ui.activeTabId);
   const patternsField = useSelector(selectPatternsField); // for use in updating dependency array of cacheKey
+  const sort = useSelector(selectSort);
 
   const cacheKey = useMemo(() => {
-    const activeTab = services.tabRegistry.getTab(activeTabId);
-    const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
-    return prepareQuery(query);
+    const tab = services.tabRegistry.getTab(tabId);
+    const prepareQuery = tab?.prepareQuery || defaultPrepareQueryString;
+    return prepareQuery(query, sort);
     // TODO: redo logic of using patternsField in dependency array when we have a better method to update cacheKey
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTabId, services, patternsField]);
+  }, [query, tabId, services, patternsField, sort]);
 
   // Select only the specific result by cache key instead of the entire results map
   const result = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));
