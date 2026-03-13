@@ -338,7 +338,6 @@ const PREFERRED_RULE_NAMES: readonly string[] = [
   'tableQualifiedName',
   'statsFunctionName',
   'renameClasue',
-  'renameClause',
   'stringLiteral',
   'integerLiteral',
   'decimalLiteral',
@@ -768,8 +767,7 @@ export function enrichRuntimeResult(
         break;
       }
 
-      case 'renameClasue':
-      case 'renameClause': {
+      case 'renameClasue': {
         const expressionStart = rule.startTokenIndex;
         if (expressionStart === cursorTokenIndex) {
           shouldSuggestColumns = true;
