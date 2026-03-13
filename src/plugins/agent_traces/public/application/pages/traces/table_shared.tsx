@@ -193,10 +193,14 @@ export const useDataTableCore = ({ defaultColumns }: DataTableCoreOptions) => {
 
   const handleSortChange = useCallback(
     (newSort: SortOrder[]) => {
-      dispatch(setSort(newSort));
+      // When sort is cleared, fall back to default time desc
+      const timeField = dataset?.timeFieldName;
+      const effectiveSort =
+        newSort.length === 0 && timeField ? [[timeField, 'desc'] as SortOrder] : newSort;
+      dispatch(setSort(effectiveSort));
       dispatch(executeQueries({ services }) as any);
     },
-    [dispatch, services]
+    [dispatch, services, dataset]
   );
 
   // Wrap cell text toggle
