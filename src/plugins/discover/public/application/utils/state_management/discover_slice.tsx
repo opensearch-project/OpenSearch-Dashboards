@@ -100,7 +100,7 @@ export const getPreloadedState = async ({
         },
       };
 
-      savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
+     savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
     }
   } else if (config.get(DEFAULT_COLUMNS_SETTING)) {
     preloadedState.state.columns = config.get(DEFAULT_COLUMNS_SETTING);
@@ -185,6 +185,10 @@ export const discoverSlice = createSlice({
         isDirty: false,
       };
     },
+    clearSavedSearch(state) {
+      const { savedSearch, ...rest } = state;
+      return { ...rest };
+    },
     setMetadata(state, action: PayloadAction<Partial<DiscoverState['metadata']>>) {
       return {
         ...state,
@@ -221,6 +225,7 @@ export const {
   setState,
   updateState,
   setSavedSearchId,
+  clearSavedSearch,
   setMetadata,
   setSavedQuery,
 } = discoverSlice.actions;
