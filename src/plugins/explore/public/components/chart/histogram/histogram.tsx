@@ -176,34 +176,6 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     };
   }, [chartData, timefilterUpdateHandler]);
 
-  // Show/hide grid lines on hover
-  useEffect(() => {
-    const inst = instanceRef.current;
-    if (!inst || !containerRef.current) return;
-
-    const container = containerRef.current;
-
-    const showGridLines = () => {
-      if (inst && !inst.isDisposed()) {
-        inst.setOption({ yAxis: { splitLine: { show: true } } });
-      }
-    };
-
-    const hideGridLines = () => {
-      if (inst && !inst.isDisposed()) {
-        inst.setOption({ yAxis: { splitLine: { show: false } } });
-      }
-    };
-
-    container.addEventListener('mouseenter', showGridLines);
-    container.addEventListener('mouseleave', hideGridLines);
-
-    return () => {
-      container.removeEventListener('mouseenter', showGridLines);
-      container.removeEventListener('mouseleave', hideGridLines);
-    };
-  }, []);
-
   // Build and update the chart spec
   const spec = useMemo(() => {
     if (!chartData) return null;

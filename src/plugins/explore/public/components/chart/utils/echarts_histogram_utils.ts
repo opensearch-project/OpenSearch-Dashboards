@@ -323,7 +323,7 @@ export function createBarSeries(
     id,
     name,
     data: data.map((d) => [d.x, d.y]),
-    barMaxWidth: 50,
+    barWidth: '98%',
     itemStyle: {
       color,
     },
@@ -521,10 +521,17 @@ export function createHistogramSpec(
       nameGap: 30,
       splitNumber: 3,
       splitLine: {
-        show: false,
+        show: true,
         lineStyle: {
           type: 'dashed',
+          opacity: 0.75,
         },
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLine: {
+        show: false,
       },
       axisLabel: {
         formatter: (value: number) => {
@@ -587,10 +594,10 @@ export function createHistogramSpec(
         }
       : { show: false },
     grid: {
-      top: 20,
+      top: 0,
       right: hasMultipleSeries ? 180 : 20,
-      bottom: 40,
-      left: 50,
+      bottom: 25,
+      left: 20,
       containLabel: false,
     },
   };
