@@ -383,7 +383,11 @@ export class DatasetService {
         },
       ]);
 
-      return { ...dataset, timeFieldName: indexPattern.timeFieldName };
+      return {
+        ...dataset,
+        timeFieldName: indexPattern.timeFieldName,
+        displayName: indexPattern.displayName, // Include displayName from index pattern
+      };
     }
 
     return undefined;
