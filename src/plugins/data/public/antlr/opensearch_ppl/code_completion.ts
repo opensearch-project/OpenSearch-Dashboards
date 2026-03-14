@@ -160,24 +160,11 @@ export const getDefaultSuggestions = async ({
 
   try {
     const { lineNumber, column } = position || {};
-    const cursor: CursorPosition = {
+
+    const suggestions = getDefaultOpenSearchPplAutoCompleteSuggestions(query, {
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
-    };
-
-    // Check feature flag for runtime grammar (defaults to enabled)
-    const runtimeGrammarEnabled =
-      services?.uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
-
-    const runtimeResult = runtimeGrammarEnabled
-      ? tryRuntimeGrammarSuggestions(query, cursor, services, indexPattern, true)
-      : null;
-    // Fall back to compiled grammar when the runtime path returns an empty result.
-    // A non-null but empty result would suppress the compiled grammar otherwise.
-    const suggestions =
-      runtimeResult && hasActionableContent(runtimeResult)
-        ? runtimeResult
-        : getDefaultOpenSearchPplAutoCompleteSuggestions(query, cursor);
+    });
 
     const finalSuggestions: QuerySuggestion[] = [];
 
@@ -238,20 +225,13 @@ export const getDefaultSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
           // sortText is the only option to sort suggestions, compares strings
-          sortText: resolveKeywordSuggestionDetails(sk)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
+          sortText:
+            PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
       );
     }
 
-    // Deduplicate suggestions by text
-    const seen = new Map<string, QuerySuggestion>();
-    for (const suggestion of finalSuggestions) {
-      const key = suggestion.text || suggestion.insertText || '';
-      if (!seen.has(key)) {
-        seen.set(key, suggestion);
-      }
-    }
-    return Array.from(seen.values());
+    return finalSuggestions;
   } catch (e) {
     return [];
   }
