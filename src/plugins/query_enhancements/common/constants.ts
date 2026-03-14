@@ -58,6 +58,7 @@ export const URI = {
   ML: '/_plugins/_ml',
   OBSERVABILITY: '/_plugins/_observability',
   DATA_CONNECTIONS: '/_plugins/_query/_datasources',
+  PPL_BUNDLE: '/_plugins/_ppl/_grammar',
 };
 
 export const OPENSEARCH_API = {
