@@ -174,6 +174,16 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
 
       if (!option.grid) {
         option.grid = { ...DEFAULT_GRID };
+        if (spec.visualMap) {
+          const visualMap = Array<echarts.VisualMapComponentOption>().concat(spec.visualMap);
+          for (const v of visualMap) {
+            if (v.right) {
+              option.grid.right = 60;
+            } else if (v.bottom) {
+              option.grid.bottom = 80;
+            }
+          }
+        }
         if (gridConfigRef.current) {
           option.grid = { ...option.grid, ...gridConfigRef.current };
         }
