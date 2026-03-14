@@ -122,7 +122,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             lineNumbers: 'off', // Disabled line numbers
             // lineHeight: 40,
             fontSize: 14,
-            fontFamily: 'Roboto Mono',
+            fontFamily: "'Roboto Mono', 'Source Code Pro', Consolas, Menlo, Monaco, 'Courier New', monospace",
             minimap: {
               enabled: false,
             },
