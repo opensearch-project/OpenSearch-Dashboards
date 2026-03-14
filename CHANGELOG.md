@@ -62,6 +62,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Create a more condensed UI for the Explore Discover page ([#11221](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11221))
  - [Enhancement][MDS] Implement 1st MV Refresh Window For Integration Creation ([#11226](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11226))
  - Add gzip compression support for PPL queries ([#11240](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11240))
+ -  Add header based authentication to AG-UI calls. ([#11524](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11524))
 
 ### 🐛 Bug Fixes
 
