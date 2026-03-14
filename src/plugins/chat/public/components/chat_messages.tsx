@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
@@ -14,6 +14,7 @@ import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
 import { AssistantActionService } from '../../../context_provider/public';
+import type { AssistantContextStore } from '../../../context_provider/public';
 
 /**
  * Determine tool status based on tool call and result
@@ -54,6 +55,49 @@ const STARTER_SUGGESTIONS: SuggestionItem[] = [
     prompt: 'Explain [concept or feature] in OpenSearch Dashboards',
   },
 ];
+
+const SEARCH_RELEVANCE_SUGGESTIONS: SuggestionItem[] = [
+  {
+    icon: 'visBarVerticalStacked',
+    iconColor: 'primary',
+    text: 'Compare two search configurations',
+    prompt: 'Help me set up a query set comparison between two search configurations',
+  },
+  {
+    icon: 'starFilled',
+    iconColor: 'warning',
+    text: 'Evaluate search quality',
+    prompt: 'How do I evaluate my search quality using NDCG or MAP metrics?',
+  },
+  {
+    icon: 'searchProfilerApp',
+    iconColor: 'accent',
+    text: 'Create a query set',
+    prompt: 'Help me create a query set for search relevance evaluation',
+  },
+];
+
+const CONTEXT_SUGGESTIONS: Record<string, SuggestionItem[]> = {
+  searchRelevance: SEARCH_RELEVANCE_SUGGESTIONS,
+};
+
+function getStarterSuggestions(): SuggestionItem[] {
+  const contextStore = (window as any).assistantContextStore as AssistantContextStore | undefined;
+  if (contextStore) {
+    const pageContexts = contextStore.getContextsByCategory('page');
+    for (const ctx of pageContexts) {
+      try {
+        const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
+        if (value?.appId && CONTEXT_SUGGESTIONS[value.appId]) {
+          return CONTEXT_SUGGESTIONS[value.appId];
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }
+  return STARTER_SUGGESTIONS;
+}
 
 interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
@@ -235,6 +279,17 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onFillInput,
   startResponse,
 }) => {
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>(getStarterSuggestions);
+
+  useEffect(() => {
+    const contextStore = (window as any).assistantContextStore as AssistantContextStore | undefined;
+    if (!contextStore) return;
+    const unsubscribe = contextStore.subscribe(() => {
+      setSuggestions(getStarterSuggestions());
+    });
+    return unsubscribe;
+  }, []);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const userHasScrolledUp = useRef<boolean>(false);
@@ -361,7 +416,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
               </EuiText>
             </div>
             <div className="chatMessages__suggestions">
-              {STARTER_SUGGESTIONS.map((suggestion, index) => (
+              {suggestions.map((suggestion, index) => (
                 <EuiPanel
                   key={index}
                   paddingSize="m"

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from './chat_header_button';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
@@ -403,6 +403,96 @@ describe('ChatMessages', () => {
       // The actual resend trigger would be in MessageRow component
       // This test verifies the prop is passed correctly
       expect(onResendMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('context-aware starter suggestions', () => {
+    const mockUnsubscribe = jest.fn();
+
+    afterEach(() => {
+      delete (window as any).assistantContextStore;
+    });
+
+    it('should show default suggestions when no context store is present', () => {
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+      expect(getByText('/investigate an issue')).toBeTruthy();
+      expect(getByText('Explain a concept')).toBeTruthy();
+    });
+
+    it('should show default suggestions when context store has no matching appId', () => {
+      (window as any).assistantContextStore = {
+        getContextsByCategory: jest.fn().mockReturnValue([]),
+        subscribe: jest.fn().mockReturnValue(mockUnsubscribe),
+      };
+
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+    });
+
+    it('should show search relevance suggestions when appId is searchRelevance', () => {
+      (window as any).assistantContextStore = {
+        getContextsByCategory: jest.fn().mockReturnValue([
+          {
+            description: 'Page context for /app/searchRelevance',
+            value: JSON.stringify({ appId: 'searchRelevance', breadcrumbs: [] }),
+            label: 'Page: /app/searchRelevance',
+          },
+        ]),
+        subscribe: jest.fn().mockReturnValue(mockUnsubscribe),
+      };
+
+      const { getByText, queryByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(getByText('Compare two search configurations')).toBeTruthy();
+      expect(getByText('Evaluate search quality')).toBeTruthy();
+      expect(getByText('Create a query set')).toBeTruthy();
+      expect(queryByText('Ask questions about your data')).toBeNull();
+    });
+
+    it('should update suggestions reactively when context store emits a change', () => {
+      let subscriberCallback: () => void;
+      const mockStore = {
+        getContextsByCategory: jest.fn().mockReturnValue([]),
+        subscribe: jest.fn().mockImplementation((cb: () => void) => {
+          subscriberCallback = cb;
+          return mockUnsubscribe;
+        }),
+      };
+      (window as any).assistantContextStore = mockStore;
+
+      const { getByText, queryByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+
+      mockStore.getContextsByCategory.mockReturnValue([
+        {
+          description: 'Page context for /app/searchRelevance',
+          value: JSON.stringify({ appId: 'searchRelevance', breadcrumbs: [] }),
+          label: 'Page: /app/searchRelevance',
+        },
+      ]);
+
+      act(() => {
+        subscriberCallback!();
+      });
+
+      expect(getByText('Compare two search configurations')).toBeTruthy();
+      expect(queryByText('Ask questions about your data')).toBeNull();
+    });
+
+    it('should unsubscribe from context store on unmount', () => {
+      (window as any).assistantContextStore = {
+        getContextsByCategory: jest.fn().mockReturnValue([]),
+        subscribe: jest.fn().mockReturnValue(mockUnsubscribe),
+      };
+
+      const { unmount } = render(<ChatMessages {...defaultProps} />);
+      unmount();
+
+      expect(mockUnsubscribe).toHaveBeenCalled();
     });
   });
 
