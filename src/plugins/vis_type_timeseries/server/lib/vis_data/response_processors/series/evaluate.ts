@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable-next-line @osd/eslint/no-mathjs */
 import { create, all } from 'mathjs';
 
 const math = create(all);
