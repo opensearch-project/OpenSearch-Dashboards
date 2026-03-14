@@ -228,6 +228,7 @@
   - [RELEASING](../RELEASING.md)
   - [SECURITY](../SECURITY.md)
   - [TESTING](../TESTING.md)
+  - [THEME_README](../THEME_README.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
   - [Testing_strategy](../testing_strategy.md)
