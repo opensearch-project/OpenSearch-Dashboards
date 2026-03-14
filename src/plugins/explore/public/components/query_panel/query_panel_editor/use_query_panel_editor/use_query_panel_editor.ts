@@ -123,7 +123,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [queryLanguage]);
 
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_query_bar',
+    id: 'focus_explore_query_bar',
     pluginId: 'explore',
     name: i18n.translate('explore.queryPanelEditor.focusQueryBarShortcut', {
       defaultMessage: 'Focus query bar',
@@ -132,9 +132,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       defaultMessage: 'Search',
     }),
     keys: '/',
-    execute: () => {
+    execute: useCallback(() => {
       editorRef.current?.focus();
-    },
+    }, []),
   });
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
@@ -230,9 +230,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           sortText: s.sortText,
           documentation: s.documentation
             ? {
-                value: s.documentation,
-                isTrusted: true,
-              }
+              value: s.documentation,
+              isTrusted: true,
+            }
             : '',
           command: {
             id: 'editor.action.triggerSuggest',
