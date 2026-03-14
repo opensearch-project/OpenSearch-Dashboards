@@ -6,8 +6,10 @@
 import { createHeatmapWithBin, createRegularHeatmap } from './to_expression';
 import { VisFieldType, VisColumn, TooltipOptions, Positions } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
+import * as utils from '../utils/utils';
 
 jest.mock('./heatmap_chart_utils', () => ({
+  ...jest.requireActual('./heatmap_chart_utils'),
   enhanceStyle: jest.fn(),
   addTransform: jest.fn(() => []),
   createLabelLayer: jest.fn(() => null),
@@ -58,7 +60,23 @@ const mockCategoricalColumns: VisColumn[] = [
   },
 ];
 
-const mockData: any[] = [];
+const mockData: any[] = [
+  {
+    'field-1': 10,
+    'field-2': 'A',
+    'field-3': 'X',
+  },
+  {
+    'field-1': 100,
+    'field-2': 'B',
+    'field-3': 'Y',
+  },
+  {
+    'field-1': 40,
+    'field-2': 'B',
+    'field-3': 'X',
+  },
+];
 
 const mockAxisMappings = {
   x: mockNumericColumns[0],
@@ -75,6 +93,9 @@ const baseStyles = {
     colorSchema: 'blues',
     colorScaleType: 'linear',
     reverseSchema: false,
+    label: {
+      show: false,
+    },
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
@@ -282,5 +303,104 @@ describe('createRegularHeatmap', () => {
 
     const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);
     expect(spec.layer[0].encoding.color.bin).toBe(false);
+  });
+});
+
+describe('createRegularHeatmap in Echarts', () => {
+  beforeEach(() => {
+    jest.spyOn(utils, 'getChartRender').mockReturnValue('echarts');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const regularAxisMappings = {
+    x: mockCategoricalColumns[0],
+    y: mockCategoricalColumns[1],
+    color: mockNumericColumns[0],
+  };
+
+  it('should create a regular heatmap with categorical axes', () => {
+    const result = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      baseStyles,
+      regularAxisMappings
+    );
+
+    expect(result).toHaveProperty('series');
+    expect(result?.series[0].type).toBe('heatmap');
+    expect(result).toHaveProperty('dataset');
+    expect(result).toHaveProperty('visualMap');
+  });
+
+  it('should handle different title display options', () => {
+    // Case 1: No title (show = false)
+    const noTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: false,
+        titleName: '',
+      },
+    };
+
+    const noTitleResult = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      noTitleStyles,
+      regularAxisMappings
+    );
+    expect(noTitleResult.title.text).toBeUndefined();
+
+    // Case 2: Default title (show = true, titleName = '')
+    const defaultTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: true,
+        titleName: '',
+      },
+    };
+
+    const defaultTitleResult = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      defaultTitleStyles,
+      regularAxisMappings
+    );
+    expect(defaultTitleResult?.title?.text).toBe('value1 by category1 and category2');
+
+    // Case 3: Custom title (show = true, titleName = 'Custom Title')
+    const customTitleStyles = {
+      ...baseStyles,
+      titleOptions: {
+        show: true,
+        titleName: 'Custom Regular Heatmap',
+      },
+    };
+
+    const customTitleResult = createRegularHeatmap(
+      mockData,
+      mockNumericColumns,
+      customTitleStyles,
+      regularAxisMappings
+    );
+    expect(customTitleResult?.title?.text).toBe('Custom Regular Heatmap');
+  });
+
+  it('should respect color scale settings', () => {
+    const styles = {
+      ...baseStyles,
+      exclusive: {
+        ...baseStyles.exclusive,
+        colorScaleType: 'log',
+        colorSchema: 'reds',
+        reverseSchema: true,
+      },
+    } as HeatmapChartStyle;
+
+    const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);
+    expect(spec.dataset.source[1][2]).toBe(1);
+    expect(spec.dataset.source[2][2]).toBe(2);
   });
 });
