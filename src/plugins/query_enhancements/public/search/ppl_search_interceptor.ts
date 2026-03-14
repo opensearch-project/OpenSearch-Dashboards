@@ -4,8 +4,8 @@
  */
 
 import { trimEnd } from 'lodash';
-import { from, Observable } from 'rxjs';
-import { first, switchMap } from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, first, switchMap, tap } from 'rxjs/operators';
 import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -28,6 +28,7 @@ import {
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
+import { Semaphore } from './utils/semaphore';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
@@ -36,6 +37,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
   private uiSettings!: IUiSettingsClient;
   private indexPatterns!: IndexPatternsContract;
+
+  private strategySemaphores = new Map<string, Semaphore>();
+  private activeQueries = new Map<string, boolean>(); // Track which queryIds have semaphores
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -48,25 +52,85 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     });
   }
 
+  /**
+   * Register a semaphore for a specific search strategy
+   * @param strategy - The search strategy name (e.g., 'CLOUD_WATCH_LAKE')
+   * @param limit - Maximum number of concurrent queries allowed
+   */
+  public registerStrategySemaphore(strategy: string, limit: number): void {
+    this.strategySemaphores.set(strategy, new Semaphore(limit));
+  }
+
   protected runSearch(
     request: IOpenSearchDashboardsSearchRequest,
     signal?: AbortSignal,
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const context: EnhancedFetchContext = {
-      http: this.deps.http,
-      path: trimEnd(`${API.SEARCH}/${strategy}`),
-      signal,
-      body: {
-        pollQueryResultsParams: request.params?.pollQueryResultsParams,
-        timeRange: request.params?.body?.timeRange,
-      },
+
+    const pollParams = request.params?.pollQueryResultsParams;
+    const hasQueryId = pollParams?.queryId;
+    const semaphore = strategy ? this.strategySemaphores.get(strategy) : undefined;
+
+    const executeQuery = () => {
+      const context: EnhancedFetchContext = {
+        http: this.deps.http,
+        path: trimEnd(`${API.SEARCH}/${strategy}`),
+        signal,
+        body: {
+          pollQueryResultsParams: request.params?.pollQueryResultsParams,
+          timeRange: request.params?.body?.timeRange,
+        },
+      };
+
+      return from(this.buildQuery(request)).pipe(
+        switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
+      );
     };
 
-    return from(this.buildQuery(request)).pipe(
-      switchMap((query) => fetch(context, query, this.getAggConfig(searchRequest, query)))
-    );
+    if (semaphore) {
+      if (!hasQueryId) {
+        return from(semaphore.acquire()).pipe(
+          switchMap(() => executeQuery()),
+          tap((result) => {
+            const status = (result as any)?.status?.toLowerCase();
+            const queryId = (result as any)?.body?.queryStatusConfig?.queryId;
+
+            if (status === 'success' || status === 'failed') {
+              semaphore.release();
+            } else if (queryId) {
+              this.activeQueries.set(queryId, true);
+            }
+          }),
+          catchError((error) => {
+            semaphore.release();
+            return throwError(error);
+          })
+        );
+      } else {
+        return executeQuery().pipe(
+          tap((result) => {
+            const status = (result as any)?.status?.toLowerCase();
+            if (
+              (status === 'success' || status === 'failed') &&
+              this.activeQueries.has(hasQueryId)
+            ) {
+              semaphore.release();
+              this.activeQueries.delete(hasQueryId);
+            }
+          }),
+          catchError((error) => {
+            if (this.activeQueries.has(hasQueryId)) {
+              semaphore.release();
+              this.activeQueries.delete(hasQueryId);
+            }
+            return throwError(error);
+          })
+        );
+      }
+    }
+
+    return executeQuery();
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
