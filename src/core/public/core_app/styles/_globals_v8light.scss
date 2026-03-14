@@ -2,6 +2,75 @@
 // ---
 // prepended to all .scss imports (from JS, when v8light theme selected)
 
+// Font family override — must be declared before EUI imports so !default values are pre-empted.
+
+// stylelint-disable @osd/stylelint/no_restricted_values
+// this specific file is a theme palette file that intentionally hard-codes colors
+
+// sass-lint:disable quotes
+$ouiFontFamily: "Lexend",
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  Helvetica,
+  Arial,
+  sans-serif,
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol";
+
+// sass-lint:enable quotes
+
+// AWS default color palette overrides.
+// Must be declared before the EUI imports so !default values are pre-empted.
+
+// These colors stay the same no matter the theme
+$ouiColorGhost: #fff !default;
+$ouiColorInk: #000716;
+
+// Core
+$ouiColorPrimary: #006ce0;   // AWS blue (interactive)
+$ouiColorSecondary: #00827d; // AWS teal
+$ouiColorAccent: #f90;       // AWS orange (brand)
+
+// Status
+$ouiColorWarning: #8d6605;   // AWS amber
+$ouiColorDanger: #d91515;    // AWS red
+
+// Grays — light mode (inverted from dark)
+$ouiColorEmptyShade: #fff;
+$ouiColorLightestShade: #f2f3f3;
+$ouiColorLightShade: #eaeded;
+$ouiColorMediumShade: #879596;
+$ouiColorDarkShade: #545b64;
+$ouiColorDarkestShade: #16191f;
+$ouiColorFullShade: #000716;
+
+// Backgrounds
+$ouiPageBackgroundColor: #f2f3f3;
+$ouiColorHighlight: #fff8e7;
+
+// CodeBlock — light-mode friendly
+$ouiCodeBlockCommentShade: #5c6670;
+$ouiCodeBlockStringShade: #c7254e;
+$ouiCodeBlockNameShade: #0061b3;
+$ouiCodeBlockNumberShade: #007a5b;
+$ouiCodeBlockKeywordShade: #7b1fa2;
+$ouiCodeBlockTypeShade: #0061b3;
+$ouiCodeBlockTitleShade: #c34900;
+
+// Text — dark text on light background
+$ouiTextColor: #16191f;
+
+// Shadows
+$ouiShadowColor: #000716;
+$ouiShadowColorLarge: #000716;
+
+// Spacing — compact scale (14px base vs EUI default 16px).
+// All derived tokens ($ouiSizeXXS … $ouiSizeXXL) recalculate automatically
+// because they are declared with !default in EUI's _size.scss.
+$ouiSize: 20px;
+
 @import "@elastic/eui/src/themes/eui-next/eui_next_colors_light";
 @import "@elastic/eui/src/themes/eui-next/eui_next_globals";
 @import "./mixins";
