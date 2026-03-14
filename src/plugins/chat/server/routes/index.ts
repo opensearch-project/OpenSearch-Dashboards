@@ -37,7 +37,7 @@ async function forwardToAgUI(
     headers: {
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
-      ...(request.headers.authorization ? { Authorization: request.headers.authorization }: {})
+      ...(request.headers.authorization ? { Authorization: request.headers.authorization } : {}),
     },
     body: JSON.stringify(requestBody),
   });
