@@ -99,9 +99,10 @@ test('editor mount setup', () => {
     func();
   }) as any;
 
-  monaco.languages.registerCompletionItemProvider = jest.fn();
-  monaco.languages.registerSignatureHelpProvider = jest.fn();
-  monaco.languages.registerHoverProvider = jest.fn();
+  const mockDisposable = { dispose: jest.fn() };
+  monaco.languages.registerCompletionItemProvider = jest.fn().mockReturnValue(mockDisposable);
+  monaco.languages.registerSignatureHelpProvider = jest.fn().mockReturnValue(mockDisposable);
+  monaco.languages.registerHoverProvider = jest.fn().mockReturnValue(mockDisposable);
 
   monaco.editor.defineTheme = jest.fn();
 

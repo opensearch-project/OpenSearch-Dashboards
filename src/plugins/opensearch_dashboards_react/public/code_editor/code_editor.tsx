@@ -122,6 +122,7 @@ export interface Props {
 
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+  _providerDisposables: monaco.IDisposable[] = [];
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -188,15 +189,21 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     monaco.languages.onLanguage(languageId, () => {
       if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+        this._providerDisposables.push(
+          monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+        );
       }
 
       if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+        this._providerDisposables.push(
+          monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+        );
       }
 
       if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+        this._providerDisposables.push(
+          monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+        );
       }
 
       if (this.props.languageConfiguration) {
@@ -220,6 +227,11 @@ export class CodeEditor extends React.Component<Props, {}> {
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>
     );
+  }
+
+  componentWillUnmount() {
+    this._providerDisposables.forEach((d) => d.dispose());
+    this._providerDisposables = [];
   }
 
   _updateDimensions = () => {
