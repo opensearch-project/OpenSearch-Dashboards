@@ -56,6 +56,7 @@ import { EmbeddableStart, ViewMode } from '../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SavedDashboardPanel730ToLatest } from '../common';
 import { UiActionsStart } from '../../ui_actions/public';
+import { EditorRegistryService } from '../public/services/register_in_context_editor_service';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -281,4 +282,5 @@ export interface DashboardServices extends CoreStart {
   restorePreviousUrl: () => void;
   addBasePath?: (url: string) => string;
   toastNotifications: ToastsStart;
+  editorRegistryService: EditorRegistryService;
 }

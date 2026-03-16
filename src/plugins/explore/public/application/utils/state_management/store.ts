@@ -107,8 +107,8 @@ export const configurePreloadedStore = (
             // subsequent middleware or reducer sees the action. Do not reorder.
             .concat(createResultsCacheMiddleware())
             .concat(createPersistenceMiddleware(services))
-            .concat(createQuerySyncMiddleware(services))
-            .concat(createTimefilterSyncMiddleware(services))
+            .concat(createQuerySyncMiddleware(services)) // add
+            .concat(createTimefilterSyncMiddleware(services)) // add
             .concat(createDatasetChangeMiddleware(services))
             .concat(createOverallStatusMiddleware())
         : getDefaultMiddleware().concat(createResultsCacheMiddleware());

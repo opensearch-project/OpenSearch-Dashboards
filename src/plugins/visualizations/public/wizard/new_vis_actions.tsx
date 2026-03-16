@@ -105,6 +105,20 @@ export const createNewVisActions = (services: {
           execute: async () => {
             const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
             await navigateTo(visType.aliasApp, visType.aliasPath, currentAppId);
+            // when trigger
+            // execute: async (context) => {
+            //   if (context && context?.containerInfo) {
+            //     const queryString = new URLSearchParams(
+            //       context?.containerInfo as URLSearchParams
+            //     ).toString();
+
+            //     const pathWithParams = `${visType.aliasPath}?${queryString}`;
+
+            //     application.navigateToApp(visType.aliasApp, { path: pathWithParams });
+            //     return;
+            //   }
+
+            //   application.navigateToApp(visType.aliasApp, { path: visType.aliasPath });
           },
           isCompatible: async () => {
             return !Boolean(

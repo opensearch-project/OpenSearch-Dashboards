@@ -39,6 +39,7 @@ export const StylePanelRender = <T extends ChartType>({
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
+
   const chartConfig = useObservable(config$);
   const axesMapping = chartConfig?.axesMapping;
 
@@ -60,6 +61,7 @@ export const StylePanelRender = <T extends ChartType>({
     ]);
   }, [axesMapping, visualizationData]);
 
+  console.log('axisColumnMappings', axisColumnMappings);
   const styleOptions = useMemo(() => {
     if (chartConfig) {
       const standardAxes =

@@ -8,6 +8,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { useAsync } from 'react-use';
+import { ScopedHistory } from 'opensearch-dashboards/public';
 import { EuiButton, EuiWrappingPopover, EuiSpacer, EuiContextMenu } from '@elastic/eui';
 import { buildContextMenuForActions, UiActionsStart } from '../../../../../../ui_actions/public';
 import { dashboardAddPanelTrigger, DASHBOARD_ADD_PANEL_TRIGGER } from '../../../../ui_triggers';
@@ -17,6 +18,11 @@ let root: Root | null = null;
 
 const container = document.createElement('div');
 
+interface ContainerInfo {
+  containerName?: string;
+  containerId?: string;
+}
+
 const unmount = () => {
   if (root) {
     root.unmount();
@@ -24,21 +30,25 @@ const unmount = () => {
   }
   isMount = false;
 };
-const triggerContext = {
-  trigger: dashboardAddPanelTrigger,
-};
 
+// place of import ui actions to dashboard top-nav
 const PanelPopover = ({
   onClose,
   button,
   onAddExistingPanelFlyout,
   uiActions,
+  getContainerInfo,
 }: {
   onClose: () => void;
   button: HTMLElement;
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
+  getContainerInfo: () => ContainerInfo | undefined;
 }) => {
+  const triggerContext = {
+    trigger: dashboardAddPanelTrigger,
+    containerInfo: getContainerInfo(),
+  };
   const actionsRef = useRef(uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER));
 
   const panels = useAsync(() => {
@@ -85,10 +95,12 @@ export function showAddPanelPopover({
   anchorElement,
   onAddExistingPanelFlyout,
   uiActions,
+  containerInfo,
 }: {
   anchorElement: HTMLElement;
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
+  containerInfo?: ContainerInfo;
 }) {
   if (isMount) {
     unmount();
@@ -101,6 +113,7 @@ export function showAddPanelPopover({
   root = createRoot(container);
   root.render(
     <PanelPopover
+      getContainerInfo={() => containerInfo}
       onAddExistingPanelFlyout={onAddExistingPanelFlyout}
       button={anchorElement}
       onClose={unmount}

@@ -76,6 +76,7 @@ import { SlotRegistryService } from './services/slot_registry';
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
+import { InContextVisEditor } from './application/in_context_vis_editor/in_context_vis_editor';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 
@@ -382,7 +383,7 @@ export class ExplorePlugin
           const abortAction = createAbortDataQueryAction(abortActionId);
           services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
           setServices(services);
-
+          setLegacyServices(services);
           appMounted();
 
           // Call renderApp with params, services, and store
@@ -518,6 +519,11 @@ export class ExplorePlugin
       setExpressionLoader(plugins.expressions.ExpressionLoader);
     }
 
+    plugins.dashboard.editorRegistry.register({
+      editorType: 'exploreEditor',
+      render: () => InContextVisEditor,
+    });
+
     // Control nav link visibility based on dynamic capabilities
     const capabilities = core.application.capabilities;
 
@@ -642,8 +648,8 @@ export class ExplorePlugin
     // Register explore visualization as visualization alias
     setupDeps.visualizations.registerAlias({
       name: this.DISCOVER_VISUALIZATION_NAME,
-      aliasPath: '#/',
-      aliasApp: PLUGIN_ID,
+      aliasPath: '#/view_explore',
+      aliasApp: 'dashboards',
       title: exploreVisDisplayName,
       description: i18n.translate('explore.visualization.description', {
         defaultMessage: 'Create visualization with Discover',
@@ -676,8 +682,8 @@ export class ExplorePlugin
             return {
               description: `${attributes?.description || ''}`,
               // TODO: it should navigate to different explore flavor based on the `attributes.type`
-              editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
-              editUrl: `#/view/${encodeURIComponent(id)}`,
+              editApp: `dashboards`,
+              editUrl: `#/view_explore/${encodeURIComponent(id)}`,
               icon: iconType,
               id,
               savedObjectType: SAVED_OBJECT_TYPE,
