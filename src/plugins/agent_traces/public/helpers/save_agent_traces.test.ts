@@ -11,6 +11,10 @@ jest.mock('../application/utils/state_management/slices', () => ({
   setSavedSearch: jest.fn(),
 }));
 
+jest.mock('../saved_agent_traces/transforms', () => ({
+  updateLegacyPropertiesInSavedObject: jest.fn(),
+}));
+
 jest.mock('@osd/i18n', () => ({
   i18n: {
     translate: jest.fn(),
@@ -34,6 +38,11 @@ const createMockServices = () => ({
       legacy: {
         columns: ['column1', 'column2'],
         sort: [['column1', 'asc']],
+      },
+      query: {
+        query: 'test',
+        language: 'kuery',
+        dataset: undefined,
       },
     })),
     dispatch: jest.fn(),

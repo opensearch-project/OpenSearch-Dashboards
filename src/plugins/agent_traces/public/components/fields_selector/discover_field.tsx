@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -40,11 +40,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
+import { FieldIcon, wrapOnDot } from '../../../../opensearch_dashboards_react/public';
 import { FieldDetails } from './types';
 import { DataViewField, DataView } from '../../../../data/public';
 import { shortenDottedString } from '../../application/legacy/discover/application/helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
+import { AGENT_TRACES_COLUMN_DISPLAY_NAMES } from '../../../common';
 import './discover_field.scss';
 
 export interface DiscoverFieldProps {
@@ -89,17 +90,39 @@ export interface DiscoverFieldProps {
    * Determines whether to show the field summary
    */
   showSummary?: boolean;
+  /**
+   * When true, the field cannot be removed from the table (no remove button shown)
+   */
+  nonRemovable?: boolean;
 }
 
 export const DiscoverField = ({
   field,
+  selected,
+  onAddField,
+  onRemoveField,
   columns,
   dataSet,
   onAddFilter,
   getDetails,
   useShortDots,
   showSummary,
+  nonRemovable,
 }: DiscoverFieldProps) => {
+  const addLabelAria = i18n.translate(
+    'agentTraces.discover.fieldChooser.discoverField.addButtonAriaLabel',
+    {
+      defaultMessage: 'Add {field} to table',
+      values: { field: field.name },
+    }
+  );
+  const removeLabelAria = i18n.translate(
+    'agentTraces.discover.fieldChooser.discoverField.removeButtonAriaLabel',
+    {
+      defaultMessage: 'Remove {field} from table',
+      values: { field: field.name },
+    }
+  );
   const infoLabelAria = i18n.translate(
     'agentTraces.discover.fieldChooser.discoverField.infoButtonAriaLabel',
     {
@@ -111,20 +134,85 @@ export const DiscoverField = ({
 
   const [infoIsOpen, setOpen] = useState(false);
 
-  function wrapOnDot(str?: string) {
-    // u200B is a non-width white-space character, which allows
-    // the browser to efficiently word-wrap right after the dot
-    // without us having to draw a lot of extra DOM elements, etc
-    return str ? str.replace(/\./g, '.\u200B') : '';
-  }
+  const toggleDisplay = (f: DataViewField) => {
+    if (selected) {
+      onRemoveField(f.name);
+    } else {
+      onAddField(f.name);
+    }
+  };
+
+  const wrappedName = useMemo(() => {
+    if (field.name === dataSet.timeFieldName) return 'Time';
+    const friendly = AGENT_TRACES_COLUMN_DISPLAY_NAMES[field.name];
+    if (friendly) return friendly;
+    return useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName);
+  }, [field.name, field.displayName, useShortDots, dataSet.timeFieldName]);
 
   const fieldName = (
     <EuiToolTip delay="long" content={field.name}>
       <span data-test-subj={`field-${field.name}`} className="agentTracesSidebarField__name">
-        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+        {wrappedName}
       </span>
     </EuiToolTip>
   );
+
+  let actionButton;
+  if (!isSourceField && !selected) {
+    actionButton = (
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('agentTraces.discover.fieldChooser.discoverField.addFieldTooltip', {
+          defaultMessage: 'Add field as column',
+        })}
+      >
+        <EuiButtonIcon
+          iconType="plusInCircleFilled"
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field);
+          }}
+          size="xs"
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={addLabelAria}
+          className="agentTracesSidebarField__actionButton"
+        />
+      </EuiToolTip>
+    );
+  } else if (!isSourceField && selected && !nonRemovable) {
+    actionButton = (
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate(
+          'agentTraces.discover.fieldChooser.discoverField.removeFieldTooltip',
+          {
+            defaultMessage: 'Remove field from table',
+          }
+        )}
+      >
+        <EuiButtonIcon
+          color="danger"
+          iconType="cross"
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            if (ev.type === 'click') {
+              ev.currentTarget.focus();
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field);
+          }}
+          size="xs"
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={removeLabelAria}
+          className="agentTracesSidebarField__actionButton"
+        />
+      </EuiToolTip>
+    );
+  }
 
   return (
     <EuiFlexGroup
@@ -146,7 +234,7 @@ export const DiscoverField = ({
       </EuiFlexItem>
       {!isSourceField && (
         <div className="agentTracesSidebarField__actionButtons">
-          {showSummary && (
+          {showSummary && field.name !== 'totalTokens' && (
             <EuiPopover
               ownFocus
               display="block"
@@ -195,6 +283,7 @@ export const DiscoverField = ({
               )}
             </EuiPopover>
           )}
+          {actionButton}
         </div>
       )}
     </EuiFlexGroup>

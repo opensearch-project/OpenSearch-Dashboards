@@ -170,7 +170,10 @@
     "**/qs": "^6.14.1",
     "**/lodash-es": "4.17.23",
     "**/lodash": "4.17.23",
-    "**/body-parser": "^2.2.1"
+    "**/body-parser": "^2.2.1",
+    "**/@tootallnate/once": "^3.0.1",
+    "**/fast-xml-parser": "^5.3.8",
+    "**/grunt/minimatch": "^3.1.5"
   },
   "workspaces": {
     "packages": [
@@ -220,6 +223,7 @@
     "@osd/analytics": "1.0.0",
     "@osd/antlr-grammar": "1.0.0",
     "@osd/apm-config-loader": "1.0.0",
+    "@osd/apm-topology": "1.0.0",
     "@osd/config": "1.0.0",
     "@osd/config-schema": "1.0.0",
     "@osd/cross-platform": "1.0.0",
@@ -251,7 +255,7 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dns-sync": "npm:@amoo-miki/dns-sync@^0.2.1",
-    "dompurify": "^3.2.4",
+    "dompurify": "^3.3.2",
     "echarts": "^6.0.0",
     "elastic-apm-node": "^4.10.0",
     "elasticsearch": "^16.7.0",
@@ -284,7 +288,7 @@
     "lucene": "^2.1.1",
     "mathjs": "^11.8.2",
     "mime": "^3.0.0",
-    "minimatch": "^3.0.4",
+    "minimatch": "^3.1.5",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "mustache": "^2.3.2",
@@ -548,7 +552,7 @@
     "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^6.1.2",
     "selenium-webdriver": "^4.0.0-alpha.7",
-    "simple-git": "^3.16.0",
+    "simple-git": "^3.32.3",
     "sinon": "^7.4.2",
     "strip-ansi": "^6.0.0",
     "stylelint": "^14.5.2",

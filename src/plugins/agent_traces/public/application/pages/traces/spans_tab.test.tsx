@@ -7,14 +7,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SpansTab } from './spans_tab';
 
-jest.mock('./spans_table', () => ({
-  SpansTable: () => <div data-test-subj="mock-spans-table">Spans Table</div>,
+jest.mock('./spans_data_table', () => ({
+  SpansDataTable: () => <div data-test-subj="mock-spans-data-table">Spans Data Table</div>,
 }));
 
 describe('SpansTab', () => {
-  it('renders SpansTable inside container', () => {
+  it('renders SpansDataTable inside container', () => {
     const { container } = render(<SpansTab />);
-    expect(screen.getByTestId('mock-spans-table')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-spans-data-table')).toBeInTheDocument();
     expect(container.querySelector('.agentTraces-spans-tab')).toBeTruthy();
   });
 });

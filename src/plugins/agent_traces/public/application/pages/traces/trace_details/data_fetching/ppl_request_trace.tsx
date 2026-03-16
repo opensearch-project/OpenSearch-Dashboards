@@ -45,7 +45,7 @@ export class TracePPLService extends PPLService {
     return query;
   }
 
-  async fetchTraceSpans(params: PPLQueryParamsWithFilters): Promise<any> {
+  async fetchTraceSpans(params: PPLQueryParamsWithFilters, signal?: AbortSignal): Promise<any> {
     const { traceId, dataset, limit = 100, filters = [] } = params;
 
     if (!traceId || !dataset) {
@@ -64,7 +64,7 @@ export class TracePPLService extends PPLService {
       };
 
       const queryRequest = buildPPLQueryRequest(datasetWithoutTime, pplQuery);
-      return await executePPLQuery(this.dataService, queryRequest);
+      return await executePPLQuery(this.dataService, queryRequest, signal);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('PPL Query with Filters Error:', error);

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import {
   ChatServiceSetup,
@@ -26,7 +27,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   private memoryProvider: ConversationMemoryProvider;
 
   // Core-managed infrastructure state
-  private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
+  private threadId$ = new BehaviorSubject<string | undefined>(undefined);
   private windowState$ = new BehaviorSubject<ChatWindowState>({
     isWindowOpen: false,
     windowMode: 'sidecar',
@@ -34,6 +35,8 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   });
   private windowOpenCallbacks = new Set<() => void>();
   private windowCloseCallbacks = new Set<() => void>();
+
+  private windowOpenChangeSubscription?: Subscription;
 
   constructor() {
     this.screenshotService = new ChatScreenshotService();
@@ -48,6 +51,19 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   }
 
   public setup(): ChatServiceSetup {
+    this.windowOpenChangeSubscription = this.windowState$
+      .pipe(
+        map((state) => state.isWindowOpen),
+        distinctUntilChanged()
+      )
+      .subscribe((isWindowOpen) => {
+        if (isWindowOpen) {
+          this.windowOpenCallbacks.forEach((callback) => callback());
+        } else {
+          this.windowCloseCallbacks.forEach((callback) => callback());
+        }
+      });
+
     return {
       setImplementation: (implementation: ChatImplementationFunctions) => {
         this.implementation = implementation;
@@ -133,27 +149,12 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         return () => this.windowCloseCallbacks.delete(callback);
       },
 
-      // Operations (delegated to plugin - throw if unavailable)
       openWindow: async () => {
-        if (!this.implementation) {
-          throw new Error(
-            'Chat service is not available. Please ensure the chat plugin is enabled.'
-          );
-        }
-
-        // Trigger callbacks to request window opening
-        this.windowOpenCallbacks.forEach((callback) => callback());
+        setWindowState({ isWindowOpen: true });
       },
 
       closeWindow: async () => {
-        if (!this.implementation) {
-          throw new Error(
-            'Chat service is not available. Please ensure the chat plugin is enabled.'
-          );
-        }
-
-        // Trigger callbacks to request window closing
-        this.windowCloseCallbacks.forEach((callback) => callback());
+        setWindowState({ isWindowOpen: false });
       },
 
       sendMessage: async (content: string, messages: Message[]) => {
@@ -203,5 +204,6 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
     this.windowOpenCallbacks.clear();
     this.windowCloseCallbacks.clear();
     this.screenshotService.stop();
+    this.windowOpenChangeSubscription?.unsubscribe();
   }
 }

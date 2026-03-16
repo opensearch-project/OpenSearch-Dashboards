@@ -9,13 +9,18 @@ import { PPLService } from '../trace_details/data_fetching/ppl_request_helpers';
 import { Dataset } from '../../../../../../data/common';
 import { usePPLQueryDeps, useTimeVersion } from './use_ppl_query_deps';
 import { RootState } from '../../../utils/state_management/store';
+import { splitPplWhereAndTail } from '../table_shared';
 
 export interface TraceMetrics {
   totalTraces: number;
   totalSpans: number;
+  filteredTraces: number;
+  filteredSpans: number;
   totalTokens: number;
   latencyP50Nanos: number;
   latencyP99Nanos: number;
+  errorTraces: number;
+  errorSpans: number;
 }
 
 export interface UseTraceMetricsResult {
@@ -59,46 +64,56 @@ let pendingMetrics: { key: string; promise: Promise<TraceMetrics> } | null = nul
 const doFetchMetrics = async (
   pplService: PPLService,
   datasetParam: Dataset,
-  baseQueryString: string
+  sourceOnlyQuery: string,
+  filteredQuery: string
 ): Promise<TraceMetrics> => {
-  const rootFilter = `where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`)`;
-  const rootQueryBase = `${baseQueryString} | ${rootFilter}`;
+  const genAiFilter = `where isnotnull(\`attributes.gen_ai.operation.name\`)`;
+  const { whereQuery } = splitPplWhereAndTail(filteredQuery);
 
-  // Run both queries in parallel
-  const [traceStats, spanStats] = await Promise.all([
-    // Query 1: Combined trace stats + token stats on root gen_ai traces
+  // Run all queries in parallel
+  // Note: User non-where commands (head, sort, etc.) are intentionally excluded from stats queries.
+  // When a user types `| head 10`, it limits the data display but should not affect aggregate counts
+  // or statistics. The UI hides the "of X total" text when head is detected (see queryEndsWithHead).
+  const [countStats, filteredStats, filteredCounts] = await Promise.all([
+    // Query A — Counts (source-only, no user filter):
+    // Total Traces, Total Spans, and their error counts are unaffected by user query filters
     (async () => {
-      try {
-        const combinedQuery = `${rootQueryBase} | stats count() as total_traces, percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens`;
-        const combinedResponse = await pplService.executeQuery(datasetParam, combinedQuery);
-        return parseStatsResponse(combinedResponse);
-      } catch {
-        // Token fields may not exist — retry without them
-        const traceOnlyQuery = `${rootQueryBase} | stats count() as total_traces, percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency`;
-        const traceOnlyResponse = await pplService.executeQuery(datasetParam, traceOnlyQuery);
-        return parseStatsResponse(traceOnlyResponse);
-      }
+      const countsQuery = `${sourceOnlyQuery} | ${genAiFilter} | stats count() as total_spans, sum(case(parentSpanId = "", 1 else 0)) as total_traces, sum(case(\`status.code\` = 2, 1 else 0)) as error_spans, sum(case(\`status.code\` = 2 AND parentSpanId = "", 1 else 0)) as error_traces`;
+      const countsResponse = await pplService.executeQuery(datasetParam, countsQuery);
+      return parseStatsResponse(countsResponse);
     })(),
-    // Query 2: Count agent spans (those with gen_ai.operation.name)
+    // Query B — Filtered stats (with user query where clauses only):
+    // Tokens and Latency respect user query where filters
     (async () => {
-      const agentSpanFilter = `where isnotnull(\`attributes.gen_ai.operation.name\`)`;
-      const totalSpansQuery = `${baseQueryString} | ${agentSpanFilter} | stats count() as total_spans`;
-      const totalSpansResponse = await pplService.executeQuery(datasetParam, totalSpansQuery);
-      return parseStatsResponse(totalSpansResponse);
+      const rootFilter = `where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`)`;
+      const statsQuery = `${whereQuery} | ${rootFilter} | stats percentile(durationInNanos, 50) as p50_latency, percentile(durationInNanos, 99) as p99_latency, sum(\`attributes.gen_ai.usage.input_tokens\`) as input_tokens, sum(\`attributes.gen_ai.usage.output_tokens\`) as output_tokens`;
+      const statsResponse = await pplService.executeQuery(datasetParam, statsQuery);
+      return parseStatsResponse(statsResponse);
+    })(),
+    // Query C — Filtered counts (with user query where clauses only):
+    // Total traces/spans matching the user's current query, shown in the info bar
+    (async () => {
+      const query = `${whereQuery} | ${genAiFilter} | stats count() as filtered_spans, sum(case(parentSpanId = "", 1 else 0)) as filtered_traces`;
+      const response = await pplService.executeQuery(datasetParam, query);
+      return parseStatsResponse(response);
     })(),
   ]);
 
   return {
-    totalTraces: traceStats.total_traces ?? 0,
-    totalSpans: spanStats.total_spans ?? 0,
-    totalTokens: (traceStats.input_tokens ?? 0) + (traceStats.output_tokens ?? 0),
-    latencyP50Nanos: traceStats.p50_latency ?? 0,
-    latencyP99Nanos: traceStats.p99_latency ?? 0,
+    totalTraces: countStats.total_traces ?? 0,
+    totalSpans: countStats.total_spans ?? 0,
+    filteredTraces: filteredCounts.filtered_traces ?? 0,
+    filteredSpans: filteredCounts.filtered_spans ?? 0,
+    totalTokens: (filteredStats.input_tokens ?? 0) + (filteredStats.output_tokens ?? 0),
+    latencyP50Nanos: filteredStats.p50_latency ?? 0,
+    latencyP99Nanos: filteredStats.p99_latency ?? 0,
+    errorTraces: countStats.error_traces ?? 0,
+    errorSpans: countStats.error_spans ?? 0,
   };
 };
 
 export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult => {
-  const { services, datasetParam, baseQueryString } = usePPLQueryDeps();
+  const { services, datasetParam, baseQueryString, sourceOnlyQueryString } = usePPLQueryDeps();
   const fetchVersion = useSelector((state: RootState) => state.queryEditor.fetchVersion);
   const timeVersion = useTimeVersion(services);
 
@@ -112,13 +127,14 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
   ]);
 
   const fetchMetrics = useCallback(async () => {
-    if (!pplService || !datasetParam || !tracesLoaded || !baseQueryString) return;
+    if (!pplService || !datasetParam || !tracesLoaded || !baseQueryString || !sourceOnlyQueryString)
+      return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const cacheKey = baseQueryString;
+      const cacheKey = `${sourceOnlyQueryString}|${baseQueryString}`;
       let result: TraceMetrics;
 
       if (pendingMetrics && pendingMetrics.key === cacheKey) {
@@ -126,7 +142,12 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
         result = await pendingMetrics.promise;
       } else {
         // Start new request
-        const promise = doFetchMetrics(pplService, datasetParam, baseQueryString);
+        const promise = doFetchMetrics(
+          pplService,
+          datasetParam,
+          sourceOnlyQueryString,
+          baseQueryString
+        );
         pendingMetrics = { key: cacheKey, promise };
         try {
           result = await promise;
@@ -146,14 +167,13 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
     } finally {
       setLoading(false);
     }
-  }, [pplService, datasetParam, baseQueryString, tracesLoaded]);
+  }, [pplService, datasetParam, baseQueryString, sourceOnlyQueryString, tracesLoaded]);
 
   useEffect(() => {
     fetchMetrics();
   }, [fetchMetrics, refreshCounter, timeVersion, fetchVersion]);
 
   const refresh = useCallback(() => {
-    setMetrics(null);
     pendingMetrics = null;
     setRefreshCounter((c) => c + 1);
   }, []);

@@ -15,6 +15,9 @@ import {
   uiReducer,
   resultsInitialState,
   resultsReducer,
+  legacyReducer,
+  tabReducer,
+  queryEditorReducer,
 } from '../state_management/slices';
 import { metaReducer } from '../state_management/slices/meta/meta_slice';
 import { executeQueries } from '../state_management/actions/query_actions';
@@ -133,6 +136,9 @@ describe('useInitialQueryExecution', () => {
         ui: uiReducer,
         results: resultsReducer,
         meta: metaReducer,
+        legacy: legacyReducer,
+        tab: tabReducer,
+        queryEditor: queryEditorReducer,
       },
       preloadedState: {
         query: {
@@ -161,6 +167,9 @@ describe('useInitialQueryExecution', () => {
           ui: uiReducer,
           results: resultsReducer,
           meta: metaReducer,
+          legacy: legacyReducer,
+          tab: tabReducer,
+          queryEditor: queryEditorReducer,
         },
         preloadedState: {
           query: initialState.query || {

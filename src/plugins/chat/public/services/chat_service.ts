@@ -8,7 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
-import { ChatLayoutMode } from '../components/chat_header_button';
+import { ChatLayoutMode } from '../types';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
@@ -33,11 +33,6 @@ export interface CurrentChatState {
   messages: Message[];
 }
 
-export type ChatWindowStateCallback = (
-  newWindowState: ChatWindowState,
-  changed: { [key in keyof ChatWindowState]: boolean }
-) => void;
-
 export class ChatService {
   private agent: AgUiAgent;
   public availableTools: ToolDefinition[] = [];
@@ -47,10 +42,6 @@ export class ChatService {
   private uiSettings: IUiSettingsClient;
   private coreChatService?: ChatServiceStart;
   private workspaces?: WorkspacesStart;
-
-  // Chat state persistence
-  private readonly STORAGE_KEY = 'chat.currentState';
-  private currentMessages: Message[] = [];
 
   // ChatWindow instance for delegating sendMessage calls to proper timeline management
   private chatWindowInstance: ChatWindowInstance | null = null;
@@ -84,17 +75,6 @@ export class ChatService {
       throw new Error('Core chat service is required for conversation history');
     }
     this.conversationHistoryService = new ConversationHistoryService(coreChatService);
-
-    // Try to restore existing state first
-    const currentChatState = this.loadCurrentChatState();
-    if (currentChatState?.threadId && this.coreChatService) {
-      // Set thread ID in core service
-      this.coreChatService.setThreadId(currentChatState.threadId);
-    }
-
-    // Clean up trailing error messages from interrupted sessions (e.g., page refresh)
-    const messages = currentChatState?.messages || [];
-    this.currentMessages = this.removeTrailingErrorMessages(messages);
 
     // Subscribe to assistant action service to keep tools in sync
     const assistantActionService = AssistantActionService.getInstance();
@@ -138,29 +118,6 @@ export class ChatService {
     this.activeRequests.delete(requestId);
   }
 
-  // Window state management - delegate to core service
-  public isWindowOpen(): boolean {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.isWindowOpen();
-  }
-
-  public getWindowState(): ChatWindowState {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.getWindowState();
-  }
-
-  public getWindowMode(): ChatLayoutMode {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    const windowMode = this.coreChatService.getWindowState().windowMode;
-    return windowMode === 'sidecar' ? ChatLayoutMode.SIDECAR : ChatLayoutMode.FULLSCREEN;
-  }
-
   public getPaddingSize(): number {
     if (!this.coreChatService) {
       throw new Error('Core chat service not available');
@@ -168,58 +125,6 @@ export class ChatService {
     const paddingSize = this.coreChatService.getWindowState().paddingSize;
     // Fallback to default if undefined
     return paddingSize ?? 400;
-  }
-
-  public setWindowState(newWindowState: Partial<ChatWindowState>): void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    this.coreChatService.setWindowState(newWindowState);
-  }
-
-  public onWindowStateChange(callback: ChatWindowStateCallback): () => void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-
-    let previousState: ChatWindowState | null = null;
-
-    // Subscribe to core service observable and add change tracking logic
-    const subscription = this.coreChatService.getWindowState$().subscribe((newState) => {
-      if (previousState === null) {
-        previousState = { ...newState };
-        return;
-      }
-
-      // Compare with previous state to determine what changed
-      const changed = {
-        isWindowOpen: previousState.isWindowOpen !== newState.isWindowOpen,
-        windowMode: previousState.windowMode !== newState.windowMode,
-        paddingSize: previousState.paddingSize !== newState.paddingSize,
-      };
-
-      // Only notify if something actually changed
-      if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
-        callback(newState, changed);
-        previousState = { ...newState };
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }
-
-  public onWindowOpenRequest(callback: () => void): () => void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.onWindowOpen(callback);
-  }
-
-  public onWindowCloseRequest(callback: () => void): () => void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.onWindowClose(callback);
   }
 
   // ChatWindow instance management for proper timeline handling
@@ -247,7 +152,7 @@ export class ChatService {
     }
 
     // If window is already open and instance is available, return it immediately
-    if (this.isWindowOpen() && this.chatWindowInstance) {
+    if (this.coreChatService.isWindowOpen() && this.chatWindowInstance) {
       return this.chatWindowInstance;
     }
 
@@ -284,17 +189,16 @@ export class ChatService {
     observable: any;
     userMessage: UserMessage;
   }> {
+    // Start new thread first to avoid restoring from latest conversation when window opens
+    if (options?.clearConversation) {
+      this.newThread();
+    }
     // Ensure window is open and get the window instance
     const chatWindowInstance = await this.openWindow();
 
-    // Clear conversation if requested (create new thread)
+    // Reset chat window UI to a fresh chat panel
     if (options?.clearConversation) {
-      this.newThread();
-
-      // If we have ChatWindow instance, also clear its conversation
-      if (chatWindowInstance) {
-        chatWindowInstance.startNewChat();
-      }
+      chatWindowInstance.startNewChat();
     }
 
     await chatWindowInstance.sendMessage({ content, messages });
@@ -448,9 +352,14 @@ export class ChatService {
       description: ctx.description,
       value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
     }));
+    const threadId = this.getThreadId();
+
+    if (!threadId) {
+      throw new Error('Thread ID is required to send a message');
+    }
 
     const runInput: RunAgentInput = {
-      threadId: this.getThreadId(),
+      threadId,
       runId: this.generateRunId(),
       messages: this.conversationHistoryService.getMemoryProvider().includeFullHistory
         ? [...messages, userMessage]
@@ -517,10 +426,18 @@ export class ChatService {
     }));
 
     // Send the tool result back to the agent with full conversation history
-    const mappedMessages = [...messages, toolMessage];
+    const mappedMessages = this.conversationHistoryService.getMemoryProvider().includeFullHistory
+      ? [...messages, toolMessage]
+      : [toolMessage];
+
+    const threadId = this.getThreadId();
+
+    if (!threadId) {
+      throw new Error('Thread ID is required to send a tool result');
+    }
 
     const runInput: RunAgentInput = {
-      threadId: this.getThreadId(),
+      threadId,
       runId: this.generateRunId(),
       messages: mappedMessages,
       tools: this.availableTools || [],
@@ -561,87 +478,16 @@ export class ChatService {
     this.agent.resetConnection();
   }
 
-  // Chat state persistence methods
-  private saveCurrentChatState(): void {
-    const state: CurrentChatState = {
-      threadId: this.getThreadId(),
-      messages: this.currentMessages,
-    };
-    try {
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to save chat state to sessionStorage:', error);
-    }
-  }
-
-  private loadCurrentChatState(): CurrentChatState | null {
-    try {
-      const stored = sessionStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to load chat state from sessionStorage:', error);
-      return null;
-    }
-  }
-
-  private clearCurrentChatState(): void {
-    try {
-      sessionStorage.removeItem(this.STORAGE_KEY);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to clear chat state from sessionStorage:', error);
-    }
-  }
-
   /**
-   * Remove trailing system error messages from restored chat sessions.
-   * This prevents stale "network error" messages from interrupted connections (page refresh)
-   * from appearing when the user returns to the chat.
+   * Save messages to conversation history
    */
-  private removeTrailingErrorMessages(messages: any[]): any[] {
-    if (!messages.length) {
-      return messages;
-    }
-
-    // Work backwards from the end, removing trailing system error messages
-    let endIndex = messages.length;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
-
-      // Check if this is the specific network error from page refresh
-      if (message.role === 'system' && message.content === 'Error: network error') {
-        endIndex = i; // Mark for removal
-      } else {
-        // Stop when we hit a non-error message
-        break;
-      }
-    }
-
-    // Return array without trailing error messages
-    return messages.slice(0, endIndex);
-  }
-
-  public saveCurrentChatStatePublic(): void {
-    this.saveCurrentChatState();
-  }
-
-  public getCurrentMessages(): Message[] {
-    return this.currentMessages;
-  }
-
-  public updateCurrentMessages(messages: Message[]): void {
-    this.currentMessages = messages;
-    this.saveCurrentChatState();
-
-    // Save to conversation history (async but don't await to avoid blocking)
+  public async saveConversation(messages: Message[]): Promise<void> {
     if (messages.length > 0) {
       const threadId = this.getThreadId();
-      this.conversationHistoryService.saveConversation(threadId, messages).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.warn('Failed to save conversation to history:', error);
-      });
+      if (!threadId) {
+        throw new Error('Thread ID is required to save conversation');
+      }
+      await this.conversationHistoryService.saveConversation(threadId, messages);
     }
   }
 
@@ -669,14 +515,68 @@ export class ChatService {
     }
     this.coreChatService.newThread();
 
-    this.currentMessages = [];
-    this.clearCurrentChatState();
-
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
 
     // Reset AgUiAgent connection state to clear any aborted controllers
     this.resetConnection();
+  }
+
+  /**
+   * Restore the latest conversation from agentic memory
+   * Returns the messages and thread ID
+   * If thread ID is already set, skip restore (use existing thread)
+   * If no conversation can be restored, generate a new thread
+   */
+  public async restoreLatestConversation(): Promise<{
+    threadId: string;
+    messages: Message[];
+  } | null> {
+    // Check if thread ID is already set - if so, skip restore and use existing thread
+    const currentThreadId = this.coreChatService?.getThreadId();
+    if (currentThreadId) {
+      // Thread already set, don't restore from latest conversation
+      return null;
+    }
+
+    // Get the latest conversation summary from conversation history service
+    const result = await this.conversationHistoryService.getConversations({
+      page: 0,
+      pageSize: 1,
+    });
+
+    if (result.conversations.length > 0) {
+      // Found a latest conversation - get full details
+      const latestConversationSummary = result.conversations[0];
+
+      // Get the full conversation with all events
+      const events = await this.conversationHistoryService.getConversation(
+        latestConversationSummary.threadId
+      );
+
+      if (!events) {
+        // No events found, generate a new thread
+        this.newThread();
+        return null;
+      }
+
+      // Extract messages from MESSAGES_SNAPSHOT event
+      const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
+      if (snapshotEvent && 'messages' in snapshotEvent) {
+        // Set the thread ID in core service
+        if (this.coreChatService) {
+          this.coreChatService.setThreadId(latestConversationSummary.threadId);
+        }
+        return {
+          threadId: latestConversationSummary.threadId,
+          messages: snapshotEvent.messages,
+        };
+      }
+    }
+
+    // No conversation found or no snapshot event, generate a new thread
+    this.newThread();
+    return null;
   }
 
   /**
@@ -692,13 +592,6 @@ export class ChatService {
     // Set the thread ID in core service
     if (this.coreChatService) {
       this.coreChatService.setThreadId(threadId);
-    }
-
-    // Extract messages from MESSAGES_SNAPSHOT event for current state management
-    const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
-    if (snapshotEvent && 'messages' in snapshotEvent) {
-      this.currentMessages = snapshotEvent.messages;
-      this.saveCurrentChatState();
     }
 
     return events;

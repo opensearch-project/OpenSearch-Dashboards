@@ -17,18 +17,12 @@
 .agentTracesFlow__container {
   height: 100%;
   position: relative;
-}
 
-.agentTracesFlow__controls {
-  position: absolute;
-  top: $ouiSizeM;
-  right: $ouiSizeM;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: $ouiSizeXS;
-}
-
-.agentTracesFlow__controlButton {
-  padding: $ouiSizeXXS;
+  // Map EUI theme colors to CelestialMap node-kind CSS custom properties
+  --osd-color-type-agent: #{$ouiColorPrimary};
+  --osd-color-type-llm: #{$ouiColorVis3};
+  --osd-color-type-tool: #{$ouiColorDarkShade};
+  --osd-color-type-embeddings: #{$ouiColorVis1};
+  --osd-color-type-retrieval: #{$ouiColorVis4};
+  --osd-color-type-other: #{$ouiColorMediumShade};
 }

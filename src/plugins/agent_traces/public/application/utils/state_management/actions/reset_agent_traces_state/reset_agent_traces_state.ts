@@ -10,9 +10,12 @@ import {
   setResultsState,
   setTabState,
   setUiState,
+  setSort,
 } from '../../slices';
+import { setOverallQueryStatus } from '../../slices/query_editor/query_editor_slice';
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { AgentTracesServices } from '../../../../../types';
+import { QueryExecutionStatus } from '../../types';
 import { executeQueries } from '../query_actions';
 import { AppDispatch, RootState } from '../../store';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
@@ -36,6 +39,25 @@ export const resetAgentTracesStateActionCreator = (
   dispatch(setLegacyState(state.legacy));
   dispatch(setQueryState(state.query));
   dispatch(setQueryEditorState(state.queryEditor));
+
+  // Initialize default sort so the cache key from executeQueries matches
+  // what useTabResults computes after the tab components re-render.
+  const timeFieldName = state.query.dataset?.timeFieldName;
+  if (timeFieldName) {
+    dispatch(setSort([[timeFieldName, 'desc']]));
+  }
+
+  // Set overall status to LOADING so the table shows a loading indicator
+  // instead of the empty state while the query executes.
+  dispatch(
+    setOverallQueryStatus({
+      status: QueryExecutionStatus.LOADING,
+      startTime: Date.now(),
+      elapsedMs: undefined,
+      error: undefined,
+    })
+  );
+
   await dispatch(executeQueries({ services }));
   dispatch(detectAndSetOptimalTab({ services }));
 };

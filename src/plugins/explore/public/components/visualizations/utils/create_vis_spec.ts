@@ -18,11 +18,11 @@ interface Options {
 
 export const createVisSpec = ({ timeRange, data, config }: Options) => {
   if (!data) {
-    return;
+    return {};
   }
 
   if (!config?.type) {
-    return;
+    return {};
   }
 
   const columns = [
@@ -33,7 +33,7 @@ export const createVisSpec = ({ timeRange, data, config }: Options) => {
 
   const rule = visualizationRegistry.findRuleByAxesMapping(config?.axesMapping ?? {}, columns);
   if (!rule || !rule.toSpec) {
-    return;
+    return {};
   }
   const standardAxes = 'standardAxes' in config.styles ? config.styles.standardAxes : [];
   const axisColumnMappings = convertStringsToMappings(config?.axesMapping ?? {}, columns);
@@ -41,14 +41,17 @@ export const createVisSpec = ({ timeRange, data, config }: Options) => {
   const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
   const styles = { ...config.styles, standardAxes: allAxisConfig };
 
-  return rule.toSpec(
-    data.transformedData,
-    data.numericalColumns,
-    data.categoricalColumns,
-    data.dateColumns,
-    styles,
-    config.type,
+  return {
+    spec: rule.toSpec(
+      data.transformedData,
+      data.numericalColumns,
+      data.categoricalColumns,
+      data.dateColumns,
+      styles,
+      config.type,
+      axisColumnMappings,
+      timeRange
+    ),
     axisColumnMappings,
-    timeRange
-  );
+  };
 };

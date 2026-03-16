@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["expressions", "uiActions"],
-  "optionalPlugins": ["usageCollection", "dataSource"],
+  "optionalPlugins": ["usageCollection", "dataSource", "contextProvider"],
   "extraPublicDirs": [
     "common", 
     "common/utils/abort_utils", 

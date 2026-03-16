@@ -22,10 +22,7 @@ import {
   CORE_SIGNAL_TYPES,
 } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
-import {
-  AGENT_TRACES_DEFAULT_LANGUAGE,
-  DEFAULT_TRACE_COLUMNS_SETTING,
-} from '../../../../../common';
+import { AGENT_TRACES_DEFAULT_LANGUAGE } from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
@@ -411,11 +408,9 @@ const getPreloadedTabState = (services: AgentTracesServices): TabState => {
 export const getPreloadedLegacyState = async (
   services: AgentTracesServices
 ): Promise<LegacyState> => {
-  const defaultColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING);
-
   return {
     savedSearch: undefined,
-    columns: defaultColumns || ['_source'],
+    columns: DEFAULT_VIRTUAL_TRACE_COLUMNS,
     sort: [],
     isDirty: false,
     savedQuery: undefined,
@@ -435,21 +430,23 @@ const getPreloadedMetaState = (services: AgentTracesServices) => {
   };
 };
 
+const DEFAULT_VIRTUAL_TRACE_COLUMNS = [
+  'kind',
+  'name',
+  'status',
+  'latency',
+  'totalTokens',
+  'input',
+  'output',
+];
+
 const getColumnsForDataset = async (
   services: AgentTracesServices,
   currentColumns?: string[]
 ): Promise<string[] | null> => {
-  if (currentColumns && currentColumns.length > 0) {
-    return null;
+  if (!currentColumns || currentColumns.length === 0) {
+    return DEFAULT_VIRTUAL_TRACE_COLUMNS;
   }
 
-  try {
-    const tracesDefaultColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING) || [
-      'spanId',
-    ];
-
-    return tracesDefaultColumns;
-  } catch (error) {
-    return null;
-  }
+  return null;
 };

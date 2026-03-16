@@ -35,7 +35,7 @@ import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
-import { VisColumn } from '../components/visualizations/types';
+import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
@@ -75,6 +75,7 @@ export interface SearchProps {
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -411,6 +412,7 @@ export class ExploreEmbeddable
           };
         } else {
           const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          this.searchProps.axisColumnMappings = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
             visualization.axesMapping,
             allColumns

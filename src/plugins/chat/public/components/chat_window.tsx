@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import moment from "moment";
-import { EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
@@ -21,7 +22,7 @@ import type {
   Message,
   UserMessage,
 } from '../../common/types';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
@@ -30,6 +31,9 @@ import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CoreStart } from '../../../../core/public';
+import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
 import "./chat_window.scss"
 
 export interface ChatWindowInstance {
@@ -56,18 +60,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const service = AssistantActionService.getInstance();
   const { chatService, confirmationService } = useChatContext();
+  const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
+  const toasts = services.core?.notifications?.toasts;
   const [timeline, setTimeline] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
-  const loadingMessageIdRef = useRef<string | null>(null);
+  const loadingAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
+  const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
+  const [startResponse, setStartResponse] = useState(false);
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -96,14 +106,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   // Create the event handler using useMemo
   const eventHandler = useMemo(
     () =>
-      new ChatEventHandler(
-        service,
+      new ChatEventHandler({
+        assistantActionService: service,
         chatService,
-        setTimeline,
-        setIsStreaming,
-        () => timelineRef.current,
-        confirmationService
-      ),
+        confirmationService,
+        callbacks: {
+          onTimelineUpdate: setTimeline,
+          onStreamingStateChange: setIsStreaming,
+          onStartResponse: setStartResponse,
+          getTimeline: () => timelineRef.current,
+        },
+      }),
     [service, chatService, confirmationService]
   );
 
@@ -114,6 +127,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         // Store tools for when we send messages
         (chatService as any).availableTools = state.toolDefinitions;
       }
+      // Update tool call states
+      setToolCallStates(state.toolCallStates);
     });
 
     return () => subscription.unsubscribe();
@@ -126,18 +141,38 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
-  // Restore timeline from current chat state on component mount
-  useEffect(() => {
-    const restoreTimeline = async () => {
-      const currentMessages = chatService.getCurrentMessages();
-      if (currentMessages.length > 0) {
+  // Extracted restoration logic to avoid duplication
+  const restoreConversationTimeline = useCallback(async () => {
+    // Create abort controller for this loading operation
+    const abortController = new AbortController();
+    loadingAbortControllerRef.current = abortController;
+
+    setIsLoading(true);
+    setRestoreError(null);
+
+    try {
+      // Check if aborted before starting
+      if (abortController.signal.aborted) {
+        return;
+      }
+
+      const result = await chatService.restoreLatestConversation();
+
+      // Check if aborted after async operation
+      if (abortController.signal.aborted) {
+        return;
+      }
+
+      if (result && result.messages.length > 0) {
+        const { messages } = result;
+
         // load message and query unfinished tool call
-        const lastMessage = currentMessages[currentMessages.length - 1];
+        const lastMessage = messages[messages.length - 1];
         if (lastMessage.role === 'assistant' && lastMessage.toolCalls) {
           // restore unfinished tool call by triggering events
           const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
             // Check if there's no corresponding tool result message
-            const hasToolResult = currentMessages.some(msg =>
+            const hasToolResult = messages.some(msg =>
               msg.role === 'tool' && msg.toolCallId === toolCall.id
             );
             return !hasToolResult;
@@ -175,17 +210,37 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             }
           }
         }
-        setTimeline(currentMessages);
+        setTimeline(messages);
       }
-    };
-
-    restoreTimeline();
+    } catch (error: any) {
+      // Don't show error if aborted
+      if (!abortController.signal.aborted) {
+        console.error('Error restoring conversation:', error);
+        setRestoreError(error.message || 'Failed to restore conversation');
+      }
+    } finally {
+      // Only update loading state if not aborted
+      if (!abortController.signal.aborted) {
+        setIsLoading(false);
+      }
+      // Clear the abort controller reference
+      if (loadingAbortControllerRef.current === abortController) {
+        loadingAbortControllerRef.current = null;
+      }
+    }
   }, [chatService, eventHandler]);
 
-  // Sync timeline changes with ChatService for persistence
+  // Restore timeline from latest conversation on component mount
   useEffect(() => {
-    chatService.updateCurrentMessages(timeline);
-  }, [timeline, chatService]);
+    restoreConversationTimeline();
+  }, [restoreConversationTimeline]);
+
+  // Save conversation to history whenever timeline changes
+  useEffect(() => {
+    if (timeline.length > 0 && !isLoading) {
+      chatService.saveConversation(timeline);
+    }
+  }, [timeline, chatService, isLoading]);
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
@@ -195,6 +250,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   ) => {
     isStreamingRef.current = true;
     setIsStreaming(true);
+    setStartResponse(false);
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
@@ -209,18 +265,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,  // For regular messages, raw and content are the same
       };
 
-      // Add loading assistant message
-      const loadingMessageId = `loading-${Date.now()}`;
-      loadingMessageIdRef.current = loadingMessageId;
-      const loadingMessage: Message = {
-        id: loadingMessageId,
-        role: 'assistant',
-        content: '',
-      };
-
-      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
-
-      let firstResponseReceived = false;
+      setTimeline((prev) => [...prev, timelineUserMessage]);
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -230,30 +275,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(event.runId);
           }
 
-          // Remove loading message on first response
-          if (!firstResponseReceived) {
-            firstResponseReceived = true;
-            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-            loadingMessageIdRef.current = null;
-          }
-
           // Handle all events through the event handler service
           await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
-          // Remove loading message on error
-          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          loadingMessageIdRef.current = null;
           isStreamingRef.current = false;
+          setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
         },
         complete: () => {
-          // Remove loading message if still present
-          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          loadingMessageIdRef.current = null;
           isStreamingRef.current = false;
+          setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
@@ -324,7 +358,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   };
 
-  const handleResendMessage = async (message: Message) => {
+  const handleResendMessage = useCallback(async (message: Message) => {
     // Use ref for immediate check since React 18 batches state updates
     if (isStreamingRef.current) return;
 
@@ -364,7 +398,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setInput('');
 
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
-  };
+  }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
 
   const handleNewChat = useCallback(() => {
     chatService.newThread();
@@ -373,18 +407,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(false);
     setPendingConfirmation(null);
     setShowHistory(false);
+    setRestoreError(null);
   }, [chatService]);
 
   const handleStop = useCallback(() => {
     // Abort the current streaming request
     chatService.abort();
-
-    // Remove loading message if it exists
-    if (loadingMessageIdRef.current) {
-      setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageIdRef.current));
-      loadingMessageIdRef.current = null;
-    }
-
     // Unsubscribe from current observable if exists
     if (currentSubscriptionRef.current) {
       currentSubscriptionRef.current.unsubscribe();
@@ -394,6 +422,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
+    setStartResponse(false);
   }, [chatService]);
 
   const handleApproveConfirmation = useCallback(() => {
@@ -417,11 +446,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   }, [capturePageContainer]);
 
-  const currentState = service.getCurrentState();
-  const enhancedProps = {
-    toolCallStates: currentState.toolCallStates,
-    getActionRenderer: service.getActionRenderer,
-  };
+  const enhancedProps = useMemo(() => {
+    return {
+      toolCallStates,
+      getActionRenderer: service.getActionRenderer,
+    };
+  }, [toolCallStates, service.getActionRenderer]);
 
   // Get conversation name from first user message with text content
   const conversationName = useMemo(() => {
@@ -447,29 +477,87 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline]);
 
   const handleShowHistory = useCallback(() => {
+    loadingAbortControllerRef.current?.abort();
+    setIsLoading(false);
     setShowHistory(true);
+    setRestoreError(null);
   }, []);
 
   const handleCloseHistory = useCallback(() => {
+    // Abort any ongoing loading operation
+    if (loadingAbortControllerRef.current) {
+      loadingAbortControllerRef.current.abort();
+      loadingAbortControllerRef.current = null;
+    }
+
+    // Reset loading state and show history panel
+    setIsLoading(false);
     setShowHistory(false);
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
-    // Load the conversation and get AG-UI event array
-    const events = await chatService.loadConversation(conversation.threadId);
-    if (events) {
-      // Process each event through the event handler for proper state restoration
-      for (const event of events) {
-        await eventHandler.handleEvent(event);
+    // Create abort controller for this loading operation
+    const abortController = new AbortController();
+    loadingAbortControllerRef.current = abortController;
+
+    setIsLoading(true);
+
+    try {
+      // Check if aborted before starting
+      if (abortController.signal.aborted) {
+        return;
       }
 
-      // Reset UI state
-      setCurrentRunId(null);
-      setIsStreaming(false);
-      setPendingConfirmation(null);
-      setShowHistory(false);
+      // Load the conversation and get AG-UI event array
+      const events = await chatService.loadConversation(conversation.threadId);
+
+      // Check if aborted after async operation
+      if (abortController.signal.aborted) {
+        return;
+      }
+
+      if (events) {
+        // Process each event through the event handler for proper state restoration
+        for (const event of events) {
+          await eventHandler.handleEvent(event);
+        }
+
+        // Reset UI state
+        setCurrentRunId(null);
+        setIsStreaming(false);
+        setPendingConfirmation(null);
+        setShowHistory(false);
+      }
+    } catch (error: any) {
+      // Don't show error if aborted
+      if (!abortController.signal.aborted) {
+        toasts?.addWarning({
+          title: i18n.translate('chat.window.loadConversationErrorTitle', {
+            defaultMessage: 'Failed to load conversation',
+          }),
+          text:
+            error instanceof Error
+              ? error.message
+              : i18n.translate('chat.window.loadConversationErrorMessage', {
+                  defaultMessage: 'An unexpected error occurred while loading the conversation.',
+                }),
+        });
+      }
+    } finally {
+      // Only update loading state if not aborted
+      if (!abortController.signal.aborted) {
+        setIsLoading(false);
+      }
+      // Clear the abort controller reference
+      if (loadingAbortControllerRef.current === abortController) {
+        loadingAbortControllerRef.current = null;
+      }
     }
-  }, [chatService, eventHandler]);
+  }, [chatService, eventHandler, toasts]);
+
+  const handleRetryRestore = useCallback(() => {
+    restoreConversationTimeline();
+  }, [restoreConversationTimeline]);
 
   // Build window instance object
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
@@ -502,13 +590,41 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         title={showHistory ? 'All conversations' : undefined}
       />
 
-      {showHistory ? (
+      {isLoading ? (
+        <div className="chatWindow__loadingContainer">
+          <EuiLoadingSpinner size="xl" />
+          <EuiText color="subdued">
+            {i18n.translate('chat.window.loadingMessage', {
+              defaultMessage: 'Loading conversation...',
+            })}
+          </EuiText>
+        </div>
+      ) : restoreError ? (
+        <div className="chatWindow__errorContainer">
+          <EuiText color="danger" textAlign="center">
+            <h3>
+              {i18n.translate('chat.window.restoreErrorTitle', {
+                defaultMessage: 'Failed to restore conversation',
+              })}
+            </h3>
+            <p>{restoreError}</p>
+          </EuiText>
+          <EuiButton
+            onClick={handleRetryRestore}
+            iconType="refresh"
+          >
+            {i18n.translate('chat.window.retryButton', {
+              defaultMessage: 'Retry',
+            })}
+          </EuiButton>
+        </div>
+      ) : showHistory ? (
         <ConversationHistoryPanel
           conversationHistoryService={chatService.conversationHistoryService}
           onSelectConversation={handleSelectConversation}
         />
       ) : (
-        <>
+        <ChatSessionErrorBoundary onStartNewSession={handleNewChat}>
           <ChatMessages
             layoutMode={layoutMode}
             timeline={timeline}
@@ -518,6 +634,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
             {...enhancedProps}
+            startResponse={startResponse}
           />
 
           {
@@ -563,7 +680,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             includeScreenShotEnabled={screenshotFeatureEnabled}
             onCaptureScreenshot={handleCaptureScreenshot}
           />
-        </>
+        </ChatSessionErrorBoundary>
       )}
     </ChatContainer>
   );

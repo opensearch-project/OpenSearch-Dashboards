@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { TraceFlyoutProvider, useTraceFlyout } from './trace_flyout_context';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('./trace_details_flyout', () => ({
   TraceDetailsFlyout: ({ trace, onClose }: any) => (

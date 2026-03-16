@@ -10,6 +10,7 @@ import {
   ConversationHistoryService,
   SavedConversation,
 } from '../services/conversation_history_service';
+import { AgenticMemoryProvider } from '../services/agentic_memory_provider';
 
 describe('ConversationHistoryPanel', () => {
   let mockService: jest.Mocked<ConversationHistoryService>;
@@ -27,11 +28,21 @@ describe('ConversationHistoryPanel', () => {
   };
 
   beforeEach(() => {
+    // Default mock provider (non-AgenticMemoryProvider)
+    const mockDefaultProvider = {
+      includeFullHistory: true,
+      saveConversation: jest.fn(),
+      getConversations: jest.fn(),
+      getConversation: jest.fn(),
+      deleteConversation: jest.fn().mockResolvedValue(undefined),
+    };
+
     mockService = {
       getConversations: jest.fn(),
       deleteConversation: jest.fn(),
       getConversation: jest.fn(),
       saveConversation: jest.fn(),
+      getMemoryProvider: jest.fn().mockReturnValue(mockDefaultProvider),
     } as any;
 
     mockOnSelectConversation = jest.fn();
@@ -180,47 +191,6 @@ describe('ConversationHistoryPanel', () => {
     });
   });
 
-  describe('Conversation grouping', () => {
-    it('should group conversations by date', async () => {
-      const now = Date.now();
-      const recentConv: SavedConversation = {
-        id: 'conv-recent',
-        threadId: 'thread-recent',
-        name: 'Recent Conversation',
-        messages: [],
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      const oldConv: SavedConversation = {
-        id: 'conv-old',
-        threadId: 'thread-old',
-        name: 'Old Conversation',
-        messages: [],
-        createdAt: now - 8 * 24 * 60 * 60 * 1000, // 8 days ago
-        updatedAt: now - 8 * 24 * 60 * 60 * 1000,
-      };
-
-      mockService.getConversations.mockResolvedValue({
-        conversations: [recentConv, oldConv],
-        hasMore: false,
-        total: 1,
-      });
-
-      render(
-        <ConversationHistoryPanel
-          conversationHistoryService={mockService}
-          onSelectConversation={mockOnSelectConversation}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Last 7 days')).toBeInTheDocument();
-        expect(screen.getByText('Older')).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Conversation selection', () => {
     it('should call onSelectConversation when conversation is clicked', async () => {
       const mockConversations = createMockConversations(2);
@@ -284,6 +254,37 @@ describe('ConversationHistoryPanel', () => {
       await waitFor(() => {
         expect(mockService.deleteConversation).toHaveBeenCalledWith('thread-0');
       });
+    });
+
+    it('should not show delete action when using AgenticMemoryProvider', async () => {
+      const mockConversations = createMockConversations(2);
+      mockService.getConversations.mockResolvedValue({
+        conversations: mockConversations,
+        hasMore: false,
+        total: 1,
+      });
+
+      // Create a real AgenticMemoryProvider instance with mocked http
+      const mockHttp = {
+        post: jest.fn(),
+      } as any;
+      const agenticProvider = new AgenticMemoryProvider(mockHttp);
+      mockService.getMemoryProvider = jest.fn().mockReturnValue(agenticProvider);
+
+      render(
+        <ConversationHistoryPanel
+          conversationHistoryService={mockService}
+          onSelectConversation={mockOnSelectConversation}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Conversation 0')).toBeInTheDocument();
+      });
+
+      // Verify that action buttons (delete) are not present when using agentic memory
+      const actionButtons = screen.queryAllByLabelText('Actions');
+      expect(actionButtons).toHaveLength(0);
     });
   });
 

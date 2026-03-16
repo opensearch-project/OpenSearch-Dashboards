@@ -6,11 +6,22 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
-    translate: (_key: string, opts: { defaultMessage: string }) => opts.defaultMessage,
+    translate: (
+      _key: string,
+      opts: { defaultMessage: string; values?: Record<string, string> }
+    ) => {
+      let msg = opts.defaultMessage;
+      if (opts.values) {
+        Object.entries(opts.values).forEach(([k, v]) => {
+          msg = msg.replace(`{${k}}`, String(v));
+        });
+      }
+      return msg;
+    },
   },
 }));
 
@@ -51,7 +62,10 @@ const mockTrace: TraceRow = {
   startTime: '01/01/2025, 12:00:00 AM',
   endTime: '01/01/2025, 12:00:01 AM',
   latency: '1s',
+  durationNanos: 1000000000,
   totalTokens: 100,
+  inputTokens: 50,
+  outputTokens: 50,
   totalCost: '—',
 };
 
@@ -63,18 +77,18 @@ const defaultProps: TraceDetailsProps = {
 describe('TraceDetailsFlyout', () => {
   it('renders trace name in header', () => {
     render(<TraceDetailsFlyout {...defaultProps} />);
-    expect(screen.getByText('Test Agent Trace')).toBeInTheDocument();
+    expect(screen.getByText('Trace: Test Agent Trace')).toBeInTheDocument();
   });
 
-  it('renders SUCCESS badge for success status', () => {
+  it('renders Success status for success status', () => {
     render(<TraceDetailsFlyout {...defaultProps} />);
-    expect(screen.getByText('SUCCESS')).toBeInTheDocument();
+    expect(screen.getByText('Success')).toBeInTheDocument();
   });
 
-  it('renders ERROR badge for error status', () => {
+  it('renders Error status for error status', () => {
     const errorTrace = { ...mockTrace, status: 'error' as const };
     render(<TraceDetailsFlyout {...defaultProps} trace={errorTrace} />);
-    expect(screen.getByText('ERROR')).toBeInTheDocument();
+    expect(screen.getByText('Error')).toBeInTheDocument();
   });
 
   it('renders trace ID', () => {
@@ -114,8 +128,8 @@ describe('TraceDetailsFlyout', () => {
 
     render(<TraceDetailsFlyout {...defaultProps} trace={childTrace} fullTree={[rootTrace]} />);
 
-    expect(screen.getByText('Test Agent Trace')).toBeInTheDocument();
-    expect(screen.getByText('SUCCESS')).toBeInTheDocument();
+    expect(screen.getByText('Trace: Test Agent Trace')).toBeInTheDocument();
+    expect(screen.getByText('Success')).toBeInTheDocument();
     expect(screen.queryByText('invoke_agent')).not.toBeInTheDocument();
   });
 });

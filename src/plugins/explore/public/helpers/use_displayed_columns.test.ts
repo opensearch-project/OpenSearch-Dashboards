@@ -10,6 +10,11 @@ jest.mock('react-redux', () => ({
   connect: jest.fn(() => (component: any) => component),
 }));
 
+// Mock slices to prevent heavy import chain (QueryExecutionStatus etc.)
+jest.mock('../application/utils/state_management/slices', () => ({
+  resultsCache: new Map(),
+}));
+
 // Mock the specific problematic opensearch_dashboards_react import to avoid EUI chain
 jest.mock('../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
