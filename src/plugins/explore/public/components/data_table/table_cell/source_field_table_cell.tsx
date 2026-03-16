@@ -12,7 +12,6 @@
 import './source_field_table_cell.scss';
 
 import React, { Fragment } from 'react';
-import dompurify from 'dompurify';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
@@ -22,15 +21,17 @@ export interface SourceFieldTableCellProps {
   dataset: IndexPattern | Dataset;
   row: OpenSearchSearchHit<Record<string, unknown>>;
   isShortDots: boolean;
+  wrapCellText?: boolean;
 }
 
-export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
+const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
   colName,
   dataset,
   row,
   isShortDots,
+  wrapCellText,
 }) => {
-  const formattedRow = dataset.formatHit(row);
+  const formattedRow = dataset.formatHit(row, 'text');
   const metaFields = dataset.metaFields || [];
   const rawKeys = Object.keys(formattedRow).filter((key) => !metaFields.includes(key));
   const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
@@ -38,7 +39,9 @@ export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
   return (
     <td
       key={colName}
-      className="exploreDocTableCell eui-textTruncate exploreDocTableCell__source"
+      className={`exploreDocTableCell${
+        wrapCellText ? '' : ' eui-textTruncate'
+      } exploreDocTableCell__source`}
       data-test-subj="docTableField"
     >
       <div className="exploreDocTableCell__content">
@@ -48,14 +51,9 @@ export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
               <span className="source__key" data-test-subj="sourceFieldKey">
                 {key}:
               </span>
-              <span
-                className="source__value"
-                data-test-subj="sourceFieldValue"
-                // eslint-disable-next-line react/no-danger
-                dangerouslySetInnerHTML={{
-                  __html: dompurify.sanitize(formattedRow[rawKeys[index]]),
-                }}
-              />
+              <span className="source__value" data-test-subj="sourceFieldValue">
+                {formattedRow[rawKeys[index]]}
+              </span>
               {index !== keys.length - 1 && ' '}
             </Fragment>
           ))}
@@ -64,3 +62,5 @@ export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
     </td>
   );
 };
+
+export const SourceFieldTableCell = React.memo(SourceFieldTableCellComponent);

@@ -1,0 +1,2 @@
+refactor:
+- [Chat] Refactor to single window with mount service ([#11483](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11483))

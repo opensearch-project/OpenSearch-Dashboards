@@ -428,7 +428,8 @@ function processLatencyData(
       transformer: (value) => {
         // If the value is from avg_duration_nanos (which would be a large number),
         // convert from nanoseconds to milliseconds
-        return value > 1000000 ? value / 1000000 : value;
+        const ms = value > 1000000 ? value / 1000000 : value;
+        return Math.round(ms * 100) / 100; // Round to 2 decimal places
       },
       aggregationType: 'average',
     },

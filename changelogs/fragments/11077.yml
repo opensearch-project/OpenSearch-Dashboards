@@ -1,5 +1,0 @@
-feat:
-- Introducing ECharts to discover visualization ([#11077](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11077))
-
-refactor:
-- Refactor bar charts from Vega to ECharts ([#11077](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11077))

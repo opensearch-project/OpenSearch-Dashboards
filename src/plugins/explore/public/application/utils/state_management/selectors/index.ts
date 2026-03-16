@@ -42,6 +42,11 @@ export const selectShowHistogram = createSelector(
   (uiState) => uiState.showHistogram
 );
 
+export const selectWrapCellText = createSelector(
+  [selectUIState],
+  (uiState) => uiState.wrapCellText
+);
+
 export const selectPatternsField = createSelector(
   [selectTabState],
   (tabState) => tabState.patterns.patternsField

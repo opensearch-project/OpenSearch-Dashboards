@@ -124,6 +124,7 @@ export const createGaugeSeries = ({
       z: 5,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       progress: {
         show: true,
         width: fontSizeFactor + 2,
@@ -175,6 +176,7 @@ export const createGaugeSeries = ({
       z: 10,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       itemStyle: {
         color: valueArcColor,
       },
@@ -244,7 +246,7 @@ export const createGaugeSeries = ({
                 textAlign: 'center',
                 fontSize: valueFontSize,
                 fontWeight: 'bold',
-                fill: textColor,
+                fill: styles?.useThresholdColor ? textColor : getColors().text,
               },
             },
             ...(styles.showTitle

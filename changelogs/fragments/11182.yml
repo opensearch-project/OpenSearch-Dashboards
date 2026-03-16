@@ -1,2 +1,0 @@
-fix:
-- Filter Rows with null values in Patterns Table ([#11182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11182))

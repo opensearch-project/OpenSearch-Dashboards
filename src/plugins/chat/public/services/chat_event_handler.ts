@@ -13,6 +13,7 @@ import type {
   ToolCallArgsEvent,
   ToolCallEndEvent,
   ToolCallResultEvent,
+  MessagesSnapshotEvent,
 } from '../../common/events';
 import type {
   Message,
@@ -26,13 +27,19 @@ import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
 import { ConfirmationService } from './confirmation_service';
 
-// Timeline is now purely AG-UI Messages
-
-interface PendingToolCall {
-  id: string;
-  name: string;
-  args: string;
-  messageId?: string;
+/**
+ * Configuration interface for ChatEventHandler
+ */
+export interface ChatEventHandlerConfig {
+  assistantActionService: AssistantActionService;
+  chatService: ChatService;
+  confirmationService: ConfirmationService;
+  callbacks: {
+    onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
+    onStreamingStateChange: (isStreaming: boolean) => void;
+    onStartResponse: (flag: boolean) => void;
+    getTimeline: () => Message[];
+  };
 }
 
 /**
@@ -46,15 +53,21 @@ export class ChatEventHandler {
   private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
 
-  constructor(
-    private assistantActionService: AssistantActionService,
-    private chatService: ChatService,
-    private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void,
-    private onStreamingStateChange: (isStreaming: boolean) => void,
-    private getTimeline: () => Message[],
-    confirmationService: ConfirmationService
-  ) {
-    this.toolExecutor = new ToolExecutor(assistantActionService, confirmationService);
+  private assistantActionService: AssistantActionService;
+  private chatService: ChatService;
+  private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
+  private onStreamingStateChange: (isStreaming: boolean) => void;
+  private onStartResponse: (flag: boolean) => void;
+  private getTimeline: () => Message[];
+
+  constructor(config: ChatEventHandlerConfig) {
+    this.assistantActionService = config.assistantActionService;
+    this.chatService = config.chatService;
+    this.onTimelineUpdate = config.callbacks.onTimelineUpdate;
+    this.onStreamingStateChange = config.callbacks.onStreamingStateChange;
+    this.onStartResponse = config.callbacks.onStartResponse;
+    this.getTimeline = config.callbacks.getTimeline;
+    this.toolExecutor = new ToolExecutor(config.assistantActionService, config.confirmationService);
   }
 
   /**
@@ -98,6 +111,10 @@ export class ChatEventHandler {
         this.handleToolCallResult(event as ToolCallResultEvent);
         break;
 
+      case EventType.MESSAGES_SNAPSHOT:
+        await this.handleMessagesSnapshot(event as MessagesSnapshotEvent);
+        break;
+
       case EventType.RUN_ERROR:
         this.handleRunError(event);
         break;
@@ -128,6 +145,7 @@ export class ChatEventHandler {
    * Handle start of a text message
    */
   private handleTextMessageStart(event: TextMessageStartEvent): void {
+    this.onStartResponse(true);
     // Track this as the last TEXT_MESSAGE_START for tool call association
     this.lastTextMessageStartId = event.messageId;
 
@@ -225,6 +243,7 @@ export class ChatEventHandler {
    * in the conversation timeline, maintaining proper message ordering.
    */
   private handleToolCallStart(event: ToolCallStartEvent): void {
+    this.onStartResponse(true);
     const { toolCallId, toolCallName, parentMessageId } = event;
 
     // Update tool call state in AssistantActionService
@@ -582,9 +601,11 @@ export class ChatEventHandler {
           // eslint-disable-next-line no-console
           console.error('Tool result response error:', error);
           this.onStreamingStateChange(false);
+          this.onStartResponse(false);
         },
         complete: () => {
           this.onStreamingStateChange(false);
+          this.onStartResponse(false);
         },
       });
     } catch (error) {
@@ -595,6 +616,18 @@ export class ChatEventHandler {
   }
 
   // timelineToMessages method removed - timeline is now directly AG-UI compatible
+
+  /**
+   * Handle messages snapshot - restore conversation state from saved messages
+   * Simply sets the timeline to the saved messages
+   */
+  private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
+    // Set timeline to snapshot messages
+    this.onTimelineUpdate(() => event.messages || []);
+
+    // Reset streaming state
+    this.onStreamingStateChange(false);
+  }
 
   /**
    * Clear all state (useful for resetting)

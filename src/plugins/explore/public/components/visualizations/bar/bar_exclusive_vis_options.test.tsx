@@ -16,19 +16,22 @@ jest.mock('../utils/use_debounced_value', () => ({
 
 describe('BarExclusiveVisOptions', () => {
   const defaultProps = {
-    type: 'bar',
+    type: 'bar' as const,
     barSizeMode: 'manual' as 'manual' | 'auto',
     barWidth: 0.7,
     barPadding: 0.1,
     showBarBorder: false,
     barBorderWidth: 1,
     barBorderColor: '#000000',
+    stackMode: 'none' as 'none' | 'total',
     onBarSizeModeChange: jest.fn(),
     onBarWidthChange: jest.fn(),
     onBarPaddingChange: jest.fn(),
     onShowBarBorderChange: jest.fn(),
     onBarBorderWidthChange: jest.fn(),
     onBarBorderColorChange: jest.fn(),
+    onUseThresholdColorChange: jest.fn(),
+    onStackModeChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -44,13 +47,7 @@ describe('BarExclusiveVisOptions', () => {
     // Check if the bar width input exists with correct value
     const barWidthInput = screen.getByTestId('barWidthInput');
     expect(barWidthInput).toBeInTheDocument();
-    expect(barWidthInput).toHaveValue(0.7);
-
-    // Check if the bar padding input exists with correct value
-    const barPaddingInput = screen.getByTestId('barPaddingInput');
-    expect(barPaddingInput).toBeInTheDocument();
-    expect(barPaddingInput).toHaveValue(0.1);
-
+    expect(barWidthInput).toHaveValue(70);
     // Check if the bar border switch exists
     const barBorderSwitch = screen.getByTestId('barBorderSwitch');
     expect(barBorderSwitch).toBeInTheDocument();
@@ -82,21 +79,10 @@ describe('BarExclusiveVisOptions', () => {
 
     // Get the bar width input and change its value
     const barWidthInput = screen.getByTestId('barWidthInput');
-    fireEvent.change(barWidthInput, { target: { value: '0.8' } });
+    fireEvent.change(barWidthInput, { target: { value: '80' } });
 
     // Check if the callback was called with the correct value
     expect(defaultProps.onBarWidthChange).toHaveBeenCalledWith(0.8);
-  });
-
-  test('calls onBarPaddingChange when bar padding is changed', () => {
-    render(<BarExclusiveVisOptions {...defaultProps} />);
-
-    // Get the bar padding input and change its value
-    const barPaddingInput = screen.getByTestId('barPaddingInput');
-    fireEvent.change(barPaddingInput, { target: { value: '0.2' } });
-
-    // Check if the callback was called with the correct value
-    expect(defaultProps.onBarPaddingChange).toHaveBeenCalledWith(0.2);
   });
 
   test('calls onShowBarBorderChange when show bar border is toggled', () => {
@@ -135,17 +121,13 @@ describe('BarExclusiveVisOptions', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     // Check if help text is rendered for bar width
-    expect(screen.getByText('Value between 0.1 and 1')).toBeInTheDocument();
-
-    // Check if help text is rendered for bar padding
-    expect(screen.getByText('Value between 0 and 0.5')).toBeInTheDocument();
+    expect(screen.getByText('Percentage Value between 1 and 100')).toBeInTheDocument();
   });
 
   test('renders form labels correctly', () => {
     render(<BarExclusiveVisOptions {...defaultProps} />);
 
     expect(screen.getByText('Width')).toBeInTheDocument();
-    expect(screen.getByText('Padding')).toBeInTheDocument();
     expect(screen.getByText('Show border')).toBeInTheDocument();
   });
 
@@ -155,5 +137,68 @@ describe('BarExclusiveVisOptions', () => {
     // Check if border-related labels are rendered
     expect(screen.getByText('Border width')).toBeInTheDocument();
     expect(screen.getByText('Border color')).toBeInTheDocument();
+  });
+
+  test('renders stack mode options correctly', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    // Check if the stack mode button group exists
+    const stackModeButtonGroup = screen.getByTestId('barStackModeButtonGroup');
+    expect(stackModeButtonGroup).toBeInTheDocument();
+
+    // Check if the "None" and "Stacked" buttons exist
+    expect(screen.getByText('None')).toBeInTheDocument();
+    expect(screen.getByText('Stacked')).toBeInTheDocument();
+
+    // Check if the stack mode label is rendered (using getAllByText to handle multiple matches)
+    expect(screen.getAllByText('Stack')).toHaveLength(2); // label and legend
+  });
+
+  test('calls onStackModeChange when stack mode is changed', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    // Find and click the "Stacked" button
+    const stackedButton = screen.getByText('Stacked');
+    fireEvent.click(stackedButton);
+
+    // Check if the callback was called with the correct value
+    expect(defaultProps.onStackModeChange).toHaveBeenCalledWith('total');
+  });
+
+  test('renders with stacked mode selected', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} stackMode="total" />);
+
+    // The "Stacked" button should be selected
+    const stackedButton = screen.getByText('Stacked');
+    expect(stackedButton.closest('label')).toHaveClass('euiButtonGroupButton-isSelected');
+  });
+
+  test('renders use threshold color switch correctly', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    // Check if the use threshold color switch exists
+    const thresholdColorSwitch = screen.getByTestId('useThresholdColorButton');
+    expect(thresholdColorSwitch).toBeInTheDocument();
+    expect(screen.getByText('Use threshold colors')).toBeInTheDocument();
+  });
+
+  test('calls onUseThresholdColorChange when threshold color is toggled', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} />);
+
+    // Find the switch and click it
+    const thresholdColorSwitch = screen.getByTestId('useThresholdColorButton');
+    fireEvent.click(thresholdColorSwitch);
+
+    // Check if the callback was called with the correct value
+    expect(defaultProps.onUseThresholdColorChange).toHaveBeenCalledWith(true);
+  });
+
+  test('does not render stack mode options for histogram type', () => {
+    render(<BarExclusiveVisOptions {...defaultProps} type="histogram" />);
+
+    // Stack mode options should not be visible for histogram
+    expect(screen.queryByTestId('barStackModeButtonGroup')).not.toBeInTheDocument();
+    expect(screen.queryByText('None')).not.toBeInTheDocument();
+    expect(screen.queryByText('Stacked')).not.toBeInTheDocument();
   });
 });

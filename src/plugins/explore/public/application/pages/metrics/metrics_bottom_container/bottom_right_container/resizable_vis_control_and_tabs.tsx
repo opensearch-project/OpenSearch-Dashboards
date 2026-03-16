@@ -49,7 +49,7 @@ export const ResizableVisControlAndTabs = () => {
   }
 
   return (
-    <EuiResizableContainer style={{ height: '100%' }}>
+    <EuiResizableContainer className="tabsPanelContainer">
       {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
         collapseFn.current = (id, direction: PanelDirection = 'left') =>
           togglePanel?.(id, { direction });

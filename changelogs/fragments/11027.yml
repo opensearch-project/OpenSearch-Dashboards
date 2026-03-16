@@ -1,2 +1,0 @@
-fix:
-- [Chat][Context][BUG] Fix page context replacement and get dataSourceId from page context ([#11027](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11027))

@@ -144,22 +144,17 @@ export const LineExclusiveVisOptions = ({
         />
       </EuiFormRow>
 
-      <EuiSpacer size="s" />
-
       {shouldShowTimeMarker && (
-        <EuiFormRow
+        <EuiSwitch
+          compressed
           label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
             defaultMessage: 'Show current time marker',
           })}
-        >
-          <EuiSwitch
-            compressed
-            label=""
-            checked={addTimeMarker}
-            onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
-          />
-        </EuiFormRow>
+          checked={addTimeMarker}
+          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+        />
       )}
+      <EuiSpacer size="s" />
     </StyleAccordion>
   );
 };

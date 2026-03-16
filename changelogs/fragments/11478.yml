@@ -1,0 +1,2 @@
+chore:
+- Move raw hits into a module-level cache and keep only lightweight metadata in Redux for reactivity ([#11478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11478))

@@ -4,6 +4,7 @@
   overflow-x: auto;
   scrollbar-width: thin;
   flex-grow: 1;
+  border-radius: $euiSizeXS;
 }
 
 .exploreVisPanel {
@@ -39,5 +40,23 @@
 
   .exploreVisStylePanel {
     overflow-y: auto;
+  }
+}
+
+.chartCustomTooltip {
+  min-width: 120px;
+
+  p {
+    display: flex;
+    margin-top: 8px;
+
+    span {
+      padding-right: 20px;
+    }
+
+    b {
+      margin-left: auto;
+      font-weight: bolder;
+    }
   }
 }

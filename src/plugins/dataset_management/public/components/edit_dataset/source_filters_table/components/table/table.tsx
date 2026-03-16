@@ -99,7 +99,7 @@ export class Table extends Component<TableProps, TableState> {
   };
 
   getColumns(): Array<EuiBasicTableColumn<SourceFiltersTableFilter>> {
-    const { deleteFilter, fieldWildcardMatcher, dataset, saveFilter } = this.props;
+    const { deleteFilter, fieldWildcardMatcher, dataset, saveFilter, isSaving } = this.props;
 
     return [
       {
@@ -163,6 +163,7 @@ export class Table extends Component<TableProps, TableState> {
               <>
                 <EuiButtonIcon
                   size="s"
+                  disabled={isSaving}
                   onClick={() => {
                     saveFilter({
                       clientId: this.state.editingFilterId,
@@ -175,6 +176,7 @@ export class Table extends Component<TableProps, TableState> {
                 />
                 <EuiButtonIcon
                   size="s"
+                  disabled={isSaving}
                   onClick={() => {
                     this.stopEditingFilter();
                   }}
@@ -190,6 +192,7 @@ export class Table extends Component<TableProps, TableState> {
               <EuiToolTip content={editAria} delay="long" position="top">
                 <EuiButtonIcon
                   size="s"
+                  disabled={isSaving}
                   onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
                   iconType="pencil"
                   aria-label={editAria}
@@ -198,6 +201,7 @@ export class Table extends Component<TableProps, TableState> {
               <EuiToolTip content={deleteAria} delay="long" position="top">
                 <EuiButtonIcon
                   size="s"
+                  disabled={isSaving}
                   color="danger"
                   onClick={() => deleteFilter(filter)}
                   iconType="trash"

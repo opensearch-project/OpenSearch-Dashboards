@@ -103,6 +103,15 @@ export function fillMissingTimestamps(
   return filledSeriesMap;
 }
 
+/**
+ * Checks if the main query ends with a head command (optionally followed by `from N` or `| where`).
+ * Subquery brackets [...] are masked so that head inside subqueries is ignored.
+ */
+export const queryEndsWithHead = (queryString: string): boolean => {
+  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  return /\|\s*head\b(\s+\d+)?(\s+from\s+\d+)?\s*(\|\s*where\b.*)?\s*$/i.test(masked);
+};
+
 export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
   const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
 
@@ -223,7 +232,7 @@ export const processRawResultsForHistogram = (
 
     Object.entries(responseAggs).forEach(([id, value]) => {
       if (aggsConfig && aggsConfig.date_histogram) {
-        let totalHits = rawResults.hits.total;
+        let totalHits = 0;
         const buckets = value as Array<{ key: string; value: number }>;
         tempResult.aggregations[id] = {
           buckets: buckets.map((bucket) => {

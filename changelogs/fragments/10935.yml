@@ -1,2 +1,0 @@
-refactor:
-- Axes panel of line & area chart to use StandardAxes ([#10935](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10935))

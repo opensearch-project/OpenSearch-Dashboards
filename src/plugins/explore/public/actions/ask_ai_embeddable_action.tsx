@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { get } from 'lodash';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import { EmbeddableContext, IEmbeddable } from '../../../embeddable/public';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { CoreStart } from '../../../../core/public';
@@ -85,6 +85,10 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
       // Capture visualization as base64 image
       let visualizationBase64 = '';
 
+      const nonce = document.querySelector('meta[name="csp-nonce"]')?.getAttribute('content');
+      if (nonce) {
+        html2canvas.setCspNonce(nonce);
+      }
       const canvas = await html2canvas(visEmbeddable.node, {
         backgroundColor: '#ffffff',
         logging: false,

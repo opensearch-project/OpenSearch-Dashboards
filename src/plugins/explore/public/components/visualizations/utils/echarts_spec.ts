@@ -27,6 +27,7 @@ import {
   AxisRole,
 } from '../types';
 import { convertThresholds } from './utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Base style interface that all chart styles should extend
@@ -66,6 +67,8 @@ export interface EChartsAxisConfig {
   yAxis?: Axis;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2Axis?: Axis;
+  y2AxisStyle?: StandardAxes;
 }
 
 /**
@@ -185,15 +188,17 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
+  const hasY2 = axisColumnMappings.y2 !== undefined && axisConfig?.y2Axis;
 
   const getConfig = (
     axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
-    gridNumber?: number
+    gridNumber?: number,
+    addSplitLineStyle: boolean = false
   ) => {
     return {
       type: getAxisType(axis),
-      ...applyAxisStyling({ axisStyle }),
+      ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
       ...(hasFacet && { gridIndex: gridNumber }),
     };
   };
@@ -218,6 +223,11 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
 
     yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+
+    if (hasY2) {
+      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle, undefined, true);
+      yAxisConfig = [yAxisConfig, y2AxisConfig];
+    }
   }
 
   return { ...state, xAxisConfig, yAxisConfig };
@@ -291,8 +301,10 @@ const POSITION_MAP = {
 
 export const applyAxisStyling = ({
   axisStyle,
+  addSplitLineStyle,
 }: {
   axisStyle?: StandardAxes;
+  addSplitLineStyle?: boolean;
 }): XAXisComponentOption | YAXisComponentOption => {
   const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
@@ -311,6 +323,12 @@ export const applyAxisStyling = ({
   if (axisStyle?.grid) {
     echartsAxisConfig.splitLine = {
       show: axisStyle.grid.showLines ?? true,
+      ...(addSplitLineStyle && {
+        lineStyle: {
+          type: 'dotted',
+          opacity: DEFAULT_OPACITY / 2,
+        },
+      }),
     };
   }
 

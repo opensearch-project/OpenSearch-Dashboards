@@ -14,9 +14,11 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields, throwFacetError } from '../../common/utils';
+import { getFields, queryEndsWithHead, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
+
+const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -38,6 +40,13 @@ export const pplSearchStrategyProvider = (
       try {
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
+
+        const hasHead = typeof query.query === 'string' && queryEndsWithHead(query.query);
+        if (!hasHead) {
+          const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+          request.body = { ...request.body, fetchSize };
+        }
+
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) throwFacetError(rawResponse);

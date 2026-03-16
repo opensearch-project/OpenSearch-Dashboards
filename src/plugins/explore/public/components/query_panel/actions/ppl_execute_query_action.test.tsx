@@ -121,13 +121,14 @@ describe('usePPLExecuteQueryAction', () => {
       mockUseAssistantAction.mock.calls[mockUseAssistantAction.mock.calls.length - 1][0];
     expect(latestCall).toMatchObject({
       name: 'execute_ppl_query',
-      description: 'Update the query bar with a PPL query and optionally execute it',
+      description:
+        'Update the query bar with a PPL query, optionally set the time range, and execute it. The query should NOT contain time filters - use the from/to parameters to specify the time range instead.',
       parameters: {
         type: 'object',
         properties: {
           query: {
             type: 'string',
-            description: 'The PPL query to set in the query bar',
+            description: 'The PPL query to set in the query bar (without time filters)',
           },
           autoExecute: {
             type: 'boolean',
@@ -174,7 +175,8 @@ describe('usePPLExecuteQueryAction', () => {
       success: true,
       executed: true,
       query: 'source=logs | head 10',
-      message: 'Query updated and executed successfully',
+      message: 'Query updated and executed successfully.',
+      timeRange: undefined,
     });
   });
 
@@ -225,7 +227,8 @@ describe('usePPLExecuteQueryAction', () => {
       success: true,
       executed: false,
       query: 'source=logs | head 10',
-      message: 'Query updated',
+      message: 'Query updated.',
+      timeRange: undefined,
     });
   });
 
@@ -298,7 +301,8 @@ describe('usePPLExecuteQueryAction', () => {
       success: true,
       executed: true,
       query: 'source=logs | head 10',
-      message: 'Query updated and executed successfully',
+      message: 'Query updated and executed successfully.',
+      timeRange: undefined,
     });
   });
 
@@ -514,7 +518,8 @@ describe('usePPLExecuteQueryAction', () => {
       success: true,
       executed: true,
       query: 'source=logs | head 10',
-      message: 'Query updated and executed successfully',
+      message: 'Query updated and executed successfully.',
+      timeRange: undefined,
     });
   });
 

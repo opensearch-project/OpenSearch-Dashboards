@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import {
   ChatServiceSetup,
@@ -11,7 +12,10 @@ import {
   ChatImplementationFunctions,
   Message,
   ChatWindowState,
+  ConversationMemoryProvider,
 } from './types';
+import { ChatScreenshotService } from './screenshot_service';
+import { LocalStorageMemoryProvider } from './local_storage_memory_provider';
 
 /**
  * Core chat service - manages infrastructure state
@@ -19,9 +23,11 @@ import {
 export class ChatService implements CoreService<ChatServiceSetup, ChatServiceStart> {
   private implementation?: ChatImplementationFunctions;
   private suggestedActionsService?: { registerProvider(provider: any): void };
+  private screenshotService: ChatScreenshotService;
+  private memoryProvider: ConversationMemoryProvider;
 
   // Core-managed infrastructure state
-  private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
+  private threadId$ = new BehaviorSubject<string | undefined>(undefined);
   private windowState$ = new BehaviorSubject<ChatWindowState>({
     isWindowOpen: false,
     windowMode: 'sidecar',
@@ -30,6 +36,14 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   private windowOpenCallbacks = new Set<() => void>();
   private windowCloseCallbacks = new Set<() => void>();
 
+  private windowOpenChangeSubscription?: Subscription;
+
+  constructor() {
+    this.screenshotService = new ChatScreenshotService();
+    // Initialize with default LocalStorage provider
+    this.memoryProvider = new LocalStorageMemoryProvider();
+  }
+
   private generateThreadId(): string {
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 11);
@@ -37,6 +51,19 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
   }
 
   public setup(): ChatServiceSetup {
+    this.windowOpenChangeSubscription = this.windowState$
+      .pipe(
+        map((state) => state.isWindowOpen),
+        distinctUntilChanged()
+      )
+      .subscribe((isWindowOpen) => {
+        if (isWindowOpen) {
+          this.windowOpenCallbacks.forEach((callback) => callback());
+        } else {
+          this.windowCloseCallbacks.forEach((callback) => callback());
+        }
+      });
+
     return {
       setImplementation: (implementation: ChatImplementationFunctions) => {
         this.implementation = implementation;
@@ -47,6 +74,20 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       },
 
       suggestedActionsService: this.suggestedActionsService,
+
+      setScreenshotPageContainerElement: (element: HTMLElement) => {
+        this.screenshotService.setPageContainerElement(element);
+      },
+
+      screenshot: this.screenshotService,
+
+      setMemoryProvider: (provider: ConversationMemoryProvider) => {
+        this.memoryProvider = provider;
+      },
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
     };
   }
 
@@ -108,27 +149,12 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         return () => this.windowCloseCallbacks.delete(callback);
       },
 
-      // Operations (delegated to plugin - throw if unavailable)
       openWindow: async () => {
-        if (!this.implementation) {
-          throw new Error(
-            'Chat service is not available. Please ensure the chat plugin is enabled.'
-          );
-        }
-
-        // Trigger callbacks to request window opening
-        this.windowOpenCallbacks.forEach((callback) => callback());
+        setWindowState({ isWindowOpen: true });
       },
 
       closeWindow: async () => {
-        if (!this.implementation) {
-          throw new Error(
-            'Chat service is not available. Please ensure the chat plugin is enabled.'
-          );
-        }
-
-        // Trigger callbacks to request window closing
-        this.windowCloseCallbacks.forEach((callback) => callback());
+        setWindowState({ isWindowOpen: false });
       },
 
       sendMessage: async (content: string, messages: Message[]) => {
@@ -157,6 +183,18 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
       get suggestedActionsService() {
         return chatServiceInstance.suggestedActionsService;
       },
+
+      // Screenshot page container element (deprecated)
+      get screenshotPageContainerElement() {
+        return chatServiceInstance.screenshotService.getPageContainerElement();
+      },
+
+      // Screenshot service
+      screenshot: this.screenshotService,
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
     };
   }
 
@@ -165,5 +203,7 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
     this.suggestedActionsService = undefined;
     this.windowOpenCallbacks.clear();
     this.windowCloseCallbacks.clear();
+    this.screenshotService.stop();
+    this.windowOpenChangeSubscription?.unsubscribe();
   }
 }

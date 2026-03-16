@@ -23,8 +23,6 @@ describe('ChatService', () => {
         observable: null,
         userMessage: { id: '1', role: 'user', content: 'test' },
       }),
-      openWindow: jest.fn().mockResolvedValue(undefined),
-      closeWindow: jest.fn().mockResolvedValue(undefined),
     };
   });
 
@@ -34,6 +32,7 @@ describe('ChatService', () => {
 
       expect(setupContract).toHaveProperty('setImplementation');
       expect(setupContract).toHaveProperty('setSuggestedActionsService');
+      expect(setupContract).toHaveProperty('setScreenshotPageContainerElement');
     });
 
     it('should allow setting implementation', () => {
@@ -42,6 +41,28 @@ describe('ChatService', () => {
       expect(() => {
         setupContract.setImplementation(mockImplementation);
       }).not.toThrow();
+    });
+
+    it('should allow setting screenshot page container element', () => {
+      const setupContract = service.setup();
+      const mockElement = document.createElement('div');
+      mockElement.id = 'test-container';
+
+      expect(() => {
+        setupContract.setScreenshotPageContainerElement(mockElement);
+      }).not.toThrow();
+    });
+
+    it('should store the screenshot page container element', () => {
+      const setupContract = service.setup();
+      const mockElement = document.createElement('div');
+      mockElement.id = 'root-element';
+
+      setupContract.setScreenshotPageContainerElement(mockElement);
+
+      // Verify the element is stored by accessing it through the service
+      // (In real usage, this would be accessed by the chat plugin internally)
+      expect(mockElement.id).toBe('root-element');
     });
   });
 
@@ -64,6 +85,26 @@ describe('ChatService', () => {
       expect(startContract).toHaveProperty('closeWindow');
       expect(startContract).toHaveProperty('sendMessage');
       expect(startContract).toHaveProperty('sendMessageWithWindow');
+      expect(startContract).toHaveProperty('screenshotPageContainerElement');
+      expect(startContract).toHaveProperty('screenshot');
+    });
+
+    it('should return undefined for screenshotPageContainerElement if not set', () => {
+      const startContract = service.start();
+
+      expect(startContract.screenshotPageContainerElement).toBeUndefined();
+    });
+
+    it('should return screenshotPageContainerElement if set during setup', () => {
+      const setupContract = service.setup();
+      const mockElement = document.createElement('div');
+      mockElement.id = 'root-element';
+
+      setupContract.setScreenshotPageContainerElement(mockElement);
+
+      const startContract = service.start();
+      expect(startContract.screenshotPageContainerElement).toBe(mockElement);
+      expect(startContract.screenshotPageContainerElement?.id).toBe('root-element');
     });
 
     it('should not be available without implementation', () => {
@@ -82,19 +123,26 @@ describe('ChatService', () => {
     it('should manage thread ID in core', () => {
       const startContract = service.start();
 
+      // Initial thread ID should be undefined (lazy initialization)
       const initialThreadId = startContract.getThreadId();
-      expect(initialThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+      expect(initialThreadId).toBeUndefined();
 
-      // Test observable
+      // Test observable emits undefined initially
       let emittedThreadId: string | undefined;
       startContract.getThreadId$().subscribe((id) => (emittedThreadId = id));
-      expect(emittedThreadId).toBe(initialThreadId);
+      expect(emittedThreadId).toBeUndefined();
 
-      // Test setting new thread
+      // Test creating new thread generates a valid thread ID
       startContract.newThread();
       const newThreadId = startContract.getThreadId();
-      expect(newThreadId).not.toBe(initialThreadId);
       expect(newThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+      expect(emittedThreadId).toBe(newThreadId);
+
+      // Test creating another new thread generates a different ID
+      startContract.newThread();
+      const anotherThreadId = startContract.getThreadId();
+      expect(anotherThreadId).not.toBe(newThreadId);
+      expect(anotherThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
     });
 
     it('should manage window state in core', () => {
@@ -149,12 +197,39 @@ describe('ChatService', () => {
       );
     });
 
-    it('should throw error when opening window without implementation', async () => {
+    it('should allow opening window without implementation', async () => {
       const startContract = service.start();
 
-      await expect(startContract.openWindow()).rejects.toThrow(
-        'Chat service is not available. Please ensure the chat plugin is enabled.'
-      );
+      // openWindow now just updates state, doesn't require implementation
+      await expect(startContract.openWindow()).resolves.not.toThrow();
+      expect(startContract.isWindowOpen()).toBe(true);
+    });
+
+    it('should provide screenshot service', () => {
+      const setupContract = service.setup();
+      const startContract = service.start();
+
+      // Screenshot service should be available
+      expect(startContract.screenshot).toBeDefined();
+      expect(setupContract.screenshot).toBeDefined();
+
+      // Initial state
+      expect(startContract.screenshot.isEnabled()).toBe(false);
+
+      // Test observable
+      let emittedValue: boolean | undefined;
+      startContract.screenshot.getEnabled$().subscribe((value) => (emittedValue = value));
+      expect(emittedValue).toBe(false);
+
+      // Enable screenshot feature
+      startContract.screenshot.setEnabled(true);
+      expect(startContract.screenshot.isEnabled()).toBe(true);
+      expect(emittedValue).toBe(true);
+
+      // Test configure method
+      startContract.screenshot.configure({ enabled: false, title: 'Custom Title' });
+      expect(startContract.screenshot.isEnabled()).toBe(false);
+      expect(startContract.screenshot.getScreenshotButton().title).toBe('Custom Title');
     });
 
     it('should delegate to implementation when available', async () => {

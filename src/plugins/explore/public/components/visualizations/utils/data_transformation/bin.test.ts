@@ -17,10 +17,10 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 1 },
-        { bucket: '10-20', value: 2 },
-        { bucket: '20-30', value: 1 },
-        { bucket: '30-40', value: 1 },
+        { start: 0, end: 10, value: 1 },
+        { start: 10, end: 20, value: 2 },
+        { start: 20, end: 30, value: 1 },
+        { start: 30, end: 40, value: 1 },
       ]);
     });
 
@@ -36,8 +36,8 @@ describe('bin', () => {
       // binStart = floor(5/20)*20 = 0
       // Bins: 0-20, 20-40
       expect(result).toEqual([
-        { bucket: '0-20', value: 2 },
-        { bucket: '20-40', value: 2 },
+        { start: 0, end: 20, value: 2 },
+        { start: 20, end: 40, value: 2 },
       ]);
     });
 
@@ -51,9 +51,9 @@ describe('bin', () => {
 
       // binStart = floor(42.2/5)*5 = floor(8.44)*5 = 40
       expect(result).toEqual([
-        { bucket: '40-45', value: 1 },
-        { bucket: '45-50', value: 1 },
-        { bucket: '50-55', value: 1 },
+        { start: 40, end: 45, value: 1 },
+        { start: 45, end: 50, value: 1 },
+        { start: 50, end: 55, value: 1 },
       ]);
     });
 
@@ -66,9 +66,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '40-45', value: 1 },
-        { bucket: '45-50', value: 1 },
-        { bucket: '50-55', value: 1 },
+        { start: 40, end: 45, value: 1 },
+        { start: 45, end: 50, value: 1 },
+        { start: 50, end: 55, value: 1 },
       ]);
     });
   });
@@ -90,9 +90,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 100 },
-        { bucket: '10-20', value: 350 },
-        { bucket: '20-30', value: 120 },
+        { start: 0, end: 10, value: 100 },
+        { start: 10, end: 20, value: 350 },
+        { start: 20, end: 30, value: 120 },
       ]);
     });
 
@@ -105,9 +105,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 100 },
-        { bucket: '10-20', value: 175 },
-        { bucket: '20-30', value: 120 },
+        { start: 0, end: 10, value: 100 },
+        { start: 10, end: 20, value: 175 },
+        { start: 20, end: 30, value: 120 },
       ]);
     });
 
@@ -120,9 +120,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 100 },
-        { bucket: '10-20', value: 200 },
-        { bucket: '20-30', value: 120 },
+        { start: 0, end: 10, value: 100 },
+        { start: 10, end: 20, value: 200 },
+        { start: 20, end: 30, value: 120 },
       ]);
     });
 
@@ -135,9 +135,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 100 },
-        { bucket: '10-20', value: 150 },
-        { bucket: '20-30', value: 120 },
+        { start: 0, end: 10, value: 100 },
+        { start: 10, end: 20, value: 150 },
+        { start: 20, end: 30, value: 120 },
       ]);
     });
 
@@ -150,9 +150,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 1 },
-        { bucket: '10-20', value: 2 },
-        { bucket: '20-30', value: 1 },
+        { start: 0, end: 10, value: 1 },
+        { start: 10, end: 20, value: 2 },
+        { start: 20, end: 30, value: 1 },
       ]);
     });
 
@@ -163,9 +163,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 1 },
-        { bucket: '10-20', value: 2 },
-        { bucket: '20-30', value: 1 },
+        { start: 0, end: 10, value: 1 },
+        { start: 10, end: 20, value: 2 },
+        { start: 20, end: 30, value: 1 },
       ]);
     });
   });
@@ -206,9 +206,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-10', value: 1 },
-        { bucket: '10-20', value: 1 },
-        { bucket: '20-30', value: 1 },
+        { start: 0, end: 10, value: 1 },
+        { start: 10, end: 20, value: 1 },
+        { start: 20, end: 30, value: 1 },
       ]);
     });
 
@@ -220,7 +220,7 @@ describe('bin', () => {
         binField: 'value',
       })(data);
 
-      expect(result).toEqual([{ bucket: '42-42', value: 3 }]);
+      expect(result).toEqual([{ start: 42, end: 42, value: 3 }]);
     });
 
     it('should handle negative values', () => {
@@ -232,10 +232,10 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '-20--10', value: 1 },
-        { bucket: '-10-0', value: 1 },
-        { bucket: '0-10', value: 1 },
-        { bucket: '10-20', value: 1 },
+        { start: -20, end: -10, value: 1 },
+        { start: -10, end: 0, value: 1 },
+        { start: 0, end: 10, value: 1 },
+        { start: 10, end: 20, value: 1 },
       ]);
     });
 
@@ -248,8 +248,8 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-0.5', value: 2 },
-        { bucket: '0.5-1', value: 2 },
+        { start: 0, end: 0.5, value: 2 },
+        { start: 0.5, end: 1, value: 2 },
       ]);
     });
   });
@@ -267,8 +267,8 @@ describe('bin', () => {
       // With nice number rounding, step should be 20
       // binStart = 0
       expect(result).toEqual([
-        { bucket: '0-20', value: 1 },
-        { bucket: '20-40', value: 1 },
+        { start: 0, end: 20, value: 1 },
+        { start: 20, end: 40, value: 1 },
       ]);
     });
 
@@ -282,9 +282,9 @@ describe('bin', () => {
       })(data);
 
       expect(result).toEqual([
-        { bucket: '0-7.5', value: 1 },
-        { bucket: '7.5-15', value: 1 },
-        { bucket: '15-22.5', value: 1 },
+        { start: 0, end: 7.5, value: 1 },
+        { start: 7.5, end: 15, value: 1 },
+        { start: 15, end: 22.5, value: 1 },
       ]);
     });
   });
@@ -301,9 +301,9 @@ describe('bin', () => {
       // Should use size=10, not count=2
       expect(result).toEqual(
         [
-          { bucket: '0-10', value: 1 },
-          { bucket: '40-50', value: 0 },
-          { bucket: '50-60', value: 1 },
+          { start: 0, end: 10, value: 1 },
+          { start: 40, end: 50, value: 0 },
+          { start: 50, end: 60, value: 1 },
         ].filter((b) => b.value > 0)
       );
     });
@@ -321,8 +321,8 @@ describe('bin', () => {
       // Should only include bins with data
       expect(result.length).toBe(2);
       expect(result).toEqual([
-        { bucket: '0-10', value: 1 },
-        { bucket: '50-60', value: 1 },
+        { start: 0, end: 10, value: 1 },
+        { start: 50, end: 60, value: 1 },
       ]);
     });
   });

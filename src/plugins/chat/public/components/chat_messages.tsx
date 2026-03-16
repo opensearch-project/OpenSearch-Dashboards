@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { MessageRow } from './message_row';
-import { ToolCallRow } from './tool_call_row';
+import { TimelineToolCall, ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
+import { ToolCallGroup } from './tool_call_group';
+import { AssistantActionService } from '../../../context_provider/public';
 
 /**
  * Determine tool status based on tool call and result
@@ -61,9 +63,169 @@ interface ChatMessagesProps {
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
+  startResponse?: boolean;
 }
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({
+/**
+ * Converts a timeline of messages into display rows, grouping tool calls appropriately.
+ *
+ * Processing rules:
+ * - Non-tool messages (user, assistant, system) are included as-is
+ * - Completed tool calls from consecutive assistant messages are grouped together
+ * - Running tool calls are displayed individually
+ * - Tool calls with custom renderers are displayed individually (not grouped)
+ * - Tool result messages are filtered out (they're referenced by tool calls)
+ *
+ * @param timeline - Array of messages from the conversation
+ * @returns Array of message rows ready for display
+ */
+export const convertTimelineToMessageRows = (timeline: Message[]) => {
+  const result: Array<
+    | Message
+    | { role: 'toolCallGroup'; toolCalls: TimelineToolCall[] }
+    | { role: 'toolCall'; toolCall: TimelineToolCall }
+  > = [];
+
+  // Remove tool result messages - they're only referenced by tool calls
+  const messages = timeline.filter((msg) => msg.role !== 'tool');
+
+  // Helper: Convert ToolCall to TimelineToolCall with status
+  const toTimelineToolCall = (toolCall: ToolCall): TimelineToolCall => {
+    const toolResult = timeline.find(
+      (msg): msg is ToolMessage =>
+        msg.role === 'tool' && (msg as ToolMessage).toolCallId === toolCall.id
+    );
+
+    return {
+      type: 'tool_call' as const,
+      id: toolCall.id,
+      toolName: toolCall.function.name,
+      status: getToolStatus(toolCall, toolResult),
+      arguments: toolCall.function.arguments,
+      result: toolResult?.content,
+      timestamp: Date.now(),
+    };
+  };
+
+  // Helper: Check if any tool call is running
+  const hasRunningTool = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    return toolCalls.some((tc) => {
+      const toolResult = timeline.find(
+        (msg): msg is ToolMessage => msg.role === 'tool' && msg.toolCallId === tc.id
+      );
+      return !toolResult; // No result means still running
+    });
+  };
+
+  // Helper: Check if tool has custom renderer
+  const hasCustomRenderer = (toolName: string): boolean => {
+    const service = AssistantActionService.getInstance();
+    return service.shouldUseCustomRenderer(toolName);
+  };
+
+  // Helper: Check if any tool call has custom renderer
+  const hasCustomRendererTool = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    return toolCalls.some((tc) => hasCustomRenderer(tc.function.name));
+  };
+
+  // Helper: Find next message that closes a tool call batch
+  // (non-assistant message or assistant with content)
+  const findBatchEndIndex = (startIndex: number): number => {
+    for (let i = startIndex; i < messages.length; i++) {
+      const msg = messages[i];
+      if (msg.role !== 'assistant' || msg.content) {
+        return i;
+      }
+    }
+    return -1; // No closing message found
+  };
+
+  // Helper: Add tool calls as individual rows
+  const addIndividualToolCalls = (toolCalls?: ToolCall[]) => {
+    if (!toolCalls?.length) return;
+    toolCalls.forEach((tc) => {
+      result.push({ role: 'toolCall', toolCall: toTimelineToolCall(tc) });
+    });
+  };
+
+  // Helper: Add tool calls as a group
+  const addToolCallGroup = (toolCalls: ToolCall[]) => {
+    if (!toolCalls.length) return;
+    result.push({
+      role: 'toolCallGroup',
+      toolCalls: toolCalls.map(toTimelineToolCall),
+    });
+  };
+
+  // Process messages
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+    result.push(message);
+
+    // Only assistant messages can have tool calls
+    if (message.role !== 'assistant') continue;
+
+    const assistantMsg = message as AssistantMessage;
+    const toolCalls = assistantMsg.toolCalls;
+
+    // No tool calls to process
+    if (!toolCalls?.length) continue;
+
+    // If any tool is running, show individually and continue processing
+    if (hasRunningTool(toolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // If any tool has custom renderer, show individually (don't group)
+    if (hasCustomRendererTool(toolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // Find where this batch of tool calls ends
+    const batchEndIndex = findBatchEndIndex(i + 1);
+
+    // If no closing message, show individually (batch incomplete) and continue
+    if (batchEndIndex === -1) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // Collect tool calls from continuation messages (empty assistant messages between current and end)
+    const continuationToolCalls: ToolCall[] = [];
+    for (let j = i + 1; j < batchEndIndex; j++) {
+      const continuationMsg = messages[j] as AssistantMessage;
+      if (continuationMsg.toolCalls) {
+        continuationToolCalls.push(...continuationMsg.toolCalls);
+      }
+    }
+
+    // If any continuation tool is running, show current individually and continue
+    if (hasRunningTool(continuationToolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // If any continuation tool has custom renderer, show all individually (don't group)
+    if (hasCustomRendererTool(continuationToolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // All tools completed and none have custom renderers - group them together
+    addToolCallGroup([...toolCalls, ...continuationToolCalls]);
+
+    // Skip to the message before batch end
+    i = batchEndIndex - 1;
+  }
+
+  return result;
+};
+
+const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
   isStreaming,
@@ -71,37 +233,111 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
+  startResponse,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const userHasScrolledUp = useRef<boolean>(false);
+  const isAutoScrolling = useRef<boolean>(false);
 
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView?.({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback(() => {
+    if (messagesEndRef.current) {
+      isAutoScrolling.current = true;
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      // Reset flag after animation completes
+      setTimeout(() => {
+        isAutoScrolling.current = false;
+      }, 500);
+    }
+  }, []);
 
+  // Check if user is near the bottom of the scroll area
+  const isNearBottom = useCallback((container: HTMLElement, threshold: number = 100): boolean => {
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    return distanceFromBottom < threshold;
+  }, []);
+
+  // Handle scroll events to detect if user scrolled up
+  const handleScroll = useCallback(() => {
+    // Ignore scroll events triggered by auto-scrolling
+    if (isAutoScrolling.current) {
+      return;
+    }
+
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const nearBottom = isNearBottom(container);
+
+    // If user is near the bottom, enable auto-scroll
+    if (nearBottom) {
+      if (userHasScrolledUp.current) {
+        userHasScrolledUp.current = false;
+      }
+    } else {
+      // User has scrolled up - disable auto-scroll
+      if (!userHasScrolledUp.current) {
+        userHasScrolledUp.current = true;
+      }
+    }
+  }, [isNearBottom]);
+
+  // Auto-scroll only if user hasn't scrolled up
   useEffect(() => {
-    scrollToBottom();
-  }, [timeline]);
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const shouldScroll = !userHasScrolledUp.current || isNearBottom(container);
+
+    // Only auto-scroll if:
+    // 1. User hasn't manually scrolled up, OR
+    // 2. User is already near the bottom
+    if (shouldScroll) {
+      scrollToBottom();
+    }
+  }, [timeline, isNearBottom, scrollToBottom]);
+
+  // Attach scroll listener
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
+  const messageRows = useMemo(() => convertTimelineToMessageRows(timeline), [timeline]);
+
   const lastAssistantMessageIndex = useMemo(
-    () => timeline.findLastIndex((message) => message.role === 'assistant'),
-    [timeline]
+    () => messageRows.findLastIndex((message) => message.role === 'assistant'),
+    [messageRows]
   );
   // Only enable suggestion on llm outputs after last user input
   const suggestionsEnabled = useMemo(() => {
     if (isStreaming) {
       return false;
     }
-    if (timeline.length === 0) {
+    if (messageRows.length === 0) {
       return false;
     }
-    const lastUserMessageIndex = timeline.findLastIndex((message) => message.role === 'user');
+    const lastUserMessageIndex = messageRows.findLastIndex((message) => message.role === 'user');
     return lastAssistantMessageIndex > lastUserMessageIndex;
-  }, [timeline, isStreaming, lastAssistantMessageIndex]);
+  }, [messageRows, isStreaming, lastAssistantMessageIndex]);
 
   return (
     <>
@@ -111,7 +347,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       </div> */}
 
       {/* Timeline Area */}
-      <div className={`chatMessages chatMessages--${layoutMode}`}>
+      <div className={`chatMessages chatMessages--${layoutMode}`} ref={messagesContainerRef}>
         {timeline.length === 0 && !isStreaming && (
           <div className="chatMessages__emptyState">
             <div className="chatMessages__emptyStateHeader">
@@ -149,7 +385,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           </div>
         )}
 
-        {timeline.map((message, index) => {
+        {messageRows.map((message, index) => {
           // Handle different message types
           if (message.role === 'user') {
             return <MessageRow key={message.id} message={message} onResend={onResendMessage} />;
@@ -157,66 +393,64 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
-            const isLoadingMessage = message.id.startsWith('loading-');
-            const isEmptyAndStreaming =
-              !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
+
+            const renderAssistantContent = () => {
+              if (!assistantMsg.content) {
+                return null;
+              }
+
+              if (Array.isArray(assistantMsg.content)) {
+                return assistantMsg.content
+                  .filter((content) => content.text?.trim())
+                  .map((content, contentIndex) => (
+                    <MessageRow
+                      key={`${assistantMsg.id}-${contentIndex}`}
+                      message={{
+                        role: 'assistant',
+                        content: content.text,
+                        id: `${assistantMsg.id}-${contentIndex}`,
+                      }}
+                    />
+                  ));
+              }
+
+              if (assistantMsg.content.trim()) {
+                return <MessageRow message={assistantMsg} />;
+              }
+
+              return null;
+            };
 
             return (
               <div key={message.id}>
-                {/* Show loading indicator for loading messages or empty streaming messages */}
-                {(isLoadingMessage || isEmptyAndStreaming) && (
-                  <div className="messageRow">
-                    <div className="messageRow__icon">
-                      <EuiIcon type="console" size="m" color="success" />
-                    </div>
-                    <div className="messageRow__content">
-                      <div className="chatMessages__thinkingText">Thinking...</div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Assistant message content */}
-                {!isLoadingMessage && assistantMsg.content && assistantMsg.content.trim() && (
-                  <MessageRow message={assistantMsg} />
-                )}
+                {renderAssistantContent()}
 
-                {!isLoadingMessage && suggestionsEnabled && lastAssistantMessageIndex === index && (
+                {suggestionsEnabled && lastAssistantMessageIndex === index && (
                   <ChatSuggestions messages={timeline} currentMessage={message} />
                 )}
-
-                {/* Tool calls below the message */}
-                {!isLoadingMessage &&
-                  assistantMsg.toolCalls?.map((toolCall) => {
-                    // Find corresponding tool result
-                    const toolResult = timeline.find(
-                      (m): m is ToolMessage =>
-                        m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
-                    );
-
-                    return (
-                      <ToolCallRow
-                        key={toolCall.id}
-                        onApprove={onApproveConfirmation}
-                        onReject={onRejectConfirmation}
-                        toolCall={{
-                          type: 'tool_call',
-                          id: toolCall.id,
-                          toolName: toolCall.function.name,
-                          status: getToolStatus(toolCall, toolResult),
-                          arguments: toolCall.function.arguments,
-                          result: toolResult?.content,
-                          timestamp: Date.now(), // Not used in display
-                        }}
-                      />
-                    );
-                  })}
               </div>
             );
           }
 
-          // Don't render tool messages separately (they're shown in ToolCallRow)
-          if (message.role === 'tool') {
-            return null;
+          if (message.role === 'toolCall') {
+            return (
+              <ToolCallRow
+                key={message.toolCall.id}
+                onApprove={onApproveConfirmation}
+                onReject={onRejectConfirmation}
+                toolCall={message.toolCall}
+              />
+            );
+          }
+
+          if (message.role === 'toolCallGroup') {
+            return (
+              <ToolCallGroup
+                key={message.toolCalls.map((toolCall) => toolCall.id).join('-')}
+                toolCalls={message.toolCalls}
+              />
+            );
           }
 
           // Handle system messages as errors
@@ -227,12 +461,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           return null;
         })}
 
-        {/* Loading indicator - waiting for agent response */}
-        {isStreaming && timeline.length === 0 && (
+        {isStreaming && !startResponse && (
           <div className="chatMessages__loadingIndicator">
             <div className="messageRow">
               <div className="messageRow__icon">
-                <EuiIcon type="discuss" size="m" color="success" />
+                <EuiIcon type="console" size="m" color="success" />
               </div>
               <div className="messageRow__content">
                 <div className="chatMessages__thinkingText">Thinking...</div>
@@ -240,9 +473,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             </div>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
     </>
   );
 };
+
+export const ChatMessages = React.memo(ChatMessagesComponent);
