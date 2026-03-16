@@ -242,6 +242,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
+  // Reset thread id to avoid restore latest logic gone
+  useEffect(()=>{
+    return ()=>{
+      services.core.chat.resetThreadId()
+    }
+  }, [services.core.chat])
+
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
     messageContent: string,
