@@ -432,6 +432,61 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('Authorization header forwarding', () => {
+      it('should forward Authorization header to AG-UI when present in request', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('Authorization', 'Bearer test-token-123')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+            Authorization: 'Bearer test-token-123',
+          },
+          body: JSON.stringify(validRequest),
+        });
+      });
+
+      it('should not include Authorization header when absent from request', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        const fetchHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(fetchHeaders).not.toHaveProperty('Authorization');
+      });
+    });
+
     describe('System Prompt Injection', () => {
       const mockSuccessfulAgUiResponse = () => {
         mockFetch.mockResolvedValue({
