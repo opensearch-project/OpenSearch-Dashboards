@@ -174,7 +174,7 @@ export const createSavedQueryService = (
   };
 
   const parseSavedQueryObject = (savedQuery: SavedQuery) => {
-    const queryString = savedQuery.attributes.query.query as string;
+    const queryString = savedQuery.attributes.query?.query as string | undefined;
     let parsedQuery;
     try {
       parsedQuery = JSON.parse(queryString);
