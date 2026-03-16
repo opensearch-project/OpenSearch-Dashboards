@@ -35,7 +35,9 @@ import dedent from 'dedent';
 
 import { Command } from './run_with_commands';
 
-const DEFAULT_GLOBAL_USAGE = `node ${Path.relative(process.cwd(), process.argv[1])}`;
+const DEFAULT_GLOBAL_USAGE = `node ${
+  process.argv[1] ? Path.relative(process.cwd(), process.argv[1]) : '<script>'
+}`;
 export const GLOBAL_FLAGS = dedent`
   --verbose, -v      Log verbosely
   --debug            Log debug messages (less than verbose)

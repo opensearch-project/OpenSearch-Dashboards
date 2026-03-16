@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { createScatterConfig, ScatterChartStyleControls } from './scatter_vis_config';
+import { createScatterConfig, defaultScatterChartStyles } from './scatter_vis_config';
 import { ScatterVisStyleControls } from './scatter_vis_options';
-import { Positions, PointShape, AxisRole, StandardAxes } from '../types';
+import { Positions, PointShape, ThresholdMode } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -27,46 +27,31 @@ describe('createScatterConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createScatterConfig();
-    const defaults = config.ui.style.defaults as ScatterChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);
-    expect(defaults.legendPosition).toBe(Positions.RIGHT);
+    expect(defaults.legendPosition).toBe(Positions.BOTTOM);
     // Verify exclusive style
     expect(defaults.exclusive.pointShape).toBe(PointShape.CIRCLE);
     expect(defaults.exclusive.angle).toBe(0);
-    expect(defaults.exclusive.filled).toBe(false);
-
-    // Verify axes
-    expect(defaults.standardAxes).toHaveLength(2);
-    const xAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.X);
-    expect(xAxis).toHaveProperty('position', Positions.BOTTOM);
-    const yAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.Y);
-    expect(yAxis).toHaveProperty('position', Positions.LEFT);
+    expect(defaults.exclusive.filled).toBe(true);
 
     // Verify title
     expect(defaults.titleOptions.show).toBe(false);
     expect(defaults.titleOptions.titleName).toBe('');
+    expect(defaults.thresholdOptions).toMatchObject({
+      baseColor: '#00BD6B',
+      thresholds: [],
+      thresholdStyle: ThresholdMode.Off,
+    });
   });
   it('should render the ScatterVisStyleControls component with the provided props', () => {
     const config = createScatterConfig();
     const renderFunction = config.ui.style.render;
     // Mock props
     const mockProps = {
-      styleOptions: {
-        switchAxes: false,
-        tooltipOptions: {
-          mode: 'hidden' as 'hidden',
-        },
-        addLegend: false,
-        legendPosition: Positions.RIGHT,
-        exclusive: {
-          pointShape: PointShape.CIRCLE,
-          angle: 0,
-          filled: false,
-        },
-        standardAxes: [] as StandardAxes[],
-      } as ScatterChartStyleControls,
+      styleOptions: defaultScatterChartStyles,
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { act } from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
@@ -201,24 +201,42 @@ const renderInEditModeAndOpenContextMenu = async (
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, embeddableInputs);
 
-  const component = mount(
-    <I18nProvider>
-      <EmbeddablePanel
-        embeddable={embeddable}
-        getActions={getActions}
-        getAllEmbeddableFactories={start.getEmbeddableFactories}
-        getEmbeddableFactory={start.getEmbeddableFactory}
-        notifications={{} as any}
-        overlays={{} as any}
-        application={applicationMock}
-        inspector={inspector}
-        SavedObjectFinder={() => null}
-      />
-    </I18nProvider>
-  );
+  let component: any;
+  await act(async () => {
+    component = mount(
+      <I18nProvider>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={getActions}
+          getAllEmbeddableFactories={start.getEmbeddableFactories}
+          getEmbeddableFactory={start.getEmbeddableFactory}
+          notifications={{} as any}
+          overlays={{} as any}
+          application={applicationMock}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+        />
+      </I18nProvider>
+    );
+  });
+  // Update enzyme wrapper to reflect React 18's rendered content
+  component.update();
 
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await act(async () => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  });
+
+  // Wait for React 18's async rendering and action promises to resolve
+  // First tick for the click event to propagate
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+  component.update();
+
+  // Second tick for getActions promise to resolve and render action items
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
   component.update();
 
   return { component };

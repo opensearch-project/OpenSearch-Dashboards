@@ -9,9 +9,11 @@ import {
   INDEX_PATTERN_WITH_NO_TIME,
   INDEX_WITHOUT_TIME_1,
   DATASOURCE_NAME,
-} from '../../../../../../utils/constants';
+} from '../../../../../../utils/apps/constants';
+import { nonTimeBasedFieldsForDatasetCreation } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   getDefaultQuery,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
@@ -20,35 +22,57 @@ import {
   generateSimpleDatasetSelectorTestConfigurations,
   validateItemsInSimpleDatasetSelectorDropDown,
 } from '../../../../../../utils/apps/query_enhancements/simple_dataset_selector';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
+const timebasedDatasetId = getRandomizedDatasetId();
+const nontimebasedDatasetId = getRandomizedDatasetId();
 
+const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
+// eslint-disable-next-line no-loop-func
 export const runSimpleDatasetSelectorTests = () => {
-  describe('simple dataset selector selecting an index pattern', () => {
-    before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_NO_TIME.replace('*', ''),
-        timefieldName: '',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-        indexPatternHasTimefield: false,
+  before(() => {
+    cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+    createWorkspaceAndDatasetUsingEndpoint(
+      DATASOURCE_NAME,
+      workspaceName,
+      timebasedDatasetId,
+      INDEX_PATTERN_WITH_TIME, // Create index pattern from base index
+      'timestamp', // timestampField
+      'logs', // signalType
+      ['use-case-search'] // features
+    );
+
+    // Creating the Non Timebased Dataset
+    cy.get('@DATASOURCE_ID').then((datasourceId) => {
+      cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
+        cy.osd.createDatasetByEndpoint(
+          nontimebasedDatasetId,
+          workspaceId,
+          datasourceId,
+          {
+            title: INDEX_PATTERN_WITH_NO_TIME,
+            signalType: 'logs',
+            fields: nonTimeBasedFieldsForDatasetCreation,
+          },
+          `${nontimebasedDatasetId}:DATASET_ID`
+        );
       });
     });
 
+    // Navigate to discover page ONCE for all tests
+    cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'data-explorer/discover',
+      isEnhancement: true,
+    });
+  });
+
+  describe('simple dataset selector selecting an index pattern', () => {
     after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
         INDEX_WITH_TIME_1,
@@ -56,26 +80,25 @@ export const runSimpleDatasetSelectorTests = () => {
       ]);
     });
 
-    generateSimpleDatasetSelectorTestConfigurations([
-      {
-        indexPattern: INDEX_PATTERN_WITH_TIME,
-        time: true,
-      },
-      {
-        indexPattern: INDEX_PATTERN_WITH_NO_TIME,
-        time: false,
-      },
-    ]).forEach((config) => {
-      it(`Select ${
-        config.time ? 'time-based' : 'no-time-based'
-      } Indexpattern when original language was ${
-        config.language
-      } from the simple dataset selector`, () => {
-        cy.osd.navigateToWorkSpaceSpecificPage({
-          workspaceName,
-          page: 'discover',
-          isEnhancement: true,
-        });
+    it('Test all dataset selector configurations without page reloads', () => {
+      const configs = generateSimpleDatasetSelectorTestConfigurations([
+        {
+          indexPattern: INDEX_PATTERN_WITH_TIME,
+          time: true,
+        },
+        {
+          indexPattern: INDEX_PATTERN_WITH_NO_TIME,
+          time: false,
+        },
+      ]);
+
+      // Test all configurations in a single test - no page reloads between iterations
+      configs.forEach((config, index) => {
+        cy.log(
+          `Testing configuration ${index + 1}/${configs.length}: ${
+            config.time ? 'time-based' : 'no-time-based'
+          } with ${config.language}`
+        );
 
         // Select the original language
         cy.setQueryLanguage(config.language);
@@ -101,26 +124,51 @@ export const runSimpleDatasetSelectorTests = () => {
           setDatePickerDatesAndSearchIfRelevant(config.language);
           cy.getElementByTestId('docTableHeaderField').contains('Time');
         }
+
+        cy.log(`✅ Configuration ${index + 1} completed successfully`);
       });
     });
   });
 
   describe('filtering index pattern in simple dataset selector', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
+      // Create workspace and dataset using our new helper function
+      cy.osd.getDataSourceId(DATASOURCE_NAME);
+      cy.get('@DATASOURCE_ID').then((datasourceId) => {
+        cy.osd.createWorkspaceWithDataSourceId(
+          datasourceId,
+          workspaceName,
+          ['use-case-search'],
+          `${workspaceName}:WORKSPACE_ID`
+        );
+      });
 
       for (let i = 1; i <= noIndexPatterns; i++) {
-        cy.createWorkspaceIndexPatterns({
-          workspaceName: workspaceName,
-          indexPattern: INDEX_PATTERN_WITH_TIME.slice(0, i),
-          timefieldName: 'timestamp',
-          dataSource: DATASOURCE_NAME,
-          isEnhancement: true,
+        const currentDatasetId = getRandomizedDatasetId();
+        // eslint-disable-next-line no-loop-func
+        cy.get('@DATASOURCE_ID').then((datasourceId) => {
+          // eslint-disable-next-line no-loop-func
+          cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
+            cy.osd.createDatasetByEndpoint(
+              currentDatasetId,
+              workspaceId,
+              datasourceId,
+              {
+                title: `${INDEX_PATTERN_WITH_TIME.slice(0, i)}*`,
+                signalType: 'logs',
+                timestamp: 'timestamp',
+              },
+              `${currentDatasetId}:DATASET_ID`
+            );
+          });
         });
       }
+
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'data-explorer/discover',
+        isEnhancement: true,
+      });
     });
 
     after(() => {
@@ -131,12 +179,6 @@ export const runSimpleDatasetSelectorTests = () => {
     });
 
     it('validate filtering index pattern in simple dataset selector', () => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName,
-        page: 'discover',
-        isEnhancement: true,
-      });
-
       for (let i = 1; i <= noIndexPatterns; i++) {
         validateItemsInSimpleDatasetSelectorDropDown(
           `::${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,

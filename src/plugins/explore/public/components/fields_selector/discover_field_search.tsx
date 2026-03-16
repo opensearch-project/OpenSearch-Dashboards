@@ -192,6 +192,7 @@ export function DiscoverFieldSearch({
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
           handleValueChange(id, e.target.value)
         }
+        onMouseUp={(e) => e.stopPropagation()}
         aria-label={i18n.translate('explore.discover.fieldChooser.filter.fieldSelectorLabel', {
           defaultMessage: 'Selection of {id} filter options',
           values: { id },

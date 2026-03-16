@@ -73,6 +73,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { convertIndexPatternTerminology } from '../../../../opensearch_dashboards_utils/public';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
@@ -136,6 +137,7 @@ export interface SavedObjectsTableProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigationUI: NavigationPublicPluginStart['ui'];
   useUpdatedUX: boolean;
+  isDatasetManagementEnabled: boolean;
 }
 
 export interface SavedObjectsTableState {
@@ -1126,6 +1128,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       namespaceRegistry,
       useUpdatedUX,
       navigationUI,
+      isDatasetManagementEnabled,
     } = this.props;
 
     const selectionConfig = {
@@ -1133,11 +1136,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
     const typeCounts = savedObjectCounts.type || {};
 
-    const filterOptions = allowedTypes.map((type) => ({
-      value: type,
-      name: type,
-      view: `${type} (${typeCounts[type] || 0})`,
-    }));
+    const filterOptions = allowedTypes.map((type) => {
+      const convertedName = convertIndexPatternTerminology(type, isDatasetManagementEnabled);
+      return {
+        value: type,
+        name: convertedName,
+        view: `${convertedName} (${typeCounts[type] || 0})`,
+      };
+    });
 
     const filters: EuiSearchBarProps['filters'] = [
       {
@@ -1264,6 +1270,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             showDuplicate={this.state.workspaceEnabled}
             onRefresh={this.refreshObjects}
             useUpdatedUX={useUpdatedUX}
+            isDatasetManagementEnabled={isDatasetManagementEnabled}
           />
         </RedirectAppLinks>
       </EuiPageContent>

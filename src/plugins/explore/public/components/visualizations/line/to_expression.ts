@@ -3,17 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineChartStyleControls } from './line_vis_config';
+import { LineChartStyle } from './line_vis_config';
 import { VisColumn, Positions, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import {
   buildMarkConfig,
   createTimeMarkerLayer,
   applyAxisStyling,
   ValueAxisPosition,
+  createLineSeries,
+  createLineBarSeries,
+  createFacetLineSeries,
 } from './line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
-import { getTooltipFormat } from '../utils/utils';
-
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
+import {
+  applyTimeRangeToEncoding,
+  getAxisByRole,
+  getSwappedAxisRole,
+  getTooltipFormat,
+  getChartRender,
+} from '../utils/utils';
+import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
+import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  applyTimeRange,
+} from '../utils/echarts_spec';
+import {
+  convertTo2DArray,
+  transform,
+  pivot,
+  sortByTime,
+  facetTransform,
+  flatten,
+} from '../utils/data_transformation';
 /**
  * Rule 1: Create a simple line chart with one metric and one date
  * @param transformedData The transformed data
@@ -26,19 +51,53 @@ export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const metricField = yAxisColumn?.column;
-  const dateField = xAxisColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !timeField) throw Error('Missing axis config for line chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
+      buildAxisConfigs,
+      applyTimeRange,
+      createLineSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: [valueField],
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
+
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'line'),
     encoding: {
       x: {
@@ -46,11 +105,11 @@ export const createSimpleLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           [],
@@ -61,15 +120,15 @@ export const createSimpleLineChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
-          styles,
+          { title: '' },
+          yAxisStyle,
           'value',
           numericalColumns,
           [],
           dateColumns
         ),
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -84,9 +143,27 @@ export const createSimpleLineChart = (
   };
 
   layers.push(mainLayer);
+  layers.push(
+    ...createCrosshairLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName ?? '',
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName ?? '',
+        },
+      },
+      { showTooltip }
+    )
+  );
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -97,8 +174,14 @@ export const createSimpleLineChart = (
     layers.push(timeMarkerLayer);
   }
 
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time`
       : undefined,
@@ -119,22 +202,63 @@ export const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
   const secondYAxisMapping = axisColumnMappings?.[AxisRole.Y_SECOND];
 
+  const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
+  const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
+
   const metric1Field = yAxisMapping?.column;
   const metric2Field = secondYAxisMapping?.column;
   const dateField = xAxisMapping?.column;
-  const metric1Name = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
-  const metric2Name = styles.valueAxes?.[1]?.title?.text || secondYAxisMapping?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const metric1Name = yAxisStyle?.title?.text || yAxisMapping?.name;
+  const metric2Name = y2AxisStyle?.title?.text || secondYAxisMapping?.name;
+  const dateName = xAxisStyle?.title?.text || xAxisMapping?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis;
+    const value2Field = axisColumnMappings?.[AxisRole.Y_SECOND];
+
+    if (!timeField || !valueField || !value2Field) {
+      throw Error('Missing axis config or color field for line-bar chart');
+    }
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      createBaseConfig({
+        title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      applyTimeRange,
+      createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
 
   const barLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'bar'),
     encoding: {
       x: {
@@ -142,11 +266,11 @@ export const createLineBarChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           [],
@@ -157,8 +281,8 @@ export const createLineBarChart = (
         field: metric1Field,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metric1Name },
-          styles,
+          { title: '' },
+          yAxisStyle,
           'value',
           numericalColumns,
           [],
@@ -170,12 +294,12 @@ export const createLineBarChart = (
         datum: metric1Name,
         legend: styles.addLegend
           ? {
-              title: 'Metrics',
+              title: styles.legendTitle,
               orient: styles.legendPosition,
             }
           : null,
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -205,28 +329,28 @@ export const createLineBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           {
-            title: metric2Name,
+            title: '',
             orient: Positions.RIGHT,
           },
-          styles,
+          y2AxisStyle,
           'value',
           numericalColumns,
           [],
           dateColumns,
           ValueAxisPosition.Right // Second value axis which is on the right
         ),
-        scale: { zero: false },
+        // scale: { zero: false },
       },
       color: {
         datum: metric2Name,
         legend: styles.addLegend
           ? {
-              title: 'Metrics',
+              title: styles.legendTitle,
               orient: styles.legendPosition,
             }
           : null,
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -241,12 +365,35 @@ export const createLineBarChart = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     barWithThresholdLayer.layer.push(thresholdLayer);
   }
 
   layers.push(barWithThresholdLayer, lineLayer);
+
+  layers.push(
+    ...createHighlightBarLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName,
+        },
+        y: {
+          name: metric1Field ?? '',
+          type: 'quantitative',
+          title: metric1Name,
+        },
+        y1: {
+          name: metric2Field ?? '',
+          type: 'quantitative',
+          title: metric2Name,
+        },
+      },
+      { showTooltip }
+    )
+  );
 
   // Add time marker layer if enabled
   const timeMarkerLayer = createTimeMarkerLayer(styles);
@@ -254,8 +401,14 @@ export const createLineBarChart = (
     layers.push(timeMarkerLayer);
   }
 
+  // Apply time range to bar layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(barLayer.encoding, axisColumnMappings, timeRange);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`
       : undefined,
@@ -281,22 +434,71 @@ export const createMultiLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
 
-  const metricField = yAxisColumn?.column;
-  const dateField = xAxisColumn?.column;
+    if (!timeField || !valueField || !colorField) {
+      throw Error('Missing axis config or color field for multi lines chart');
+    }
+
+    const result = pipe(
+      transform(
+        sortByTime(timeField),
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+        }),
+        flatten(),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      applyTimeRange,
+      createLineSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
+
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
   const categoryField = colorColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'line'),
     encoding: {
       x: {
@@ -304,11 +506,11 @@ export const createMultiLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -319,8 +521,8 @@ export const createMultiLineChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
-          styles,
+          { title: '' },
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,
@@ -333,12 +535,12 @@ export const createMultiLineChart = (
         legend:
           styles?.addLegend !== false
             ? {
-                title: categoryName,
+                title: styles.legendTitle,
                 orient: styles?.legendPosition || Positions.RIGHT,
               }
             : null,
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -354,9 +556,32 @@ export const createMultiLineChart = (
   };
 
   layers.push(mainLayer);
+  layers.push(
+    ...createCrosshairLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName ?? '',
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName ?? '',
+        },
+        color: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName ?? '',
+        },
+      },
+      { showTooltip, data: transformedData }
+    )
+  );
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -367,8 +592,14 @@ export const createMultiLineChart = (
     layers.push(timeMarkerLayer);
   }
 
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
       : undefined,
@@ -391,28 +622,140 @@ export const createFacetedMultiLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
-  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
+    if (!timeField || !valueField || !colorField || !facetColumn) {
+      throw Error('Missing axis config for facet time line chart');
+    }
+
+    const result = pipe(
+      facetTransform(
+        facetColumn,
+        sortByTime(timeField),
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+        }),
+        flatten(),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      applyTimeRange,
+      createFacetLineSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
+    });
+
+    return result.spec;
+  }
+
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const metricField = yAxisMapping?.column;
-  const dateField = xAxisMapping?.column;
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
+  const mainLayerEncoding = {
+    x: {
+      field: dateField,
+      type: 'temporal',
+      axis: applyAxisStyling(
+        {
+          title: '',
+          labelAngle: -45,
+          labelSeparation: 8,
+        },
+        xAxisStyle,
+        'category',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    y: {
+      field: metricField,
+      type: 'quantitative',
+      axis: applyAxisStyling(
+        { title: '' },
+        yAxisStyle,
+        'value',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    color: {
+      field: category1Field,
+      type: 'nominal',
+      legend:
+        styles?.addLegend !== false
+          ? {
+              title: styles.legendTitle,
+              orient: styles?.legendPosition || Positions.RIGHT,
+            }
+          : null,
+    },
+    ...(showTooltip && {
+      tooltip: [
+        {
+          field: dateField,
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        { field: metricField, type: 'quantitative', title: metricName },
+        { field: category1Field, type: 'nominal', title: category1Name },
+      ],
+    }),
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    applyTimeRangeToEncoding(mainLayerEncoding, axisColumnMappings, timeRange);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
@@ -427,87 +770,32 @@ export const createFacetedMultiLineChart = (
       layer: [
         {
           mark: facetMarkConfig,
-          encoding: {
+          params: [createTimeRangeBrush({ timeAxis: 'x' })],
+          encoding: mainLayerEncoding,
+        },
+        ...createCrosshairLayers(
+          {
             x: {
-              field: dateField,
+              name: dateField ?? '',
               type: 'temporal',
-              axis: applyAxisStyling(
-                {
-                  title: dateName,
-                  labelAngle: -45,
-                  labelSeparation: 8,
-                },
-                styles,
-                'category',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+              title: dateName,
+              format: getTooltipFormat(transformedData, dateField),
             },
             y: {
-              field: metricField,
+              name: metricField ?? '',
               type: 'quantitative',
-              axis: applyAxisStyling(
-                { title: metricName },
-                styles,
-                'value',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+              title: metricName,
             },
             color: {
-              field: category1Field,
+              name: category1Field ?? '',
               type: 'nominal',
-              legend:
-                styles?.addLegend !== false
-                  ? {
-                      title: category1Name,
-                      orient: styles?.legendPosition || Positions.RIGHT,
-                    }
-                  : null,
+              title: category1Name,
             },
-            ...(styles.tooltipOptions?.mode !== 'hidden' && {
-              tooltip: [
-                {
-                  field: dateField,
-                  type: 'temporal',
-                  title: dateName,
-                  format: getTooltipFormat(transformedData, dateField),
-                },
-                { field: metricField, type: 'quantitative', title: metricName },
-                { field: category1Field, type: 'nominal', title: category1Name },
-              ],
-            }),
           },
-        },
+          { showTooltip, data: transformedData }
+        ),
         // Add threshold layer to each facet if enabled
-        ...(styles?.thresholdLines && styles.thresholdLines.length > 0
-          ? styles.thresholdLines
-              .filter((threshold) => threshold.show)
-              .map((threshold) => ({
-                mark: {
-                  type: 'rule',
-                  color: threshold.color,
-                  strokeWidth: threshold.width,
-                  strokeDash: getStrokeDash(threshold.style),
-                  tooltip: styles?.tooltipOptions?.mode !== 'hidden',
-                },
-                encoding: {
-                  y: {
-                    datum: threshold.value,
-                    type: 'quantitative',
-                  },
-                  ...(styles?.tooltipOptions?.mode !== 'hidden' && {
-                    tooltip: {
-                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
-                        threshold.value
-                      }`,
-                    },
-                  }),
-                },
-              }))
-          : []),
+        ...(thresholdLayer?.layer ?? []),
         // Add time marker to each facet if enabled
         ...(styles?.addTimeMarker
           ? [
@@ -552,24 +840,195 @@ export const createCategoryLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
-    throw new Error(
-      'Category line chart requires at least one numerical column and one categorical column'
-    );
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const categoryField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !categoryField) throw Error('Missing axis config for line chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+    // When axesMapping is updated but the data itself has not changed
+    // (for example, when switching x axis to a different field),
+    // the previous chart styles will be preserved.
+    // This is the critical minimal fix:
+    // for category-based line charts, simply set addTimeMarker to false
+    // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
+    const result = pipe(
+      transform(convertTo2DArray(allColumns)),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
+        legend: { show: false },
+      }),
+      buildAxisConfigs,
+      createLineSeries({
+        styles,
+        categoryField,
+        seriesFields: [valueField],
+        addTimeMarker: false,
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const categoryField = xAxis?.column;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const categoryName = xAxisStyle?.title?.text || xAxis?.name;
+  const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  const mainLayer = {
+    mark: buildMarkConfig(styles, 'line'),
+    encoding: {
+      x: {
+        field: categoryField,
+        type: 'nominal',
+        axis: applyAxisStyling(
+          {
+            title: '',
+            labelAngle: -45,
+            labelSeparation: 8,
+          },
+          xAxisStyle,
+          'category',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: '' },
+          yAxisStyle,
+          'value',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      ...(showTooltip && {
+        tooltip: [
+          { field: categoryField, type: 'nominal', title: categoryName },
+          { field: metricField, type: 'quantitative', title: metricName },
+        ],
+      }),
+    },
+  };
+
+  layers.push(mainLayer);
+
+  layers.push(
+    ...createHighlightBarLayers(
+      {
+        x: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName,
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+        },
+      },
+      { showTooltip }
+    )
+  );
+
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  if (thresholdLayer) {
+    layers.push(thresholdLayer);
   }
 
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
+};
 
-  const metricField = yAxisColumn?.column;
-  const categoryField = xAxisColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+export const createCategoryMultiLineChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const cateField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    if (!cateField || !valueField || !colorField) {
+      throw Error('Missing axis config or color field for multi lines chart');
+    }
+    const result = pipe(
+      transform(
+        pivot({
+          groupBy: cateField,
+          pivot: colorField,
+          field: valueField,
+        }),
+        flatten(),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+        legend: { show: styles.addLegend },
+      }),
+      buildAxisConfigs,
+      createLineSeries({
+        styles,
+        categoryField: cateField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
+        addTimeMarker: false,
+      }),
+
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+  const colorAxisColumn = axisColumnMappings?.[AxisRole.COLOR];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const categoryField = xAxis?.column;
+  const categoryField2 = colorAxisColumn?.column;
+  const metricName = yAxis?.name;
+  const categoryName = xAxis?.name;
+  const category2Name = colorAxisColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
     mark: buildMarkConfig(styles, 'line'),
@@ -583,7 +1042,7 @@ export const createCategoryLineChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -595,17 +1054,28 @@ export const createCategoryLineChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: metricName },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,
           dateColumns
         ),
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      color: {
+        field: categoryField2,
+        type: 'nominal',
+        legend: styles.addLegend
+          ? {
+              title: styles.legendTitle,
+              orient: styles.legendPosition?.toLowerCase() || Positions.RIGHT,
+            }
+          : null,
+      },
+      ...(showTooltip && {
         tooltip: [
           { field: categoryField, type: 'nominal', title: categoryName },
           { field: metricField, type: 'quantitative', title: metricName },
+          { field: categoryField2, type: 'nominal', title: category2Name },
         ],
       }),
     },
@@ -613,8 +1083,31 @@ export const createCategoryLineChart = (
 
   layers.push(mainLayer);
 
+  layers.push(
+    ...createCrosshairLayers(
+      {
+        x: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName ?? '',
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName ?? '',
+        },
+        color: {
+          name: categoryField2 ?? '',
+          type: 'nominal',
+          title: category2Name ?? '',
+        },
+      },
+      { showTooltip, data: transformedData }
+    )
+  );
+
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -622,7 +1115,7 @@ export const createCategoryLineChart = (
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName}`
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName} and ${category2Name}`
       : undefined,
     data: { values: transformedData },
     layer: layers,

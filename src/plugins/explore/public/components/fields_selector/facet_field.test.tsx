@@ -9,8 +9,8 @@ import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { FacetField } from './facet_field';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPatternField } from '../../../../data/public';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { DataViewField } from '../../../../data/public';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 
 jest.mock('./facet_value', () => ({
   FacetValue: ({ bucket }: any) => (
@@ -19,7 +19,7 @@ jest.mock('./facet_value', () => ({
 }));
 
 function getProps({ buckets = [], shortDotsEnabled = false } = {}) {
-  const indexPattern = getStubIndexPattern(
+  const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
@@ -27,19 +27,17 @@ function getProps({ buckets = [], shortDotsEnabled = false } = {}) {
     coreMock.createSetup()
   );
 
-  const mockField = new IndexPatternField(
-    {
-      name: 'status',
-      type: 'string',
-      esTypes: ['keyword'],
-      count: 5,
-      scripted: false,
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
-    },
-    'status'
-  );
+  const mockField = {
+    name: 'status',
+    type: 'string',
+    esTypes: ['keyword'],
+    count: 5,
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+    displayName: 'status',
+  } as DataViewField;
 
   const defaultBuckets =
     buckets.length > 0
@@ -51,7 +49,7 @@ function getProps({ buckets = [], shortDotsEnabled = false } = {}) {
 
   return {
     field: mockField,
-    selectedIndexPattern: indexPattern,
+    selectedDataSet: dataSet,
     onAddFilter: jest.fn(),
     getDetailsByField: jest.fn(() => ({ buckets: defaultBuckets, error: '', exists: 1, total: 1 })),
     shortDotsEnabled,
@@ -117,8 +115,8 @@ describe('FacetField', () => {
     expect(toggleButton.querySelector('[data-euiicon-type="arrowRight"]')).toBeInTheDocument();
   });
 
-  it('renders nothing when no index pattern', () => {
-    const props = { ...getProps(), selectedIndexPattern: undefined };
+  it('renders nothing when no data set', () => {
+    const props = { ...getProps(), selectedDataSet: undefined };
     const { container } = render(<FacetField {...props} />);
 
     expect(container.firstChild).toBeNull();

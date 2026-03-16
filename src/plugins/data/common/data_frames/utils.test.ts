@@ -8,6 +8,7 @@ import {
   convertResult,
   DATA_FRAME_TYPES,
   formatTimePickerDate,
+  getFieldType,
   IDataFrameErrorResponse,
   IDataFrameResponse,
 } from '.';
@@ -33,6 +34,52 @@ describe('formatTimePickerDate', () => {
     expect(datemath.parse).toHaveBeenCalledTimes(2);
     expect(datemath.parse).toHaveBeenCalledWith('now/d', { roundUp: undefined });
     expect(datemath.parse).toHaveBeenCalledWith('now/d', { roundUp: true });
+  });
+});
+
+describe('getFieldType', () => {
+  it('should return object for struct type', () => {
+    const field = { type: 'struct' };
+    const result = getFieldType(field);
+    expect(result).toBe('object');
+  });
+
+  it('should return date for timestamp type', () => {
+    const field = { type: 'timestamp' };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field name containing date', () => {
+    const field = { name: 'created_date' };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field name containing timestamp', () => {
+    const field = { name: 'event_timestamp' };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field with Date values', () => {
+    const field = { values: [new Date()] };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field with datemath parseable values', () => {
+    jest.spyOn(datemath, 'isDateTime').mockReturnValue(true);
+    const field = { values: ['2025-02-13T00:51:50Z'] };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+    expect(datemath.isDateTime).toHaveBeenCalledWith('2025-02-13T00:51:50Z');
+  });
+
+  it('should return original type if no special conditions match', () => {
+    const field = { type: 'keyword' };
+    const result = getFieldType(field);
+    expect(result).toBe('keyword');
   });
 });
 
@@ -384,5 +431,70 @@ describe('convertResult', () => {
     const result = convertResult({ response, options });
     expect(result.hits.hits[0]._source.foo).toBe(null);
     expect(result.hits.hits[1]._source.foo).toBe(undefined);
+  });
+
+  it('should transform instant data from meta to instantHits format', () => {
+    const instantRows = [
+      { Time: 1702483200000, cpu: '0', mode: 'idle', Value: 0.95 },
+      { Time: 1702483200000, cpu: '1', mode: 'idle', Value: 0.87 },
+    ];
+    const instantSchema = [
+      { name: 'Time', type: 'time', values: [] },
+      { name: 'cpu', type: 'string', values: [] },
+      { name: 'mode', type: 'string', values: [] },
+      { name: 'Value', type: 'number', values: [] },
+    ];
+
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      body: {
+        fields: [
+          { name: 'Time', type: 'time', values: [1702483200000] },
+          { name: 'Series', type: 'string', values: ['{cpu="0", mode="idle"}'] },
+          { name: 'Value', type: 'number', values: [0.95] },
+        ],
+        size: 1,
+        name: 'prometheus-data',
+        meta: {
+          instantData: {
+            schema: instantSchema,
+            rows: instantRows,
+          },
+        },
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const result = convertResult({ response });
+
+    // Verify instantHits is created with correct structure
+    expect((result as any).instantHits).toBeDefined();
+    expect((result as any).instantHits.hits).toHaveLength(2);
+    expect((result as any).instantHits.total).toBe(2);
+
+    // Verify each hit has correct format
+    expect((result as any).instantHits.hits[0]).toEqual({
+      _index: 'prometheus-data',
+      _source: instantRows[0],
+    });
+    expect((result as any).instantHits.hits[1]).toEqual({
+      _index: 'prometheus-data',
+      _source: instantRows[1],
+    });
+
+    // Verify instantFieldSchema is preserved
+    expect((result as any).instantFieldSchema).toEqual(instantSchema);
   });
 });

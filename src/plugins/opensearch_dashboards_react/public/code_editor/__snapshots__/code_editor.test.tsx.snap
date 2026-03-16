@@ -18,12 +18,7 @@ exports[`is rendered 1`] = `
   <ResizeDetector
     handleHeight={true}
     handleWidth={true}
-    nodeType="div"
     onResize={[Function]}
-    querySelector={null}
-    refreshRate={1000}
-    skipOnMount={false}
-    targetDomEl={null}
   />
 </Fragment>
 `;

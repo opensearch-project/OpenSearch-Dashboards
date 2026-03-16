@@ -29,6 +29,7 @@ export function DocViewTable({
           .map((field) => {
             return (
               <DocViewTableRowContainer
+                key={field}
                 hit={hit}
                 indexPattern={indexPattern}
                 filter={filter}

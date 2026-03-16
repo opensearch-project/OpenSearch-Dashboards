@@ -28,343 +28,266 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import moment from 'moment-timezone';
-import { unitOfTime } from 'moment';
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
+import * as echarts from 'echarts';
 
-import {
-  AnnotationDomainType,
-  Axis,
-  Chart,
-  HistogramBarSeries,
-  LineAnnotation,
-  Position,
-  ScaleType,
-  Settings,
-  RectAnnotation,
-  TooltipValue,
-  TooltipType,
-  ElementClickListener,
-  XYChartElementEvent,
-  BrushEndListener,
-  Theme,
-} from '@elastic/charts';
-
-import { i18n } from '@osd/i18n';
-import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
-import { Subscription, combineLatest } from 'rxjs';
 import { Chart as IChart } from '../utils/point_series';
 import { ExploreServices } from '../../../types';
+import {
+  createHistogramSpec,
+  getTimezone,
+  findMinInterval,
+} from '../utils/echarts_histogram_utils';
+import { getColors } from '../../visualizations/theme/default_colors';
+import { DEFAULT_THEME } from '../../visualizations/theme/default';
+
+interface EChartsBrushEndEvent {
+  areas?: Array<{
+    coordRange: [number, number];
+  }>;
+}
+
+interface EChartsClickEvent {
+  componentType?: string;
+  value?: [number, number];
+}
 
 export interface DiscoverHistogramProps {
   chartData: IChart;
+  chartType: 'HistogramBar' | 'Line';
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   services: ExploreServices;
+  showYAxisLabel?: boolean;
+  customChartsTheme?: Record<string, any>;
+  /**
+   * When true, uses a smarter date format that hides the year for intervals
+   * smaller than month, making the x-axis labels more compact and readable.
+   */
+  useSmartDateFormat?: boolean;
 }
 
-interface DiscoverHistogramState {
-  chartsTheme: EuiChartThemeType['theme'];
-  chartsBaseTheme: Theme;
-}
+// Re-export for backwards compatibility
+export { findMinInterval };
 
-function findIntervalFromDuration(
-  dateValue: number,
-  opensearchValue: number,
-  opensearchUnit: unitOfTime.Base,
-  timeZone: string
-) {
-  const date = moment.tz(dateValue, timeZone);
-  const startOfDate = moment.tz(date, timeZone).startOf(opensearchUnit);
-  const endOfDate = moment
-    .tz(date, timeZone)
-    .startOf(opensearchUnit)
-    .add(opensearchValue, opensearchUnit);
-  return endOfDate.valueOf() - startOfDate.valueOf();
-}
+export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
+  chartData,
+  chartType,
+  timefilterUpdateHandler,
+  services,
+  showYAxisLabel = false,
+  customChartsTheme,
+  useSmartDateFormat = false,
+}) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const instanceRef = useRef<echarts.ECharts | null>(null);
+  const isMountedRef = useRef(true);
+  const [ready, setReady] = useState(false);
 
-function getIntervalInMs(
-  value: number,
-  opensearchValue: number,
-  opensearchUnit: unitOfTime.Base,
-  timeZone: string
-): number {
-  switch (opensearchUnit) {
-    case 's':
-      return 1000 * opensearchValue;
-    case 'ms':
-      return 1 * opensearchValue;
-    default:
-      return findIntervalFromDuration(value, opensearchValue, opensearchUnit, timeZone);
-  }
-}
+  const { uiSettings } = services;
+  const timeZone = getTimezone(uiSettings);
+  const isDarkMode = uiSettings.get('theme:darkMode');
+  const colors = getColors();
 
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
-}
-
-export function findMinInterval(
-  xValues: number[],
-  opensearchValue: number,
-  opensearchUnit: string,
-  timeZone: string
-): number {
-  return xValues.reduce((minInterval, currentXvalue, index) => {
-    let currentDiff = minInterval;
-    if (index > 0) {
-      currentDiff = Math.abs(xValues[index - 1] - currentXvalue);
+  // Extract custom color from theme if provided
+  const customColor = useMemo(() => {
+    if (customChartsTheme?.colors?.vizColors?.[0]) {
+      return customChartsTheme.colors.vizColors[0];
     }
-    const singleUnitInterval = getIntervalInMs(
-      currentXvalue,
-      opensearchValue,
-      opensearchUnit as unitOfTime.Base,
-      timeZone
-    );
-    return Math.min(minInterval, singleUnitInterval, currentDiff);
-  }, Number.MAX_SAFE_INTEGER);
-}
+    return undefined;
+  }, [customChartsTheme]);
 
-export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
-  public static propTypes = {
-    chartData: PropTypes.object,
-    timefilterUpdateHandler: PropTypes.func,
-  };
+  // Initialize ECharts instance
+  useLayoutEffect(() => {
+    if (containerRef.current && !instanceRef.current) {
+      containerRef.current.style.opacity = '0';
+      const echartsInstance = echarts.init(containerRef.current, DEFAULT_THEME);
+      instanceRef.current = echartsInstance;
 
-  private subscription?: Subscription;
+      // Set up resize observer
+      const resizeObserver = new ResizeObserver(() => {
+        if (instanceRef.current && !instanceRef.current.isDisposed()) {
+          instanceRef.current.resize();
+        }
+      });
+      resizeObserver.observe(containerRef.current);
 
-  componentDidMount() {
-    this.subscription = combineLatest(
-      this.props.services.theme.chartsTheme$,
-      this.props.services.theme.chartsBaseTheme$
-    ).subscribe(([chartsTheme, chartsBaseTheme]) =>
-      this.setState({ chartsTheme, chartsBaseTheme })
-    );
-  }
-
-  componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+      return () => {
+        isMountedRef.current = false;
+        resizeObserver.disconnect();
+        if (instanceRef.current && !instanceRef.current.isDisposed()) {
+          instanceRef.current.dispose();
+          instanceRef.current = null;
+        }
+      };
     }
-  }
+  }, []);
 
-  public onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
+  // Signal readiness after first paint so the spec effect can fire
+  useEffect(() => {
+    if (instanceRef.current && isMountedRef.current) {
+      setReady(true);
     }
-    const [from, to] = x;
-    this.props.timefilterUpdateHandler({ from, to });
-  };
+  }, []);
 
-  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
-    const startRange = (elementData as XYChartElementEvent)[0].x;
+  // Handle brush selection for time range filtering
+  useEffect(() => {
+    const inst = instanceRef.current;
+    if (!inst) return;
 
-    const range = {
-      from: startRange,
-      to: startRange + xInterval,
-    };
-
-    this.props.timefilterUpdateHandler(range);
-  };
-
-  public formatXValue = (val: string) => {
-    const xAxisFormat = this.props.chartData.xAxisFormat.params!.pattern;
-
-    return moment(val).format(xAxisFormat);
-  };
-
-  public renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
-    headerData: TooltipValue
-  ): JSX.Element | string => {
-    const headerDataValue = headerData.value;
-    const formattedValue = this.formatXValue(headerDataValue);
-
-    const partialDataText = i18n.translate(
-      'explore.discover.histogram.partialData.bucketTooltipText',
-      {
-        defaultMessage:
-          'The selected time range does not include this entire bucket, it may contain partial data.',
+    const onBrushEnd = (params: EChartsBrushEndEvent) => {
+      const [from, to] = params.areas?.[0]?.coordRange ?? [];
+      if (from !== undefined && to !== undefined) {
+        timefilterUpdateHandler({ from, to });
       }
-    );
-
-    if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
-      return (
-        <React.Fragment>
-          <EuiFlexGroup
-            alignItems="center"
-            className="exploreHistogram__header--partial"
-            data-test-subj="dscHistogramHeader"
-            responsive={false}
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="iInCircle" />
-            </EuiFlexItem>
-            <EuiFlexItem>{partialDataText}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            <p>{formattedValue}</p>
-          </EuiText>
-        </React.Fragment>
-      );
-    }
-
-    return formattedValue;
-  };
-
-  public render() {
-    const { chartData, services } = this.props;
-    const { uiSettings } = services;
-    const timeZone = getTimezone(uiSettings);
-    const chartsTheme = services.theme.chartsDefaultTheme;
-    const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
-
-    if (!chartData) {
-      return null;
-    }
-
-    const data = chartData.values;
-
-    /**
-     * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
-     * see https://github.com/elastic/kibana/issues/27410
-     * TODO: Once the Discover query has been update, we should change the below to use the new field
-     */
-    const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
-    const xInterval = interval.asMilliseconds();
-
-    const xValues = chartData.xAxisOrderedValues;
-    const lastXValue = xValues[xValues.length - 1];
-
-    const domain = chartData.ordered;
-    const domainStart = domain.min.valueOf();
-    const domainEnd = domain.max.valueOf();
-
-    const domainMin = data[0]?.x > domainStart ? domainStart : data[0]?.x;
-    const domainMax = domainEnd - xInterval > lastXValue ? domainEnd - xInterval : lastXValue;
-
-    const xDomain = {
-      min: domainMin,
-      max: domainMax,
-      minInterval: findMinInterval(
-        xValues,
-        intervalOpenSearchValue,
-        intervalOpenSearchUnit,
-        timeZone
-      ),
     };
 
-    // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
-    // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
-    const now = moment();
-    const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
-    const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
+    inst.on('brushEnd', onBrushEnd);
 
-    const lineAnnotationData = [
-      {
-        dataValue: lineAnnotationValue,
-      },
-    ];
-    const isDarkMode = uiSettings.get('theme:darkMode');
+    return () => {
+      if (!inst.isDisposed()) {
+        inst.off('brushEnd', onBrushEnd);
+      }
+    };
+  }, [timefilterUpdateHandler]);
 
-    const lineAnnotationStyle = {
-      line: {
-        strokeWidth: 2,
-        stroke: euiThemeVars.euiColorDanger,
-        opacity: 0.7,
-      },
+  // Handle click on bars/points for zoom
+  useEffect(() => {
+    const inst = instanceRef.current;
+    if (!inst || !chartData) return;
+
+    const xInterval = chartData.ordered.interval.asMilliseconds();
+
+    const onClick = (params: EChartsClickEvent) => {
+      if (params.componentType === 'series' && params.value) {
+        const startRange = params.value[0];
+        timefilterUpdateHandler({
+          from: startRange,
+          to: startRange + xInterval,
+        });
+      }
     };
 
-    const rectAnnotations = [];
-    if (domainStart !== domainMin) {
-      rectAnnotations.push({
-        coordinates: {
-          x1: domainStart,
+    inst.on('click', onClick);
+
+    return () => {
+      if (!inst.isDisposed()) {
+        inst.off('click', onClick);
+      }
+    };
+  }, [chartData, timefilterUpdateHandler]);
+
+  // Show/hide grid lines on hover
+  useEffect(() => {
+    const inst = instanceRef.current;
+    if (!inst || !containerRef.current) return;
+
+    const container = containerRef.current;
+
+    const showGridLines = () => {
+      if (inst && !inst.isDisposed()) {
+        inst.setOption({ yAxis: { splitLine: { show: true } } });
+      }
+    };
+
+    const hideGridLines = () => {
+      if (inst && !inst.isDisposed()) {
+        inst.setOption({ yAxis: { splitLine: { show: false } } });
+      }
+    };
+
+    container.addEventListener('mouseenter', showGridLines);
+    container.addEventListener('mouseleave', hideGridLines);
+
+    return () => {
+      container.removeEventListener('mouseenter', showGridLines);
+      container.removeEventListener('mouseleave', hideGridLines);
+    };
+  }, []);
+
+  // Build and update the chart spec
+  const spec = useMemo(() => {
+    if (!chartData) return null;
+
+    return createHistogramSpec(chartData, {
+      chartType,
+      timeZone,
+      isDarkMode,
+      showYAxisLabel,
+      yAxisLabel: chartData.yAxisLabel,
+      customColor,
+      useSmartDateFormat,
+      colorPalette: colors.categories,
+    });
+  }, [
+    chartData,
+    chartType,
+    timeZone,
+    isDarkMode,
+    showYAxisLabel,
+    customColor,
+    useSmartDateFormat,
+    colors.categories,
+  ]);
+
+  // Apply spec to chart instance.
+  // Gated on `ready` so that at least one browser paint occurs between
+  // echarts.init() (useLayoutEffect) and setOption() — this preserves
+  // the 300ms bar-growth animation. The container starts at opacity 0
+  // (set in the init effect) and is revealed here in the same synchronous
+  // block as setOption(), preventing Firefox jitter.
+  useEffect(() => {
+    if (!ready || !instanceRef.current || !spec) return;
+
+    const xAxis = Array.isArray(spec.xAxis) ? spec.xAxis[0] : spec.xAxis;
+    let option = { ...spec };
+
+    if (xAxis?.type === 'time') {
+      option = {
+        ...option,
+        brush: {
+          toolbox: ['lineX'],
+          xAxisIndex: 0,
+        },
+        toolbox: {
+          show: false,
+        },
+      };
+    }
+
+    instanceRef.current.setOption(option, { notMerge: true });
+
+    if (xAxis?.type === 'time') {
+      instanceRef.current.dispatchAction({
+        type: 'takeGlobalCursor',
+        key: 'brush',
+        brushOption: {
+          brushType: 'lineX',
+          brushMode: 'single',
         },
       });
     }
-    if (domainEnd !== domainMax) {
-      rectAnnotations.push({
-        coordinates: {
-          x0: domainEnd,
-        },
-      });
+
+    // Reveal chart now that data is applied — same sync block as setOption
+    // so the next browser paint shows the chart with data + animation starting.
+    if (containerRef.current) {
+      containerRef.current.style.opacity = '1';
     }
+  }, [ready, spec, chartData?.series]);
 
-    const rectAnnotationStyle = {
-      stroke: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
-      strokeWidth: 0,
-      opacity: isDarkMode ? 0.6 : 0.2,
-      fill: isDarkMode ? euiThemeVars.euiColorLightShade : euiThemeVars.euiColorDarkShade,
-    };
-
-    const tooltipProps = {
-      headerFormatter: this.renderBarTooltip(xInterval, domainStart, domainEnd),
-      type: TooltipType.VerticalCursor,
-    };
-
-    // These styles override the chartsTheme so that the correct base chart colors are used
-    delete chartsTheme.axes?.gridLine?.horizontal?.stroke;
-    delete chartsTheme.axes?.gridLine?.vertical?.stroke;
-    delete chartsTheme.axes?.axisLine;
-    chartsTheme.axes!.axisTitle = {
-      fill: euiThemeVars.euiTextColor,
-    };
-    chartsTheme.colors = chartsTheme.colors ?? {};
-    chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
-
-    return (
-      <Chart size="100%">
-        <Settings
-          xDomain={xDomain}
-          onBrushEnd={this.onBrushEnd}
-          onElementClick={this.onElementClick(xInterval)}
-          tooltip={tooltipProps}
-          theme={chartsTheme}
-          baseTheme={chartsBaseTheme}
-        />
-        <Axis id="discover-histogram-left-axis" position={Position.Left} ticks={5} />
-        <Axis
-          id="discover-histogram-bottom-axis"
-          position={Position.Bottom}
-          tickFormat={this.formatXValue}
-          ticks={10}
-        />
-        <LineAnnotation
-          id="line-annotation"
-          domainType={AnnotationDomainType.XDomain}
-          dataValues={lineAnnotationData}
-          hideTooltips={true}
-          style={lineAnnotationStyle}
-        />
-        <RectAnnotation
-          dataValues={rectAnnotations}
-          id="rect-annotation"
-          zIndex={2}
-          style={rectAnnotationStyle}
-          hideTooltips={true}
-        />
-        <HistogramBarSeries
-          id="discover-histogram"
-          minBarHeight={2}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={data}
-          timeZone={timeZone}
-          name={chartData.yAxisLabel}
-        />
-      </Chart>
-    );
+  if (!chartData) {
+    return null;
   }
-}
+
+  return (
+    <div
+      ref={containerRef}
+      data-test-subj="discoverHistogramEcharts"
+      aria-label={`Histogram chart showing ${chartData.yAxisLabel || 'data'} over time`}
+      style={{
+        width: '100%',
+        height: '100%',
+        minHeight: '100px',
+      }}
+    />
+  );
+};

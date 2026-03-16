@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DatasetTypes,
-  DATASOURCE_NAME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITHOUT_TIME_1,
-  QueryLanguages,
-} from './constants';
+import { DatasetTypes, DATASOURCE_NAME, INDEX_WITH_TIME_1, QueryLanguages } from './constants';
 import path from 'path';
 import moment from 'moment';
 import { setDatePickerDatesIfRelevant } from './shared';
@@ -43,14 +37,6 @@ export const generateDownloadCsvTestConfigurations = () => {
           dataset: `${INDEX_WITH_TIME_1}${dataset.name === DatasetTypes.INDEXES.name ? '' : '*'}`,
           hasTime: true,
           saveName: `${dataset.name}-${language.name}-Time`,
-        },
-        {
-          ...sharedConfig,
-          dataset: `${INDEX_WITHOUT_TIME_1}${
-            dataset.name === DatasetTypes.INDEXES.name ? '' : '*'
-          }`,
-          hasTime: false,
-          saveName: `${dataset.name}-${language.name}-NoTime`,
         },
       ];
     });

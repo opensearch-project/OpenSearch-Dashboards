@@ -203,11 +203,8 @@ export async function parseManifest(
       ? manifest.opensearchDashboardsVersion
       : manifest.version;
   if (!isVersionCompatible(expectedOpenSearchDashboardsVersion, packageInfo.version)) {
-    throw PluginDiscoveryError.incompatibleVersion(
-      manifestPath,
-      new Error(
-        `Plugin "${manifest.id}" is only compatible with OpenSearch Dashboards version "${expectedOpenSearchDashboardsVersion}", but used OpenSearch Dashboards version is "${packageInfo.version}".`
-      )
+    log.warn(
+      `Plugin "${manifest.id}" is version "${expectedOpenSearchDashboardsVersion}", but used OpenSearch Dashboards version is "${packageInfo.version}".`
     );
   }
 
@@ -286,19 +283,15 @@ function isVersionCompatible(
   }
 
   const coercedActualOpenSearchDashboardsVersion = coerce(actualOpenSearchDashboardsVersion);
-  if (coercedActualOpenSearchDashboardsVersion == null) {
-    return false;
-  }
-
   const coercedExpectedOpenSearchDashboardsVersion = coerce(expectedOpenSearchDashboardsVersion);
-  if (coercedExpectedOpenSearchDashboardsVersion == null) {
+
+  if (!coercedActualOpenSearchDashboardsVersion || !coercedExpectedOpenSearchDashboardsVersion) {
     return false;
   }
 
-  // Compare coerced versions, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
-  return (
-    coercedActualOpenSearchDashboardsVersion.compare(coercedExpectedOpenSearchDashboardsVersion) ===
-    0
+  return semver.eq(
+    coercedActualOpenSearchDashboardsVersion,
+    coercedExpectedOpenSearchDashboardsVersion
   );
 }
 /**

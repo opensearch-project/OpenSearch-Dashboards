@@ -12,6 +12,7 @@ import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
 import { waitFor } from '@testing-library/dom';
+import { DuplicateDataViewError } from '../../../../common/data_views/errors/duplicate_data_view';
 
 describe('DatasetService', () => {
   let service: DatasetService;
@@ -187,6 +188,208 @@ describe('DatasetService', () => {
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
   });
 
+  test('cacheDataset passes signalType and schemaMappings to index pattern spec', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+      schemaMappings: { otelLogs: { traceId: 'trace.id' } },
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset, mockDataPluginServices, true, 'logs');
+    expect(indexPatterns.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signalType: 'logs',
+        schemaMappings: { otelLogs: { traceId: 'trace.id' } },
+      }),
+      true
+    );
+  });
+
+  test('cacheDataset passes dataSourceMeta when dataSource has meta', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+      dataSource: {
+        id: 'ds-1',
+        title: 'Data Source 1',
+        type: 'OpenSearch',
+        version: '1.0',
+        meta: { prometheusUrl: 'http://localhost:9090', customField: 'value' },
+      },
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset, mockDataPluginServices);
+    expect(indexPatterns.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceMeta: { prometheusUrl: 'http://localhost:9090', customField: 'value' },
+      }),
+      true
+    );
+  });
+
+  test('cacheDataset sets dataSourceMeta to undefined when dataSource has no meta', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+      dataSource: {
+        id: 'ds-1',
+        title: 'Data Source 1',
+        type: 'OpenSearch',
+        version: '1.0',
+      },
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset, mockDataPluginServices);
+    expect(indexPatterns.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceMeta: undefined,
+      }),
+      true
+    );
+  });
+
+  test('saveDataset creates and saves a new dataset without data source', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      displayName: 'My Dataset',
+      description: 'Test description',
+      type: mockType.id,
+      timeFieldName: 'timestamp',
+      schemaMappings: { otelLogs: { spanId: 'span.id' } },
+      // No dataSource property
+    } as Dataset;
+
+    const mockCreatedDataView = {
+      id: 'generated-uuid-1234',
+    };
+
+    const mockDataViews = {
+      createAndSave: jest.fn().mockResolvedValue(mockCreatedDataView),
+    };
+
+    const servicesWithDataViews = {
+      ...mockDataPluginServices,
+      data: {
+        ...dataPluginMock.createStartContract(),
+        dataViews: mockDataViews as any,
+      },
+    };
+
+    service.registerType(mockType);
+    await service.saveDataset(mockDataset, servicesWithDataViews, 'metrics');
+
+    // Should call createAndSave without the ID to allow UUID generation
+    expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: undefined, // Should be undefined for datasets without data source
+        title: 'Test Dataset',
+        displayName: 'My Dataset',
+        description: 'Test description',
+        timeFieldName: 'timestamp',
+        signalType: 'metrics',
+        schemaMappings: { otelLogs: { spanId: 'span.id' } },
+      }),
+      undefined,
+      false
+    );
+
+    // Should update the dataset with the generated UUID
+    expect(mockDataset.id).toBe('generated-uuid-1234');
+  });
+
+  test('saveDataset creates and saves a new dataset with data source', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      displayName: 'My Dataset',
+      description: 'Test description',
+      type: mockType.id,
+      timeFieldName: 'timestamp',
+      schemaMappings: { otelLogs: { spanId: 'span.id' } },
+      dataSource: {
+        id: 'data-source-123',
+        title: 'My Data Source',
+        type: 'OpenSearch',
+        version: '1.0',
+      },
+    } as Dataset;
+
+    const mockCreatedDataView = {
+      id: 'data-source-123::generated-uuid-5678',
+    };
+
+    const mockDataViews = {
+      createAndSave: jest.fn().mockResolvedValue(mockCreatedDataView),
+    };
+
+    const servicesWithDataViews = {
+      ...mockDataPluginServices,
+      data: {
+        ...dataPluginMock.createStartContract(),
+        dataViews: mockDataViews as any,
+      },
+    };
+
+    service.registerType(mockType);
+    await service.saveDataset(mockDataset, servicesWithDataViews, 'metrics');
+
+    // Should call createAndSave with data source prefixed ID
+    expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: expect.stringMatching(/^data-source-123::[0-9a-f-]{36}$/), // Should match data-source-id::uuid pattern
+        title: 'Test Dataset',
+        displayName: 'My Dataset',
+        description: 'Test description',
+        timeFieldName: 'timestamp',
+        signalType: 'metrics',
+        schemaMappings: { otelLogs: { spanId: 'span.id' } },
+        dataSourceRef: {
+          id: 'data-source-123',
+          name: 'My Data Source',
+          type: 'OpenSearch',
+          version: '1.0',
+        },
+      }),
+      undefined,
+      false
+    );
+
+    // Should update the dataset with the generated UUID
+    expect(mockDataset.id).toBe('data-source-123::generated-uuid-5678');
+  });
+
+  test('saveDataset does not save index pattern datasets', async () => {
+    const mockDataset = {
+      id: 'test-index-pattern',
+      title: 'Test Index Pattern',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    } as Dataset;
+
+    const mockDataViews = {
+      createAndSave: jest.fn(),
+    };
+
+    const servicesWithDataViews = {
+      ...mockDataPluginServices,
+      data: {
+        ...dataPluginMock.createStartContract(),
+        dataViews: mockDataViews as any,
+      },
+    };
+
+    service.registerType(indexPatternTypeConfig);
+    await service.saveDataset(mockDataset, servicesWithDataViews);
+
+    expect(mockDataViews.createAndSave).not.toHaveBeenCalled();
+  });
+
   test('addRecentDataset adds a dataset', () => {
     const mockDataset1: Dataset = {
       id: 'dataset1',
@@ -287,6 +490,175 @@ describe('DatasetService', () => {
 
     await waitFor(() => {
       expect(service.getDefault()?.dataSource).toBe(undefined);
+    });
+  });
+
+  describe('saveDataset error handling', () => {
+    test('re-throws DuplicateDataViewError without wrapping by error name', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const duplicateError = new DuplicateDataViewError('Duplicate data view: Test Dataset');
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(duplicateError),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        DuplicateDataViewError
+      );
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Duplicate data view: Test Dataset'
+      );
+    });
+
+    test('re-throws DuplicateDataViewError without wrapping by message pattern', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const duplicateError = new Error('Duplicate data view: Test Dataset');
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(duplicateError),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Duplicate data view: Test Dataset'
+      );
+    });
+
+    test('wraps other errors in "Failed to save dataset" error', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const networkError = new Error('Network connection failed');
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(networkError),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Failed to save dataset: test-dataset'
+      );
+    });
+
+    test('throws "Failed to save dataset" when createAndSave throws generic error', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(new Error('Unknown error')),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Failed to save dataset'
+      );
+    });
+
+    test('does not update dataset ID when createAndSave returns undefined', async () => {
+      const originalId = 'test-dataset';
+      const mockDataset = {
+        id: originalId,
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+      await service.saveDataset(mockDataset, servicesWithDataViews);
+
+      // Dataset ID should remain unchanged when no ID is returned
+      expect(mockDataset.id).toBe(originalId);
+    });
+
+    test('does not update dataset ID when createAndSave returns object without ID', async () => {
+      const originalId = 'test-dataset';
+      const mockDataset = {
+        id: originalId,
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockResolvedValue({}),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+      await service.saveDataset(mockDataset, servicesWithDataViews);
+
+      // Dataset ID should remain unchanged when no ID is returned
+      expect(mockDataset.id).toBe(originalId);
     });
   });
 });

@@ -312,7 +312,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     ...baseInputProps,
     onChange: onInputChange,
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editor.setValue(`\n`.repeat(10));
       setLineCount(editor.getModel()?.getLineCount());
       inputRef.current = editor;
       // eslint-disable-next-line no-bitwise

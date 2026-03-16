@@ -58,7 +58,7 @@ export async function install(settings, logger) {
 
     existingInstall(settings, logger);
 
-    assertVersion(settings);
+    assertVersion(settings, logger);
 
     const targetDir = path.join(settings.pluginDir, settings.plugins[0].id);
     await renamePlugin(settings.workingPath, targetDir);

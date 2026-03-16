@@ -6,7 +6,6 @@
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
   QueryLanguages,
 } from '../../../../../../utils/apps/constants.js';
 import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
@@ -15,6 +14,7 @@ import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared.js';
 import {
   generateInspectTestConfiguration,
@@ -24,28 +24,51 @@ import {
   visualizationTitlesWithNoInspectOptions,
   visualizationTitlesWithInspectOptions,
 } from '../../../../../../utils/apps/query_enhancements/inspect.js';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD = 17;
 
 const inspectTestSuite = () => {
   describe('inspect spec', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
+
+      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
+      cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceID) => {
+        cy.get('@DATASOURCE_ID').then((dataSourceId) => {
+          cy.request({
+            method: 'POST',
+            url: `${BASE_PATH}/w/${workspaceID}/api/sample_data/flights?data_source_id=${dataSourceId}`,
+            headers: {
+              'Content-Type': 'application/json',
+              'osd-xsrf': true,
+            },
+            failOnStatusCode: false,
+          }).then((response) => {
+            expect(response.status).to.eq(200);
+          });
+        });
       });
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateInspectTestConfiguration).forEach((config) => {
@@ -96,20 +119,6 @@ const inspectTestSuite = () => {
     });
 
     it('should test visualizations inspect', () => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspaceName,
-        page: 'import_sample_data',
-        isEnhancement: true,
-      });
-
-      // adding a wait here as sometimes the button doesn't click below
-      cy.wait(3000);
-
-      cy.getElementByTestId('addSampleDataSetflights').should('be.visible').click();
-
-      cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
-
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,

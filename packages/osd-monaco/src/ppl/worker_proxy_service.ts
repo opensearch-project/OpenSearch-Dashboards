@@ -4,7 +4,8 @@
  */
 
 import { PPLValidationResult, PPLToken } from './ppl_language_analyzer';
-import { ID } from './constants';
+import { getWorker } from '../monaco_environment';
+import { WorkerLabels } from '../worker_config';
 
 /**
  * Simple worker proxy that communicates with PPL worker
@@ -17,28 +18,30 @@ export class PPLWorkerProxyService {
   /**
    * Set up the worker
    */
-  public setup(workerSrc: string) {
+  public setup() {
     if (this.worker) {
       return; // Already set up
     }
 
-    // Create worker from source
-    const blob = new Blob([workerSrc], { type: 'application/javascript' });
-    this.worker = new Worker(URL.createObjectURL(blob));
+    // Create worker from served URL
+    this.worker = getWorker(WorkerLabels.PPL);
 
     // Handle messages from worker
     this.worker.onmessage = (e: MessageEvent) => {
       const { id, result, error } = e.data;
       const pending = this.pendingMessages.get(id);
 
-      if (pending) {
-        this.pendingMessages.delete(id);
-        if (error) {
-          pending.reject(new Error(error));
-        } else {
-          pending.resolve(result);
-        }
+      if (!pending) {
+        return;
       }
+
+      this.pendingMessages.delete(id);
+      if (error) {
+        pending.reject(new Error(error));
+        return;
+      }
+
+      pending.resolve(result);
     };
 
     // Handle worker errors

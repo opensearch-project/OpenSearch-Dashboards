@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { mergeWith, isPlainObject } from 'lodash';
 import {
   StandardAxes,
   ColorSchemas,
@@ -11,30 +12,33 @@ import {
   VisFieldType,
   VisColumn,
   AxisColumnMappings,
-  AxisSupportedStyles,
+  Threshold,
+  AxisConfig,
+  ThresholdOptions,
+  ThresholdMode,
 } from '../types';
+import { ChartStyles, StyleOptions } from './use_visualization_types';
 
-export const applyAxisStyling = (
-  axis?: VisColumn,
-  axisStyle?: StandardAxes,
-  disableGrid?: boolean
-): any => {
+export const applyAxisStyling = ({
+  axis,
+  axisStyle,
+  disableGrid,
+  defaultAxisTitle = '',
+}: {
+  axis?: VisColumn;
+  axisStyle?: StandardAxes;
+  disableGrid?: boolean;
+  defaultAxisTitle?: string;
+}): AxisConfig => {
   const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
 
-  const fullAxisConfig: any = {
+  const fullAxisConfig: AxisConfig = {
     // Grid settings
     grid: gridEnabled,
-    gridColor: '#E0E0E0',
-    gridOpacity: 0.5,
     labelSeparation: 8,
+    orient: axisStyle?.position,
+    title: axisStyle?.title.text || defaultAxisTitle,
   };
-
-  // Apply position
-
-  fullAxisConfig.orient = axisStyle?.position;
-
-  // Apply title settings
-  fullAxisConfig.title = axisStyle?.title.text || axis?.name;
 
   // Apply axis visibility
   if (!axisStyle?.show) {
@@ -47,23 +51,38 @@ export const applyAxisStyling = (
 
   // Apply label settings
   if (axisStyle?.labels) {
-    if (!axisStyle?.labels.show) {
-      fullAxisConfig.labels = false;
-    } else {
-      fullAxisConfig.labels = true;
-      // Apply label rotation/alignment
-      if (axisStyle?.labels.rotate !== undefined) {
-        fullAxisConfig.labelAngle = axisStyle?.labels.rotate;
+    fullAxisConfig.labels = !!axisStyle.labels.show;
+    if (fullAxisConfig.labels) {
+      fullAxisConfig.labelAngle = 0;
+      fullAxisConfig.labelLimit = 100;
+
+      if (axisStyle.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle.labels.rotate;
+      }
+      if (axisStyle.labels.truncate !== undefined && axisStyle.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle.labels.truncate;
       }
 
-      // Apply label truncation
-      if (axisStyle?.labels.truncate !== undefined && axisStyle?.labels.truncate > 0) {
-        fullAxisConfig.labelLimit = axisStyle?.labels.truncate;
-      }
-
-      // Apply label filtering (this controls overlapping labels)
       fullAxisConfig.labelOverlap = 'greedy';
+      fullAxisConfig.labelFlush = false;
     }
+  }
+
+  // Apply time formatting for date/time axes
+  if (axis?.schema === VisFieldType.Date) {
+    // Configure time formats for different granularities using 24-hour format for better clarity.
+    // Each format corresponds to the appropriate time precision:
+    // - hours: Display hours and minutes (HH:MM)
+    // - minutes: Display hours and minutes (HH:MM)
+    // - seconds: Display full time with seconds (HH:MM:SS)
+    // - milliseconds: Display full time with milliseconds (HH:MM:SS.mmm)
+    // Using %H (24-hour) instead of %I (12-hour) provides clearer, unambiguous time representation
+    fullAxisConfig.format = {
+      hours: '%H:%M',
+      minutes: '%H:%M',
+      seconds: '%H:%M:%S',
+      milliseconds: '%H:%M:%S.%L',
+    };
   }
 
   return fullAxisConfig;
@@ -71,7 +90,7 @@ export const applyAxisStyling = (
 
 export function getAxisByRole(
   axes: StandardAxes[],
-  axisRole: AxisRole.X | AxisRole.Y
+  axisRole: AxisRole.X | AxisRole.Y | AxisRole.Y_SECOND
 ): StandardAxes | undefined {
   return axes.find((axis) => axis.axisRole === axisRole);
 }
@@ -152,22 +171,26 @@ const positionSwapMap: Record<Positions, Positions> = {
 const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
 
 export const getSwappedAxisRole = (
-  styles: Partial<AxisSupportedStyles>,
+  styles: { standardAxes?: StandardAxes[]; switchAxes?: boolean },
   axisColumnMappings?: AxisColumnMappings
 ): {
   xAxis?: VisColumn;
   yAxis?: VisColumn;
+  y2Axis?: VisColumn;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
+  y2AxisStyle?: StandardAxes;
 } => {
   const xAxis = axisColumnMappings?.x;
   const yAxis = axisColumnMappings?.y;
+  const y2Axis = axisColumnMappings?.y2;
 
   const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
   const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
 
   if (!styles?.switchAxes) {
-    return { xAxis, xAxisStyle, yAxis, yAxisStyle };
+    return { xAxis, xAxisStyle, yAxis, yAxisStyle, ...(y2Axis && { y2Axis, y2AxisStyle }) };
   }
 
   return {
@@ -185,6 +208,7 @@ export const getSwappedAxisRole = (
           ...(xAxisStyle?.position ? { position: swapPosition(xAxisStyle.position) } : undefined),
         }
       : undefined,
+    ...(y2Axis && { y2Axis, y2AxisStyle }), // switch axes won't apply to y2(line-bar chart)
   };
 };
 
@@ -198,6 +222,19 @@ export const getSchemaByAxis = (
       return 'nominal';
     case VisFieldType.Date:
       return 'temporal';
+    default:
+      return 'unknown';
+  }
+};
+
+export const getAxisType = (axis?: VisColumn) => {
+  switch (axis?.schema) {
+    case VisFieldType.Numerical:
+      return 'value';
+    case VisFieldType.Categorical:
+      return 'category';
+    case VisFieldType.Date:
+      return 'time';
     default:
       return 'unknown';
   }
@@ -270,4 +307,266 @@ export const getTooltipFormat = (
 ): string => {
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
+};
+
+/**
+ * Determines the color for a value based on a set of thresholds.
+ * @param value - The value to evaluate (e.g., a number, string, or any type that can be converted to a number).
+ * @param thresholds - Array of threshold objects with `value` (number) and `color` (string) properties.
+ * @returns The matched threshold
+ */
+export function getThresholdByValue<T>(
+  value: any,
+  thresholds: Threshold[] = []
+): Threshold | undefined {
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return undefined;
+  }
+
+  // Sort thresholds in descending order
+  const sortedThresholds = [...thresholds].sort((a, b) => b.value - a.value);
+
+  // Find the first threshold where the value is greater than or equal to the threshold value
+  for (const threshold of sortedThresholds) {
+    if (numValue >= threshold.value) {
+      return threshold;
+    }
+  }
+
+  return undefined;
+}
+
+export const mergeStyles = (dest: ChartStyles, source: StyleOptions | undefined) => {
+  const copiedDest = { ...dest };
+
+  function customMerge(objValue: any, srcValue: any) {
+    if (isPlainObject(objValue) && isPlainObject(srcValue)) {
+      // Deep merge nested objects
+      const merged = { ...objValue };
+
+      // Iterate through all keys in srcValue
+      Object.keys(srcValue).forEach((key) => {
+        if (isPlainObject(objValue[key]) && isPlainObject(srcValue[key])) {
+          // Recursively merge nested objects
+          merged[key] = customMerge(objValue[key], srcValue[key]);
+        } else if (srcValue[key] !== undefined) {
+          // Only override if srcValue[key] is not undefined
+          merged[key] = srcValue[key];
+        }
+      });
+
+      return merged;
+    }
+
+    // For non-objects or if one of the values is not an object,
+    // return srcValue if it's not undefined, otherwise keep objValue
+    return srcValue !== undefined ? srcValue : objValue;
+  }
+
+  return mergeWith(copiedDest, source, customMerge);
+};
+
+export function applyTimeRangeToEncoding(
+  mainLayerEncoding?: any,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string },
+  switchAxes: boolean = false
+): void {
+  if (!axisColumnMappings || !timeRange?.from || !timeRange?.to || !mainLayerEncoding) {
+    return;
+  }
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => getSchemaByAxis(col) === 'temporal'
+  );
+
+  if (!timeAxisEntry) return;
+
+  const [axisRole] = timeAxisEntry as [AxisRole, VisColumn];
+  const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
+
+  // Check if the time field has timezone information or is UTC format
+  const hasTimezoneInfo = (timeString: string) => {
+    return (
+      timeString.includes('T') &&
+      (timeString.endsWith('Z') || timeString.includes('+') || timeString.includes('-'))
+    );
+  };
+
+  // Smart time processing: preserve UTC fields as strings, convert timezone-aware fields to UTC objects
+  const processTimeValue = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso; // fallback: let Vega-Lite parse string
+
+    // For UTC fields (format: "2025-09-25 18:19:02.49"), keep as string to let Vega-Lite handle naturally
+    if (!hasTimezoneInfo(iso)) {
+      return iso;
+    }
+
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      date: d.getUTCDate(),
+      hours: d.getUTCHours(),
+      minutes: d.getUTCMinutes(),
+      seconds: d.getUTCSeconds(),
+      milliseconds: d.getUTCMilliseconds(),
+      utc: true,
+    };
+  };
+
+  const scaleConfig = {
+    domain: [processTimeValue(timeRange.from), processTimeValue(timeRange.to)],
+  };
+
+  if (mainLayerEncoding[targetRole]) {
+    mainLayerEncoding[targetRole].scale = {
+      ...(mainLayerEncoding[targetRole].scale || {}),
+      ...scaleConfig,
+    };
+  }
+}
+
+/**
+ * Parses a date string or timestamp as a Date object
+ *
+ * Behavior:
+ * - Numbers: Treated as Unix timestamps and passed directly to Date constructor
+ * - Strings with timezone info (Z, +HH:MM, -HH:MM): Parsed directly as-is
+ * - Strings without timezone info: Treated as UTC by converting to ISO format and appending 'Z'
+ *
+ * @param input - Date string (with or without timezone) or Unix timestamp (number)
+ * @returns Date object
+ *
+ * @example
+ * parseUTCDate(1704067200000) // Unix timestamp -> Date object
+ * parseUTCDate("2025-12-10 00:00:00") // No timezone -> Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00") // No timezone -> Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00Z") // Already has timezone -> Parses directly
+ * parseUTCDate("2025-12-10T00:00:00+08:00") // Already has timezone -> Parses directly
+ */
+export function parseUTCDate(input: string | number): Date {
+  if (typeof input === 'number') {
+    return new Date(input);
+  }
+  // If already has timezone info (Z, +, or -), parse directly
+  if (input.includes('Z') || /[+-]\d{2}:\d{2}$/.test(input)) {
+    return new Date(input);
+  }
+
+  // Convert space to 'T' for ISO 8601 format and add 'Z' for UTC
+  const isoString = input.replace(' ', 'T') + 'Z';
+  return new Date(isoString);
+}
+
+export const getChartRender = () => {
+  try {
+    const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
+    return chartRender || 'echarts';
+  } catch (e) {
+    return 'echarts';
+  }
+};
+
+export const convertThresholds = (thresholds: Threshold[]) => {
+  return thresholds.map((t, i) => ({
+    min: t.value,
+    max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+
+    color: t.color,
+  }));
+};
+
+export const convertThresholdLineStyle = (style: ThresholdMode | undefined) => {
+  if (style === ThresholdMode.DotDashed) return 'dotted';
+  return style;
+};
+
+export const adjustOppositeSymbol = (switchAxes: boolean, symbol: string) => {
+  if (switchAxes) {
+    return symbol === 'x' ? 'y' : 'x';
+  }
+  return symbol;
+};
+
+export const generateThresholdSteps = (
+  thresholds: Threshold[] | undefined,
+  switchAxes?: boolean
+) => {
+  return thresholds?.map((t) => ({
+    [switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    itemStyle: { color: t.color },
+  }));
+};
+
+export const generateThresholdLines = (
+  thresholdOptions: ThresholdOptions,
+  switchAxes?: boolean
+) => {
+  if (thresholdOptions.thresholdStyle === ThresholdMode.Off) return {};
+
+  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds, switchAxes);
+
+  return {
+    markLine: {
+      symbol: 'none',
+      silent: true,
+      animation: false,
+      lineStyle: {
+        width: 1,
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data: ThresholdSteps,
+    },
+  };
+};
+
+// return a combined markline with threshold lines and time marker
+export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
+  const hasThresholds = thresholdOptions?.thresholdStyle !== ThresholdMode.Off;
+
+  if (!hasThresholds && !addTimeMarker) return {};
+
+  const data = [];
+
+  if (hasThresholds) {
+    const thresholdSteps = generateThresholdSteps(thresholdOptions?.thresholds) ?? [];
+    data.push(...thresholdSteps);
+  }
+
+  if (addTimeMarker) {
+    data.push({
+      xAxis: new Date(),
+      itemStyle: { color: 'red' },
+      lineStyle: { type: 'dashed' },
+      label: { formatter: new Date().toISOString(), align: 'right' },
+    });
+  }
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data,
+    },
+  };
+};
+
+export const getValueColorByThreshold = (value: number, thresholdOptions: ThresholdOptions) => {
+  const thresholds = thresholdOptions.thresholds ?? [];
+  let color = thresholdOptions.baseColor;
+  let curr = -Infinity;
+
+  for (const threshold of thresholds) {
+    if (value > curr && value > threshold.value) {
+      color = threshold.color;
+      curr = threshold.value;
+    }
+  }
+  return color;
 };

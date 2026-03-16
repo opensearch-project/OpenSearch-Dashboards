@@ -6,7 +6,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OverwriteModal } from './overwrite_modal';
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { ShallowWrapper } from 'enzyme';
 
 const confirmModalIdentifier = 'EuiConfirmModal';

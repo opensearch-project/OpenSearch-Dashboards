@@ -34,8 +34,8 @@ import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { DiscoverField } from './discover_field';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPatternField } from '../../../../data/public';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { DataViewField } from '../../../../data/public';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 
 jest.mock('../../application/legacy/discover/opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -70,9 +70,9 @@ function getProps({
   selected?: boolean;
   showSummary?: boolean;
   useShortDots?: boolean;
-  field?: IndexPatternField;
+  field?: DataViewField;
 }) {
-  const indexPattern = getStubIndexPattern(
+  const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
@@ -82,22 +82,21 @@ function getProps({
 
   const finalField =
     field ??
-    new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    ({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      filterable: true,
+    } as DataViewField);
 
   const props = {
-    indexPattern,
+    dataSet,
     columns: [],
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 1 })),
@@ -144,17 +143,18 @@ describe('discover sidebar field', function () {
     expect(screen.queryByTestId('field-bytes-showDetails')).toBeNull();
   });
   it('should not allow clicking on _source', function () {
-    const field = new IndexPatternField(
-      {
-        name: '_source',
-        type: '_source',
-        esTypes: ['_source'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      '_source'
-    );
+    const field = {
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: '_source',
+      count: 0,
+      scripted: false,
+      filterable: false,
+    } as DataViewField;
     const props = getProps({
       selected: true,
       field,

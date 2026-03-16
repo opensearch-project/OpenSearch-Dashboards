@@ -273,4 +273,45 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       'Deprecation warning: updating workspace settings through global scope will no longer be supported.'
     );
   });
+
+  it('should not throw error if global config does not exist when calling get / update', async () => {
+    jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ requestWorkspaceId: 'workspace-id' });
+
+    const { wrappedClient, clientMock } = createWrappedClient();
+    clientMock.get.mockImplementation(async (type, id) => {
+      if (type === 'config') {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+      }
+
+      if (type === WORKSPACE_TYPE) {
+        return Promise.resolve({
+          id,
+          references: [],
+          type: WORKSPACE_TYPE,
+          attributes: {
+            uiSettings: {
+              defaultDashboard: 'default-dashboard-workspace',
+              [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-workspace',
+            },
+          },
+        });
+      }
+
+      return {
+        id,
+        type,
+        attributes: {},
+        references: [],
+      };
+    });
+
+    await expect(
+      wrappedClient.update('config', `${CURRENT_WORKSPACE_PLACEHOLDER}_3.0.0`, {
+        [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'data_source_id',
+      })
+    ).resolves.toBeDefined();
+    await expect(
+      wrappedClient.get('config', `${CURRENT_WORKSPACE_PLACEHOLDER}_3.0.0`)
+    ).resolves.toBeDefined();
+  });
 });

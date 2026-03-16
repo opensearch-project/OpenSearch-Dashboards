@@ -8,7 +8,6 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from 'opensearch-dashboards/public';
-import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import {
   DATA_STRUCTURE_META_TYPES,
@@ -18,13 +17,14 @@ import {
   Dataset,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
-import { getSearchService, getIndexPatterns } from '../../../../services';
+import { getIndexPatterns } from '../../../../services';
 import {
   getRemoteClusterConnections,
   getRemoteClusterIndices,
   injectMetaToDataStructures,
 } from './utils';
 import { DataSourceEngineType } from '../../../../../../../plugins/data_source/common/data_sources';
+import { IndexDataStructureCreator } from './index_data_structure_creator/index_data_structure_creator';
 
 export const DELIMITER = '::';
 
@@ -35,6 +35,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
     searchOnLoad: true,
+    cacheOptions: false,
   },
 
   toDataset: (path) => {
@@ -42,9 +43,30 @@ export const indexTypeConfig: DatasetTypeConfig = {
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
     const indexMeta = index.meta as DataStructureCustomMeta;
 
+    // Build dataset title from multi-selections (wildcards and/or exact indices)
+    let datasetTitle = index.title;
+
+    if (indexMeta?.isMultiWildcard || indexMeta?.isMultiIndex) {
+      const titles: string[] = [];
+
+      // Add wildcard patterns if present
+      if (indexMeta.wildcardPatterns?.length) {
+        titles.push(...indexMeta.wildcardPatterns);
+      }
+
+      // Add exact indices if present
+      if (indexMeta.selectedTitles?.length) {
+        titles.push(...indexMeta.selectedTitles);
+      }
+
+      if (titles.length > 0) {
+        datasetTitle = titles.join(',');
+      }
+    }
+
     return {
       id: index.id,
-      title: index.title,
+      title: datasetTitle,
       type: DEFAULT_DATA.SET_TYPES.INDEX,
       timeFieldName: indexMeta?.timeFieldName,
       isRemoteDataset: indexMeta?.isRemoteIndex,
@@ -68,6 +90,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
           ...dataStructure,
           hasNext: false,
           columnHeader: 'Indexes',
+          DataStructureCreator: IndexDataStructureCreator,
           children: indices.map((index) => ({
             id: `${dataStructure.id}::${index.name}`,
             title: index.name,
@@ -201,50 +224,58 @@ const mapDataSourceSavedObjectToDataStructure = (
   };
 };
 
-const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => {
-  const search = getSearchService();
-  const buildSearchRequest = () => ({
-    params: {
-      ignoreUnavailable: true,
-      expand_wildcards: 'all',
-      index: '*',
-      body: {
-        size: 0,
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: 100,
-            },
-          },
-        },
-      },
-    },
-    dataSourceId: dataStructure.id,
-  });
+interface ResolveIndexResponse {
+  indices?: Array<{ name: string; attributes?: string[] }>;
+  aliases?: Array<{ name: string }>;
+  data_streams?: Array<{ name: string }>;
+}
 
-  const searchResponseToArray = (response: any) => {
-    const { rawResponse } = response;
-    if (!rawResponse.aggregations) {
+const fetchIndices = async (dataStructure: DataStructure, http: HttpSetup): Promise<string[]> => {
+  try {
+    const query: any = {
+      expand_wildcards: 'all',
+    };
+
+    if (dataStructure.id && dataStructure.id !== '') {
+      query.data_source = dataStructure.id;
+    }
+
+    const response = await http.get<ResolveIndexResponse>(
+      `/internal/index-pattern-management/resolve_index/*`,
+      { query }
+    );
+
+    if (!response) {
       return [];
     }
 
-    return rawResponse.aggregations.indices.buckets.map((bucket: { key: string }) => {
-      const key = bucket.key;
-      // Note: Index names cannot contain ':' or '::' in OpenSearch, so these delimiters
-      // are guaranteed not to be part of the regular format of index name
-      const parts = key.split(DELIMITER);
-      const lastPart = parts[parts.length - 1] || key;
-      // extract index name or return original key if pattern doesn't match
-      return lastPart.split(':')[0] || key;
-    });
-  };
+    const indices: string[] = [];
 
-  return search
-    .getDefaultSearchInterceptor()
-    .search(buildSearchRequest())
-    .pipe(map(searchResponseToArray))
-    .toPromise();
+    // Add regular indices
+    if (response.indices) {
+      response.indices.forEach((index) => {
+        indices.push(index.name);
+      });
+    }
+
+    // Add aliases as indices
+    if (response.aliases) {
+      response.aliases.forEach((alias) => {
+        indices.push(alias.name);
+      });
+    }
+
+    // Add data streams as indices
+    if (response.data_streams) {
+      response.data_streams.forEach((dataStream) => {
+        indices.push(dataStream.name);
+      });
+    }
+
+    return indices.sort();
+  } catch (error) {
+    return [];
+  }
 };
 
 const fetchAllIndices = async (
@@ -254,7 +285,7 @@ const fetchAllIndices = async (
   // Create promises for both local and remote indices
   const [localIndices, remoteIndices] = await Promise.all([
     // Fetch local indices
-    fetchIndices(dataStructure).then((indices) =>
+    fetchIndices(dataStructure, http).then((indices) =>
       indices.map((index) => ({
         name: index,
         isRemoteIndex: false,

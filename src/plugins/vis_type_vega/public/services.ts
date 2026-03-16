@@ -62,6 +62,7 @@ export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;
+  exposeDebugObjectToWindow: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
 
@@ -70,5 +71,6 @@ export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<Map
 );
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
+export const getExposeDebugObjectToWindow = () => getInjectedVars().exposeDebugObjectToWindow;
 export const getEmsTileLayerId = () => getMapsLegacyConfig().emsTileLayerId;
 export const getShowRegionDeniedWarning = () => getMapsLegacyConfig().showRegionDeniedWarning;

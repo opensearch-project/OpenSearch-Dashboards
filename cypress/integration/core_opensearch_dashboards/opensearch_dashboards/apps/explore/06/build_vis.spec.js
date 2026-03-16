@@ -3,14 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/apps/explore/constants';
+import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/apps/constants';
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runBuildVisTests = () => {
   describe('build visualization manully tests', () => {
@@ -22,25 +27,32 @@ export const runBuildVisTests = () => {
 
     const selectFieldFromComboBox = (labelText, index, fieldName) => {
       cy.get('.euiFormLabel').contains(labelText).should('be.visible');
-      cy.get('[data-test-subj="comboBoxInput"]').eq(index).click();
-      cy.get('.euiFilterSelectItem').contains(fieldName).click();
+      cy.get('#axesSelector').within(() => {
+        cy.get('[data-test-subj="comboBoxInput"]').eq(index).click();
+      });
+      cy.get('div[role="listBox"]').contains(fieldName).click();
       cy.wait(500);
     };
 
     const verifyVisualizationGenerated = () => {
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
-      cy.get('.visualization').should('be.visible');
+      cy.get('.exploreVisContainer canvas').should('be.visible');
     };
 
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
@@ -76,6 +88,7 @@ export const runBuildVisTests = () => {
       // Verify discover table is visible firstly
       cy.getElementByTestId('discoverTable').should('be.visible');
 
+      cy.wait(2000);
       // Switch to visualization type
       cy.get('#explore_visualization_tab').click();
     });
@@ -168,7 +181,8 @@ export const runBuildVisTests = () => {
 
       selectFieldFromComboBox('Value', 0, 'bytes_transferred');
 
-      verifyVisualizationGenerated();
+      cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
+      cy.get('.metric-value-number').should('not.be.empty');
     });
   });
 };

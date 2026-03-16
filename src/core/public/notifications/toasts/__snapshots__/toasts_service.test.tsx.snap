@@ -22,19 +22,12 @@ Array [
         }
       />
     </I18nContext>,
-    <div
-      test="target-dom-element"
-    />,
   ],
 ]
 `;
 
 exports[`#stop() unmounts the GlobalToastList from the targetDomElement 1`] = `
 Array [
-  Array [
-    <div
-      test="target-dom-element"
-    />,
-  ],
+  Array [],
 ]
 `;

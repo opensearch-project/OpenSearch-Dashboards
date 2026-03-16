@@ -95,6 +95,10 @@ const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
 beforeEach(() => {
+  // Clear mocks at the start of each test to ensure clean state
+  // This is important for Jest's retry mechanism which may not run afterEach before retry
+  jest.clearAllMocks();
+
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = {
@@ -545,6 +549,9 @@ describe('start', () => {
   });
 
   it('logs only server-side plugins', async () => {
+    // Create a fresh pluginsSystem to ensure test isolation during retries
+    const freshPluginsSystem = new PluginsSystem(coreContext);
+
     [
       createPlugin('order-0'),
       createPlugin('order-not-run', { server: false }),
@@ -552,12 +559,24 @@ describe('start', () => {
     ].forEach((plugin, index) => {
       jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
       jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
-      pluginsSystem.addPlugin(plugin);
+      freshPluginsSystem.addPlugin(plugin);
     });
-    await pluginsSystem.setupPlugins(setupDeps);
-    await pluginsSystem.startPlugins(startDeps);
-    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
-    expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
+
+    // Get the logger and clear its info mock to avoid accumulation from test retries
+    const log = logger.get.mock.results[logger.get.mock.results.length - 1].value as jest.Mocked<
+      Logger
+    >;
+    log.info.mockClear();
+
+    await freshPluginsSystem.setupPlugins(setupDeps);
+    await freshPluginsSystem.startPlugins(startDeps);
+
+    // Find the "Starting" log call from this test run
+    const startingCalls = log.info.mock.calls.filter((call) =>
+      String(call[0]).startsWith('Starting')
+    );
+    expect(startingCalls.length).toBe(1);
+    expect(startingCalls[0][0]).toBe(`Starting [2] plugins: [order-1,order-0]`);
   });
 
   it('validates plugin start when opensearch dependency is fulfilled', async () => {

@@ -4,48 +4,56 @@
  */
 
 import {
+  DATASOURCE_NAME,
   START_TIME,
   END_TIME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
   QueryLanguages,
-  DATASOURCE_NAME,
-} from '../../../../../../utils/apps/constants';
+} from '../../../../../../utils/constants';
+
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
+
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/query_enhancements/histogram_interaction';
 import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runHistogramInteractionTests = () => {
   describe('histogram interaction', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspace,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace);
     });
 
     generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {

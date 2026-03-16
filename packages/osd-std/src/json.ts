@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import JSON11 from 'json11';
+import * as JSON11 from 'json11';
 
 export const stringify = (
   obj: any,

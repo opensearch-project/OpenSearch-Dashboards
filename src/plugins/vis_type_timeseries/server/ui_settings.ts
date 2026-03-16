@@ -33,7 +33,7 @@ import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 
-import { MAX_BUCKETS_SETTING } from '../common/constants';
+import { MAX_BUCKETS_SETTING, CLIENT_SIDE_EVALUATION_SETTING } from '../common/constants';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [MAX_BUCKETS_SETTING]: {
@@ -45,5 +45,18 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage: 'The maximum number of buckets a single datasource can return',
     }),
     schema: schema.number(),
+  },
+  [CLIENT_SIDE_EVALUATION_SETTING]: {
+    name: i18n.translate('visTypeTimeseries.advancedSettings.clientSideEvaluationTitle', {
+      defaultMessage: 'TSVB client-side math evaluation',
+    }),
+    value: true,
+    description: i18n.translate('visTypeTimeseries.advancedSettings.clientSideEvaluationText', {
+      defaultMessage:
+        'Enable client-side evaluation of math expressions in TSVB. When enabled, math calculations are performed in the browser rather than on the server, reducing server load. Disable to use legacy server-side evaluation.',
+    }),
+    category: ['visualization'],
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
 };

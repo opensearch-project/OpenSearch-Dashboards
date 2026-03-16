@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import Boom from '@hapi/boom';
 import { i18n, i18nLoader } from '@osd/i18n';
 import * as v7light from '@elastic/eui/dist/eui_theme_light.json';
@@ -41,6 +41,7 @@ import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
+import { applyCspModifications } from './utils';
 
 /**
  * @typedef {import('../../server/osd_server').default} OsdServer
@@ -306,21 +307,71 @@ export function uiRenderMixin(osdServer, server, config) {
 
   async function renderApp(h) {
     const { http } = osdServer.newPlatform.setup.core;
+    const { dynamicConfig } = osdServer.newPlatform.start.core;
     const { savedObjects } = osdServer.newPlatform.start.core;
     const { rendering } = osdServer.newPlatform.__internals;
     const req = OpenSearchDashboardsRequest.from(h.request);
     const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(
       savedObjects.getScopedClient(req)
     );
+
+    const nonce = randomBytes(16).toString('base64');
+
     const vars = {
       apmConfig: getApmConfig(h.request.path),
     };
     const content = await rendering.render(h.request, uiSettings, {
       includeUserSettings: true,
       vars,
+      nonce,
     });
 
-    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
+    let cspHeader = http.csp.header;
+    try {
+      const dynamicConfigClient = dynamicConfig.getClient();
+      const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);
+      const cspModificationsDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-modifications' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+
+      const modifications = cspModificationsDynamicConfig?.modifications;
+      if (modifications && modifications.length > 0) {
+        cspHeader = applyCspModifications(http.csp.rules, modifications);
+      }
+    } catch (e) {
+      // Fall back to default CSP header on error
+    }
+
+    const output = h
+      .response(content)
+      .type('text/html')
+      .header('content-security-policy', cspHeader);
+
+    let cspReportOnlyIsEmitting;
+    try {
+      const dynamicConfigClient = dynamicConfig.getClient();
+      const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);
+      const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-report-only' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+      cspReportOnlyIsEmitting =
+        cspReportOnlyDynamicConfig.isEmitting ?? http.cspReportOnly.isEmitting;
+    } catch (e) {
+      cspReportOnlyIsEmitting = http.cspReportOnly.isEmitting;
+    }
+
+    if (cspReportOnlyIsEmitting) {
+      const cspReportOnlyHeader = http.cspReportOnly.buildHeaderWithNonce(nonce);
+      output.header('content-security-policy-report-only', cspReportOnlyHeader);
+
+      if (http.cspReportOnly.reportingEndpointsHeader) {
+        output.header('reporting-endpoints', http.cspReportOnly.reportingEndpointsHeader);
+      }
+    }
+
+    return output;
   }
 
   server.decorate('toolkit', 'renderApp', function () {

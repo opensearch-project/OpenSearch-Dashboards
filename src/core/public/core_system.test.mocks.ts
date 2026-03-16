@@ -44,6 +44,7 @@ import { contextServiceMock } from './context/context_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { workspacesServiceMock } from './workspace/workspaces_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
+import { coreTelemetryServiceMock } from './telemetry/telemetry_service.mock';
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest
@@ -153,4 +154,14 @@ export const WorkspacesServiceConstructor = jest
   .mockImplementation(() => MockWorkspacesService);
 jest.doMock('./workspace', () => ({
   WorkspacesService: WorkspacesServiceConstructor,
+}));
+
+export const MockTelemetryService = {
+  setup: jest.fn().mockReturnValue(coreTelemetryServiceMock.createSetupContract()),
+  start: jest.fn().mockReturnValue(coreTelemetryServiceMock.createStartContract()),
+  stop: jest.fn(),
+};
+export const TelemetryServiceConstructor = jest.fn().mockImplementation(() => MockTelemetryService);
+jest.doMock('./telemetry', () => ({
+  TelemetryCoreService: TelemetryServiceConstructor,
 }));

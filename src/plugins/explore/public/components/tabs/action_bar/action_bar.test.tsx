@@ -45,6 +45,11 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
           },
         },
       },
+      slotRegistry: {
+        getSortedItems$: () => ({
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        }),
+      },
     },
   }),
   withOpenSearchDashboards: jest.fn((component: any) => component),
@@ -70,6 +75,29 @@ jest.mock('../../../application/utils/hooks/use_tab_results', () => ({
       elapsedMs: 100,
     },
   }),
+}));
+
+jest.mock('../../../application/utils/hooks/use_histogram_results', () => ({
+  useHistogramResults: () => ({
+    results: {
+      hits: {
+        total: { value: 10, relation: 'eq' },
+      },
+    },
+  }),
+}));
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: () => ({ language: 'PPL', query: 'source=logs', dataset: { id: 'test' } }),
+}));
+
+jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: () => 'source=logs',
+}));
+
+jest.mock('../../../application/utils/state_management/actions/utils', () => ({
+  queryEndsWithHead: () => false,
 }));
 
 describe('ActionBar', () => {

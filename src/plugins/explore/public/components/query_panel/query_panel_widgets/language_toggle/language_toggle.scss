@@ -15,8 +15,11 @@
     border: 1px solid $ouiBorderColor;
     box-shadow: none; // override the badge's box-shadow with border
     margin-right: $ouiSizeXS;
-    width: 56px; // have it fixed width so layout shifting does not occur when changing languages
+    min-width: 56px;
+    padding-left: $ouiSizeM;
+    padding-right: $ouiSizeM;
     position: relative;
+    text-transform: none;
 
     &::before {
       content: "";

@@ -1,0 +1,203 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import React, { Fragment } from 'react';
+import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+
+import { FormattedMessage } from '@osd/i18n/react';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { DatasetManagmentContext } from '../../../../types';
+
+export const ScriptingSyntax = () => {
+  const docLinksScriptedFields = useOpenSearchDashboards<DatasetManagmentContext>().services
+    .docLinks?.links.noDocumentation.scriptedFields;
+  return (
+    <Fragment>
+      <EuiSpacer />
+      <EuiText>
+        <h3>
+          <FormattedMessage id="datasetManagement.syntaxHeader" defaultMessage="Syntax" />
+        </h3>
+        <p>
+          <FormattedMessage
+            id="datasetManagement.syntax.defaultLabel.defaultDetail"
+            defaultMessage="By default, OpenSearch Dashboards scripted fields use {painless}, a simple and secure scripting language designed
+          specifically for use with OpenSearch, to access values in the document use the following format:"
+            values={{
+              painless: (
+                <EuiLink target="_blank" href={docLinksScriptedFields.painless}>
+                  <FormattedMessage
+                    id="datasetManagement.syntax.defaultLabel.painlessLink"
+                    defaultMessage="Painless"
+                  />{' '}
+                  <EuiIcon type="link" />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>
+          <EuiCode>
+            <FormattedMessage
+              id="datasetManagement.syntax.default.formatLabel"
+              defaultMessage="doc['some_field'].value"
+            />
+          </EuiCode>
+        </p>
+        <p>
+          <FormattedMessage
+            id="datasetManagement.syntax.painlessLabel.painlessDetail"
+            defaultMessage="Painless is powerful but easy to use. It provides access to many {javaAPIs}. Read up on its {syntax} and
+          you'll be up to speed in no time!"
+            values={{
+              javaAPIs: (
+                <EuiLink target="_blank" href={docLinksScriptedFields.painlessApi}>
+                  <FormattedMessage
+                    id="datasetManagement.syntax.painlessLabel.javaAPIsLink"
+                    defaultMessage="native Java APIs"
+                  />
+                  &nbsp;
+                  <EuiIcon type="link" />
+                </EuiLink>
+              ),
+              syntax: (
+                <EuiLink target="_blank" href={docLinksScriptedFields.painlessSyntax}>
+                  <FormattedMessage
+                    id="datasetManagement.syntax.painlessLabel.syntaxLink"
+                    defaultMessage="syntax"
+                  />
+                  &nbsp;
+                  <EuiIcon type="link" />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="datasetManagement.syntax.opensearchDashboardsLabel"
+            defaultMessage="OpenSearch Dashboards currently imposes one special limitation on the painless scripts you write. They cannot contain named
+          functions."
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="datasetManagement.syntax.lucene.commonLabel.commonDetail"
+            defaultMessage="Coming from an older version of OpenSearch Dashboards? The {lucene} you know and love are still available. Lucene expressions
+          are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations."
+            values={{
+              lucene: (
+                <EuiLink target="_blank" href={docLinksScriptedFields.luceneExpressions}>
+                  <FormattedMessage
+                    id="datasetManagement.syntax.lucene.commonLabel.luceneLink"
+                    defaultMessage="Lucene Expressions"
+                  />
+                  &nbsp;
+                  <EuiIcon type="link" />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="datasetManagement.syntax.lucene.limitsLabel"
+            defaultMessage="There are a few limitations when using Lucene Expressions:"
+          />
+        </p>
+        <ul>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.limits.typesLabel"
+              defaultMessage="Only numeric, boolean, date, and geo_point fields may be accessed"
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.limits.fieldsLabel"
+              defaultMessage="Stored fields are not available"
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.limits.sparseLabel"
+              defaultMessage="If a field is sparse (only some documents contain a value), documents missing the field will have
+            a value of 0"
+            />
+          </li>
+        </ul>
+        <p>
+          <FormattedMessage
+            id="datasetManagement.syntax.lucene.operationsLabel"
+            defaultMessage="Here are all the operations available to lucene expressions:"
+          />
+        </p>
+        <ul>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.arithmeticLabel"
+              defaultMessage="Arithmetic operators: {operators}"
+              values={{ operators: <code>+ - * / %</code> }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.bitwiseLabel"
+              defaultMessage="Bitwise operators: {operators}"
+              values={{
+                operators: <code>| & ^ ~ &#x3C;&#x3C; &#x3E;&#x3E; &#x3E;&#x3E;&#x3E;</code>,
+              }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.booleanLabel"
+              defaultMessage="Boolean operators (including the ternary operator): {operators}"
+              values={{ operators: <code>&& || ! ?:</code> }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.comparisonLabel"
+              defaultMessage="Comparison operators: {operators}"
+              values={{ operators: <code>&#x3C; &#x3C;= == &#x3E;= &#x3E;</code> }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.mathLabel"
+              defaultMessage="Common mathematic functions: {operators}"
+              values={{ operators: <code>abs ceil exp floor ln log10 logn max min sqrt pow</code> }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.trigLabel"
+              defaultMessage="Trigonometric library functions: {operators}"
+              values={{
+                operators: (
+                  <code>acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan</code>
+                ),
+              }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.distanceLabel"
+              defaultMessage="Distance functions: {operators}"
+              values={{ operators: <code>haversin</code> }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="datasetManagement.syntax.lucene.operations.miscellaneousLabel"
+              defaultMessage="Miscellaneous functions: {operators}"
+              values={{ operators: <code>min, max</code> }}
+            />
+          </li>
+        </ul>
+      </EuiText>
+    </Fragment>
+  );
+};

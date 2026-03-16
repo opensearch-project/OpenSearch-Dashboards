@@ -14,17 +14,20 @@ import {
   Positions,
   AxisRole,
   TooltipOptions,
-  LabelAggregationType,
+  AggregationType,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
+import { getColors } from '../theme/default_colors';
+import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
 
 export interface HeatmapLabels {
   show: boolean;
   rotate: boolean;
   overwriteColor: boolean;
   color: string;
-  type?: LabelAggregationType;
+  type?: AggregationType;
 }
 export interface ExclusiveHeatmapConfig {
   colorSchema: ColorSchemas;
@@ -33,34 +36,49 @@ export interface ExclusiveHeatmapConfig {
   scaleToDataBounds: boolean;
   percentageMode: boolean;
   maxNumberOfColors: number;
-  useCustomRanges: boolean;
+  /**
+   * @deprecated - use useThresholdColor instead
+   */
+  useCustomRanges?: boolean;
   label: HeatmapLabels;
+
+  /**
+   * @deprecated - use global thresholdOptions instead
+   */
   customRanges?: RangeValue[];
 }
-// Complete heatmap chart style controls interface
-export interface HeatmapChartStyleControls {
+// Complete heatmap chart style options interface
+export interface HeatmapChartStyleOptions {
   // Basic controls
-  tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  tooltipOptions?: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  // @deprecated - removed this once migrated to echarts
+  legendTitle?: string;
 
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  exclusive: ExclusiveHeatmapConfig;
-  switchAxes: boolean;
+  exclusive?: ExclusiveHeatmapConfig;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
+  useThresholdColor?: boolean;
+  thresholdOptions?: ThresholdOptions;
 }
 
-export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
+export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
+
+export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   switchAxes: false,
   // Basic controls
   tooltipOptions: {
     mode: 'all',
   },
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
 
   // exclusive
   exclusive: {
@@ -70,55 +88,34 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     scaleToDataBounds: false,
     percentageMode: false,
     maxNumberOfColors: 4,
-    useCustomRanges: false,
+
     label: {
-      type: LabelAggregationType.SUM,
+      type: AggregationType.SUM,
       show: false,
       rotate: false,
       overwriteColor: false,
       color: 'black',
     },
   },
+  useThresholdColor: false,
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+  },
 
   // Standard axes
   standardAxes: [
     {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
+      ...DEFAULT_X_AXIS_CONFIG,
       grid: {
-        showLines: false,
+        showLines: true,
       },
-      axisRole: AxisRole.X,
     },
     {
-      id: 'Axis-2',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
+      ...DEFAULT_Y_AXIS_CONFIG,
       grid: {
-        showLines: false,
+        showLines: true,
       },
-      axisRole: AxisRole.Y,
     },
   ],
   titleOptions: {

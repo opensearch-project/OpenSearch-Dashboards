@@ -211,7 +211,6 @@ export const WorkspaceFormSummaryPanel = ({
         formId={formId}
         application={application}
         isSubmitting={isSubmitting}
-        dataSourceEnabled={dataSourceEnabled}
       />
     </EuiCard>
   );

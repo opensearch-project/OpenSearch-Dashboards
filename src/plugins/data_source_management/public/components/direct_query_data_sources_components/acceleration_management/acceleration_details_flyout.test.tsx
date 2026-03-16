@@ -128,7 +128,13 @@ describe('AccelerationDetailsFlyout', () => {
     let wrapper;
     await act(async () => {
       wrapper = mount(<AccelerationDetailsFlyout {...defaultProps} />);
-      wrapper.find('EuiButtonEmpty').at(0).simulate('click');
+    });
+    // @ts-expect-error TS7005 TODO(ts-error): fixme
+    wrapper!.update();
+
+    await act(async () => {
+      // @ts-expect-error TS7005 TODO(ts-error): fixme
+      wrapper!.find('EuiButtonEmpty').at(0).simulate('click');
     });
     // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();

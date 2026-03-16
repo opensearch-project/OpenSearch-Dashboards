@@ -61,6 +61,7 @@ export class TooltipHandler {
     this.position = opts.position;
     this.padding = opts.padding;
     this.centerOnMark = opts.centerOnMark;
+    this.tooltipTimeout = null;
 
     view.tooltip(this.handler.bind(this));
   }
@@ -69,28 +70,46 @@ export class TooltipHandler {
    * The handler function.
    */
   handler(view, event, item, value) {
-    this.hideTooltip();
-
     // hide tooltip for null, undefined, or empty string values
     if (value == null || value === '') {
+      this.hideTooltip();
       return;
     }
 
-    const el = document.createElement('div');
-    el.setAttribute('id', tooltipId);
-    ['vgaVis__tooltip', 'euiToolTipPopover', 'euiToolTip', `euiToolTip--${this.position}`].forEach(
-      (className) => {
-        el.classList.add(className);
+    window.clearTimeout(this.tooltipTimeout);
+
+    if (typeof value === 'object') {
+      const keys = Object.keys(value);
+      const newValue = {};
+      for (const key of keys) {
+        if (value[key] !== 'NaN') {
+          newValue[key] = value[key];
+        }
       }
-    );
+      value = newValue;
+    }
+
+    let el = document.getElementById(tooltipId);
+    if (!el) {
+      el = document.createElement('div');
+      el.setAttribute('id', tooltipId);
+      [
+        'vgaVis__tooltip',
+        'euiToolTipPopover',
+        'euiToolTip',
+        `euiToolTip--${this.position}`,
+      ].forEach((className) => {
+        el.classList.add(className);
+      });
+
+      // add to DOM to calculate tooltip size
+      document.body.appendChild(el);
+    }
 
     // Sanitized HTML is created by the tooltip library,
     // with a large number of tests, hence suppressing eslint here.
     // eslint-disable-next-line no-unsanitized/property
     el.innerHTML = createTooltipContent(value, _.escape, 2);
-
-    // add to DOM to calculate tooltip size
-    document.body.appendChild(el);
 
     // if centerOnMark numeric value is smaller than the size of the mark, use mouse [x,y]
     let anchorBounds;
@@ -118,7 +137,9 @@ export class TooltipHandler {
   }
 
   hideTooltip() {
-    const el = document.getElementById(tooltipId);
-    if (el) el.remove();
+    this.tooltipTimeout = window.setTimeout(() => {
+      const el = document.getElementById(tooltipId);
+      if (el) el.remove();
+    }, 100);
   }
 }

@@ -90,5 +90,19 @@ jest.mock('@osd/monaco', () => {
     // Add any other properties needed by your tests
   };
 
-  return { monaco };
+  // Mock Worker class for tests
+  class MockWorker {
+    constructor(url) {
+      this.url = url;
+    }
+    postMessage = jest.fn();
+    terminate = jest.fn();
+    onmessage = null;
+    onerror = null;
+  }
+
+  // Mock getWorker function to return a mock Worker without requiring setBuildHash
+  const getWorker = jest.fn(() => new MockWorker('mock-worker-url'));
+
+  return { monaco, getWorker };
 });

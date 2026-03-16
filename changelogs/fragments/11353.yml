@@ -1,0 +1,2 @@
+feat:
+- Fix CSP violation for Console worker by loading from URL instead of blob ([#11353](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11353))

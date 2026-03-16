@@ -14,6 +14,26 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../style_panel/standard_options/standard_options_panel', () => ({
+  StandardOptionsPanel: jest.fn(({ min, onMinChange, max, onMaxChange, unit, onUnitChange }) => (
+    <div data-test-subj="mockStandardPanel">
+      <input
+        data-test-subj="thresholdMinBase"
+        onChange={(e) => onMinChange(Number(e.target.value))}
+      />
+      <input
+        data-test-subj="thresholdMaxBase"
+        onChange={(e) => onMaxChange(Number(e.target.value))}
+      />
+      <div data-test-subj="mockGaugeUnitPanel">
+        <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
+          <option value="number">Number</option>
+        </select>
+      </div>
+    </div>
+  )),
+}));
+
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
     axisColumnMappings: {
@@ -53,29 +73,6 @@ describe('MetricVisStyleControls', () => {
     expect(screen.getByText('Metric')).toBeInTheDocument();
   });
 
-  it('renders the show title switch', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    expect(screen.getByTestId('showTitleSwitch')).toBeInTheDocument();
-  });
-
-  it('calls onStyleChange when show title switch is toggled', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    const switchButton = screen.getByTestId('showTitleSwitch');
-    fireEvent.click(switchButton);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ showTitle: false });
-  });
-
-  it('renders title input when showTitle is true', () => {
-    const propsWithTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true },
-    };
-    render(<MetricVisStyleControls {...propsWithTitle} />);
-
-    expect(screen.getByPlaceholderText('Title')).toBeInTheDocument();
-  });
-
   it('does not render title input when showTitle is false', () => {
     const propsWithoutTitle = {
       ...mockProps,
@@ -83,44 +80,19 @@ describe('MetricVisStyleControls', () => {
     };
     render(<MetricVisStyleControls {...propsWithoutTitle} />);
 
-    expect(screen.queryByPlaceholderText('Title')).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Default title')).not.toBeInTheDocument();
   });
 
   it('renders font size range slider', () => {
     render(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.getByRole('slider', { name: 'Font size' })).toBeInTheDocument();
+    expect(screen.getByTestId('valueFontSizeInput')).toBeInTheDocument();
   });
 
   it('renders use color switch', () => {
     render(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.getByText('Value color')).toBeInTheDocument();
-  });
-
-  it('calls onStyleChange when use color switch is toggled', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    const switches = screen.getAllByRole('switch');
-    const colorSwitch = switches.find((sw) => sw.getAttribute('aria-checked') === 'false');
-    fireEvent.click(colorSwitch!);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ useColor: true });
-  });
-
-  it('renders color schema select when useColor is true', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-
-    expect(screen.getByText('Color Schema')).toBeInTheDocument();
-  });
-
-  it('does not render color schema when useColor is false', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-
-    expect(screen.queryByText('Color Schema')).not.toBeInTheDocument();
+    expect(screen.getByText('Use threshold colors')).toBeInTheDocument();
   });
 
   it('does not render style options when no axis mapping is selected', () => {
@@ -143,7 +115,7 @@ describe('MetricVisStyleControls', () => {
 
   it('calls onStyleChange when font size is changed', async () => {
     render(<MetricVisStyleControls {...mockProps} />);
-    const fontSizeSlider = screen.getByRole('slider', { name: 'Font size' });
+    const fontSizeSlider = screen.getByTestId('valueFontSizeInput');
     fireEvent.change(fontSizeSlider, { target: { value: '80' } });
 
     await waitFor(() => {
@@ -151,63 +123,15 @@ describe('MetricVisStyleControls', () => {
     });
   });
 
-  it('calls onStyleChange when color schema is changed', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
-    fireEvent.change(colorSchemaSelect, { target: { value: 'greens' } });
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ colorSchema: 'greens' });
+  it('renders standard panel', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockStandardPanel')).toBeInTheDocument();
   });
 
-  it('renders custom ranges when useColor is true', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-
-    // CustomRange component should be rendered
-    expect(screen.getByText('Color Schema')).toBeInTheDocument();
-  });
-
-  it('calls onStyleChange when title text is changed', async () => {
-    const propsWithTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true },
-    };
-    render(<MetricVisStyleControls {...propsWithTitle} />);
-    const titleInput = screen.getByPlaceholderText('Title');
-    fireEvent.change(titleInput, { target: { value: 'New Title' } });
-
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ title: 'New Title' });
-    });
-  });
-
-  it('uses numerical column name as default title when no title is set', () => {
-    const propsWithTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true, title: '' },
-    };
-    render(<MetricVisStyleControls {...propsWithTitle} />);
-    const titleInput = screen.getByDisplayValue('value');
-
-    expect(titleInput).toBeInTheDocument();
-  });
-
-  it('uses empty string as default title when no title and no value axis mapping is set', () => {
-    const propsWithEmptyTitle = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, showTitle: true, title: '' },
-      axisColumnMappings: { value: undefined },
-    };
-    render(<MetricVisStyleControls {...propsWithEmptyTitle} />);
-    const titleInput = screen.getByPlaceholderText('Title');
-
-    expect(titleInput).toHaveValue('');
+  it('calls onStyleChange when unit is changed', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+    const unitSelect = screen.getByTestId('changeUnit');
+    fireEvent.click(unitSelect);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ unitId: 'number' });
   });
 });

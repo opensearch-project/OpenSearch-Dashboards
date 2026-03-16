@@ -36,6 +36,7 @@ import { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
+  nonce: string;
 }
 
 interface FontFace {
@@ -49,7 +50,7 @@ interface FontFace {
   }>;
 }
 
-export const Fonts: FunctionComponent<Props> = ({ url }) => {
+export const Fonts: FunctionComponent<Props> = ({ url, nonce }) => {
   // For v9 theme
   const rubik: FontFace = {
     family: 'Rubik',
@@ -633,6 +634,7 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
 
   return (
     <style
+      nonce={nonce}
       dangerouslySetInnerHTML={{
         __html: `
         ${fontsDefinitionRules}

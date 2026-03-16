@@ -6,12 +6,15 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { DiscoverDownloadCsvPopoverContent } from './download_csv_popover_content';
 import { useDiscoverDownloadCsv } from './use_download_csv';
 import { DownloadCsvFormId } from './constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { IndexPattern } from '../../../../../../data/common';
 import { useDiscoverDownloadCsvToasts } from './use_download_csv_toasts';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../../types';
 
 export interface DiscoverDownloadCsvProps {
   hits?: number;
@@ -21,6 +24,7 @@ export interface DiscoverDownloadCsvProps {
 
 export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownloadCsvProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { onSuccess, onError, onLoading } = useDiscoverDownloadCsvToasts();
   const { isLoading, downloadCsvForOption } = useDiscoverDownloadCsv({
     rows,
@@ -33,6 +37,27 @@ export const DiscoverDownloadCsv = ({ indexPattern, hits, rows }: DiscoverDownlo
 
   const openPopover = () => setIsPopoverOpen(true);
   const closePopover = () => setIsPopoverOpen(false);
+
+  const handleDownloadCsvShortcut = () => {
+    if (!isLoading) {
+      openPopover();
+    }
+  };
+  const { keyboardShortcut } = services;
+
+  // Register keyboard shortcut
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'download_csv',
+    pluginId: 'explore',
+    name: i18n.translate('explore.downloadCsv.downloadCsvShortcut', {
+      defaultMessage: 'Download CSV',
+    }),
+    category: i18n.translate('explore.downloadCsv.dataActionsCategory', {
+      defaultMessage: 'Data actions',
+    }),
+    keys: 'e',
+    execute: handleDownloadCsvShortcut,
+  });
 
   const handleDownloadCsvForOption = async (option: DownloadCsvFormId) => {
     closePopover();

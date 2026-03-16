@@ -8,14 +8,14 @@ import { getEffectiveLanguageForAutoComplete } from './utils';
 describe('utils', () => {
   describe('getEffectiveLanguageForAutoComplete test matrix', () => {
     const languages = ['PPL', 'SQL', 'DQL', 'lucene', 'kuery'];
-    const appIds = ['explore', 'discover', 'dashboard', 'visualize', ''];
+    const appIds = ['explore', 'agentTraces', 'discover', 'dashboard', 'visualize', ''];
 
     languages.forEach((language) => {
       appIds.forEach((appId) => {
         it(`should handle ${language} language with ${appId || 'empty'} appId`, () => {
           const result = getEffectiveLanguageForAutoComplete(language, appId);
 
-          if (language === 'PPL' && appId === 'explore') {
+          if (language === 'PPL' && (appId === 'explore' || appId === 'agentTraces')) {
             expect(result).toBe('PPL_Simplified');
           } else {
             expect(result).toBe(language);

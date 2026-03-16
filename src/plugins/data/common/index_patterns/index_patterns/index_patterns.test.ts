@@ -221,6 +221,7 @@ describe('IndexPatterns', () => {
         fieldFormatMap: '{"field":{}}',
         typeMeta: '{}',
         type: '',
+        schemaMappings: '{"otelLogs":{"traceId":"trace.id"}}',
       },
       type: 'index-pattern',
       references: [],
@@ -241,6 +242,7 @@ describe('IndexPatterns', () => {
         fieldFormatMap: '{"field":{}}',
         typeMeta: '{}',
         type: '',
+        schemaMappings: '{"otelLogs":{"spanId":"span.id"}}',
       },
       type: 'index-pattern',
       references: [

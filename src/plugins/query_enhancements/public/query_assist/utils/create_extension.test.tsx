@@ -89,7 +89,13 @@ describe('CreateExtension', () => {
     summary: { enabled: false, branding: { label: '' } },
   };
 
-  it('should be enabled if at least one language is configured', async () => {
+  it('should be enabled if current language matches configured language and AI features enabled', async () => {
+    const mockQueryWithPPL = {
+      ...mockQueryWithIndexPattern,
+      language: 'PPL',
+    };
+    queryStringMock.getQuery.mockReturnValue(mockQueryWithPPL);
+    queryStringMock.getUpdates$.mockReturnValue(of(mockQueryWithPPL));
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const extension = createQueryAssistExtension(
       coreSetupMock,
@@ -121,6 +127,36 @@ describe('CreateExtension', () => {
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
     });
+  });
+
+  it('should be disabled when AI features are disabled', async () => {
+    const mockCoreSetup = {
+      ...coreSetupMock,
+      getStartServices: jest.fn().mockResolvedValue([
+        {
+          ...coreMock.createStart(),
+          uiSettings: {
+            ...uiSettingsServiceMock.createStartContract(),
+            get: jest.fn().mockReturnValue(false),
+          },
+        },
+        {},
+        {},
+      ]),
+    };
+    httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
+    const extension = createQueryAssistExtension(
+      mockCoreSetup,
+      dataMock,
+      config,
+      mockIsQuerySummaryCollapsed$,
+      mockIsSummaryAgentAvailable$,
+      mockresultSummaryEnabled$
+    );
+    // Wait for assistantEnabled$ to be updated
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
+    expect(isEnabled).toBeFalsy();
   });
 
   it('creates data structure meta', async () => {

@@ -46,6 +46,29 @@ describe('ppl_request_helpers', () => {
         timeFieldName: undefined,
       });
     });
+
+    it('includes dataSource when present (external data source)', () => {
+      const datasetWithDataSource = {
+        ...createMockDataset(),
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      };
+      const result = buildPPLDataset(datasetWithDataSource);
+      expect(result).toEqual({
+        id: 'test-dataset-id',
+        title: 'test-index',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      });
+    });
   });
 
   describe('buildPPLQueryRequest', () => {
@@ -71,6 +94,37 @@ describe('ppl_request_helpers', () => {
       const dataset = createMockDataset();
       const result = buildPPLQueryRequest(dataset, 'source = test-index');
       expect(result.params.body.query.dataset).toEqual(buildPPLDataset(dataset));
+    });
+
+    it('includes aggConfig when provided (external data source)', () => {
+      const dataset = createMockDataset();
+      const aggConfig = {
+        date_histogram: {
+          field: 'endTime',
+          fixed_interval: '5s',
+          time_zone: 'America/Los_Angeles',
+          min_doc_count: 1,
+        },
+      };
+      const result = buildPPLQueryRequest(dataset, 'source = test-index', aggConfig);
+      expect(result.params.body.aggConfig).toEqual(aggConfig);
+    });
+
+    it('works with external data source dataset', () => {
+      const datasetWithDataSource = {
+        ...createMockDataset(),
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      };
+      const result = buildPPLQueryRequest(datasetWithDataSource, 'source = test-index');
+      expect(result.params.body.query.dataset.dataSource).toEqual({
+        id: 'external-datasource-id',
+        title: 'external',
+        type: 'OpenSearch',
+      });
     });
   });
 

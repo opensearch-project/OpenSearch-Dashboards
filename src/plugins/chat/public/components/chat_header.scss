@@ -1,0 +1,45 @@
+.chatHeader {
+  grid-area: header;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  gap: 16px;
+  overflow-x: hidden;
+
+  &__titleGroup {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__titleContainer {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__chatIcon {
+    color: $euiColorDarkShade;
+  }
+
+  &__title {
+    margin: 0;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  &__experimentalBadge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}

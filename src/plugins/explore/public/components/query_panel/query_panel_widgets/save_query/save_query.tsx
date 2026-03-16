@@ -184,6 +184,7 @@ export const SaveQueryButton = () => {
       closePopover={closePopover}
       anchorPosition="downCenter"
       panelPaddingSize="none"
+      panelClassName="exploreSaveQuery__popoverContent"
     >
       <SavedQueryManagementComponent
         savedQueryService={savedQueryService}
@@ -197,6 +198,7 @@ export const SaveQueryButton = () => {
         saveQuery={handleSaveQuery}
         useNewSavedQueryUI={true}
         saveQueryIsDisabled={saveButtonIsDisabled}
+        textSize="xs"
       />
     </EuiPopover>
   );

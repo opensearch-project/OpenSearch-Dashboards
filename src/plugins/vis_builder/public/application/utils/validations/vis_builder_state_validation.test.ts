@@ -35,13 +35,16 @@ describe('visBuilder state validation', () => {
   });
 
   describe('correct return with errors when validation fails', () => {
-    test('with non object type styleStyle', () => {
+    test('with non object type styleState', () => {
       const validationResult = validateVisBuilderState({
         styleState: [],
         visualizationState: validVisualizationState,
       });
       expect(validationResult.valid).toBeFalsy();
       expect(validationResult.errorMsg).toBeDefined();
+      expect(validationResult.errorMsg).toStrictEqual(
+        '/styleState Expected object, received array'
+      );
     });
   });
 });

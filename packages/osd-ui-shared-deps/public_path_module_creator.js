@@ -30,6 +30,6 @@
 
 module.exports = function ({ key }) {
   return {
-    code: `__webpack_public_path__ = window.__osdPublicPath__['${key}']`,
+    code: `__webpack_public_path__ = window.__osdPublicPath__['${key}']; __webpack_nonce__ = window.__webpack_nonce__ || '';`,
   };
 };

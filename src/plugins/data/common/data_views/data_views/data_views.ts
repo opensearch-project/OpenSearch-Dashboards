@@ -25,7 +25,7 @@ import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
-import { findByTitle, getDataViewTitle } from '../utils';
+import { findByTitle } from '../utils';
 import { DuplicateDataViewError, MissingDataViewError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -93,7 +93,17 @@ export class DataViewsService {
   }
 
   /**
-   * Refresh cache of data view ids and titles
+   * Refresh cache of data view ids and titles.
+   *
+   * OPTIMIZATION: We intentionally do NOT resolve data-source titles here anymore.
+   * Resolving titles requires fetching each data-source object, which adds unnecessary
+   * network requests during cache refresh. Instead:
+   * 1. Cache stores raw index-pattern titles (e.g., "logs-*")
+   * 2. Data-source titles are resolved lazily when DataViews are actually created/used
+   * 3. The SavedObjectsClient cache ensures data-source fetches are deduplicated
+   *
+   * This reduces initial load time and avoids fetching data-sources for index-patterns
+   * that may never be used.
    */
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
@@ -101,27 +111,167 @@ export class DataViewsService {
       fields: ['title'],
       perPage: 10000,
     });
-
-    this.savedObjectsCache = await Promise.all(
-      this.savedObjectsCache.map(async (obj) => {
-        // TODO: This behaviour will cause the data view title to be resolved differently depending on how its fetched since the get method in this service will not append the datasource title
-        if (obj.type === 'index-pattern') {
-          const result = { ...obj };
-          result.attributes.title = await getDataViewTitle(
-            obj.attributes.title,
-            obj.references,
-            this.getDataSource
-          );
-          return result;
-        } else {
-          return obj;
-        }
-      })
-    );
   }
 
   getDataSource = async (id: string) => {
     return await this.savedObjectsClient.get<DataSourceAttributes>('data-source', id);
+  };
+  /**
+   * Fetches multiple DataViews by their IDs using bulkGet for improved performance.
+   * This method optimizes the fetching process by:
+   * 1. Returning already-cached DataViews immediately
+   * 2. Using bulkGet to fetch multiple uncached DataViews in a single request
+   * 3. Processing all DataViews in parallel
+   *
+   * @param ids - Array of DataView IDs to fetch
+   * @returns Promise resolving to array of DataViews in the same order as input IDs
+   *
+   * @example
+   * const dataViews = await dataViewsService.getMultiple(['id-1', 'id-2', 'id-3']);
+   */
+  getMultiple = async (ids: string[]): Promise<DataView[]> => {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    // Separate cached and uncached IDs
+    const cachedDataViews: Map<string, DataView> = new Map();
+    const uncachedIds: string[] = [];
+
+    for (const id of ids) {
+      // Check cache first
+      const cached = await this.patterns.get(id, true);
+      if (cached) {
+        cachedDataViews.set(id, cached as DataView);
+        continue;
+      }
+
+      // Not cached - needs to be fetched
+      uncachedIds.push(id);
+    }
+
+    // If all are cached, return them in order
+    if (uncachedIds.length === 0) {
+      return ids.map((id) => cachedDataViews.get(id)!);
+    }
+
+    // Fetch uncached DataViews using bulkGet
+    const response = await this.savedObjectsClient.bulkGet<DataViewAttributes>(
+      uncachedIds.map((id) => ({ id, type: savedObjectType }))
+    );
+
+    // Process each saved object and create DataViews in parallel
+    const newDataViewPromises = response.savedObjects.map(
+      async (savedObject: SavedObject<DataViewAttributes>) => {
+        if (!savedObject.version) {
+          throw new SavedObjectNotFound(
+            savedObjectType,
+            savedObject.id,
+            'management/opensearch-dashboards/indexPatterns'
+          );
+        }
+
+        const spec = this.savedObjectToSpec(savedObject);
+        const { title, type, typeMeta, dataSourceRef } = spec;
+        const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
+          ? JSON.parse(savedObject.attributes.fieldFormatMap)
+          : {};
+
+        const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
+        let isSaveRequired = isFieldRefreshRequired;
+        try {
+          spec.fields = isFieldRefreshRequired
+            ? await this.refreshFieldSpecMap(
+                spec.fields || {},
+                savedObject.id,
+                spec.title as string,
+                {
+                  pattern: title,
+                  metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+                  type,
+                  params: typeMeta && typeMeta.params,
+                  dataSourceId: dataSourceRef?.id,
+                }
+              )
+            : spec.fields;
+        } catch (err) {
+          isSaveRequired = false;
+          if (err instanceof DataViewMissingIndices) {
+            this.onNotification({
+              title: (err as any).message,
+              color: 'danger',
+              iconType: 'alert',
+            });
+          } else {
+            this.onError(err, {
+              title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
+                defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+                values: { id: savedObject.id, title },
+              }),
+            });
+          }
+        }
+
+        Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
+          const field = spec.fields?.[fieldName];
+          if (field) {
+            field.format = value;
+          }
+        });
+
+        const dataView = await this.create(spec, true);
+        this.patterns.saveToCache(savedObject.id, dataView);
+
+        if (isSaveRequired) {
+          try {
+            this.updateSavedObject(dataView);
+          } catch (err) {
+            this.onError(err, {
+              title: i18n.translate('data.dataViews.fetchFieldSaveErrorTitle', {
+                defaultMessage:
+                  'Error saving after fetching fields for data view {title} (ID: {id})',
+                values: {
+                  id: dataView.id,
+                  title: dataView.title,
+                },
+              }),
+            });
+          }
+        }
+
+        if (dataView.isUnsupportedTimePattern()) {
+          this.onUnsupportedTimePattern({
+            id: dataView.id as string,
+            title: dataView.title,
+            index: dataView.getIndex(),
+          });
+        }
+
+        dataView.resetOriginalSavedObjectBody();
+        return { id: savedObject.id, dataView };
+      }
+    );
+
+    // Wait for all DataViews to be created
+    const newDataViewResults = await Promise.all(newDataViewPromises);
+
+    // Build a map of newly created DataViews
+    const newDataViewsMap: Map<string, DataView> = new Map();
+    newDataViewResults.forEach(({ id, dataView }: { id: string; dataView: DataView }) => {
+      newDataViewsMap.set(id, dataView);
+    });
+
+    // Return DataViews in the same order as input IDs
+    // Throw error if any DataView is missing (shouldn't happen in normal flow)
+    return ids.map((id) => {
+      const dataView = cachedDataViews.get(id) || newDataViewsMap.get(id);
+      if (!dataView) {
+        throw new Error(
+          `DataView with id "${id}" was not found in cache or fetch results. This may indicate a failed fetch operation.`
+        );
+      }
+      return dataView;
+    });
   };
 
   /**
@@ -379,6 +529,7 @@ export class DataViewsService {
         title,
         displayName,
         description,
+        signalType,
         timeFieldName,
         intervalName,
         fields,
@@ -386,6 +537,7 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
+        schemaMappings,
       },
       references,
     } = savedObject;
@@ -394,6 +546,7 @@ export class DataViewsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: DataViewFieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
@@ -403,6 +556,7 @@ export class DataViewsService {
       title,
       displayName,
       description,
+      signalType,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -410,18 +564,25 @@ export class DataViewsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
+      schemaMappings: parsedSchemaMappings,
     };
   };
 
   /**
-   * Get an data view by id. Cache optimized
-   * @param id
-   * @param onlyCheckCache - Only check cache for data view if it doesn't exist it will not error out
+   * Get an data view by id. Cache optimized.
+   *
+   * @param id - DataView ID to fetch
+   * @param onlyCheckCache - If true, only check cache and return undefined if not found
    */
   get = async (id: string, onlyCheckCache: boolean = false): Promise<DataView> => {
+    // Check cache first
     const cache = await this.patterns.get(id, true);
 
-    if (cache || onlyCheckCache) {
+    if (cache) {
+      return cache as DataView;
+    }
+
+    if (onlyCheckCache) {
       return cache as DataView;
     }
 
@@ -541,9 +702,26 @@ export class DataViewsService {
   }
 
   /**
-   * Create a new data view instance
-   * @param spec
-   * @param skipFetchFields
+   * Create a new data view instance.
+   *
+   * FLOW:
+   * 1. Constructs a new DataView object with the provided spec
+   * 2. Calls initializeDataSourceRef() to fetch and populate data-source details
+   * 3. Optionally refreshes fields from the data source
+   *
+   * DATA-SOURCE HANDLING:
+   * The spec contains only dataSourceRef.id and dataSourceRef.type from the saved object.
+   * initializeDataSourceRef() enriches this with the actual data-source title (name),
+   * engine type, and version by fetching the data-source saved object.
+   *
+   * CACHING:
+   * - DataView instances are cached by DataViewsService.get() after creation
+   * - Cached DataViews skip this method entirely (already have populated dataSourceRef)
+   * - SavedObjectsClient.get() cache prevents duplicate network requests for same data-source
+   *
+   * @param spec - DataView specification from saved object
+   * @param skipFetchFields - If true, skips field refresh (used when fields are already in spec)
+   * @returns Fully initialized DataView instance
    */
   async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
@@ -556,6 +734,9 @@ export class DataViewsService {
       shortDotsEnable,
       metaFields,
     });
+
+    // Initialize data source ref to fetch the actual data source title
+    await dataView.initializeDataSourceRef();
 
     if (!skipFetchFields) {
       await this.refreshFields(dataView);
@@ -614,13 +795,27 @@ export class DataViewsService {
     const body = dataView.getAsSavedObjectBody();
     const references = dataView.getSaveObjectReference();
 
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: dataView.id,
-      references,
-    });
-    dataView.id = response.id;
-    this.patterns.saveToCache(dataView.id, dataView);
-    return dataView;
+    try {
+      const response = await this.savedObjectsClient.create(savedObjectType, body, {
+        id: dataView.id,
+        references,
+      });
+      dataView.id = response.id;
+      this.patterns.saveToCache(dataView.id, dataView);
+      return dataView;
+    } catch (err) {
+      // Handle 409 conflict errors (document already exists) as duplicate data view errors
+      if (
+        (err.statusCode === 409 || err.status === 409 || err.body?.statusCode === 409) &&
+        (err.message?.includes('document already exists') ||
+          err.message?.includes('version conflict') ||
+          err.body?.message?.includes('document already exists') ||
+          err.body?.message?.includes('version conflict'))
+      ) {
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
+      }
+      throw err;
+    }
   }
 
   /**
@@ -717,9 +912,25 @@ export class DataViewsService {
   }
 
   /**
-   * Convert a DataView to a Dataset object
+   * Convert a DataView to a Dataset object.
+   *
+   * FLOW:
+   * Delegates to dataView.toDataset() which reuses the already-populated dataSourceRef
+   * from initializeDataSourceRef(). This avoids redundant data-source fetches.
+   *
+   * TYPICAL USAGE:
+   * ```typescript
+   * const dataView = await dataViews.get(id);  // Fetches & populates dataSourceRef
+   * const dataset = await dataViews.convertToDataset(dataView);  // Reuses dataSourceRef
+   * ```
+   *
+   * OPTIMIZATION:
+   * Before: Each call would fetch the data-source again (redundant)
+   * After: Reuses data from initializeDataSourceRef() (efficient)
+   *
    * @experimental This method is experimental and may change in future versions
    * @param dataView DataView object to convert to Dataset
+   * @returns Dataset object with data source information
    */
   async convertToDataset(dataView: DataView): Promise<Dataset> {
     if (dataView.toDataset) {
@@ -731,6 +942,8 @@ export class DataViewsService {
       title: dataView.title,
       type: dataView.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: dataView.timeFieldName,
+      displayName: dataView.displayName,
+      description: dataView.description,
       ...(dataView.dataSourceRef?.id && {
         dataSource: {
           id: dataView.dataSourceRef.id,

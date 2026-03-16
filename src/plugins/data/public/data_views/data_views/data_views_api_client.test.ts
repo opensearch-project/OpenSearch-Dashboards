@@ -16,7 +16,7 @@ describe('DataViewsApiClient', () => {
   });
 
   test('uses the right URI to fetch fields for time patterns', async function () {
-    const expectedPath = '/api/data_views/_fields_for_time_pattern';
+    const expectedPath = '/api/index_patterns/_fields_for_time_pattern';
 
     await dataViewsApiClient.getFieldsForTimePattern();
 
@@ -24,7 +24,7 @@ describe('DataViewsApiClient', () => {
   });
 
   test('uses the right URI to fetch fields for wildcard', async function () {
-    const expectedPath = '/api/data_views/_fields_for_wildcard';
+    const expectedPath = '/api/index_patterns/_fields_for_wildcard';
 
     await dataViewsApiClient.getFieldsForWildcard();
 
@@ -32,7 +32,7 @@ describe('DataViewsApiClient', () => {
   });
 
   test('uses the right URI to fetch fields for wildcard given a type', async function () {
-    const expectedPath = '/api/data_views/rollup/_fields_for_wildcard';
+    const expectedPath = '/api/index_patterns/_fields_for_wildcard';
 
     await dataViewsApiClient.getFieldsForWildcard({ type: 'rollup' });
 

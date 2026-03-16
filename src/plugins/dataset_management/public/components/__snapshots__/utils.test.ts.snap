@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getting index patterns 1`] = `
+Array [
+  Object {
+    "default": true,
+    "description": "test name",
+    "displayName": "test name",
+    "id": "test",
+    "referenceId": undefined,
+    "signalType": "test name",
+    "sort": "0test name",
+    "tags": undefined,
+    "title": "test name",
+  },
+  Object {
+    "default": false,
+    "description": "test name 1",
+    "displayName": "test name 1",
+    "id": "test1",
+    "referenceId": undefined,
+    "signalType": "test name 1",
+    "sort": "1test name 1",
+    "tags": undefined,
+    "title": "test name 1",
+  },
+]
+`;

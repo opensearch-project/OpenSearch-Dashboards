@@ -36,6 +36,7 @@ import { VisTypeVegaPlugin } from './plugin';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExternalUrls: true,
+    exposeDebugObjectToWindow: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [

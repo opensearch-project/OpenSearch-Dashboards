@@ -76,6 +76,9 @@ export interface InjectedMetadataParams {
     };
     branding: Branding;
     survey?: string;
+    keyboardShortcuts: {
+      enabled: boolean;
+    };
   };
 }
 
@@ -153,6 +156,10 @@ export class InjectedMetadataService {
       getSurvey: () => {
         return this.state.survey;
       },
+
+      getKeyboardShortcuts: () => {
+        return this.state.keyboardShortcuts;
+      },
     };
   }
 }
@@ -188,6 +195,9 @@ export interface InjectedMetadataSetup {
   };
   getBranding: () => Branding;
   getSurvey: () => string | undefined;
+  getKeyboardShortcuts: () => {
+    enabled: boolean;
+  };
 }
 
 /** @internal */

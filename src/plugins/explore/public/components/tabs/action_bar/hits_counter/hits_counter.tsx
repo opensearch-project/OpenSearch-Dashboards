@@ -56,6 +56,10 @@ export interface HitsCounterProps {
    * query ran time in ms
    */
   elapsedMs?: number;
+  /**
+   * optional override for the rows count display (useful for filtered results)
+   */
+  rowsCountOverride?: number;
 }
 
 export function HitsCounter({
@@ -64,8 +68,9 @@ export function HitsCounter({
   onResetQuery,
   rows,
   elapsedMs,
+  rowsCountOverride,
 }: HitsCounterProps) {
-  const rowsCount = rows?.length || 0;
+  const rowsCount = rowsCountOverride !== undefined ? rowsCountOverride : rows?.length || 0;
 
   return (
     <I18nProvider>

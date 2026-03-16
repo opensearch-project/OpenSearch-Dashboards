@@ -5,32 +5,39 @@
 
 import {
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
   QueryLanguages,
   DATASOURCE_NAME,
 } from '../../../../../../utils/apps/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/explore/histogram_interaction';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runHistogramInteractionTests = () => {
   describe('histogram interaction', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspace,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -42,7 +49,7 @@ const runHistogramInteractionTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace);
     });
 
     generateAllTestConfigurations(generateHistogramTestConfigurations).forEach((config) => {
@@ -70,7 +77,6 @@ const runHistogramInteractionTests = () => {
           config.langPermutation.forEach((lang) => {
             if (lang === QueryLanguages.SQL.name) return; // SQL doesn't have a histogram
             cy.getElementByTestId('discoverIntervalSelect').should('have.value', interval);
-            cy.getElementByTestId('discoverIntervalDateRange').should('be.visible');
           });
         });
         cy.getElementByTestId('discoverIntervalSelect').select('auto');
@@ -83,9 +89,6 @@ const runHistogramInteractionTests = () => {
         const START_DATE = `Jan 1, 2021 @ ${TIME}`;
         const END_DATE = `Oct 1, 2021 @ ${TIME}`;
         const checkIntervals = () => {
-          cy.getElementByTestId('discoverIntervalDateRange')
-            .should('be.visible')
-            .and('have.text', `${START_DATE} - ${END_DATE} per`);
           cy.getElementByTestId('docTableExpandToggleColumn')
             .eq(0)
             .find('button')

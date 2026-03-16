@@ -145,6 +145,10 @@ test('suggest controller details visibility is set on editor mount', () => {
   const mockEditor = {
     getContribution: jest.fn().mockReturnValue(mockSuggestController),
     onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
   } as any;
 
   const component = shallow(

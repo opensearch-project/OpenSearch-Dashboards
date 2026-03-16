@@ -32,42 +32,43 @@ import { of } from './of';
 
 describe('of()', () => {
   describe('when promise resolves', () => {
-    const promise = new Promise<void>((resolve) => resolve()).then(() => 123);
+    const createResolvedPromise = () => new Promise<void>((resolve) => resolve()).then(() => 123);
 
     test('first member of 3-tuple is the promise value', async () => {
-      const [result] = await of(promise);
+      const [result] = await of(createResolvedPromise());
       expect(result).toBe(123);
     });
 
     test('second member of 3-tuple is undefined', async () => {
-      const [, error] = await of(promise);
+      const [, error] = await of(createResolvedPromise());
       expect(error).toBe(undefined);
     });
 
     test('third, flag member, of 3-tuple is true', async () => {
-      const [, , resolved] = await of(promise);
+      const [, , resolved] = await of(createResolvedPromise());
       expect(resolved).toBe(true);
     });
   });
 
   describe('when promise rejects', () => {
-    const promise = new Promise<void>((resolve) => resolve()).then(() => {
-      // eslint-disable-next-line no-throw-literal
-      throw 123;
-    });
+    const createRejectedPromise = () =>
+      new Promise<void>((resolve) => resolve()).then(() => {
+        // eslint-disable-next-line no-throw-literal
+        throw 123;
+      });
 
     test('first member of 3-tuple is undefined', async () => {
-      const [result] = await of(promise);
+      const [result] = await of(createRejectedPromise());
       expect(result).toBe(undefined);
     });
 
     test('second member of 3-tuple is thrown error', async () => {
-      const [, error] = await of(promise);
+      const [, error] = await of(createRejectedPromise());
       expect(error).toBe(123);
     });
 
     test('third, flag member, of 3-tuple is false', async () => {
-      const [, , resolved] = await of(promise);
+      const [, , resolved] = await of(createRejectedPromise());
       expect(resolved).toBe(false);
     });
   });

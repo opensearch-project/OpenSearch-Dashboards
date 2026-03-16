@@ -1,0 +1,59 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.datasetInfoPanel {
+  &__schemaGroup {
+    margin-bottom: $euiSizeM;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__titleWithButton {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeXS;
+  }
+
+  &__schemaLabel {
+    font-weight: $euiFontWeightSemiBold;
+    margin-bottom: $euiSizeS;
+  }
+
+  &__mappingRow {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeS;
+    margin-bottom: $euiSizeXS;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__attributeTag {
+    display: inline-block;
+    padding: $euiSizeXS $euiSizeS;
+    background-color: $euiColorLightestShade;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightMedium;
+    color: $euiColorDarkestShade;
+    white-space: nowrap;
+  }
+
+  &__fieldName {
+    font-size: $euiFontSizeS;
+    flex: 1;
+  }
+
+  &__moreText {
+    font-size: $euiFontSizeS;
+    color: $euiColorDarkShade;
+    margin-top: $euiSizeXS;
+  }
+}

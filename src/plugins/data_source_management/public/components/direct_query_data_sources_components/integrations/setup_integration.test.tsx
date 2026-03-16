@@ -4,22 +4,34 @@
  */
 
 import { configure, mount, shallow } from 'enzyme';
-// @ts-expect-error TS7016 TODO(ts-error): fixme
-import Adapter from 'enzyme-adapter-react-16';
-import React from 'react';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
+import React, { act } from 'react';
 import { SetupIntegrationForm, SetupBottomBar, LoadingPage } from './setup_integration';
 import { HttpStart } from 'opensearch-dashboards/public';
-import { act } from 'react-dom/test-utils';
 import { TEST_INTEGRATION_CONFIG } from '../../../mocks';
 
 const mockHttp: Partial<HttpStart> = {
-  get: jest.fn().mockResolvedValue({
-    data: TEST_INTEGRATION_CONFIG,
-  }),
-  post: jest.fn(),
+  get: jest.fn().mockImplementation(() =>
+    Promise.resolve({
+      data: TEST_INTEGRATION_CONFIG,
+    })
+  ),
+  post: jest.fn().mockImplementation(() =>
+    Promise.resolve({
+      data_streams: [],
+    })
+  ),
 };
 
 configure({ adapter: new Adapter() });
+
+// Helper to wait for promises and state updates in React 18
+const waitForComponentUpdate = async (wrapper: any) => {
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+  wrapper.update();
+};
 
 describe('SetupIntegrationForm tests', () => {
   const setupProps = {
@@ -28,32 +40,54 @@ describe('SetupIntegrationForm tests', () => {
     http: mockHttp as HttpStart,
   };
 
-  it('renders SetupIntegrationForm', () => {
-    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
-    const wrapper = shallow(<SetupIntegrationForm {...setupProps} />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('renders SetupIntegrationForm', async () => {
+    let wrapper: any;
+    await act(async () => {
+      // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
+      wrapper = shallow(<SetupIntegrationForm {...setupProps} />);
+    });
+    await waitForComponentUpdate(wrapper);
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('displays loading page when showLoading is true', () => {
-    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
-    const wrapper = mount(<SetupIntegrationForm {...setupProps} />);
+  it('displays loading page when showLoading is true', async () => {
+    let wrapper: any;
+    await act(async () => {
+      // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
+      wrapper = mount(<SetupIntegrationForm {...setupProps} />);
+    });
+
+    // Wait for initial rendering and effects to complete
+    await waitForComponentUpdate(wrapper);
+
     const setupBottomBar = wrapper.find(SetupBottomBar).first();
 
-    act(() => {
+    // Simulate clicking the loading button
+    await act(async () => {
       setupBottomBar.prop('setLoading')(true);
     });
 
-    wrapper.update();
+    await waitForComponentUpdate(wrapper);
+
     expect(wrapper.find(LoadingPage)).toHaveLength(1);
   });
 
-  it('renders SetupBottomBar with correct props', () => {
-    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
-    const wrapper = mount(<SetupIntegrationForm {...setupProps} />);
-
-    act(() => {
-      wrapper.update();
+  it('renders SetupBottomBar with correct props', async () => {
+    let wrapper: any;
+    await act(async () => {
+      // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
+      wrapper = mount(<SetupIntegrationForm {...setupProps} />);
     });
+
+    await waitForComponentUpdate(wrapper);
 
     const setupBottomBar = wrapper.find(SetupBottomBar).first();
 
@@ -67,21 +101,23 @@ describe('SetupIntegrationForm tests', () => {
       enabledWorkflows: [],
     });
 
-    // Check only the properties that should be initially set
+    // Check that integration prop contains the fetched data
     expect(setupBottomBar.prop('integration')).toMatchObject({
-      name: 'test_integration',
-      type: '',
-      assets: [],
-      version: '',
-      license: '',
-      components: [],
+      name: 'sample',
+      type: 'logs',
+      license: 'Apache-2.0',
+      version: '2.0.0',
     });
   });
 
   // New snapshot test
-  it('renders SetupIntegrationForm and matches snapshot', () => {
-    // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
-    const wrapper = mount(<SetupIntegrationForm {...setupProps} />);
+  it('renders SetupIntegrationForm and matches snapshot', async () => {
+    let wrapper: any;
+    await act(async () => {
+      // @ts-expect-error TS2322, TS2786 TODO(ts-error): fixme
+      wrapper = mount(<SetupIntegrationForm {...setupProps} />);
+    });
+    await waitForComponentUpdate(wrapper);
     expect(wrapper).toMatchSnapshot();
   });
 });

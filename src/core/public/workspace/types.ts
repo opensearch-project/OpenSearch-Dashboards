@@ -117,6 +117,14 @@ export interface IWorkspaceClient {
   delete(id: string): Promise<IWorkspaceResponse<null>>;
 
   /**
+   * Deletes multiple workspaces by a list of workspace id
+   *
+   * @param id
+   * @returns {Promise<IResponse<null>>} result for this operation
+   */
+  batchDelete(ids: string[]): Promise<{ success: number; fail: number; failedIds: string[] }>;
+
+  /**
    * Search for workspaces
    *
    * @param {object} [options={}]

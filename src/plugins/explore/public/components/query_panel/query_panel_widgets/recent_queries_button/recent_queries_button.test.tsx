@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
@@ -13,6 +13,17 @@ const mockDispatch = jest.fn();
 const mockHandleTimeChange = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
+const mockUseKeyboardShortcut = jest.fn();
+const mockI18nTranslate = jest.fn();
+
+// Mock i18n
+jest.doMock('@osd/i18n', () => ({
+  i18n: {
+    translate: mockI18nTranslate.mockImplementation(
+      (key, options) => options?.defaultMessage || key
+    ),
+  },
+}));
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -36,6 +47,12 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
             ]),
           },
         },
+      },
+      keyboardShortcut: {
+        useKeyboardShortcut: mockUseKeyboardShortcut,
+        register: jest.fn(),
+        unregister: jest.fn(),
+        getAllShortcuts: jest.fn(),
       },
     },
   }),
@@ -117,7 +134,7 @@ describe('RecentQueriesButton', () => {
 
     const button = screen.getByTestId('exploreRecentQueriesButton');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Recent Queries');
+    expect(button).toHaveTextContent('Recent queries');
   });
 
   it('toggles popover visibility when button is clicked', () => {
@@ -227,5 +244,111 @@ describe('RecentQueriesButton', () => {
     // Popover should be closed (table hidden)
     table = screen.getByTestId('recent-queries-table');
     expect(table).toHaveStyle({ display: 'none' });
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('registers keyboard shortcut correctly', () => {
+      renderWithStore();
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(1);
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'recent_queries',
+        pluginId: 'explore',
+        name: expect.any(String),
+        category: expect.any(String),
+        keys: 'shift+q',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcut toggles popover when executed', async () => {
+      renderWithStore();
+
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'recent_queries'
+      );
+      expect(shortcutCall).toBeDefined();
+
+      const executeFunction = shortcutCall[0].execute;
+
+      expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'none' });
+      });
+    });
+
+    it('keyboard shortcut execute function is the same as button click handler', async () => {
+      renderWithStore();
+
+      const button = screen.getByTestId('exploreRecentQueriesButton');
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
+      const executeFunction = shortcutCall[0].execute;
+
+      expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
+
+      fireEvent.click(button);
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'none' });
+      });
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
+    });
+
+    it('keyboard shortcut works independently of button clicks', async () => {
+      renderWithStore();
+
+      const shortcutCall = mockUseKeyboardShortcut.mock.calls[0];
+      const executeFunction = shortcutCall[0].execute;
+
+      expect(screen.queryByTestId('recent-queries-table')).not.toBeInTheDocument();
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'none' });
+      });
+
+      act(() => {
+        executeFunction();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('recent-queries-table')).toHaveStyle({ display: 'block' });
+      });
+    });
   });
 });

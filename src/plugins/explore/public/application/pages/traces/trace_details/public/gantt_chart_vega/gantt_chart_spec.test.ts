@@ -4,7 +4,7 @@
  */
 
 import { createGanttSpec } from './gantt_chart_spec';
-import { GANTT_CHART_CONSTANTS, TOTAL_PADDING, calculateLeftPadding } from './gantt_constants';
+import { GANTT_CHART_CONSTANTS } from './gantt_constants';
 
 describe('gantt_chart_spec', () => {
   it('creates a valid Vega specification', () => {
@@ -29,42 +29,33 @@ describe('gantt_chart_spec', () => {
 
     const spec = createGanttSpec(height, dataLength, containerWidth);
 
-    // Check that width is calculated correctly using shared function
-    const leftPadding = calculateLeftPadding(containerWidth);
-    const expectedWidth = containerWidth - leftPadding - GANTT_CHART_CONSTANTS.RIGHT_PADDING;
-    expect(spec.width).toBe(expectedWidth);
+    // Check that width uses container width directly
+    expect(spec.width).toBe(containerWidth);
 
     // Check that height is calculated correctly using shared constants
-    const calculatedHeight = Math.max(
+    const expectedHeight = Math.max(
       height,
       dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
         GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT
     );
-    const expectedHeight = calculatedHeight - TOTAL_PADDING;
     expect(spec.height).toBe(expectedHeight);
 
     // Check padding using shared constants
-    expect(spec.padding).toEqual({
-      left: leftPadding,
-      right: GANTT_CHART_CONSTANTS.RIGHT_PADDING,
-      top: GANTT_CHART_CONSTANTS.TOP_PADDING,
-      bottom: GANTT_CHART_CONSTANTS.BOTTOM_PADDING,
-    });
+    expect(spec.padding).toBe(GANTT_CHART_CONSTANTS.PADDING);
   });
 
   it('handles zero data length gracefully', () => {
     const spec = createGanttSpec(400, 0, 1000);
 
     // Should still create a valid spec with minimum height using shared constants
-    expect(spec.height).toBe(400 - TOTAL_PADDING); // 400 (input height) - TOTAL_PADDING
+    expect(spec.height).toBe(400); // Uses input height directly
   });
 
   it('handles minimum height requirements', () => {
     const dataLength = 20;
     const minExpectedHeight =
       dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
-      GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT -
-      TOTAL_PADDING;
+      GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT;
 
     // Input height is less than calculated minimum
     const spec = createGanttSpec(200, dataLength, 1000);

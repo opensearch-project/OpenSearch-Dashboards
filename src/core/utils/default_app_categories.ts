@@ -109,6 +109,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 8000,
   },
+  detectionInsights: {
+    id: 'detectionInsights',
+    label: i18n.translate('core.ui.detectionInsights.label', {
+      defaultMessage: 'Detection Insights',
+    }),
+    order: 7000,
+  },
   configure: {
     id: 'configure',
     label: i18n.translate('core.ui.configure.label', {

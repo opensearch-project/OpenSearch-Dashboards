@@ -17,8 +17,6 @@ import { DATA_FRAME_TYPES, IDataFrame } from '../../../../data/common';
 import { coreMock } from '../../../../../core/public/mocks';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-jest.useFakeTimers();
-
 describe('query assist summary', () => {
   const defaultCoreSetupMock = coreMock.createSetup();
   const defaultDataSetupMock = dataPluginMock.createSetupContract();
@@ -150,8 +148,13 @@ describe('query assist summary', () => {
     };
   };
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   it('should show summary component', async () => {

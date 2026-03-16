@@ -8,32 +8,57 @@ import './table_cell.scss';
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DocViewFilterFn } from '../../../types/doc_views_types';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useDatasetContext } from '../../../application/context';
-import { isOnTracesPage, isSpanIdColumn, SpanIdLink } from './trace_utils/trace_utils';
+import {
+  isSpanIdColumn,
+  TraceFlyoutButton,
+  SpanIdLink,
+  DurationTableCell,
+  isDurationColumn,
+} from './trace_utils/trace_utils';
+import { LogActionMenu } from '../../log_action_menu';
 
 export interface ITableCellProps {
   columnId: string;
+  index?: number;
   isTimeField?: boolean;
   onFilter?: DocViewFilterFn;
   fieldMapping?: any;
   sanitizedCellValue: string;
-  rowData?: any;
+  rowData?: OpenSearchSearchHit<Record<string, unknown>>;
+  isOnTracesPage: boolean;
+  setIsRowSelected: (isRowSelected: boolean) => void;
+  wrapCellText?: boolean;
 }
 
+// TODO: Move to a better cell component design that not rely on rowData
 export const TableCellUI = ({
   columnId,
+  index,
   isTimeField,
   onFilter,
   fieldMapping,
   sanitizedCellValue,
   rowData,
+  isOnTracesPage,
+  setIsRowSelected,
+  wrapCellText,
 }: ITableCellProps) => {
   const { dataset } = useDatasetContext();
 
   const dataFieldContent =
-    isSpanIdColumn(columnId) && isOnTracesPage() ? (
+    isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
       <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
+    ) : isTimeField && isOnTracesPage && rowData && dataset ? (
+      <TraceFlyoutButton
+        sanitizedCellValue={sanitizedCellValue}
+        rowData={rowData}
+        dataset={dataset}
+        setIsRowSelected={setIsRowSelected}
+      />
+    ) : isOnTracesPage && isDurationColumn(columnId) ? (
+      <DurationTableCell sanitizedCellValue={sanitizedCellValue} />
     ) : (
       <span
         className="exploreDocTableCell__dataField"
@@ -47,6 +72,17 @@ export const TableCellUI = ({
     <>
       {dataFieldContent}
       <span className="exploreDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
+        {/* Add AI icon before filter buttons - show for all cells except _source */}
+        {rowData?._source && columnId !== '_source' && (
+          <LogActionMenu
+            document={rowData._source}
+            query={undefined}
+            indexPattern={dataset?.title}
+            metadata={{ index }}
+            iconType="generate"
+            size="xs"
+          />
+        )}
         <EuiToolTip
           content={i18n.translate('explore.filterForValue', {
             defaultMessage: 'Filter for value',
@@ -55,7 +91,7 @@ export const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
-            iconType="plusInCircle"
+            iconType="magnifyWithPlus"
             aria-label={i18n.translate('explore.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
@@ -71,7 +107,7 @@ export const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
-            iconType="minusInCircle"
+            iconType="magnifyWithMinus"
             aria-label={i18n.translate('explore.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}
@@ -83,16 +119,14 @@ export const TableCellUI = ({
     </>
   );
 
-  return isTimeField ? (
-    <td data-test-subj="docTableField" className="exploreDocTableCell eui-textNoWrap">
-      {content}
-    </td>
-  ) : (
+  return (
     <td
       data-test-subj="docTableField"
-      className="exploreDocTableCell eui-textBreakAll eui-textBreakWord"
+      className={`exploreDocTableCell ${
+        isTimeField ? 'eui-textNoWrap' : wrapCellText ? '' : 'eui-textTruncate'
+      }`}
     >
-      <div className="truncate-by-height">{content}</div>
+      <div className="exploreDocTableCell__content">{content}</div>
     </td>
   );
 };

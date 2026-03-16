@@ -530,6 +530,27 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.fetchIndexPatterns().then(this.updateSuggestions);
     this.handleListUpdate();
 
+    // Register keyboard shortcut for focusing query input using direct service registration
+    const { keyboardShortcut } = this.services;
+    if (keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+        name: i18n.translate('data.query.queryStringInput.focusQueryBarShortcut', {
+          defaultMessage: 'Focus query bar',
+        }),
+        category: i18n.translate('data.query.queryStringInput.searchCategory', {
+          defaultMessage: 'Search',
+        }),
+        keys: '/',
+        execute: () => {
+          if (this.inputRef) {
+            this.inputRef.focus();
+          }
+        },
+      });
+    }
+
     window.addEventListener('resize', this.handleAutoHeight);
     window.addEventListener('scroll', this.handleListUpdate, {
       passive: true, // for better performance as we won't call preventDefault
@@ -571,6 +592,15 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
+
+    const { keyboardShortcut } = this.services;
+    if (keyboardShortcut) {
+      keyboardShortcut.unregister({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+      });
+    }
+
     window.removeEventListener('resize', this.handleAutoHeight);
     window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }

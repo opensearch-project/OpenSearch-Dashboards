@@ -51,7 +51,13 @@ themeColorDom.content = themeDefinition.euiHeaderBackgroundColor;
 
 document.head.insertBefore(themeColorDom, stylesheetTarget);
 
+var nonceMetaTag = document.querySelector('meta[name="csp-nonce"]');
+var nonce = nonceMetaTag ? nonceMetaTag.getAttribute('content') : null;
+
 var themedStylesDom = document.createElement('style');
+if (nonce) {
+  themedStylesDom.nonce = nonce;
+}
 
 themedStylesDom.innerHTML = `
   :root {
@@ -88,6 +94,9 @@ var fontCode = fontCodes[themeVersion];
 var fontTarget = document.querySelector('head meta[name="add-fonts-here"]');
 
 var themedFontDom = document.createElement('style');
+if (nonce) {
+  themedFontDom.nonce = nonce;
+}
 
 themedFontDom.innerHTML = `
   :root {

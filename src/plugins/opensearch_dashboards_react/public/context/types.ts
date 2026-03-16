@@ -45,6 +45,6 @@ export interface OpenSearchDashboardsReactContextValue<
 
 export interface OpenSearchDashboardsReactContext<T extends OpenSearchDashboardsServices> {
   value: OpenSearchDashboardsReactContextValue<T>;
-  Provider: React.FC<{ services?: T }>;
+  Provider: React.FC<{ services?: T; children?: React.ReactNode }>;
   Consumer: React.Consumer<OpenSearchDashboardsReactContextValue<T>>;
 }

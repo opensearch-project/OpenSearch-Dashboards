@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mount } from 'enzyme';
 import { EditActionDropdown, VisualizationItem } from './edit_action_dropdown';
 import {

@@ -29,12 +29,12 @@
  */
 
 import _ from 'lodash';
-import handlebars from 'handlebars/dist/handlebars';
+import Handlebars from 'kbn-handlebars';
 import { i18n } from '@osd/i18n';
 
 export function replaceVars(str, args = {}, vars = {}) {
   try {
-    const template = handlebars.compile(str, { strict: true, knownHelpersOnly: true });
+    const template = Handlebars.compileAST(str, { strict: true, knownHelpersOnly: true });
 
     const string = template(_.assign({}, vars, { args }));
 

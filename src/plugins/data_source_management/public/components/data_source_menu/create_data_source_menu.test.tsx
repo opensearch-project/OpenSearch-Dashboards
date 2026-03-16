@@ -21,7 +21,7 @@ describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
-  const { uiSettings, workspaces } = coreMock.createSetup();
+  const { uiSettings, workspaces } = coreMock.createStart();
   const dataSourceSelection = new DataSourceSelectionService();
 
   beforeAll(() => {

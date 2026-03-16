@@ -22,6 +22,7 @@ function mockProps() {
     bootstrapScriptUrl: `${http.basePath}/bootstrap.js`,
     startupScriptUrl: `${http.basePath}/startup.js`,
     strictCsp: true,
+    nonce: 'test-nonce',
     injectedMetadata: {
       version: injectedMetadata.getOpenSearchDashboardsVersion(),
       buildNumber: 1,
@@ -55,6 +56,7 @@ function mockProps() {
       },
       branding: injectedMetadata.getBranding(),
       survey: injectedMetadata.getSurvey(),
+      keyboardShortcuts: injectedMetadata.getKeyboardShortcuts(),
     },
   };
 }

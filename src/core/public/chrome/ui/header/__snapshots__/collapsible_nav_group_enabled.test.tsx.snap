@@ -22,7 +22,38 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
       </div>
       <div
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
-      />
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <input
+              aria-label="Search the menus"
+              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
+              data-test-subj="global-search-input"
+              placeholder="Search menu or assets"
+              style="padding-right: 32px;"
+              type="search"
+              value=""
+            />
+            <div
+              class="euiFormControlLayoutIcons"
+            >
+              <span
+                class="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="search"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div
         class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
@@ -86,7 +117,33 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
     >
       <div
         class="searchBarIcon euiHeaderSectionItemButton"
-      />
+      >
+        <div
+          class="euiPopover euiPopover--anchorDownCenter"
+        >
+          <div
+            class="euiPopover__anchor"
+          >
+            <span
+              class="euiToolTipAnchor"
+            >
+              <button
+                aria-label="search"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="globalSearch-leftNav-icon"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="search"
+                />
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
       <div
         class="flex-1-container"
       />
@@ -120,7 +177,38 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
       </div>
       <div
         class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder searchBar-wrapper"
-      />
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <input
+              aria-label="Search the menus"
+              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
+              data-test-subj="global-search-input"
+              placeholder="Search menu or assets"
+              style="padding-right: 32px;"
+              type="search"
+              value=""
+            />
+            <div
+              class="euiFormControlLayoutIcons"
+            >
+              <span
+                class="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="search"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div
         class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"

@@ -235,4 +235,218 @@ describe('<HeaderSearchBar />', () => {
       expect(queryByText('saved objects')).toBeInTheDocument();
     });
   });
+
+  it('should call onSearchResultClick callback when provided', async () => {
+    const onSearchResultClick = jest.fn();
+    const mockSearchFn = jest.fn().mockImplementation((query, callback) => {
+      callback();
+      return Promise.resolve([<EuiText>result</EuiText>]);
+    });
+
+    const commands: GlobalSearchCommand[] = [
+      {
+        id: 'test',
+        type: 'PAGES',
+        run: mockSearchFn,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar
+        globalSearchCommands={commands}
+        onSearchResultClick={onSearchResultClick}
+        panel
+      />
+    );
+
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: 'test' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockSearchFn).toHaveBeenCalled();
+      expect(onSearchResultClick).toHaveBeenCalled();
+    });
+  });
+
+  it('should abort previous search requests when new search is triggered', async () => {
+    const abortedSearchFn = jest.fn().mockImplementation((query, callback, options) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (!options?.abortSignal?.aborted) {
+            resolve([<EuiText>slow result</EuiText>]);
+          }
+        }, 100);
+      });
+    });
+
+    jest.fn().mockResolvedValue([<EuiText>fast result</EuiText>]);
+
+    const commands: GlobalSearchCommand[] = [
+      {
+        id: 'slow',
+        type: 'PAGES',
+        run: abortedSearchFn,
+      },
+    ];
+
+    const { getByTestId } = render(<HeaderSearchBar globalSearchCommands={commands} panel />);
+
+    const searchInput = getByTestId('global-search-input');
+
+    // Trigger first search
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'first' },
+      });
+    });
+
+    // Quickly trigger second search
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'second' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(abortedSearchFn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('should clear results when search value is empty', async () => {
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
+    );
+
+    searchFn.mockResolvedValue([<EuiText>test result</EuiText>]);
+
+    // First, perform a search
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: 'test' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(queryByText('test result')).toBeInTheDocument();
+    });
+
+    // Clear the search
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: '' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(queryByText('test result')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should trigger action commands when Enter key is pressed', async () => {
+    const actionFn = jest.fn();
+    const commandsWithAction: GlobalSearchCommand[] = [
+      {
+        id: 'action-command',
+        type: 'ACTIONS',
+        run: jest.fn().mockResolvedValue([]),
+        action: actionFn,
+      },
+      {
+        id: 'regular-command',
+        type: 'PAGES',
+        run: searchFn,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithAction} panel />
+    );
+
+    const searchInput = getByTestId('global-search-input');
+
+    // Type in the search input
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'test query' },
+      });
+    });
+
+    // Press Enter key
+    act(() => {
+      fireEvent.keyDown(searchInput, {
+        key: 'Enter',
+        code: 'Enter',
+      });
+    });
+    act(() => {
+      fireEvent.keyUp(searchInput, {
+        key: 'Enter',
+        code: 'Enter',
+      });
+    });
+
+    await waitFor(() => {
+      expect(actionFn).toHaveBeenCalledWith({
+        content: 'test query',
+      });
+    });
+  });
+
+  it('should display custom input placeholder from commands', () => {
+    const customPlaceholder = 'Search for custom items';
+    const commandsWithPlaceholder: GlobalSearchCommand[] = [
+      {
+        id: 'custom',
+        type: 'PAGES',
+        run: searchFn,
+        inputPlaceholder: customPlaceholder,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithPlaceholder} panel />
+    );
+
+    const searchInput = getByTestId('global-search-input');
+    expect(searchInput).toHaveAttribute('placeholder', customPlaceholder);
+  });
+
+  it('should include ACTIONS type commands in filtered results', async () => {
+    const actionSearchFn = jest.fn().mockResolvedValue([<EuiText>action result</EuiText>]);
+    const commandsWithActions: GlobalSearchCommand[] = [
+      {
+        id: 'page-command',
+        type: 'PAGES',
+        run: searchFn,
+      },
+      {
+        id: 'action-command',
+        type: 'ACTIONS',
+        run: actionSearchFn,
+      },
+    ];
+
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithActions} panel />
+    );
+
+    searchFn.mockResolvedValue([<EuiText>page result</EuiText>]);
+
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: 'test' },
+      });
+    });
+
+    await waitFor(() => {
+      // Both PAGES and ACTIONS commands should be called
+      expect(searchFn).toHaveBeenCalled();
+      expect(actionSearchFn).toHaveBeenCalled();
+      expect(queryByText('page result')).toBeInTheDocument();
+      expect(queryByText('action result')).toBeInTheDocument();
+    });
+  });
 });

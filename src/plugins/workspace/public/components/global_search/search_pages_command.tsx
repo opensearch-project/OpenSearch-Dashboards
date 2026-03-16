@@ -48,7 +48,8 @@ export const workspaceSearchPages = async (
         const urlWithoutWorkspace = formatUrlWithWorkspaceId(
           link.href,
           '',
-          coreStart.http.basePath
+          coreStart.http.basePath,
+          true
         );
         window.location.assign(urlWithoutWorkspace);
         return;

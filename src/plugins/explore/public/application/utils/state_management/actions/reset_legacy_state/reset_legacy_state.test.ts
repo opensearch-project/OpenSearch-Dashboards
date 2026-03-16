@@ -31,13 +31,13 @@ describe('resetLegacyStateActionCreator', () => {
     mockDispatch = jest.fn();
   });
 
-  it('should return a function that dispatches setLegacyState with preloaded state', () => {
+  it('should return a function that dispatches setLegacyState with preloaded state', async () => {
     const mockLegacyState = {
       data: { some: 'data' },
       metadata: { test: 'metadata' },
     };
 
-    mockedGetPreloadedLegacyState.mockReturnValue(mockLegacyState as any);
+    mockedGetPreloadedLegacyState.mockResolvedValue(mockLegacyState as any);
     mockedSetLegacyState.mockReturnValue({
       type: 'legacy/setLegacyState',
       payload: mockLegacyState,
@@ -49,8 +49,8 @@ describe('resetLegacyStateActionCreator', () => {
     // Verify it returns a function
     expect(typeof thunkFunction).toBe('function');
 
-    // Call the thunk function with dispatch
-    thunkFunction(mockDispatch);
+    // Call the thunk function with dispatch and await it
+    await thunkFunction(mockDispatch);
 
     // Verify getPreloadedLegacyState was called with services
     expect(mockedGetPreloadedLegacyState).toHaveBeenCalledWith(mockServices);

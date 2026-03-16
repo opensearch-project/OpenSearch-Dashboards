@@ -13,7 +13,7 @@ import {
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
   prependWorkspaceToBreadcrumbs,
-  getIsOnlyAllowEssentialUseCase,
+  areAllDataSourcesOpenSearchServerless,
   mergeDataSourcesWithConnections,
   fetchDataSourceConnections,
   getUseCaseUrl,
@@ -507,7 +507,7 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
         },
       ],
     });
-    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(true);
+    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(true);
   });
 
   it('should return false when not all data sources are serverless', async () => {
@@ -535,7 +535,7 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
         },
       ],
     });
-    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(false);
+    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(false);
   });
 });
 
@@ -972,6 +972,52 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
         type: 'OpenSearch',
       },
     ]);
+  });
+
+  it('should exclude Prometheus connections from relatedConnections', () => {
+    const dataSources = [
+      {
+        id: 'id1',
+        title: 'title1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        dataSourceEngineType: 'OpenSearch' as DataSourceEngineType,
+        description: '',
+      },
+    ];
+    const directQueryConnections = [
+      {
+        id: 'id1-prometheus',
+        name: 'prometheus-connection',
+        parentId: 'id1',
+        description: 'Prometheus connection',
+        type: 'Prometheus',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+      {
+        id: 'id1-s3',
+        name: 's3-connection',
+        parentId: 'id1',
+        description: 'S3 connection',
+        type: 'Amazon S3',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+    ];
+    const result = mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      AssociationDataSourceModalMode.DirectQueryConnections
+    );
+    // Prometheus connection should be in the flat list but not in relatedConnections
+    expect(result).toContainEqual(
+      expect.objectContaining({
+        id: 'id1-prometheus',
+        type: 'Prometheus',
+      })
+    );
+    // OpenSearch connection should only have S3 in relatedConnections, not Prometheus
+    const openSearchConnection = result.find((r) => r.id === 'id1');
+    expect(openSearchConnection?.relatedConnections).toHaveLength(1);
+    expect(openSearchConnection?.relatedConnections?.[0].type).toBe('Amazon S3');
   });
 });
 

@@ -45,6 +45,7 @@ const mockTimeHistory = {
   get: () => {
     return [];
   },
+  add: jest.fn(),
 };
 
 jest.mock('../filter_bar/filter_bar', () => {
@@ -122,7 +123,15 @@ function wrapSearchBarInContext(testProps: any) {
   };
 
   const services = {
-    uiSettings: startMock.uiSettings,
+    uiSettings: {
+      ...startMock.uiSettings,
+      get: jest.fn((key) => {
+        if (key === 'query:enhancements:enabled') return true;
+        if (key === 'timepicker:quickRanges')
+          return [{ from: 'now-15m', to: 'now', display: 'Last 15 minutes' }];
+        return startMock.uiSettings.get(key);
+      }),
+    },
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
@@ -131,6 +140,19 @@ function wrapSearchBarInContext(testProps: any) {
       query: {
         ...queryServiceMock.createStartContract(false),
         savedQueries: {},
+        queryString: {
+          getLanguageService: () => ({
+            getLanguage: () => ({
+              fields: { filterable: true },
+              editorSupportedAppNames: ['test'],
+            }),
+          }),
+          getDatasetService: () => ({
+            getType: jest.fn().mockReturnValue({
+              meta: { supportsTimeFilter: true },
+            }),
+          }),
+        },
       },
     },
   };
@@ -255,5 +277,45 @@ describe('SearchBar', () => {
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
     expect(component.find(FILTER_BAR).length).toBe(1);
     expect(component.find(QUERY_BAR).length).toBe(1);
+  });
+
+  describe('Cancel Button Props', () => {
+    it('Should accept cancel button props without errors', () => {
+      const mockOnCancel = jest.fn();
+
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [mockIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: dqlQuery,
+          showCancelButton: true,
+          onQueryCancel: mockOnCancel,
+          isQueryRunning: true,
+        })
+      );
+
+      expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+      // Should render without errors
+      expect(component).toBeTruthy();
+    });
+
+    it('Should handle undefined cancel button props gracefully', () => {
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [mockIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: dqlQuery,
+          showCancelButton: undefined,
+          onQueryCancel: undefined,
+          isQueryRunning: undefined,
+        })
+      );
+
+      expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+      // Should render without errors
+      expect(component).toBeTruthy();
+    });
   });
 });

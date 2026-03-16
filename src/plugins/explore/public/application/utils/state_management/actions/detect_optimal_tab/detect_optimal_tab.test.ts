@@ -12,8 +12,14 @@ import { setActiveTab } from '../../slices';
 import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
 import { VisualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
+import { QueryExecutionStatus } from '../../types';
+import { EXPLORE_LOGS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../../common';
+import { resultsCache, clearResultsCache } from '../../slices';
 
-jest.mock('../../slices');
+jest.mock('../../slices', () => ({
+  ...jest.requireActual('../../slices'),
+  setActiveTab: jest.fn(),
+}));
 jest.mock('../query_actions');
 jest.mock('../../../../../components/visualizations/utils/use_visualization_types');
 
@@ -27,6 +33,23 @@ describe('detect_optimal_tab', () => {
   let mockDispatch: jest.Mock;
   let mockGetState: jest.Mock;
 
+  const fullTestResult = {
+    hits: {
+      hits: [
+        { _source: { timestamp: '2023-01-01', level: 'info' } },
+        { _source: { timestamp: '2023-01-02', level: 'error' } },
+      ],
+    },
+    fieldSchema: [
+      { name: 'timestamp', type: 'date' },
+      { name: 'level', type: 'keyword' },
+    ],
+    elapsedMs: 0,
+    took: 0,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -38,41 +61,44 @@ describe('detect_optimal_tab', () => {
       tabRegistry: {
         getTab: jest.fn(),
         getAllTabs: jest.fn().mockReturnValue([
-          { id: 'logs', label: 'Logs' },
-          { id: 'explore_visualization_tab', label: 'Visualization' },
+          { id: EXPLORE_LOGS_TAB_ID, label: 'Logs' },
+          { id: EXPLORE_VISUALIZATION_TAB_ID, label: 'Visualization' },
         ]),
       },
     } as any;
 
-    // Mock store state
+    // Mock store state — results slice now holds only metadata; full results in resultsCache
     const mockState = {
       query: {
         query: 'SELECT * FROM logs',
       },
       results: {
-        'test-cache-key': {
-          hits: {
-            hits: [
-              { _source: { timestamp: '2023-01-01', level: 'info' } },
-              { _source: { timestamp: '2023-01-02', level: 'error' } },
-            ],
+        'test-cache-key': { total: 2, elapsedMs: 0, hasResults: true },
+      },
+      queryEditor: {
+        queryStatusMap: {
+          'test-cache-key': {
+            status: QueryExecutionStatus.READY,
           },
-          fieldSchema: [
-            { name: 'timestamp', type: 'date' },
-            { name: 'level', type: 'keyword' },
-          ],
         },
       },
     };
 
     mockGetState.mockReturnValue(mockState);
 
+    // Populate cache with full result for the default test case
+    resultsCache.set('test-cache-key', fullTestResult as any);
+
     // Mock tab registry
     (mockServices.tabRegistry!.getTab as jest.Mock).mockReturnValue({
-      prepareQuery: jest.fn().mockReturnValue('test-cache-key'),
+      prepareQuery: undefined,
     });
 
     mockDefaultPrepareQueryString.mockReturnValue('test-cache-key');
+  });
+
+  afterEach(() => {
+    clearResultsCache();
   });
 
   describe('canResultsBeVisualized', () => {
@@ -117,7 +143,6 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
@@ -140,7 +165,6 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
@@ -150,7 +174,7 @@ describe('detect_optimal_tab', () => {
         fieldSchema: [{ name: 'test', type: 'string' }],
       };
 
-      expect(determineOptimalTab(results, mockServices)).toBe('explore_visualization_tab');
+      expect(determineOptimalTab(results, mockServices)).toBe(EXPLORE_VISUALIZATION_TAB_ID);
       spy.mockRestore();
     });
 
@@ -164,7 +188,7 @@ describe('detect_optimal_tab', () => {
         fieldSchema: [{ name: 'test', type: 'string' }],
       };
 
-      expect(determineOptimalTab(results, mockServices)).toBe('logs');
+      expect(determineOptimalTab(results, mockServices)).toBe(EXPLORE_LOGS_TAB_ID);
       spy.mockRestore();
     });
   });
@@ -177,12 +201,11 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
 
-      const mockAction = { type: 'setActiveTab', payload: 'explore_visualization_tab' };
+      const mockAction = { type: 'setActiveTab', payload: EXPLORE_VISUALIZATION_TAB_ID };
       mockSetActiveTab.mockReturnValue(mockAction);
 
       const thunk = detectAndSetOptimalTab({
@@ -191,16 +214,26 @@ describe('detect_optimal_tab', () => {
 
       await thunk(mockDispatch, mockGetState, undefined);
 
-      expect(mockServices.tabRegistry!.getTab).toHaveBeenCalledWith('explore_visualization_tab');
-      expect(mockSetActiveTab).toHaveBeenCalledWith('explore_visualization_tab');
+      expect(mockServices.tabRegistry!.getTab).toHaveBeenCalledWith(EXPLORE_VISUALIZATION_TAB_ID);
+      expect(mockSetActiveTab).toHaveBeenCalledWith(EXPLORE_VISUALIZATION_TAB_ID);
       expect(mockDispatch).toHaveBeenCalledWith(mockAction);
       spy.mockRestore();
     });
 
-    it('should not set tab when no results are available', async () => {
+    it('should not set tab as empty when no results are available', async () => {
+      // Clear the cache set by beforeEach so no results are available
+      clearResultsCache();
+
       const mockStateWithoutResults = {
         query: { query: 'SELECT * FROM logs' },
         results: {},
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.READY,
+            },
+          },
+        },
       };
       mockGetState.mockReturnValue(mockStateWithoutResults);
 
@@ -209,17 +242,28 @@ describe('detect_optimal_tab', () => {
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetActiveTab).not.toHaveBeenCalled();
+      expect(mockSetActiveTab).toHaveBeenCalledWith('');
     });
 
-    it('should not set tab when results have no hits', async () => {
+    it('should not set tab as empty when results have no hits', async () => {
+      // Overwrite cache with empty hits
+      resultsCache.set('test-cache-key', {
+        hits: { hits: [] },
+        fieldSchema: [{ name: 'test', type: 'string' }],
+        elapsedMs: 0,
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
+
       const mockStateWithEmptyResults = {
         query: { query: 'SELECT * FROM logs' },
-        results: {
-          'test-cache-key': {
-            hits: { hits: [] },
-            fieldSchema: [{ name: 'test', type: 'string' }],
+        results: { 'test-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.READY,
+            },
           },
         },
       };
@@ -230,8 +274,7 @@ describe('detect_optimal_tab', () => {
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetActiveTab).not.toHaveBeenCalled();
+      expect(mockSetActiveTab).toHaveBeenCalledWith('');
     });
 
     it('should use defaultPrepareQueryString when tab has no prepareQuery function', async () => {
@@ -245,12 +288,11 @@ describe('detect_optimal_tab', () => {
           id: 'rule-id',
           name: 'rule-name',
           matches: jest.fn(),
-          matchIndex: [0, 1, 0],
           chartTypes: [],
         },
       });
 
-      const mockAction = { type: 'setActiveTab', payload: 'explore_visualization_tab' };
+      const mockAction = { type: 'setActiveTab', payload: EXPLORE_VISUALIZATION_TAB_ID };
       mockSetActiveTab.mockReturnValue(mockAction);
 
       const thunk = detectAndSetOptimalTab({
@@ -262,7 +304,7 @@ describe('detect_optimal_tab', () => {
       expect(mockDefaultPrepareQueryString).toHaveBeenCalledWith({
         query: 'SELECT * FROM logs',
       });
-      expect(mockSetActiveTab).toHaveBeenCalledWith('explore_visualization_tab');
+      expect(mockSetActiveTab).toHaveBeenCalledWith(EXPLORE_VISUALIZATION_TAB_ID);
       spy.mockRestore();
     });
 
@@ -271,7 +313,7 @@ describe('detect_optimal_tab', () => {
         .spyOn(VisualizationRegistry.prototype, 'findBestMatch')
         .mockReturnValue(null);
 
-      const mockAction = { type: 'setActiveTab', payload: 'logs' };
+      const mockAction = { type: 'setActiveTab', payload: EXPLORE_LOGS_TAB_ID };
       mockSetActiveTab.mockReturnValue(mockAction);
 
       const thunk = detectAndSetOptimalTab({
@@ -280,9 +322,46 @@ describe('detect_optimal_tab', () => {
 
       await thunk(mockDispatch, mockGetState, undefined);
 
-      expect(mockSetActiveTab).toHaveBeenCalledWith('logs');
+      expect(mockSetActiveTab).toHaveBeenCalledWith(EXPLORE_LOGS_TAB_ID);
       expect(mockDispatch).toHaveBeenCalledWith(mockAction);
       spy.mockRestore();
+    });
+
+    it('should set visualization tab when query has error status', async () => {
+      // Overwrite cache with empty hits so only the error-status path triggers
+      resultsCache.set('test-cache-key', {
+        hits: { hits: [] },
+        fieldSchema: [{ name: 'test', type: 'string' }],
+        elapsedMs: 0,
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      } as any);
+
+      const mockStateWithError = {
+        query: { query: 'SELECT * FROM logs' },
+        results: { 'test-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.ERROR,
+            },
+          },
+        },
+      };
+      mockGetState.mockReturnValue(mockStateWithError);
+
+      const mockAction = { type: 'setActiveTab', payload: EXPLORE_VISUALIZATION_TAB_ID };
+      mockSetActiveTab.mockReturnValue(mockAction);
+
+      const thunk = detectAndSetOptimalTab({
+        services: mockServices,
+      });
+
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockSetActiveTab).toHaveBeenCalledWith(EXPLORE_VISUALIZATION_TAB_ID);
+      expect(mockDispatch).toHaveBeenCalledWith(mockAction);
     });
   });
 });

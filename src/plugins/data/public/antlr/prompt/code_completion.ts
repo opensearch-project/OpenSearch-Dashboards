@@ -84,7 +84,7 @@ export const getSuggestions = async ({
             indexPattern.title,
             fieldName,
             services,
-            indexPattern.fields.find((field) => field.name === fieldName),
+            indexPattern,
             datasetType
           ).catch(() => []),
           (val: any) => (typeof val === 'string' ? `"${val}"` : `${val}`)

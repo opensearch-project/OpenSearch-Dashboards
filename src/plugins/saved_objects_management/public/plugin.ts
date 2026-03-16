@@ -35,6 +35,7 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/publi
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { ContentManagementPluginStart } from 'src/plugins/content_management/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import { DatasetManagementSetup } from 'src/plugins/dataset_management/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -98,6 +99,7 @@ export interface SetupDependencies {
   uiActions: UiActionsSetup;
   dataSource?: DataSourcePluginSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  datasetManagement?: DatasetManagementSetup;
 }
 
 export interface StartDependencies {
@@ -129,11 +131,19 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions, dataSource, dataSourceManagement }: SetupDependencies
+    {
+      home,
+      management,
+      uiActions,
+      dataSource,
+      dataSourceManagement,
+      datasetManagement,
+    }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
     const namespaceSetup = this.namespaceService.setup();
+    const isDatasetManagementEnabled = !!datasetManagement;
 
     if (home) {
       home.featureCatalogue.register({
@@ -167,6 +177,7 @@ export class SavedObjectsManagementPlugin
           mountParams,
           dataSourceEnabled: !!dataSource,
           dataSourceManagement,
+          isDatasetManagementEnabled,
         });
       },
     });
@@ -196,6 +207,7 @@ export class SavedObjectsManagementPlugin
             },
             dataSourceEnabled: !!dataSource,
             dataSourceManagement,
+            isDatasetManagementEnabled,
           });
         },
       });

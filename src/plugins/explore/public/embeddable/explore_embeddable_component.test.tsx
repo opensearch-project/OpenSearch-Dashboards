@@ -10,7 +10,16 @@ import { SearchProps } from './explore_embeddable';
 
 // Mock the services
 jest.mock('../application/legacy/discover/opensearch_dashboards_services', () => ({
+  getDocViewsRegistry: jest.fn(() => ({
+    getDocViewsSorted: jest.fn(() => []),
+  })),
   getServices: jest.fn(() => ({
+    uiSettings: {
+      get: jest.fn((key) => {
+        if (key === 'discover:sampleSize') return 500;
+        return false;
+      }),
+    },
     expressions: {
       ReactExpressionRenderer: jest.fn(({ expression, searchContext }) => (
         <div data-test-subj="mockExpressionRenderer">
@@ -22,19 +31,34 @@ jest.mock('../application/legacy/discover/opensearch_dashboards_services', () =>
   })),
 }));
 
-// Mock the DataGridTable component
-jest.mock(
-  '../application/legacy/discover/application/components/data_grid/data_grid_table',
-  () => ({
-    DataGridTable: jest.fn((props) => (
-      <div data-test-subj="mockDataGridTable">
-        <div data-test-subj="mockColumns">{JSON.stringify(props.columns)}</div>
-        <div data-test-subj="mockRows">{JSON.stringify(props.rows)}</div>
-        <div data-test-subj="mockTitle">{props.title}</div>
-      </div>
-    )),
-  })
-);
+// Mock the DataTable component
+jest.mock('../components/data_table/data_table', () => ({
+  DataTable: jest.fn((props) => (
+    <div data-test-subj="mockDataGridTable">
+      <div data-test-subj="mockColumns">{JSON.stringify(props.columns)}</div>
+      <div data-test-subj="mockRows">{JSON.stringify(props.rows)}</div>
+    </div>
+  )),
+}));
+
+// Mock the helper functions
+jest.mock('../helpers/data_table_helper', () => ({
+  getLegacyDisplayedColumns: jest.fn((columns) =>
+    columns.map((col: string, idx: number) => ({
+      name: col,
+      displayName: col,
+      isSortable: true,
+      isRemoveable: true,
+      colLeftIdx: idx - 1,
+      colRightIdx: idx + 1,
+    }))
+  ),
+}));
+
+// Mock TableVis component
+jest.mock('../components/visualizations/table/table_vis', () => ({
+  TableVis: jest.fn(() => <div data-test-subj="mockTableVis">Table Visualization</div>),
+}));
 
 // Mock the VisualizationNoResults component
 jest.mock('../../../visualizations/public', () => ({
@@ -76,7 +100,6 @@ describe('ExploreEmbeddableComponent', () => {
     expect(screen.getByTestId('mockDataGridTable')).toBeInTheDocument();
     expect(screen.getByTestId('mockColumns')).toHaveTextContent('column1');
     expect(screen.getByTestId('mockColumns')).toHaveTextContent('column2');
-    expect(screen.getByTestId('mockTitle')).toHaveTextContent('Test Explore');
   });
 
   test('renders visualization when activeTab is not logs and rows exist', () => {

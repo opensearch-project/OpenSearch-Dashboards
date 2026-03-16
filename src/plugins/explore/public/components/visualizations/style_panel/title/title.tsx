@@ -5,33 +5,29 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiFieldText, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { StyleAccordion } from '../style_accordion';
 import { TitleOptions } from '../../types';
-import { useDebouncedValue } from '../../utils/use_debounced_value';
+import { DebouncedFieldText } from '../utils';
 
 export interface TitleOptionsPanelProps {
   titleOptions: TitleOptions;
   onShowTitleChange: (show: Partial<TitleOptions>) => void;
+  initialIsOpen?: boolean;
 }
 
 export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
   titleOptions,
   onShowTitleChange,
+  initialIsOpen = false,
 }) => {
-  const [localTitle, handleTitleChange] = useDebouncedValue(
-    titleOptions?.titleName || '',
-    (value) => onShowTitleChange({ titleName: value }),
-    500
-  );
-
   return (
     <StyleAccordion
       id="titleSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.title', {
         defaultMessage: 'Title',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       <EuiFormRow>
         <EuiSwitch
@@ -50,10 +46,10 @@ export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
             defaultMessage: 'Display name',
           })}
         >
-          <EuiFieldText
+          <DebouncedFieldText
             compressed
-            value={localTitle}
-            onChange={(e) => handleTitleChange(e.target.value)}
+            value={titleOptions.titleName}
+            onChange={(value) => onShowTitleChange({ titleName: value })}
             placeholder={i18n.translate('explore.stylePanel.title.default', {
               defaultMessage: 'Default title',
             })}

@@ -72,6 +72,7 @@ export function NavGroups({
       buttonClassName: 'nav-link-item-btn',
       'data-test-subj': euiListItem['data-test-subj'],
       'aria-label': link.title,
+      disabled: euiListItem.isDisabled,
     };
   };
   const createSideNavItem = (
@@ -125,7 +126,7 @@ export function NavGroups({
           <CollapsibleNavGroupsLabel
             label={props.name}
             storageKey={parentOpenKey}
-            collapsible={!categoryCollapsible}
+            collapsible
             onToggle={() => setRenderKey(Date.now())}
             data-test-subj={props['data-test-subj']}
           />

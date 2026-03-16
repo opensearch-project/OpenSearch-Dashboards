@@ -227,6 +227,40 @@ describe('PPLSearchInterceptor', () => {
       expect(spy).toHaveBeenCalledWith(mockRequest, mockOptions.abortSignal, customStrategy);
     });
 
+    it('should pass dataset parameter to getSearchOptions', () => {
+      const mockGetSearchOptions = jest.fn().mockReturnValue({ strategy: SEARCH_STRATEGY.PPL });
+      const mockDatasetService = {
+        getType: jest.fn().mockReturnValue({
+          getSearchOptions: mockGetSearchOptions,
+          languageOverrides: { PPL: { hideDatePicker: true } },
+        }),
+      };
+
+      const expectedDataset = { type: 'DEFAULT', timeFieldName: '@timestamp' };
+
+      const testRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [{ language: 'PPL', query: 'source=test_index', dataset: expectedDataset }],
+            },
+          },
+        },
+      };
+
+      (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: expectedDataset,
+      });
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue(
+        mockDatasetService
+      );
+
+      pplSearchInterceptor.search(testRequest, mockOptions);
+      expect(mockGetSearchOptions).toHaveBeenCalledWith(expectedDataset);
+    });
+
     it('should pass time range when hideDatePicker is false', () => {
       const mockDatasetService = {
         getType: jest.fn().mockReturnValue({

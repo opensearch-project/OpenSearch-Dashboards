@@ -25,34 +25,66 @@ export interface PPLQueryRequest {
           title: string;
           type: string;
           timeFieldName?: string;
+          dataSource?: {
+            id: string;
+            title: string;
+            type: string;
+          };
         };
       };
+      aggConfig?: any; // For external data source aggregations
     };
   };
 }
 
 // Build a PPL dataset object for queries
-export const buildPPLDataset = (dataset: Dataset) => ({
-  id: dataset.id,
-  title: dataset.title,
-  type: dataset.type,
-  timeFieldName: dataset.timeFieldName,
-});
+export const buildPPLDataset = (dataset: Dataset) => {
+  const pplDataset: any = {
+    id: dataset.id,
+    title: dataset.title,
+    type: dataset.type,
+    timeFieldName: dataset.timeFieldName,
+  };
+
+  // Include dataSource if present (external data source)
+  if (dataset.dataSource) {
+    pplDataset.dataSource = {
+      id: dataset.dataSource.id,
+      title: dataset.dataSource.title,
+      type: dataset.dataSource.type,
+    };
+  }
+
+  return pplDataset;
+};
 
 // Build a complete PPL query request object using dataset
-export const buildPPLQueryRequest = (dataset: Dataset, pplQuery: string): PPLQueryRequest => ({
-  params: {
-    index: dataset.title, // Use the dataset title as the index
-    body: {
-      query: {
-        query: pplQuery,
-        language: 'PPL',
-        format: 'jdbc',
-        dataset: buildPPLDataset(dataset),
+export const buildPPLQueryRequest = (
+  dataset: Dataset,
+  pplQuery: string,
+  aggConfig?: any
+): PPLQueryRequest => {
+  const request: PPLQueryRequest = {
+    params: {
+      index: dataset.title, // Use the dataset title as the index
+      body: {
+        query: {
+          query: pplQuery,
+          language: 'PPL',
+          format: 'jdbc',
+          dataset: buildPPLDataset(dataset),
+        },
       },
     },
-  },
-});
+  };
+
+  // Add aggConfig if provided (for external data sources)
+  if (aggConfig) {
+    request.params.body.aggConfig = aggConfig;
+  }
+
+  return request;
+};
 
 // Execute a PPL query using the data service
 export const executePPLQuery = async (

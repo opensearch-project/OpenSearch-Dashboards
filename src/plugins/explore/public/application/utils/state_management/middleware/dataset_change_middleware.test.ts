@@ -14,16 +14,13 @@ import {
   clearLastExecutedData,
   setPatternsField,
   setUsingRegexPatterns,
-  setEditorMode,
 } from '../slices';
 import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
 import { createMockExploreServices, createMockStore, MockStore } from '../__mocks__';
 import { DEFAULT_DATA } from '../../../../../../data/common';
-import { EditorMode } from '../types';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import * as queryActions from '../actions/query_actions';
-import * as tabActions from '../actions/detect_optimal_tab';
 import * as resetLegacyStateActions from '../actions/reset_legacy_state';
 
 jest.mock('../../get_prompt_mode_is_available', () => ({
@@ -48,9 +45,6 @@ jest.mock('../actions/reset_legacy_state', () => ({
 
 const mockedExecuteQueries = queryActions.executeQueries as jest.MockedFunction<
   typeof queryActions.executeQueries
->;
-const mockedDetectAndSetOptimalTab = tabActions.detectAndSetOptimalTab as jest.MockedFunction<
-  typeof tabActions.detectAndSetOptimalTab
 >;
 const mockedGetPromptModeIsAvailable = getPromptModeIsAvailable as jest.MockedFunction<
   typeof getPromptModeIsAvailable
@@ -123,16 +117,11 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/resetLegacyState' });
     expect(mockedResetLegacyStateActionCreator).toHaveBeenCalledWith(mockServices);
     expect(mockStore.dispatch).toHaveBeenCalledWith(setPromptModeIsAvailable(true));
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setEditorMode(EditorMode.Prompt));
     expect(mockStore.dispatch).toHaveBeenCalledWith(setSummaryAgentIsAvailable(true));
 
     // Verify the executeQueries action was dispatched
     expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/executeQueries' });
-
-    // Verify the detectAndSetOptimalTab action was dispatched
-    expect(mockedDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
-    expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/detectOptimalTab' });
   });
 
   it('should trigger side effects when dataset changes with setQueryWithHistory', async () => {
@@ -224,7 +213,6 @@ describe('createDatasetChangeMiddleware', () => {
 
     // Verify that execute queries was not called
     expect(mockedExecuteQueries).not.toHaveBeenCalled();
-    expect(mockedDetectAndSetOptimalTab).not.toHaveBeenCalled();
   });
 
   it('should update prompt mode availability only if different from current state', async () => {

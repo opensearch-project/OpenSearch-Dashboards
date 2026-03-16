@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createTableConfig, TableChartStyleControls } from './table_vis_config';
-import { TableVisStyleControls } from './table_vis_options';
+import { createTableConfig, defaultTableChartStyles } from './table_vis_config';
+import { TableVisStyleControls as TableVisStyleControlsComponent } from './table_vis_options';
 
 // Mock the TableVisStyleControls component
 jest.mock('./table_vis_options', () => ({
@@ -27,11 +27,11 @@ describe('table_vis_config', () => {
 
       // Check the style defaults
       expect(config.ui.style.defaults).toBeDefined();
-      expect(config.ui.style.defaults.pageSize).toBe(10);
+      expect(config.ui.style.defaults.pageSize).toBe(50);
 
       // Check that the render function returns a React element
       const mockProps = {
-        styleOptions: { pageSize: 10 },
+        styleOptions: { ...defaultTableChartStyles, pageSize: 10 },
         onStyleChange: jest.fn(),
         updateVisualization: jest.fn(),
         axisColumnMappings: {},
@@ -41,16 +41,26 @@ describe('table_vis_config', () => {
       };
 
       const renderResult = config.ui.style.render(mockProps);
-      expect(renderResult.type).toBe(TableVisStyleControls);
+      expect(renderResult.type).toBe(TableVisStyleControlsComponent);
       expect(renderResult.props).toEqual(mockProps);
     });
 
     test('style defaults match expected values', () => {
       const config = createTableConfig();
-      const defaults = config.ui.style.defaults as TableChartStyleControls;
+      const defaults = config.ui.style.defaults;
 
       expect(defaults).toEqual({
-        pageSize: 10,
+        pageSize: 50,
+        globalAlignment: 'left',
+        hiddenColumns: [],
+        showColumnFilter: false,
+        showFooter: false,
+        footerCalculations: [],
+        cellTypes: [],
+        thresholds: [],
+        baseColor: '#000000',
+        dataLinks: [],
+        visibleColumns: [],
       });
     });
   });

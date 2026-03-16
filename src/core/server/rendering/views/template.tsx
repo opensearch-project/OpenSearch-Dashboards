@@ -48,6 +48,7 @@ export const Template: FunctionComponent<Props> = ({
     startupScriptUrl,
     bootstrapScriptUrl,
     strictCsp,
+    nonce,
   },
 }) => {
   const darkLogos = getLogos(
@@ -74,6 +75,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
+        <meta name="csp-nonce" content={nonce} />
         <title>{applicationTitle}</title>
         {/**
          * ToDo: Custom branded favicons will not work correctly across all browsers with
@@ -125,14 +127,14 @@ export const Template: FunctionComponent<Props> = ({
           content={favicon ? `` : `${uiPublicUrl}/favicons/browserconfig.xml`}
         />
 
-        <Styles />
+        <Styles nonce={nonce} />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
 
         {/* Place fonts after styles that would be injected later to make sure nothing overrides them */}
-        <Fonts url={uiPublicUrl} />
+        <Fonts url={uiPublicUrl} nonce={nonce} />
         <meta name="add-fonts-here" />
 
         <script src={startupScriptUrl} />
@@ -220,15 +222,6 @@ export const Template: FunctionComponent<Props> = ({
           </div>
         </div>
 
-        <script>
-          {`
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          `}
-        </script>
         <script src={bootstrapScriptUrl} />
       </body>
     </html>

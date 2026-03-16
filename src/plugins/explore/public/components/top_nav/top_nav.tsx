@@ -8,7 +8,6 @@ import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -17,17 +16,28 @@ import { useDatasetContext } from '../../application/context';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
   selectTabState,
-  selectUIState,
+  selectActiveTabId,
   selectQueryStatus,
+  selectIsQueryRunning,
+  selectShouldShowCancelButton,
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
+import { getOpenButtonRun } from './top_nav_links/top_nav_open/top_nav_open';
+import { getSaveButtonRun } from './top_nav_links/top_nav_save/top_nav_save';
 import { SavedExplore } from '../../saved_explore';
-import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import {
+  setDateRange,
+  setHasUserInitiatedQuery,
+  setOverallQueryStatus,
+} from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import { clearResults } from '../../application/utils/state_management/slices';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
+import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
 import { QueryExecutionButton } from './query_execution_button';
 import { Query, TimeRange } from '../../../../data/common';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -38,6 +48,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const clearEditors = useClearEditors();
   const editorRef = useEditorRef();
+  const { keyboardShortcut } = services;
 
   const flavorId = useFlavorId();
   const {
@@ -48,15 +59,15 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       ui: { TopNavMenu },
     },
     data,
-    uiSettings,
-    scopedHistory,
   } = services;
 
-  const uiState = useNewStateSelector(selectUIState);
+  const activeTabId = useNewStateSelector(selectActiveTabId);
   const tabState = useNewStateSelector(selectTabState);
   const queryStatus = useNewStateSelector(selectQueryStatus);
+  const isQueryRunning = useNewStateSelector(selectIsQueryRunning);
+  const shouldShowCancelButton = useNewStateSelector(selectShouldShowCancelButton);
 
-  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+  const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
@@ -81,17 +92,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     };
   }, [data.query.state$]);
 
-  // Create osdUrlStateStorage from storage
-  const osdUrlStateStorage = useMemo(() => {
-    return createOsdUrlStateStorage({
-      useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: scopedHistory,
-    });
-  }, [uiSettings, scopedHistory]);
-
+  // Use the shared osdUrlStateStorage instance from services to avoid
+  // multiple instances competing to update the same URL, which causes
+  // lost updates (e.g., _q and _a being overwritten when _g is synced).
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
-    osdUrlStateStorage
+    services.osdUrlStateStorage!
   );
 
   const dispatch = useDispatch();
@@ -106,7 +112,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         tabState,
         flavorId,
         tabDefinition,
-        activeTabId: uiState.activeTabId,
+        activeTabId,
       },
       clearEditors,
       savedExplore
@@ -121,19 +127,14 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     flavorId,
     tabDefinition,
     clearEditors,
-    uiState.activeTabId,
+    activeTabId,
   ]);
 
   useEffect(() => {
     // capitalize first letter
-    const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}/ ` : '';
-    setScreenTitle(
-      flavorPrefix +
-        (savedExplore?.title ||
-          i18n.translate('explore.discover.savedSearch.newTitle', {
-            defaultMessage: 'Search',
-          }))
-    );
+    const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}` : '';
+
+    setScreenTitle(flavorPrefix + (savedExplore?.title ? `: ${savedExplore?.title}` : ''));
   }, [flavorId, savedExplore?.title]);
 
   const showDatePicker = useMemo(() => {
@@ -162,16 +163,109 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     [dispatch, services, editorRef]
   );
 
-  const handleCustomButtonClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      handleQuerySubmit();
-    },
-    [handleQuerySubmit]
-  );
+  const handleQueryCancel = useCallback(() => {
+    abortAllActiveQueries();
+    dispatch(setHasUserInitiatedQuery(false));
+    // Clear all cached results to ensure refresh works properly after cancel
+    dispatch(clearResults());
+    // Reset overall query status to UNINITIALIZED to stop spinner immediately
+    dispatch(
+      setOverallQueryStatus({
+        status: QueryExecutionStatus.UNINITIALIZED,
+        startTime: undefined,
+        elapsedMs: undefined,
+        error: undefined,
+      })
+    );
+  }, [dispatch]);
+
+  const handleOpenShortcut = useCallback(() => {
+    const openButtonRun = getOpenButtonRun(services);
+    openButtonRun({} as HTMLElement);
+  }, [services]);
+
+  const handleSaveShortcut = useCallback(() => {
+    if (savedExplore) {
+      const saveButtonRun = getSaveButtonRun(
+        services,
+        startSyncingQueryStateWithUrl,
+        searchContext,
+        {
+          dataset,
+          tabState,
+          flavorId,
+          tabDefinition,
+          activeTabId,
+        },
+        savedExplore
+      );
+      saveButtonRun({} as HTMLElement);
+    }
+  }, [
+    services,
+    startSyncingQueryStateWithUrl,
+    searchContext,
+    dataset,
+    tabState,
+    flavorId,
+    tabDefinition,
+    activeTabId,
+    savedExplore,
+  ]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'saved_search',
+    pluginId: 'explore',
+    name: i18n.translate('explore.topNav.savedSearchShortcut', {
+      defaultMessage: 'Saved search',
+    }),
+    category: i18n.translate('explore.topNav.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'shift+o',
+    execute: handleOpenShortcut,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'save_search',
+    pluginId: 'explore',
+    name: i18n.translate('explore.topNav.saveSearchShortcut', {
+      defaultMessage: 'Save discover search',
+    }),
+    category: i18n.translate('explore.topNav.editingCategory', {
+      defaultMessage: 'Data actions',
+    }),
+    keys: 'cmd+s',
+    execute: handleSaveShortcut,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'refresh_query',
+    pluginId: 'explore',
+    name: i18n.translate('explore.topNav.refreshResultsShortcut', {
+      defaultMessage: 'Refresh results',
+    }),
+    category: i18n.translate('explore.topNav.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'r',
+    execute: () => handleQuerySubmit(),
+  });
+
+  const handleCustomButtonClick = useCallback(() => {
+    handleQuerySubmit();
+  }, [handleQuerySubmit]);
 
   const customSubmitButton = useMemo(() => {
-    return <QueryExecutionButton onClick={handleCustomButtonClick} />;
-  }, [handleCustomButtonClick]);
+    return (
+      <QueryExecutionButton
+        onClick={handleCustomButtonClick}
+        showCancelButton={shouldShowCancelButton}
+        onCancel={handleQueryCancel}
+        isQueryRunning={isQueryRunning}
+      />
+    );
+  }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
 
   return (
     <TopNavMenu
@@ -182,6 +276,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
       useDefaultBehaviors={false}
+      disableTimeRangeTool={true}
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}
@@ -195,6 +290,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
+      showCancelButton={shouldShowCancelButton}
+      onQueryCancel={handleQueryCancel}
+      isQueryRunning={isQueryRunning}
     />
   );
 };

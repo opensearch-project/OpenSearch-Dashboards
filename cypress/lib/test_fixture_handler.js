@@ -3,48 +3,47 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BASE_ENGINE } from '../utils/constants';
+import { PATHS } from '../utils/constants';
 
 export class TestFixtureHandler {
-  constructor(inputTestRunner, openSearchUrl = BASE_ENGINE.url) {
+  constructor(inputTestRunner) {
     this.testRunner = inputTestRunner;
-    this.openSearchUrl = openSearchUrl;
   }
 
   // TODO: Migrate legacy methods from test library
-
-  importMapping(filename) {
-    return cy.readFile(filename).then((mappingData) => {
+  importMapping(filename, options = { url: PATHS.ENGINE }) {
+    return cy.readFile(filename).then((body) => {
       const targetIndex = this._extractIndexNameFromPath(filename);
 
       return cy.request({
         method: 'PUT',
-        url: `${this.openSearchUrl}/${targetIndex}`,
+        url: `${options.url}/${targetIndex}`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: mappingData,
+        body,
         failOnStatusCode: false,
       });
     });
   }
 
-  importData(filename) {
-    return cy.readFile(filename, 'utf8').then((content) => {
+  importData(filename, options = { url: PATHS.ENGINE }) {
+    return cy.readFile(filename, 'utf8').then((body) => {
       return cy
         .request({
           method: 'POST',
-          url: `${this.openSearchUrl}/_bulk`,
+          url: `${options.url}/_bulk`,
           headers: {
             'Content-Type': 'application/x-ndjson',
           },
-          body: content,
+          body,
           failOnStatusCode: false,
         })
         .then(() => {
           return cy.request({
             method: 'POST',
-            url: `${this.openSearchUrl}/_all/_refresh`,
+            url: `${options.url}/_all/_refresh`,
+            failOnStatusCode: false,
           });
         });
     });

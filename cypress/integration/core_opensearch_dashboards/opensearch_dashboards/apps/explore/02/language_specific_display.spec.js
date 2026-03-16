@@ -12,33 +12,37 @@ import {
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
+import { generateDisplayTestConfiguration } from '../../../../../../utils/apps/explore/language_specific_display';
 import {
-  generateDisplayTestConfiguration,
-  getLanguageReferenceTestText,
-} from '../../../../../../utils/apps/explore/language_specific_display';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runDisplayTests = () => {
   describe('Language-Specific Display', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     after(() => {
+      // Cleanup workspace and associated resources
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
@@ -81,12 +85,6 @@ export const runDisplayTests = () => {
         cy.getElementByTestId('docTableHeaderFieldSort_timestamp').should(
           config.sort ? 'exist' : 'not.exist'
         );
-
-        // testing the language information popup button
-        cy.getElementByTestId('exploreLanguageReference').click();
-        cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
-        cy.get('.euiPanel').contains(getLanguageReferenceTestText(config.language));
-        cy.getElementByTestId('exploreLanguageReference').click();
 
         // testing the saved queries management button
         cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();

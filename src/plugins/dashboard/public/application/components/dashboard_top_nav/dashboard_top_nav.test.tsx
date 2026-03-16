@@ -35,6 +35,7 @@ import { createDashboardServicesMock } from '../../utils/mocks';
 import { mount } from 'enzyme';
 import { TopNavMenu, TopNavControls as HeaderControl } from 'src/plugins/navigation/public';
 import { dashboardAppStateStub } from '../../utils/stubs';
+import { ViewMode } from 'src/plugins/embeddable/public';
 
 let mockURL = '?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))';
 
@@ -48,15 +49,26 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-function wrapDashboardTopNavInContext(mockServices: any, currentState: DashboardAppState) {
+function wrapDashboardTopNavInContext(
+  mockServices: any,
+  currentState: DashboardAppState,
+  includeKeyboardShortcut = false
+) {
+  const { keyboardShortcut, ...servicesWithoutKeyboardShortcut } = mockServices;
+
   const services = {
-    ...mockServices,
+    ...servicesWithoutKeyboardShortcut,
     dashboardCapabilities: {
       saveQuery: true,
     },
     navigation: {
       ui: { TopNavMenu, HeaderControl },
     },
+    // Only include keyboard shortcut service when explicitly requested
+    ...(includeKeyboardShortcut &&
+      keyboardShortcut && {
+        keyboardShortcut,
+      }),
   };
 
   const topNavProps = {
@@ -165,5 +177,202 @@ describe('Dashboard top nav', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  describe('Keyboard Shortcuts Integration', () => {
+    let mockUseKeyboardShortcut: jest.Mock;
+    let mockRegister: jest.Mock;
+    let mockUnregister: jest.Mock;
+
+    beforeEach(() => {
+      mockUseKeyboardShortcut = jest.fn();
+      mockRegister = jest.fn();
+      mockUnregister = jest.fn();
+
+      Object.defineProperty(document, 'querySelector', {
+        value: jest.fn(),
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    function wrapWithKeyboardShortcuts(state: DashboardAppState) {
+      const services = {
+        ...mockServices,
+        dashboardCapabilities: { saveQuery: true },
+        navigation: { ui: { TopNavMenu, HeaderControl } },
+        keyboardShortcut: {
+          useKeyboardShortcut: mockUseKeyboardShortcut,
+          register: mockRegister,
+          unregister: mockUnregister,
+        },
+      };
+
+      const topNavProps = {
+        isChromeVisible: false,
+        savedDashboardInstance: { id: 'test-dashboard', title: 'Test Dashboard' },
+        appState: {
+          getState: () => state,
+          transitions: { set: jest.fn(), setDashboard: jest.fn(), setOption: jest.fn() },
+        } as any,
+        dashboard: { save: jest.fn() } as any,
+        currentAppState: state,
+        isEmbeddableRendered: true,
+        currentContainer: {} as DashboardContainer,
+        indexPatterns: [],
+        dashboardIdFromUrl: 'test-dashboard',
+      };
+
+      return (
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={services}>
+            <DashboardTopNav {...topNavProps} />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+    }
+
+    test('registers toggle edit shortcut', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.VIEW })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'toggle_dashboard_edit',
+        pluginId: 'dashboard',
+        name: expect.any(String),
+        category: expect.any(String),
+        keys: 'shift+e',
+        execute: expect.any(Function),
+      });
+    });
+
+    test('registers save and add shortcuts in edit mode', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.EDIT })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(mockRegister).toHaveBeenCalledWith({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+        name: expect.any(String),
+        category: expect.any(String),
+        keys: 'cmd+s',
+        execute: expect.any(Function),
+      });
+
+      expect(mockRegister).toHaveBeenCalledWith({
+        id: 'add_panel_to_dashboard',
+        pluginId: 'dashboard',
+        name: expect.any(String),
+        category: expect.any(String),
+        keys: 'a',
+        execute: expect.any(Function),
+      });
+    });
+
+    test('does not register save/add shortcuts in view mode', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.VIEW })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      const saveCall = mockRegister.mock.calls.find((call) => call[0].id === 'save_dashboard');
+      const addCall = mockRegister.mock.calls.find(
+        (call) => call[0].id === 'add_panel_to_dashboard'
+      );
+
+      expect(saveCall).toBeUndefined();
+      expect(addCall).toBeUndefined();
+    });
+
+    test('add panel shortcut executes successfully', async () => {
+      const mockGetEmbeddableFactories = jest.fn();
+      const mockGetEmbeddableFactory = jest.fn();
+
+      function wrapWithMockedServices(state: DashboardAppState) {
+        const services = {
+          ...mockServices,
+          dashboardCapabilities: { saveQuery: true },
+          navigation: { ui: { TopNavMenu, HeaderControl } },
+          keyboardShortcut: {
+            useKeyboardShortcut: mockUseKeyboardShortcut,
+            register: mockRegister,
+            unregister: mockUnregister,
+          },
+          embeddable: {
+            getEmbeddableFactories: mockGetEmbeddableFactories,
+            getEmbeddableFactory: mockGetEmbeddableFactory,
+          },
+          notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+          overlays: { openFlyout: jest.fn(), openModal: jest.fn() },
+          savedObjects: { client: {} },
+          uiSettings: { get: jest.fn() },
+          data: {},
+          application: {},
+        };
+
+        const topNavProps = {
+          isChromeVisible: false,
+          savedDashboardInstance: { id: 'test-dashboard', title: 'Test Dashboard' },
+          appState: {
+            getState: () => state,
+            transitions: { set: jest.fn(), setDashboard: jest.fn(), setOption: jest.fn() },
+          } as any,
+          dashboard: { save: jest.fn() } as any,
+          currentAppState: state,
+          isEmbeddableRendered: true,
+          currentContainer: {
+            id: 'test-container',
+            type: 'dashboard',
+          } as any,
+          indexPatterns: [],
+          dashboardIdFromUrl: 'test-dashboard',
+        };
+
+        return (
+          <I18nProvider>
+            <OpenSearchDashboardsContextProvider services={services}>
+              <DashboardTopNav {...topNavProps} />
+            </OpenSearchDashboardsContextProvider>
+          </I18nProvider>
+        );
+      }
+
+      const component = mount(wrapWithMockedServices({ ...currentState, viewMode: ViewMode.EDIT }));
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      const addCall = mockRegister.mock.calls.find(
+        (call) => call[0].id === 'add_panel_to_dashboard'
+      );
+      expect(addCall).toBeDefined();
+
+      expect(() => addCall[0].execute()).not.toThrow();
+    });
+
+    test('cleans up shortcuts on unmount', async () => {
+      const component = mount(
+        wrapWithKeyboardShortcuts({ ...currentState, viewMode: ViewMode.EDIT })
+      );
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      component.unmount();
+
+      expect(mockUnregister).toHaveBeenCalledWith({
+        id: 'save_dashboard',
+        pluginId: 'dashboard',
+      });
+      expect(mockUnregister).toHaveBeenCalledWith({
+        id: 'add_panel_to_dashboard',
+        pluginId: 'dashboard',
+      });
+    });
   });
 });

@@ -70,6 +70,7 @@ interface Props {
   closeMenuPopover: () => void;
   saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   saveQueryIsDisabled?: boolean;
+  textSize?: React.ComponentProps<typeof EuiText>['size'];
 }
 
 export function SavedQueryManagementComponent({
@@ -84,6 +85,7 @@ export function SavedQueryManagementComponent({
   useNewSavedQueryUI,
   saveQuery,
   saveQueryIsDisabled,
+  textSize = 's',
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -221,9 +223,10 @@ export function SavedQueryManagementComponent({
       className="osdSavedQueryManagement__popover"
       data-test-subj="saved-query-management-popover"
     >
-      <EuiListGroup>
-        <div>
+      <EuiListGroup className="osdSavedQueryManagement__newUIList">
+        <div className="osdSavedQueryManagement__newUIItem">
           <EuiButtonEmpty
+            className="osdSavedQueryManagement__newUIButton"
             data-test-subj="saved-query-management-save-button"
             disabled={saveQueryIsDisabled}
             iconType="save"
@@ -243,13 +246,16 @@ export function SavedQueryManagementComponent({
               );
             }}
           >
-            {i18n.translate('data.saved_query_management.save_query_item_label', {
-              defaultMessage: 'Save query',
-            })}
+            <EuiText size={textSize}>
+              {i18n.translate('data.saved_query_management.save_query_item_label', {
+                defaultMessage: 'Save query',
+              })}
+            </EuiText>
           </EuiButtonEmpty>
         </div>
-        <div>
+        <div className="osdSavedQueryManagement__newUIItem">
           <EuiButtonEmpty
+            className="osdSavedQueryManagement__newUIButton"
             data-test-subj="saved-query-management-open-button"
             iconType="folderOpen"
             onClick={() => {
@@ -267,9 +273,11 @@ export function SavedQueryManagementComponent({
               );
             }}
           >
-            {i18n.translate('data.saved_query_management.open_query_item_label', {
-              defaultMessage: 'Open query',
-            })}
+            <EuiText size={textSize}>
+              {i18n.translate('data.saved_query_management.open_query_item_label', {
+                defaultMessage: 'Open query',
+              })}
+            </EuiText>
           </EuiButtonEmpty>
         </div>
       </EuiListGroup>

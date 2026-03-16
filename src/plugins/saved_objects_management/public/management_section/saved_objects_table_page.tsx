@@ -58,6 +58,7 @@ const SavedObjectsTablePage = ({
   dataSourceManagement,
   navigation,
   useUpdatedUX,
+  isDatasetManagementEnabled,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -71,6 +72,7 @@ const SavedObjectsTablePage = ({
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigation: NavigationPublicPluginStart;
   useUpdatedUX: boolean;
+  isDatasetManagementEnabled: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -131,6 +133,7 @@ const SavedObjectsTablePage = ({
       dataSourceManagement={dataSourceManagement}
       navigationUI={navigation.ui}
       useUpdatedUX={useUpdatedUX}
+      isDatasetManagementEnabled={isDatasetManagementEnabled}
     />
   );
 };

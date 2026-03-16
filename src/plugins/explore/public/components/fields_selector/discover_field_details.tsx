@@ -39,21 +39,21 @@ import {
   getVisualizeHref,
 } from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../data/public';
+import { DataViewField, DataView } from '../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
   columns: string[];
   details: FieldDetails;
-  field: IndexPatternField;
-  indexPattern: IndexPattern;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  field: DataViewField;
+  dataSet: DataView;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldDetails({
   columns,
   details,
   field,
-  indexPattern,
+  dataSet,
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
@@ -62,23 +62,21 @@ export function DiscoverFieldDetails({
 
   useEffect(() => {
     const checkIfVisualizable = async () => {
-      const visualizable = await isFieldVisualizable(field, indexPattern.id, columns).catch(
-        () => false
-      );
+      const visualizable = await isFieldVisualizable(field, dataSet.id, columns).catch(() => false);
 
       setShowVisualizeLink(visualizable);
       if (visualizable) {
-        const href = await getVisualizeHref(field, indexPattern.id, columns).catch(() => '');
+        const href = await getVisualizeHref(field, dataSet.id, columns).catch(() => '');
         setVisualizeLink(href || '');
       }
     };
     checkIfVisualizable();
-  }, [field, indexPattern.id, columns]);
+  }, [field, dataSet.id, columns]);
 
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     // regular link click. let the uiActions code handle the navigation and show popup if needed
     event.preventDefault();
-    triggerVisualizeActions(field, indexPattern.id, columns);
+    triggerVisualizeActions(field, dataSet.id, columns);
   };
 
   return (
@@ -128,7 +126,7 @@ export function DiscoverFieldDetails({
       {!details.error && (
         <EuiPopoverFooter>
           <EuiText size="xs" textAlign="center">
-            {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
+            {!dataSet.metaFields.includes(field.name) && !field.scripted ? (
               <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
                 <FormattedMessage
                   id="explore.discover.fieldChooser.detailViews.existsText"

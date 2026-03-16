@@ -1,0 +1,209 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { CoreService } from '../../types';
+import {
+  ChatServiceSetup,
+  ChatServiceStart,
+  ChatImplementationFunctions,
+  Message,
+  ChatWindowState,
+  ConversationMemoryProvider,
+} from './types';
+import { ChatScreenshotService } from './screenshot_service';
+import { LocalStorageMemoryProvider } from './local_storage_memory_provider';
+
+/**
+ * Core chat service - manages infrastructure state
+ */
+export class ChatService implements CoreService<ChatServiceSetup, ChatServiceStart> {
+  private implementation?: ChatImplementationFunctions;
+  private suggestedActionsService?: { registerProvider(provider: any): void };
+  private screenshotService: ChatScreenshotService;
+  private memoryProvider: ConversationMemoryProvider;
+
+  // Core-managed infrastructure state
+  private threadId$ = new BehaviorSubject<string | undefined>(undefined);
+  private windowState$ = new BehaviorSubject<ChatWindowState>({
+    isWindowOpen: false,
+    windowMode: 'sidecar',
+    paddingSize: 400,
+  });
+  private windowOpenCallbacks = new Set<() => void>();
+  private windowCloseCallbacks = new Set<() => void>();
+
+  private windowOpenChangeSubscription?: Subscription;
+
+  constructor() {
+    this.screenshotService = new ChatScreenshotService();
+    // Initialize with default LocalStorage provider
+    this.memoryProvider = new LocalStorageMemoryProvider();
+  }
+
+  private generateThreadId(): string {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 11);
+    return `thread-${timestamp}-${randomStr}`;
+  }
+
+  public setup(): ChatServiceSetup {
+    this.windowOpenChangeSubscription = this.windowState$
+      .pipe(
+        map((state) => state.isWindowOpen),
+        distinctUntilChanged()
+      )
+      .subscribe((isWindowOpen) => {
+        if (isWindowOpen) {
+          this.windowOpenCallbacks.forEach((callback) => callback());
+        } else {
+          this.windowCloseCallbacks.forEach((callback) => callback());
+        }
+      });
+
+    return {
+      setImplementation: (implementation: ChatImplementationFunctions) => {
+        this.implementation = implementation;
+      },
+
+      setSuggestedActionsService: (service: { registerProvider(provider: any): void }) => {
+        this.suggestedActionsService = service;
+      },
+
+      suggestedActionsService: this.suggestedActionsService,
+
+      setScreenshotPageContainerElement: (element: HTMLElement) => {
+        this.screenshotService.setPageContainerElement(element);
+      },
+
+      screenshot: this.screenshotService,
+
+      setMemoryProvider: (provider: ConversationMemoryProvider) => {
+        this.memoryProvider = provider;
+      },
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
+    };
+  }
+
+  public start(): ChatServiceStart {
+    const setWindowState = (partialState: Partial<ChatWindowState>) => {
+      const currentState = this.windowState$.getValue();
+      const newState = { ...currentState, ...partialState };
+      this.windowState$.next(newState);
+    };
+
+    const chatServiceInstance = this;
+
+    return {
+      // Availability check
+      isAvailable: () => {
+        return !!this.implementation;
+      },
+
+      // Thread management (core-managed)
+      getThreadId: () => {
+        return this.threadId$.getValue();
+      },
+
+      getThreadId$: () => {
+        return this.threadId$.asObservable();
+      },
+
+      setThreadId: (threadId: string) => {
+        this.threadId$.next(threadId);
+      },
+
+      newThread: () => {
+        const newThreadId = this.generateThreadId();
+        this.threadId$.next(newThreadId);
+      },
+
+      // Window state management (core-managed)
+      isWindowOpen: () => {
+        return this.windowState$.getValue().isWindowOpen;
+      },
+
+      getWindowState: () => {
+        return this.windowState$.getValue();
+      },
+
+      getWindowState$: () => {
+        return this.windowState$.asObservable();
+      },
+
+      setWindowState,
+
+      onWindowOpen: (callback: () => void) => {
+        this.windowOpenCallbacks.add(callback);
+        return () => this.windowOpenCallbacks.delete(callback);
+      },
+
+      onWindowClose: (callback: () => void) => {
+        this.windowCloseCallbacks.add(callback);
+        return () => this.windowCloseCallbacks.delete(callback);
+      },
+
+      openWindow: async () => {
+        setWindowState({ isWindowOpen: true });
+      },
+
+      closeWindow: async () => {
+        setWindowState({ isWindowOpen: false });
+      },
+
+      sendMessage: async (content: string, messages: Message[]) => {
+        if (!this.implementation) {
+          throw new Error(
+            'Chat service is not available. Please ensure the chat plugin is enabled.'
+          );
+        }
+        return this.implementation.sendMessage(content, messages);
+      },
+
+      sendMessageWithWindow: async (
+        content: string,
+        messages: Message[],
+        options?: { clearConversation?: boolean }
+      ) => {
+        if (!this.implementation) {
+          throw new Error(
+            'Chat service is not available. Please ensure the chat plugin is enabled.'
+          );
+        }
+        return this.implementation.sendMessageWithWindow(content, messages, options);
+      },
+
+      // Infrastructure service - use getter to ensure dynamic access
+      get suggestedActionsService() {
+        return chatServiceInstance.suggestedActionsService;
+      },
+
+      // Screenshot page container element (deprecated)
+      get screenshotPageContainerElement() {
+        return chatServiceInstance.screenshotService.getPageContainerElement();
+      },
+
+      // Screenshot service
+      screenshot: this.screenshotService,
+
+      getMemoryProvider: () => {
+        return this.memoryProvider;
+      },
+    };
+  }
+
+  public async stop() {
+    this.implementation = undefined;
+    this.suggestedActionsService = undefined;
+    this.windowOpenCallbacks.clear();
+    this.windowCloseCallbacks.clear();
+    this.screenshotService.stop();
+    this.windowOpenChangeSubscription?.unsubscribe();
+  }
+}

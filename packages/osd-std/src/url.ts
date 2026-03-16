@@ -83,36 +83,40 @@ export function modifyUrl(
   url: string,
   urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void
 ) {
-  const parsed = parseUrl(url, true) as URLMeaningfulParts;
+  try {
+    const parsed = parseUrl(url, true) as URLMeaningfulParts;
 
-  // Copy over the most specific version of each property. By default, the parsed url includes several
-  // conflicting properties (like path and pathname + search, or search and query) and keeping track
-  // of which property is actually used when they are formatted is harder than necessary.
-  const meaningfulParts: URLMeaningfulParts = {
-    auth: parsed.auth,
-    hash: parsed.hash,
-    hostname: parsed.hostname,
-    pathname: parsed.pathname,
-    port: parsed.port,
-    protocol: parsed.protocol,
-    query: parsed.query || {},
-    slashes: parsed.slashes,
-  };
+    // Copy over the most specific version of each property. By default, the parsed url includes several
+    // conflicting properties (like path and pathname + search, or search and query) and keeping track
+    // of which property is actually used when they are formatted is harder than necessary.
+    const meaningfulParts: URLMeaningfulParts = {
+      auth: parsed.auth,
+      hash: parsed.hash,
+      hostname: parsed.hostname,
+      pathname: parsed.pathname,
+      port: parsed.port,
+      protocol: parsed.protocol,
+      query: parsed.query || {},
+      slashes: parsed.slashes,
+    };
 
-  // The urlModifier modifies the meaningfulParts object, or returns a new one.
-  const modifiedParts = urlModifier(meaningfulParts) || meaningfulParts;
+    // The urlModifier modifies the meaningfulParts object, or returns a new one.
+    const modifiedParts = urlModifier(meaningfulParts) || meaningfulParts;
 
-  // Format the modified/replaced meaningfulParts back into a url.
-  return formatUrl({
-    auth: modifiedParts.auth,
-    hash: modifiedParts.hash,
-    hostname: modifiedParts.hostname,
-    pathname: modifiedParts.pathname,
-    port: modifiedParts.port,
-    protocol: modifiedParts.protocol,
-    query: modifiedParts.query,
-    slashes: modifiedParts.slashes,
-  } as UrlObject);
+    // Format the modified/replaced meaningfulParts back into a url.
+    return formatUrl({
+      auth: modifiedParts.auth,
+      hash: modifiedParts.hash,
+      hostname: modifiedParts.hostname,
+      pathname: modifiedParts.pathname,
+      port: modifiedParts.port,
+      protocol: modifiedParts.protocol,
+      query: modifiedParts.query,
+      slashes: modifiedParts.slashes,
+    } as UrlObject);
+  } catch (error) {
+    return url; // Safe fallback to original url
+  }
 }
 
 /**
@@ -122,28 +126,36 @@ export function modifyUrl(
  * @public
  */
 export function isRelativeUrl(candidatePath: string) {
-  // validate that `candidatePath` is not attempting a redirect to somewhere
-  // outside of this OpenSearch Dashboards install
-  const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
-  const { protocol, hostname, port } = all;
-  // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
-  // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
-  // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
-  // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
-  // and the first slash that belongs to path.
-  if (protocol !== null || hostname !== null || port !== null) {
-    return false;
+  try {
+    // validate that `candidatePath` is not attempting a redirect to somewhere
+    // outside of this OpenSearch Dashboards install
+    const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
+    const { protocol, hostname, port } = all;
+    // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
+    // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
+    // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
+    // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
+    // and the first slash that belongs to path.
+    if (protocol !== null || hostname !== null || port !== null) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false; // Safe fallback to "not relative"
   }
-  return true;
 }
 
 /**
  * Returns the origin (protocol + host + port) from given `url` if `url` is a valid absolute url, or null otherwise
  */
 export function getUrlOrigin(url: string): string | null {
-  const obj = parseUrl(url);
-  if (!obj.protocol && !obj.hostname) {
-    return null;
+  try {
+    const obj = parseUrl(url);
+    if (!obj.protocol && !obj.hostname) {
+      return null;
+    }
+    return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
+  } catch (error) {
+    return null; // Safe fallback to null
   }
-  return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
 }

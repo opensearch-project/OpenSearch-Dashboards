@@ -8,7 +8,7 @@ import React from 'react';
 import { ResizableButton } from './resizable_button';
 import { mount, shallow } from 'enzyme';
 import { SIDECAR_DOCKED_MODE } from '../sidecar_service';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { waitFor } from '@testing-library/dom';
 import { MIN_SIDECAR_SIZE } from '../helper';
 

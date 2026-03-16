@@ -50,7 +50,11 @@ export const useInitPage = () => {
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const queryFromSavedSearch = searchSource.query;
-          const query = { ...queryFromSavedSearch, ...queryFromUrl };
+          const query = {
+            ...queryFromSavedSearch,
+            ...queryFromUrl,
+            query: queryFromUrl.query || queryFromSavedSearch.query,
+          };
           if (query) {
             dispatch(setQueryState(query));
             setEditorText(query.query);
@@ -66,9 +70,7 @@ export const useInitPage = () => {
         const uiState = savedExplore.uiState;
         if (visualization) {
           const { chartType, params, axesMapping } = JSON.parse(visualization);
-          visualizationBuilder.setCurrentChartType(chartType);
-          visualizationBuilder.setAxesMapping(axesMapping);
-          visualizationBuilder.setStyles({ type: chartType, styles: params });
+          visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
         }
         if (uiState) {
           const { activeTab } = JSON.parse(uiState);

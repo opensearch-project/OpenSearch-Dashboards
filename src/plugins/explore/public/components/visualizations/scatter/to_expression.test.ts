@@ -17,7 +17,15 @@ import {
   AxisColumnMappings,
   PointShape,
 } from '../types';
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
+
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
 
 describe('Scatter Chart to_expression', () => {
   // Mock data for testing
@@ -70,9 +78,12 @@ describe('Scatter Chart to_expression', () => {
 
   const mockDateColumns: VisColumn[] = [];
 
-  const mockStyles: Partial<ScatterChartStyleControls> = {
+  const mockStyles: ScatterChartStyle = {
+    ...defaultScatterChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
+    legendTitle: 'Category', // Added to fix legend title for color
+    legendTitleForSize: 'Size', // Added to fix legend title for size
     tooltipOptions: {
       mode: 'all',
     },
@@ -83,10 +94,8 @@ describe('Scatter Chart to_expression', () => {
     },
     standardAxes: [
       {
-        id: 'Axis-1',
         position: Positions.BOTTOM,
         show: true,
-        style: {},
         labels: {
           show: true,
           rotate: 0,
@@ -98,15 +107,10 @@ describe('Scatter Chart to_expression', () => {
         },
         grid: { showLines: true },
         axisRole: AxisRole.X,
-        field: {
-          default: mockNumericalColumns[0],
-        },
       },
       {
-        id: 'Axis-2',
         position: Positions.LEFT,
         show: true,
-        style: {},
         labels: {
           show: true,
           rotate: 0,
@@ -118,9 +122,6 @@ describe('Scatter Chart to_expression', () => {
           text: 'Y Axis',
         },
         axisRole: AxisRole.Y,
-        field: {
-          default: mockNumericalColumns[1],
-        },
       },
     ],
   };

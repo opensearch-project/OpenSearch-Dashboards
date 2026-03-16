@@ -28,8 +28,10 @@
  * under the License.
  */
 
-// Build vega-lite from source for es5 compatibility
-import { compile, version } from 'vega-lite/src';
+/* eslint-disable import/namespace */
+
+// vega-lite 6.x no longer exports from /src subpath
+import { compile, version } from 'vega-lite';
 import * as vega from 'vega';
 import { expressionInterpreter as vegaExpressionInterpreter } from 'vega-interpreter/build/vega-interpreter.module';
 

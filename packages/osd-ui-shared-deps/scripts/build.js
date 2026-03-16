@@ -32,8 +32,9 @@ const Path = require('path');
 const Fs = require('fs');
 
 const { run, createFailError, CiStatsReporter } = require('@osd/dev-utils');
-const webpack = require('webpack');
-const Stats = require('webpack/lib/Stats');
+// const webpack = require('webpack');
+const { rspack, Stats } = require('@rspack/core');
+// const Stats = require('webpack/lib/Stats');
 const del = require('del');
 
 const { getWebpackConfig } = require('../webpack.config');
@@ -45,13 +46,13 @@ run(
     log.info('cleaning previous build output');
     await del(DIST_DIR);
 
-    const compiler = webpack(
+    const compiler = rspack(
       getWebpackConfig({
         dev: flags.dev,
       })
     );
 
-    /** @param {webpack.Stats} stats */
+    /** @param {Stats} stats */
     const onCompilationComplete = async (stats) => {
       const took = Math.round((stats.endTime - stats.startTime) / 1000);
 

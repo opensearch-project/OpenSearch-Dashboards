@@ -82,11 +82,18 @@ export class WorkspaceUiSettingsClientWrapper {
 
         const normalizeDocId = id.replace(`${CURRENT_WORKSPACE_PLACEHOLDER}_`, '');
 
-        const configObject = await wrapperOptions.client.get<Record<string, any>>(
-          'config',
-          normalizeDocId,
-          options
-        );
+        let configObject: SavedObject<T> = {
+          type: 'config',
+          id: normalizeDocId,
+          references: [],
+          attributes: {} as T,
+        };
+
+        try {
+          configObject = await wrapperOptions.client.get<T>('config', normalizeDocId, options);
+        } catch (e) {
+          // make global config nullable when getting workspace settings
+        }
 
         let workspaceObject: SavedObject<WorkspaceAttribute> | null = null;
         const workspaceTypeEnabledClient = this.getWorkspaceTypeEnabledClient(
@@ -122,9 +129,9 @@ export class WorkspaceUiSettingsClientWrapper {
           workspaceSettings[key] = workspaceSettings[key] || value;
         });
 
-        configObject.attributes = workspaceSettings;
+        configObject.attributes = workspaceSettings as T;
 
-        return configObject as SavedObject<T>;
+        return configObject;
       }
 
       return wrapperOptions.client.get(type, id, options);
@@ -143,11 +150,18 @@ export class WorkspaceUiSettingsClientWrapper {
         workspaceAttributes: Partial<T>
       ) => {
         const savedObjectsClient = this.getWorkspaceTypeEnabledClient(wrapperOptions.request);
-        const configObject = await wrapperOptions.client.get<Record<string, any>>(
-          'config',
-          configDocId,
-          options
-        );
+        let configObject: SavedObjectsUpdateResponse<T> = {
+          type: 'config',
+          id: configDocId,
+          references: [],
+          attributes: {},
+        };
+
+        try {
+          configObject = await wrapperOptions.client.get<T>('config', configDocId, options);
+        } catch (e) {
+          // make global config nullable when updating workspace settings
+        }
 
         const workspaceObject = await savedObjectsClient.get<WorkspaceAttribute>(
           WORKSPACE_TYPE,
@@ -164,9 +178,9 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        configObject.attributes = workspaceUpdateResult.attributes.uiSettings || {};
+        configObject.attributes = (workspaceUpdateResult.attributes.uiSettings || {}) as T;
 
-        return configObject as SavedObjectsUpdateResponse<T>;
+        return configObject;
       };
 
       /**

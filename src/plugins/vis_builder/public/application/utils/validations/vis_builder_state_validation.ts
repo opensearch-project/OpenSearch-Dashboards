@@ -3,21 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Ajv from 'ajv';
-import visBuilderStateSchema from '../schema.json';
+import { z } from 'zod';
 import { ValidationResult } from './types';
 
-const ajv = new Ajv();
-const validateState = ajv.compile(visBuilderStateSchema);
+const visBuilderStateSchema = z
+  .object({
+    styleState: z.object({}).passthrough(),
+    visualizationState: z
+      .object({
+        activeVisualization: z
+          .object({
+            name: z.string(),
+            aggConfigParams: z.array(z.any()),
+          })
+          .strict()
+          .optional(),
+        indexPattern: z.string().optional(),
+        searchField: z.string(),
+      })
+      .strict(),
+    uiState: z.object({}).passthrough().optional(),
+  })
+  .strict();
 
 export const validateVisBuilderState = (visBuilderState: any): ValidationResult => {
-  const isVisBuilderStateValid = validateState(visBuilderState);
-  const errorMsg = validateState.errors
-    ? validateState.errors[0].instancePath + ' ' + validateState.errors[0].message
-    : undefined;
+  const result = visBuilderStateSchema.safeParse(visBuilderState);
+
+  if (result.success) {
+    return { valid: true };
+  }
+
+  // Format error message as "/{path} {message}"
+  const firstError = result.error.issues[0];
+  const path = firstError.path.length > 0 ? '/' + firstError.path.join('/') : '';
+  const errorMsg = path + ' ' + firstError.message;
 
   return {
-    valid: isVisBuilderStateValid,
+    valid: false,
     errorMsg,
   };
 };

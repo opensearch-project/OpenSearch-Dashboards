@@ -343,8 +343,11 @@ export const fulfillRelatedConnections = (
   directQueryConnections: DataSourceConnection[]
 ) => {
   return connections.map((connection) => {
+    // Exclude Prometheus connections - they are shown as flat list, not nested under OpenSearch
     const relatedConnections = directQueryConnections.filter(
-      (directQueryConnection) => directQueryConnection.parentId === connection.id
+      (directQueryConnection) =>
+        directQueryConnection.parentId === connection.id &&
+        directQueryConnection.type !== 'Prometheus'
     );
     return {
       ...connection,
@@ -396,8 +399,10 @@ export const mergeDataSourcesWithConnections = (
   return result;
 };
 
-// If all connected data sources are serverless, will only allow to select essential use case.
-export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
+// If all connected data sources are serverless, will use the list of registered use cases specifically for serverless collections.
+export const areAllDataSourcesOpenSearchServerless = async (
+  client: SavedObjectsStart['client']
+) => {
   const allDataSources = await getDataSourcesList(client);
   if (allDataSources.length > 0) {
     return allDataSources.every(

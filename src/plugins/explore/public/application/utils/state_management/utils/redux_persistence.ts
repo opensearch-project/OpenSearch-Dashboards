@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getCurrentAppId, getFlavorFromAppId } from '../../../../helpers/get_flavor_from_app_id';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
@@ -14,13 +15,23 @@ import {
   TabState,
   UIState,
 } from '../slices';
-import { Dataset, DataStructure } from '../../../../../../data/common';
+import {
+  Dataset,
+  DataStructure,
+  DEFAULT_DATA,
+  CORE_SIGNAL_TYPES,
+} from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  DEFAULT_TRACE_COLUMNS_SETTING,
+  DEFAULT_LOGS_COLUMNS_SETTING,
+  ExploreFlavor,
+  EXPLORE_DEFAULT_LANGUAGE,
+} from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
-import { EditorMode } from '../types';
 
 /**
  * Persists Redux state to URL
@@ -60,26 +71,38 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const queryState = services.osdUrlStateStorage.get('_q') as QueryState | null;
     const appState = services.osdUrlStateStorage.get('_a') as AppState | null;
 
-    // Query state handling
-    let finalQueryState: QueryState;
+    // Query state handling - always resolve dataset to ensure SignalType validation
+    let urlDataset: Dataset | undefined;
     if (queryState?.dataset) {
-      // The dataset from URL should already be minimal, but ensure it only has the necessary properties
-      finalQueryState = {
-        ...queryState,
-        dataset: queryState.dataset
-          ? {
-              id: queryState.dataset.id,
-              title: queryState.dataset.title,
-              type: queryState.dataset.type,
-              timeFieldName: queryState.dataset.timeFieldName,
-              // Map dataSource if it exists
-              dataSource: queryState.dataset.dataSource,
-            }
-          : undefined,
+      // Extract minimal dataset from URL state
+      urlDataset = {
+        id: queryState.dataset.id,
+        title: queryState.dataset.title,
+        type: queryState.dataset.type,
+        language: queryState.dataset.language,
+        timeFieldName: queryState.dataset.timeFieldName,
+        dataSource: queryState.dataset.dataSource,
+        signalType: queryState.dataset.signalType,
       };
-    } else {
-      finalQueryState = await getPreloadedQueryState(services);
     }
+
+    // Always call getPreloadedQueryState to ensure SignalType validation runs
+    const resolvedQueryState = await getPreloadedQueryState(services, urlDataset);
+
+    // Use the resolved dataset but preserve other query state from URL if available
+    // When the dataset changes (due to signal type filtering), also update the language
+    const datasetChanged =
+      queryState?.dataset?.id !== resolvedQueryState.dataset?.id ||
+      queryState?.dataset?.type !== resolvedQueryState.dataset?.type;
+
+    const finalQueryState: QueryState = queryState
+      ? {
+          ...queryState,
+          dataset: resolvedQueryState.dataset,
+          language: datasetChanged ? resolvedQueryState.language : queryState.language,
+          query: datasetChanged ? '' : queryState.query,
+        }
+      : resolvedQueryState;
     services.data.query.queryString.setQuery(finalQueryState);
     const timefilter = services?.data?.query?.timefilter?.timefilter;
     if (timefilter) {
@@ -90,7 +113,23 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
-    const finalLegacyState = appState?.legacy || getPreloadedLegacyState(services);
+
+    // Handle legacy state with special logic for columns
+    let finalLegacyState = appState?.legacy;
+    if (!finalLegacyState || !finalLegacyState.columns || finalLegacyState.columns.length === 0) {
+      // If no legacy state or columns are empty/missing, load defaults
+      finalLegacyState = await getPreloadedLegacyState(services);
+    } else {
+      const correctedColumns = await getColumnsForDataset(services, finalLegacyState.columns);
+
+      if (correctedColumns) {
+        finalLegacyState = {
+          ...finalLegacyState,
+          columns: correctedColumns,
+        };
+      }
+    }
+
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
@@ -116,7 +155,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
   const uiState = getPreloadedUIState(services);
   const resultsState = getPreloadedResultsState(services);
   const tabState = getPreloadedTabState(services);
-  const legacyState = getPreloadedLegacyState(services);
+  const legacyState = await getPreloadedLegacyState(services);
   const queryEditorState = await getPreloadedQueryEditorState(services, queryState);
   const metaState = getPreloadedMetaState(services);
 
@@ -135,7 +174,9 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
  * Fetches the first available dataset using the data plugin's dataset service
  */
 const fetchFirstAvailableDataset = async (
-  services: ExploreServices
+  services: ExploreServices,
+  flavor: ExploreFlavor | null,
+  requiredSignalType?: string
 ): Promise<Dataset | undefined> => {
   try {
     const datasetService = services.data?.query?.queryString?.getDatasetService();
@@ -143,7 +184,9 @@ const fetchFirstAvailableDataset = async (
       return undefined;
     }
 
-    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType('INDEX_PATTERN');
+    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType(
+      flavor === ExploreFlavor.Metrics ? 'PROMETHEUS' : 'INDEX_PATTERN'
+    );
     if (!typeConfig) {
       return undefined;
     }
@@ -162,7 +205,42 @@ const fetchFirstAvailableDataset = async (
         typeConfig.toDataset([pattern])
       ) ?? [];
 
-    return fetchedDatasets.length > 0 ? fetchedDatasets[0] : undefined;
+    // Filter by SignalType compatibility
+    if (fetchedDatasets.length > 0) {
+      for (const dataset of fetchedDatasets) {
+        try {
+          const dataView = await services.data?.dataViews?.get(
+            dataset.id,
+            dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+          );
+
+          // Get effective signal type from dataView or dataset (for Prometheus which sets signalType directly)
+          const effectiveSignalType = dataView?.signalType || dataset.signalType;
+
+          // If requiredSignalType is specified, dataset must match it
+          if (requiredSignalType) {
+            if (effectiveSignalType === requiredSignalType) {
+              return dataset;
+            }
+          } else {
+            // If requiredSignalType is not specified (i.e., Logs flavor),
+            // dataset should not have signalType equal to Traces or Metrics
+            if (
+              effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+            ) {
+              return dataset;
+            }
+          }
+        } catch (error) {
+          // Continue to next dataset if this one fails
+          continue;
+        }
+      }
+      return undefined; // No compatible dataset found
+    }
+
+    return undefined;
   } catch (error) {
     return undefined;
   }
@@ -171,27 +249,67 @@ const fetchFirstAvailableDataset = async (
 /**
  * Resolves the dataset to use for the initial query state
  */
-const resolveDataset = async (services: ExploreServices): Promise<Dataset | undefined> => {
-  // First, try to get dataset from QueryStringManager (same as ConnectedDatasetSelector)
+const resolveDataset = async (
+  services: ExploreServices,
+  preferredDataset?: Dataset
+): Promise<Dataset | undefined> => {
+  const currentAppId = await getCurrentAppId(services);
+  const flavorFromAppId = getFlavorFromAppId(currentAppId);
+  const requiredSignalType =
+    flavorFromAppId === ExploreFlavor.Traces
+      ? CORE_SIGNAL_TYPES.TRACES
+      : flavorFromAppId === ExploreFlavor.Metrics
+      ? CORE_SIGNAL_TYPES.METRICS
+      : undefined;
+
+  // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
+  const defaultQuery =
+    flavorFromAppId === ExploreFlavor.Metrics
+      ? undefined
+      : services.data?.query?.queryString?.getDefaultQuery();
+  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
-  let selectedDataset = queryStringQuery?.dataset || defaultQuery?.dataset;
+  // If we have an existing dataset, validate SignalType compatibility
+  if (existingDataset) {
+    try {
+      // Read signalType directly from the Dataset.
+      const effectiveSignalType = existingDataset.signalType || preferredDataset?.signalType;
 
-  // If no dataset found, fetch available datasets and select first one (same as DatasetSelector)
-  if (!selectedDataset) {
-    selectedDataset = await fetchFirstAvailableDataset(services);
+      // If requiredSignalType is specified, dataset must match it
+      if (requiredSignalType) {
+        if (effectiveSignalType === requiredSignalType) {
+          return existingDataset;
+        }
+      } else {
+        // If requiredSignalType is not specified (i.e., Logs flavor),
+        // dataset should not have signalType equal to Traces or Metrics
+        if (
+          effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+          effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+        ) {
+          return existingDataset;
+        }
+      }
+    } catch (error) {
+      // Silently continue to fetch a new dataset if validation fails
+      // This is expected behavior when datasets are incompatible with current flavor
+    }
   }
 
-  return selectedDataset;
+  // Fetch first available dataset with required SignalType
+  return await fetchFirstAvailableDataset(services, flavorFromAppId, requiredSignalType);
 };
 
 /**
  * Get preloaded query state with dataset initialization
  */
-const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryState> => {
-  // Resolve the dataset to use for the initial query state
-  const selectedDataset = await resolveDataset(services);
+const getPreloadedQueryState = async (
+  services: ExploreServices,
+  preferredDataset?: Dataset
+): Promise<QueryState> => {
+  // Always resolve the dataset to ensure SignalType validation runs
+  const selectedDataset = await resolveDataset(services, preferredDataset);
 
   // Use toDataset method if available, otherwise extract minimal properties
   let minimalDataset: Dataset | undefined;
@@ -204,8 +322,10 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
         id: selectedDataset.id,
         title: selectedDataset.title,
         type: selectedDataset.type,
+        language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
+        signalType: selectedDataset.signalType,
       };
     }
   }
@@ -213,7 +333,7 @@ const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryS
   if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: EXPLORE_DEFAULT_LANGUAGE,
+      language: minimalDataset.language || EXPLORE_DEFAULT_LANGUAGE,
     });
 
     // override the initial query to be an empty string
@@ -271,7 +391,7 @@ const getPreloadedQueryEditorState = async (
     },
     promptModeIsAvailable,
     promptToQueryIsLoading: false,
-    editorMode: promptModeIsAvailable ? EditorMode.Prompt : DEFAULT_EDITOR_MODE,
+    editorMode: DEFAULT_EDITOR_MODE,
     lastExecutedTranslatedQuery: '',
     summaryAgentIsAvailable,
     lastExecutedPrompt: '',
@@ -303,15 +423,23 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
 /**
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
-export const getPreloadedLegacyState = (services: ExploreServices): LegacyState => {
+export const getPreloadedLegacyState = async (services: ExploreServices): Promise<LegacyState> => {
   // Only return defaults - NO saved object loading (like vis_builder)
-  const defaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
+  const currentAppId = await getCurrentAppId(services);
+  const flavorFromAppId = getFlavorFromAppId(currentAppId);
+
+  const defaultColumns =
+    flavorFromAppId === ExploreFlavor.Traces
+      ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
+      : flavorFromAppId === ExploreFlavor.Logs
+      ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
+      : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
 
   return {
     // Fields that exist in data_explorer + discover
     // TODO: load saved explore by id
     savedSearch: undefined, // Matches discover format - string ID, not object
-    columns: defaultColumns,
+    columns: defaultColumns || ['_source'],
     sort: [],
     isDirty: false,
     savedQuery: undefined,
@@ -329,4 +457,30 @@ const getPreloadedMetaState = (services: ExploreServices) => {
   return {
     isInitialized: false,
   };
+};
+
+const getColumnsForDataset = async (
+  services: ExploreServices,
+  currentColumns?: string[]
+): Promise<string[] | null> => {
+  if (currentColumns && currentColumns.length > 0) {
+    return null;
+  }
+
+  try {
+    const currentAppId = await getCurrentAppId(services);
+    const currentFlavor = getFlavorFromAppId(currentAppId);
+    const isTracesFlavor = currentFlavor === ExploreFlavor.Traces;
+
+    const tracesDefaultColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING) || [
+      'spanId',
+    ];
+    const logsDefaultColumns = services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING) || [
+      '_source',
+    ];
+
+    return isTracesFlavor ? tracesDefaultColumns : logsDefaultColumns;
+  } catch (error) {
+    return null;
+  }
 };

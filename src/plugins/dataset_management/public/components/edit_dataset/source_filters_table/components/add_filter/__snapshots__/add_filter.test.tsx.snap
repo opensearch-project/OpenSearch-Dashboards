@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddFilter should ignore strings with just spaces 1`] = `
+<EuiFlexGroup
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={10}
+  >
+    <EuiCompressedFieldText
+      fullWidth={true}
+      onChange={[Function]}
+      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      value=""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiSmallButton
+      isDisabled={true}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Add"
+        id="datasetManagement.editDataset.source.addButtonLabel"
+        values={Object {}}
+      />
+    </EuiSmallButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`AddFilter should match snapshot when useUpdatedUX equal false 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem
+    grow={10}
+  >
+    <EuiCompressedFieldText
+      fullWidth={true}
+      onChange={[Function]}
+      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      value=""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiSmallButton
+      isDisabled={true}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Add"
+        id="datasetManagement.editDataset.source.addButtonLabel"
+        values={Object {}}
+      />
+    </EuiSmallButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`AddFilter should render normally 1`] = `
+<EuiFlexGroup
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={10}
+  >
+    <EuiCompressedFieldText
+      fullWidth={true}
+      onChange={[Function]}
+      placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
+      value=""
+    />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiSmallButton
+      isDisabled={true}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Add"
+        id="datasetManagement.editDataset.source.addButtonLabel"
+        values={Object {}}
+      />
+    </EuiSmallButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

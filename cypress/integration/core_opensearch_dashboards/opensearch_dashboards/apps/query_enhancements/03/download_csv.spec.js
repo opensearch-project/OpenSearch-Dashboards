@@ -6,8 +6,10 @@
 import Papa from 'papaparse';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
+import { nonTimeBasedFieldsForDatasetCreation } from '../../../../../../utils/constants';
 import {
   DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
@@ -26,31 +28,36 @@ import {
   prepareDiscoverPageForDownload,
   toggleFieldsForCsvDownload,
 } from '../../../../../../utils/apps/query_enhancements/download_csv';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+  createDatasetWithEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetWithTimeId = getRandomizedDatasetId();
+const datasetWithoutTimeId = getRandomizedDatasetId();
 
 const runDownloadCsvTests = () => {
   describe('Download as CSV', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITHOUT_TIME_1,
-        timefieldName: '',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-        indexPatternHasTimefield: false,
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and first dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetWithTimeId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern with time
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
+
+      createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, datasetWithoutTimeId, {
+        title: `${INDEX_WITHOUT_TIME_1}*`,
+        signalType: 'logs',
+        fields: nonTimeBasedFieldsForDatasetCreation,
       });
     });
 
@@ -60,10 +67,7 @@ const runDownloadCsvTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateDownloadCsvTestConfigurations().forEach((config) => {

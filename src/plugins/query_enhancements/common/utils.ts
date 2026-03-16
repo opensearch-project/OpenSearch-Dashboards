@@ -141,8 +141,18 @@ export const buildQueryStatusConfig = (response: any) => {
 };
 
 /**
+ * Detects whether a PPL query ends with a `head` command in the main query,
+ * ignoring any trailing `| where ...` clauses (appended time-range filters)
+ * and any `head` commands inside subquery brackets [...].
+ */
+export const queryEndsWithHead = (queryString: string): boolean => {
+  const masked = queryString.replace(/\[.*?\]/g, (match) => '\0'.repeat(match.length));
+  return /\|\s*head\b(\s+\d+)?(\s+from\s+\d+)?\s*(\|\s*where\b.*)?\s*$/i.test(masked);
+};
+
+/**
  * Test if a PPL query is using search command
- * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst
+ * https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.md
  */
 export const isPPLSearchQuery = (
   query: Query

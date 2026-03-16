@@ -31,12 +31,6 @@
 import { modifyUrl, isRelativeUrl, getUrlOrigin } from './url';
 
 describe('modifyUrl()', () => {
-  test('throws an error with invalid input', () => {
-    expect(() => modifyUrl(1 as any, () => ({}))).toThrowError();
-    expect(() => modifyUrl(undefined as any, () => ({}))).toThrowError();
-    expect(() => modifyUrl('http://localhost', undefined as any)).toThrowError();
-  });
-
   test('supports returning a new url spec', () => {
     expect(modifyUrl('http://localhost', () => ({}))).toEqual('');
   });
@@ -79,6 +73,12 @@ describe('modifyUrl()', () => {
       })
     ).toEqual('mail:localhost');
   });
+
+  test('does not throw URIError for malformed urls', () => {
+    expect(() => {
+      modifyUrl('http://user:%E0%A4@example.com', () => {});
+    }).not.toThrowError();
+  });
 });
 
 describe('isRelativeUrl()', () => {
@@ -93,6 +93,11 @@ describe('isRelativeUrl()', () => {
     expect(isRelativeUrl('///evil.com')).toBe(false);
     expect(isRelativeUrl(' //evil.com')).toBe(false);
   });
+  test('does not throw URIError for malformed urls', () => {
+    expect(() => {
+      isRelativeUrl('http://user:%E0%A4@example.com');
+    }).not.toThrowError();
+  });
 });
 
 describe('getOrigin', () => {
@@ -104,6 +109,11 @@ describe('getOrigin', () => {
     });
     it('return origin with port when the url does have a port', () => {
       expect(getUrlOrigin('http://example.com:80/path/to/file')).toEqual('http://example.com:80');
+    });
+    it('does not throw URIError for malformed urls', () => {
+      expect(() => {
+        getUrlOrigin('http://user:%E0%A4@example.com');
+      }).not.toThrowError();
     });
   });
   describe('when passing a non absolute url', () => {

@@ -71,6 +71,7 @@ import {
   setUiService,
   setUiSettings,
   setDataViews,
+  setSavedObjects,
 } from './services';
 import { opensearchaggs } from './search/expressions';
 import {
@@ -106,7 +107,10 @@ import {
   getDefaultSuggestions as getPPLSuggestions,
   getSimplifiedPPLSuggestions,
 } from './antlr/opensearch_ppl/code_completion';
+import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
+import { promqlTriggerCharacters } from './antlr/promql/constants';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
+import { ResourceClientFactory } from './resources';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -132,6 +136,7 @@ export class DataPublicPlugin
   private readonly storage: DataStorage;
   private readonly sessionStorage: DataStorage;
   private readonly config: ConfigSchema;
+  private resourceClientFactory!: ResourceClientFactory;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -195,17 +200,25 @@ export class DataPublicPlugin
     autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
     autoComplete.addQuerySuggestionProvider('PPL_Simplified', getSimplifiedPPLSuggestions); // Support implicit PPL queries that don't necessarily start with source = datasetName
     autoComplete.addQuerySuggestionProvider('AI', getPromptSuggestions);
+    autoComplete.addQuerySuggestionProvider(
+      'PROMQL',
+      getPromQLSuggestions,
+      promqlTriggerCharacters
+    );
 
     const useNewSavedQueriesUI =
       core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
       this.config.savedQueriesNewUI.enabled;
     setUseNewSavedQueriesUI(useNewSavedQueriesUI);
 
+    this.resourceClientFactory = new ResourceClientFactory(core.http);
+
     return {
       autocomplete: autoComplete,
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      resourceClientFactory: this.resourceClientFactory,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
         if (enhancements.search) searchService.__enhance(enhancements.search);
         if (enhancements.editor)
@@ -214,7 +227,10 @@ export class DataPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
+  public start(
+    core: CoreStart,
+    { uiActions, contextProvider }: DataStartDependencies
+  ): DataPublicPluginStart {
     const {
       uiSettings,
       http,
@@ -228,6 +244,7 @@ export class DataPublicPlugin
     setOverlays(overlays);
     setUiSettings(uiSettings);
     setApplication(application);
+    setSavedObjects(savedObjects);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -331,11 +348,16 @@ export class DataPublicPlugin
         dataSourceService,
         dataSourceFactory,
       },
+      resourceClientFactory: this.resourceClientFactory,
     };
 
     registerDefaultDataSource(dataServices);
 
-    const uiService = this.uiService.start(core, { dataServices, storage: this.storage });
+    const uiService = this.uiService.start(core, {
+      dataServices,
+      storage: this.storage,
+      contextProvider,
+    });
     setUiService(uiService);
 
     return {

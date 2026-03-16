@@ -13,11 +13,10 @@
   "dependencies": {
     "@elastic/safer-lodash-set": "0.0.0",
     "@osd/utils": "1.0.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "typescript": "4.5.5",
     "tsd": "^0.21.0"
   }
 }

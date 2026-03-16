@@ -35,6 +35,7 @@ export interface IDataView extends IIndexPattern {
   displayName?: string;
   description?: string;
   type?: string;
+  signalType?: string;
   dataSourceRef?: DataViewSavedObjectReference;
 
   /**
@@ -142,6 +143,8 @@ export type DataViewSavedObjectReference = SavedObjectReference;
  */
 export type DataViewSpec = IndexPatternSpec & {
   dataSourceRef?: DataViewSavedObjectReference;
+  // non OpenSearch data-source may have additional meta properties
+  dataSourceMeta?: Record<string, unknown>;
 };
 
 /**

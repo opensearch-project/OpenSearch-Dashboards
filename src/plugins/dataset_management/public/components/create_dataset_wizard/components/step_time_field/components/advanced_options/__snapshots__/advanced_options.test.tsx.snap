@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedOptions should hide if not showing 1`] = `
+<div>
+  <EuiSmallButtonEmpty
+    iconType="arrowRight"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Show advanced settings"
+      id="datasetManagement.createDataset.stepTime.options.showButton"
+      values={Object {}}
+    />
+  </EuiSmallButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+</div>
+`;
+
+exports[`AdvancedOptions should render normally 1`] = `
+<div>
+  <EuiSmallButtonEmpty
+    iconType="arrowDown"
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Hide advanced settings"
+      id="datasetManagement.createDataset.stepTime.options.hideButton"
+      values={Object {}}
+    />
+  </EuiSmallButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiForm>
+    <EuiCompressedFormRow
+      describedByIds={Array []}
+      display="rowCompressed"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      helpText={
+        <FormattedMessage
+          defaultMessage="OpenSearch Dashboards will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one."
+          id="datasetManagement.createDataset.stepTime.options.patternLabel"
+          values={Object {}}
+        />
+      }
+      label={
+        <FormattedMessage
+          defaultMessage="Custom index pattern ID"
+          id="datasetManagement.createDataset.stepTime.options.patternHeader"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiCompressedFieldText
+        data-test-subj="createDatasetIdInput"
+        name="datasetId"
+        onChange={[Function]}
+        placeholder="custom-index-pattern-id"
+        value="foobar"
+      />
+    </EuiCompressedFormRow>
+  </EuiForm>
+</div>
+`;

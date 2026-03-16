@@ -4,9 +4,10 @@
  */
 
 import { isEqual } from 'lodash';
+import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
@@ -31,13 +32,12 @@ import {
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { SortOrder } from '../types/saved_explore_types';
 import { SavedExplore } from '../saved_explore';
-import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
-import { ExpressionRenderError } from '../../../expressions/public';
-import { VisColumn } from '../components/visualizations/types';
+import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
+import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -47,10 +47,13 @@ import {
 } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
 import {
+  adaptLegacyData,
   convertStringsToMappings,
-  findRuleByIndex,
-} from '../components/visualizations/visualization_container_utils';
+} from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
+import { visualizationRegistry } from '../components/visualizations/visualization_registry';
+import { prepareQueryForLanguage } from '../application/utils/languages';
+import { mergeStyles } from '../components/visualizations/utils/utils';
 
 export interface SearchProps {
   description?: string;
@@ -61,6 +64,7 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   services: ExploreServices;
+  spec?: any;
   expression?: string;
   sharedItemTitle?: string;
   searchContext?: {
@@ -70,6 +74,8 @@ export interface SearchProps {
   };
   chartType?: ChartType;
   activeTab?: string;
+  styleOptions?: StyleOptions;
+  axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -80,6 +86,8 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
+  onExpressionEvent?: (e: ExpressionRendererEvent) => void;
+  onSelectTimeRange?: (range: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -117,6 +125,7 @@ export class ExploreEmbeddable
     timeRange: undefined as TimeRange | undefined,
   };
   private node?: HTMLElement;
+  private root?: Root;
 
   constructor(
     {
@@ -171,7 +180,6 @@ export class ExploreEmbeddable
   private initializeSearchProps() {
     const { searchSource } = this.savedExplore;
     const indexPattern = searchSource.getField('index');
-    if (!indexPattern) return;
     const searchProps: SearchProps = {
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
@@ -193,9 +201,13 @@ export class ExploreEmbeddable
     const query = this.savedExplore.searchSource.getField('query');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const activeTab = uiState.activeTab;
-    // If the active tab is logs, we need to prepare the query for the logs tab
-    if (activeTab === 'logs' && query) {
-      query.query = defaultPrepareQueryString(query);
+    if (query) {
+      // If the active tab is logs, we need to prepare the query for the logs tab
+      if (activeTab === 'logs') {
+        query.query = defaultPrepareQueryString(query);
+      } else {
+        query.query = prepareQueryForLanguage(query).query;
+      }
     }
     searchSource.setFields({
       index: indexPattern,
@@ -250,7 +262,7 @@ export class ExploreEmbeddable
         field,
         value,
         operator,
-        indexPattern.id!
+        indexPattern?.id!
       );
       filters = filters.map((filter) => ({
         ...filter,
@@ -259,6 +271,33 @@ export class ExploreEmbeddable
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         filters,
+      });
+    };
+
+    searchProps.onExpressionEvent = async (e: ExpressionRendererEvent) => {
+      if (e.name === 'applyFilter') {
+        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+          embeddable: this,
+          ...e.data,
+        });
+      }
+    };
+
+    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+        embeddable: this,
+        filters: [
+          {
+            range: {
+              '*': {
+                mode: 'absolute',
+                gte: moment(range.from),
+                lte: moment(range.to),
+              },
+            },
+          },
+        ],
+        timeFieldName: '*',
       });
     };
 
@@ -282,7 +321,18 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
-      await this.fetch();
+      try {
+        await this.fetch();
+      } catch (error: any) {
+        this.updateOutput({
+          loading: false,
+          error: {
+            name: error?.body?.error,
+            message: error?.body?.message,
+          },
+        });
+        throw error;
+      }
     } else if (searchProps) {
       this.searchProps = searchProps;
     }
@@ -341,8 +391,10 @@ export class ExploreEmbeddable
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
+    const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
+    this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
       const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
       const allColumns = [
@@ -350,55 +402,59 @@ export class ExploreEmbeddable
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
       ];
-      if (selectedChartType === 'table') {
-        this.searchProps.tableData = {
-          columns: allColumns,
-          rows: visualizationData.transformedData ?? [],
-        };
-      } else {
-        const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = findRuleByIndex(visualization.axesMapping, allColumns);
-        if (!matchedRule) {
-          throw new Error(
-            `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+
+      // Check if there's data to visualize
+      if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
+        if (selectedChartType === 'table') {
+          this.searchProps.tableData = {
+            columns: allColumns,
+            rows: visualizationData.transformedData ?? [],
+          };
+        } else {
+          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          this.searchProps.axisColumnMappings = axesMapping;
+          const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+            visualization.axesMapping,
+            allColumns
           );
-        }
-        const ruleBasedToExpressionFn = (
-          transformedData: Array<Record<string, any>>,
-          numericalCols: VisColumn[],
-          categoricalCols: VisColumn[],
-          dateCols: VisColumn[],
-          styleOpts: StyleOptions
-        ) => {
-          return matchedRule?.toSpec?.(
-            transformedData,
-            numericalCols,
-            categoricalCols,
-            dateCols,
-            styleOpts,
+          if (!matchedRule || !matchedRule.toSpec) {
+            throw new Error(
+              `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+            );
+          }
+          const searchContext = {
+            query: this.input.query,
+            filters: this.input.filters,
+            timeRange: this.input.timeRange,
+          };
+          this.searchProps.searchContext = searchContext;
+          const styleOptions = visualization.params;
+
+          let styles = adaptLegacyData({
+            type: selectedChartType,
+            styles: styleOptions,
+            axesMapping: visualization.axesMapping,
+          })?.styles;
+
+          if (vis) {
+            styles = mergeStyles(vis.ui.style.defaults, styles);
+          }
+          this.searchProps.styleOptions = styles;
+
+          const spec = matchedRule.toSpec(
+            visualizationData.transformedData,
+            numericalColumns,
+            categoricalColumns,
+            dateColumns,
+            styles || styleOptions,
             selectedChartType,
-            axesMapping
+            axesMapping,
+            searchContext.timeRange
           );
-        };
-        const searchContext = {
-          query: this.input.query,
-          filters: this.input.filters,
-          timeRange: this.input.timeRange,
-        };
-        this.searchProps.searchContext = searchContext;
-        const indexPattern = this.savedExplore.searchSource.getField('index');
-        const styleOptions = visualization.params;
-        const exp = toExpression(
-          searchContext,
-          indexPattern!,
-          ruleBasedToExpressionFn,
-          visualizationData.transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          styleOptions
-        );
-        this.searchProps.expression = exp;
+          this.searchProps.spec = spec;
+          const exp = toExpression(searchContext, spec);
+          this.searchProps.expression = exp;
+        }
       }
     }
     this.updateOutput({ loading: false, error: undefined });
@@ -410,9 +466,9 @@ export class ExploreEmbeddable
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) return;
+    if (!this.searchProps || !this.root) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {
@@ -431,8 +487,8 @@ export class ExploreEmbeddable
     if (this.searchProps) {
       delete this.searchProps;
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 
@@ -448,11 +504,12 @@ export class ExploreEmbeddable
     if (!this.searchProps) {
       throw new Error('Search scope not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
-    this.renderComponent(node, this.searchProps);
+    this.node.style.height = '100%';
+    this.root = createRoot(node);
   }
 
   public getInspectorAdapters() {

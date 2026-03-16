@@ -64,6 +64,8 @@ export interface DatasetTypeConfig {
     isFieldLoadAsync?: boolean;
     /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */
     cacheOptions?: boolean;
+    /** Optional list of supported apps. If undefined, it will show up in all apps */
+    supportedAppNames?: string[];
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -100,7 +102,7 @@ export interface DatasetTypeConfig {
    * Retrieves the search options to be used for running the query on the data connection associated
    * with this Dataset
    */
-  getSearchOptions?: () => DatasetSearchOptions;
+  getSearchOptions?: (dataset: Dataset) => DatasetSearchOptions;
   /**
    * Combines a list of user selected data structures into a single one to use in discover.
    * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.

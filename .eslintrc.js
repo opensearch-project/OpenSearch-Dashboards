@@ -379,7 +379,6 @@ module.exports = {
      */
     {
       files: [
-        '**/*.stories.tsx',
         'test/*/config.ts',
         'test/*/config_open.ts',
         'test/*/{tests,test_suites,apis,apps}/**/*',
@@ -604,6 +603,19 @@ module.exports = {
                 name: 'lodash/fp/assocPath',
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
+              {
+                name: 'lodash',
+                importNames: ['template'],
+                message: 'lodash.template is not allowed due to security concerns',
+              },
+              {
+                name: 'lodash.template',
+                message: 'lodash.template is not allowed due to security concerns',
+              },
+              {
+                name: 'lodash/template',
+                message: 'lodash.template is not allowed due to security concerns',
+              },
             ],
           },
         ],
@@ -626,6 +638,14 @@ module.exports = {
               {
                 name: 'lodash/setWith',
                 message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash.template',
+                message: 'lodash.template is not allowed due to security concerns',
+              },
+              {
+                name: 'lodash/template',
+                message: 'lodash.template is not allowed due to security concerns',
               },
             ],
           },
@@ -671,6 +691,16 @@ module.exports = {
             object: '_',
             property: 'assocPath',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'template',
+            message: 'lodash.template is not allowed due to security concerns',
+          },
+          {
+            object: '_',
+            property: 'template',
+            message: 'lodash.template is not allowed due to security concerns',
           },
         ],
       },
@@ -741,6 +771,21 @@ module.exports = {
           'error',
           {
             patterns: ['lodash/*', '!lodash/fp'],
+            paths: [
+              {
+                name: 'lodash',
+                importNames: ['template'],
+                message: 'lodash.template is not allowed due to security concerns',
+              },
+              {
+                name: 'lodash.template',
+                message: 'lodash.template is not allowed due to security concerns',
+              },
+              {
+                name: 'lodash/template',
+                message: 'lodash.template is not allowed due to security concerns',
+              },
+            ],
           },
         ],
       },

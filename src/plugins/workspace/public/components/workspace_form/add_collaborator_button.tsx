@@ -56,19 +56,23 @@ export const AddCollaboratorButton = ({
 
   const onAddCollaborators = async (collaborators: WorkspaceCollaborator[]) => {
     const uniqueCollaboratorIds = new Set();
-    const addedSettings = collaborators.map(({ permissionType, accessLevel, collaboratorId }) => ({
-      type: permissionType,
-      modes: accessLevelNameToWorkspacePermissionModesMap[accessLevel],
-      id: nextIdGenerator(),
-      ...(permissionType === WorkspacePermissionItemType.User
-        ? {
-            userId: collaboratorId,
-          }
-        : {
-            group: collaboratorId,
-          }),
-      collaboratorId,
-    })) as Array<WorkspacePermissionSetting & { collaboratorId: string }>;
+    const addedSettings = collaborators.map(({ permissionType, accessLevel, collaboratorId }) => {
+      const trimmedId = collaboratorId.trim();
+      return {
+        type: permissionType,
+        modes: accessLevelNameToWorkspacePermissionModesMap[accessLevel],
+        id: nextIdGenerator(),
+        ...(permissionType === WorkspacePermissionItemType.User
+          ? {
+              userId: trimmedId,
+            }
+          : {
+              group: trimmedId,
+            }),
+        collaboratorId: trimmedId,
+      };
+    }) as Array<WorkspacePermissionSetting & { collaboratorId: string }>;
+
     const existingDuplicateSettings = addedSettings.filter((permissionSettingToAdd) =>
       hasSameUserIdOrGroup(permissionSettings, permissionSettingToAdd)
     );

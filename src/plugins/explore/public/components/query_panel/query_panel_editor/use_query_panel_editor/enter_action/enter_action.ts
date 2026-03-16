@@ -19,11 +19,8 @@ export const getEnterAction = (handleRun: () => void): IActionDescriptor => ({
     const suggestWidgetVisible = contextKeyService?.getContextKeyValue('suggestWidgetVisible');
 
     if (suggestWidgetVisible) {
-      // Accept the selected suggestion and trigger next suggestions
+      // Accept the selected suggestion without retriggering
       editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
-      setTimeout(() => {
-        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
-      }, 100);
     } else {
       handleRun();
     }

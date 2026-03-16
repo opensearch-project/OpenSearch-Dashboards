@@ -8,23 +8,35 @@ import {
   DATASOURCE_NAME,
   END_TIME,
   START_TIME,
-} from '../../../../../../utils/apps/explore/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+} from '../../../../../../utils/apps/constants';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/explore/shared';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runCreateVisTests = () => {
   describe('create visualization tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
@@ -66,7 +78,7 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .within(() => {
           // Try finding the EuiSuperSelect button directly
-          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
@@ -107,7 +119,7 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .within(() => {
           // Try finding the EuiSuperSelect button directly
-          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
@@ -149,7 +161,7 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .within(() => {
           // Try finding the EuiSuperSelect button directly
-          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
@@ -181,7 +193,7 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
-      cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+      cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
 
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
@@ -223,7 +235,7 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .within(() => {
           // Try finding the EuiSuperSelect button directly
-          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
@@ -249,7 +261,7 @@ export const runCreateVisTests = () => {
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
-      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category`;
+      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp_span, category`;
       cy.explore.setQueryEditor(query, { submit: false });
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
@@ -267,14 +279,14 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .and('contain.text', 'Line');
 
-      cy.getElementByTestId('field-x').should('contain.text', 'timestamp');
+      cy.getElementByTestId('field-x').should('contain.text', 'timestamp_span');
       cy.getElementByTestId('field-y').should('contain.text', 'count');
       cy.getElementByTestId('field-color').should('contain.text', 'category');
 
       // Switch to table, the table should correctly render
       cy.getElementByTestId('exploreChartTypeSelector-table').click();
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'count');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp');
+      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp_span');
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
     });
 
@@ -284,7 +296,7 @@ export const runCreateVisTests = () => {
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
-      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category, unique_category`;
+      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp_span, category, unique_category`;
       cy.explore.setQueryEditor(query, { submit: false });
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
@@ -303,7 +315,7 @@ export const runCreateVisTests = () => {
         .and('contain.text', 'Line');
 
       // Axes should be correctly set
-      cy.getElementByTestId('field-x').should('contain.text', 'timestamp');
+      cy.getElementByTestId('field-x').should('contain.text', 'timestamp_span');
       cy.getElementByTestId('field-y').should('contain.text', 'count');
       cy.getElementByTestId('field-color').should('contain.text', 'category');
       cy.getElementByTestId('field-facet').should('contain.text', 'unique_category');
@@ -313,7 +325,7 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'count');
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'unique_category');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp');
+      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp_span');
     });
 
     it('should create a line and bar visualization using a query with one metric and two categories', () => {
@@ -337,7 +349,7 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .within(() => {
           // Try finding the EuiSuperSelect button directly
-          cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
@@ -350,7 +362,7 @@ export const runCreateVisTests = () => {
       cy.get('body').click(0, 0);
 
       // Verify the visualization are displayed
-      cy.get('.visualization').should('be.visible');
+      cy.get('.exploreVisContainer canvas').should('be.visible');
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
     });
   });

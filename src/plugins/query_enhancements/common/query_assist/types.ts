@@ -14,6 +14,8 @@ export interface QueryAssistParameters {
   question: string;
   index: string;
   language: string;
+  currentTime?: string;
+  timeField?: string;
   // for MDS
   dataSourceId?: string;
 }

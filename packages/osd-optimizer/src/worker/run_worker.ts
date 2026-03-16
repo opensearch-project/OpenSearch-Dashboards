@@ -75,16 +75,28 @@ const send = (msg: WorkerMsg) => {
  */
 const exit = (code: number) => {
   process.exitCode = code;
+
+  // On Windows, worker processes sometimes don't exit cleanly
+  // Use a shorter timeout and force exit without error if the process completed successfully
+  const timeout = process.platform === 'win32' ? 5000 : 30000;
+
   setTimeout(() => {
-    send(
-      workerMsgs.error(
-        new Error(
-          `process did not automatically exit within 30 seconds (previous code: ${code}); forcing exit...`
+    if (code === 0) {
+      // If the process completed successfully but didn't exit, force exit without error
+      process.exit(0);
+    } else {
+      send(
+        workerMsgs.error(
+          new Error(
+            `process did not automatically exit within ${
+              timeout / 1000
+            } seconds (previous code: ${code}); forcing exit...`
+          )
         )
-      )
-    );
-    process.exit(1);
-  }, 30000).unref();
+      );
+      process.exit(1);
+    }
+  }, timeout).unref();
 };
 
 // check for connected parent on an unref'd timer rather than listening

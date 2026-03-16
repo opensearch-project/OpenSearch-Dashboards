@@ -90,7 +90,7 @@
   }
 
   .bottom-container {
-    padding: 0 $euiSize;
+    padding: 0 $euiSizeM;
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
 
@@ -107,7 +107,7 @@
     }
 
     &.bottom-container-expanded {
-      gap: 16px;
+      gap: $euiSizeM;
       padding-top: $euiSizeM;
       padding-bottom: $euiSizeM;
       border-top: $euiBorderThin;

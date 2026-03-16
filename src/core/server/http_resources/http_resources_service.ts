@@ -28,9 +28,11 @@
  * under the License.
  */
 
+import crypto from 'crypto';
 import { RequestHandlerContext } from 'src/core/server';
 
 import { CoreContext } from '../core_context';
+import { applyCspModifications } from '../csp_modifications';
 import {
   IRouter,
   RouteConfig,
@@ -79,42 +81,95 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         route: RouteConfig<P, Q, B, 'get'>,
         handler: HttpResourcesRequestHandler<P, Q, B>
       ) => {
-        return router.get<P, Q, B>(route, (context, request, response) => {
+        return router.get<P, Q, B>(route, async (context, request, response) => {
           return handler(context, request, {
             ...response,
-            ...this.createResponseToolkit(deps, context, request, response),
+            ...(await this.createResponseToolkit(deps, context, request, response)),
           });
         });
       },
     };
   }
 
-  private createResponseToolkit(
+  private async createResponseToolkit(
     deps: SetupDeps,
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest,
     response: OpenSearchDashboardsResponseFactory
-  ): HttpResourcesServiceToolkit {
+  ): Promise<HttpResourcesServiceToolkit> {
     const cspHeader = deps.http.csp.header;
+    const cspReportOnly = deps.http.cspReportOnly;
+
+    let cspReportOnlyIsEmitting: boolean;
+    try {
+      const dynamicConfigClient = context.core.dynamicConfig.client;
+      const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
+      const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-report-only' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+      cspReportOnlyIsEmitting = cspReportOnlyDynamicConfig?.isEmitting ?? cspReportOnly.isEmitting;
+    } catch (e) {
+      cspReportOnlyIsEmitting = cspReportOnly.isEmitting;
+    }
+
+    const nonce = crypto.randomBytes(16).toString('base64');
+    const cspReportOnlyHeader = cspReportOnly.buildHeaderWithNonce(nonce);
+
+    const cspReportOnlyHeaders = cspReportOnlyIsEmitting
+      ? {
+          'content-security-policy-report-only': cspReportOnlyHeader,
+          'reporting-endpoints': cspReportOnly.reportingEndpointsHeader,
+        }
+      : {};
+
+    let modifiedCspHeader = cspHeader;
+    try {
+      const dynamicConfigClient = context.core.dynamicConfig.client;
+      const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
+
+      const cspModificationsDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-modifications' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+
+      const modifications = cspModificationsDynamicConfig?.modifications;
+      if (modifications && modifications.length > 0) {
+        modifiedCspHeader = applyCspModifications(deps.http.csp.rules, modifications);
+      }
+    } catch (e) {
+      // Fall back to default CSP header on error
+    }
+
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: true,
+          nonce,
         });
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: {
+            ...options.headers,
+            ...cspReportOnlyHeaders,
+            'content-security-policy': modifiedCspHeader,
+          },
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: false,
+          nonce,
         });
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: {
+            ...options.headers,
+            ...cspReportOnlyHeaders,
+            'content-security-policy': modifiedCspHeader,
+          },
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
@@ -122,8 +177,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           body: options.body,
           headers: {
             ...options.headers,
+            ...cspReportOnlyHeaders,
             'content-type': 'text/html',
-            'content-security-policy': cspHeader,
+            'content-security-policy': modifiedCspHeader,
           },
         });
       },
@@ -132,8 +188,9 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           body: options.body,
           headers: {
             ...options.headers,
+            ...cspReportOnlyHeaders,
             'content-type': 'text/javascript',
-            'content-security-policy': cspHeader,
+            'content-security-policy': modifiedCspHeader,
           },
         });
       },

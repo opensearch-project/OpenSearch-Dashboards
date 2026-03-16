@@ -1282,6 +1282,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
         ]
       }
       goInspectObject={[Function]}
+      isDatasetManagementEnabled={false}
       isSearching={false}
       itemId="id"
       items={

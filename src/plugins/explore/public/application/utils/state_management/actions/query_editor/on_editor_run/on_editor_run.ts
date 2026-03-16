@@ -10,6 +10,7 @@ import { EditorMode } from '../../../types';
 import { callAgentActionCreator } from './call_agent';
 import { runQueryActionCreator } from '../run_query';
 import { clearLastExecutedData } from '../../../slices';
+import { setHasUserInitiatedQuery } from '../../../slices/query_editor/query_editor_slice';
 
 // This is used when user submits a query or a prompt. This called runQueryActionCreator under the hood
 export const onEditorRunActionCreator = (services: ExploreServices, editorText: string) => (
@@ -22,6 +23,8 @@ export const onEditorRunActionCreator = (services: ExploreServices, editorText: 
 
   if (queryExecutionButtonStatus === 'DISABLED') return;
 
+  // Set flag to indicate user has initiated a query
+  dispatch(setHasUserInitiatedQuery(true));
   dispatch(clearLastExecutedData());
 
   if (editorMode === EditorMode.Prompt) {

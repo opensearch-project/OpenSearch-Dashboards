@@ -9,29 +9,38 @@ import {
 } from '../../../../../../utils/apps/constants.js';
 import { BASE_PATH, DATASOURCE_NAME } from '../../../../../../utils/constants.js';
 import { DatasetTypes } from '../../../../../../utils/apps/query_enhancements/constants.js';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/query_enhancements/shared.js';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/query_enhancements/shared.js';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const cachingTestSuite = () => {
   describe('caching spec', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
       cy.getElementByTestId('discoverNewButton').click();
@@ -46,18 +55,30 @@ const cachingTestSuite = () => {
       const alternativeIndexPattern = alternativeIndexPatternName + '*';
 
       cy.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, DatasetTypes.INDEX_PATTERN.name);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: alternativeIndexPatternName,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
+
+      const alternativeDatasetId = getRandomizedDatasetId();
+      const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+
+      cy.osd.getDataSourceId(DATASOURCE_NAME);
+      cy.get('@DATASOURCE_ID').then((datasourceId) => {
+        cy.osd.createDatasetByEndpoint(
+          alternativeDatasetId,
+          workspaceId,
+          datasourceId,
+          {
+            title: alternativeIndexPattern,
+            signalType: 'logs',
+            timestamp: 'timestamp',
+          },
+          `${alternativeDatasetId}:DATASET_ID`
+        );
+        cy.wait(2000);
       });
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
 

@@ -1,0 +1,110 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { CoreStart, PluginInitializerContext } from 'opensearch-dashboards/public';
+import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
+import { Storage } from '../../opensearch_dashboards_utils/public';
+import { RequestAdapter } from '../../inspector/public';
+
+import { AgentTracesStartDependencies, AgentTracesServices } from './types';
+import { createSavedAgentTracesLoader } from './saved_agent_traces';
+import { getHistory } from './application/legacy/discover/opensearch_dashboards_services';
+import { TabRegistryService } from './services/tab_registry/tab_registry_service';
+import { AppStore } from './application/utils/state_management/store';
+import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
+import { SlotRegistryService } from './services/slot_registry';
+import { DEFAULT_DATA } from '../../data/common';
+
+export function buildServices(
+  core: CoreStart,
+  plugins: AgentTracesStartDependencies,
+  context: PluginInitializerContext,
+  tabRegistry: TabRegistryService,
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService,
+  isDatasetManagementEnabled: boolean = false,
+  slotRegistry?: SlotRegistryService,
+  dataImporterConfig?: AgentTracesServices['dataImporterConfig'],
+  dataSourceEnabled: boolean = false,
+  hideLocalCluster: boolean = false,
+  dataSourceManagement?: AgentTracesServices['dataSourceManagement']
+): AgentTracesServices {
+  const supportedTypes = [DEFAULT_DATA.SET_TYPES.INDEX, DEFAULT_DATA.SET_TYPES.INDEX_PATTERN];
+  const services: SavedObjectOpenSearchDashboardsServices = {
+    savedObjectsClient: core.savedObjects.client,
+    indexPatterns: plugins.data.indexPatterns,
+    search: plugins.data.search,
+    chrome: core.chrome,
+    overlays: core.overlays,
+  };
+  const savedObjectService = createSavedAgentTracesLoader(services);
+  const storage = new Storage(localStorage);
+
+  return {
+    addBasePath: core.http.basePath.prepend,
+    appName: 'agentTraces',
+    capabilities: core.application.capabilities,
+    chrome: core.chrome,
+    core,
+    data: plugins.data,
+    docLinks: core.docLinks,
+    theme: plugins.charts.theme,
+    filterManager: plugins.data.query.filterManager,
+    dataViews: plugins.data.dataViews,
+    indexPatterns: plugins.data.indexPatterns,
+    getSavedAgentTracesById: async (id?: string) => {
+      return savedObjectService.get(id);
+    },
+    getSavedAgentTracesUrlById: async (id: string) => savedObjectService.urlFor(id),
+    history: getHistory,
+    inspector: plugins.inspector,
+    inspectorAdapters: {
+      requests: new RequestAdapter(),
+    },
+    metadata: {
+      branch: context.env.packageInfo.branch,
+    },
+    navigation: plugins.navigation,
+    share: plugins.share,
+    contextProvider: plugins.contextProvider,
+    opensearchDashboardsLegacy: plugins.opensearchDashboardsLegacy,
+    urlForwarding: plugins.urlForwarding,
+    timefilter: plugins.data.query.timefilter.timefilter,
+    toastNotifications: core.notifications.toasts,
+    uiSettings: core.uiSettings,
+    visualizations: plugins.visualizations,
+    storage,
+    uiActions: plugins.uiActions,
+
+    // Additional CoreStart properties that are accessed directly
+    savedObjects: core.savedObjects,
+    notifications: core.notifications,
+    http: core.http,
+    overlays: core.overlays,
+
+    // From DataExplorerServices (since Explore incorporates DataExplorer functionality)
+    store: (undefined as unknown) as AppStore, // Will be set by the store
+    viewRegistry: undefined, // Will be replaced with tabRegistry
+    embeddable: plugins.embeddable,
+    scopedHistory: undefined, // Will be set by the app
+    osdUrlStateStorage: undefined, // Will be set by the app
+
+    // Agent Traces-specific services
+    tabRegistry,
+    queryPanelActionsRegistry,
+    slotRegistry,
+    expressions: plugins.expressions,
+
+    dashboard: plugins.dashboard,
+    keyboardShortcut: core.keyboardShortcut,
+
+    // Add supportedTypes from config
+    supportedTypes,
+    isDatasetManagementEnabled,
+    dataImporterConfig,
+    dataSourceEnabled,
+    hideLocalCluster,
+    dataSourceManagement,
+  };
+}

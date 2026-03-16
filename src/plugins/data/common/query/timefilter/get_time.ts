@@ -67,7 +67,7 @@ function createTimeRangeFilter(
   if (!indexPattern) {
     return;
   }
-  const field = indexPattern.fields.find(
+  const field = indexPattern.fields?.find(
     (f) => f.name === (fieldName || indexPattern.timeFieldName)
   );
   if (!field) {

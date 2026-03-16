@@ -498,4 +498,62 @@ curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: applicatio
   "fetch_size": 1
 }'`.trim()
   );
+
+  const patchPrefix = 'PATCH _plugins/_security/api/internalusers/admin';
+
+  const patchSingleOpBody = [
+    '[',
+    '  { "op": "replace", "path": "/attributes", "value": { "x": 1 } }',
+    ']',
+  ].join('\n');
+
+  const patchMultiOpBody = [
+    '[',
+    '  { "op": "add",  "path": "/users", "value": ["user1"] },',
+    '  { "op": "add",  "path": "/users", "value": ["user2"] }',
+    ']',
+  ].join('\n');
+
+  utilsTest(
+    'PATCH request – range (single op)',
+    patchPrefix,
+    patchSingleOpBody,
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      expect(range).toEqual({
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 4, column: 2 }, // line with the closing ']'
+      });
+      done();
+    })
+  );
+
+  utilsTest(
+    'PATCH request – data (single op)',
+    patchPrefix,
+    patchSingleOpBody,
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'PATCH',
+        url: '_plugins/_security/api/internalusers/admin',
+        data: [patchSingleOpBody],
+      };
+      compareRequest(request, expected);
+      done();
+    })
+  );
+
+  utilsTest(
+    'PATCH request – data (multiple ops, full array captured)',
+    patchPrefix,
+    patchMultiOpBody,
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'PATCH',
+        url: '_plugins/_security/api/internalusers/admin',
+        data: [patchMultiOpBody],
+      };
+      compareRequest(request, expected);
+      done();
+    })
+  );
 });

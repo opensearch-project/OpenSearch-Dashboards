@@ -1,0 +1,295 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateDatasetWizard defaults to the loading state 1`] = `
+<Fragment>
+  <LoadingState />
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateDatasetWizard renders index pattern step when there are indices 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      datasetName="name"
+      docLinks={
+        Object {
+          "links": Object {
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
+          },
+        }
+      }
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepDataset
+      allIndices={
+        Array [
+          Object {
+            "name": "myDataset",
+          },
+        ]
+      }
+      catchAndWarn={[Function]}
+      datasetCreationType={
+        DatasetCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
+      showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
+    />
+  </EuiPageContent>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateDatasetWizard renders the empty state when there are no indices 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      datasetName="name"
+      docLinks={
+        Object {
+          "links": Object {
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
+          },
+        }
+      }
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepDataset
+      allIndices={Array []}
+      catchAndWarn={[Function]}
+      datasetCreationType={
+        DatasetCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
+      showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
+    />
+  </EuiPageContent>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateDatasetWizard renders time field step when step is set to TIME_FIELD_STEP 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      datasetName="name"
+      docLinks={
+        Object {
+          "links": Object {
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
+          },
+        }
+      }
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepTimeField
+      createDataset={[Function]}
+      dataset=""
+      datasetCreationType={
+        DatasetCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      goToPreviousStep={[Function]}
+      stepInfo={
+        Object {
+          "currentStepNumber": 2,
+          "totalStepNumber": 2,
+        }
+      }
+    />
+  </EuiPageContent>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateDatasetWizard renders when there are no indices but there are remote clusters 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      datasetName="name"
+      docLinks={
+        Object {
+          "links": Object {
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
+          },
+        }
+      }
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepDataset
+      allIndices={Array []}
+      catchAndWarn={[Function]}
+      datasetCreationType={
+        DatasetCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
+      showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
+    />
+  </EuiPageContent>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateDatasetWizard should render normally when use update UX 1`] = `
+<Fragment>
+  <LoadingState />
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateDatasetWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
+<Fragment>
+  <EuiPageContent>
+    <Header
+      datasetName="name"
+      docLinks={
+        Object {
+          "links": Object {
+            "noDocumentation": Object {
+              "indexPatterns": Object {},
+              "scriptedFields": Object {},
+            },
+          },
+        }
+      }
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepDataset
+      allIndices={
+        Array [
+          Object {
+            "name": ".kibana ",
+          },
+        ]
+      }
+      catchAndWarn={[Function]}
+      datasetCreationType={
+        DatasetCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
+      showSystemIndices={true}
+      stepInfo={
+        Object {
+          "currentStepNumber": 1,
+          "totalStepNumber": 2,
+        }
+      }
+    />
+  </EuiPageContent>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    side="right"
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;

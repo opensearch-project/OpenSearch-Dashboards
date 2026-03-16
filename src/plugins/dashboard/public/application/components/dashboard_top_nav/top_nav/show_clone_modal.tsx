@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { DashboardCloneModal } from './clone_modal';
@@ -43,8 +43,9 @@ export function showCloneModal(
   title: string
 ) {
   const container = document.createElement('div');
+  const root = createRoot(container);
   const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
   };
 
@@ -76,5 +77,5 @@ export function showCloneModal(
       />
     </I18nProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

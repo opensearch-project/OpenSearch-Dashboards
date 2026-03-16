@@ -29,7 +29,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -53,7 +53,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper"
         id="app-wrapper"
-        style="padding-right: 640px;"
+        style="padding-right: 648px;"
       >
         app-content
       </div>
@@ -65,7 +65,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper hidden-chrome"
         id="app-wrapper"
-        style="padding-right: 640px;"
+        style="padding-right: 648px;"
       >
         app-content
       </div>
@@ -77,7 +77,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper"
         id="app-wrapper"
-        style="padding-right: 640px;"
+        style="padding-right: 648px;"
       >
         app-content
       </div>
@@ -100,7 +100,7 @@ describe('AppWrapper', () => {
       <div
         class="app-wrapper"
         id="app-wrapper"
-        style="padding-left: 640px;"
+        style="padding-left: 648px;"
       >
         app-content
       </div>

@@ -68,7 +68,7 @@ export class UrlPatternMatcher {
     // to avoid suggesting endpoints that are incompatible with the
     // method that the user has entered.
     this.methodsData = {};
-    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
+    ['HEAD', 'GET', 'PATCH', 'PUT', 'POST', 'DELETE'].forEach((method) => {
       this.methodsData[method] = {
         rootComponent: new SharedComponent('ROOT'),
         parametrizedComponentFactories: parametrizedComponentFactories || {
