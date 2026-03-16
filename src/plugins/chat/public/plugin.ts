@@ -142,7 +142,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     // Set up agentic memory provider only if ML Commons agent ID is configured
     if (this.coreSetup?.chat?.setMemoryProvider && chatConfig.mlCommonsAgentId) {
       try {
-        const agenticMemoryProvider = new AgenticMemoryProvider(core.http);
+        const agenticMemoryProvider = new AgenticMemoryProvider(
+          core.http,
+          () => this.chatService?.getCurrentDataSourceId() ?? Promise.resolve(undefined)
+        );
         this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
       } catch (error) {
         // If agentic memory provider setup fails, fall back to default LocalStorageMemoryProvider
