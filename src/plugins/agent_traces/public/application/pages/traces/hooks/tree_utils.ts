@@ -70,14 +70,14 @@ export const spanToRow = (
   index: number,
   formatTs: (ts: string) => string
 ): BaseRow => ({
-  id: span.spanId || `span-${index}`,
+  id: span.spanId,
   spanId: span.spanId,
   traceId: span.traceId,
   parentSpanId: span.parentSpanId,
   status: span.statusCode === 0 || span.statusCode === 1 ? 'success' : 'error',
   statusMessage: span.statusMessage || undefined,
-  kind: span.operationName || 'Other',
-  name: span.name || span.operationName || 'Unknown',
+  kind: span.operationName || '—',
+  name: span.name || '—',
   input: span.input || '—',
   output: span.output || '—',
   startTime: formatTs(span.startTime),
