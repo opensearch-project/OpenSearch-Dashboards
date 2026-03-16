@@ -29,10 +29,10 @@ export function syncPPLValidationContext(
 
 export function attachPPLValidationContext(
   editor: monaco.editor.IStandaloneCodeEditor,
-  context: PPLValidationContext
+  getContext: () => PPLValidationContext
 ): () => void {
   let currentModel = editor.getModel();
-  applyValidationContext(currentModel, context);
+  applyValidationContext(currentModel, getContext());
 
   const modelChangeSubscription = editor.onDidChangeModel(() => {
     if (currentModel) {
@@ -40,7 +40,7 @@ export function attachPPLValidationContext(
     }
 
     currentModel = editor.getModel();
-    applyValidationContext(currentModel, context);
+    applyValidationContext(currentModel, getContext());
   });
 
   return () => {

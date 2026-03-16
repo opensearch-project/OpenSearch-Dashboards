@@ -50,7 +50,7 @@ describe('ppl_grammar_cache', () => {
   const mockUiSettings = ({ get: jest.fn().mockReturnValue(true) } as unknown) as IUiSettingsClient;
 
   beforeEach(() => {
-    pplGrammarCache.clear();
+    pplGrammarCache.dispose();
     jest
       .spyOn(ATNDeserializer.prototype, 'deserialize')
       .mockReturnValue({} as ReturnType<ATNDeserializer['deserialize']>);
@@ -58,7 +58,7 @@ describe('ppl_grammar_cache', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
-    pplGrammarCache.clear();
+    pplGrammarCache.dispose();
   });
 
   it('should gate backend grammar fetch by OpenSearch version', () => {
@@ -306,7 +306,7 @@ describe('ppl_grammar_cache', () => {
     });
 
     unsubscribe();
-    pplGrammarCache.clear();
+    pplGrammarCache.dispose();
     pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-notify', '3.6.0');
     await flushPromises();
 
@@ -519,13 +519,13 @@ describe('ppl_grammar_cache', () => {
 
     // Clear and retry same datasource without version — should use cachedVersion
     // Note: clear() resets cachedVersion, so this tests the datasource-switch path
-    pplGrammarCache.clear();
+    pplGrammarCache.dispose();
     pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-1', '3.6.0');
     await flushPromises();
 
     // Now warmUp again for same datasource without explicit version
     // cachedVersion should still be '3.6.0' from the warmUp above
-    pplGrammarCache.clear();
+    pplGrammarCache.dispose();
     http.get = jest.fn().mockResolvedValueOnce(createBundle('sha256:reuse-ver')) as any;
     pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-1', '3.6.0');
     await flushPromises();
@@ -618,7 +618,7 @@ describe('ppl_grammar_cache', () => {
     await flushPromises();
     expect(pplGrammarCache.getCachedGrammar('ds-1')?.grammarHash).toBe('sha256:first');
 
-    pplGrammarCache.clear();
+    pplGrammarCache.dispose();
 
     pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-1', '3.6.0');
     await flushPromises();

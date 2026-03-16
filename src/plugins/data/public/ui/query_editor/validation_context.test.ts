@@ -53,11 +53,11 @@ describe('query editor validation context', () => {
       }),
     } as any;
 
-    const detach = attachPPLValidationContext(editor, {
+    const detach = attachPPLValidationContext(editor, () => ({
       useRuntimeGrammar: true,
       dataSourceId: 'ds-1',
       dataSourceVersion: '3.6.0',
-    });
+    }));
 
     currentModel = secondModel;
     onDidChangeModelHandler?.();

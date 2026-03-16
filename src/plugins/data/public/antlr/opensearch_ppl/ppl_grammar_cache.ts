@@ -141,6 +141,9 @@ function isValidBundleShape(bundle: unknown): bundle is PPLGrammarBundle {
  * Automatically clears itself when a different datasource is requested.
  */
 class PPLGrammarCache {
+  /** Retry a failed fetch after 30 seconds. */
+  private static readonly RETRY_AFTER_MS = 30_000;
+
   private grammarUpdateListeners: Set<
     (event: { dataSourceId?: string; grammarHash: string }) => void
   > = new Set();
@@ -150,6 +153,7 @@ class PPLGrammarCache {
   private cachedGrammar: CachedGrammar | null = null;
   private pendingFetch: Promise<CachedGrammar | null> | null = null;
   private fetchFailed = false;
+  private fetchFailedAt = 0;
 
   /**
    * Returns true if version >= 3.6.0 (grammar artifact endpoint support).
@@ -201,7 +205,12 @@ class PPLGrammarCache {
       this.cachedVersion = datasourceVersion;
     }
 
-    // Already cached, in-flight, or previously failed — nothing to do.
+    // Allow retry after the cooldown period has elapsed.
+    if (this.fetchFailed && Date.now() - this.fetchFailedAt >= PPLGrammarCache.RETRY_AFTER_MS) {
+      this.fetchFailed = false;
+    }
+
+    // Already cached, in-flight, or recently failed — nothing to do.
     if (this.cachedGrammar || this.pendingFetch || this.fetchFailed) return;
 
     const promise = this.doWarmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
@@ -210,6 +219,7 @@ class PPLGrammarCache {
     promise
       .catch(() => {
         this.fetchFailed = true;
+        this.fetchFailedAt = Date.now();
       })
       .finally(() => {
         if (this.pendingFetch === promise) {
@@ -225,9 +235,11 @@ class PPLGrammarCache {
     this.cachedGrammar = null;
     this.pendingFetch = null;
     this.fetchFailed = false;
+    this.fetchFailedAt = 0;
   }
 
-  clear(): void {
+  /** Reset all cache state AND unregister all grammar-update listeners. */
+  dispose(): void {
     this.reset();
     this.grammarUpdateListeners.clear();
   }
@@ -264,7 +276,9 @@ class PPLGrammarCache {
       // Grammar endpoint was reachable but returned an invalid bundle, or the
       // request itself failed — treat as a real failure to avoid hammering.
       // Only set if datasource hasn't changed while we were fetching.
+      // Retries are allowed after RETRY_AFTER_MS elapses.
       this.fetchFailed = true;
+      this.fetchFailedAt = Date.now();
     }
     return result;
   }

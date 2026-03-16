@@ -143,9 +143,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   );
 
   useEffect(() => {
-    services.application?.currentAppId$?.subscribe?.((appId) => {
+    const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {
       setCurrentAppId(appId || '');
     });
+    return () => subscription?.unsubscribe();
   }, [services.application?.currentAppId$]);
 
   useEffect(() => {
@@ -371,10 +372,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       inputRef.current = editor;
       detachValidationContextRef.current?.();
       detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(
-        editor,
-        getValidationContext()
-      );
+      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
       detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
         editor,
         getValidationContext,
@@ -449,10 +447,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       inputRef.current = editor;
       detachValidationContextRef.current?.();
       detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(
-        editor,
-        getValidationContext()
-      );
+      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
       detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
         editor,
         getValidationContext,
