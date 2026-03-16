@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
+import { useUnmount } from 'react-use';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
@@ -242,12 +243,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
-  // Reset thread id to avoid restore latest logic gone
-  useEffect(()=>{
-    return ()=>{
-      services.core.chat.resetThreadId()
-    }
-  }, [services.core.chat])
+  // Clear thread ID so next mount can restore the latest conversation
+  useUnmount(() => {
+    services.core.chat.resetThreadId()
+  });
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
