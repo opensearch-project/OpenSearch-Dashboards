@@ -7,6 +7,7 @@ import {
   createNumericalStateTimeline,
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
+  createSingleNumericalStateTimeline,
 } from './to_expression';
 import {
   DisableMode,
@@ -15,21 +16,25 @@ import {
   VisFieldType,
   VisColumn,
   AxisColumnMappings,
+  ValueMapping,
 } from '../types';
 import { defaultStateTimeLineChartStyles } from './state_timeline_config';
+import * as utils from '../utils/utils'; // Import the utils module
 
 jest.mock('../utils/utils', () => ({
+  ...jest.requireActual('../utils/utils'),
   getSwappedAxisRole: jest.fn(() => ({
-    xAxis: { column: 'timestamp', name: 'Time' },
+    xAxis: { column: 'timestamp', name: 'Time', schema: 'date' },
     xAxisStyle: { title: { text: 'Time' } },
-    yAxis: { column: 'category', name: 'Category' },
+    yAxis: { column: 'category', name: 'Category', schema: 'categorical' },
     yAxisStyle: { title: { text: 'Category' } },
   })),
   applyAxisStyling: jest.fn(),
-  getChartRender: jest.fn(),
+  getChartRender: jest.fn().mockReturnValue('vega'),
 }));
 
 jest.mock('./state_timeline_utils', () => ({
+  ...jest.requireActual('./state_timeline_utils'),
   mergeDataCore: jest.fn(() => () => [
     {
       timestamp: '2023-01-01',
@@ -83,7 +88,7 @@ const mockTimeColumns: VisColumn[] = [
     id: 1,
     name: 'date 1',
     schema: VisFieldType.Date,
-    column: 'd1',
+    column: 'timestamp',
     validValuesCount: 6,
     uniqueValuesCount: 6,
   },
@@ -342,6 +347,124 @@ describe('to_expression', () => {
       };
       const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
       expect(result.layer[0].encoding.color.legend.title).toBe('default');
+    });
+  });
+
+  describe('createNumericalStateTimeline in echarts rendering', () => {
+    it('should create a state timeline chart with one date one cate and one metric', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const rangeMappings = [{ type: 'range', range: { min: 0 } }] as ValueMapping[];
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.COLOR]: mockNumericalColumns[0],
+        [AxisRole.Y]: mockCateColumns[0],
+        [AxisRole.X]: mockTimeColumns[0],
+      };
+
+      const result = createNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis.type).toBe('category');
+      expect(result).toHaveProperty('tooltip');
+      expect(result?.series[0]?.type).toBe('custom');
+      expect(result?.series[0]?.encode.x).toMatchObject(['start', 'end']);
+    });
+  });
+
+  describe('createCategoricalStateTimeline in echarts rendering', () => {
+    it('should create a state timeline chart with one date two cate', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const rangeMappings = [{ type: 'range', range: { min: 0 } }] as ValueMapping[];
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.COLOR]: mockCateColumns[1],
+        [AxisRole.Y]: mockCateColumns[0],
+        [AxisRole.X]: mockTimeColumns[0],
+      };
+
+      const result = createCategoricalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis.type).toBe('category');
+      expect(result).toHaveProperty('tooltip');
+      expect(result?.series[0]?.type).toBe('custom');
+      expect(result?.series[0]?.encode.x).toMatchObject(['start', 'end']);
+    });
+  });
+
+  describe('createSingleCategoricalStateTimeline in echarts rendering', () => {
+    it('should create a state timeline chart with one date and one cate', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const rangeMappings = [{ type: 'range', range: { min: 0 } }] as ValueMapping[];
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.COLOR]: mockCateColumns[1],
+        [AxisRole.X]: mockTimeColumns[0],
+      };
+
+      const result = createSingleCategoricalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis.type).toBe('category');
+      expect(result.yAxis.min).toBe(0);
+      expect(result.yAxis.max).toBe(10);
+      expect(result).toHaveProperty('tooltip');
+      expect(result?.series[0]?.type).toBe('custom');
+      expect(result?.series[0]?.encode.x).toMatchObject(['start', 'end']);
+    });
+  });
+
+  describe('createSingleNumericalStateTimeline in echarts rendering', () => {
+    it('should create a state timeline chart with one date and one cate', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const rangeMappings = [{ type: 'range', range: { min: 0 } }] as ValueMapping[];
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.COLOR]: mockCateColumns[1],
+        [AxisRole.X]: mockTimeColumns[0],
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis.type).toBe('category');
+      expect(result.yAxis.min).toBe(0);
+      expect(result.yAxis.max).toBe(10);
+      expect(result).toHaveProperty('tooltip');
+      expect(result?.series[0]?.type).toBe('custom');
+      expect(result?.series[0]?.encode.x).toMatchObject(['start', 'end']);
     });
   });
 });

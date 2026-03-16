@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`state_timeline_utils mergeDataCore handles disconnect threshold 1`] = `
+Array [
+  Object {
+    "category": "A",
+    "displayText": undefined,
+    "duration": "1h 30m",
+    "end": "2023-01-01T11:30:00.000Z",
+    "mergedColor": undefined,
+    "mergedCount": 2,
+    "mergedLabel": "active",
+    "start": "2023-01-01T10:00:00Z",
+    "status": "active",
+    "timestamp": "2023-01-01T10:00:00Z",
+    "value": 5,
+  },
+]
+`;
+
+exports[`state_timeline_utils mergeDataCore handles grouped data 1`] = `
+Array [
+  Object {
+    "category": "A",
+    "displayText": undefined,
+    "duration": "1h",
+    "end": "2023-01-01T11:00:00Z",
+    "mergedColor": undefined,
+    "mergedCount": 1,
+    "mergedLabel": "active",
+    "start": "2023-01-01T10:00:00Z",
+    "status": "active",
+    "timestamp": "2023-01-01T10:00:00Z",
+    "value": 5,
+  },
+]
+`;

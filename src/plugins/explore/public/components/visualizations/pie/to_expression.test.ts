@@ -13,6 +13,45 @@ import {
   AxisColumnMappings,
 } from '../types';
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
+import * as utils from '../utils/utils';
+
+const transformedData = [
+  { 'field-1': 100, 'field-2': 'Category A' },
+  { 'field-1': 200, 'field-2': 'Category B' },
+];
+
+const numericColumn: VisColumn = {
+  id: 1,
+  name: 'value',
+  schema: VisFieldType.Numerical,
+  column: 'field-1',
+  validValuesCount: 1,
+  uniqueValuesCount: 1,
+};
+
+const categoricalColumn: VisColumn = {
+  id: 2,
+  name: 'category',
+  schema: VisFieldType.Categorical,
+  column: 'field-2',
+  validValuesCount: 1,
+  uniqueValuesCount: 1,
+};
+
+const defaultStyleOptions: PieChartStyle = {
+  ...defaultPieChartStyles,
+  addLegend: true,
+  legendPosition: Positions.RIGHT,
+  tooltipOptions: {
+    mode: 'all' as TooltipOptions['mode'],
+  },
+  exclusive: {
+    donut: false,
+    showLabels: true,
+    showValues: false,
+    truncate: 100,
+  },
+};
 
 jest.mock('../utils/utils', () => {
   const actual = jest.requireActual('../utils/utils');
@@ -24,43 +63,6 @@ jest.mock('../utils/utils', () => {
 
 describe('to_expression', () => {
   // Sample data for testing
-  const transformedData = [
-    { 'field-1': 100, 'field-2': 'Category A' },
-    { 'field-1': 200, 'field-2': 'Category B' },
-  ];
-
-  const numericColumn: VisColumn = {
-    id: 1,
-    name: 'value',
-    schema: VisFieldType.Numerical,
-    column: 'field-1',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
-  };
-
-  const categoricalColumn: VisColumn = {
-    id: 2,
-    name: 'category',
-    schema: VisFieldType.Categorical,
-    column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
-  };
-
-  const defaultStyleOptions: PieChartStyle = {
-    ...defaultPieChartStyles,
-    addLegend: true,
-    legendPosition: Positions.RIGHT,
-    tooltipOptions: {
-      mode: 'all' as TooltipOptions['mode'],
-    },
-    exclusive: {
-      donut: false,
-      showLabels: true,
-      showValues: false,
-      truncate: 100,
-    },
-  };
 
   describe('createPieSpec', () => {
     it('should create a basic pie chart specification', () => {
@@ -397,6 +399,101 @@ describe('to_expression', () => {
       );
       expect(result.encoding.theta.field).toBe('field-1');
       expect(result.encoding.color.field).toBeUndefined();
+    });
+  });
+
+  describe('ECharts rendering', () => {
+    beforeEach(() => {
+      jest.spyOn(utils, 'getChartRender').mockReturnValue('echarts');
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should create ECharts pie specification with valid mappings', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.SIZE]: numericColumn,
+        [AxisRole.COLOR]: categoricalColumn,
+      };
+
+      const result = createPieSpec(
+        transformedData,
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        defaultStyleOptions,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('series');
+      expect(result?.series[0].type).toBe('pie');
+      expect(result).toHaveProperty('dataset');
+    });
+
+    it('should throw error when color column is missing', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.SIZE]: numericColumn,
+      };
+
+      expect(() => {
+        createPieSpec(
+          transformedData,
+          [numericColumn],
+          [categoricalColumn],
+          [],
+          defaultStyleOptions,
+          mockAxisColumnMappings
+        );
+      }).toThrow('Missing color or theta config for pie chart');
+    });
+
+    it('should generate correct default title', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.SIZE]: numericColumn,
+        [AxisRole.COLOR]: categoricalColumn,
+      };
+
+      const result = createPieSpec(
+        transformedData,
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        { ...defaultStyleOptions, titleOptions: { show: true, titleName: '' } },
+        mockAxisColumnMappings
+      );
+
+      expect(result?.title).toMatchObject({ text: 'value by category' });
+    });
+
+    it('should use SUM aggregation for data transformation', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.SIZE]: numericColumn,
+        [AxisRole.COLOR]: categoricalColumn,
+      };
+
+      const testData = [
+        { 'field-1': 100, 'field-2': 'A' },
+        { 'field-1': 200, 'field-2': 'A' },
+        { 'field-1': 150, 'field-2': 'B' },
+      ];
+
+      const result = createPieSpec(
+        testData,
+        [numericColumn],
+        [categoricalColumn],
+        [],
+        defaultStyleOptions,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.dataset?.source).toMatchObject([
+        ['field-1', 'field-2'],
+        [300, 'A'],
+        [150, 'B'],
+      ]);
     });
   });
 });
