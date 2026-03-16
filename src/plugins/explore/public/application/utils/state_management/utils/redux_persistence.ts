@@ -173,7 +173,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
 /**
  * Fetches the first available dataset using the data plugin's dataset service
  */
-const fetchFirstAvailableDataset = async (
+export const fetchFirstAvailableDataset = async (
   services: ExploreServices,
   flavor: ExploreFlavor | null,
   requiredSignalType?: string

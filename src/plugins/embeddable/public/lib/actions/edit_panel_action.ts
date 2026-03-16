@@ -44,6 +44,7 @@ import {
   EmbeddableInput,
   Container,
 } from '../..';
+import { ContainerInfo } from '../state_transfer';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -92,6 +93,7 @@ export class EditPanelAction implements Action<ActionContext> {
     return 'pencil';
   }
 
+  // edit embeddable
   public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
       embeddable &&
@@ -103,12 +105,20 @@ export class EditPanelAction implements Action<ActionContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
+  // execute action inside dashboard panel
+
   public async execute(context: ActionContext) {
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
       if (this.stateTransfer && appTarget.state) {
+        const queryString = new URLSearchParams(
+          appTarget.state.containerInfo as URLSearchParams
+        ).toString();
+
+        const pathWithParams = `${appTarget.path}?${queryString}`;
+
         await this.stateTransfer.navigateToEditor(appTarget.app, {
-          path: appTarget.path,
+          path: pathWithParams,
           state: appTarget.state,
         });
       } else {
@@ -124,9 +134,22 @@ export class EditPanelAction implements Action<ActionContext> {
     }
   }
 
+  private getContainerState({ embeddable }: ActionContext): ContainerInfo | undefined {
+    const container = embeddable ? embeddable.getRoot() : undefined;
+
+    if (container) {
+      return {
+        containerName: container.getTitle() ?? '',
+        containerId: container.id,
+      };
+    }
+  }
+
   public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
+    const containerInfo = embeddable ? this.getContainerState({ embeddable }) : undefined;
+
     if (app && path) {
       if (this.currentAppId) {
         const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
@@ -134,6 +157,7 @@ export class EditPanelAction implements Action<ActionContext> {
           originatingApp: this.currentAppId,
           valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
           embeddableId: embeddable.id,
+          containerInfo,
         };
         return { app, path, state };
       }

@@ -694,7 +694,7 @@ const executeQueryBase = async (
 /**
  * Helper function to create SearchSource with common configuration
  */
-const createSearchSourceWithQuery = async (
+export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,

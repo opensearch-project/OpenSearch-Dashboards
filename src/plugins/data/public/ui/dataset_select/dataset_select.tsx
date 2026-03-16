@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiButton,
@@ -80,7 +81,7 @@ export interface DetailedDataset extends Dataset {
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset | undefined) => void;
   supportedTypes?: string[];
-  signalType: string | null;
+  signalType: string | null | string[];
   showNonTimeFieldDatasets?: boolean;
   appName?: string;
 }
@@ -92,12 +93,26 @@ interface ViewDatasetsModalProps {
   services: IDataPluginServices;
 }
 
-const isDatasetCompatibleWithSignalType = (
-  dataset: DetailedDataset,
-  signalType: string | null
-): boolean => {
-  if (!signalType) return true;
+// const isDatasetCompatibleWithSignalType = (
+//   dataset: DetailedDataset,
+//   signalType: string | null
+// ): boolean => {
+//   if (!signalType) return true;
 
+//   if (signalType === CORE_SIGNAL_TYPES.TRACES) {
+//     return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+//   } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
+//     return dataset.signalType === CORE_SIGNAL_TYPES.LOGS || !dataset.signalType;
+//   } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
+//     return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
+//   }
+//   return true;
+// };
+
+const checkDatasetCompatibleWithSignalType = (
+  dataset: DetailedDataset,
+  signalType: string
+): boolean => {
   if (signalType === CORE_SIGNAL_TYPES.TRACES) {
     return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
   } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
@@ -106,6 +121,28 @@ const isDatasetCompatibleWithSignalType = (
     return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
   }
   return true;
+};
+
+const isDatasetCompatibleWithSignalType = (
+  dataset: DetailedDataset,
+  signalType: string | null | string[]
+): boolean => {
+  if (!signalType) return true;
+
+  if (Array.isArray(signalType)) {
+    const result = signalType.some((type) => checkDatasetCompatibleWithSignalType(dataset, type));
+    return result;
+  }
+  return checkDatasetCompatibleWithSignalType(dataset, signalType);
+
+  // if (signalType === CORE_SIGNAL_TYPES.TRACES) {
+  //   return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+  // } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
+  //   return dataset.signalType === CORE_SIGNAL_TYPES.LOGS || !dataset.signalType;
+  // } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
+  //   return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
+  // }
+  // return true;
 };
 
 const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
@@ -297,7 +334,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
   // Handle signal type changes (e.g., navigating from logs to traces)
   useEffect(() => {
-    const signalTypeChanged = previousSignalType.current !== signalType;
+    const signalTypeChanged = !isEqual(previousSignalType.current, signalType);
     if (signalTypeChanged) {
       previousSignalType.current = signalType;
       // Reset initial load flag AND clear datasets to force refetch with new signal type
@@ -421,12 +458,25 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
       const onFilter = (detailedDataset: DetailedDataset) => {
         // Filter by signal type
-        const signalTypeMatch =
-          signalType === CORE_SIGNAL_TYPES.TRACES
-            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
-            : signalType === CORE_SIGNAL_TYPES.METRICS
-            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS
-            : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+        let signalTypeMatch: boolean;
+
+        if (Array.isArray(signalType)) {
+          signalTypeMatch = signalType.some((type) => {
+            if (type === CORE_SIGNAL_TYPES.TRACES) {
+              return detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+            } else if (type === CORE_SIGNAL_TYPES.METRICS) {
+              return detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS;
+            }
+            return detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+          });
+        } else {
+          signalTypeMatch =
+            signalType === CORE_SIGNAL_TYPES.TRACES
+              ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
+              : signalType === CORE_SIGNAL_TYPES.METRICS
+              ? detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS
+              : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+        }
 
         if (!signalTypeMatch) {
           return false;
@@ -642,7 +692,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                 <AdvancedSelector
                   useConfiguratorV2
                   alwaysShowDatasetFields
-                  signalType={signalType || undefined}
+                  // only for in-context editor, signal types can be array
+                  // such created dataset should not have signal type labeled
+                  signalType={typeof signalType === 'string' ? signalType : undefined}
                   services={services}
                   showNonTimeFieldDatasets={showNonTimeFieldDatasets}
                   onSelect={async (query: Partial<Query>, saveDataset) => {
@@ -653,14 +705,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                           await datasetService.saveDataset(
                             query.dataset,
                             services,
-                            signalType || undefined
+                            typeof signalType === 'string' ? signalType : undefined
                           );
                         } else {
                           await datasetService.cacheDataset(
                             query.dataset,
                             services,
                             false,
-                            signalType || undefined
+                            typeof signalType === 'string' ? signalType : undefined
                           );
                         }
                         const dataView = await data.dataViews.get(
@@ -916,7 +968,12 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           gutterSize="s"
           className="datasetSelect__footer"
         >
-          {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent}
+          {signalType === CORE_SIGNAL_TYPES.METRICS ||
+          (Array.isArray(signalType) && signalType.includes(CORE_SIGNAL_TYPES.METRICS))
+            ? metricsFooterContent
+            : defaultFooterContent}
+
+          {/* {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent} */}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>

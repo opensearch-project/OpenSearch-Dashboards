@@ -85,7 +85,19 @@ export const createNewVisActions = (services: {
               description={visType.promotion?.description ?? ''}
             />
           )),
-          execute: async () => {
+          // when trigger
+          execute: async (context) => {
+            if (context && context?.containerInfo) {
+              const queryString = new URLSearchParams(
+                context?.containerInfo as URLSearchParams
+              ).toString();
+
+              const pathWithParams = `${visType.aliasPath}?${queryString}`;
+
+              application.navigateToApp(visType.aliasApp, { path: pathWithParams });
+              return;
+            }
+
             application.navigateToApp(visType.aliasApp, { path: visType.aliasPath });
           },
           isCompatible: async () => {

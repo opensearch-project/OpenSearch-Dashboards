@@ -78,8 +78,8 @@ export const configurePreloadedStore = (
       return services
         ? getDefaultMiddleware(middlewareOptions)
             .concat(createPersistenceMiddleware(services))
-            .concat(createQuerySyncMiddleware(services))
-            .concat(createTimefilterSyncMiddleware(services))
+            .concat(createQuerySyncMiddleware(services)) // add
+            .concat(createTimefilterSyncMiddleware(services)) // add
             .concat(createDatasetChangeMiddleware(services))
             .concat(createOverallStatusMiddleware())
         : getDefaultMiddleware(middlewareOptions);
