@@ -35,7 +35,7 @@ describe('Metric to_expression', () => {
   };
 
   describe('createSingleMetric', () => {
-    it('returns an ECharts spec with dataset and series', () => {
+    it('returns result with spec, name, and data', () => {
       const mockAxisMappings: AxisColumnMappings = {
         [AxisRole.Value]: numericColumn,
       };
@@ -49,28 +49,10 @@ describe('Metric to_expression', () => {
         mockAxisMappings
       );
 
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(Array.isArray(result.series)).toBe(true);
-      expect(result.series.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('produces custom-type series for metric rendering', () => {
-      const mockAxisMappings: AxisColumnMappings = {
-        [AxisRole.Value]: numericColumn,
-      };
-
-      const result = createSingleMetric(
-        mockData,
-        [numericColumn],
-        [],
-        [],
-        mockStyles,
-        mockAxisMappings
-      );
-
-      const customSeries = result.series.filter((s: any) => s.type === 'custom');
-      expect(customSeries.length).toBeGreaterThanOrEqual(1);
+      expect(result).toHaveProperty('name', 'Value');
+      expect(result).toHaveProperty('data', mockData);
+      expect(result).toHaveProperty('spec');
+      expect(result.spec).toBeUndefined();
     });
 
     it('adds sparkline series when date column is provided', () => {
@@ -93,11 +75,13 @@ describe('Metric to_expression', () => {
         mockAxisMappings
       );
 
-      const lineSeries = result.series.filter((s: any) => s.type === 'line');
-      expect(lineSeries.length).toBeGreaterThanOrEqual(1);
+      expect(result.spec).toBeDefined();
+      expect(result.spec).toHaveProperty('series');
+      const lineSeries = (result.spec?.series as any[])?.filter((s: any) => s.type === 'line');
+      expect(lineSeries?.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('does not add sparkline series when no date column', () => {
+    it('does not include line series when no date column', () => {
       const mockAxisMappings: AxisColumnMappings = {
         [AxisRole.Value]: numericColumn,
       };
@@ -111,8 +95,7 @@ describe('Metric to_expression', () => {
         mockAxisMappings
       );
 
-      const lineSeries = result.series.filter((s: any) => s.type === 'line');
-      expect(lineSeries).toHaveLength(0);
+      expect(result.spec).toBeUndefined();
     });
 
     it('throws when no value column is provided', () => {
