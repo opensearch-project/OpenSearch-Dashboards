@@ -139,14 +139,17 @@ export class DataViewsService {
     const uncachedIds: string[] = [];
 
     for (const id of ids) {
-      // Check cache first
+      // Check cache first, but only accept proper DataView instances (with toDataset).
+      // A plain IndexPattern cached by IndexPatternsService lacks toDataset and
+      // initializeDataSourceRef(), causing dataSource.title to fall back to the raw
+      // saved-object reference name "dataSource" instead of the real data source title.
       const cached = await this.patterns.get(id, true);
-      if (cached) {
+      if (cached && (cached as any).toDataset) {
         cachedDataViews.set(id, cached as DataView);
         continue;
       }
 
-      // Not cached - needs to be fetched
+      // Not cached (or cached as a plain IndexPattern) - needs to be fetched as a DataView
       uncachedIds.push(id);
     }
 
@@ -545,7 +548,11 @@ export class DataViewsService {
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    const parsedFields: DataViewFieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFields: DataViewFieldSpec[] = Array.isArray(fields)
+      ? fields
+      : fields
+      ? JSON.parse(fields)
+      : [];
     const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
@@ -575,15 +582,17 @@ export class DataViewsService {
    * @param onlyCheckCache - If true, only check cache and return undefined if not found
    */
   get = async (id: string, onlyCheckCache: boolean = false): Promise<DataView> => {
-    // Check cache first
+    // Check cache, but only accept proper DataView instances (with toDataset).
+    // A plain IndexPattern cached by IndexPatternsService lacks toDataset and
+    // initializeDataSourceRef(), causing dataSource.title to show "dataSource".
     const cache = await this.patterns.get(id, true);
 
-    if (cache) {
+    if (cache && (cache as any).toDataset) {
       return cache as DataView;
     }
 
     if (onlyCheckCache) {
-      return cache as DataView;
+      return undefined as any;
     }
 
     const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(savedObjectType, id);
