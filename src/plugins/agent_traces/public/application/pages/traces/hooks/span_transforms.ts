@@ -85,7 +85,7 @@ export const unflattenSource = (source: Record<string, any>): Record<string, any
 export const traceHitToAgentSpan = (hit: TraceHit, index: number): AgentSpan => {
   const attrs = hit.attributes ? unflattenSource(hit.attributes) : ({} as any);
   return {
-    spanId: hit.spanId || `span-${index}`,
+    spanId: hit.spanId || '',
     traceId: hit.traceId || '',
     parentSpanId: hit.parentSpanId || null,
     name: hit.name || '',

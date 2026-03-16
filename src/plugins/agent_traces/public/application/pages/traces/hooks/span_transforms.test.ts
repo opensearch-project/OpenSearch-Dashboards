@@ -87,7 +87,7 @@ describe('span_transforms', () => {
       const minimalHit: any = {};
       const span = traceHitToAgentSpan(minimalHit, 5);
 
-      expect(span.spanId).toBe('span-5');
+      expect(span.spanId).toBe('');
       expect(span.traceId).toBe('');
       expect(span.parentSpanId).toBeNull();
       expect(span.name).toBe('');

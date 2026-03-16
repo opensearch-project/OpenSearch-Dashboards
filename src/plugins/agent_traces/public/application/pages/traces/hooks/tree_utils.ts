@@ -70,7 +70,7 @@ export const spanToRow = (
   index: number,
   formatTs: (ts: string) => string
 ): BaseRow => ({
-  id: span.spanId || `span-${index}`,
+  id: span.spanId,
   spanId: span.spanId,
   traceId: span.traceId,
   parentSpanId: span.parentSpanId,
