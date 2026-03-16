@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ChatInput } from './chat_input';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 
 // Mock the context pills component
 jest.mock('./context_pills', () => ({

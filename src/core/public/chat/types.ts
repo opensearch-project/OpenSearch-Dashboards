@@ -116,7 +116,7 @@ export type Role = 'developer' | 'system' | 'assistant' | 'user' | 'tool';
 export interface ChatWindowState {
   isWindowOpen: boolean;
   windowMode: 'sidecar' | 'fullscreen';
-  paddingSize: number;
+  paddingSize?: number;
 }
 
 /**
@@ -177,10 +177,6 @@ export interface ChatImplementationFunctions {
     messages: Message[],
     options?: { clearConversation?: boolean }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
-
-  // Window operations
-  openWindow: () => Promise<void>;
-  closeWindow: () => Promise<void>;
 }
 
 /**

@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
