@@ -300,47 +300,119 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       // Apply multi-query decorations on mount
       updateDecorations(editor, queryLanguageRef.current);
 
+      // Set initial editor height to single line regardless of container size
+      const lineHeight = 18; // Match the shared editor options line height
+      const initialHeight = lineHeight + 8; // Add some padding for better visual appearance
+      editor.layout({
+        width: editor.getLayoutInfo().width,
+        height: initialHeight,
+      });
+
+      // Ensure editor starts empty and clean
+      if (!editor.getValue()) {
+        editor.setValue('');
+      }
+
       // Update decorations when content changes
       const contentChangeDisposable = editor.onDidChangeModelContent(() => {
         updateDecorations(editor, queryLanguageRef.current);
       });
 
+      // Add ResizeObserver to handle container size changes when dragging
+      let resizeObserver: ResizeObserver | null = null;
+      const editorElement = editor.getDomNode();
+
+      if (editorElement && window.ResizeObserver) {
+        resizeObserver = new ResizeObserver(() => {
+          // Allow the editor to fill the available container space when resizing
+          const containerRect = editorElement.getBoundingClientRect();
+          const availableHeight = containerRect.height;
+          const contentHeight = editor.getContentHeight();
+
+          // Use either content height or available container height, whichever is appropriate
+          const finalHeight =
+            contentHeight > 0 ? Math.max(contentHeight, 26) : availableHeight || 26;
+
+          editor.layout({
+            width: containerRect.width,
+            height: finalHeight,
+          });
+        });
+
+        // Observe the parent container instead of just the editor element
+        const queryPanelContainer = editorElement.closest('.dscCanvas__queryPanel');
+        if (queryPanelContainer) {
+          resizeObserver.observe(queryPanelContainer);
+        } else {
+          resizeObserver.observe(editorElement);
+        }
+      }
+
+      let layoutTimeout: ReturnType<typeof setTimeout> | null = null;
+
       editor.onDidContentSizeChange(() => {
-        const contentHeight = editor.getContentHeight();
-        const maxHeight = 100;
-        const finalHeight = Math.min(contentHeight, maxHeight);
+        // Debounce layout updates to prevent rapid changes during paste operations
+        if (layoutTimeout) {
+          clearTimeout(layoutTimeout);
+        }
 
-        editor.layout({
-          width: editor.getLayoutInfo().width,
-          height: finalHeight,
-        });
+        layoutTimeout = setTimeout(() => {
+          const contentHeight = editor.getContentHeight();
+          const lineHeight = 18; // Match the shared editor options line height
+          const minHeight = lineHeight + 8; // Minimum one line height with padding
 
-        editor.updateOptions({
-          scrollBeyondLastLine: false,
-          scrollbar: {
-            vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
-          },
-        });
+          // Get the available container height
+          const editorElement = editor.getDomNode();
+          const containerRect = editorElement?.getBoundingClientRect();
+          const availableHeight = containerRect?.height || contentHeight;
 
-        // Automatically scroll to the bottom when new lines are added
-        if (contentHeight > finalHeight) {
-          const cursorLine = editor.getPosition()?.lineNumber || 0;
-          const visibleRanges = editor.getVisibleRanges();
+          // Allow editor to use either content height or available space, whichever makes more sense
+          const finalHeight = Math.max(minHeight, Math.min(contentHeight, availableHeight));
 
-          if (visibleRanges.length > 0) {
-            // use index 0 since we did not introduce code folding in our monaco editor
-            const firstVisibleLine = visibleRanges[0].startLineNumber;
-            const lastVisibleLine = visibleRanges[0].endLineNumber;
+          // Only update layout if height actually changed
+          const currentHeight = editor.getLayoutInfo().height;
+          if (Math.abs(currentHeight - finalHeight) > 1) {
+            editor.layout({
+              width: editor.getLayoutInfo().width,
+              height: finalHeight,
+            });
+          }
 
-            // Only reveal if cursor is outside the visible range
-            if (cursorLine < firstVisibleLine || cursorLine > lastVisibleLine) {
-              editor.revealLine(cursorLine);
+          editor.updateOptions({
+            scrollBeyondLastLine: false,
+            scrollbar: {
+              vertical: contentHeight > finalHeight ? 'visible' : 'hidden',
+              horizontal: 'auto', // Allow horizontal scrolling for long lines
+            },
+            wordWrap: 'on', // Enable word wrapping for better UX with long content
+          });
+
+          // Automatically scroll to the bottom when new lines are added
+          if (contentHeight > finalHeight) {
+            const cursorLine = editor.getPosition()?.lineNumber || 0;
+            const visibleRanges = editor.getVisibleRanges();
+
+            if (visibleRanges.length > 0) {
+              // use index 0 since we did not introduce code folding in our monaco editor
+              const firstVisibleLine = visibleRanges[0].startLineNumber;
+              const lastVisibleLine = visibleRanges[0].endLineNumber;
+
+              // Only reveal if cursor is outside the visible range
+              if (cursorLine < firstVisibleLine || cursorLine > lastVisibleLine) {
+                editor.revealLine(cursorLine);
+              }
             }
           }
-        }
+        }, 50); // 50ms debounce
       });
 
       return () => {
+        if (layoutTimeout) {
+          clearTimeout(layoutTimeout);
+        }
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
         focusDisposable.dispose();
         blurDisposable.dispose();
         contentChangeDisposable.dispose();
