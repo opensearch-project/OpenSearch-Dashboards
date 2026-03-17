@@ -42,16 +42,7 @@ export const createVisSpec = ({ timeRange, data, config }: Options) => {
   const styles = { ...config.styles, standardAxes: allAxisConfig };
 
   return {
-    spec: rule.toSpec(
-      data.transformedData,
-      data.numericalColumns,
-      data.categoricalColumns,
-      data.dateColumns,
-      styles,
-      config.type,
-      axisColumnMappings,
-      timeRange
-    ),
+    spec: rule.toSpec(data.transformedData, styles, config.type, axisColumnMappings, timeRange),
     axisColumnMappings,
   };
 };

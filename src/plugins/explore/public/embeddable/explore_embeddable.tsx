@@ -435,9 +435,6 @@ export class ExploreEmbeddable
 
           const spec = matchedRule.toSpec(
             visualizationData.transformedData,
-            numericalColumns,
-            categoricalColumns,
-            dateColumns,
             styles || styleOptions,
             selectedChartType,
             axesMapping,

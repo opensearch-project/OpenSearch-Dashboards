@@ -4,22 +4,13 @@
  */
 
 import { MetricChartStyle } from './metric_vis_config';
-import {
-  VisColumn,
-  AxisRole,
-  AxisColumnMappings,
-  VisFieldType,
-  RendererSpecConfig,
-} from '../types';
+import { AxisRole, AxisColumnMappings, VisFieldType, RendererSpecConfig } from '../types';
 import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 import { assembleForMetric, createMetricChartSeries } from './metric_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: MetricChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
@@ -65,9 +56,6 @@ export const createSingleMetric = (
 
 export const createMultiMetric = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: MetricChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
@@ -100,14 +88,7 @@ export const createMultiMetric = (
 
   const specs: RendererSpecConfig[] = [];
   for (const [key, value] of groupedData) {
-    const result = createSingleMetric(
-      value,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      styles,
-      axisColumnMappings
-    );
+    const result = createSingleMetric(value, styles, axisColumnMappings);
     if (result && 'spec' in result) {
       specs.push({ spec: result.spec, name: key, data: value });
     }

@@ -4,7 +4,7 @@
  */
 
 import { HistogramChartStyle } from './histogram_vis_config';
-import { AxisColumnMappings, VisColumn, VisFieldType } from '../types';
+import { AxisColumnMappings, VisFieldType } from '../types';
 import { getSwappedAxisRole } from '../utils/utils';
 import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
@@ -13,7 +13,6 @@ import { createHistogramSeries } from './histogram_chart_utils';
 
 export const createNumericalHistogramChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styles: HistogramChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -68,7 +67,6 @@ export const createNumericalHistogramChart = (
 
 export const createSingleHistogramChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styles: HistogramChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

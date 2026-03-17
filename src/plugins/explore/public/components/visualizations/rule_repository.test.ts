@@ -127,7 +127,7 @@ describe('rule_repository', () => {
 
   // Sample transformed data for testing
   const transformedData = [{ 'field-0': '2023-01-01', 'field-1': 100, 'field-2': 'Category A' }];
-  const styleOptions = { showLine: true };
+  const styleOptions = { showLine: true } as any;
   const timeRange = { from: '2023-01-01', to: '2023-01-02' };
 
   describe('ALL_VISUALIZATION_RULES', () => {
@@ -183,12 +183,8 @@ describe('rule_repository', () => {
     });
 
     it('should create a simple line chart expression by default', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 1);
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'line',
         undefined,
@@ -200,8 +196,6 @@ describe('rule_repository', () => {
       // Verify the createSimpleLineChart function was called with the correct arguments
       expect(createSimpleLineChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        dateColumns,
         styleOptions,
         undefined,
         timeRange
@@ -223,7 +217,7 @@ describe('rule_repository', () => {
     });
 
     it('should create a line bar chart expression by default', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const { numericalColumns, dateColumns } = createTestColumns(2, 0, 1);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericalColumns[0],
         [AxisRole.X]: dateColumns[0],
@@ -232,9 +226,6 @@ describe('rule_repository', () => {
 
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'line',
         mockAxisColumnMappings,
@@ -246,8 +237,6 @@ describe('rule_repository', () => {
       // Verify the createLineBarChart function was called with the correct arguments
       expect(createLineBarChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange
@@ -255,7 +244,7 @@ describe('rule_repository', () => {
     });
 
     it('should create multi-line chart when no y2 axis mapping', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const { numericalColumns, dateColumns } = createTestColumns(2, 0, 1);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericalColumns[0],
         [AxisRole.X]: dateColumns[0],
@@ -263,9 +252,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'line',
         mockAxisColumnMappings,
@@ -275,9 +261,6 @@ describe('rule_repository', () => {
 
       expect(createMultiLineChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange
@@ -285,7 +268,7 @@ describe('rule_repository', () => {
     });
 
     it('should create grouped bar chart', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const { numericalColumns, dateColumns } = createTestColumns(2, 0, 1);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericalColumns[0],
         [AxisRole.X]: dateColumns[0],
@@ -294,9 +277,6 @@ describe('rule_repository', () => {
 
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'bar',
         mockAxisColumnMappings,
@@ -307,16 +287,13 @@ describe('rule_repository', () => {
 
       expect(createGroupedTimeBarChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange
       );
     });
     it('should create multi area chart', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const { numericalColumns, dateColumns } = createTestColumns(2, 0, 1);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericalColumns[0],
         [AxisRole.X]: dateColumns[0],
@@ -325,9 +302,6 @@ describe('rule_repository', () => {
 
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'area',
         mockAxisColumnMappings,
@@ -338,9 +312,6 @@ describe('rule_repository', () => {
 
       expect(createMultiAreaChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange
@@ -362,12 +333,8 @@ describe('rule_repository', () => {
     });
 
     it('should create a multi line chart expression by default', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 1);
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'line',
         undefined,
@@ -376,9 +343,6 @@ describe('rule_repository', () => {
       expect(expression).toBe('multi-line-chart-expression');
       expect(createMultiLineChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         undefined,
         timeRange
@@ -400,12 +364,8 @@ describe('rule_repository', () => {
     });
 
     it('should create a faceted multi line chart expression by default', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 1);
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'line',
         undefined,
@@ -417,9 +377,6 @@ describe('rule_repository', () => {
       // Verify the createFacetedMultiLineChart function was called with the correct arguments
       expect(createFacetedMultiLineChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         undefined,
         timeRange
@@ -453,46 +410,21 @@ describe('rule_repository', () => {
     });
 
     it('should create a regular heatmap expression by default', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
+      const { categoricalColumns } = createTestColumns(1, 2, 0);
       categoricalColumns[0].uniqueValuesCount = 10;
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions);
 
       expect(expression).toBe('regular-heatmap-expression');
-      expect(createRegularHeatmap).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createRegularHeatmap).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
 
     it('should create a stacked bar chart expression when chart type is bar', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
+      const { categoricalColumns } = createTestColumns(1, 2, 0);
       categoricalColumns[0].uniqueValuesCount = 10;
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        'bar'
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions, 'bar');
 
       expect(expression).toBe('stacked-bar-chart-expression');
-      expect(createStackedBarSpec).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createStackedBarSpec).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
   });
 
@@ -510,68 +442,24 @@ describe('rule_repository', () => {
     });
 
     it('should create a pie chart expression by default', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions);
 
       expect(expression).toBe('pie-chart-expression');
-      expect(createPieSpec).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createPieSpec).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
 
     it('should create a bar chart expression when chart type is bar', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        'bar'
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions, 'bar');
 
       expect(expression).toBe('bar-chart-expression');
-      expect(createBarSpec).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createBarSpec).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
 
     it('should create a pie chart expression when chart type is pie', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        'pie'
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions, 'pie');
 
       expect(expression).toBe('pie-chart-expression');
-      expect(createPieSpec).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createPieSpec).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
   });
 
@@ -589,24 +477,10 @@ describe('rule_repository', () => {
     });
 
     it('should create a single metric expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions);
 
       expect(expression).toBe('single-metric-expression');
-      expect(createSingleMetric).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createSingleMetric).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
   });
 
@@ -624,28 +498,14 @@ describe('rule_repository', () => {
     });
 
     it('should create a scatter chart expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions);
 
       expect(expression).toBe('two-metric-scatter-expression');
-      expect(createTwoMetricScatter).toHaveBeenCalledWith(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions,
-        undefined
-      );
+      expect(createTwoMetricScatter).toHaveBeenCalledWith(transformedData, styleOptions, undefined);
     });
 
     it('should create a pie chart expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
+      const { numericalColumns } = createTestColumns(2, 0, 0);
 
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.SIZE]: numericalColumns[0],
@@ -653,9 +513,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'pie',
         mockAxisColumnMappings
@@ -664,9 +521,6 @@ describe('rule_repository', () => {
       expect(expression).toBe('pie-chart-expression');
       expect(createPieSpec).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings
       );
@@ -687,28 +541,18 @@ describe('rule_repository', () => {
     });
 
     it('should create a scatter chart with category expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions);
 
       expect(expression).toBe('two-metric-one-cate-scatter-expression');
       expect(createTwoMetricOneCateScatter).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         undefined
       );
     });
 
     it('should create a stacked bar chart with category expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
+      const { numericalColumns, categoricalColumns } = createTestColumns(2, 1, 0);
 
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericalColumns[0],
@@ -717,9 +561,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'bar',
         mockAxisColumnMappings
@@ -728,16 +569,13 @@ describe('rule_repository', () => {
       expect(expression).toBe('stacked-bar-chart-expression');
       expect(createStackedBarSpec).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings
       );
     });
 
     it('should create a stacked area chart with category expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
+      const { numericalColumns, categoricalColumns } = createTestColumns(2, 1, 0);
 
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericalColumns[0],
@@ -746,9 +584,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'area',
         mockAxisColumnMappings
@@ -757,9 +592,6 @@ describe('rule_repository', () => {
       expect(expression).toBe('stacked-area-chart-expression');
       expect(createStackedAreaChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings
       );
@@ -780,21 +612,11 @@ describe('rule_repository', () => {
     });
 
     it('should create a scatter chart with three metrics and one category expression', () => {
-      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 1, 0);
-      const expression = rule?.toSpec?.(
-        transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        styleOptions
-      );
+      const expression = rule?.toSpec?.(transformedData, styleOptions);
 
       expect(expression).toBe('three-metric-one-cate-scatter-expression');
       expect(createThreeMetricOneCateScatter).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         undefined
       );
@@ -825,9 +647,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'bar',
         mockAxisColumnMappings,
@@ -837,9 +656,6 @@ describe('rule_repository', () => {
       expect(expression).toBe('faceted-time-bar-chart-expression');
       expect(createFacetedTimeBarChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange
@@ -856,9 +672,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'area',
         mockAxisColumnMappings,
@@ -868,9 +681,6 @@ describe('rule_repository', () => {
       expect(expression).toBe('faceted-multi-area-chart-expression');
       expect(createFacetedMultiAreaChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange
@@ -887,9 +697,6 @@ describe('rule_repository', () => {
       };
       const expression = rule?.toSpec?.(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         'line',
         mockAxisColumnMappings,
@@ -899,9 +706,6 @@ describe('rule_repository', () => {
       expect(expression).toBe('faceted-multi-line-chart-expression');
       expect(createFacetedMultiLineChart).toHaveBeenCalledWith(
         transformedData,
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
         styleOptions,
         mockAxisColumnMappings,
         timeRange

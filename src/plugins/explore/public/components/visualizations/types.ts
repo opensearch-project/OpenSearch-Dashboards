@@ -50,9 +50,6 @@ export interface VisualizationRule {
   // TODO: refactor to access an object of options instead of a list of arguments
   toSpec?: (
     transformedData: Array<Record<string, any>>,
-    numericalColumns: VisColumn[],
-    categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[],
     styleOptions: ChartStylesMapping[ChartType],
     chartType?: ChartType,
     axisColumnMappings?: AxisColumnMappings,
