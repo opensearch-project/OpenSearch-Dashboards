@@ -47,6 +47,80 @@ const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
 /** Sentinel for "rule not found". -1 avoids collision with 0-based rule indices. */
 const INVALID_RULE_INDEX = -1;
 
+/** Short keywords that look like commands but are actually structural/boolean — not functions. */
+const NON_FUNCTION_KEYWORDS = new Set([
+  'AS',
+  'BY',
+  'ON',
+  'IN',
+  'OR',
+  'AND',
+  'NOT',
+  'TRUE',
+  'FALSE',
+]);
+
+/**
+ * Symbolic token names that are internal/structural and should never surface
+ * as visible keyword suggestions when deriving labels from symbolic names.
+ */
+const STRUCTURAL_SYMBOLIC_NAMES = new Set([
+  'ID',
+  'WS',
+  'SPACE',
+  'EOF',
+  'ERROR_RECOGNITION',
+  'ERROR',
+  'UNRECOGNIZED',
+  'NUMBER',
+  'INTEGER',
+  'DECIMAL',
+  'DOT',
+  'COMMA',
+  'PIPE',
+  'EQUAL',
+  'NOT_EQUAL',
+  'LESS',
+  'GREATER',
+  'NOT_LESS',
+  'NOT_GREATER',
+  'LT_PRTHS',
+  'RT_PRTHS',
+  'LT_SQR_PRTHS',
+  'RT_SQR_PRTHS',
+  'STAR',
+  'PLUS',
+  'MINUS',
+  'DIV',
+  'MODULE',
+  'SINGLE_QUOTE',
+  'DOUBLE_QUOTE',
+  'BACKTICK',
+]);
+
+/** Token names to skip when walking backward for the last semantically meaningful token. */
+const OPERATOR_SKIP_TOKEN_NAMES: readonly string[] = [
+  'PIPE',
+  'EQUAL',
+  'COMMA',
+  'NOT_EQUAL',
+  'LESS',
+  'NOT_LESS',
+  'GREATER',
+  'NOT_GREATER',
+  'OR',
+  'AND',
+  'LT_PRTHS',
+  'RT_PRTHS',
+  'IN',
+  'SPAN',
+  'MATCH',
+  'MATCH_PHRASE',
+  'MATCH_BOOL_PREFIX',
+  'MATCH_PHRASE_PREFIX',
+  'SQUOTA_STRING',
+];
+
 const _runtimeC3BucketsByGrammarHash = new Map<string, unknown>();
 let _activeRuntimeC3GrammarHash: string | undefined;
 let _activeRuntimeC3ParserKey: string | undefined;
@@ -55,6 +129,12 @@ interface C3FollowSetsCacheContainer {
   followSetsByATN?: unknown;
 }
 
+/**
+ * Access the internal follow-set cache from antlr4-c3's CodeCompletionCore.
+ * This depends on the private `followSetsByATN` static field — if the library
+ * changes its internal storage, this will safely return null (no crash, just
+ * no cache isolation). Keep a focused regression test around this dependency.
+ */
 function getC3FollowSetsCache(): Map<string, unknown> | null {
   const maybeCache = ((CodeCompletionCore as unknown) as C3FollowSetsCacheContainer)
     .followSetsByATN;
@@ -141,9 +221,10 @@ export function resolveKeywordSuggestionDetails(
 export function resolveSupportedNonLiteralKeywordDetails(sk: KeywordSuggestion) {
   // Prefer symbolic name (stable across grammar versions) over ID.
   if (sk.symbolicName) {
-    const bySymbolic = _supportedNonLiteralBySymbolic.get(sk.symbolicName.toUpperCase());
-    if (bySymbolic) return bySymbolic;
+    return _supportedNonLiteralBySymbolic.get(sk.symbolicName.toUpperCase());
   }
+  // Fall back to compiled ID only when no symbolic name exists at all,
+  // since runtime token IDs can drift from compiled grammar IDs.
   return SUPPORTED_NON_LITERAL_KEYWORDS.get(sk.id);
 }
 
@@ -162,7 +243,7 @@ export function isLikelyExpressionFunctionKeyword(sk: KeywordSuggestion): boolea
   if (!sk.value) return false;
   if (!/^[A-Z][A-Z0-9_]*$/.test(sk.value)) return false;
   if (sk.value.length <= 2) return false;
-  return !['AS', 'BY', 'ON', 'IN', 'OR', 'AND', 'NOT', 'TRUE', 'FALSE'].includes(sk.value);
+  return !NON_FUNCTION_KEYWORDS.has(sk.value);
 }
 
 export function isRuntimeFunctionRuleContext(
@@ -182,13 +263,7 @@ export function deriveKeywordFromSymbolicName(symbolicName?: string | null): str
   if (!symbolicName) return '';
   if (!/^[A-Z][A-Z0-9_]*$/.test(symbolicName)) return '';
   if (/_STRING$/.test(symbolicName)) return '';
-  // Exclude internal/structural token names that could leak as visible suggestions.
-  // These are tokens without literal names whose symbolic names look word-like.
-  if (
-    /^(ID|WS|SPACE|EOF|ERROR_RECOGNITION|ERROR|UNRECOGNIZED|NUMBER|INTEGER|DECIMAL|DOT|COMMA|PIPE|EQUAL|NOT_EQUAL|LESS|GREATER|NOT_LESS|NOT_GREATER|LT_PRTHS|RT_PRTHS|LT_SQR_PRTHS|RT_SQR_PRTHS|STAR|PLUS|MINUS|DIV|MODULE|SINGLE_QUOTE|DOUBLE_QUOTE|BACKTICK)$/.test(
-      symbolicName
-    )
-  ) {
+  if (STRUCTURAL_SYMBOLIC_NAMES.has(symbolicName)) {
     return '';
   }
   return symbolicName;
@@ -329,6 +404,7 @@ const PREFERRED_RULE_NAMES: readonly string[] = [
   'tableQualifiedName',
   'statsFunctionName',
   'renameClasue',
+  'renameClause',
   'stringLiteral',
   'integerLiteral',
   'decimalLiteral',
@@ -564,38 +640,12 @@ export function isAtFirstArgumentPositionInSegmentRT(
 /** Cache for runtime skip-backward token sets, keyed by grammarHash */
 const _operatorTokenCache = new Map<string, Set<number>>();
 
-/**
- * Tokens to skip when walking backward for the last semantically meaningful token.
- * Includes operators, parentheses, and structural tokens like SQUOTA_STRING.
- * The name list is curated, not dynamically grammar-adaptive.
- */
 function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
   const cached = _operatorTokenCache.get(grammar.grammarHash);
   if (cached) return cached;
 
-  const names = [
-    'PIPE',
-    'EQUAL',
-    'COMMA',
-    'NOT_EQUAL',
-    'LESS',
-    'NOT_LESS',
-    'GREATER',
-    'NOT_GREATER',
-    'OR',
-    'AND',
-    'LT_PRTHS',
-    'RT_PRTHS',
-    'IN',
-    'SPAN',
-    'MATCH',
-    'MATCH_PHRASE',
-    'MATCH_BOOL_PREFIX',
-    'MATCH_PHRASE_PREFIX',
-    'SQUOTA_STRING',
-  ];
   const set = new Set<number>();
-  for (const name of names) {
+  for (const name of OPERATOR_SKIP_TOKEN_NAMES) {
     const id = tokenTypeBySymbolic(grammar, name);
     if (id > Token.INVALID_TYPE) set.add(id);
   }
@@ -751,7 +801,8 @@ export function enrichRuntimeResult(
         break;
       }
 
-      case 'renameClasue': {
+      case 'renameClasue':
+      case 'renameClause': {
         const expressionStart = rule.startTokenIndex;
         if (expressionStart === cursorTokenIndex) {
           shouldSuggestColumns = true;
@@ -771,7 +822,10 @@ export function enrichRuntimeResult(
         let currentIndex = cursorTokenIndex - 1;
         const currentToken = currentIndex >= 0 ? tokenStream.get(currentIndex) : undefined;
         const previousToken = currentIndex > 0 ? tokenStream.get(currentIndex - 1) : undefined;
-        const lastToken = currentToken?.type === spaceToken ? previousToken : currentToken;
+        const lastToken =
+          currentToken && isEffectivelyWhitespace(currentToken, spaceToken)
+            ? previousToken
+            : currentToken;
 
         if (!lastToken || ![EQUAL, OPENING_BRACKET, COMMA].includes(lastToken.type)) break;
 
@@ -1008,15 +1062,14 @@ export function tryRuntimeGrammarSuggestions(
       candidate.value = candidate.value || fallbackValue;
       // Keep supported symbolic-only tokens (e.g. SQUOTA_STRING) even without a value,
       // so the renderer's supportedSymbolicKeywords branch can use them.
+      // Use candidate.symbolicName (sanitized by skipSymbolicKeywords) so that
+      // symbolic-only tokens are correctly suppressed when the caller opts out.
       const isSupportedSymbolic =
         !candidate.value &&
-        !!symbolicName &&
-        _supportedNonLiteralBySymbolic.has(symbolicName.toUpperCase());
+        !!candidate.symbolicName &&
+        _supportedNonLiteralBySymbolic.has(candidate.symbolicName.toUpperCase());
       if (!candidate.value && !isSupportedSymbolic) return;
-      if (
-        candidate.value &&
-        isRuntimeNoisySuggestion({ ...candidate, symbolicName: symbolicName ?? undefined })
-      ) {
+      if (candidate.value && isRuntimeNoisySuggestion(candidate)) {
         return;
       }
 
