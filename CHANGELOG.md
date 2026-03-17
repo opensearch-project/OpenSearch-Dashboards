@@ -131,6 +131,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Bump node to v22.22.0 ([#11218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11218))
  - Bump axios ([#11233](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11233))
  - Update lodash and lodash-es to 4.17.23 ([#11254](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11254))
+ - Update DEVELOPER_GUIDE.md to reference yarn instead of node for linting. ([#11531](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11531))
 
 ### 🪛 Refactoring
 
