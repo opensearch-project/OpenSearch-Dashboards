@@ -42,7 +42,7 @@ import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
-import { PROCESS_WORKING_DIR, standardize } from '@osd/cross-platform';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 const Plugins = {
