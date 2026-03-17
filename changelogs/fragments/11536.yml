@@ -1,0 +1,2 @@
+infra:
+- Update csp configuration to allow for strictness ([#11536](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11536))
