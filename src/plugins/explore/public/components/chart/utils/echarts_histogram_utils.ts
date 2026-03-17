@@ -323,7 +323,8 @@ export function createBarSeries(
     id,
     name,
     data: data.map((d) => [d.x, d.y]),
-    barWidth: '98%',
+    barWidth: '94%',
+    barMaxWidth: 80,
     itemStyle: {
       color,
     },
