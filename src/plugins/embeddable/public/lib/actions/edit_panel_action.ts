@@ -93,7 +93,6 @@ export class EditPanelAction implements Action<ActionContext> {
     return 'pencil';
   }
 
-  // edit embeddable
   public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
       embeddable &&
@@ -106,13 +105,12 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   // execute action inside dashboard panel
-
   public async execute(context: ActionContext) {
     const appTarget = this.getAppTarget(context);
     if (appTarget) {
-      if (this.stateTransfer && appTarget.state) {
+      if (this.stateTransfer && appTarget.state?.containerInfo) {
         const queryString = new URLSearchParams(
-          appTarget.state.containerInfo as URLSearchParams
+          appTarget.state?.containerInfo as URLSearchParams
         ).toString();
 
         const pathWithParams = `${appTarget.path}?${queryString}`;

@@ -25,7 +25,7 @@ export const useInitialSaveExplore = () => {
   const { setEditorText } = useEditorOperations();
 
   const visualizationBuilder = getVisualizationBuilder();
-  const { queryBuilder, queryEditorState } = useQueryBuilderState();
+  const { queryBuilder } = useQueryBuilderState();
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -128,15 +128,7 @@ export const useInitialSaveExplore = () => {
       queryBuilder.reset();
       visualizationBuilder.reset();
     };
-  }, [
-    savedExplore,
-    error,
-    services,
-    queryBuilder,
-    setEditorText,
-    queryEditorState.languageType,
-    visualizationBuilder,
-  ]);
+  }, [savedExplore, error, services, queryBuilder, setEditorText, visualizationBuilder]);
 
   return {
     savedExplore,

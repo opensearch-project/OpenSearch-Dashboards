@@ -11,7 +11,7 @@ import { QueryPanelActions } from '../../../components/query_panel/query_panel_w
 
 import { DatasetSelectWidget } from './dataset_select';
 import '../in_context_editor.scss';
-import { SaveQueryButton } from '../component/saveQueryButton';
+import { SaveQueryButton } from './save_query_button';
 
 export const QueryPanelWidgets = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();

@@ -71,7 +71,6 @@ export const createSavedQueryService = (
       query,
     };
 
-    console.log('queryObject', queryObject);
     if (attributes.filters) {
       queryObject.filters = attributes.filters;
     }

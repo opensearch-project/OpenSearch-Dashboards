@@ -5,8 +5,8 @@
  */
 
 import { useObservable } from 'react-use';
-import React, { useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useOpenSearchDashboards,
@@ -32,7 +32,7 @@ export interface OnSaveProps {
   onTitleDuplicate: () => void;
 }
 
-const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
+const saveButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
   defaultMessage: 'Save and back to dashboard',
 });
 
@@ -53,19 +53,29 @@ export const SaveVisButton = () => {
   const { exploreId, containerId } = useInContextEditor();
 
   const { savedExplore } = useSavedExplore(exploreId);
-  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
 
   const { toastNotifications, dashboard, core } = services;
 
   const [showModal, setShowModal] = useState(false);
 
+  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
   const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
 
   const searchContext = useSearchContext();
-  // const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
-  //   data.query,
-  //   services.osdUrlStateStorage!
-  // );
+
+  // open a visualization from visualization list, containerId will be undefined
+  // in such case, back to visualization list
+  const dashboardUrl = useMemo(() => {
+    if (containerId) {
+      return core.application.getUrlForApp('dashboards', {
+        path: `#/view/${containerId}`,
+      });
+    } else {
+      return core.application.getUrlForApp('visualize', {
+        path: `#/`,
+      });
+    }
+  }, [core.application, containerId]);
 
   const handleSave = useCallback(
     async ({
@@ -77,7 +87,7 @@ export const SaveVisButton = () => {
       const axesMapping = visConfig?.axesMapping;
 
       savedExploreToSave.title = newTitle;
-      savedExploreToSave.type = undefined; // in-context editor created save explore don't have flavor
+      savedExploreToSave.type = undefined; // save explores created in in-context editor don't have flavor
       savedExploreToSave.visualization = JSON.stringify({
         title: '',
         chartType: visConfig?.type ?? 'line',
@@ -108,7 +118,7 @@ export const SaveVisButton = () => {
 
         const id = await savedExploreToSave.save(saveOptions);
 
-        // add to dashboard
+        // add to dashboard for new save explore
         if (id && exploreId === undefined) {
           const props = {
             existingDashboardId: containerId,
@@ -144,16 +154,8 @@ export const SaveVisButton = () => {
             });
           }
         }
-        // startSyncingQueryStateWithUrl();
-        setShowModal(false);
-        // Use window.location.href for full page reload to ensure dashboard refreshes
-        const dashboardUrl = core.application.getUrlForApp('dashboards', {
-          path: containerId ? `#/view/${containerId}` : '#/',
-        });
 
-        // if(!containerId){
-        //   history.back()
-        // }
+        setShowModal(false);
         window.location.href = dashboardUrl;
       } catch (error) {
         toastNotifications.add({
@@ -173,29 +175,27 @@ export const SaveVisButton = () => {
       visConfig,
       datasetView.dataView,
       exploreId,
+      containerId,
       searchContext.query,
       searchContext.filters,
       dashboard,
-      core.application,
+      dashboardUrl,
       toastNotifications,
-      containerId,
     ]
   );
 
   const handleDiscard = useCallback(() => {
-    // startSyncingQueryStateWithUrl();
-
-    const dashboardUrl = core.application.getUrlForApp('dashboards', {
-      path: containerId ? `#/view/${containerId}` : '#/',
-    });
-
     window.location.href = dashboardUrl;
-  }, [core.application, containerId]);
+  }, [dashboardUrl]);
 
   const handleSaveButtonClick = useCallback(async () => {
     // If exploreId is defined, we're editing an existing saved visualization
     // Directly save without showing the modal
     if (exploreId !== undefined && savedExplore) {
+      if (!isVisDirty && !isQueryEditorDirty) {
+        window.location.href = dashboardUrl;
+        return;
+      }
       await handleSave({
         savedExplore,
         newTitle: savedExplore.title ?? '',
@@ -206,7 +206,7 @@ export const SaveVisButton = () => {
       // Show modal for new visualizations
       setShowModal(true);
     }
-  }, [exploreId, savedExplore, handleSave]);
+  }, [exploreId, savedExplore, handleSave, isVisDirty, isQueryEditorDirty, dashboardUrl]);
 
   const saveButton = (
     <EuiButtonEmpty

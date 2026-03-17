@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import { BehaviorSubject, Subscription, from, of, combineLatest } from 'rxjs';
 import { distinctUntilChanged, switchMap, debounceTime, filter, skip } from 'rxjs/operators';
 import moment from 'moment';
@@ -26,7 +25,6 @@ import {
   QueryAssistResponse,
 } from '../../../../../query_enhancements/common/query_assist';
 
-import { ExploreFlavor } from '../../../../common';
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../../application/utils/get_summary_agent_is_available';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
@@ -88,11 +86,6 @@ export interface DatasetViewState {
   error: string | null;
 }
 
-export interface SaveExploreState {
-  saveExploreId: string;
-  favlor: ExploreFlavor;
-}
-
 const initialQueryStatus = {
   status: QueryExecutionStatus.UNINITIALIZED,
   elapsedMs: undefined,
@@ -151,19 +144,14 @@ export class QueryBuilder {
     this.consoleResult();
 
     this.subscriptions.push(
-      combineLatest([this.queryState$])
+      combineLatest([this.queryState$, this.queryEditorState$])
         .pipe(debounceTime(500))
-        .subscribe(([queryState]) => this.syncToUrl('_eq', queryState))
-    );
-
-    this.subscriptions.push(
-      combineLatest([this.queryEditorState$])
-        .pipe(debounceTime(500))
-        .subscribe(([queryEditorState]) =>
+        .subscribe(([queryState, queryEditorState]) => {
+          this.syncToUrl('_eq', queryState);
           this.syncToUrl('_e', {
             languageType: queryEditorState.languageType,
-          })
-        )
+          });
+        })
     );
 
     this.setIsInitialized(true);
@@ -197,50 +185,29 @@ export class QueryBuilder {
     this.subscriptions.push(dataRangeSyncSub);
   }
 
-  private async handleDatasetChange(dataset?: Dataset) {
-    try {
-      if (!dataset) {
-        this.datasetView$.next({
-          dataView: undefined,
-          isLoading: false,
-          error: null,
-        });
-        this.updateQueryEditorState({
-          promptModeIsAvailable: false,
-          summaryAgentIsAvailable: false,
-        });
-        return;
-      }
-      const dataView = await this.fetchDataView(dataset);
-
-      this.datasetView$.next({
-        dataView,
-        isLoading: false,
-        error: null,
+  private async handleDatasetChange(dataset?: Dataset): Promise<DataView | undefined> {
+    if (!dataset) {
+      this.updateQueryEditorState({
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
       });
-      // check agent availability
-      await this.checkAgentAvailability(dataset?.dataSource?.id);
-    } catch (error) {
-      this.datasetView$.next({
-        dataView: undefined,
-        isLoading: false,
-        error: `Error loading dataset: ${(error as Error).message}`,
-      });
-
-      this.services.notifications?.toasts.addError(error, {
-        title: `Error loading dataset: ${dataset}`,
-      });
+      return undefined;
     }
+
+    const dataView = await this.fetchDataView(dataset);
+    await this.checkAgentAvailability(dataset?.dataSource?.id);
+    return dataView;
   }
 
   private setupQuerySync() {
     const querySyncSub = this.queryState$
       .pipe(
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        switchMap(async (newQuery) => {
+        switchMap((newQuery) => {
           const currentQuery = this.services.data.query.queryString.getQuery();
           const isDatasetChanged = !isEqual(currentQuery?.dataset, newQuery?.dataset);
           const isLanguageChanged = !isEqual(currentQuery?.language, newQuery?.language);
+
           // sync query state with global queryStringManager
           this.services.data.query.queryString.setQuery(newQuery);
 
@@ -248,40 +215,61 @@ export class QueryBuilder {
           // check isLanguageChanged for the initial sync
           if (isDatasetChanged || isLanguageChanged) {
             this.datasetView$.next({ ...this.datasetView$.getValue(), isLoading: true });
-            await this.handleDatasetChange(newQuery.dataset);
+            return from(this.handleDatasetChange(newQuery.dataset));
           }
-        })
+
+          return of(null); // no change
+        }),
+        filter((result) => result !== null)
       )
-      .subscribe();
+      .subscribe({
+        next: (dataView) => {
+          this.datasetView$.next({
+            dataView,
+            isLoading: false,
+            error: null,
+          });
+        },
+        error: (error) => {
+          this.datasetView$.next({
+            dataView: undefined,
+            isLoading: false,
+            error: `Error loading dataset: ${error.message}`,
+          });
+          this.services.notifications?.toasts.addError(error, {
+            title: 'Error loading dataset',
+          });
+        },
+      });
 
     this.subscriptions.push(querySyncSub);
   }
 
-  // this language sync only handle case from PPL to PromQL or backwards
-  // should re-prepare the query state
   private setupLanguageSync() {
     const languageSyncSub = this.queryEditorState$
       .pipe(
         map((state) => state?.languageType),
-        distinctUntilChanged(),
-        // Skip initial preparation
+        distinctUntilChanged(), // Skip initial preparation
         skip(1),
         filter((languageType) => languageType !== SupportLanguageType.ai),
-        switchMap(async (languageType) => {
+        switchMap((languageType) => {
           // set loading to block user execution actions during async gap
-          this.datasetView$.next({
-            dataView: undefined,
-            isLoading: true,
-            error: null,
-          });
-          const newQuery = await getPreloadedQueryState(this.services, languageType);
-
-          if (newQuery) {
-            this.updateQueryState(newQuery);
-          }
-        })
+          this.datasetView$.next({ dataView: undefined, isLoading: true, error: null });
+          return from(getPreloadedQueryState(this.services, languageType));
+        }),
+        filter((newQuery) => newQuery !== null && newQuery !== undefined)
       )
-      .subscribe();
+      .subscribe({
+        next: (newQuery) => {
+          this.updateQueryState(newQuery);
+        },
+        error: (error) => {
+          this.datasetView$.next({ dataView: undefined, isLoading: false, error: error.message });
+          this.services.notifications?.toasts.addError(error, {
+            title: 'Error switching language',
+          });
+        },
+      });
 
     this.subscriptions.push(languageSyncSub);
   }
@@ -370,8 +358,8 @@ export class QueryBuilder {
   async callAgentActionCreator() {
     if (!this.editorRef) return;
 
-    // for prompt mode, we won't store the prompt or generated query
-    // so use the editor text
+    // for prompt mode, we won't store the prompt and generated query
+    // so directly read user input
     const editorText = this.editorRef.getValue();
 
     if (!editorText.length) {
@@ -473,8 +461,6 @@ export class QueryBuilder {
 
   updateQueryEditorState(updates: Partial<QueryEditorState>) {
     const currentState = this.queryEditorState$.value;
-
-    // Merge updates with current state
     this.queryEditorState$.next({
       ...currentState,
       ...updates,
@@ -499,7 +485,6 @@ export class QueryBuilder {
     return firstValueFrom(this.datasetView$.pipe(filter((dv) => !dv.isLoading)));
   }
 
-  // map to runQueryActionCreator
   async executeQuery() {
     this.clearResultState();
 

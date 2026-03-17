@@ -4,7 +4,7 @@
  */
 
 import './app.scss';
-import React from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
@@ -14,10 +14,11 @@ import { ExploreEditorWrapper } from './explore_editor_wrapper';
 
 export const DashboardApp = () => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const EditorComponent = services.editorRegistryService
-    .start()
-    .getEditor('exploreEditor')
-    ?.render();
+
+  const EditorComponent = useMemo(
+    () => services.editorRegistryService.start().getEditor('exploreEditor')?.render(),
+    [services.editorRegistryService]
+  );
 
   return (
     <Switch>

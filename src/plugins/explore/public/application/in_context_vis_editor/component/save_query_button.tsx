@@ -40,7 +40,6 @@ export const SaveQueryButton = () => {
         .getSavedQuery(currentSavedQueryId)
         .then(setCurrentSavedQuery)
         .catch(() => {
-          setCurrentSavedQueryId(undefined);
           setCurrentSavedQuery(undefined);
         });
     } else {
@@ -69,9 +68,14 @@ export const SaveQueryButton = () => {
         query: queryToSave,
       };
 
-      if (meta.shouldIncludeTimeFilter && timeFilter) {
+      if (meta.shouldIncludeTimeFilter && timeFilter && typeof timeFilter.getTime === 'function') {
         const tf = timeFilter.getTime();
-        if (tf && tf.from !== undefined && tf.to !== undefined) {
+        if (
+          tf &&
+          tf.from !== undefined &&
+          tf.to !== undefined &&
+          typeof timeFilter.getRefreshInterval === 'function'
+        ) {
           const refresh = timeFilter.getRefreshInterval();
           attributes.timefilter = {
             from: tf.from,
@@ -104,19 +108,22 @@ export const SaveQueryButton = () => {
   const handleLoadSavedQuery = useCallback(
     async (savedQuery: SavedQuery) => {
       setCurrentSavedQueryId(savedQuery.id);
-
       queryBuilder.updateQueryState(savedQuery.attributes.query);
 
       // Update editor text
       setEditorText(savedQuery.attributes.query.query as string);
 
-      // direct Handle time filter if present
+      // Handle time filter if present
       if (savedQuery.attributes.timefilter && timeFilter) {
-        timeFilter.setTime({
-          from: savedQuery.attributes.timefilter.from,
-          to: savedQuery.attributes.timefilter.to,
+        queryBuilder.updateQueryEditorState({
+          dateRange: {
+            from: savedQuery.attributes.timefilter.from,
+            to: savedQuery.attributes.timefilter.to,
+          },
         });
-        timeFilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        if (typeof timeFilter.setRefreshInterval === 'function') {
+          timeFilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+        }
       }
 
       setIsPopoverOpen(false);

@@ -237,7 +237,6 @@ export class VisualizationBuilder {
   onDataChange(data?: VisData) {
     const currentChartType = this.visConfig$.value?.type;
     const axesMapping = this.visConfig$.value?.axesMapping;
-    console.log('currentChartType', data);
     if (!data) {
       return;
     }

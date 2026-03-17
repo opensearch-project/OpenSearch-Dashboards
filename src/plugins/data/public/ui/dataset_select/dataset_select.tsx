@@ -93,22 +93,6 @@ interface ViewDatasetsModalProps {
   services: IDataPluginServices;
 }
 
-// const isDatasetCompatibleWithSignalType = (
-//   dataset: DetailedDataset,
-//   signalType: string | null
-// ): boolean => {
-//   if (!signalType) return true;
-
-//   if (signalType === CORE_SIGNAL_TYPES.TRACES) {
-//     return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
-//   } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
-//     return dataset.signalType === CORE_SIGNAL_TYPES.LOGS || !dataset.signalType;
-//   } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
-//     return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
-//   }
-//   return true;
-// };
-
 const checkDatasetCompatibleWithSignalType = (
   dataset: DetailedDataset,
   signalType: string
@@ -134,15 +118,6 @@ const isDatasetCompatibleWithSignalType = (
     return result;
   }
   return checkDatasetCompatibleWithSignalType(dataset, signalType);
-
-  // if (signalType === CORE_SIGNAL_TYPES.TRACES) {
-  //   return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
-  // } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
-  //   return dataset.signalType === CORE_SIGNAL_TYPES.LOGS || !dataset.signalType;
-  // } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
-  //   return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
-  // }
-  // return true;
 };
 
 const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({

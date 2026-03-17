@@ -4,8 +4,6 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { useObservable } from 'react-use';
-
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import {
@@ -108,12 +106,12 @@ export const ResizableQueryPanelAndVisualization = () => {
     return <VisualizationContainer />;
   };
   return (
-    <EuiResizableContainer direction="vertical" style={{ height: '100%' }}>
+    <EuiResizableContainer direction="vertical">
       {(EuiResizablePanel, EuiResizableButton) => {
         return (
           <>
             <EuiResizablePanel
-              id="visualization_panel"
+              className="visualization_panel"
               initialSize={70}
               minSize="60%"
               paddingSize="none"
@@ -123,7 +121,12 @@ export const ResizableQueryPanelAndVisualization = () => {
 
             <EuiResizableButton />
 
-            <EuiResizablePanel id="query_panel" initialSize={30} minSize="20%" paddingSize="none">
+            <EuiResizablePanel
+              className="query_panel"
+              initialSize={30}
+              minSize="20%"
+              paddingSize="none"
+            >
               <QueryPanel
                 queryEditorState$={queryBuilder.queryEditorState$}
                 queryState$={queryBuilder.queryState$}
@@ -142,10 +145,6 @@ export const VisualizationContainer = () => {
 
   const visualizationBuilder = getVisualizationBuilder();
   const { resultState: results, queryBuilder } = useQueryBuilderState();
-
-  const visConfig = useObservable(visualizationBuilder.visConfig$);
-  const showRawTable = useObservable(visualizationBuilder.showRawTable$);
-  const isNonTableChart = !!visConfig?.type && visConfig.type !== 'table';
 
   useEffect(() => {
     if (results) {

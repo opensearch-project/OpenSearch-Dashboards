@@ -8,7 +8,6 @@ import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { useAsync } from 'react-use';
-import { ScopedHistory } from 'opensearch-dashboards/public';
 import { EuiButton, EuiWrappingPopover, EuiSpacer, EuiContextMenu } from '@elastic/eui';
 import { buildContextMenuForActions, UiActionsStart } from '../../../../../../ui_actions/public';
 import { dashboardAddPanelTrigger, DASHBOARD_ADD_PANEL_TRIGGER } from '../../../../ui_triggers';
@@ -31,7 +30,6 @@ const unmount = () => {
   isMount = false;
 };
 
-// place of import ui actions to dashboard top-nav
 const PanelPopover = ({
   onClose,
   button,

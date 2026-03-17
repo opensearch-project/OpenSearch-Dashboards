@@ -1,8 +1,7 @@
-/*                                                                         
-   * Copyright OpenSearch Contributors
-   * SPDX-License-Identifier: Apache-2.0
-   */
-
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 $osdHeaderOffset: $euiHeaderHeightCompensation;
 
@@ -25,28 +24,40 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     height: 100%;
   }
 
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiResizableContainer {
-    gap: $euiSizeXS;
-  }
-
   &__bottom-panel {
     flex: 1;
     min-height: 0;
     gap: $euiSizeXS;
 
+    // control style option panel
     .resizable-panel-right {
       overflow-x: hidden;
+      overflow-y: auto;
+
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiPanel--paddingSmall {
+        padding: $ouiSizeXS $ouiSizeS;
+      }
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiPanel {
+        border-top: 0;
+      }
     }
-  }
 
-  .globalQueryBar {
-    padding: 0;
-  }
+    .resizable-panel-left {
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      & > .euiResizableContainer {
+        gap: $euiSizeXS;
+        height: 100%;
 
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiPanel--paddingSmall {
-    padding: 0 $ouiSizeXS;
+        .visualization_panel {
+          // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+          .euiPanel {
+            border-top: 0;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -57,53 +68,6 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     height: calc(100vh - #{$osdHeaderOffset * 3});
   }
 }
-
-.mainPage {
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.visStylePanelOuter {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-left: $ouiSizeS;
-    overflow-y: auto;
-}
-
-.visStylePanelInner {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding-left: $ouiSizeXS;
-    border-left: $euiBorderThin;
-    min-height: 100%;
-}
-
-
-
-
-.resizable-panel-right {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-
-// for style controls tab
-
-.visStylePanelOuter {
-  padding-left: $ouiSizeS;
-}
-
-.visStylePanelInner {
-  padding-left: $ouiSizeXS;
-  border-left: $euiBorderThin;
-  min-height: 100%;
-}
-
 
 .exploreErrorGuard {
   padding-top: $ouiSizeXXL;
@@ -120,28 +84,22 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
 .exploreQueryPanelWidgets {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
 
   &__left {
     display: flex;
-    padding: $ouiSizeXXS 0;
+    padding: $ouiSizeXS 0;
     flex-wrap: wrap;
     align-items: center;
     gap: $ouiSizeXS;
   }
 
-  &__right {
-    align-items: center;
-    display: flex;
-    gap: $ouiSizeXS;
-    justify-content: end;
-    flex-wrap: wrap;
+  &__verticalSeparator {
+    width: 1px;
+    height: $ouiSize;
+    background: $euiColorLightShade;
+    margin: $ouiSizeXS $ouiSizeXXS;
   }
-}
-
-// Ensure language toggle and dataset select stay in one row
-.exploreLanguageToggle {
-  flex-shrink: 0;
 }
 
 .exploreDatasetSelectWrapper {

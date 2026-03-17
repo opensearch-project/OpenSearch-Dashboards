@@ -648,6 +648,9 @@ export class ExplorePlugin
     // Register explore visualization as visualization alias
     setupDeps.visualizations.registerAlias({
       name: this.DISCOVER_VISUALIZATION_NAME,
+      // Create new visulization
+      // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
+      // Need to define a two-way route
       aliasPath: '#/view_explore',
       aliasApp: 'dashboards',
       title: exploreVisDisplayName,
@@ -679,11 +682,19 @@ export class ExplorePlugin
             } catch (e) {
               iconType = '';
             }
+
+            const adjustEditApp = attributes.type
+              ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
+              : 'dashboards';
+            const adjustEditUrl = attributes.type
+              ? `#/view/${encodeURIComponent(id)}` // regular explore vis
+              : `#/view_explore/${encodeURIComponent(id)}`; // dashboard created vis
+
             return {
               description: `${attributes?.description || ''}`,
-              // TODO: it should navigate to different explore flavor based on the `attributes.type`
-              editApp: `dashboards`,
-              editUrl: `#/view_explore/${encodeURIComponent(id)}`,
+              // Open a visulization
+              editApp: adjustEditApp,
+              editUrl: adjustEditUrl,
               icon: iconType,
               id,
               savedObjectType: SAVED_OBJECT_TYPE,

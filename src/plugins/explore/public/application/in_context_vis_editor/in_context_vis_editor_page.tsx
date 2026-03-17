@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiPage,
   EuiErrorBoundary,
@@ -60,6 +60,7 @@ export const InContextVisEditorPage = () => {
                       initialSize={80}
                       minSize="75%"
                       paddingSize="none"
+                      className="resizable-panel-left"
                     >
                       <ResizableQueryPanelAndVisualization />
                     </EuiResizablePanel>
@@ -74,8 +75,8 @@ export const InContextVisEditorPage = () => {
                       <EuiPanel
                         paddingSize="s"
                         style={{ height: '100%' }}
-                        hasBorder={false}
                         borderRadius="none"
+                        hasShadow={false}
                       >
                         {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
                       </EuiPanel>

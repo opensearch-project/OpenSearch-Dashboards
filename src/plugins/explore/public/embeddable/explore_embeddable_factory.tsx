@@ -95,7 +95,6 @@ export class ExploreEmbeddableFactory
       const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
-      // const editUrl = services.addBasePath(`/app/dashboards#/view_explore/${savedObjectId}`);
       const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
 
       // for in-context created visulization
