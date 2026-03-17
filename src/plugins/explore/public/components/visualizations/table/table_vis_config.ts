@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { TableVisStyleControls } from './table_vis_options';
 import { CellAlignment, ColorMode, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
@@ -51,7 +52,8 @@ export const defaultTableChartStyles: TableChartStyle = {
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
-  name: 'table',
+  name: 'Table',
+  icon: 'visTable',
   type: 'table',
   ui: {
     style: {
@@ -61,3 +63,5 @@ export const createTableConfig = (): VisualizationType<'table'> => ({
     availableMappings: [],
   },
 });
+
+visualizationRegistry.registerVisualization(createTableConfig());

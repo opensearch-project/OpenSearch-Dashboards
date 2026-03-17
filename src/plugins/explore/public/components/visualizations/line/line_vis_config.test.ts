@@ -25,7 +25,7 @@ describe('line_vis_config', () => {
       const config = createLineConfig();
 
       // Verify the basic structure
-      expect(config).toHaveProperty('name', 'line');
+      expect(config).toHaveProperty('name', 'Line');
       expect(config).toHaveProperty('type', 'line');
       expect(config).toHaveProperty('ui.style.defaults');
       expect(config).toHaveProperty('ui.style.render');

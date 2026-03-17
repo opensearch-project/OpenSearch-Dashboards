@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { GaugeVisStyleControls } from './gauge_vis_options';
 import { ThresholdOptions, AxisRole, VisFieldType, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
@@ -47,7 +48,8 @@ export const defaultGaugeChartStyles: GaugeChartStyle = {
 };
 
 export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
-  name: 'gauge',
+  name: 'Gauge',
+  icon: 'visGauge',
   type: 'gauge',
   ui: {
     style: {
@@ -61,3 +63,5 @@ export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createGaugeConfig());

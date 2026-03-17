@@ -42,7 +42,8 @@ describe('area_vis_config', () => {
       const config = createAreaConfig();
 
       expect(config).toEqual({
-        name: 'area',
+        name: 'Area',
+        icon: 'visArea',
         type: 'area',
         ui: {
           style: {

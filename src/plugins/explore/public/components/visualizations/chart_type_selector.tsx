@@ -16,8 +16,6 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { VisualizationRule } from './types';
 import { ChartType } from './utils/use_visualization_types';
-import { CHART_METADATA } from './constants';
-import { isChartType } from './utils/is_chart_type';
 import { VisData } from './visualization_builder.types';
 import { visualizationRegistry } from './visualization_registry';
 
@@ -54,10 +52,7 @@ export const ChartTypeSelector = <T extends ChartType>({
 
   // Get icon type based on chart type
   const getChartIconType = (type: string): string => {
-    if (isChartType(type)) {
-      return CHART_METADATA[type].icon;
-    }
-    return '';
+    return visualizationRegistry.getVisualization(type)?.icon ?? '';
   };
 
   // Create base mapping once with all visualization rules

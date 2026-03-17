@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 
 import {
   ThresholdMode,
@@ -85,8 +86,9 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
-  name: 'histogram',
+  name: 'Histogram',
   type: 'histogram',
+  icon: 'visBarVertical',
   ui: {
     style: {
       defaults: defaultHistogramChartStyles,
@@ -103,3 +105,5 @@ export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createHistogramConfig());

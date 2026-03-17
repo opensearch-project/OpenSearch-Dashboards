@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { BarGaugeVisStyleControls } from './bar_gauge_vis_options';
 import { TitleOptions, AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
 import { CalculationMethod } from '../utils/calculation';
@@ -52,7 +53,8 @@ export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
 };
 
 export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
-  name: 'bar_gauge',
+  name: 'Bar Gauge',
+  icon: 'visBarHorizontal',
   type: 'bar_gauge',
   ui: {
     style: {
@@ -71,3 +73,5 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createBarGaugeConfig());

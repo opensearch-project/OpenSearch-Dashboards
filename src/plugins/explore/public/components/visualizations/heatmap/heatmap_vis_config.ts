@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
 import {
   StandardAxes,
@@ -125,8 +126,9 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
 };
 
 export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
-  name: 'heatmap',
+  name: 'Heatmap',
   type: 'heatmap',
+  icon: 'heatmap',
   ui: {
     style: {
       defaults: defaultHeatmapChartStyles,
@@ -141,3 +143,5 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createHeatmapConfig());

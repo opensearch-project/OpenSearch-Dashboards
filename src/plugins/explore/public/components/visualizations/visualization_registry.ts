@@ -21,7 +21,7 @@ import {
 } from './types';
 import { createBarConfig } from './bar/bar_vis_config';
 import { createTableConfig } from './table/table_vis_config';
-import { ChartType } from './utils/use_visualization_types';
+import { ChartType, VisualizationType } from './utils/use_visualization_types';
 import { getColumnsByAxesMapping } from './visualization_builder_utils';
 import { createGaugeConfig } from './gauge/gauge_vis_config';
 import { createStateTimelineConfig } from './state_timeline/state_timeline_config';
@@ -34,6 +34,7 @@ import { createHistogramConfig } from './histogram/histogram_vis_config';
  */
 export class VisualizationRegistry {
   private rules: VisualizationRule[] = [];
+  private visualizations: Map<string, VisualizationType<any>> = new Map();
 
   constructor(initialRules: VisualizationRule[] = ALL_VISUALIZATION_RULES) {
     this.rules = [...initialRules];
@@ -209,6 +210,16 @@ export class VisualizationRegistry {
    */
   public getRules(): VisualizationRule[] {
     return [...this.rules];
+  }
+
+  public registerVisualization(visConfig: VisualizationType<any>) {
+    if (!this.visualizations.has(visConfig.type)) {
+      this.visualizations.set(visConfig.type, visConfig);
+    }
+  }
+
+  public getVisualization(visType: string) {
+    return this.visualizations.get(visType);
   }
 }
 

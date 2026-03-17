@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { ScatterVisStyleControls } from './scatter_vis_options';
 import {
   StandardAxes,
@@ -83,7 +84,8 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
 };
 
 export const createScatterConfig = (): VisualizationType<'scatter'> => ({
-  name: 'scatter',
+  name: 'Scatter',
+  icon: '',
   type: 'scatter',
   ui: {
     style: {
@@ -109,3 +111,5 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createScatterConfig());

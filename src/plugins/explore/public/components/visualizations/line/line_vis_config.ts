@@ -6,6 +6,7 @@
 import React from 'react';
 import { LineVisStyleControls } from './line_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import {
   CategoryAxis,
   ThresholdLines,
@@ -95,7 +96,8 @@ export const defaultLineChartStyles: LineChartStyle = {
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({
-  name: 'line',
+  name: 'Line',
+  icon: 'visLine',
   type: 'line',
   ui: {
     style: {
@@ -151,3 +153,5 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createLineConfig());

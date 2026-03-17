@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 
 import { PieVisStyleControls } from './pie_vis_options';
 import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
@@ -58,7 +59,8 @@ export const defaultPieChartStyles: PieChartStyle = {
 };
 
 export const createPieConfig = (): VisualizationType<'pie'> => ({
-  name: 'pie',
+  name: 'Pie',
+  icon: 'visPie',
   type: 'pie',
   ui: {
     style: {
@@ -77,3 +79,5 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createPieConfig());

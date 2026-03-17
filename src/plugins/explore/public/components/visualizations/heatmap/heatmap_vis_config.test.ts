@@ -19,7 +19,7 @@ describe('createHeatmapeConfig', () => {
     const config = createHeatmapConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'heatmap');
+    expect(config).toHaveProperty('name', 'Heatmap');
     expect(config).toHaveProperty('type', 'heatmap');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');

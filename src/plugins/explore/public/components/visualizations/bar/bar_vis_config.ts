@@ -23,6 +23,7 @@ import {
 import { BarVisStyleControls } from './bar_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
 import { getColors } from '../theme/default_colors';
+import { visualizationRegistry } from '../visualization_registry';
 
 export interface BarChartStyleOptions {
   // Basic controls
@@ -104,8 +105,9 @@ export const defaultBarChartStyles: BarChartStyle = {
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({
-  name: 'bar',
+  name: 'Bar',
   type: 'bar',
+  icon: 'visBarVertical',
   ui: {
     style: {
       defaults: defaultBarChartStyles,
@@ -199,3 +201,5 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createBarConfig());

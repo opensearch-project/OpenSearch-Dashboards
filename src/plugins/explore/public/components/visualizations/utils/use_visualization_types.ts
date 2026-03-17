@@ -86,6 +86,7 @@ type ChartTypePossibleMapping = Partial<Record<AxisRole, { type: VisFieldType; i
 export interface VisualizationType<T extends ChartType> {
   readonly name: string;
   readonly type: T;
+  readonly icon?: string;
   readonly ui: {
     style: {
       defaults: ChartStylesMapping[T];

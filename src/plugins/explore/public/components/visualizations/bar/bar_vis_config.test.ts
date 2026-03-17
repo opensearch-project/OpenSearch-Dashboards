@@ -67,7 +67,7 @@ describe('bar_vis_config', () => {
       const config = createBarConfig();
 
       expect(config).toMatchObject({
-        name: 'bar',
+        name: 'Bar',
         type: 'bar',
         ui: {
           style: {

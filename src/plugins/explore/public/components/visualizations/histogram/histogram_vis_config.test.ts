@@ -62,7 +62,7 @@ describe('bar_vis_config', () => {
       const config = createHistogramConfig();
 
       expect(config).toMatchObject({
-        name: 'histogram',
+        name: 'Histogram',
         type: 'histogram',
         ui: {
           style: {

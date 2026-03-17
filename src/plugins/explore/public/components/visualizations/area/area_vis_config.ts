@@ -6,6 +6,7 @@
 import React from 'react';
 import { AreaVisStyleControls } from './area_vis_options';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import {
   CategoryAxis,
   ThresholdLines,
@@ -91,7 +92,8 @@ const defaultAreaChartStyles: AreaChartStyle = {
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({
-  name: 'area',
+  name: 'Area',
+  icon: 'visArea',
   type: 'area',
   ui: {
     style: {
@@ -142,3 +144,5 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createAreaConfig());

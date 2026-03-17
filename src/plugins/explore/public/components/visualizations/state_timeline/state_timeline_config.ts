@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { StateTimeLineVisStyleControls } from './state_timeline_vis_options';
 import {
   StandardAxes,
@@ -106,8 +107,9 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
 };
 
 export const createStateTimelineConfig = (): VisualizationType<'state_timeline'> => ({
-  name: 'state_timeline',
+  name: 'State timeline',
   type: 'state_timeline',
+  icon: 'visBarHorizontal',
   ui: {
     style: {
       defaults: defaultStateTimeLineChartStyles,
@@ -136,3 +138,5 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createStateTimelineConfig());

@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
+import { visualizationRegistry } from '../visualization_registry';
 import { MetricVisStyleControls } from './metric_vis_options';
 import {
   RangeValue,
@@ -103,7 +104,8 @@ export const defaultMetricChartStyles: MetricChartStyle = {
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({
-  name: 'metric',
+  name: 'Metric',
+  icon: 'visMetric',
   type: 'metric',
   ui: {
     style: {
@@ -130,3 +132,5 @@ export const createMetricConfig = (): VisualizationType<'metric'> => ({
     ],
   },
 });
+
+visualizationRegistry.registerVisualization(createMetricConfig());
