@@ -4,6 +4,7 @@
  */
 
 import { config } from './config';
+import { AllowedSourcesConfig, CSP_DIRECTIVES } from '../constants';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -81,16 +82,6 @@ export interface ICspReportOnlyConfig {
 }
 
 /**
- * Allowed source configuration for CSP directives.
- * @internal
- */
-interface AllowedSourcesConfig {
-  allowedFrameAncestorSources?: string[];
-  allowedConnectSources?: string[];
-  allowedImgSources?: string[];
-}
-
-/**
  * CSP-Report-Only configuration for use in OpenSearch Dashboards.
  * @public
  */
@@ -149,13 +140,13 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
    */
   private applyAllowedSources(rules: string[], sources: AllowedSourcesConfig): string[] {
     return rules.map((rule) => {
-      if (sources.allowedFrameAncestorSources && rule.startsWith('frame-ancestors')) {
+      if (sources.allowedFrameAncestorSources && rule.startsWith(CSP_DIRECTIVES.frameAncestors)) {
         return `${rule} ${sources.allowedFrameAncestorSources.join(' ')}`;
       }
-      if (sources.allowedConnectSources && rule.startsWith('connect-src')) {
+      if (sources.allowedConnectSources && rule.startsWith(CSP_DIRECTIVES.connect)) {
         return `${rule} ${sources.allowedConnectSources.join(' ')}`;
       }
-      if (sources.allowedImgSources && rule.startsWith('img-src')) {
+      if (sources.allowedImgSources && rule.startsWith(CSP_DIRECTIVES.img)) {
         return `${rule} ${sources.allowedImgSources.join(' ')}`;
       }
       return rule;
