@@ -18,17 +18,17 @@ export interface PPLValidationProviderRequest {
   context?: PPLValidationContext;
 }
 
-export type PPLValidationProvider =
-  | ((
-      request: PPLValidationProviderRequest
-    ) => Promise<PPLValidationResult | null> | PPLValidationResult | null)
-  | undefined;
+export type PPLValidationProvider = (
+  request: PPLValidationProviderRequest
+) => Promise<PPLValidationResult | null> | PPLValidationResult | null;
 
 interface PPLValidationGlobalState {
-  provider: PPLValidationProvider;
+  provider: PPLValidationProvider | undefined;
   contexts: WeakMap<monaco.editor.IModel, PPLValidationContext>;
 }
 
+// Use globalThis so multiple bundled Monaco/language modules share one
+// provider registry and one per-model context map.
 const PPL_VALIDATION_GLOBAL_STATE_KEY = '__osdPPLValidationGlobalState';
 
 function getGlobalValidationState(): PPLValidationGlobalState {
@@ -80,7 +80,7 @@ export async function resolvePPLValidationResult(
         model,
         context: state.contexts.get(model),
       });
-      if (runtimeResult) {
+      if (runtimeResult !== null) {
         return runtimeResult;
       }
     } catch {
