@@ -8,6 +8,7 @@ import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore
 import { prepareTestSuite, createWorkspaceWithDatasource } from '../../../../../../utils/helpers';
 
 const AGENT_TRACES_INDEX_PATTERN = 'agent_traces_cy_test*';
+const AGENT_TRACES_INDEX_PATTERN_ALT = 'agent_traces_cy_tes*';
 const AGENT_TRACES_TIME_FIELD = 'startTime';
 const AGENT_TRACES_START = 'Sep 1, 2026 @ 00:00:00.000';
 const AGENT_TRACES_END = 'Oct 1, 2026 @ 00:00:00.000';
@@ -171,6 +172,41 @@ const agentTracesTestSuite = () => {
         'have.length.greaterThan',
         0
       );
+    });
+
+    it('should display traces immediately after switching datasets', () => {
+      // Load the first dataset
+      selectDatasetAndWaitForData();
+
+      cy.get('.agentTracesTable__container .agentTraces-table tbody tr', {
+        timeout: 15000,
+      }).should('have.length.greaterThan', 0);
+
+      // Switch to the second dataset
+      cy.explore.setIndexPatternFromAdvancedSelector(
+        AGENT_TRACES_INDEX_PATTERN_ALT,
+        DATASOURCE_NAME,
+        undefined,
+        AGENT_TRACES_TIME_FIELD
+      );
+
+      cy.getElementByTestId('datasetSelectButton').should(
+        'contain.text',
+        AGENT_TRACES_INDEX_PATTERN_ALT
+      );
+
+      // Traces should appear without needing to click the tab again or the
+      // Update button.  Previously, a race condition in the dataset change
+      // middleware caused "No agent traces found" to flash until the user
+      // manually re-triggered a query.
+      cy.get('.agentTracesTable__container .agentTraces-table tbody tr', {
+        timeout: 15000,
+      }).should('have.length.greaterThan', 0);
+
+      // Verify the Traces tab is still active
+      cy.getElementByTestId('agentTracesTabs')
+        .find('.euiTab-isSelected .euiTab__content')
+        .should('contain.text', 'Traces');
     });
   });
 };
