@@ -17,6 +17,8 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   void,
   { services: AgentTracesServices; savedTabId?: string },
   { state: RootState }
->('ui/detectAndSetOptimalTab', async (_args, { dispatch }) => {
+>('ui/detectAndSetOptimalTab', async (_args, { getState, dispatch }) => {
+  const { ui } = getState();
+  if (ui.activeTabId) return;
   dispatch(setActiveTab(AGENT_TRACES_TRACES_TAB_ID));
 });

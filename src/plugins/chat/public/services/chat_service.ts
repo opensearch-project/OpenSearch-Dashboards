@@ -8,7 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
-import { ChatLayoutMode } from '../components/chat_header_button';
+import { ChatLayoutMode } from '../types';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
@@ -32,11 +32,6 @@ export interface CurrentChatState {
   threadId: string;
   messages: Message[];
 }
-
-export type ChatWindowStateCallback = (
-  newWindowState: ChatWindowState,
-  changed: { [key in keyof ChatWindowState]: boolean }
-) => void;
 
 export class ChatService {
   private agent: AgUiAgent;
@@ -123,29 +118,6 @@ export class ChatService {
     this.activeRequests.delete(requestId);
   }
 
-  // Window state management - delegate to core service
-  public isWindowOpen(): boolean {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.isWindowOpen();
-  }
-
-  public getWindowState(): ChatWindowState {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.getWindowState();
-  }
-
-  public getWindowMode(): ChatLayoutMode {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    const windowMode = this.coreChatService.getWindowState().windowMode;
-    return windowMode === 'sidecar' ? ChatLayoutMode.SIDECAR : ChatLayoutMode.FULLSCREEN;
-  }
-
   public getPaddingSize(): number {
     if (!this.coreChatService) {
       throw new Error('Core chat service not available');
@@ -153,58 +125,6 @@ export class ChatService {
     const paddingSize = this.coreChatService.getWindowState().paddingSize;
     // Fallback to default if undefined
     return paddingSize ?? 400;
-  }
-
-  public setWindowState(newWindowState: Partial<ChatWindowState>): void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    this.coreChatService.setWindowState(newWindowState);
-  }
-
-  public onWindowStateChange(callback: ChatWindowStateCallback): () => void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-
-    let previousState: ChatWindowState | null = null;
-
-    // Subscribe to core service observable and add change tracking logic
-    const subscription = this.coreChatService.getWindowState$().subscribe((newState) => {
-      if (previousState === null) {
-        previousState = { ...newState };
-        return;
-      }
-
-      // Compare with previous state to determine what changed
-      const changed = {
-        isWindowOpen: previousState.isWindowOpen !== newState.isWindowOpen,
-        windowMode: previousState.windowMode !== newState.windowMode,
-        paddingSize: previousState.paddingSize !== newState.paddingSize,
-      };
-
-      // Only notify if something actually changed
-      if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
-        callback(newState, changed);
-        previousState = { ...newState };
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }
-
-  public onWindowOpenRequest(callback: () => void): () => void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.onWindowOpen(callback);
-  }
-
-  public onWindowCloseRequest(callback: () => void): () => void {
-    if (!this.coreChatService) {
-      throw new Error('Core chat service not available');
-    }
-    return this.coreChatService.onWindowClose(callback);
   }
 
   // ChatWindow instance management for proper timeline handling
@@ -232,7 +152,7 @@ export class ChatService {
     }
 
     // If window is already open and instance is available, return it immediately
-    if (this.isWindowOpen() && this.chatWindowInstance) {
+    if (this.coreChatService.isWindowOpen() && this.chatWindowInstance) {
       return this.chatWindowInstance;
     }
 
