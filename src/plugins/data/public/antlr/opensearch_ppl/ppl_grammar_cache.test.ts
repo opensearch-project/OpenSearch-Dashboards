@@ -21,12 +21,8 @@ const flushPromises = async () => {
 };
 
 const createBundle = (grammarHash = 'sha256:test'): PPLGrammarBundle => ({
-  language: 'ppl',
   bundleVersion: '1.0',
   grammarHash,
-  antlrToolVersion: '4.13.1',
-  antlr4ngVersion: '3.x',
-  grammarFileName: 'OpenSearchPPL.g4',
   startRuleIndex: 0,
   pipeStartRuleIndex: 1,
   lexerSerializedATN: [1, 2, 3],
@@ -43,7 +39,6 @@ const createBundle = (grammarHash = 'sha256:test'): PPLGrammarBundle => ({
   } as Record<string, number>,
   ignoredTokens: [0],
   rulesToVisit: [1],
-  catalogs: {},
 });
 
 describe('ppl_grammar_cache', () => {
