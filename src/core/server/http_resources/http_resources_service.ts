@@ -135,7 +135,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
       const modifications = cspModificationsDynamicConfig?.modifications;
       if (modifications && modifications.length > 0) {
-        modifiedCspHeader = applyCspModifications(modifiedCspHeader.split(/\r?\n/), modifications);
+        modifiedCspHeader = applyCspModifications(modifiedCspHeader.split('; '), modifications);
       }
     } catch (e) {
       // Fall back to default CSP header on error
