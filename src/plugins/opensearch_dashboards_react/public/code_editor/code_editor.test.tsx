@@ -127,11 +127,14 @@ test('editor mount setup', () => {
   // Verify our theme will be setup
   expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
 
-  // Verify our language features have been registered
+  // Verify our language features have been registered.
+  // Providers are registered twice: once directly in render() (for SPA remount)
+  // and once via the onLanguage callback (for first-time language encounter).
+  // The onLanguage callback disposes the first set before re-registering.
   expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
-  expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(2);
+  expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(2);
+  expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(2);
 });
 
 test('suggest controller details visibility is set on editor mount', () => {

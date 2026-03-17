@@ -185,41 +185,47 @@ export class CodeEditor extends React.Component<Props, {}> {
     suggestController.widget.value._setDetailsVisible(true);
   };
 
+  _registerProviders(languageId: string) {
+    this._providerDisposables.forEach((d) => d.dispose());
+    this._providerDisposables = [];
+
+    if (this.props.suggestionProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
+      );
+    }
+
+    if (this.props.signatureProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
+      );
+    }
+
+    if (this.props.hoverProvider) {
+      this._providerDisposables.push(
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
+      );
+    }
+
+    if (this.props.languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+    }
+  }
+
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
 
-    // Cancel any pending onLanguage listener from a previous render to prevent
-    // listener accumulation. When a model change triggers onDidRequestRichLanguageFeatures,
-    // only the latest listener should fire.
     this._onLanguageDisposable?.dispose();
 
+    // Register providers directly so they are available immediately when the
+    // language was already encountered (e.g. after SPA navigation unmount/remount).
+    // onLanguage is one-shot and won't fire again for an already-encountered language.
+    this._registerProviders(languageId);
+
+    // Also listen for the language's first encounter so providers are registered
+    // when a model for this language is created for the very first time.
     this._onLanguageDisposable = monaco.languages.onLanguage(languageId, () => {
-      // Dispose previous providers before registering new ones so that
-      // a model re-creation does not produce duplicate registrations.
-      this._providerDisposables.forEach((d) => d.dispose());
-      this._providerDisposables = [];
-
-      if (this.props.suggestionProvider) {
-        this._providerDisposables.push(
-          monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
-        );
-      }
-
-      if (this.props.signatureProvider) {
-        this._providerDisposables.push(
-          monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider)
-        );
-      }
-
-      if (this.props.hoverProvider) {
-        this._providerDisposables.push(
-          monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
-        );
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
-      }
+      this._registerProviders(languageId);
     });
 
     return (
