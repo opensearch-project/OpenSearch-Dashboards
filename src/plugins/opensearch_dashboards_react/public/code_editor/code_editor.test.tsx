@@ -91,15 +91,15 @@ test('editor mount setup', () => {
 
   const editorWillMount = jest.fn();
 
+  const mockDisposable = { dispose: jest.fn() };
   monaco.languages.onLanguage = jest.fn((languageId, func) => {
     expect(languageId).toBe('loglang');
 
     // Call the function immediately so we can see our providers
     // get setup without a monaco editor setting up completely
     func();
+    return mockDisposable;
   }) as any;
-
-  const mockDisposable = { dispose: jest.fn() };
   monaco.languages.registerCompletionItemProvider = jest.fn().mockReturnValue(mockDisposable);
   monaco.languages.registerSignatureHelpProvider = jest.fn().mockReturnValue(mockDisposable);
   monaco.languages.registerHoverProvider = jest.fn().mockReturnValue(mockDisposable);

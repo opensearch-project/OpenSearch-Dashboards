@@ -123,6 +123,7 @@ export interface Props {
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
   _providerDisposables: monaco.IDisposable[] = [];
+  _onLanguageDisposable: monaco.IDisposable | undefined;
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -187,7 +188,17 @@ export class CodeEditor extends React.Component<Props, {}> {
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
 
-    monaco.languages.onLanguage(languageId, () => {
+    // Cancel any pending onLanguage listener from a previous render to prevent
+    // listener accumulation. When a model change triggers onDidRequestRichLanguageFeatures,
+    // only the latest listener should fire.
+    this._onLanguageDisposable?.dispose();
+
+    this._onLanguageDisposable = monaco.languages.onLanguage(languageId, () => {
+      // Dispose previous providers before registering new ones so that
+      // a model re-creation does not produce duplicate registrations.
+      this._providerDisposables.forEach((d) => d.dispose());
+      this._providerDisposables = [];
+
       if (this.props.suggestionProvider) {
         this._providerDisposables.push(
           monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider)
@@ -230,6 +241,7 @@ export class CodeEditor extends React.Component<Props, {}> {
   }
 
   componentWillUnmount() {
+    this._onLanguageDisposable?.dispose();
     this._providerDisposables.forEach((d) => d.dispose());
     this._providerDisposables = [];
   }
