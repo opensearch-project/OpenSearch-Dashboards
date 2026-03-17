@@ -90,24 +90,37 @@ jobs:
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Run bootstrap (Windows)
         if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
-      # Run with parallel workers instead of --runInBand for faster execution.
       # Linux: include coverage for Codecov reporting.
       # Windows: skip coverage to avoid ~2x overhead; Linux results are sufficient for coverage.
       - name: Run unit tests group ${{ matrix.group }} with coverage (Linux)
         if: matrix.os != 'windows-latest'
         id: unit-tests
-        run: node scripts/jest --ci --colors --maxWorkers=4 --coverage --ci-group=${{ matrix.group }}
+        run: node scripts/jest --ci --colors --runInBand --coverage --ci-group=${{ matrix.group }}
 
       - name: Run unit tests group ${{ matrix.group }} (Windows)
         if: matrix.os == 'windows-latest'
         id: unit-tests-windows
-        run: node scripts/jest --ci --colors --maxWorkers=4 --ci-group=${{ matrix.group }}
+        run: node scripts/jest --ci --colors --runInBand --ci-group=${{ matrix.group }}
 
       - name: Run mocha tests with coverage
         # ciGroup 1 of unit-tests is shorter
@@ -181,7 +194,14 @@ jobs:
             yarn-
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Check for yarn.lock changes
         run: |
@@ -312,11 +332,25 @@ jobs:
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Run bootstrap (Windows)
         if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
@@ -427,11 +461,25 @@ jobs:
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Run bootstrap (Windows)
         if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
@@ -548,7 +596,14 @@ jobs:
           echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build `${{ matrix.name }}`
         run: yarn ${{ matrix.script }} --release
@@ -654,67 +709,3 @@ jobs:
           retention-days: 1
           overwrite: true
 
-  pr-test-results-comment:
-    name: Post test results to PR
-    needs: [build-test]
-    # Run on every PR push so failures are reported and previous failure comments
-    # are cleared when tests go green. Skipped on push-to-branch (no PR to comment on).
-    if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download JUnit artifacts
-        if: needs.build-test.result == 'failure'
-        uses: actions/download-artifact@v4
-        with:
-          # Matches junit-jest-group1-Linux, junit-jest-group2-Windows, etc.
-          # Each artifact lands in its own subdirectory; the script recurses into all of them.
-          pattern: junit-jest-group*
-          path: downloaded-junit
-
-      - name: Build failure comment body
-        if: needs.build-test.result == 'failure'
-        shell: bash
-        run: |
-          {
-            echo "<!-- ci-test-failure-summary -->"
-            echo "> 🔗 [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) · commit \`${{ github.event.pull_request.head.sha }}\`"
-            echo ""
-            # Unset GITHUB_STEP_SUMMARY so the script writes to stdout instead
-            GITHUB_STEP_SUMMARY="" node scripts/summarize_jest_failures.js --dir=downloaded-junit
-          } > pr-comment.md
-
-      - name: Build success comment body
-        if: needs.build-test.result == 'success'
-        shell: bash
-        run: |
-          {
-            echo "<!-- ci-test-failure-summary -->"
-            echo "## ✅ All unit tests passing"
-            echo ""
-            echo "> 🔗 [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) · commit \`${{ github.event.pull_request.head.sha }}\`"
-          } > pr-comment.md
-
-      - name: Find existing comment
-        id: find-comment
-        uses: peter-evans/find-comment@v3
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '<!-- ci-test-failure-summary -->'
-
-      # Post a new comment on first failure, update it on subsequent runs.
-      # On success, only update if a failure comment already exists (avoids
-      # posting a green banner on every PR that never had a failure).
-      - name: Post or update PR comment
-        if: needs.build-test.result == 'failure' || steps.find-comment.outputs.comment-id != ''
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body-path: pr-comment.md
-          edit-mode: replace

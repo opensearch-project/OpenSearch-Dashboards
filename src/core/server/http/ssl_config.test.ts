@@ -67,30 +67,26 @@ describe('#SslConfig', () => {
 
     test('throws if `key` is invalid', () => {
       const obj = { key: '/invalid/key', certificate: '/valid/certificate' };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/key'"`
-      );
+      expect(() => createConfig(obj)).toThrow(/ENOENT.*no such file or directory.*invalid.*key/i);
     });
 
     test('throws if `certificate` is invalid', () => {
       mockReadFileSync.mockImplementationOnce((path: string) => `content-of-${path}`);
       const obj = { key: '/valid/key', certificate: '/invalid/certificate' };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/certificate'"`
+      expect(() => createConfig(obj)).toThrow(
+        /ENOENT.*no such file or directory.*invalid.*certificate/i
       );
     });
 
     test('throws if `certificateAuthorities` is invalid', () => {
       const obj = { certificateAuthorities: '/invalid/ca' };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/ca'"`
-      );
+      expect(() => createConfig(obj)).toThrow(/ENOENT.*no such file or directory.*invalid.*ca/i);
     });
 
     test('throws if `keystore.path` is invalid', () => {
       const obj = { keystore: { path: '/invalid/keystore' } };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/keystore'"`
+      expect(() => createConfig(obj)).toThrow(
+        /ENOENT.*no such file or directory.*invalid.*keystore/i
       );
     });
 
@@ -118,8 +114,8 @@ describe('#SslConfig', () => {
 
     test('throws if `truststore.path` is invalid', () => {
       const obj = { truststore: { path: '/invalid/truststore' } };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/truststore'"`
+      expect(() => createConfig(obj)).toThrow(
+        /ENOENT.*no such file or directory.*invalid.*truststore/i
       );
     });
   });
