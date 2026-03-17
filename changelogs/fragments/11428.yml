@@ -1,0 +1,5 @@
+feat:
+- Adopt backend grammar bundle as runtime source for PPL autocomplete ([#11428](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11428))
+
+fix:
+- Re-register Monaco providers after SPA navigation to prevent lost suggestions ([#11428](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11428))
