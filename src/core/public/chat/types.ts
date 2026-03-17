@@ -134,6 +134,7 @@ export interface ChatServiceInterface {
   getThreadId$(): Observable<string | undefined>;
   getThreadId(): string | undefined;
   setThreadId(threadId: string): void;
+  resetThreadId(): void;
   newThread(): void;
 
   /**

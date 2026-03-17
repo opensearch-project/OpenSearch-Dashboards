@@ -119,6 +119,10 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         this.threadId$.next(threadId);
       },
 
+      resetThreadId: () => {
+        this.threadId$.next(undefined);
+      },
+
       newThread: () => {
         const newThreadId = this.generateThreadId();
         this.threadId$.next(newThreadId);

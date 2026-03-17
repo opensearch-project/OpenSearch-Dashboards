@@ -886,6 +886,21 @@ describe('ChatWindow', () => {
       expect(() => unmount()).not.toThrow();
     });
 
+    it('should reset thread ID on unmount to avoid restore latest logic issues', () => {
+      mockCore.chat.resetThreadId = jest.fn();
+
+      const { unmount } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Verify resetThreadId has not been called yet
+      expect(mockCore.chat.resetThreadId).not.toHaveBeenCalled();
+
+      // Unmount the component
+      unmount();
+
+      // Verify resetThreadId was called on unmount
+      expect(mockCore.chat.resetThreadId).toHaveBeenCalledTimes(1);
+    });
+
     it('should subscribe to tool updates on mount', () => {
       // Mock the AssistantActionService getInstance method
       const mockGetState = jest.fn(() => mockObservable);

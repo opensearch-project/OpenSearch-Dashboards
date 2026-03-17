@@ -145,6 +145,27 @@ describe('ChatService', () => {
       expect(anotherThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
     });
 
+    it('should reset thread ID to undefined', () => {
+      const startContract = service.start();
+
+      // Create a new thread first
+      startContract.newThread();
+      const threadId = startContract.getThreadId();
+      expect(threadId).toBeDefined();
+      expect(threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+
+      // Track observable emissions
+      let emittedThreadId: string | undefined = threadId;
+      startContract.getThreadId$().subscribe((id) => (emittedThreadId = id));
+
+      // Reset thread ID
+      startContract.resetThreadId();
+
+      // Verify thread ID is now undefined
+      expect(startContract.getThreadId()).toBeUndefined();
+      expect(emittedThreadId).toBeUndefined();
+    });
+
     it('should manage window state in core', () => {
       const startContract = service.start();
 

@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
+import { useUnmount } from 'react-use';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
@@ -241,6 +242,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       chatService.saveConversation(timeline);
     }
   }, [timeline, chatService, isLoading]);
+
+  // Clear thread ID so next mount can restore the latest conversation
+  useUnmount(() => {
+    services.core.chat.resetThreadId()
+  });
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
