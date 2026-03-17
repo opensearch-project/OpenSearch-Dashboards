@@ -97,7 +97,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     request: OpenSearchDashboardsRequest,
     response: OpenSearchDashboardsResponseFactory
   ): Promise<HttpResourcesServiceToolkit> {
-    const cspHeader = deps.http.csp.header;
+    const csp = deps.http.csp;
     const cspReportOnly = deps.http.cspReportOnly;
 
     let cspReportOnlyIsEmitting: boolean;
@@ -123,7 +123,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         }
       : {};
 
-    let modifiedCspHeader = cspHeader;
+    let modifiedCspHeader = csp.strict ? csp.buildHeaderWithNonce(nonce) : csp.header;
     try {
       const dynamicConfigClient = context.core.dynamicConfig.client;
       const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
@@ -135,7 +135,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
       const modifications = cspModificationsDynamicConfig?.modifications;
       if (modifications && modifications.length > 0) {
-        modifiedCspHeader = applyCspModifications(deps.http.csp.rules, modifications);
+        modifiedCspHeader = applyCspModifications(modifiedCspHeader.split(/\r?\n/), modifications);
       }
     } catch (e) {
       // Fall back to default CSP header on error
