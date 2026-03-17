@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
-import { visualizationRegistry } from '../visualization_registry';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { BarGaugeVisStyleControls } from './bar_gauge_vis_options';
 import { TitleOptions, AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
+import { createBarGaugeSpec } from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface ExclusiveBarGaugeConfig {
   orientation: 'vertical' | 'horizontal';
@@ -56,22 +57,36 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
   name: 'Bar Gauge',
   icon: 'visBarHorizontal',
   type: 'bar_gauge',
+  getRules: () => {
+    const rules: Array<VisRule<'bar_gauge'>> = [
+      {
+        priority: 80,
+        mappings: [
+          {
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.X]: { type: VisFieldType.Categorical },
+          },
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Categorical },
+          },
+        ],
+        render(props) {
+          const spec = createBarGaugeSpec(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultBarGaugeChartStyles,
       render: (props) => React.createElement(BarGaugeVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-      },
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
-      },
-    ],
   },
 });
-
-visualizationRegistry.registerVisualization(createBarGaugeConfig());

@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationRegistry } from '../components/visualizations/visualization_registry';
-import { VisualizationRule } from '../components/visualizations/types';
+import {
+  visualizationRegistry,
+  VisualizationRegistry,
+} from '../components/visualizations/visualization_registry';
+import { VisualizationType } from '../components/visualizations/utils/use_visualization_types';
 
 /**
  * Service interface for the visualization registry
@@ -12,65 +15,48 @@ import { VisualizationRule } from '../components/visualizations/types';
  */
 export interface VisualizationRegistryServiceSetup {
   /**
-   * Register a new visualization rule
-   * @param rule The visualization rule to register
+   * Register a new visualization
    */
-  registerRule: (rule: VisualizationRule) => void;
-
-  /**
-   * Register multiple visualization rules
-   * @param rules The visualization rules to register
-   */
-  registerRules: (rules: VisualizationRule[]) => void;
+  registerVisualization: (
+    visualization: VisualizationType<any> | Array<VisualizationType<any>>
+  ) => void;
 }
 
 export interface VisualizationRegistryServiceStart {
   /**
-   * Register a new visualization rule
-   * @param rule The visualization rule to register
+   * Register a new visualization
    */
-  registerRule: (rule: VisualizationRule) => void;
+  registerVisualization: (visualization: VisualizationType<any>) => void;
 
   /**
-   * Register multiple visualization rules
-   * @param rules The visualization rules to register
+   * Get a visualization by type
    */
-  registerRules: (rules: VisualizationRule[]) => void;
-
-  /**
-   * Get all registered visualization rules
-   */
-  getRules: () => VisualizationRule[];
+  getVisualization: (chartType: string) => VisualizationType<any> | undefined;
 }
 
 export class VisualizationRegistryService {
   private readonly registry: VisualizationRegistry;
 
   constructor() {
-    this.registry = new VisualizationRegistry();
+    // TODO: refactor this to not rely on this visualizationRegistry singleton
+    this.registry = visualizationRegistry;
   }
 
   public setup(): VisualizationRegistryServiceSetup {
     return {
-      registerRule: (rule: VisualizationRule) => {
-        this.registry.registerRule(rule);
-      },
-      registerRules: (rules: VisualizationRule[]) => {
-        this.registry.registerRules(rules);
+      registerVisualization: (visualization) => {
+        this.registry.registerVisualization(visualization);
       },
     };
   }
 
   public start(): VisualizationRegistryServiceStart {
     return {
-      registerRule: (rule: VisualizationRule) => {
-        this.registry.registerRule(rule);
+      registerVisualization: (visualization) => {
+        this.registry.registerVisualization(visualization);
       },
-      registerRules: (rules: VisualizationRule[]) => {
-        this.registry.registerRules(rules);
-      },
-      getRules: () => {
-        return this.registry.getRules();
+      getVisualization: (chartType) => {
+        return this.registry.getVisualization(chartType);
       },
     };
   }

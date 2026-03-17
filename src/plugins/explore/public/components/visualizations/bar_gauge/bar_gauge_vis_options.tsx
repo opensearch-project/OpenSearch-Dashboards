@@ -27,8 +27,6 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {

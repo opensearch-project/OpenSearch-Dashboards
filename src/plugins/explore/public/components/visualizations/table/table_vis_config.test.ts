@@ -23,7 +23,6 @@ describe('table_vis_config', () => {
       // Check the UI configuration
       expect(config.ui).toBeDefined();
       expect(config.ui.style).toBeDefined();
-      expect(config.ui.availableMappings).toEqual([]);
 
       // Check the style defaults
       expect(config.ui.style.defaults).toBeDefined();

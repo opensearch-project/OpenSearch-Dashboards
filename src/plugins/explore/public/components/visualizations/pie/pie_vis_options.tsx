@@ -22,8 +22,6 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {

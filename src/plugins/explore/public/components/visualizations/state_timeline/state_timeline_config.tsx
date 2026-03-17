@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { visualizationRegistry } from '../visualization_registry';
 import { StateTimeLineVisStyleControls } from './state_timeline_vis_options';
 import {
@@ -22,6 +22,13 @@ import {
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
+import {
+  createNumericalStateTimeline,
+  createCategoricalStateTimeline,
+  createSingleCategoricalStateTimeline,
+  createSingleNumericalStateTimeline,
+} from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface ExclusiveStateTimeLineConfig {
   showValues?: boolean;
@@ -110,33 +117,85 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
   name: 'State timeline',
   type: 'state_timeline',
   icon: 'visBarHorizontal',
+  getRules: () => {
+    const rules: Array<VisRule<'state_timeline'>> = [
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date },
+            [AxisRole.Y]: { type: VisFieldType.Categorical },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createNumericalStateTimeline(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+        },
+      },
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date },
+            [AxisRole.Y]: { type: VisFieldType.Categorical },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+          },
+        ],
+        render(props) {
+          const spec = createCategoricalStateTimeline(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+        },
+      },
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+          },
+        ],
+        render(props) {
+          const spec = createSingleCategoricalStateTimeline(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+        },
+      },
+      {
+        priority: 40,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Date },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createSingleNumericalStateTimeline(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultStateTimeLineChartStyles,
       render: (props) => React.createElement(StateTimeLineVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
-        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
-      },
-
-      {
-        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
-        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
-      },
-      {
-        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-      },
-      {
-        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
-      },
-    ],
   },
 });
-
-visualizationRegistry.registerVisualization(createStateTimelineConfig());

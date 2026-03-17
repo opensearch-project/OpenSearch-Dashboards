@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { visualizationRegistry } from '../visualization_registry';
 import { ScatterVisStyleControls } from './scatter_vis_options';
 import {
@@ -19,6 +19,12 @@ import {
   ThresholdOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
+import {
+  createTwoMetricScatter,
+  createTwoMetricOneCateScatter,
+  createThreeMetricOneCateScatter,
+} from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -87,29 +93,69 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
   name: 'Scatter',
   icon: '',
   type: 'scatter',
+  getRules: () => {
+    const rules: Array<VisRule<'scatter'>> = [
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createTwoMetricScatter(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} />;
+        },
+      },
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+          },
+        ],
+        render(props) {
+          const spec = createTwoMetricOneCateScatter(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} />;
+        },
+      },
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+            [AxisRole.SIZE]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createThreeMetricOneCateScatter(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultScatterChartStyles,
       render: (props) => React.createElement(ScatterVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-      },
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-      },
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-        [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 2 },
-      },
-    ],
   },
 });
-
-visualizationRegistry.registerVisualization(createScatterConfig());

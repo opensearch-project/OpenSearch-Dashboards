@@ -17,9 +17,6 @@ import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
 import { SAMPLE_SIZE_SETTING } from '../../common';
-import { EchartsRender } from '../components/visualizations/echarts_render';
-import { MetricChartRender } from '../components/visualizations/metric/metric_component';
-import { MetricChartStyle } from '../components/visualizations/metric/metric_vis_config';
 
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
@@ -117,19 +114,8 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       );
     }
 
-    if (searchProps.spec) {
-      if (searchProps.chartType === 'metric') {
-        return (
-          <MetricChartRender
-            spec={searchProps.spec}
-            styles={searchProps.styleOptions as MetricChartStyle}
-            axisColumnMappings={searchProps.axisColumnMappings}
-          />
-        );
-      }
-      return (
-        <EchartsRender spec={searchProps.spec} onSelectTimeRange={searchProps.onSelectTimeRange} />
-      );
+    if (searchProps.chartRender) {
+      return searchProps.chartRender();
     }
 
     return null;

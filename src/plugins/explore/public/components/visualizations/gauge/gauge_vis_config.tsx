@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
-import { visualizationRegistry } from '../visualization_registry';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { GaugeVisStyleControls } from './gauge_vis_options';
 import { ThresholdOptions, AxisRole, VisFieldType, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
+import { createGauge } from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface GaugeChartStyleOptions {
   showTitle?: boolean;
@@ -51,17 +52,31 @@ export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
   name: 'Gauge',
   icon: 'visGauge',
   type: 'gauge',
+  getRules: () => {
+    const rules: Array<VisRule<'gauge'>> = [
+      {
+        priority: 80,
+        mappings: [
+          {
+            [AxisRole.Value]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createGauge(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec ?? {}} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultGaugeChartStyles,
       render: (props) => React.createElement(GaugeVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.Value]: { type: VisFieldType.Numerical, index: 0 },
-      },
-    ],
   },
 });
-
-visualizationRegistry.registerVisualization(createGaugeConfig());

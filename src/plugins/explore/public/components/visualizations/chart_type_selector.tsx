@@ -13,8 +13,7 @@ import {
   EuiText,
   EuiPanel,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { VisualizationRule } from './types';
+import React, { useMemo } from 'react';
 import { ChartType } from './utils/use_visualization_types';
 import { VisData } from './visualization_builder.types';
 import { visualizationRegistry } from './visualization_registry';
@@ -30,7 +29,6 @@ interface AvailableChartTypeOption {
   inputDisplay: React.ReactNode;
   iconType?: string;
   disabled?: boolean;
-  rules: Array<Partial<VisualizationRule>>;
 }
 
 // TODO: refactor ChartTypeSelector a dumb component so that it won't compute the disabled options internally
@@ -39,86 +37,31 @@ export const ChartTypeSelector = <T extends ChartType>({
   onChartTypeChange,
   chartType,
 }: ChartTypeSelectorProps<T>) => {
-  // Indicates no rule is matched and the user should manually generate the visualization
-  const shouldManuallyGenerate = useRef(!Boolean(chartType));
-  const [currChartTypeId, setCurrChartTypeId] = useState(chartType);
-
-  useEffect(() => {
-    setCurrChartTypeId(chartType);
-  }, [chartType]);
-
   // Map columns to add value and text fields for select component
   const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
 
-  // Get icon type based on chart type
-  const getChartIconType = (type: string): string => {
-    return visualizationRegistry.getVisualization(type)?.icon ?? '';
-  };
-
-  // Create base mapping once with all visualization rules
-  const baseChartTypeMapping = useMemo(() => {
-    return visualizationRegistry.getRules().reduce((acc, rule) => {
-      rule.chartTypes.forEach(({ type, name }) => {
-        if (!acc[type]) {
-          const iconType = getChartIconType(type);
-          acc[type] = {
-            value: type,
-            inputDisplay: name,
-            iconType,
-            rules: [],
-          };
-        }
-        acc[type].rules.push({ ...rule });
-      });
+  const chartTypeMappedOptions = useMemo(() => {
+    return visualizationRegistry.getAvailableChartTypes().reduce((acc, metadata) => {
+      if (!acc[metadata.type]) {
+        const { all } = visualizationRegistry.findRulesByColumns(
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          metadata.type
+        );
+        acc[metadata.type] = {
+          value: metadata.type,
+          inputDisplay: metadata.name,
+          iconType: metadata.icon,
+          disabled: all.length === 0 && metadata.type !== 'table',
+        };
+      }
       return acc;
     }, {} as Record<string, AvailableChartTypeOption>);
-  }, []); // Only calculate once
-
-  // Process chart types to mark unavailable ones as disabled
-  const chartTypeMappedOptions = useMemo(() => {
-    // First, filter rules for each chart type based on current selected columns
-    const processed = Object.fromEntries(
-      Object.entries(baseChartTypeMapping).map(([type, option]) => {
-        const filteredRules = option.rules.filter((rule) => {
-          if (rule.matches?.(numericalColumns, categoricalColumns, dateColumns) === 'NOT_MATCH') {
-            return false;
-          }
-          return true;
-        });
-
-        // Mark chart type as disabled if it has no valid rules
-        const isDisabled = filteredRules.length === 0;
-
-        return [
-          type,
-          {
-            inputDisplay: option.inputDisplay,
-            value: option.value,
-            iconType: option.iconType,
-            disabled: isDisabled,
-          },
-        ];
-      })
-    );
-
-    return processed;
-  }, [baseChartTypeMapping, numericalColumns, categoricalColumns, dateColumns]);
+  }, [numericalColumns, categoricalColumns, dateColumns]);
 
   const selectOptions = useMemo(() => {
-    const allTypes = [
-      ...Object.values(chartTypeMappedOptions).map((t) => ({
-        value: t.value,
-        disabled: t.disabled,
-        inputDisplay: t.inputDisplay,
-        iconType: t.iconType,
-      })),
-      {
-        value: 'table',
-        iconType: getChartIconType('table'),
-        disabled: false,
-        inputDisplay: 'Table',
-      },
-    ];
+    const allTypes = [...Object.values(chartTypeMappedOptions)];
     const options = allTypes.map((option) => ({
       value: option.value,
       disabled: option.disabled,
@@ -146,11 +89,8 @@ export const ChartTypeSelector = <T extends ChartType>({
     return options;
   }, [chartTypeMappedOptions]);
 
-  const updateChartTypeSelection = (chartTypeId: ChartType) => {
-    shouldManuallyGenerate.current = true;
-
-    onChartTypeChange?.(chartTypeId);
-    setCurrChartTypeId(chartTypeId);
+  const updateChartTypeSelection = (type: ChartType) => {
+    onChartTypeChange?.(type);
   };
 
   if (!visualizationData || !Boolean(Object.keys(chartTypeMappedOptions).length)) return null;
@@ -167,8 +107,7 @@ export const ChartTypeSelector = <T extends ChartType>({
           id="chartType"
           data-test-subj="exploreChartTypeSelector"
           compressed
-          valueOfSelected={currChartTypeId || ''}
-          placeholder="Select a visualization type"
+          valueOfSelected={chartType || ''}
           options={selectOptions}
           onChange={(value) => {
             updateChartTypeSelection(value as ChartType);

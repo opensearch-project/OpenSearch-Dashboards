@@ -338,6 +338,6 @@ export interface ConnectNullValuesOption {
 
 export interface RendererSpecConfig {
   spec?: echarts.EChartsOption;
-  name: string;
+  name?: string;
   data: Array<Record<string, any>>;
 }

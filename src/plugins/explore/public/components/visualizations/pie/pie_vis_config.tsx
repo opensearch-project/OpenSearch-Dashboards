@@ -4,11 +4,12 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
-import { visualizationRegistry } from '../visualization_registry';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
 import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
+import { createPieSpec } from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface PieExclusiveStyleOptions {
   donut?: boolean;
@@ -62,22 +63,49 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
   name: 'Pie',
   icon: 'visPie',
   type: 'pie',
+  getRules: () => {
+    const rules: Array<VisRule<'pie'>> = [
+      {
+        priority: 60,
+        mappings: [
+          {
+            [AxisRole.SIZE]: { type: VisFieldType.Numerical },
+            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+          },
+        ],
+        render(props) {
+          const spec = createPieSpec(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec ?? {}} />;
+        },
+      },
+      {
+        priority: 40,
+        mappings: [
+          {
+            [AxisRole.SIZE]: { type: VisFieldType.Numerical },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createPieSpec(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec ?? {}} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultPieChartStyles,
       render: (props) => React.createElement(PieVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-      },
-      {
-        [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
-      },
-    ],
   },
 });
-
-visualizationRegistry.registerVisualization(createPieConfig());
