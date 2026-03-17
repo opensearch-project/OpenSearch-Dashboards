@@ -9,10 +9,14 @@ import { ChartsPluginStart } from '../../charts/public';
 import { ChatService } from './services/chat_service';
 import { SuggestedActionsServiceSetupContract } from './services/suggested_action';
 import { CommandRegistrySetup } from './services/command_registry_service';
+import { StarterSuggestionItem } from './services/starter_suggestions_registry';
+
+export type { StarterSuggestionItem };
 
 export interface ChatPluginSetup {
   suggestedActionsService: SuggestedActionsServiceSetupContract;
   commandRegistry: CommandRegistrySetup;
+  registerStarterSuggestions: (appId: string, suggestions: StarterSuggestionItem[]) => void;
 }
 
 export interface ChatPluginStart {

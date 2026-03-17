@@ -9,6 +9,7 @@ import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from './chat_header_button';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
 import { convertTimelineToMessageRows } from './chat_messages';
+import { starterSuggestionsRegistry } from '../services/starter_suggestions_registry';
 
 // Mock the child components
 jest.mock('./message_row', () => ({
@@ -408,8 +409,18 @@ describe('ChatMessages', () => {
 
   describe('context-aware starter suggestions', () => {
     const mockUnsubscribe = jest.fn();
+    const customSuggestions = [
+      {
+        icon: 'visBarVerticalStacked',
+        iconColor: 'primary',
+        text: 'Compare configurations',
+        prompt: 'Compare',
+      },
+      { icon: 'starFilled', iconColor: 'warning', text: 'Evaluate quality', prompt: 'Evaluate' },
+    ];
 
     afterEach(() => {
+      starterSuggestionsRegistry.unregister('testApp');
       delete (window as any).assistantContextStore;
     });
 
@@ -421,9 +432,15 @@ describe('ChatMessages', () => {
       expect(getByText('Explain a concept')).toBeTruthy();
     });
 
-    it('should show default suggestions when context store has no matching appId', () => {
+    it('should show default suggestions when context store has no matching appId in registry', () => {
       (window as any).assistantContextStore = {
-        getContextsByCategory: jest.fn().mockReturnValue([]),
+        getContextsByCategory: jest.fn().mockReturnValue([
+          {
+            description: 'Page context for /app/unknownApp',
+            value: JSON.stringify({ appId: 'unknownApp', breadcrumbs: [] }),
+            label: 'Page: /app/unknownApp',
+          },
+        ]),
         subscribe: jest.fn().mockReturnValue(mockUnsubscribe),
       };
 
@@ -432,13 +449,14 @@ describe('ChatMessages', () => {
       expect(getByText('Ask questions about your data')).toBeTruthy();
     });
 
-    it('should show search relevance suggestions when appId is searchRelevance', () => {
+    it('should show registered suggestions when appId matches a registry entry', () => {
+      starterSuggestionsRegistry.register('testApp', customSuggestions);
       (window as any).assistantContextStore = {
         getContextsByCategory: jest.fn().mockReturnValue([
           {
-            description: 'Page context for /app/searchRelevance',
-            value: JSON.stringify({ appId: 'searchRelevance', breadcrumbs: [] }),
-            label: 'Page: /app/searchRelevance',
+            description: 'Page context for /app/testApp',
+            value: JSON.stringify({ appId: 'testApp', breadcrumbs: [] }),
+            label: 'Page: /app/testApp',
           },
         ]),
         subscribe: jest.fn().mockReturnValue(mockUnsubscribe),
@@ -446,13 +464,14 @@ describe('ChatMessages', () => {
 
       const { getByText, queryByText } = render(<ChatMessages {...defaultProps} />);
 
-      expect(getByText('Compare two search configurations')).toBeTruthy();
-      expect(getByText('Evaluate search quality')).toBeTruthy();
-      expect(getByText('Create a query set')).toBeTruthy();
+      expect(getByText('Compare configurations')).toBeTruthy();
+      expect(getByText('Evaluate quality')).toBeTruthy();
       expect(queryByText('Ask questions about your data')).toBeNull();
     });
 
     it('should update suggestions reactively when context store emits a change', () => {
+      starterSuggestionsRegistry.register('testApp', customSuggestions);
+
       let subscriberCallback: () => void;
       const mockStore = {
         getContextsByCategory: jest.fn().mockReturnValue([]),
@@ -469,9 +488,9 @@ describe('ChatMessages', () => {
 
       mockStore.getContextsByCategory.mockReturnValue([
         {
-          description: 'Page context for /app/searchRelevance',
-          value: JSON.stringify({ appId: 'searchRelevance', breadcrumbs: [] }),
-          label: 'Page: /app/searchRelevance',
+          description: 'Page context for /app/testApp',
+          value: JSON.stringify({ appId: 'testApp', breadcrumbs: [] }),
+          label: 'Page: /app/testApp',
         },
       ]);
 
@@ -479,7 +498,7 @@ describe('ChatMessages', () => {
         subscriberCallback!();
       });
 
-      expect(getByText('Compare two search configurations')).toBeTruthy();
+      expect(getByText('Compare configurations')).toBeTruthy();
       expect(queryByText('Ask questions about your data')).toBeNull();
     });
 
