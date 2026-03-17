@@ -29,7 +29,6 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   { state: RootState }
 >('ui/detectAndSetOptimalTab', async ({ services }, { getState, dispatch }) => {
   const state = getState();
-  if (state.ui.activeTabId) return;
   const queryString = typeof state.query.query === 'string' ? state.query.query : '';
 
   if (hasStatsPipe(queryString)) {

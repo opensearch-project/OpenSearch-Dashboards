@@ -8,6 +8,7 @@ import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore
 import { prepareTestSuite, createWorkspaceWithDatasource } from '../../../../../../utils/helpers';
 
 const AGENT_TRACES_INDEX_PATTERN = 'agent_traces_cy_test*';
+const AGENT_TRACES_INDEX_PATTERN_ALT = 'agent_traces_cy_tes*';
 const AGENT_TRACES_TIME_FIELD = 'startTime';
 const AGENT_TRACES_START = 'Sep 1, 2026 @ 00:00:00.000';
 const AGENT_TRACES_END = 'Oct 1, 2026 @ 00:00:00.000';
@@ -258,6 +259,34 @@ const agentTracesTestSuite = () => {
       cy.osd.setTopNavDate(AGENT_TRACES_START, AGENT_TRACES_END);
 
       cy.getElementByTestId('embeddedSavedAgentTraces', { timeout: 30000 }).should('be.visible');
+    });
+
+    it('should display traces immediately after switching datasets', () => {
+      selectDatasetAndWaitForData();
+
+      cy.get('.agentTracesTable__container .agentTraces-table tbody tr', {
+        timeout: 15000,
+      }).should('have.length.greaterThan', 0);
+
+      cy.explore.setIndexPatternFromAdvancedSelector(
+        AGENT_TRACES_INDEX_PATTERN_ALT,
+        DATASOURCE_NAME,
+        undefined,
+        AGENT_TRACES_TIME_FIELD
+      );
+
+      cy.getElementByTestId('datasetSelectButton').should(
+        'contain.text',
+        AGENT_TRACES_INDEX_PATTERN_ALT
+      );
+
+      cy.get('.agentTracesTable__container .agentTraces-table tbody tr', {
+        timeout: 15000,
+      }).should('have.length.greaterThan', 0);
+
+      cy.getElementByTestId('agentTracesTabs')
+        .find('.euiTab-isSelected .euiTab__content')
+        .should('contain.text', 'Traces');
     });
   });
 };
