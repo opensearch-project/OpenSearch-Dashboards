@@ -47,8 +47,6 @@ const INFERRED_RUNTIME_FUNCTION_DETAILS: KeywordSuggestionDetails = {
 /** Sentinel for "rule not found". -1 avoids collision with 0-based rule indices. */
 const INVALID_RULE_INDEX = -1;
 
-// ─── C3 cache isolation for runtime grammars ──────────────────────────────────
-
 const _runtimeC3BucketsByGrammarHash = new Map<string, unknown>();
 let _activeRuntimeC3GrammarHash: string | undefined;
 let _activeRuntimeC3ParserKey: string | undefined;
@@ -85,8 +83,6 @@ function isolateC3CacheForRuntimeGrammar(grammarHash: string, parser: ParserInte
   _activeRuntimeC3GrammarHash = grammarHash;
   _activeRuntimeC3ParserKey = parserKey;
 }
-
-// ─── Keyword suggestion details resolution ────────────────────────────────────
 
 const _keywordDetailsByLiteral = new Map<string, KeywordSuggestionDetails>();
 const _keywordDetailsBySymbolic = new Map<string, KeywordSuggestionDetails>();
@@ -212,8 +208,6 @@ export function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
   return !/^[=!<>+*\/%&|~^\\-]+$/.test(value);
 }
 
-// ─── Grammar resolution helpers ────────────────────────────────────────────────
-
 /**
  * Resolve the whitespace token type from the grammar.
  * Tries WHITESPACE, SPACE, and WS in order (backend vs compiled naming).
@@ -315,8 +309,6 @@ export function pickStartRuleIndex(query: string, grammar: CachedGrammar): numbe
   return grammar.startRuleIndex ?? 0;
 }
 
-// ─── C3 preferred rules logic ──────────────────────────────────────────────────
-
 /**
  * C3 preferred rules: rules we want as rule candidates instead of exploding
  * into many token candidates. Three categories:
@@ -332,7 +324,6 @@ export function pickStartRuleIndex(query: string, grammar: CachedGrammar): numbe
  * that introduce new structural rules may need additions here.
  */
 const PREFERRED_RULE_NAMES: readonly string[] = [
-  // ── Leaf concepts ──
   'qualifiedName',
   'wcQualifiedName',
   'tableQualifiedName',
@@ -341,15 +332,12 @@ const PREFERRED_RULE_NAMES: readonly string[] = [
   'stringLiteral',
   'integerLiteral',
   'decimalLiteral',
-  // ── Expression rule that gates field suggestions ──
   'fieldExpression',
-  // ── Noise suppression ──
   'keywordsCanBeId',
   'searchableKeyWord',
   'takeAggFunction',
   'positionFunctionName',
   'sqlLikeJoinType',
-  // ── Structural rules ──
   'searchCommand',
   'comparisonOperator',
   'searchComparisonOperator',
@@ -459,8 +447,6 @@ function getGenericPreferredRuleReruns(
   }
   return rerun;
 }
-
-// ─── Runtime token-stream helpers (name-based, no compiled constants) ─────────
 
 /**
  * Check if a token is effectively whitespace. Also matches tokens that
@@ -617,8 +603,6 @@ function getRuntimeOperatorTokens(grammar: CachedGrammar): Set<number> {
   _operatorTokenCache.set(grammar.grammarHash, set);
   return set;
 }
-
-// ─── Runtime result enrichment ─────────────────────────────────────────────────
 
 /**
  * Enrich autocomplete results using runtime grammar rule/token names.
@@ -852,8 +836,6 @@ export function enrichRuntimeResult(
   };
 }
 
-// ─── Main entry point ──────────────────────────────────────────────────────────
-
 /**
  * Try runtime grammar suggestions using cached backend grammar metadata.
  * Returns null if grammar is not cached — caller falls through to compiled grammar path.
@@ -1002,7 +984,6 @@ export function tryRuntimeGrammarSuggestions(
       core.preferredRules = savedPreferred;
     }
 
-    // ─── Build keyword suggestions from token candidates ──────────────────
     const suggestKeywords: KeywordSuggestion[] = [];
     const inRuntimeFunctionContext = isRuntimeFunctionRuleContext(grammar, rules);
     const openingParenToken = tokenTypeBySymbolic(grammar, 'LT_PRTHS');

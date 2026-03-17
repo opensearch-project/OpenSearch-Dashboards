@@ -1104,8 +1104,6 @@ describe('ppl code_completion', () => {
       const hasText = (result: QuerySuggestion[], text: string) =>
         result.some((s) => s.text === text);
 
-      // ─── New command added on backend ────────────────────────────────────
-
       it('should surface a new command keyword added by backend grammar', async () => {
         const grammar = setupRuntimeGrammar();
         const newCommandTokenType = grammar.vocabulary.maxTokenType + 500;
@@ -1161,8 +1159,6 @@ describe('ppl code_completion', () => {
         }
       });
 
-      // ─── New function added on backend ───────────────────────────────────
-
       it('should surface a new function keyword from backend grammar', async () => {
         const grammar = setupRuntimeGrammar();
         const newFuncTokenType = grammar.vocabulary.maxTokenType + 700;
@@ -1194,8 +1190,6 @@ describe('ppl code_completion', () => {
         expect(funcSuggestion).toBeTruthy();
         expect(funcSuggestion?.type).toBe(monaco.languages.CompletionItemKind.Module);
       });
-
-      // ─── Keyword removed on backend ──────────────────────────────────────
 
       it('should not suggest a command that was removed from backend grammar', async () => {
         const grammar = setupRuntimeGrammar();
@@ -1267,8 +1261,6 @@ describe('ppl code_completion', () => {
         expect(result.some((s) => s.text === 'removed_func()')).toBeFalsy();
       });
 
-      // ─── Keyword renamed on backend ──────────────────────────────────────
-
       it('should reflect a renamed command keyword from backend grammar', async () => {
         const grammar = setupRuntimeGrammar();
         const renamedTokenType = grammar.vocabulary.maxTokenType + 800;
@@ -1291,8 +1283,6 @@ describe('ppl code_completion', () => {
         expect(hasText(result, 'FILTER')).toBeTruthy();
         expect(hasText(result, 'WHERE')).toBeFalsy();
       });
-
-      // ─── Token type IDs renumbered on backend ────────────────────────────
 
       it('should handle token type renumbering across grammar versions', async () => {
         const grammar = setupRuntimeGrammar({
@@ -1330,8 +1320,6 @@ describe('ppl code_completion', () => {
         expect(hasText(result, 'CMDTWO')).toBeTruthy();
       });
 
-      // ─── Empty grammar (edge case) ──────────────────────────────────────
-
       it('should return empty keyword suggestions when grammar has no token candidates', async () => {
         setupRuntimeGrammar();
 
@@ -1349,8 +1337,6 @@ describe('ppl code_completion', () => {
         );
         expect(keywordSuggestions).toHaveLength(0);
       });
-
-      // ─── New rule from backend triggers field suggestions ────────────────
 
       it('should suggest fields when backend grammar surfaces qualifiedName rule', async () => {
         const grammar = setupRuntimeGrammar();
@@ -1380,8 +1366,6 @@ describe('ppl code_completion', () => {
           type: monaco.languages.CompletionItemKind.Field,
         });
       });
-
-      // ─── Grammar version change produces different suggestion set ────────
 
       it('should produce different suggestions when grammar hash changes', async () => {
         const grammar1 = buildRuntimeGrammar({ grammarHash: 'grammar-v1' });

@@ -152,8 +152,6 @@ describe('ppl_grammar_warmup', () => {
     );
   });
 
-  // ─── Multi-datasource scenarios (AWS OpenSearch / Explore) ──────────────
-
   it('should forward warmUp through rapid multi-datasource switching', () => {
     const cache = createCacheMock();
     const handler = createPplGrammarWarmupHandler(http, uiSettings, savedObjectsClient, cache);

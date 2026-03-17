@@ -340,8 +340,6 @@ describe('ppl_grammar_cache', () => {
     expect(pplGrammarCache.getCachedGrammar(undefined)?.grammarHash).toBe('sha256:localhost');
   });
 
-  // ─── Multi-datasource scenarios (AWS OpenSearch / Explore) ──────────────
-
   it('should cycle through multiple remote datasources without leaking state', async () => {
     const http = ({
       get: jest

@@ -26,8 +26,6 @@ import { KeywordSuggestion, SourceOrTableSuggestion } from '../../shared/types';
 import { CachedGrammar } from '../ppl_grammar_cache';
 import { SUPPORTED_NON_LITERAL_KEYWORDS } from '../constants';
 
-// ─── Test helpers ──────────────────────────────────────────────────────────────
-
 /** Token type constants for the mock grammar */
 const T = {
   INVALID: 0,
@@ -210,11 +208,7 @@ function createMockTokenStream(tokens: Token[]): TokenStream {
   } as TokenStream;
 }
 
-// ─── Tests ─────────────────────────────────────────────────────────────────────
-
 describe('runtime PPL autocomplete helpers', () => {
-  // ─── deriveKeywordFromSymbolicName ───────────────────────────────────────
-
   describe('deriveKeywordFromSymbolicName', () => {
     it('returns empty string for null/undefined', () => {
       expect(deriveKeywordFromSymbolicName(null)).toBe('');
@@ -278,8 +272,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── isRuntimeNoisySuggestion ────────────────────────────────────────────
-
   describe('isRuntimeNoisySuggestion', () => {
     const makeSk = (value: string): KeywordSuggestion => ({ value, id: 1 });
 
@@ -327,8 +319,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── isCommandPositionInCurrentSegment ───────────────────────────────────
-
   describe('isCommandPositionInCurrentSegment', () => {
     it('returns true for empty input', () => {
       expect(isCommandPositionInCurrentSegment('')).toBe(true);
@@ -360,8 +350,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── isLikelyCommandKeyword ──────────────────────────────────────────────
-
   describe('isLikelyCommandKeyword', () => {
     it('returns true for uppercase multi-char keywords', () => {
       expect(isLikelyCommandKeyword({ value: 'WHERE', id: 1 })).toBe(true);
@@ -387,8 +375,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── isLikelyExpressionFunctionKeyword ───────────────────────────────────
-
   describe('isLikelyExpressionFunctionKeyword', () => {
     it('returns true for function-like keywords', () => {
       expect(isLikelyExpressionFunctionKeyword({ value: 'AVG', id: 1 })).toBe(true);
@@ -413,8 +399,6 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(isLikelyExpressionFunctionKeyword({ value: 'avg', id: 2 })).toBe(false);
     });
   });
-
-  // ─── isRuntimeFunctionRuleContext ────────────────────────────────────────
 
   describe('isRuntimeFunctionRuleContext', () => {
     it('returns true when a rule name contains "function"', () => {
@@ -449,8 +433,6 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(isRuntimeFunctionRuleContext(grammar, rules)).toBe(true);
     });
   });
-
-  // ─── resolveKeywordSuggestionDetails ─────────────────────────────────────
 
   describe('resolveKeywordSuggestionDetails', () => {
     it('resolves by literal value (case-insensitive uppercase match)', () => {
@@ -504,8 +486,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── resolveSupportedNonLiteralKeywordDetails ────────────────────────────
-
   describe('resolveSupportedNonLiteralKeywordDetails', () => {
     it('returns undefined for unknown keywords', () => {
       const result = resolveSupportedNonLiteralKeywordDetails({ value: 'UNKNOWN', id: 99999 });
@@ -522,8 +502,6 @@ describe('runtime PPL autocomplete helpers', () => {
       }
     });
   });
-
-  // ─── resolveSpaceToken ───────────────────────────────────────────────────
 
   describe('resolveSpaceToken', () => {
     it('resolves WHITESPACE from tokenDictionary', () => {
@@ -572,8 +550,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── pickStartRuleIndex ──────────────────────────────────────────────────
-
   describe('pickStartRuleIndex', () => {
     it('returns startRuleIndex for normal queries', () => {
       const grammar = createMockGrammar();
@@ -621,8 +597,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── isEffectivelyWhitespace ─────────────────────────────────────────────
-
   describe('isEffectivelyWhitespace', () => {
     it('returns true for the space token type', () => {
       expect(isEffectivelyWhitespace(mockToken(T.SPACE, ' '), T.SPACE)).toBe(true);
@@ -646,8 +620,6 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(isEffectivelyWhitespace(mockToken(999, ''), T.SPACE)).toBe(false);
     });
   });
-
-  // ─── findLastNonSpaceTokenRT ─────────────────────────────────────────────
 
   describe('findLastNonSpaceTokenRT', () => {
     it('finds the last non-space token before cursor', () => {
@@ -689,8 +661,6 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(result!.index).toBe(0);
     });
   });
-
-  // ─── isAtFirstArgumentPositionInSegmentRT ────────────────────────────────
 
   describe('isAtFirstArgumentPositionInSegmentRT', () => {
     it('returns true after command keyword with space', () => {
@@ -737,8 +707,6 @@ describe('runtime PPL autocomplete helpers', () => {
     });
   });
 
-  // ─── buildRuntimePreferredRules ──────────────────────────────────────────
-
   describe('buildRuntimePreferredRules', () => {
     it('includes known preferred rules from the grammar', () => {
       const grammar = createMockGrammar();
@@ -764,8 +732,6 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(rules.size).toBe(0);
     });
   });
-
-  // ─── getSafeRuntimeIgnoredTokens ─────────────────────────────────────────
 
   describe('getSafeRuntimeIgnoredTokens', () => {
     it('includes non-literal token types', () => {
@@ -806,8 +772,6 @@ describe('runtime PPL autocomplete helpers', () => {
       expect(getSafeRuntimeIgnoredTokens(grammar).size).toBe(0);
     });
   });
-
-  // ─── enrichRuntimeResult ─────────────────────────────────────────────────
 
   describe('enrichRuntimeResult', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
