@@ -22,13 +22,22 @@ describe('Chat Proxy Routes', () => {
   const testSetup = async (
     agUiUrl?: string,
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
-    mlCommonsAgentId?: string
+    mlCommonsAgentId?: string,
+    forwardCredentials?: boolean
   ) => {
     const { server: testServer, httpSetup } = await setupServer();
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
-    defineRoutes(router, mockLogger, agUiUrl, getCapabilitiesResolver, mlCommonsAgentId);
+    defineRoutes(
+      router,
+      mockLogger,
+      agUiUrl,
+      getCapabilitiesResolver,
+      mlCommonsAgentId,
+      undefined,
+      forwardCredentials
+    );
 
     // Mock dynamicConfigService required by server.start()
     const dynamicConfigService = {
@@ -432,8 +441,8 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
-    describe('Authorization header forwarding', () => {
-      it('should forward Authorization header to AG-UI when present in request', async () => {
+    describe('OBO token credential forwarding', () => {
+      it('should not forward any auth header when forwardCredentials is false (default)', async () => {
         const mockReader = {
           read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
         };
@@ -447,35 +456,7 @@ describe('Chat Proxy Routes', () => {
 
         await supertest(httpSetup.server.listener)
           .post('/api/chat/proxy')
-          .set('Authorization', 'Bearer test-token-123')
-          .send(validRequest)
-          .expect(200);
-
-        expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'text/event-stream',
-            Authorization: 'Bearer test-token-123',
-          },
-          body: JSON.stringify(validRequest),
-        });
-      });
-
-      it('should not include Authorization header when absent from request', async () => {
-        const mockReader = {
-          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
-        };
-        mockFetch.mockResolvedValue({
-          ok: true,
-          status: 200,
-          body: { getReader: () => mockReader },
-        } as any);
-
-        const httpSetup = await testSetup('http://test-agui:3000');
-
-        await supertest(httpSetup.server.listener)
-          .post('/api/chat/proxy')
+          .set('Authorization', 'Bearer raw-user-token')
           .send(validRequest)
           .expect(200);
 
@@ -484,6 +465,72 @@ describe('Chat Proxy Routes', () => {
           string
         >;
         expect(fetchHeaders).not.toHaveProperty('Authorization');
+      });
+
+      it('should gracefully degrade when forwardCredentials is true but OBO is unavailable', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          true // forwardCredentials
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // The OBO call will fail in the test env (no real OpenSearch client),
+        // so we verify that the error is logged and the request still proceeds
+        const warnCalls = mockLogger.warn.mock.calls.map((c: any) => c[0]);
+        const errorCalls = mockLogger.error.mock.calls.map((c: any) => c[0]);
+        const oboLogFound =
+          warnCalls.some((msg: string) => msg.includes('OBO token')) ||
+          errorCalls.some((msg: string) => msg.includes('OBO token'));
+        expect(oboLogFound).toBe(true);
+
+        // Request still went through to AG-UI without auth header
+        const fetchHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(fetchHeaders).not.toHaveProperty('Authorization');
+      });
+
+      it('should not attempt OBO token generation when forwardCredentials is false', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          false // forwardCredentials explicitly false
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // No OBO-related log messages should appear
+        expect(mockLogger.warn).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
+        expect(mockLogger.error).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
       });
     });
 

@@ -9,12 +9,52 @@ import {
   IRouter,
   Logger,
   OpenSearchDashboardsRequest,
+  RequestHandlerContext,
   Capabilities,
 } from '../../../../core/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
 import { getMemoryContainerId } from './utils/get_memory_container_id';
+
+/**
+ * Generate an On-Behalf-Of (OBO) token using the security plugin API.
+ * Returns the token string on success, or undefined if the endpoint is
+ * unavailable or OBO is not configured.
+ */
+async function generateOboToken(
+  context: RequestHandlerContext,
+  logger: Logger,
+  agUiUrl: string
+): Promise<string | undefined> {
+  try {
+    const client = context.core.opensearch.client.asCurrentUser;
+    const { body } = await client.transport.request({
+      method: 'POST',
+      path: '/_plugins/_security/api/generateonbehalfoftoken',
+      body: {
+        description: 'OBO token for AG-UI credential forwarding',
+      },
+    });
+    const token = (body as any)?.authenticationToken;
+    if (token) {
+      logger.info(`OBO token generated for credential forwarding to AG-UI endpoint: ${agUiUrl}`);
+      return token;
+    }
+    logger.warn('OBO token response did not contain authenticationToken');
+    return undefined;
+  } catch (error: any) {
+    const statusCode = error?.statusCode ?? error?.meta?.statusCode;
+    if (statusCode === 404 || statusCode === 400) {
+      logger.warn(
+        `OBO token generation unavailable (HTTP ${statusCode}): security plugin may not be installed or OBO is not configured`
+      );
+    } else {
+      logger.error(`Failed to generate OBO token: ${error.message ?? error}`);
+    }
+    return undefined;
+  }
+}
 
 /**
  * Forward request to external AG-UI server
@@ -24,7 +64,8 @@ async function forwardToAgUI(
   request: OpenSearchDashboardsRequest,
   response: any,
   dataSourceId?: string,
-  logger?: Logger
+  logger?: Logger,
+  oboToken?: string
 ) {
   // Prepare request body - include dataSourceId if provided
   const requestBody = dataSourceId ? { ...(request.body || {}), dataSourceId } : request.body;
@@ -37,7 +78,7 @@ async function forwardToAgUI(
     headers: {
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
-      ...(request.headers.authorization ? { Authorization: request.headers.authorization } : {}),
+      ...(oboToken ? { Authorization: `Bearer ${oboToken}` } : {}),
     },
     body: JSON.stringify(requestBody),
   });
@@ -89,7 +130,8 @@ export function defineRoutes(
     | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
     | undefined,
   mlCommonsAgentId?: string,
-  observabilityAgentId?: string
+  observabilityAgentId?: string,
+  forwardCredentials?: boolean
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -246,8 +288,14 @@ export function defineRoutes(
           });
         }
 
+        // Generate OBO token when credential forwarding is enabled
+        let oboToken: string | undefined;
+        if (forwardCredentials) {
+          oboToken = await generateOboToken(context, logger, agUiUrl);
+        }
+
         // Forward to AG-UI capable endpoint. This is the default router.
-        return await forwardToAgUI(agUiUrl, request, response, dataSourceId, logger);
+        return await forwardToAgUI(agUiUrl, request, response, dataSourceId, logger, oboToken);
       } catch (error) {
         logger.error(`AI agent routing error: ${error}`);
         return response.customError({
