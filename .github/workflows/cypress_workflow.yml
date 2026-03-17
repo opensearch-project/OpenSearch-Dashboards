@@ -387,6 +387,19 @@ jobs:
           path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
 
+      # Upload JUnit XML results separately (uncompressed) so AI agents and humans
+      # can read failures directly via `gh run download -n ftr-cypress-junit-<group>`
+      # without extracting the tar.gz first.
+      - name: Upload FT repo Cypress JUnit results
+        if: always() && matrix.test_location == 'ftr'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftr-cypress-junit-${{ matrix.group }}
+          path: ${{ env.FTR_PATH }}/cypress/results/**/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
+          overwrite: true
+
       - name: Compress OSD repo artifacts
         if: always() && matrix.test_location == 'source'
         run: |
@@ -406,6 +419,19 @@ jobs:
           name: osd-cypress-artifacts-${{ matrix.group }}
           path: osd-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
+          overwrite: true
+
+      # Upload JUnit XML results separately (uncompressed) so AI agents and humans
+      # can read failures directly via `gh run download -n cypress-junit-<group>`
+      # without extracting the tar.gz first.
+      - name: Upload Cypress JUnit results
+        if: always() && matrix.test_location == 'source'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-junit-${{ matrix.group }}
+          path: cypress/results/**/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
           overwrite: true
 
   add-comment:

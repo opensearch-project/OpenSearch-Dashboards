@@ -37,6 +37,7 @@ jobs:
           - os: windows-latest
             name: Windows
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     env:
       # Override just OSD_OPTIMIZER_MAX_WORKERS for ciGroup1 because it contains a test that checks number of workers
       OSD_OPTIMIZER_MAX_WORKERS: ${{ matrix.group != 1 && 8 || '' }}
@@ -75,18 +76,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
@@ -96,9 +96,18 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: yarn osd bootstrap || yarn osd bootstrap
 
-      - name: Run unit tests group ${{ matrix.group }} with coverage
+      # Run with parallel workers instead of --runInBand for faster execution.
+      # Linux: include coverage for Codecov reporting.
+      # Windows: skip coverage to avoid ~2x overhead; Linux results are sufficient for coverage.
+      - name: Run unit tests group ${{ matrix.group }} with coverage (Linux)
+        if: matrix.os != 'windows-latest'
         id: unit-tests
-        run: yarn test:jest:ci:coverage  --ci-group=${{ matrix.group }}
+        run: node scripts/jest --ci --colors --maxWorkers=4 --coverage --ci-group=${{ matrix.group }}
+
+      - name: Run unit tests group ${{ matrix.group }} (Windows)
+        if: matrix.os == 'windows-latest'
+        id: unit-tests-windows
+        run: node scripts/jest --ci --colors --maxWorkers=4 --ci-group=${{ matrix.group }}
 
       - name: Run mocha tests with coverage
         # ciGroup 1 of unit-tests is shorter
@@ -108,6 +117,7 @@ jobs:
 
       - name: Upload Code Coverage
         id: upload-code-coverage
+        if: matrix.os != 'windows-latest'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -119,6 +129,26 @@ jobs:
         if: matrix.group == 1
         id: integration-tests
         run: yarn test:jest_integration:ci
+
+      # Upload JUnit XML so the reports are accessible to humans and AI agents via
+      # `gh run download -n junit-jest-group<N>-<OS>`. Retention is 7 days (vs the
+      # default 1 day used for screenshot artifacts) to give teams time to triage.
+      - name: Upload JUnit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-jest-group${{ matrix.group }}-${{ matrix.name }}
+          path: target/junit/**/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
+          overwrite: true
+
+      # Write a human- and AI-readable Markdown summary of any failing tests
+      # to the GitHub Actions step summary panel.
+      - name: Generate test failure summary
+        if: failure()
+        shell: bash
+        run: node scripts/summarize_jest_failures.js
 
   lint-and-validate:
     name: Lint and validate
@@ -205,6 +235,7 @@ jobs:
           - os: windows-latest
             name: Windows
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
@@ -242,18 +273,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       # Lock Chrome version until ChromeDriver's release pipeline is fixed
       - name: Download Chrome
@@ -358,18 +388,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       # Lock Chrome version until ChromeDriver's release pipeline is fixed
       - name: Download Chrome
@@ -486,18 +515,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       - name: Get package version (Linux)
         if: matrix.os != 'windows-latest'
@@ -625,3 +653,68 @@ jobs:
             ./artifacts/bwc_tmp/test/cypress/results/*
           retention-days: 1
           overwrite: true
+
+  pr-test-results-comment:
+    name: Post test results to PR
+    needs: [build-test]
+    # Run on every PR push so failures are reported and previous failure comments
+    # are cleared when tests go green. Skipped on push-to-branch (no PR to comment on).
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JUnit artifacts
+        if: needs.build-test.result == 'failure'
+        uses: actions/download-artifact@v4
+        with:
+          # Matches junit-jest-group1-Linux, junit-jest-group2-Windows, etc.
+          # Each artifact lands in its own subdirectory; the script recurses into all of them.
+          pattern: junit-jest-group*
+          path: downloaded-junit
+
+      - name: Build failure comment body
+        if: needs.build-test.result == 'failure'
+        shell: bash
+        run: |
+          {
+            echo "<!-- ci-test-failure-summary -->"
+            echo "> 🔗 [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) · commit \`${{ github.event.pull_request.head.sha }}\`"
+            echo ""
+            # Unset GITHUB_STEP_SUMMARY so the script writes to stdout instead
+            GITHUB_STEP_SUMMARY="" node scripts/summarize_jest_failures.js --dir=downloaded-junit
+          } > pr-comment.md
+
+      - name: Build success comment body
+        if: needs.build-test.result == 'success'
+        shell: bash
+        run: |
+          {
+            echo "<!-- ci-test-failure-summary -->"
+            echo "## ✅ All unit tests passing"
+            echo ""
+            echo "> 🔗 [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) · commit \`${{ github.event.pull_request.head.sha }}\`"
+          } > pr-comment.md
+
+      - name: Find existing comment
+        id: find-comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- ci-test-failure-summary -->'
+
+      # Post a new comment on first failure, update it on subsequent runs.
+      # On success, only update if a failure comment already exists (avoids
+      # posting a green banner on every PR that never had a failure).
+      - name: Post or update PR comment
+        if: needs.build-test.result == 'failure' || steps.find-comment.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: pr-comment.md
+          edit-mode: replace
