@@ -322,10 +322,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       // Attach PPL runtime validation context
       detachValidationContextRef.current?.();
       detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(
-        editor,
-        getValidationContext()
-      );
+      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
       detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
         editor,
         getValidationContext,
