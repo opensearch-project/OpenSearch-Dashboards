@@ -228,7 +228,7 @@ class PPLGrammarCache {
       });
   }
 
-  /** Reset cache state. Used internally and by tests via `clear()`. */
+  /** Reset cache state. Used internally and by tests via `dispose()`. */
   private reset(): void {
     this.cachedDatasourceId = undefined;
     this.cachedVersion = undefined;
