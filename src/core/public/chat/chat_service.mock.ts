@@ -47,6 +47,7 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   getThreadId$: jest.fn().mockReturnValue(new BehaviorSubject<string>('')),
   getThreadId: jest.fn().mockReturnValue(''),
   setThreadId: jest.fn(),
+  resetThreadId: jest.fn(),
   newThread: jest.fn(),
   openWindow: jest.fn(),
   closeWindow: jest.fn(),

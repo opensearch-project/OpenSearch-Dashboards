@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { join } from 'path';
 import { mockCoreContext } from '../core_context.mock';
 import { coreMock } from '../mocks';
 import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
@@ -86,7 +87,7 @@ describe('CoreApp', () => {
 
       expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
         expect.stringMatching(/^\/\d+\/editor\/workers\/\{path\*\}$/),
-        expect.stringContaining('node_modules/@osd/monaco/target/public')
+        expect.stringContaining(join('node_modules', '@osd', 'monaco', 'target', 'public'))
       );
     });
   });

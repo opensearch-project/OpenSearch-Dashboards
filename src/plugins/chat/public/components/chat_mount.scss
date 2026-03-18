@@ -1,0 +1,16 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.chatMount {
+  &__mountPoint {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__content {
+    height: 100%;
+    box-sizing: border-box;
+  }
+}

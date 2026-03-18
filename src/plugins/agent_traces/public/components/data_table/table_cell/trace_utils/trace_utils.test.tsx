@@ -51,14 +51,14 @@ describe('trace_utils', () => {
       expect(isOnTracesPage()).toBe(true);
     });
 
-    it('should return true when hash includes /agentTraces/traces', () => {
-      mockLocation.hash = '#/agentTraces/traces';
+    it('should return true when pathname includes /agentTraces with hash routing', () => {
+      mockLocation.pathname = '/w/workspace/app/agentTraces/';
+      mockLocation.hash = '#/?_q=...&_a=(ui:(activeTabId:traces))';
       expect(isOnTracesPage()).toBe(true);
     });
 
-    it('should return true when both pathname and hash include /agentTraces/traces', () => {
-      mockLocation.pathname = '/app/agentTraces/traces';
-      mockLocation.hash = '#/agentTraces/traces/details';
+    it('should return true when pathname includes /agentTraces without /traces suffix', () => {
+      mockLocation.pathname = '/app/agentTraces/';
       expect(isOnTracesPage()).toBe(true);
     });
 
@@ -75,7 +75,7 @@ describe('trace_utils', () => {
     });
 
     it('should handle partial matches correctly', () => {
-      mockLocation.pathname = '/app/agentTraces/trace'; // missing 's'
+      mockLocation.pathname = '/app/agentTrace'; // missing 's' - not /agentTraces
       expect(isOnTracesPage()).toBe(false);
     });
   });

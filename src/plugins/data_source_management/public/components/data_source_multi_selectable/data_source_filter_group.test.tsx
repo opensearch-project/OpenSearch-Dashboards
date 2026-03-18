@@ -35,9 +35,10 @@ describe('DataSourceFilterGroup', () => {
     const button = await container.findByTestId('dataSourceFilterGroupButton');
     button.click();
 
-    // Wait for the popover to open and render the option
+    // Wait for the popover to fully open (content visible + isOpen class applied)
     await waitFor(() => {
       expect(screen.getByText('name1')).toBeInTheDocument();
+      expect(container.container.querySelector('.euiPopover-isOpen')).toBeInTheDocument();
     });
 
     expect(container).toMatchSnapshot();

@@ -6,7 +6,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
 import { convertTimelineToMessageRows } from './chat_messages';
 

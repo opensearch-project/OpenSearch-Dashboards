@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ChatInput } from './chat_input';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 
 // Mock the context pills component
 jest.mock('./context_pills', () => ({
@@ -575,6 +575,78 @@ describe('ChatInput', () => {
       expect(queryByLabelText('Add context')).toBeTruthy();
       // Screenshot icon should not be rendered
       expect(queryByLabelText('Add dashboard screenshot')).toBeNull();
+    });
+  });
+
+  describe('isSendingToolResult behavior', () => {
+    it('should disable input when isSendingToolResult is true', () => {
+      const { getByPlaceholderText } = render(
+        <ChatInput {...defaultProps} isSendingToolResult={true} />
+      );
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should enable input when isSendingToolResult is false', () => {
+      const { getByPlaceholderText } = render(
+        <ChatInput {...defaultProps} isSendingToolResult={false} />
+      );
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+    });
+
+    it('should enable input when isSendingToolResult is not provided', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+    });
+
+    it('should disable send button when isSendingToolResult is true', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" isSendingToolResult={true} />
+      );
+
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+    });
+
+    it('should enable send button when isSendingToolResult is false and input has content', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" isSendingToolResult={false} />
+      );
+
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
+    });
+
+    it('should have disabled attribute on input when isSendingToolResult is true', () => {
+      const { getByPlaceholderText } = render(
+        <ChatInput {...defaultProps} isSendingToolResult={true} />
+      );
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      // Verify the input has the disabled attribute
+      expect(input).toHaveAttribute('disabled');
+    });
+
+    it('should transition input state when isSendingToolResult changes', () => {
+      const { getByPlaceholderText, rerender } = render(
+        <ChatInput {...defaultProps} isSendingToolResult={false} />
+      );
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+
+      // Simulate tool result sending starts
+      rerender(<ChatInput {...defaultProps} isSendingToolResult={true} />);
+      expect(input.disabled).toBe(true);
+
+      // Simulate tool result sending completes
+      rerender(<ChatInput {...defaultProps} isSendingToolResult={false} />);
+      expect(input.disabled).toBe(false);
     });
   });
 });

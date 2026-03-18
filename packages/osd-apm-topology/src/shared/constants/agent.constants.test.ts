@@ -14,12 +14,11 @@ describe('AGENT_NODE_KINDS', () => {
     });
   });
 
-  it('each entry has label, color, and icon fields', () => {
+  it('each entry has label and color fields', () => {
     ALL_KINDS.forEach((kind) => {
       const config = AGENT_NODE_KINDS[kind];
       expect(config.label).toBeDefined();
       expect(config.color).toBeDefined();
-      expect(config.icon).toBeDefined();
     });
   });
 

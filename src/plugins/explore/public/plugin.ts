@@ -251,11 +251,13 @@ export class ExplorePlugin
           this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
         appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
       }
-
+      const flavorSuffix = flavor ? `/${flavor}` : '';
+      const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
+      const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-        baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
+        baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
-        storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
+        storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
         stateParams: [

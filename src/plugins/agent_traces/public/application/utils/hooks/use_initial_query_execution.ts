@@ -8,9 +8,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AgentTracesServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
-import { clearResults, clearQueryStatusMap, setIsInitialized } from '../state_management/slices';
+import {
+  clearResults,
+  clearQueryStatusMap,
+  setIsInitialized,
+  setSort,
+} from '../state_management/slices';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
-import { selectActiveTabId } from '../state_management/selectors';
+import { selectActiveTabId, selectSort } from '../state_management/selectors';
 import { useCurrentAgentTracesId } from './use_current_agent_traces_id';
 import { useDatasetContext } from '../../context';
 
@@ -25,6 +30,7 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
   const activeTabId = useSelector(selectActiveTabId);
   const agentTracesId = useCurrentAgentTracesId();
   const { dataset: datasetFromContext, isLoading: datasetLoading } = useDatasetContext();
+  const sort = useSelector(selectSort);
 
   const shouldSearchOnPageLoad = useMemo(() => {
     if (queryState.dataset && services?.data?.query?.queryString) {
@@ -58,6 +64,13 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
 
+        // Initialize default sort before executing queries so the cache key
+        // from executeQueries matches what useTabResults will compute once
+        // the tab components mount and set their own default sort.
+        if ((!sort || sort.length === 0) && datasetFromContext.timeFieldName) {
+          dispatch(setSort([[datasetFromContext.timeFieldName, 'desc']]));
+        }
+
         await dispatch(executeQueries({ services }));
         if (!activeTabId) {
           dispatch(detectAndSetOptimalTab({ services }));
@@ -77,6 +90,7 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
     agentTracesId,
     datasetFromContext,
     datasetLoading,
+    sort,
   ]);
 
   return { isInitialized };

@@ -24,6 +24,7 @@ export interface BaseRow {
   traceId: string;
   parentSpanId: string | null;
   status: 'success' | 'error';
+  statusMessage?: string;
   kind: string;
   name: string;
   input: string;
@@ -33,12 +34,19 @@ export interface BaseRow {
   latency: string;
   durationNanos: number;
   totalTokens: number | string;
+  inputTokens: number | null;
+  outputTokens: number | null;
   totalCost: string;
   isExpandable?: boolean;
   isExpanded?: boolean;
   level?: number;
   children?: BaseRow[];
   rawDocument?: Record<string, unknown>;
+}
+
+export interface TraceRow extends BaseRow {
+  displayName?: string;
+  children?: TraceRow[];
 }
 
 export interface LoadingState {
@@ -62,13 +70,14 @@ export const spanToRow = (
   index: number,
   formatTs: (ts: string) => string
 ): BaseRow => ({
-  id: span.spanId || `span-${index}`,
+  id: span.spanId,
   spanId: span.spanId,
   traceId: span.traceId,
   parentSpanId: span.parentSpanId,
   status: span.statusCode === 0 || span.statusCode === 1 ? 'success' : 'error',
-  kind: span.operationName || 'Other',
-  name: span.name || span.operationName || 'Unknown',
+  statusMessage: span.statusMessage || undefined,
+  kind: span.operationName || '—',
+  name: span.name || '—',
   input: span.input || '—',
   output: span.output || '—',
   startTime: formatTs(span.startTime),
@@ -80,6 +89,8 @@ export const spanToRow = (
     (span.genAiInputTokens != null || span.genAiOutputTokens != null
       ? (span.genAiInputTokens ?? 0) + (span.genAiOutputTokens ?? 0)
       : '—'),
+  inputTokens: span.genAiInputTokens,
+  outputTokens: span.genAiOutputTokens,
   totalCost: '—',
   level: 0,
   children: [],

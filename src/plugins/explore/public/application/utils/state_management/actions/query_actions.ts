@@ -317,7 +317,7 @@ export const executeQueries = createAsyncThunk<
     const dataTableResults = latestState.results[dataTableCacheKey];
 
     // Only execute RED metrics queries if we have table results with data
-    if (dataTableResults && dataTableResults.hits?.hits?.length > 0) {
+    if (dataTableResults && dataTableResults.hasResults) {
       const dataset = query.dataset
         ? await services.data.dataViews.get(
             query.dataset.id,

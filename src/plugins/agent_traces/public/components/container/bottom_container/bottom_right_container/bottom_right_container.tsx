@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { selectQueryStatusMapByKey } from '../../../../application/utils/state_management/selectors';
 import { RootState } from '../../../../application/utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
@@ -22,10 +22,6 @@ import {
 import { useDatasetContext } from '../../../../application/context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
-import { AgentTracesFlavor } from '../../../../../common';
-import { TraceAutoDetectCallout } from '../../../trace_auto_detect_callout';
-import { TracesTable } from '../../../../application/pages/traces/traces_table';
-import { SpansTable } from '../../../../application/pages/traces/spans_table';
 import './bottom_right_container.scss';
 
 // Memoized content component to prevent re-renders of chart + tabs when status hasn't changed
@@ -69,11 +65,6 @@ export const BottomRightContainer = () => {
     );
   }
 
-  // All tabs manage their own data fetching (e.g. TracesTab uses useAgentTraces,
-  // SpansTab uses useAgentSpans, both with server-side pagination). Bypass Redux
-  // query status checks — the tab component handles its own loading / error / empty
-  // states internally. Tabs that also define prepareQuery use it only for the sidebar
-  // field details popover, not for the main content display.
   const activeTab = activeTabId ? services?.tabRegistry?.getTab(activeTabId) : null;
   if (activeTab) {
     return <ReadyContent />;

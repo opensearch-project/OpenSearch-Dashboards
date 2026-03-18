@@ -37,6 +37,7 @@ jobs:
           - os: windows-latest
             name: Windows
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     env:
       # Override just OSD_OPTIMIZER_MAX_WORKERS for ciGroup1 because it contains a test that checks number of workers
       OSD_OPTIMIZER_MAX_WORKERS: ${{ matrix.group != 1 && 8 || '' }}
@@ -75,30 +76,51 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Run bootstrap (Windows)
         if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
-      - name: Run unit tests group ${{ matrix.group }} with coverage
+      # Linux: include coverage for Codecov reporting.
+      # Windows: skip coverage to avoid ~2x overhead; Linux results are sufficient for coverage.
+      - name: Run unit tests group ${{ matrix.group }} with coverage (Linux)
+        if: matrix.os != 'windows-latest'
         id: unit-tests
-        run: yarn test:jest:ci:coverage  --ci-group=${{ matrix.group }}
+        run: node scripts/jest --ci --colors --runInBand --coverage --ci-group=${{ matrix.group }}
+
+      - name: Run unit tests group ${{ matrix.group }} (Windows)
+        if: matrix.os == 'windows-latest'
+        id: unit-tests-windows
+        run: node scripts/jest --ci --colors --runInBand --ci-group=${{ matrix.group }}
 
       - name: Run mocha tests with coverage
         # ciGroup 1 of unit-tests is shorter
@@ -108,6 +130,7 @@ jobs:
 
       - name: Upload Code Coverage
         id: upload-code-coverage
+        if: matrix.os != 'windows-latest'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -119,6 +142,26 @@ jobs:
         if: matrix.group == 1
         id: integration-tests
         run: yarn test:jest_integration:ci
+
+      # Upload JUnit XML so the reports are accessible to humans and AI agents via
+      # `gh run download -n junit-jest-group<N>-<OS>`. Retention is 7 days (vs the
+      # default 1 day used for screenshot artifacts) to give teams time to triage.
+      - name: Upload JUnit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-jest-group${{ matrix.group }}-${{ matrix.name }}
+          path: target/junit/**/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
+          overwrite: true
+
+      # Write a human- and AI-readable Markdown summary of any failing tests
+      # to the GitHub Actions step summary panel.
+      - name: Generate test failure summary
+        if: failure()
+        shell: bash
+        run: node scripts/summarize_jest_failures.js
 
   lint-and-validate:
     name: Lint and validate
@@ -151,7 +194,14 @@ jobs:
             yarn-
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Check for yarn.lock changes
         run: |
@@ -205,6 +255,7 @@ jobs:
           - os: windows-latest
             name: Windows
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
@@ -242,18 +293,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       # Lock Chrome version until ChromeDriver's release pipeline is fixed
       - name: Download Chrome
@@ -282,11 +332,25 @@ jobs:
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Run bootstrap (Windows)
         if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
@@ -358,18 +422,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       # Lock Chrome version until ChromeDriver's release pipeline is fixed
       - name: Download Chrome
@@ -398,11 +461,25 @@ jobs:
 
       - name: Run bootstrap (Linux)
         if: matrix.os != 'windows-latest'
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Run bootstrap (Windows)
         if: matrix.os == 'windows-latest'
-        run: yarn osd bootstrap || yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
@@ -486,18 +563,17 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Configure Yarn Cache (Linux)
-        if: matrix.os != 'windows-latest'
+      - name: Configure Yarn Cache
+        shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
       - name: Initialize Yarn Cache
         uses: actions/cache@v4
-        if: matrix.os != 'windows-latest'
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       - name: Get package version (Linux)
         if: matrix.os != 'windows-latest'
@@ -520,7 +596,14 @@ jobs:
           echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build `${{ matrix.name }}`
         run: yarn ${{ matrix.script }} --release
@@ -625,3 +708,4 @@ jobs:
             ./artifacts/bwc_tmp/test/cypress/results/*
           retention-days: 1
           overwrite: true
+

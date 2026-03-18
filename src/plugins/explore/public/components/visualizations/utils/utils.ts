@@ -460,15 +460,6 @@ export function parseUTCDate(input: string | number): Date {
   return new Date(isoString);
 }
 
-export const getChartRender = () => {
-  try {
-    const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
-    return chartRender || 'echarts';
-  } catch (e) {
-    return 'echarts';
-  }
-};
-
 export const convertThresholds = (thresholds: Threshold[]) => {
   return thresholds.map((t, i) => ({
     min: t.value,

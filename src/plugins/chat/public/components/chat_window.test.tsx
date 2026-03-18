@@ -45,6 +45,13 @@ jest.mock('../actions/graph_timeseries_data_action', () => ({
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();
 
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 describe('ChatWindow', () => {
   let mockCore: ReturnType<typeof coreMock.createStart>;
   let mockContextProvider: any;
@@ -884,6 +891,21 @@ describe('ChatWindow', () => {
       const { unmount } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       expect(() => unmount()).not.toThrow();
+    });
+
+    it('should reset thread ID on unmount to avoid restore latest logic issues', () => {
+      mockCore.chat.resetThreadId = jest.fn();
+
+      const { unmount } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Verify resetThreadId has not been called yet
+      expect(mockCore.chat.resetThreadId).not.toHaveBeenCalled();
+
+      // Unmount the component
+      unmount();
+
+      // Verify resetThreadId was called on unmount
+      expect(mockCore.chat.resetThreadId).toHaveBeenCalledTimes(1);
     });
 
     it('should subscribe to tool updates on mount', () => {

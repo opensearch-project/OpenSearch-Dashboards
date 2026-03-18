@@ -19,6 +19,14 @@ import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
+import {
+  isAgentTracesVirtualColumn,
+  isOnAgentTracesPage,
+  AgentTracesVirtualCell,
+  AgentTracesTimeCell,
+  getHitId,
+  VIRTUAL_COL_SOURCE_FIELD,
+} from '../table_cell/trace_utils/trace_utils';
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -30,15 +38,20 @@ export interface TableRowContentProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   isOnTracesPage: boolean;
+  wrapCellText?: boolean;
 }
 
 // Helper functions
-const getCellClassName = (timeFieldName?: string, colName?: string): string => {
+const getCellClassName = (
+  timeFieldName?: string,
+  colName?: string,
+  wrapCellText?: boolean
+): string => {
   const baseClass = 'agentTracesDocTableCell';
   if (timeFieldName === colName) {
     return `${baseClass} eui-textNoWrap`;
   }
-  return `${baseClass} eui-textTruncate`;
+  return wrapCellText ? baseClass : `${baseClass} eui-textTruncate`;
 };
 
 const shouldShowEmptyCell = (row: any, formattedValue: any): boolean => {
@@ -63,13 +76,14 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   isExpanded,
   onToggleExpand,
   isOnTracesPage,
+  wrapCellText,
 }) => {
   const [isRowSelected, setIsRowSelected] = useState(false);
 
   const flattened = dataset.flattenHit(row);
   return (
     <tr
-      key={row._id}
+      key={row._id || (row._source as any)?.spanId}
       className={row.isAnchor || isRowSelected ? 'agentTracesDocTable__row--highlight' : ''}
     >
       {isOnTracesPage ? (
@@ -92,11 +106,29 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         </td>
       )}
       {columns.map((colName) => {
+        // Agent traces: custom time cell with formatted timestamp and clickable link
+        if (isOnAgentTracesPage() && dataset.timeFieldName === colName) {
+          return <AgentTracesTimeCell key={colName} hitId={getHitId(row)} />;
+        }
+
+        // Agent traces virtual columns: bypass dataset formatField
+        if (isAgentTracesVirtualColumn(colName) && isOnAgentTracesPage()) {
+          return (
+            <AgentTracesVirtualCell
+              key={colName}
+              colName={colName}
+              row={row}
+              onFilter={onFilter}
+              fieldMapping={flattened[VIRTUAL_COL_SOURCE_FIELD[colName] || colName]}
+            />
+          );
+        }
+
         const fieldInfo = dataset.fields.getByName(colName);
         const fieldMapping = flattened[colName];
 
         if (shouldShowEmptyCell(row, null)) {
-          return <EmptyTableCell colName={colName} />;
+          return <EmptyTableCell colName={colName} wrapCellText={wrapCellText} />;
         }
 
         if (fieldInfo?.type === '_source') {
@@ -106,6 +138,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
               dataset={dataset}
               row={row}
               isShortDots={isShortDots}
+              wrapCellText={wrapCellText}
             />
           );
         }
@@ -113,16 +146,16 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         const formattedValue = formatFieldValue(dataset, row, colName);
 
         if (shouldShowEmptyCell(row, formattedValue)) {
-          return <EmptyTableCell colName={colName} />;
+          return <EmptyTableCell colName={colName} wrapCellText={wrapCellText} />;
         }
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (fieldInfo?.filterable === false) {
+        if (fieldInfo?.filterable === false && !isOnAgentTracesPage()) {
           return (
             <NonFilterableTableCell
               colName={colName}
-              className={getCellClassName(dataset.timeFieldName, colName)}
+              className={getCellClassName(dataset.timeFieldName, colName, wrapCellText)}
               sanitizedCellValue={sanitizedCellValue}
               isTimeField={dataset.timeFieldName === colName}
               index={index}
@@ -144,6 +177,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             rowData={row}
             isOnTracesPage={isOnTracesPage}
             setIsRowSelected={setIsRowSelected}
+            wrapCellText={wrapCellText}
           />
         );
       })}
