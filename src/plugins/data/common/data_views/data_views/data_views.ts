@@ -8,7 +8,7 @@ import { DataSourceAttributes } from 'src/plugins/data_source/common/data_source
 import { SavedObjectsClientCommon, Dataset, DEFAULT_DATA, UI_SETTINGS, SavedObject } from '../..';
 import { DataView } from './data_view';
 import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
-import { IndexPatternsService } from '../../index_patterns';
+import { IndexPattern, IndexPatternsService } from '../../index_patterns';
 import {
   DataViewOnNotification,
   DataViewOnError,
@@ -941,9 +941,9 @@ export class DataViewsService {
    * @param dataView DataView object to convert to Dataset
    * @returns Dataset object with data source information
    */
-  async convertToDataset(dataView: DataView): Promise<Dataset> {
-    if (dataView.toDataset) {
-      return await dataView.toDataset();
+  async convertToDataset(dataView: DataView | IndexPattern): Promise<Dataset> {
+    if ('toDataset' in dataView) {
+      return await (dataView as DataView).toDataset();
     }
 
     return {
@@ -958,6 +958,7 @@ export class DataViewsService {
           id: dataView.dataSourceRef.id,
           title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
           type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+          version: dataView.dataSourceRef.version || '',
         },
       }),
     };
