@@ -32,7 +32,7 @@ import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
-import { readFileAsBase64, clearAttachmentBase64, FileAttachment } from '../utils/read_file_as_base64';
+import { readFileAsBase64, createPendingFileAttachment, PendingFileAttachment } from '../utils/read_file_as_base64';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
 import { ChatSessionErrorBoundary } from './chat_session_error_boundary';
@@ -75,9 +75,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
   const loadingAbortControllerRef = useRef<AbortController | null>(null);
-  const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
+  const {isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
-  const [fileAttachments, setFileAttachments] = useState<FileAttachment[]>([]);
+  const [fileAttachments, setFileAttachments] = useState<PendingFileAttachment[]>([]);
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
@@ -295,10 +295,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
-          setFileAttachments((prev) => {
-            clearAttachmentBase64(prev);
-            return [];
-          });
+          setFileAttachments([]);
         },
         complete: () => {
           isStreamingRef.current = false;
@@ -306,10 +303,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
           setScreenshotData(undefined);
-          setFileAttachments((prev) => {
-            clearAttachmentBase64(prev);
-            return [];
-          });
+          setFileAttachments([]);
         },
       });
 
@@ -323,10 +317,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsStreaming(false);
       currentSubscriptionRef.current = null;
       setScreenshotData(undefined);
-      setFileAttachments((prev) => {
-        clearAttachmentBase64(prev);
-        return [];
-      });
+      setFileAttachments([]);
     }
   }, [chatService, currentRunId, eventHandler]);
 
@@ -350,13 +341,30 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         });
       }
 
-      for (const file of fileAttachments) {
-        binaryContent.push({
-          type: 'binary',
-          mimeType: file.mimeType,
-          data: file.base64,
-          filename: file.filename,
-        });
+      // Convert File objects to base64 sequentially to limit transient peak
+      // memory — each FileReader buffer is released before the next starts.
+      const failedNames: string[] = [];
+      for (const meta of fileAttachments) {
+        try {
+          const file = await readFileAsBase64(meta.file);
+          binaryContent.push({
+            type: 'binary',
+            mimeType: file.mimeType,
+            data: file.base64,
+            filename: file.filename,
+          });
+        } catch {
+          failedNames.push(meta.filename);
+        }
+      }
+      if (failedNames.length > 0) {
+        toasts?.addWarning(
+          i18n.translate('chat.window.fileReadFailed', {
+            defaultMessage:
+              'Failed to read {count, plural, one {# file} other {# files}}: {names}. They were not attached.',
+            values: { count: failedNames.length, names: failedNames.join(', ') },
+          })
+        );
       }
 
       additionalMessages = [
@@ -448,10 +456,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setPendingConfirmation(null);
     setShowHistory(false);
     setScreenshotData(undefined);
-    setFileAttachments((prev) => {
-      clearAttachmentBase64(prev);
-      return [];
-    });
+    setFileAttachments([]);
     setRestoreError(null);
   }, [chatService]);
 
@@ -482,37 +487,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [pendingConfirmation, confirmationService]);
 
-  /** Reads files sequentially to limit peak memory (one FileReader in flight at a time). */
-  const handleFilesSelected = useCallback(async (files: File[]) => {
-    const succeeded: FileAttachment[] = [];
-    let failedCount = 0;
-    for (const file of files) {
-      try {
-        const attachment = await readFileAsBase64(file);
-        succeeded.push(attachment);
-      } catch {
-        failedCount += 1;
-      }
-    }
-    if (succeeded.length > 0) {
-      setFileAttachments((prev) => [...prev, ...succeeded]);
-    }
-    if (failedCount > 0) {
-      toasts?.addWarning(
-        i18n.translate('chat.window.fileReadFailed', {
-          defaultMessage:
-            'Failed to read {count, plural, one {# file} other {# files}}. They were not attached.',
-          values: { count: failedCount },
-        })
-      );
-    }
-  }, [toasts]);
+  /** Wraps selected files in lightweight metadata (no file reading until send time). */
+  const handleFilesSelected = useCallback((files: File[]) => {
+    const attachments = files.map(createPendingFileAttachment);
+    setFileAttachments((prev) => [...prev, ...attachments]);
+  }, []);
 
   const handleRemoveFile = useCallback((index: number) => {
-    setFileAttachments((prev) => {
-      clearAttachmentBase64([prev[index]].filter(Boolean));
-      return prev.filter((_, i) => i !== index);
-    });
+    setFileAttachments((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleCaptureScreenshot = useCallback(async ()=>{
@@ -786,7 +768,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onSend={handleSend}
             onStop={handleStop}
             onKeyDown={handleKeyDown}
-            includeScreenShotEnabled={screenshotFeatureEnabled}
             onCaptureScreenshot={handleCaptureScreenshot}
             onFilesSelected={handleFilesSelected}
             fileUploadEnabled={chatService.fileUploadEnabled}

@@ -70,7 +70,6 @@ describe('ChatInput', () => {
     input: '',
     isStreaming: false,
     isCapturing: false,
-    includeScreenShotEnabled: true,
     onCaptureScreenshot: jest.fn(),
     onInputChange: jest.fn(),
     onSend: jest.fn(),
@@ -541,40 +540,20 @@ describe('ChatInput', () => {
   });
 
   describe('feature flag interactions', () => {
-    it('should hide popover when both file upload and screenshot are disabled', () => {
+    it('should show popover when file upload is disabled but screenshot button is registered', () => {
       const { queryByLabelText } = render(
-        <ChatInput {...defaultProps} fileUploadEnabled={false} includeScreenShotEnabled={false} />
+        <ChatInput {...defaultProps} fileUploadEnabled={false} />
       );
 
-      expect(queryByLabelText('Add context')).toBeNull();
-    });
-
-    it('should show popover when only screenshot is enabled', () => {
-      const { queryByLabelText } = render(
-        <ChatInput {...defaultProps} fileUploadEnabled={false} includeScreenShotEnabled={true} />
-      );
-
+      // screenshotButton is non-null (registered by the screenshot service),
+      // so the popover shows the screenshot option even when file upload is off.
       expect(queryByLabelText('Add context')).toBeTruthy();
     });
 
-    it('should show popover when only file upload is enabled', () => {
-      const { queryByLabelText } = render(
-        <ChatInput {...defaultProps} fileUploadEnabled={true} includeScreenShotEnabled={false} />
-      );
+    it('should show popover when file upload is enabled', () => {
+      const { queryByLabelText } = render(<ChatInput {...defaultProps} fileUploadEnabled={true} />);
 
       expect(queryByLabelText('Add context')).toBeTruthy();
-    });
-
-    it('should hide screenshot option when includeScreenShotEnabled is false', () => {
-      const { queryByLabelText } = render(
-        <ChatInput {...defaultProps} fileUploadEnabled={true} includeScreenShotEnabled={false} />
-      );
-
-      // Popover is present (file upload enabled) but screenshot option should not be in DOM
-      // The popover button exists
-      expect(queryByLabelText('Add context')).toBeTruthy();
-      // Screenshot icon should not be rendered
-      expect(queryByLabelText('Add dashboard screenshot')).toBeNull();
     });
   });
 

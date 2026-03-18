@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { readFileAsBase64, clearAttachmentBase64 } from './read_file_as_base64';
+import { readFileAsBase64, createPendingFileAttachment } from './read_file_as_base64';
 
 describe('readFileAsBase64', () => {
   // Helper to create a mock File
@@ -16,7 +16,6 @@ describe('readFileAsBase64', () => {
     const file = createMockFile('test.txt', 'Hello, world!', 'text/plain');
     const result = await readFileAsBase64(file);
 
-    expect(result.id).toBeDefined();
     expect(result.filename).toBe('test.txt');
     expect(result.mimeType).toBe('text/plain');
     expect(result.size).toBe(13);
@@ -84,31 +83,31 @@ describe('readFileAsBase64', () => {
     global.FileReader = originalFileReader;
   });
 
-  describe('clearAttachmentBase64', () => {
-    it('clears base64 from attachments to release memory', () => {
-      const attachments = [
-        { id: '1', filename: 'a.txt', mimeType: 'text/plain', base64: 'SGVsbG8=', size: 5 },
-        { id: '2', filename: 'b.csv', mimeType: 'text/csv', base64: 'bmFtZSxhZ2U=', size: 8 },
-      ];
-      clearAttachmentBase64(attachments);
-      expect(attachments[0].base64).toBe('');
-      expect(attachments[1].base64).toBe('');
+  describe('createPendingFileAttachment', () => {
+    it('creates lightweight metadata from a File without reading contents', () => {
+      const file = createMockFile('test.txt', 'Hello, world!', 'text/plain');
+      const meta = createPendingFileAttachment(file);
+
+      expect(meta.id).toMatch(/^attachment-/);
+      expect(meta.file).toBe(file);
+      expect(meta.filename).toBe('test.txt');
+      expect(meta.mimeType).toBe('text/plain');
+      expect(meta.size).toBe(13);
     });
 
-    it('handles empty array', () => {
-      expect(() => clearAttachmentBase64([])).not.toThrow();
+    it('falls back to application/octet-stream for empty mime type', () => {
+      const file = new File(['content'], 'unknown.dat', { type: '' });
+      const meta = createPendingFileAttachment(file);
+
+      expect(meta.mimeType).toBe('application/octet-stream');
     });
 
-    it('skips attachments with empty base64', () => {
-      const attachment = {
-        id: '3',
-        filename: 'x.txt',
-        mimeType: 'text/plain',
-        base64: '',
-        size: 0,
-      };
-      clearAttachmentBase64([attachment]);
-      expect(attachment.base64).toBe('');
+    it('generates unique ids', () => {
+      const file = createMockFile('test.txt', 'content', 'text/plain');
+      const meta1 = createPendingFileAttachment(file);
+      const meta2 = createPendingFileAttachment(file);
+
+      expect(meta1.id).not.toBe(meta2.id);
     });
   });
 });

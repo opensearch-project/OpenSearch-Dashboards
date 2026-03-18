@@ -34,7 +34,6 @@ interface ChatInputProps {
   onSend: () => void;
   onStop: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
-  includeScreenShotEnabled: boolean;
   onCaptureScreenshot: () => void;
   onFilesSelected: (files: File[]) => void;
   fileUploadEnabled: boolean;
@@ -53,7 +52,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   onStop,
   onKeyDown,
-  includeScreenShotEnabled,
   onCaptureScreenshot,
   onFilesSelected,
   fileUploadEnabled,
@@ -190,7 +188,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const chatContextPopoverOptions = useMemo(() => {
     return [
-      ...(includeScreenShotEnabled && screenshotButton
+      ...(screenshotButton
         ? [
             {
               title: screenshotButton.title,
@@ -209,7 +207,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           ]
         : []),
     ];
-  }, [includeScreenShotEnabled, screenshotButton, onCaptureScreenshot, fileUploadEnabled]);
+  }, [screenshotButton, onCaptureScreenshot, fileUploadEnabled]);
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>

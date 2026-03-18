@@ -4,7 +4,6 @@
  */
 
 export interface FileAttachment {
-  id: string;
   filename: string;
   mimeType: string;
   base64: string;
@@ -12,14 +11,29 @@ export interface FileAttachment {
 }
 
 /**
- * Clear base64 data from attachments to release memory.
- * Large files (~4MB base64) would otherwise persist until GC runs.
- * Call before discarding attachments (remove, clear all, send complete).
+ * Lightweight metadata for a file attachment.
+ * Holds a browser File reference (cheap handle, no data copy) instead of base64.
+ * Base64 conversion is deferred to send time via readFileAsBase64().
  */
-export function clearAttachmentBase64(attachments: FileAttachment[]): void {
-  attachments.forEach((item) => {
-    if (item.base64) item.base64 = '';
-  });
+export interface PendingFileAttachment {
+  id: string;
+  file: File;
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
+/**
+ * Create lightweight metadata from a File without reading its contents.
+ */
+export function createPendingFileAttachment(file: File): PendingFileAttachment {
+  return {
+    id: `attachment-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+    file,
+    filename: file.name,
+    mimeType: file.type || 'application/octet-stream',
+    size: file.size,
+  };
 }
 
 /**
@@ -35,7 +49,6 @@ export function readFileAsBase64(file: File): Promise<FileAttachment> {
       // Strip the "data:<mime>;base64," prefix
       const base64 = dataUrl.split(',')[1] || '';
       resolve({
-        id: `attachment-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         filename: file.name,
         mimeType: file.type || 'application/octet-stream',
         base64,
