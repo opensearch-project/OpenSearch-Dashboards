@@ -433,6 +433,67 @@ describe('convertResult', () => {
     expect(result.hits.hits[1]._source.foo).toBe(undefined);
   });
 
+  it('should attach highlight to each hit when body.meta.highlights is present', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      body: {
+        fields: [
+          { name: 'title', type: 'keyword', values: ['OpenSearch', 'Dashboards'] },
+          { name: 'message', type: 'keyword', values: ['hello', 'world'] },
+        ],
+        size: 2,
+        name: 'test-index',
+        meta: {
+          highlights: [{ title: ['<em>OpenSearch</em>'] }, { message: ['<em>world</em>'] }],
+        },
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const result = convertResult({ response });
+    expect(result.hits.hits[0].highlight).toEqual({ title: ['<em>OpenSearch</em>'] });
+    expect(result.hits.hits[1].highlight).toEqual({ message: ['<em>world</em>'] });
+  });
+
+  it('should not have highlight on hits when body.meta.highlights is absent', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: 0,
+        max_score: 0,
+        hits: [],
+      },
+      body: {
+        fields: [{ name: 'title', type: 'keyword', values: ['OpenSearch'] }],
+        size: 1,
+        name: 'test-index',
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const result = convertResult({ response });
+    expect(result.hits.hits[0].highlight).toBeUndefined();
+  });
+
   it('should transform instant data from meta to instantHits format', () => {
     const instantRows = [
       { Time: 1702483200000, cpu: '0', mode: 'idle', Value: 0.95 },

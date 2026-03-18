@@ -69,7 +69,16 @@ describe('SourceFieldTableCell', () => {
 
     renderInTable(defaultProps);
 
-    expect(mockDataset.formatHit).toHaveBeenCalledWith(mockRow, 'text');
+    expect(mockDataset.formatHit).toHaveBeenCalledWith(mockRow);
+  });
+
+  it('renders highlighted HTML content via dangerouslySetInnerHTML', () => {
+    mockDataset.formatHit.mockReturnValue({
+      field1: '<mark>Holmes</mark> is here',
+    });
+    renderInTable(defaultProps);
+    const valueEl = screen.getByTestId('sourceFieldValue');
+    expect(valueEl.innerHTML).toContain('<mark>Holmes</mark>');
   });
 
   it('renders field names and values', () => {

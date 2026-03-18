@@ -313,6 +313,81 @@ describe('pplSearchStrategyProvider', () => {
     expect(requestArg.body.fetchSize).toBe(200);
   });
 
+  it('should attach highlights to dataFrame meta when rawResponse contains highlights', async () => {
+    const mockHighlights = [{ title: ['<em>OpenSearch</em>'] }, { title: ['<em>Dashboards</em>'] }];
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [
+          { name: 'field1', type: 'long' },
+          { name: 'field2', type: 'text' },
+        ],
+        datarows: [
+          [1, 'value1'],
+          [2, 'value2'],
+        ],
+        highlights: mockHighlights,
+      },
+      took: 100,
+    };
+    const mockFacet = ({
+      describeQuery: jest.fn().mockResolvedValue(mockResponse),
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([
+      { name: 'field1', type: 'long' },
+      { name: 'field2', type: 'text' },
+    ]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(
+      mockRequestHandlerContext,
+      ({
+        body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(result.body.meta).toBeDefined();
+    expect(result.body.meta.highlights).toEqual(mockHighlights);
+  });
+
+  it('should not have highlights in meta when rawResponse has no highlights', async () => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [
+          { name: 'field1', type: 'long' },
+          { name: 'field2', type: 'text' },
+        ],
+        datarows: [
+          [1, 'value1'],
+          [2, 'value2'],
+        ],
+      },
+      took: 100,
+    };
+    const mockFacet = ({
+      describeQuery: jest.fn().mockResolvedValue(mockResponse),
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([
+      { name: 'field1', type: 'long' },
+      { name: 'field2', type: 'text' },
+    ]);
+
+    const strategy = pplSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(
+      mockRequestHandlerContext,
+      ({
+        body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(result.body.meta?.highlights).toBeUndefined();
+  });
+
   it('should handle empty search response', async () => {
     const mockResponse = {
       success: true,
