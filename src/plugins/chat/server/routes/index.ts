@@ -22,7 +22,7 @@ import { getMemoryContainerId } from './utils/get_memory_container_id';
  * Returns the token string on success, or undefined if the endpoint is
  * unavailable or OBO is not configured.
  */
-async function generateOboToken(
+export async function generateOboToken(
   context: RequestHandlerContext,
   logger: Logger,
   agUiUrl: string

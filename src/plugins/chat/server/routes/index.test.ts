@@ -6,9 +6,10 @@
 import supertest from 'supertest';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
-import { defineRoutes } from './index';
+import { defineRoutes, generateOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
+import { RequestHandlerContext, Logger } from '../../../../core/server';
 
 // Mock native fetch
 global.fetch = jest.fn();
@@ -841,5 +842,110 @@ describe('Chat Proxy Routes', () => {
         dataSourceId: 'ds-123',
       });
     });
+  });
+});
+
+describe('generateOboToken', () => {
+  let mockLogger: Logger;
+  let mockContext: RequestHandlerContext;
+  let mockTransportRequest: jest.Mock;
+
+  beforeEach(() => {
+    mockLogger = ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as unknown) as Logger;
+
+    mockTransportRequest = jest.fn();
+
+    mockContext = ({
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              transport: {
+                request: mockTransportRequest,
+              },
+            },
+          },
+        },
+      },
+    } as unknown) as RequestHandlerContext;
+  });
+
+  it('should return OBO token on successful generation', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'obo-jwt-token-123' },
+    });
+
+    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(token).toBe('obo-jwt-token-123');
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generated for credential forwarding to AG-UI endpoint')
+    );
+    expect(mockTransportRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_plugins/_security/api/generateonbehalfoftoken',
+      body: { description: 'OBO token for AG-UI credential forwarding' },
+    });
+  });
+
+  it('should return undefined and warn when response has no authenticationToken', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { unexpected: 'response' },
+    });
+
+    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(token).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'OBO token response did not contain authenticationToken'
+    );
+  });
+
+  it('should return undefined and warn on 404 (security plugin not installed)', async () => {
+    mockTransportRequest.mockRejectedValue({ statusCode: 404, message: 'Not Found' });
+
+    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(token).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generation unavailable (HTTP 404)')
+    );
+  });
+
+  it('should return undefined and warn on 400 (OBO not configured)', async () => {
+    mockTransportRequest.mockRejectedValue({ statusCode: 400, message: 'Bad Request' });
+
+    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(token).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generation unavailable (HTTP 400)')
+    );
+  });
+
+  it('should return undefined and log error on unexpected errors', async () => {
+    mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
+
+    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(token).toBeUndefined();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to generate OBO token: Connection refused')
+    );
+  });
+
+  it('should handle error with meta.statusCode for 404', async () => {
+    mockTransportRequest.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(token).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generation unavailable (HTTP 404)')
+    );
   });
 });
