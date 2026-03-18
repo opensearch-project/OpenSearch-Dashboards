@@ -64,16 +64,16 @@ const rootGroups = [
     '<rootDir>/packages',
   ],
   [
-    // CI Group 3 (roughly 400 files)
-    '<rootDir>/src/plugins/[a-d]', // plugins a-d
+    // CI Group 3 (roughly 200 files)
+    '<rootDir>/src/plugins/[a-c]', // plugins a-c
   ],
   [
-    // CI Group 4 (roughly 410 files)
+    // CI Group 4 (roughly 280 files)
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
     '<rootDir>/src/dev',
-    '<rootDir>/src/plugins/[e-u]', // plugins e-u
+    '<rootDir>/src/plugins/[e-k]', // plugins e-k (explore, embeddable, expressions, home, etc.)
     '<rootDir>/src/legacy/server',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/legacy/utils',
@@ -81,6 +81,13 @@ const rootGroups = [
     '<rootDir>/src/setup_node_env',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
+  ],
+  [
+    // CI Group 5 (roughly 330 files)
+    // [d] plugins are the heaviest (data, dashboard, discover, data_source, data_source_management)
+    // paired with lighter [l-u] plugins to balance the group
+    '<rootDir>/src/plugins/[d]', // plugins d
+    '<rootDir>/src/plugins/[l-u]', // plugins l-u
   ],
 ];
 

@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        group: [1, 2, 3, 4]
+        group: [1, 2, 3, 4, 5]
         include:
           - os: ubuntu-latest
             name: Linux
@@ -137,12 +137,6 @@ jobs:
           directory: ./target/opensearch-dashboards-coverage
           flags: ${{ matrix.name }}_${{ matrix.group }}
 
-      - name: Run integration tests
-        # ciGroup 1 of unit-tests is shorter
-        if: matrix.group == 1
-        id: integration-tests
-        run: yarn test:jest_integration:ci
-
       # Upload JUnit XML so the reports are accessible to humans and AI agents via
       # `gh run download -n junit-jest-group<N>-<OS>`. Retention is 7 days (vs the
       # default 1 day used for screenshot artifacts) to give teams time to triage.
@@ -162,6 +156,142 @@ jobs:
         if: failure()
         shell: bash
         run: node scripts/summarize_jest_failures.js
+
+  build-plugins-artifact:
+    name: Build plugin bundles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-Linux-
+
+      - name: Run bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Upload plugin bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-bundles
+          # Captures all plugin/package/core bundle output dirs.
+          # These are JS/CSS browser assets — platform-agnostic, safe to build
+          # once on Linux and share to all FTR jobs including Windows.
+          path: |
+            src/core/target/public
+            src/plugins/*/target/public
+            packages/*/target/public
+          retention-days: 1
+          if-no-files-found: warn
+
+  integration-tests:
+    name: Run integration tests on ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            name: Linux
+          - os: windows-latest
+            name: Windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - name: Configure git's autocrlf (Windows only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Configure pagefile size (Windows only)
+        if: matrix.os == 'windows-latest'
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        shell: bash
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      - name: Run bootstrap (Linux)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Run bootstrap (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Run integration tests
+        run: yarn test:jest_integration:ci
 
   lint-and-validate:
     name: Lint and validate
@@ -244,16 +374,35 @@ jobs:
 
   functional-tests:
     name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
+    needs: [build-plugins-artifact]
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         include:
           - os: ubuntu-latest
             name: Linux
           - os: windows-latest
             name: Windows
+        exclude:
+          # Windows FTR coverage is provided by ciGroup1 (smoke test that OSD starts
+          # and serves on Windows) and the Windows build artifact job. ciGroup2-13
+          # run browser rendering tests which are platform-agnostic and fully covered
+          # by Linux FTR. Removing them saves ~13 Windows jobs (~6-57 min each) per run.
+          - { os: windows-latest, group: 2 }
+          - { os: windows-latest, group: 3 }
+          - { os: windows-latest, group: 4 }
+          - { os: windows-latest, group: 5 }
+          - { os: windows-latest, group: 6 }
+          - { os: windows-latest, group: 7 }
+          - { os: windows-latest, group: 8 }
+          - { os: windows-latest, group: 9 }
+          - { os: windows-latest, group: 10 }
+          - { os: windows-latest, group: 11 }
+          - { os: windows-latest, group: 12 }
+          - { os: windows-latest, group: 13 }
+          - { os: windows-latest, group: 14 }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     steps:
@@ -352,8 +501,10 @@ jobs:
           done
           exit 1
 
-      - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+      - name: Download plugin bundles
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin-bundles
 
       - name: Run CI test group ${{ matrix.group }}
         id: ftr-tests
