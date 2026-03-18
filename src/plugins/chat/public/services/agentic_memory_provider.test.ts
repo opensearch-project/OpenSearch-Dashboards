@@ -194,7 +194,7 @@ describe('AgenticMemoryProvider', () => {
 
       const result = await provider.getConversation('thread-123');
 
-      expect(AgUiAgent).toHaveBeenCalledWith();
+      expect(AgUiAgent).toHaveBeenCalledWith('/api/chat/proxy');
       expect(mockRunAgent).toHaveBeenCalledWith(
         {
           threadId: 'thread-123',
