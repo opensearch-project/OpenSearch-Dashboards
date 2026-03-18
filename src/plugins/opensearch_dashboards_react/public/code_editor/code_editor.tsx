@@ -159,6 +159,11 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
+    // Register providers when the editor mounts. This handles the SPA
+    // navigation case where onLanguage won't fire because the language
+    // was already encountered in a previous mount cycle.
+    this._registerProviders(this.props.languageId);
+
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
     }
@@ -208,22 +213,28 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
 
     if (this.props.languageConfiguration) {
-      monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+      // setLanguageConfiguration requires the language to be registered.
+      // Safe inside onLanguage (language guaranteed), but editorDidMount or
+      // componentDidUpdate may run before the language is encountered.
+      try {
+        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+      } catch {
+        // Language not yet registered — onLanguage will handle this.
+      }
     }
   }
 
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
 
+    // Cancel any pending onLanguage listener from a previous render to prevent
+    // listener accumulation.
     this._onLanguageDisposable?.dispose();
 
-    // Register providers directly so they are available immediately when the
-    // language was already encountered (e.g. after SPA navigation unmount/remount).
-    // onLanguage is one-shot and won't fire again for an already-encountered language.
-    this._registerProviders(languageId);
-
-    // Also listen for the language's first encounter so providers are registered
+    // Listen for the language's first encounter so providers are registered
     // when a model for this language is created for the very first time.
+    // For SPA remounts (language already encountered), _editorDidMount handles
+    // registration directly since onLanguage won't fire again.
     this._onLanguageDisposable = monaco.languages.onLanguage(languageId, () => {
       this._registerProviders(languageId);
     });
@@ -244,6 +255,19 @@ export class CodeEditor extends React.Component<Props, {}> {
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>
     );
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // Re-register providers when the language changes on an already-mounted
+    // editor. react-monaco-editor handles language switches via
+    // setModelLanguage without re-calling editorDidMount, so neither
+    // editorDidMount nor onLanguage (one-shot) would fire in that case.
+    // Note: we intentionally do NOT compare provider prop identity here
+    // because callers pass fresh object literals on every render, which
+    // would cause dispose/re-register churn on every keystroke.
+    if (prevProps.languageId !== this.props.languageId) {
+      this._registerProviders(this.props.languageId);
+    }
   }
 
   componentWillUnmount() {
