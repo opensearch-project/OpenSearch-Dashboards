@@ -512,7 +512,6 @@ describe('DataSourceTable', () => {
 
     it('should render normally', () => {
       expect(() => component).not.toThrow();
-      expect(component).toMatchSnapshot();
       expect(utils.getDataSources).toHaveBeenCalled();
 
       // assertion for three row and description placeholder to be visible

@@ -1,0 +1,103 @@
+name: Post CI results
+
+# Triggered after "Build and test" completes. Runs in the context of the base
+# branch (not the PR branch), which grants pull-requests: write permission.
+# This is the GitHub-recommended pattern for safely posting PR comments from CI:
+# https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#workflow_run
+on:
+  workflow_run:
+    workflows: ['Build and test']
+    types: [completed]
+
+jobs:
+  post-comment:
+    name: Post test results to PR
+    runs-on: ubuntu-latest
+    # Only comment on PR-triggered runs, not direct branch pushes
+    if: github.event.workflow_run.event == 'pull_request'
+    permissions:
+      pull-requests: write
+      actions: read # required to download artifacts from the triggering run
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Resolve the PR number from the workflow_run event.
+      # For PRs within the same repo, pull_requests[] is populated directly.
+      # For fork PRs it is empty, so we fall back to searching by head branch.
+      - name: Get PR number
+        id: get-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const prs = run.pull_requests;
+            if (prs && prs.length > 0) {
+              core.setOutput('pr_number', String(prs[0].number));
+              return;
+            }
+            // Fork PR fallback: match by owner:branch
+            const { data } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              head: `${run.head_repository.owner.login}:${run.head_branch}`,
+            });
+            core.setOutput('pr_number', data[0] ? String(data[0].number) : '');
+
+      - name: Download JUnit artifacts
+        if: github.event.workflow_run.conclusion == 'failure' && steps.get-pr.outputs.pr_number != ''
+        uses: actions/download-artifact@v4
+        with:
+          # Matches junit-jest-group1-Linux, junit-jest-group2-Windows, etc.
+          # Each artifact lands in its own subdirectory; the script recurses into all of them.
+          pattern: junit-jest-group*
+          path: downloaded-junit
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build failure comment body
+        if: github.event.workflow_run.conclusion == 'failure' && steps.get-pr.outputs.pr_number != ''
+        shell: bash
+        run: |
+          {
+            echo "<!-- ci-test-failure-summary -->"
+            echo "> 🔗 [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}) · commit \`${{ github.event.workflow_run.head_sha }}\`"
+            echo ""
+            GITHUB_STEP_SUMMARY="" node scripts/summarize_jest_failures.js --dir=downloaded-junit
+          } > pr-comment.md
+
+      - name: Build success comment body
+        if: github.event.workflow_run.conclusion == 'success' && steps.get-pr.outputs.pr_number != ''
+        shell: bash
+        run: |
+          {
+            echo "<!-- ci-test-failure-summary -->"
+            echo "## ✅ All unit tests passing"
+            echo ""
+            echo "> 🔗 [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}) · commit \`${{ github.event.workflow_run.head_sha }}\`"
+          } > pr-comment.md
+
+      - name: Find existing comment
+        id: find-comment
+        if: steps.get-pr.outputs.pr_number != ''
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ steps.get-pr.outputs.pr_number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- ci-test-failure-summary -->'
+
+      # Post on first failure, update on subsequent runs.
+      # On success, only update if a prior failure comment exists — avoids
+      # posting a green banner on every clean PR.
+      - name: Post or update PR comment
+        if: |
+          steps.get-pr.outputs.pr_number != '' &&
+          (github.event.workflow_run.conclusion == 'failure' || steps.find-comment.outputs.comment-id != '')
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ steps.get-pr.outputs.pr_number }}
+          body-path: pr-comment.md
+          edit-mode: replace

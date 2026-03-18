@@ -130,3 +130,28 @@ When modifying `src/core/public/` or `src/core/server/` APIs, run `yarn docs:acc
 - All commits must include a DCO sign-off: `Signed-off-by: Name <email>` (use `git commit -s`).
 - PRs must include appropriate test coverage and pass CI checks.
 - Do not write new Selenium/FTR tests; use Cypress instead.
+
+## Analyzing CI Failures for a PR
+
+When given a PR link, use this sequence:
+
+```bash
+# 1. Get overall check status — tells you which workflows failed
+gh pr checks <pr-url>
+
+# 2. Read the bot comment for the structured failure list (fastest path)
+gh pr view <pr-url> --comments --json body \
+  | jq -r '.[] | select(.body | contains("ci-test-failure-summary")) | .body'
+
+# 3. If you need Cypress failures too (no bot comment for those yet):
+gh run list --pr <pr-number> --json databaseId,name,conclusion \
+  | jq '.[] | select(.conclusion == "failure")'
+gh run download <run-id> -n "cypress-junit-*" --dir cypress-results
+node scripts/summarize_jest_failures.js --dir=cypress-results
+```
+
+**What the bot comment covers:** Jest unit test failures from `build-test` jobs (all 4 groups, Linux + Windows). Posted automatically by the `pr-test-results-comment` job and updated on every push — including a ✅ green banner when tests recover.
+
+**What requires manual artifact download:** Cypress failures, FTR functional test failures, lint/typecheck failures (those appear only in the step logs — use `gh run view <run-id> --log-failed`).
+
+**FTR Cypress groups 1–9** (`ftr-cypress-junit-*`): test source lives in `opensearch-project/opensearch-dashboards-functional-test`, not this repo — check there if you need to read the test implementation.
