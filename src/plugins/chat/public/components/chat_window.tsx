@@ -780,6 +780,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             includeScreenShotEnabled={screenshotFeatureEnabled}
             onCaptureScreenshot={handleCaptureScreenshot}
             onFilesSelected={handleFilesSelected}
+            fileUploadEnabled={chatService.fileUploadEnabled}
             maxFileUploadBytes={chatService.maxFileUploadBytes}
             maxFileAttachments={chatService.maxFileAttachments}
             attachmentCount={fileAttachments.length + (screenshotData ? 1 : 0)}

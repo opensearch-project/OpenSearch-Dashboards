@@ -6,6 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
+import { CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES, CHAT_MAX_FILE_ATTACHMENTS } from '../../common';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ChatLayoutMode } from '../components/chat_header_button';
@@ -65,6 +66,8 @@ export class ChatService {
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
 
+  /** Whether file upload is enabled (injected from plugin config, immutable). */
+  public readonly fileUploadEnabled: boolean;
   /** Max file upload size in bytes (injected from plugin config, immutable). */
   public readonly maxFileUploadBytes: number;
   /** Max number of file attachments per message (injected from plugin config, immutable). */
@@ -75,8 +78,9 @@ export class ChatService {
     coreChatService?: ChatServiceStart,
     workspaces?: WorkspacesStart,
     http?: HttpSetup,
-    maxFileUploadBytes: number = 3145728, // 3MB default
-    maxFileAttachments: number = 10
+    fileUploadEnabled: boolean = true,
+    maxFileUploadBytes: number = CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+    maxFileAttachments: number = CHAT_MAX_FILE_ATTACHMENTS
   ) {
     // Use basePath.prepend so the proxy URL works when OSD runs with a basePath (e.g. dev mode).
     const proxyUrl = http ? http.basePath.prepend('/api/chat/proxy') : '/api/chat/proxy';
@@ -97,6 +101,7 @@ export class ChatService {
       this.availableTools = state.toolDefinitions;
     });
 
+    this.fileUploadEnabled = fileUploadEnabled;
     this.maxFileUploadBytes = maxFileUploadBytes;
     this.maxFileAttachments = maxFileAttachments;
   }

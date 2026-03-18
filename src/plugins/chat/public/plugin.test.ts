@@ -7,6 +7,7 @@ import { ChatPlugin } from './plugin';
 import { ChatService } from './services/chat_service';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { BehaviorSubject, of } from 'rxjs';
+import { CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES, CHAT_MAX_FILE_ATTACHMENTS } from '../common';
 
 // Mock dependencies
 jest.mock('./services/chat_service');
@@ -109,14 +110,15 @@ describe('ChatPlugin', () => {
     it('should initialize chat service when enabled', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      // ChatService is called with uiSettings, core chat service, workspaces, http, maxFileUploadBytes, and maxFileAttachments
+      // ChatService is called with uiSettings, core chat service, workspaces, http, fileUploadEnabled, maxFileUploadBytes, and maxFileAttachments
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.http,
-        3145728,
-        10
+        true,
+        CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+        CHAT_MAX_FILE_ATTACHMENTS
       );
     });
 
@@ -143,14 +145,15 @@ describe('ChatPlugin', () => {
 
       const startContract = testPlugin.start(mockCoreStart, mockDeps);
 
-      // ChatService should still be created with uiSettings, core chat service, workspaces, http, maxFileUploadBytes, and maxFileAttachments
+      // ChatService should still be created with uiSettings, core chat service, workspaces, http, fileUploadEnabled, maxFileUploadBytes, and maxFileAttachments
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.http,
-        3145728,
-        10
+        true,
+        CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+        CHAT_MAX_FILE_ATTACHMENTS
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -164,8 +167,9 @@ describe('ChatPlugin', () => {
         mockCoreStart.chat,
         mockCoreStart.workspaces,
         mockCoreStart.http,
-        3145728,
-        10
+        true,
+        CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+        CHAT_MAX_FILE_ATTACHMENTS
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -230,7 +234,8 @@ describe('ChatPlugin', () => {
           mockCoreStart.chat,
           mockCoreStart.workspaces,
           mockCoreStart.http,
-          3145728,
+          true,
+          CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
           10
         );
       });

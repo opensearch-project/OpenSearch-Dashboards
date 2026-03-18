@@ -22,6 +22,7 @@ import { ChatHeaderButton, ChatLayoutMode } from './components/chat_header_butto
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
+import { CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES, CHAT_MAX_FILE_ATTACHMENTS } from '../common';
 import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
@@ -110,6 +111,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       enabled: boolean;
       agUiUrl?: string;
       mlCommonsAgentId?: string;
+      fileUploadEnabled?: boolean;
       maxFileUploadBytes?: number;
       maxFileAttachments?: number;
     }>();
@@ -129,8 +131,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.chat,
       core.workspaces,
       core.http,
-      chatConfig.maxFileUploadBytes ?? 3145728,
-      chatConfig.maxFileAttachments ?? 10
+      chatConfig.fileUploadEnabled ?? true,
+      chatConfig.maxFileUploadBytes ?? CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+      chatConfig.maxFileAttachments ?? CHAT_MAX_FILE_ATTACHMENTS
     );
 
     if (!isEnabled) {

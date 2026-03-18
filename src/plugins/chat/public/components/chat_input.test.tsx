@@ -77,6 +77,7 @@ describe('ChatInput', () => {
     onStop: jest.fn(),
     onKeyDown: jest.fn(),
     onFilesSelected: jest.fn(),
+    fileUploadEnabled: true,
     maxFileUploadBytes: 10 * 1024 * 1024,
     attachmentCount: 0,
   };
@@ -522,6 +523,58 @@ describe('ChatInput', () => {
       // Only 2 remaining slots (10 - 8)
       expect(onFilesSelected).toHaveBeenCalledWith(files.slice(0, 2));
       expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('Only 2 of 5'));
+    });
+
+    it('should not render file input when fileUploadEnabled is false', () => {
+      const { container } = render(<ChatInput {...defaultProps} fileUploadEnabled={false} />);
+
+      const fileInput = container.querySelector('input[type="file"]');
+      expect(fileInput).toBeNull();
+    });
+
+    it('should render file input when fileUploadEnabled is true', () => {
+      const { container } = render(<ChatInput {...defaultProps} fileUploadEnabled={true} />);
+
+      const fileInput = container.querySelector('input[type="file"]');
+      expect(fileInput).toBeTruthy();
+    });
+  });
+
+  describe('feature flag interactions', () => {
+    it('should hide popover when both file upload and screenshot are disabled', () => {
+      const { queryByLabelText } = render(
+        <ChatInput {...defaultProps} fileUploadEnabled={false} includeScreenShotEnabled={false} />
+      );
+
+      expect(queryByLabelText('Add context')).toBeNull();
+    });
+
+    it('should show popover when only screenshot is enabled', () => {
+      const { queryByLabelText } = render(
+        <ChatInput {...defaultProps} fileUploadEnabled={false} includeScreenShotEnabled={true} />
+      );
+
+      expect(queryByLabelText('Add context')).toBeTruthy();
+    });
+
+    it('should show popover when only file upload is enabled', () => {
+      const { queryByLabelText } = render(
+        <ChatInput {...defaultProps} fileUploadEnabled={true} includeScreenShotEnabled={false} />
+      );
+
+      expect(queryByLabelText('Add context')).toBeTruthy();
+    });
+
+    it('should hide screenshot option when includeScreenShotEnabled is false', () => {
+      const { queryByLabelText } = render(
+        <ChatInput {...defaultProps} fileUploadEnabled={true} includeScreenShotEnabled={false} />
+      );
+
+      // Popover is present (file upload enabled) but screenshot option should not be in DOM
+      // The popover button exists
+      expect(queryByLabelText('Add context')).toBeTruthy();
+      // Screenshot icon should not be rendered
+      expect(queryByLabelText('Add dashboard screenshot')).toBeNull();
     });
   });
 });

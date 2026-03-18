@@ -53,6 +53,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       getCapabilitiesResolver,
       config.mlCommonsAgentId,
       config.observabilityAgentId,
+      config.fileUploadEnabled,
       config.maxFileUploadBytes,
       config.maxFileAttachments
     );

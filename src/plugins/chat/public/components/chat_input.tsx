@@ -36,6 +36,7 @@ interface ChatInputProps {
   includeScreenShotEnabled: boolean;
   onCaptureScreenshot: () => void;
   onFilesSelected: (files: File[]) => void;
+  fileUploadEnabled: boolean;
   maxFileUploadBytes: number;
   maxFileAttachments?: number;
   attachmentCount: number;
@@ -53,6 +54,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   includeScreenShotEnabled,
   onCaptureScreenshot,
   onFilesSelected,
+  fileUploadEnabled,
   maxFileUploadBytes,
   maxFileAttachments = DEFAULT_MAX_FILE_ATTACHMENTS,
   attachmentCount,
@@ -186,7 +188,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const chatContextPopoverOptions = useMemo(() => {
     return [
-      ...(screenshotButton
+      ...(includeScreenShotEnabled && screenshotButton
         ? [
             {
               title: screenshotButton.title,
@@ -195,25 +197,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             },
           ]
         : []),
-      {
-        title: i18n.translate('chat.input.attachFile', { defaultMessage: 'Attach file' }),
-        iconType: 'document',
-        onClick: () => fileInputRef.current?.click(),
-      },
+      ...(fileUploadEnabled
+        ? [
+            {
+              title: i18n.translate('chat.input.attachFile', { defaultMessage: 'Attach file' }),
+              iconType: 'document',
+              onClick: () => fileInputRef.current?.click(),
+            },
+          ]
+        : []),
     ];
-  }, [screenshotButton, onCaptureScreenshot]);
+  }, [includeScreenShotEnabled, screenshotButton, onCaptureScreenshot, fileUploadEnabled]);
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept={CHAT_FILE_ACCEPT}
-        onChange={handleFileInputChange}
-        style={{ display: 'none' }}
-        data-test-subj="chatFileInput"
-      />
+      {fileUploadEnabled && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={CHAT_FILE_ACCEPT}
+          onChange={handleFileInputChange}
+          style={{ display: 'none' }}
+          data-test-subj="chatFileInput"
+        />
+      )}
       <div className="chatInput__inputRow" style={{ position: 'relative' }}>
         {showCommandMenu && (
           <SlashCommandMenu

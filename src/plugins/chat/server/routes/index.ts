@@ -19,6 +19,8 @@ import { getMemoryContainerId } from './utils/get_memory_container_id';
 import {
   CHAT_ALLOWED_FILE_TYPES,
   CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
+  CHAT_SCREENSHOT_MIME_TYPE,
+  CHAT_MAX_SCREENSHOTS_PER_MESSAGE,
   ONE_MB,
 } from '../../common';
 
@@ -113,6 +115,7 @@ export function defineRoutes(
     | undefined,
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
+  fileUploadEnabled: boolean = true,
   maxFileUploadBytes?: number,
   maxFileAttachments: number = DEFAULT_MAX_FILE_ATTACHMENTS
 ) {
@@ -251,6 +254,54 @@ export function defineRoutes(
       const dataSourceId = request.query?.dataSourceId;
 
       try {
+        // Normalize: treat any content part with data+mimeType as binary so that
+        // all downstream checks (feature flag, MIME whitelist, base64, size, count)
+        // apply consistently regardless of whether the client set type: 'binary'.
+        for (const msg of request.body.messages) {
+          const parts = Array.isArray(msg.content) ? msg.content : [];
+          for (const part of parts) {
+            if (part.type !== 'binary' && part.data && part.mimeType) {
+              part.type = 'binary';
+            }
+          }
+        }
+
+        // Reject file uploads when disabled; allow screenshots (no filename, image/jpeg, max 1).
+        if (!fileUploadEnabled) {
+          for (const msg of request.body.messages) {
+            const parts = Array.isArray(msg.content) ? msg.content : [];
+            for (const part of parts) {
+              if (part.type !== 'binary') continue;
+
+              if (part.filename) {
+                return response.badRequest({
+                  body: {
+                    message: 'File upload is disabled by the administrator',
+                  },
+                });
+              }
+
+              if (part.mimeType !== CHAT_SCREENSHOT_MIME_TYPE) {
+                return response.badRequest({
+                  body: {
+                    message: `File upload is disabled. Only screenshots (${CHAT_SCREENSHOT_MIME_TYPE}) are allowed.`,
+                  },
+                });
+              }
+            }
+
+            const screenshotCount = parts.filter((p: any) => p.type === 'binary' && !p.filename)
+              .length;
+            if (screenshotCount > CHAT_MAX_SCREENSHOTS_PER_MESSAGE) {
+              return response.badRequest({
+                body: {
+                  message: `Too many screenshots (${screenshotCount}). Maximum allowed: ${CHAT_MAX_SCREENSHOTS_PER_MESSAGE}`,
+                },
+              });
+            }
+          }
+        }
+
         // Validate MIME types and per-file size across all messages
         for (const msg of request.body.messages) {
           const parts = Array.isArray(msg.content) ? msg.content : [];

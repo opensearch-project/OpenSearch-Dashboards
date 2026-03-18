@@ -9,6 +9,9 @@ export const CHAT_DEFAULT_AG_UI_URL = 'http://localhost:3000';
 
 export const ONE_MB = 1024 * 1024;
 
+/** Default maximum file upload size in bytes (3 MB). */
+export const CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES = 3 * ONE_MB;
+
 /** Maximum number of file attachments per message. */
 export const CHAT_MAX_FILE_ATTACHMENTS = 10;
 
@@ -27,6 +30,16 @@ export const CHAT_ALLOWED_FILE_TYPES: Record<string, string[]> = {
   'application/x-ndjson': ['.ndjson'],
   'image/jpeg': ['.jpg', '.jpeg'],
 };
+
+/**
+ * MIME type produced by the screenshot capture (html2canvas → canvas.toDataURL).
+ * Used by server-side validation to identify screenshot content when file uploads
+ * are disabled: only binary parts without a filename AND this MIME type are allowed.
+ */
+export const CHAT_SCREENSHOT_MIME_TYPE = 'image/jpeg';
+
+/** Maximum number of screenshots per message (one page capture). */
+export const CHAT_MAX_SCREENSHOTS_PER_MESSAGE = 1;
 
 /**
  * Value for the `accept` attribute on file inputs.

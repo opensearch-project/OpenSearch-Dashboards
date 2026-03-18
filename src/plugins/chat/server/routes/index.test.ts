@@ -24,6 +24,7 @@ describe('Chat Proxy Routes', () => {
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
     mlCommonsAgentId?: string,
     observabilityAgentId?: string,
+    fileUploadEnabled: boolean = true,
     maxFileUploadBytes?: number,
     maxFileAttachments?: number
   ) => {
@@ -38,6 +39,7 @@ describe('Chat Proxy Routes', () => {
       getCapabilitiesResolver,
       mlCommonsAgentId,
       observabilityAgentId,
+      fileUploadEnabled,
       maxFileUploadBytes,
       maxFileAttachments
     );
@@ -532,6 +534,38 @@ describe('Chat Proxy Routes', () => {
 
         expect(mockFetch).toHaveBeenCalled();
       });
+
+      it('should validate MIME type on parts missing type field but having data+mimeType', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithMalformed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  // No type: 'binary' — normalization should catch this
+                  mimeType: 'application/x-executable',
+                  data: 'AAAA',
+                  filename: 'sneaky.exe',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMalformed)
+          .expect(400);
+
+        expect(response.body.message).toContain(
+          "File type 'application/x-executable' is not allowed"
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
     });
 
     describe('Base64 data validation', () => {
@@ -725,6 +759,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           100
         );
 
@@ -767,6 +802,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           20
         );
 
@@ -840,6 +876,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           largeMaxBytes
         );
 
@@ -887,6 +924,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           largeMaxBytes
         );
 
@@ -922,6 +960,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           largeMaxBytes,
           5
         );
@@ -970,6 +1009,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           largeMaxBytes,
           5
         );
@@ -1016,6 +1056,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           largeMaxBytes
         );
 
@@ -1042,6 +1083,300 @@ describe('Chat Proxy Routes', () => {
           .expect(200);
 
         expect(mockFetch).toHaveBeenCalled();
+      });
+    });
+
+    describe('fileUploadEnabled flag', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      const setupDisabled = () =>
+        testSetup('http://test-agui:3000', undefined, undefined, undefined, false);
+
+      const setupEnabled = () =>
+        testSetup('http://test-agui:3000', undefined, undefined, undefined, true);
+
+      it('should reject file uploads (binary with filename) when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'test.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithFile)
+          .expect(400);
+
+        expect(response.body.message).toBe('File upload is disabled by the administrator');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow text-only messages when disabled', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupDisabled();
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should allow file uploads when enabled', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupEnabled();
+
+        const requestWithFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'test.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should allow screenshot (image/jpeg, no filename) when disabled', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupDisabled();
+
+        const requestWithScreenshot = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'image/jpeg',
+                  data: 'aGVsbG8=',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithScreenshot)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should reject non-jpeg binary without filename when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithNonJpeg = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithNonJpeg)
+          .expect(400);
+
+        expect(response.body.message).toContain('Only screenshots');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject message with screenshot + file upload when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithMixed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                { type: 'binary', mimeType: 'image/jpeg', data: 'aGVsbG8=' },
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'notes.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMixed)
+          .expect(400);
+
+        expect(response.body.message).toBe('File upload is disabled by the administrator');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should treat empty string filename as screenshot (falsy)', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupDisabled();
+
+        const requestWithEmptyFilename = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'image/jpeg',
+                  data: 'aGVsbG8=',
+                  filename: '',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithEmptyFilename)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should reject multiple screenshots per message when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithTwoScreenshots = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                { type: 'binary', mimeType: 'image/jpeg', data: 'aGVsbG8=' },
+                { type: 'binary', mimeType: 'image/jpeg', data: 'd29ybGQ=' },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithTwoScreenshots)
+          .expect(400);
+
+        expect(response.body.message).toContain('Too many screenshots');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject malformed binary-like parts missing type field when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithMalformed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'sneaky.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMalformed)
+          .expect(400);
+
+        expect(response.body.message).toBe('File upload is disabled by the administrator');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject malformed binary-like parts without filename or type when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithMalformed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMalformed)
+          .expect(400);
+
+        expect(response.body.message).toContain('Only screenshots');
+        expect(mockFetch).not.toHaveBeenCalled();
       });
     });
 
@@ -1128,6 +1463,7 @@ describe('Chat Proxy Routes', () => {
           undefined,
           undefined,
           undefined,
+          true,
           1048576
         );
 
