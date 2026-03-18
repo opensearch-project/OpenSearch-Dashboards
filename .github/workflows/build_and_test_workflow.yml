@@ -57,6 +57,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          filter: blob:none
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -163,6 +165,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          filter: blob:none
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -204,15 +208,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugin-bundles
-          # Captures all plugin/package/core bundle output dirs.
-          # These are JS/CSS browser assets — platform-agnostic, safe to build
-          # once on Linux and share to all FTR jobs including Windows.
           path: |
             src/core/target/public
             src/plugins/*/target/public
             packages/*/target/public
           retention-days: 1
-          if-no-files-found: warn
+          if-no-files-found: error
 
   integration-tests:
     name: Run integration tests on ${{ matrix.name }}
@@ -226,7 +227,7 @@ jobs:
           - os: windows-latest
             name: Windows
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Configure git's autocrlf (Windows only)
         if: matrix.os == 'windows-latest'
@@ -243,6 +244,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          filter: blob:none
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -299,6 +302,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          filter: blob:none
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -423,6 +428,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          filter: blob:none
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -554,6 +561,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          filter: blob:none
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -700,6 +709,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          filter: blob:none
           path: ./artifacts
 
       - name: Setup Node
@@ -796,6 +806,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          filter: blob:none
           path: ./artifacts
 
       - run: echo Running backwards compatibility tests for version ${{ matrix.version }}

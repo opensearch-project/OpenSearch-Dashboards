@@ -64,8 +64,9 @@ const rootGroups = [
     '<rootDir>/packages',
   ],
   [
-    // CI Group 3 (roughly 200 files)
+    // CI Group 3 (roughly 440 files)
     '<rootDir>/src/plugins/[a-c]', // plugins a-c
+    '<rootDir>/src/plugins/[q-u]', // lighter utility plugins q-u (saved_objects*, share, telemetry*, ui_actions, etc.)
   ],
   [
     // CI Group 4 (roughly 280 files)
@@ -83,11 +84,12 @@ const rootGroups = [
     '<rootDir>/test/functional/services/remote',
   ],
   [
-    // CI Group 5 (roughly 330 files)
+    // CI Group 5 (roughly 755 files)
     // [d] plugins are the heaviest (data, dashboard, discover, data_source, data_source_management)
-    // paired with lighter [l-u] plugins to balance the group
+    // [l-p] plugins (legacy_export, management*, navigation, newsfeed, opensearch_*, opensearch_ui_shared)
+    // [q-u] moved to group 3 to keep Windows wall-clock time under 30 minutes
     '<rootDir>/src/plugins/[d]', // plugins d
-    '<rootDir>/src/plugins/[l-u]', // plugins l-u
+    '<rootDir>/src/plugins/[l-p]', // plugins l-p
   ],
 ];
 
