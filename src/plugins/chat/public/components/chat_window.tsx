@@ -79,6 +79,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
+  const [isSendingToolResult, setIsSendingToolResult] = useState(false);
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -115,6 +116,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           onTimelineUpdate: setTimeline,
           onStreamingStateChange: setIsStreaming,
           onStartResponse: setStartResponse,
+          onSendToolResultStateChange: setIsSendingToolResult,
           getTimeline: () => timelineRef.current,
         },
       }),
@@ -679,6 +681,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             input={input}
             isCapturing={isCapturing}
             isStreaming={isStreaming}
+            isSendingToolResult={isSendingToolResult}
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}

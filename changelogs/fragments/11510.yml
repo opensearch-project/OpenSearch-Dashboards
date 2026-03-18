@@ -1,0 +1,2 @@
+fix:
+- [Chat] Disable chat input during tool result sending to prevent race conditions ([#11510](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11510))

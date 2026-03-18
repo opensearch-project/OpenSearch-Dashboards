@@ -506,6 +506,36 @@ describe('ChatService', () => {
   });
 
   describe('sendToolResult', () => {
+    // Helper function to create mock MESSAGES_SNAPSHOT event with toolCalls
+    const createMockMessagesSnapshot = (toolCallId: string) => [
+      {
+        type: 'MESSAGES_SNAPSHOT',
+        timestamp: Date.now(),
+        messages: [
+          {
+            role: 'user',
+            id: 'user-msg-1',
+            content: 'Test message',
+          },
+          {
+            role: 'assistant',
+            id: 'assistant-msg-1',
+            content: 'Response with tool call',
+            toolCalls: [
+              {
+                id: toolCallId,
+                type: 'function',
+                function: {
+                  name: 'test_tool',
+                  arguments: '{}',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
     beforeEach(() => {
       // Initialize a thread first - required for sendToolResult
       chatService.newThread();
@@ -515,6 +545,11 @@ describe('ChatService', () => {
           getBackendFormattedContexts: jest.fn().mockReturnValue([]),
         },
       };
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with toolCalls (for waitForToolCallSync)
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(createMockMessagesSnapshot('tool-call-123')));
     });
 
     afterEach(() => {
@@ -528,6 +563,11 @@ describe('ChatService', () => {
       const toolCallId = 'tool-call-123';
       const result = { success: true, data: 'test result' };
       const messages: Message[] = [];
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
 
       const response = await chatService.sendToolResult(toolCallId, result, messages);
 
@@ -557,6 +597,11 @@ describe('ChatService', () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot('tool-123'));
+
       const response = await chatService.sendToolResult('tool-123', 'string result', []);
 
       expect(response.toolMessage.content).toBe('string result');
@@ -565,6 +610,11 @@ describe('ChatService', () => {
     it('should stringify object results', async () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot('tool-123'));
 
       const objectResult = { key: 'value', number: 42 };
       const response = await chatService.sendToolResult('tool-123', objectResult, []);
@@ -587,6 +637,11 @@ describe('ChatService', () => {
         { id: 'msg-1', role: 'user', content: 'Previous user message' },
         { id: 'msg-2', role: 'assistant', content: 'Previous assistant message' },
       ];
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
 
       const response = await chatService.sendToolResult(toolCallId, result, messages);
 
@@ -613,6 +668,100 @@ describe('ChatService', () => {
       });
     });
 
+    it('should wait for tool call sync when includeFullHistory is false', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-sync-test';
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the tool call
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+      const response = await chatService.sendToolResult(toolCallId, { success: true }, []);
+
+      // Verify getConversation was called to check for sync
+      expect(chatService.conversationHistoryService.getConversation).toHaveBeenCalled();
+      expect(response.toolMessage.toolCallId).toBe(toolCallId);
+    });
+
+    it('should skip waiting for tool call sync when includeFullHistory is true', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = true
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: true });
+
+      const toolCallId = 'tool-call-no-sync';
+
+      // Mock getConversation - should NOT be called when includeFullHistory is true
+      chatService.conversationHistoryService.getConversation = jest.fn();
+
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'Previous message' }];
+
+      const response = await chatService.sendToolResult(toolCallId, { success: true }, messages);
+
+      // Verify getConversation was NOT called since we're including full history
+      expect(chatService.conversationHistoryService.getConversation).not.toHaveBeenCalled();
+
+      // Verify full history is passed when includeFullHistory is true
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [...messages, response.toolMessage],
+        }),
+        undefined
+      );
+    });
+
+    it('should retry polling when tool call result is not yet synced', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-retry-test';
+
+      // Mock getConversation to return empty first, then with the tool call in MESSAGES_SNAPSHOT
+      let callCount = 0;
+      chatService.conversationHistoryService.getConversation = jest.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount < 3) {
+          // First two calls return MESSAGES_SNAPSHOT without the tool call
+          return Promise.resolve([
+            {
+              type: 'MESSAGES_SNAPSHOT',
+              timestamp: Date.now(),
+              messages: [
+                {
+                  role: 'user',
+                  id: 'user-msg-1',
+                  content: 'Test message',
+                },
+              ],
+            },
+          ]);
+        }
+        // Third call returns MESSAGES_SNAPSHOT with the tool call
+        return Promise.resolve(createMockMessagesSnapshot(toolCallId));
+      });
+
+      const response = await chatService.sendToolResult(toolCallId, { success: true }, []);
+
+      // Verify getConversation was called multiple times (polling)
+      expect(chatService.conversationHistoryService.getConversation).toHaveBeenCalledTimes(3);
+      expect(response.toolMessage.toolCallId).toBe(toolCallId);
+    });
     it('should throw error when thread ID is not set', async () => {
       // Create a new service without calling newThread
       const newService = new ChatService(mockUiSettings, mockCoreChatService);
