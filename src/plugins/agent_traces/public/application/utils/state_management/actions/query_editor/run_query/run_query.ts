@@ -16,6 +16,7 @@ import {
 } from '../../../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../../query_actions';
 import { AgentTracesServices } from '../../../../../../types';
+import { detectAndSetOptimalTab } from '../../detect_optimal_tab';
 
 /**
  * This is called when you want to run the query
@@ -33,6 +34,11 @@ export const runQueryActionCreator = (services: AgentTracesServices, query?: str
   dispatch(incrementFetchVersion());
 
   await dispatch(executeQueries({ services }));
+
+  // Detect optimal tab after queries execute — the tab switch will
+  // trigger the tabs component's onTabClick which executes the tab query
+  // if results aren't cached yet.
+  await dispatch(detectAndSetOptimalTab({ services }));
 
   dispatch(setQueryExecutionButtonStatus('REFRESH'));
 };
