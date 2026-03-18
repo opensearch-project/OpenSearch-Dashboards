@@ -29,6 +29,7 @@
  */
 
 import { dirname, resolve, relative } from 'path';
+import { standardize } from '@osd/cross-platform';
 import os from 'os';
 import loadJsonFile from 'load-json-file';
 import { readFile } from 'fs/promises';
@@ -123,7 +124,7 @@ export class Config {
    * Convert an absolute path to a relative path, based from the repo
    */
   getRepoRelativePath(absolutePath: string) {
-    return relative(this.repoRoot, absolutePath);
+    return standardize(relative(this.repoRoot, absolutePath));
   }
 
   /**
