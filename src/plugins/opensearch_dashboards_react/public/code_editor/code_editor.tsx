@@ -124,6 +124,7 @@ export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
   _providerDisposables: monaco.IDisposable[] = [];
   _onLanguageDisposable: monaco.IDisposable | undefined;
+  _providerLanguageId: string | undefined;
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -159,10 +160,11 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
-    // Register providers when the editor mounts. This handles the SPA
+    // Ensure providers exist when the editor mounts. This handles the SPA
     // navigation case where onLanguage won't fire because the language
     // was already encountered in a previous mount cycle.
-    this._registerProviders(this.props.languageId);
+    this._ensureProvidersRegistered(this.props.languageId);
+    this._setLanguageConfiguration(this.props.languageId, true);
 
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
@@ -193,6 +195,7 @@ export class CodeEditor extends React.Component<Props, {}> {
   _registerProviders(languageId: string) {
     this._providerDisposables.forEach((d) => d.dispose());
     this._providerDisposables = [];
+    this._providerLanguageId = languageId;
 
     if (this.props.suggestionProvider) {
       this._providerDisposables.push(
@@ -211,17 +214,28 @@ export class CodeEditor extends React.Component<Props, {}> {
         monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider)
       );
     }
+  }
 
-    if (this.props.languageConfiguration) {
-      // setLanguageConfiguration requires the language to be registered.
-      // Safe inside onLanguage (language guaranteed), but editorDidMount or
-      // componentDidUpdate may run before the language is encountered.
+  _ensureProvidersRegistered(languageId: string) {
+    if (this._providerLanguageId === languageId && this._providerDisposables.length > 0) {
+      return;
+    }
+    this._registerProviders(languageId);
+  }
+
+  _setLanguageConfiguration(languageId: string, swallowUnknownLanguage = false) {
+    if (!this.props.languageConfiguration) {
+      return;
+    }
+    if (swallowUnknownLanguage) {
       try {
         monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
       } catch {
         // Language not yet registered — onLanguage will handle this.
       }
+      return;
     }
+    monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
   }
 
   render() {
@@ -236,7 +250,8 @@ export class CodeEditor extends React.Component<Props, {}> {
     // For SPA remounts (language already encountered), _editorDidMount handles
     // registration directly since onLanguage won't fire again.
     this._onLanguageDisposable = monaco.languages.onLanguage(languageId, () => {
-      this._registerProviders(languageId);
+      this._ensureProvidersRegistered(languageId);
+      this._setLanguageConfiguration(languageId);
     });
 
     return (
@@ -267,6 +282,7 @@ export class CodeEditor extends React.Component<Props, {}> {
     // would cause dispose/re-register churn on every keystroke.
     if (prevProps.languageId !== this.props.languageId) {
       this._registerProviders(this.props.languageId);
+      this._setLanguageConfiguration(this.props.languageId, true);
     }
   }
 
@@ -274,6 +290,7 @@ export class CodeEditor extends React.Component<Props, {}> {
     this._onLanguageDisposable?.dispose();
     this._providerDisposables.forEach((d) => d.dispose());
     this._providerDisposables = [];
+    this._providerLanguageId = undefined;
   }
 
   _updateDimensions = () => {

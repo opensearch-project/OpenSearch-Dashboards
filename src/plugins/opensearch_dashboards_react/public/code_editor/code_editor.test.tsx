@@ -164,3 +164,53 @@ test('suggest controller details visibility is set on editor mount', () => {
   expect(mockEditor.getContribution).toHaveBeenCalledWith('editor.contrib.suggestController');
   expect(mockSuggestController.widget.value._setDetailsVisible).toHaveBeenCalledWith(true);
 });
+
+test('does not register duplicate providers when editorDidMount and onLanguage both run', () => {
+  const suggestionProvider = {
+    provideCompletionItems: () => ({ suggestions: [] }),
+  };
+
+  const mockDisposable = { dispose: jest.fn() };
+  let onLanguageCallback: (() => void) | undefined;
+
+  monaco.languages.onLanguage = jest.fn((languageId, func) => {
+    expect(languageId).toBe('loglang');
+    onLanguageCallback = func;
+    return mockDisposable;
+  }) as any;
+  monaco.languages.registerCompletionItemProvider = jest.fn().mockReturnValue(mockDisposable);
+  monaco.languages.registerSignatureHelpProvider = jest.fn().mockReturnValue(mockDisposable);
+  monaco.languages.registerHoverProvider = jest.fn().mockReturnValue(mockDisposable);
+  monaco.editor.defineTheme = jest.fn();
+
+  const mockEditor = {
+    getContribution: jest.fn().mockReturnValue({
+      widget: {
+        value: {
+          _setDetailsVisible: jest.fn(),
+        },
+      },
+    }),
+    onDidFocusEditorWidget: jest.fn(),
+    onMouseDown: jest.fn(),
+    setPosition: jest.fn(),
+    revealPosition: jest.fn(),
+    focus: jest.fn(),
+  } as any;
+
+  const wrapper = shallow(
+    <CodeEditor
+      languageId="loglang"
+      value={logs}
+      onChange={() => {}}
+      suggestionProvider={suggestionProvider}
+    />
+  );
+
+  const instance = wrapper.instance() as CodeEditor;
+  instance._editorWillMount(monaco);
+  instance._editorDidMount(mockEditor, monaco);
+  onLanguageCallback?.();
+
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+});
