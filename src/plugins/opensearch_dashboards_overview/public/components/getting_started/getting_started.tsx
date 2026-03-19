@@ -58,8 +58,10 @@ interface Props {
 
 export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) => {
   const {
-    services: { application },
+    services: { application, injectedMetadata },
   } = useOpenSearchDashboards<CoreStart>();
+  const branding = injectedMetadata.getBranding();
+  const applicationTitle = branding.applicationTitle || 'OpenSearch Dashboards';
   const gettingStartedGraphicURL = `/plugins/${PLUGIN_ID}/assets/opensearch_dashboards_montage_${
     isDarkTheme ? 'dark' : 'light'
   }.svg`;
@@ -76,7 +78,8 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
               <h2 id="osdOverviewGettingStarted__title">
                 <FormattedMessage
                   id="opensearchDashboardsOverview.gettingStarted.title"
-                  defaultMessage="Getting started with OpenSearch Dashboards"
+                  defaultMessage="Getting started with {applicationTitle}"
+                  values={{ applicationTitle }}
                 />
               </h2>
             </EuiTitle>
@@ -87,7 +90,8 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
               <p>
                 <FormattedMessage
                   id="opensearchDashboardsOverview.gettingStarted.description"
-                  defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+                  defaultMessage="{applicationTitle} empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+                  values={{ applicationTitle }}
                 />
               </p>
             </EuiText>
@@ -130,7 +134,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
 
         <EuiFlexItem className="osdOverviewGettingStarted__graphic">
           <EuiImage
-            alt="OpenSearch Dashboards visualizations illustration"
+            alt={`${applicationTitle} visualizations illustration`}
             url={addBasePath(gettingStartedGraphicURL)}
           />
         </EuiFlexItem>

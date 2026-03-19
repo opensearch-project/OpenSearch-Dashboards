@@ -74,9 +74,11 @@ interface Props {
 export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, logos }) => {
   const [isNewOpenSearchDashboardsInstance, setNewOpenSearchDashboardsInstance] = useState(false);
   const {
-    services: { http, data, uiSettings, application },
+    services: { http, data, uiSettings, application, injectedMetadata },
   } = useOpenSearchDashboards<CoreStart & AppPluginStartDependencies>();
   const addBasePath = http.basePath.prepend;
+  const branding = injectedMetadata.getBranding();
+  const applicationTitle = branding.applicationTitle || 'OpenSearch Dashboards';
   const indexPatternService = data.indexPatterns;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -150,8 +152,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, logo
         showIcon={true}
         title={
           <FormattedMessage
-            defaultMessage="OpenSearch Dashboards"
+            defaultMessage="{applicationTitle}"
             id="opensearchDashboardsOverview.header.title"
+            values={{ applicationTitle }}
           />
         }
         logos={logos}

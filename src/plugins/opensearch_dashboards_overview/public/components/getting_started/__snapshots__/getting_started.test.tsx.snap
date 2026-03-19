@@ -19,9 +19,13 @@ exports[`GettingStarted dark mode on 1`] = `
             id="osdOverviewGettingStarted__title"
           >
             <FormattedMessage
-              defaultMessage="Getting started with OpenSearch Dashboards"
+              defaultMessage="Getting started with {applicationTitle}"
               id="opensearchDashboardsOverview.gettingStarted.title"
-              values={Object {}}
+              values={
+                Object {
+                  "applicationTitle": "OpenSearch Dashboards",
+                }
+              }
             />
           </h2>
         </EuiTitle>
@@ -31,9 +35,13 @@ exports[`GettingStarted dark mode on 1`] = `
         <EuiText>
           <p>
             <FormattedMessage
-              defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+              defaultMessage="{applicationTitle} empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
               id="opensearchDashboardsOverview.gettingStarted.description"
-              values={Object {}}
+              values={
+                Object {
+                  "applicationTitle": "OpenSearch Dashboards",
+                }
+              }
             />
           </p>
         </EuiText>
@@ -168,7 +176,7 @@ exports[`GettingStarted dark mode on 1`] = `
         <EuiSpacer
           size="xl"
         />
-        <RedirectAppLinks>
+        <Component>
           <EuiSmallButton
             fill={true}
             href="/app/management/opensearch-dashboards/indexPatterns"
@@ -180,7 +188,7 @@ exports[`GettingStarted dark mode on 1`] = `
               values={Object {}}
             />
           </EuiSmallButton>
-        </RedirectAppLinks>
+        </Component>
       </div>
     </EuiFlexItem>
     <EuiFlexItem
@@ -214,9 +222,13 @@ exports[`GettingStarted render 1`] = `
             id="osdOverviewGettingStarted__title"
           >
             <FormattedMessage
-              defaultMessage="Getting started with OpenSearch Dashboards"
+              defaultMessage="Getting started with {applicationTitle}"
               id="opensearchDashboardsOverview.gettingStarted.title"
-              values={Object {}}
+              values={
+                Object {
+                  "applicationTitle": "OpenSearch Dashboards",
+                }
+              }
             />
           </h2>
         </EuiTitle>
@@ -226,9 +238,13 @@ exports[`GettingStarted render 1`] = `
         <EuiText>
           <p>
             <FormattedMessage
-              defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+              defaultMessage="{applicationTitle} empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
               id="opensearchDashboardsOverview.gettingStarted.description"
-              values={Object {}}
+              values={
+                Object {
+                  "applicationTitle": "OpenSearch Dashboards",
+                }
+              }
             />
           </p>
         </EuiText>
@@ -363,7 +379,7 @@ exports[`GettingStarted render 1`] = `
         <EuiSpacer
           size="xl"
         />
-        <RedirectAppLinks>
+        <Component>
           <EuiSmallButton
             fill={true}
             href="/app/management/opensearch-dashboards/indexPatterns"
@@ -375,7 +391,7 @@ exports[`GettingStarted render 1`] = `
               values={Object {}}
             />
           </EuiSmallButton>
-        </RedirectAppLinks>
+        </Component>
       </div>
     </EuiFlexItem>
     <EuiFlexItem

@@ -33,6 +33,15 @@ import { GettingStarted } from './getting_started';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
+jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn().mockReturnValue({
+    services: {
+      injectedMetadata: { getBranding: jest.fn().mockReturnValue({}) },
+    },
+  }),
+  withOpenSearchDashboards: jest.fn((component: React.Component) => component),
+}));
+
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 const mockApps = [

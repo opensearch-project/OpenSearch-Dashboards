@@ -251,9 +251,13 @@ exports[`Overview renders with news without solutions and without features 1`] =
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -1033,9 +1037,13 @@ exports[`Overview renders with news, solutions, and features 1`] = `
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -1518,9 +1526,13 @@ exports[`Overview renders with news, with solutions, and without features 1`] = 
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -2003,9 +2015,13 @@ exports[`Overview renders with news, without solutions, and with features 1`] = 
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -2617,9 +2633,13 @@ exports[`Overview renders without news and features, with solutions 1`] = `
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -3281,9 +3301,13 @@ exports[`Overview renders without news and solutions, with features 1`] = `
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -4186,9 +4210,13 @@ exports[`Overview renders without news, solutions, and features 1`] = `
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
@@ -5203,9 +5231,13 @@ exports[`Overview renders without news, with solutions and features 1`] = `
     showIcon={true}
     title={
       <FormattedMessage
-        defaultMessage="OpenSearch Dashboards"
+        defaultMessage="{applicationTitle}"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
+        values={
+          Object {
+            "applicationTitle": "OpenSearch Dashboards",
+          }
+        }
       />
     }
   />
