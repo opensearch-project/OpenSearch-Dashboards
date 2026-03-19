@@ -42,6 +42,7 @@ export const API = {
       INDEXES: `${BASE_API}/remote_cluster/indexes`,
     },
   },
+  PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },

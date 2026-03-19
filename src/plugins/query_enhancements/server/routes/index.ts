@@ -117,10 +117,10 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
  * Defines route for PPL grammar bundle endpoint
  * Forwards requests to OpenSearch /_plugins/_ppl/_grammar
  */
-export function definePPLBundleRoute(logger: Logger, router: IRouter, client: any) {
+export function definePPLBundleRoute(logger: Logger, router: IRouter) {
   router.get(
     {
-      path: '/api/enhancements/ppl/grammar',
+      path: API.PPL_GRAMMAR,
       validate: {
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
@@ -145,16 +145,7 @@ export function definePPLBundleRoute(logger: Logger, router: IRouter, client: an
         });
         const body = result?.body ?? result;
 
-        // The result is the grammar bundle JSON
-        // Forward headers from OpenSearch if available
-        const responseHeaders: Record<string, string> = {
-          'content-type': 'application/json',
-        };
-
-        return res.ok({
-          body,
-          headers: responseHeaders,
-        });
+        return res.ok({ body });
       } catch (err: any) {
         // Don't try to return 304 - let frontend handle caching from localStorage
         // The OSD framework treats 304 as a redirect which requires a location header
@@ -196,5 +187,5 @@ export function defineRoutes(
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
 
-  definePPLBundleRoute(logger, router, client);
+  definePPLBundleRoute(logger, router);
 }

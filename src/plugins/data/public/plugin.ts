@@ -325,13 +325,8 @@ export class DataPublicPlugin
     // The initial fire with the current query covers the page-load case.
     // the subscription covers subsequent dataset switches.
     // Gated by query:enhancements:runtimePplGrammar setting (default: true).
-    const isRuntimePplGrammarEnabled = (() => {
-      try {
-        return uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR) !== false;
-      } catch {
-        return true;
-      }
-    })();
+    const isRuntimePplGrammarEnabled =
+      uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR) !== false;
 
     if (isRuntimePplGrammarEnabled) {
       const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(

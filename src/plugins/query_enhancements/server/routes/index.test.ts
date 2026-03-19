@@ -38,7 +38,7 @@ describe('definePPLBundleRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLBundleRoute(logger, router, client);
+    definePPLBundleRoute(logger, router);
 
     const requestMock = jest.fn().mockResolvedValue({
       body: { grammarHash: 'sha256:ds', language: 'ppl' },
@@ -77,9 +77,6 @@ describe('definePPLBundleRoute', () => {
     });
     expect(res.ok).toHaveBeenCalledWith({
       body: { grammarHash: 'sha256:ds', language: 'ppl' },
-      headers: {
-        'content-type': 'application/json',
-      },
     });
     expect(result).toEqual(res.ok.mock.results[0].value);
   });
@@ -94,7 +91,7 @@ describe('definePPLBundleRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLBundleRoute(logger, router, client);
+    definePPLBundleRoute(logger, router);
 
     const requestMock = jest.fn().mockResolvedValue({
       body: { language: 'ppl' },
@@ -140,7 +137,7 @@ describe('definePPLBundleRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLBundleRoute(logger, router, client);
+    definePPLBundleRoute(logger, router);
 
     const context = {
       dataSource: {
@@ -185,7 +182,7 @@ describe('definePPLBundleRoute', () => {
     const logger = loggingSystemMock.create().get();
     const client = { asScoped: jest.fn() } as any;
 
-    definePPLBundleRoute(logger, router, client);
+    definePPLBundleRoute(logger, router);
 
     const requestMock = jest.fn();
     const context = {
