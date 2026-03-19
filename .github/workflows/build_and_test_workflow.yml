@@ -230,6 +230,10 @@ jobs:
             name: Windows
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    env:
+      # Unset OSD_OPTIMIZER_MAX_WORKERS so integration tests that check worker count
+      # see the value passed in code (maxWorkerCount: 1) rather than the CI override
+      OSD_OPTIMIZER_MAX_WORKERS: ''
     steps:
       - name: Configure git's autocrlf (Windows only)
         if: matrix.os == 'windows-latest'
