@@ -187,6 +187,8 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPO }}
           ref: '${{ env.SOURCE_BRANCH }}'
+          fetch-depth: 1
+          filter: blob:none
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -221,6 +223,8 @@ jobs:
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
           clean: true
+          fetch-depth: 1
+          filter: blob:none
 
       - name: Setup spec files by input
         if: ${{ inputs.specs != '' }}

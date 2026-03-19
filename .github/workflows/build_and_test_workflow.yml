@@ -58,6 +58,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           filter: blob:none
 
       - name: Setup JDK
@@ -166,6 +167,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           filter: blob:none
 
       - name: Setup Node
@@ -245,6 +247,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           filter: blob:none
 
       - name: Setup Node
@@ -303,6 +306,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           filter: blob:none
 
       - name: Setup Node
@@ -429,6 +433,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           filter: blob:none
 
       - name: Setup JDK
@@ -562,6 +567,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 1
           filter: blob:none
 
       - name: Setup JDK
@@ -709,7 +715,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          filter: blob:none
+          fetch-depth: 1
           path: ./artifacts
 
       - name: Setup Node
@@ -806,7 +812,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          filter: blob:none
+          fetch-depth: 1
           path: ./artifacts
 
       - run: echo Running backwards compatibility tests for version ${{ matrix.version }}
