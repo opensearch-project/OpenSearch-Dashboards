@@ -9,6 +9,7 @@ import {
   SavedObjectsClientContract,
 } from 'opensearch-dashboards/public';
 import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
+import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
 
@@ -160,14 +161,8 @@ class PPLGrammarCache {
    */
   shouldFetchFromBackend(version?: string): boolean {
     if (!version) return false;
-
-    const match = version.trim().match(/^(\d+)\.(\d+)/);
-    if (!match) return false;
-    const major = Number(match[1]);
-    const minor = Number(match[2]);
-    if (!Number.isFinite(major) || !Number.isFinite(minor)) return false;
-
-    return major > 3 || (major === 3 && minor >= 6);
+    const coerced = semver.coerce(version);
+    return coerced ? semver.satisfies(coerced.version, '>=3.6.0') : false;
   }
 
   getCachedGrammar(datasourceId?: string): CachedGrammar | null {

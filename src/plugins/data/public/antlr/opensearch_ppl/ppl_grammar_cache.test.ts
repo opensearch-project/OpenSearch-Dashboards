@@ -57,15 +57,40 @@ describe('ppl_grammar_cache', () => {
   });
 
   it('should gate backend grammar fetch by OpenSearch version', () => {
-    expect(pplGrammarCache.shouldFetchFromBackend(undefined)).toBe(false);
-    expect(pplGrammarCache.shouldFetchFromBackend('3.5.9')).toBe(false);
+    // --- supported (>= 3.6.0) ---
     expect(pplGrammarCache.shouldFetchFromBackend('3.6.0')).toBe(true);
-    expect(pplGrammarCache.shouldFetchFromBackend('3.6.0-SNAPSHOT')).toBe(true);
-    expect(pplGrammarCache.shouldFetchFromBackend('3.5.9-SNAPSHOT')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.1')).toBe(true);
     expect(pplGrammarCache.shouldFetchFromBackend('3.10.1')).toBe(true);
     expect(pplGrammarCache.shouldFetchFromBackend('4.0.0')).toBe(true);
-    expect(pplGrammarCache.shouldFetchFromBackend('v3.6.0')).toBe(false);
+
+    // pre-release / snapshot builds
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.0-SNAPSHOT')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.7.0-SNAPSHOT')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.0-rc1')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.0-alpha1')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.0-beta1')).toBe(true);
+
+    // four-part versions (OpenSearch build metadata)
+    expect(pplGrammarCache.shouldFetchFromBackend('3.6.1.0')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('4.0.0.0')).toBe(true);
+
+    // prefixed strings
+    expect(pplGrammarCache.shouldFetchFromBackend('v3.6.0')).toBe(true);
+    expect(pplGrammarCache.shouldFetchFromBackend('OpenSearch 3.6.0')).toBe(true);
+
+    // --- unsupported (< 3.6.0) ---
+    expect(pplGrammarCache.shouldFetchFromBackend('3.5.9')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.5.9-SNAPSHOT')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('3.0.0')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('2.17.0')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('2.17.0-SNAPSHOT')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('1.3.14')).toBe(false);
+
+    // --- invalid / missing ---
+    expect(pplGrammarCache.shouldFetchFromBackend(undefined)).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('')).toBe(false);
     expect(pplGrammarCache.shouldFetchFromBackend('invalid')).toBe(false);
+    expect(pplGrammarCache.shouldFetchFromBackend('abc.def.ghi')).toBe(false);
   });
 
   it('should fetch and cache grammar via warmUp when version is supported', async () => {
