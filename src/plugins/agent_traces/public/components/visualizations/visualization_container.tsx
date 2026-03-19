@@ -94,7 +94,10 @@ export const VisualizationContainer = React.memo(() => {
         paddingSize="none"
       >
         <div className="agentTracesVisPanel__inner">
-          {visualizationBuilder.renderVisualization({ searchContext, onSelectTimeRange })}
+          {visualizationBuilder.renderVisualization({
+            timeRange: searchContext?.timeRange,
+            onSelectTimeRange,
+          })}
         </div>
       </EuiPanel>
     </div>

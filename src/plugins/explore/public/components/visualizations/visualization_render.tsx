@@ -132,6 +132,10 @@ const ChartRender = ({
     return createVisSpec({ data, config, timeRange });
   }, [config, data, timeRange]);
 
+  if (!spec) {
+    return null;
+  }
+
   if (config?.type === 'metric') {
     return (
       <MetricChartRender
