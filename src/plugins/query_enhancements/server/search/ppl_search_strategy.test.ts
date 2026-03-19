@@ -313,7 +313,7 @@ describe('pplSearchStrategyProvider', () => {
     expect(requestArg.body.fetchSize).toBe(200);
   });
 
-  it('should attach highlights to dataFrame meta when rawResponse contains highlights', async () => {
+  it('should attach highlights to dataFrame meta when rawResponse contains _highlight column', async () => {
     const mockHighlights = [{ title: ['<em>OpenSearch</em>'] }, { title: ['<em>Dashboards</em>'] }];
     const mockResponse = {
       success: true,
@@ -321,12 +321,12 @@ describe('pplSearchStrategyProvider', () => {
         schema: [
           { name: 'field1', type: 'long' },
           { name: 'field2', type: 'text' },
+          { name: '_highlight', type: 'struct' },
         ],
         datarows: [
-          [1, 'value1'],
-          [2, 'value2'],
+          [1, 'value1', { title: ['<em>OpenSearch</em>'] }],
+          [2, 'value2', { title: ['<em>Dashboards</em>'] }],
         ],
-        highlights: mockHighlights,
       },
       took: 100,
     };

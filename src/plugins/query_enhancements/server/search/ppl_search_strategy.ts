@@ -51,6 +51,15 @@ export const pplSearchStrategyProvider = (
 
         if (!rawResponse.success) throwFacetError(rawResponse);
 
+        // Extract _highlight column from schema/datarows if present
+        const hlIndex = rawResponse.data.schema?.findIndex((s: any) => s.name === '_highlight');
+        let highlights: any[] | undefined;
+        if (hlIndex !== undefined && hlIndex >= 0) {
+          highlights = rawResponse.data.datarows?.map((row: any) => row[hlIndex]) ?? [];
+          rawResponse.data.schema.splice(hlIndex, 1);
+          rawResponse.data.datarows?.forEach((row: any) => row.splice(hlIndex, 1));
+        }
+
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
           schema: rawResponse.data.schema,
@@ -60,8 +69,8 @@ export const pplSearchStrategyProvider = (
 
         dataFrame.size = rawResponse.data.datarows.length;
 
-        if (rawResponse.data.highlights) {
-          dataFrame.meta = { ...dataFrame.meta, highlights: rawResponse.data.highlights };
+        if (highlights) {
+          dataFrame.meta = { ...dataFrame.meta, highlights };
         }
 
         if (usage) usage.trackSuccess(rawResponse.took);
