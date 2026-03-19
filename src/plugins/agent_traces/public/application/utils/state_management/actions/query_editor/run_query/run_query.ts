@@ -25,6 +25,8 @@ export const runQueryActionCreator = (services: AgentTracesServices, query?: str
   dispatch: AppDispatch,
   getState: () => RootState
 ) => {
+  const previousQuery = getState().query.query;
+
   if (typeof query === 'string') {
     dispatch(setQueryStringWithHistory(query));
   }
@@ -35,10 +37,15 @@ export const runQueryActionCreator = (services: AgentTracesServices, query?: str
 
   await dispatch(executeQueries({ services }));
 
-  // Detect optimal tab after queries execute — the tab switch will
-  // trigger the tabs component's onTabClick which executes the tab query
-  // if results aren't cached yet.
-  await dispatch(detectAndSetOptimalTab({ services }));
+  // Only auto-detect the optimal tab when the query text has changed. When
+  // only the time filter changes (query text stays the same), the user's
+  // current tab choice must be preserved. Dataset changes are handled
+  // separately by dataset_change_middleware, which clears activeTabId before
+  // calling detectAndSetOptimalTab.
+  const effectiveQuery = typeof query === 'string' ? query : previousQuery;
+  if (effectiveQuery !== previousQuery) {
+    await dispatch(detectAndSetOptimalTab({ services }));
+  }
 
   dispatch(setQueryExecutionButtonStatus('REFRESH'));
 };
