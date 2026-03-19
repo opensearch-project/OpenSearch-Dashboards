@@ -887,7 +887,7 @@ describe('generateOboToken', () => {
     );
     expect(mockTransportRequest).toHaveBeenCalledWith({
       method: 'POST',
-      path: '/_plugins/_security/api/generateonbehalfoftoken',
+      path: '/_plugins/_security/api/obo/token',
       body: { description: 'OBO token for AG-UI credential forwarding' },
     });
   });

@@ -31,7 +31,7 @@ export async function generateOboToken(
     const client = context.core.opensearch.client.asCurrentUser;
     const { body } = await client.transport.request({
       method: 'POST',
-      path: '/_plugins/_security/api/generateonbehalfoftoken',
+      path: '/_plugins/_security/api/obo/token',
       body: {
         description: 'OBO token for AG-UI credential forwarding',
       },
