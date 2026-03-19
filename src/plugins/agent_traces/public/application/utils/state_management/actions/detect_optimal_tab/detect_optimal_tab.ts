@@ -31,17 +31,21 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   const state = getState();
   const queryString = typeof state.query.query === 'string' ? state.query.query : '';
 
-  if (hasStatsPipe(queryString)) {
-    dispatch(setActiveTab(AGENT_TRACES_VISUALIZATION_TAB_ID));
+  const targetTabId = hasStatsPipe(queryString)
+    ? AGENT_TRACES_VISUALIZATION_TAB_ID
+    : AGENT_TRACES_TRACES_TAB_ID;
 
-    const tab = services.tabRegistry.getTab(AGENT_TRACES_VISUALIZATION_TAB_ID);
-    if (tab?.prepareQuery) {
-      const cacheKey = tab.prepareQuery(state.query);
-      if (!state.results[cacheKey]) {
-        await dispatch(executeTabQuery({ services, cacheKey, queryString: cacheKey }));
-      }
+  dispatch(setActiveTab(targetTabId));
+
+  // Ensure the target tab has results cached.  When the query changes,
+  // clearResults() wipes the cache and executeQueries() only fetches for the
+  // previously-active tab.  Without this, the newly-selected tab would render
+  // with no data until the user clicks it again.
+  const tab = services.tabRegistry.getTab(targetTabId);
+  if (tab?.prepareQuery) {
+    const cacheKey = tab.prepareQuery(state.query, state.legacy.sort);
+    if (!state.results[cacheKey]) {
+      await dispatch(executeTabQuery({ services, cacheKey, queryString: cacheKey }));
     }
-  } else {
-    dispatch(setActiveTab(AGENT_TRACES_TRACES_TAB_ID));
   }
 });
