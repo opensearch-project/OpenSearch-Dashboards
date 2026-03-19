@@ -30,9 +30,13 @@ export const prepareTestSuite = (testSuiteName, runTestSuiteCallback) => {
         before(() => {
           cy.session(name, () => {
             cy.task('getNewAwsCredentials').then((awsCredentials) => {
+              if (!awsCredentials) {
+                throw new Error('Failed to get AWS credentials - received null or undefined');
+              }
               Cypress.env('AWS_CREDENTIALS', awsCredentials);
+              // Chain the method call to ensure sequential execution
+              return cy[method]();
             });
-            cy[method]();
           });
         });
 
@@ -58,6 +62,9 @@ export const createWorkspaceWithDatasource = (
   cy.osd.getDataSourceId(datasourceName);
 
   cy.get('@DATASOURCE_ID').then((datasourceId) => {
+    if (!datasourceId) {
+      throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+    }
     cy.osd.createWorkspaceWithDataSourceId(datasourceId, workspaceName, features, aliasName);
     cy.wait(2000);
   });
@@ -85,7 +92,13 @@ export const createDatasetWithEndpoint = (
   cy.osd.getDataSourceId(datasourceName);
 
   cy.get('@DATASOURCE_ID').then((datasourceId) => {
-    cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
+    if (!datasourceId) {
+      throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+    }
+    return cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
+      if (!workspaceId) {
+        throw new Error(`Failed to get workspace ID for: ${workspaceName}`);
+      }
       cy.osd.createDatasetByEndpoint(
         datasetId,
         workspaceId,
@@ -123,6 +136,9 @@ export const createWorkspaceAndDatasetUsingEndpoint = (
   cy.osd.getDataSourceId(datasourceName);
 
   cy.get('@DATASOURCE_ID').then((datasourceId) => {
+    if (!datasourceId) {
+      throw new Error(`Failed to get datasource ID for: ${datasourceName}`);
+    }
     cy.osd.createWorkspaceWithDataSourceId(
       datasourceId,
       workspaceName,
@@ -130,7 +146,10 @@ export const createWorkspaceAndDatasetUsingEndpoint = (
       workspaceAliasName
     );
     cy.wait(2000);
-    cy.get(`@${workspaceAliasName}`).then((workspaceId) => {
+    return cy.get(`@${workspaceAliasName}`).then((workspaceId) => {
+      if (!workspaceId) {
+        throw new Error(`Failed to get workspace ID for: ${workspaceName}`);
+      }
       cy.osd.createDatasetByEndpoint(
         datasetId,
         workspaceId,

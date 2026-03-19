@@ -137,7 +137,7 @@ export const selectIndexPatternDataset = (indexPatternName, datasetLanguage) => 
  */
 export const toggleDocTableRow = (rowNumber) => {
   getDocTableRow(rowNumber).within(() => {
-    cy.getElementByTestId('docTableExpandToggleColumn').find('button').click();
+    cy.getElementByTestId('docTableExpandToggleColumn').click();
   });
 };
 
