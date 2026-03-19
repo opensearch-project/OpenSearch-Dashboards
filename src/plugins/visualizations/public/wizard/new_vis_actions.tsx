@@ -118,7 +118,7 @@ export const createNewVisActions = (services: {
           order: 10 * (visTypes.length - i),
           execute: async () => {
             const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
-            await navigateTo(visType.aliasApp, visType.aliasApp, currentAppId);
+            await navigateTo(visType.aliasApp, visType.aliasPath, currentAppId);
           },
         });
       }
