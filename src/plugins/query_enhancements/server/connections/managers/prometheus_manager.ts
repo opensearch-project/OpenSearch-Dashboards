@@ -74,7 +74,7 @@ export interface PromQLQueryResponse {
   results: {
     [connectionId: string]: {
       resultType: string;
-      result: MetricResult[];
+      result: MetricResult[] | [number, string];
     };
   };
 }

@@ -17,24 +17,37 @@ import {
   splitMultiQueries,
 } from '../../../data/common';
 import {
+  MetricResult,
   prometheusManager,
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
 import { calculateStep, DEFAULT_RESOLUTION } from './prom_utils';
 
+function normalizeResult(
+  resultType: string | undefined,
+  result: MetricResult[] | [number, string] | undefined
+): MetricResult[] {
+  if (!result) return [];
+  if (resultType === 'scalar' || resultType === 'string') {
+    const [timestamp, value] = result as [number, string];
+    return [{ metric: {}, value: [timestamp, Number(value)] }];
+  }
+  return result as MetricResult[];
+}
+
 function parseTimeValue(
   value: string | undefined,
   options?: Parameters<typeof dateMath.parse>[1]
 ): number {
   if (!value) {
-    throw new Error('Time option missing');
+    throw new Error('Time or time range option missing');
   }
   const epoch = Number(value);
   if (Number.isFinite(epoch)) return epoch;
   const parsed = dateMath.parse(value, options)?.unix();
   if (!parsed) {
-    throw new Error('Invalid time option');
+    throw new Error('Invalid time or time range option');
   }
   return parsed;
 }
@@ -78,7 +91,7 @@ export const promqlSearchStrategyProvider = (
         let queryOptions: ExecuteQueryOptions;
 
         if (isInstantQuery) {
-          const parsedTime = parseTimeValue(requestOptions?.time, { roundUp: true });
+          const parsedTime = parseTimeValue(requestOptions?.time);
           queryOptions = {
             language,
             maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
@@ -273,7 +286,8 @@ function createDataFrame(
   queryResults.forEach((result) => {
     if (!result.response || result.error) return;
 
-    const series = result.response.results[datasetId]?.result || [];
+    const queryResult = result.response.results[datasetId];
+    const series = normalizeResult(queryResult?.resultType, queryResult?.result);
 
     series.forEach((metricResult, i) => {
       if (i >= MAX_SERIES_TABLE) return;
@@ -292,7 +306,8 @@ function createDataFrame(
   queryResults.forEach((result) => {
     if (!result.response || result.error) return;
 
-    const series = result.response.results[datasetId]?.result || [];
+    const queryResult = result.response.results[datasetId];
+    const series = normalizeResult(queryResult?.resultType, queryResult?.result);
 
     series.forEach((metricResult, seriesIndex) => {
       if (seriesIndex >= MAX_SERIES_TABLE) return;

@@ -968,6 +968,46 @@ describe('promqlSearchStrategy', () => {
       expect(instantRows[1].Value).toBe(0);
     });
 
+    it('should handle scalar result type from instant query', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'scalar',
+            result: [1773874502, '1'],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: '1',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              queryType: 'INSTANT',
+              time: '1773874502',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      expect(result.type).toBe(DATA_FRAME_TYPES.DEFAULT);
+      expect(result.body.size).toBe(1);
+
+      const instantRows = result.body.meta?.instantData.rows;
+      expect(instantRows.length).toBe(1);
+      expect(instantRows[0].Value).toBe(1);
+    });
+
     it('should throw when no options.time is provided for instant query', async () => {
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await expect(
@@ -991,7 +1031,7 @@ describe('promqlSearchStrategy', () => {
           } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
           {}
         )
-      ).rejects.toThrow('Time option missing');
+      ).rejects.toThrow('Time or time range option missing');
     });
 
     it('should parse dateMath expressions for options.time', async () => {
