@@ -213,6 +213,7 @@ export class VisualizationsPlugin
       overlays: core.overlays,
       application: core.application,
       savedObjects: core.savedObjects,
+      embeddable,
     });
 
     // Register Ask AI action for visualizations
