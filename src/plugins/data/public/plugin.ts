@@ -120,14 +120,12 @@ declare module '../../ui_actions/public' {
   }
 }
 
-export class DataPublicPlugin
-  implements
-    Plugin<
-      DataPublicPluginSetup,
-      DataPublicPluginStart,
-      DataSetupDependencies,
-      DataStartDependencies
-    > {
+export class DataPublicPlugin implements Plugin<
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies
+> {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly uiService: UiService;
@@ -228,15 +226,8 @@ export class DataPublicPlugin
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const {
-      uiSettings,
-      http,
-      notifications,
-      savedObjects,
-      overlays,
-      application,
-      workspaces,
-    } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application, workspaces } =
+      core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);

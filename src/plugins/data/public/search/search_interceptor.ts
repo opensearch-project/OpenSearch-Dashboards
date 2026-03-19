@@ -81,6 +81,7 @@ export class SearchInterceptor {
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
     });
+
   }
 
   /*
@@ -105,8 +106,8 @@ export class SearchInterceptor {
     } else if (isSessionDisconnectError(e)) {
       // Handle session disconnect/authentication failure
       const err = new SessionDisconnectError(e);
-      // Show the disconnect banner here, so it's shown application-wide
-      this.showSessionDisconnectBanner(err);
+      // Handle redirect directly here since this interceptor processes the error first
+      this.showSessionDisconnectAndRedirect(err);
       return err;
     } else if (isPainlessError(e)) {
       return new PainlessError(e, request);
@@ -219,6 +220,37 @@ export class SearchInterceptor {
   );
 
   /**
+   * Shows session disconnect banner with redirect (debounced to prevent spam)
+   * @internal
+   */
+  private showSessionDisconnectAndRedirect = debounce(
+    (sessionError: SessionDisconnectError) => {
+      // Show toaster at bottom left
+      const sessionToast = this.deps.toasts.addInfo({
+        title: 'Session Expired',
+        text: toMountPoint(sessionError.getErrorMessage(this.application)),
+        toastLifeTimeMs: 5000, // Show for 5 seconds before auto-redirect
+      });
+
+      // Set timeout to redirect after showing the message
+      setTimeout(() => {
+        // Remove the toast before redirect
+        this.deps.toasts.remove(sessionToast);
+
+        // Use location header from 303 response if available, otherwise default to IDPSelect page
+        const redirectUrl = sessionError.redirectUrl || '/_login/IDPSelect.html?options=IAM Identity Center';
+
+        console.info('[SearchInterceptor] Redirecting to:', redirectUrl);
+
+        window.location.href = redirectUrl;
+      }, 5000);
+    },
+    30000, // Debounce for 30 seconds to prevent multiple toasters
+    { leading: true, trailing: false }
+  );
+
+
+  /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
    * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
@@ -284,6 +316,15 @@ export class SearchInterceptor {
       title: 'Search Error',
       id: simpleHash(e.message),
     });
+  }
+
+
+  /**
+   * Clean up resources when the interceptor is destroyed
+   * @internal
+   */
+  public destroy() {
+    // No resources to clean up currently
   }
 }
 
