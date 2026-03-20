@@ -28,7 +28,7 @@ import { useExistingDashboard } from '../../application/utils/hooks/use_existing
 
 interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
-  onConfirm: (props: OnSaveProps) => void;
+  onConfirm: (props: OnSaveProps) => void | Promise<void>;
   onCancel: () => void;
   savedAgentTracesId: string | undefined;
 }
@@ -76,16 +76,20 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const handleSave = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    if (savedAgentTraces) {
-      await onConfirm({
-        savedAgentTraces,
-        newTitle: title,
-        isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
-        onTitleDuplicate: handleTitleDuplicate,
-        mode: selectedOption,
-        selectDashboard: selectedDashboard,
-        newDashboardName,
-      });
+    try {
+      if (savedAgentTraces) {
+        await onConfirm({
+          savedAgentTraces,
+          newTitle: title,
+          isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
+          onTitleDuplicate: handleTitleDuplicate,
+          mode: selectedOption,
+          selectDashboard: selectedDashboard,
+          newDashboardName,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -109,7 +113,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
             />
           }
           color="warning"
-          data-test-subj="titleDupicateWarnMsg"
+          data-test-subj="titleDuplicateWarnMsg"
         >
           <p>
             <FormattedMessage

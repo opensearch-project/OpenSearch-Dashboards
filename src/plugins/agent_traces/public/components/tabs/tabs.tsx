@@ -26,12 +26,6 @@ const TabIdContext = createContext('');
 /** Returns the tab ID of the enclosing tab panel. */
 export const useOwnTabId = () => useContext(TabIdContext);
 
-/**
- * Returns `true` when the enclosing tab panel is the active (visible) tab.
- * With EuiTabbedContent unmount/remount, this always returns true for mounted tabs.
- */
-export const useIsTabActive = () => true;
-
 export const AgentTracesTabs = () => {
   const dispatch = useDispatch();
   const { services } = useOpenSearchDashboards<AgentTracesServices>();

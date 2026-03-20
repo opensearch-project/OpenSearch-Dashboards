@@ -9,7 +9,6 @@ import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 
-import './visualization_container.scss';
 import { AxisColumnMappings } from '../../../../explore/public';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
