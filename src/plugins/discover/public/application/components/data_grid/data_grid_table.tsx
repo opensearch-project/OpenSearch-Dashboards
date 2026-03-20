@@ -221,7 +221,12 @@ export const DataGridTable = ({
                 className="dscTable__inspectorHeader"
               >
                 <EuiFlexItem grow={false} className="dscTable__inspectorNav">
-                  <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+                  <EuiFlexGroup
+                    gutterSize="none"
+                    alignItems="center"
+                    responsive={false}
+                    className="dscTable__inspectorNavGroup"
+                  >
                     <EuiFlexItem grow={false}>
                       <EuiToolTip content={`Previous ${stepSize}`} position="bottom">
                         <EuiSmallButtonEmpty

@@ -120,10 +120,7 @@ export function DocViewTable({
           {filter && <th />}
           <th style={{ position: 'relative' }}>
             Field
-            <div
-              className="osdDocViewerTable__colResizer"
-              onMouseDown={onColResizeMouseDown}
-            />
+            <div className="osdDocViewerTable__colResizer" onMouseDown={onColResizeMouseDown} />
           </th>
           <th>Value</th>
         </tr>

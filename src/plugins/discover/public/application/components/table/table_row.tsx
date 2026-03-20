@@ -32,13 +32,7 @@ import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import React, { ReactNode, useState, useCallback, useRef } from 'react';
 import DOMPurify from 'dompurify';
-import {
-  EuiButtonIcon,
-  EuiPopover,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCopy,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiCopy } from '@elastic/eui';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
@@ -113,10 +107,7 @@ function FastTooltip({ text, children }: { text: string; children: ReactNode }) 
     >
       {children}
       {visible && text && (
-        <span
-          className="osdDocViewer__fastTooltip"
-          style={{ left: pos.x, top: pos.y }}
-        >
+        <span className="osdDocViewer__fastTooltip" style={{ left: pos.x, top: pos.y }}>
           {text}
           <span className="osdDocViewer__fastTooltipArrow" />
         </span>

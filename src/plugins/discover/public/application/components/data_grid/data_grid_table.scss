@@ -42,10 +42,8 @@
   flex: 0 0 auto;
 }
 
-.dscTable__inspectorNav {
-  .euiFlexGroup {
-    gap: 0;
-  }
+.dscTable__inspectorNav .dscTable__inspectorNavGroup {
+  gap: 0;
 }
 
 .dscTable__inspectorPos {
@@ -71,6 +69,7 @@
 .dscTable__inspectorBody {
   flex: 1 1 auto;
   overflow-y: auto;
+
   @include euiScrollBar;
 
   .osdDocViewerTable {
@@ -86,13 +85,13 @@
   .osdDocViewer__value {
     padding-top: 0;
   }
+}
 
-  .euiTabs {
-    padding: 0 $euiSizeXS;
-  }
+.dscTable__inspectorTabs {
+  padding: 0 $euiSizeXS;
+}
 
-  .euiTab {
-    padding: $euiSizeXS $euiSizeS;
-    font-size: $euiFontSizeXS;
-  }
+.dscTable__inspectorTab {
+  padding: $euiSizeXS $euiSizeS;
+  font-size: $euiFontSizeXS;
 }
