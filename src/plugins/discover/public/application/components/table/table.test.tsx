@@ -168,12 +168,7 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    ([
-      'addInclusiveFilterButton',
-      'collapseBtn',
-      'toggleColumnButton',
-      'underscoreWarning',
-    ] as const).forEach((element) => {
+    (['collapseBtn', 'underscoreWarning'] as const).forEach((element) => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {
@@ -181,6 +176,26 @@ describe('DocViewTable at Discover', () => {
 
         it(`renders ${element} for '${check._property}' correctly`, () => {
           const disabled = btn.length ? btn.props().disabled : true;
+          const clickAble = btn.length && !disabled ? true : false;
+          expect(clickAble).toBe(elementExist);
+        });
+      }
+    });
+
+    (['addInclusiveFilterButton', 'toggleColumnButton'] as const).forEach((element) => {
+      const elementExist = check[element];
+
+      if (typeof elementExist === 'boolean') {
+        it(`renders ${element} for '${check._property}' correctly`, () => {
+          const freshComponent = mount(<DocViewTable {...props} />);
+          const row = findTestSubject(freshComponent, `tableDocViewRow-${check._property}`);
+          const filterBtn = findTestSubject(row, 'docViewerFilterBtn');
+          if (filterBtn.length) {
+            filterBtn.simulate('click');
+            freshComponent.update();
+          }
+          const btn = findTestSubject(freshComponent, element);
+          const disabled = btn.length ? btn.at(0).props().disabled : true;
           const clickAble = btn.length && !disabled ? true : false;
           expect(clickAble).toBe(elementExist);
         });
@@ -260,7 +275,11 @@ describe('DocViewTable at Discover Context', () => {
 
   it(`renders addInclusiveFilterButton`, () => {
     const row = findTestSubject(component, `tableDocViewRow-_index`);
-    const btn = findTestSubject(row, 'addInclusiveFilterButton');
+    const filterBtn = findTestSubject(row, 'docViewerFilterBtn');
+    expect(filterBtn.length).toBe(1);
+    filterBtn.simulate('click');
+    component.update();
+    const btn = findTestSubject(component, 'addInclusiveFilterButton');
     expect(btn.length).toBe(1);
     btn.simulate('click');
     expect(props.filter).toBeCalled();

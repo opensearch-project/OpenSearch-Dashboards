@@ -29,6 +29,8 @@ export interface TableRowProps {
   onFilter?: DocViewFilterFn;
   onClose?: () => void;
   isShortDots: boolean;
+  isInspected?: boolean;
+  onInspect?: (hit: OpenSearchSearchHit | undefined) => void;
 }
 
 const TableRowUI = ({
@@ -40,6 +42,8 @@ const TableRowUI = ({
   onFilter,
   onClose,
   isShortDots,
+  isInspected,
+  onInspect,
 }: TableRowProps) => {
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -47,13 +51,34 @@ const TableRowUI = ({
     setIsExpanded,
   ]);
 
+  const useSidePanel = typeof onInspect === 'function';
+
+  const handleToggleInspect = () => {
+    onInspect?.(isInspected ? undefined : row);
+  };
+
+  const rowClassName = [
+    row.isAnchor ? 'osdDocTable__row--highlight' : '',
+    useSidePanel && isInspected ? 'osdDocTable__row--inspected' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   const tableRow = (
-    <tr key={row._id} className={row.isAnchor ? 'osdDocTable__row--highlight' : ''}>
+    <tr key={row._id} className={rowClassName}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiSmallButtonIcon
-          color="text"
-          onClick={handleExpanding}
-          iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+          color={useSidePanel && isInspected ? 'primary' : 'text'}
+          onClick={useSidePanel ? handleToggleInspect : handleExpanding}
+          iconType={
+            useSidePanel
+              ? isInspected
+                ? 'minimize'
+                : 'expand'
+              : isExpanded
+              ? 'arrowDown'
+              : 'arrowRight'
+          }
           aria-label={i18n.translate('discover.defaultTable.docTableExpandToggleColumnLabel', {
             defaultMessage: `Toggle row details`,
           })}
@@ -195,7 +220,7 @@ const TableRowUI = ({
   return (
     <>
       {tableRow}
-      {isExpanded && expandedTableRow}
+      {!useSidePanel && isExpanded && expandedTableRow}
     </>
   );
 };

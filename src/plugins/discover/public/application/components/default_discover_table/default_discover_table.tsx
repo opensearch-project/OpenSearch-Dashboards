@@ -36,6 +36,8 @@ export interface DefaultDiscoverTableProps {
   onClose?: () => void;
   showPagination?: boolean;
   scrollToTop?: () => void;
+  inspectedHit?: OpenSearchSearchHit;
+  onInspect?: (hit: OpenSearchSearchHit | undefined) => void;
 }
 
 // ToDo: These would need to be read from an upcoming config panel
@@ -58,6 +60,8 @@ const DefaultDiscoverTableUI = ({
   onClose,
   showPagination,
   scrollToTop,
+  inspectedHit,
+  onInspect,
 }: DefaultDiscoverTableProps) => {
   const services = getServices();
   const [sampleSize, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
@@ -268,6 +272,8 @@ const DefaultDiscoverTableUI = ({
                     onFilter={onFilter}
                     onClose={onClose}
                     isShortDots={isShortDots}
+                    isInspected={inspectedHit?._id === row._id}
+                    onInspect={onInspect}
                   />
                 );
               }
