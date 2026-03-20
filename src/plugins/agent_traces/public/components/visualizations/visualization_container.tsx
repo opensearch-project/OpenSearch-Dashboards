@@ -5,7 +5,7 @@
 
 import './visualization_container.scss';
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 
@@ -27,21 +27,6 @@ import { executeQueries } from '../../application/utils/state_management/actions
 export interface UpdateVisualizationProps {
   mappings: AxisColumnMappings;
 }
-// TODO: add back notifications
-// const VISUALIZATION_TOAST_MSG = {
-//   useRule: i18n.translate('agentTraces.visualize.toast.useRule', {
-//     defaultMessage: 'Cannot apply previous configured visualization, use rule matched',
-//   }),
-//   reset: i18n.translate('agentTraces.visualize.toast.reset', {
-//     defaultMessage: 'Cannot apply previous configured visualization, reset',
-//   }),
-//   metricReset: i18n.translate('agentTraces.visualize.toast.metricReset', {
-//     defaultMessage: 'Cannot apply metric type visualization, reset',
-//   }),
-//   switchReset: i18n.translate('agentTraces.visualize.toast.switchReset', {
-//     defaultMessage: 'Cannot apply configured visualization to the current chart type, reset',
-//   }),
-// };
 
 export const VisualizationContainer = React.memo(() => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
@@ -50,22 +35,30 @@ export const VisualizationContainer = React.memo(() => {
   const dispatch = useDispatch();
 
   const visualizationBuilder = getVisualizationBuilder();
-
-  useEffect(() => {
-    if (results) {
-      const rows = results.hits?.hits || [];
-      const fieldSchema = results.fieldSchema || [];
-      visualizationBuilder.handleData(rows, fieldSchema);
-    }
-  }, [visualizationBuilder, results]);
-
   useEffect(() => {
     visualizationBuilder.init();
     return () => {
-      // reset visualization builder
       visualizationBuilder.reset();
     };
   }, [visualizationBuilder]);
+
+  useEffect(() => {
+    if (!results) return;
+
+    const rows = results.hits?.hits || [];
+    const fieldSchema = results.fieldSchema || [];
+
+    // Defer handleData to the next microtask so that:
+    // 1. init() (which sets up the onDataChange subscription) has already run
+    // 2. VisualizationRender has mounted and subscribed to data$/config$
+    // Without this deferral, data$.next() can fire before onDataChange is
+    // subscribed, causing the auto-detection to be skipped entirely.
+    const timer = setTimeout(() => {
+      visualizationBuilder.handleData(rows, fieldSchema);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [visualizationBuilder, results]);
 
   const onSelectTimeRange = useCallback(
     (timeRange?: TimeRange) => {
