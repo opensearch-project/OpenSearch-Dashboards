@@ -84,6 +84,19 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
         }
 
         setHasMore(result.hasMore);
+        pageRef.current = currentPage;
+
+        // Auto-load more if content doesn't fill the container (no scrollbar)
+        if (result.hasMore) {
+          // Use requestAnimationFrame to check after DOM updates
+          requestAnimationFrame(() => {
+            const container = contentRef.current;
+            if (container && container.scrollHeight <= container.clientHeight) {
+              setIsLoadingWithRef(false);
+              loadConversations(currentPage + 1, true);
+            }
+          });
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error('Failed to load conversations:', err);
@@ -103,8 +116,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
   useEffect(() => {
     loadConversations(0, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationHistoryService]);
+  }, [loadConversations]);
 
   const handleDelete = async (threadId: string) => {
     try {
@@ -158,8 +170,24 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
     if (!container) return;
 
     container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+
+    // Watch for container resize (e.g., window height change)
+    const resizeObserver = new ResizeObserver(() => {
+      if (!hasMore || isLoadingRef.current || error) return;
+      if (container.scrollHeight <= container.clientHeight) {
+        pageRef.current += 1;
+        const nextPage = pageRef.current;
+        setPage((prev) => prev + 1);
+        loadConversations(nextPage, true);
+      }
+    });
+    resizeObserver.observe(container);
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, [handleScroll, hasMore, error, loadConversations]);
 
   const handleSelectConversation = (conversation: SavedConversation) => {
     onSelectConversation(conversation);

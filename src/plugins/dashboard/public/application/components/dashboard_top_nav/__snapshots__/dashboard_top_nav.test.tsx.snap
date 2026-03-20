@@ -141,6 +141,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "onWindowClose": [MockFunction],
               "onWindowOpen": [MockFunction],
               "openWindow": [MockFunction],
+              "resetThreadId": [MockFunction],
               "screenshot": Object {
                 "configure": [MockFunction],
                 "getEnabled$": [MockFunction],
@@ -1348,6 +1349,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "onWindowClose": [MockFunction],
               "onWindowOpen": [MockFunction],
               "openWindow": [MockFunction],
+              "resetThreadId": [MockFunction],
               "screenshot": Object {
                 "configure": [MockFunction],
                 "getEnabled$": [MockFunction],
@@ -2555,6 +2557,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "onWindowClose": [MockFunction],
               "onWindowOpen": [MockFunction],
               "openWindow": [MockFunction],
+              "resetThreadId": [MockFunction],
               "screenshot": Object {
                 "configure": [MockFunction],
                 "getEnabled$": [MockFunction],
@@ -3762,6 +3765,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "onWindowClose": [MockFunction],
               "onWindowOpen": [MockFunction],
               "openWindow": [MockFunction],
+              "resetThreadId": [MockFunction],
               "screenshot": Object {
                 "configure": [MockFunction],
                 "getEnabled$": [MockFunction],
@@ -4969,6 +4973,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "onWindowClose": [MockFunction],
               "onWindowOpen": [MockFunction],
               "openWindow": [MockFunction],
+              "resetThreadId": [MockFunction],
               "screenshot": Object {
                 "configure": [MockFunction],
                 "getEnabled$": [MockFunction],
@@ -6176,6 +6181,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "onWindowClose": [MockFunction],
               "onWindowOpen": [MockFunction],
               "openWindow": [MockFunction],
+              "resetThreadId": [MockFunction],
               "screenshot": Object {
                 "configure": [MockFunction],
                 "getEnabled$": [MockFunction],

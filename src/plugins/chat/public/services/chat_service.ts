@@ -394,6 +394,58 @@ export class ChatService {
     return { observable: trackedObservable, userMessage };
   }
 
+  /**
+   * Wait for tool call result to be synced to agentic memory
+   * Polls the conversation history to check if the tool call has been saved
+   */
+  private async waitForToolCallSync(
+    toolCallId: string,
+    maxAttempts: number = 10,
+    intervalMs: number = 1000
+  ): Promise<void> {
+    const threadId = this.getThreadId();
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const events = await this.conversationHistoryService.getConversation(threadId);
+
+        if (events) {
+          // Check for tool call in MESSAGES_SNAPSHOT events
+          // The tool call is stored in assistant messages' toolCalls array
+          const toolCallSynced = events.some((event) => {
+            if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
+              const messages = (event as any).messages as Message[];
+              return messages.some(
+                (msg) =>
+                  msg.role === 'assistant' &&
+                  'toolCalls' in msg &&
+                  Array.isArray((msg as any).toolCalls) &&
+                  (msg as any).toolCalls.some((tc: any) => tc.id === toolCallId)
+              );
+            }
+            return false;
+          });
+
+          if (toolCallSynced) {
+            return; // Tool call has been synced
+          }
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn(`Failed to check tool call sync status (attempt ${attempt + 1}):`, error);
+      }
+
+      // Wait before next attempt
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    // If we've exhausted all attempts, log a warning but continue
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Tool call sync check timed out after ${maxAttempts} attempts for toolCallId: ${toolCallId}`
+    );
+  }
+
   public async sendToolResult(
     toolCallId: string,
     result: any,
@@ -426,9 +478,9 @@ export class ChatService {
     }));
 
     // Send the tool result back to the agent with full conversation history
-    const mappedMessages = this.conversationHistoryService.getMemoryProvider().includeFullHistory
-      ? [...messages, toolMessage]
-      : [toolMessage];
+    const includeFullHistory = this.conversationHistoryService.getMemoryProvider()
+      .includeFullHistory;
+    const mappedMessages = includeFullHistory ? [...messages, toolMessage] : [toolMessage];
 
     const threadId = this.getThreadId();
 
@@ -445,6 +497,12 @@ export class ChatService {
       state: {}, // Empty for agent internal use only
       forwardedProps: {},
     };
+
+    // Wait for tool call result to be synced to agentic memory only when not including full history
+    // (when full history is included, messages are passed directly so no sync wait needed)
+    if (!includeFullHistory) {
+      await this.waitForToolCallSync(toolCallId);
+    }
 
     // Continue the conversation with the tool result
     const observable = this.agent.runAgent(runInput, dataSourceId);

@@ -31,7 +31,7 @@ function getCategoryColor(category: SpanCategory): string {
     case 'EMBEDDINGS':
       return euiThemeVars.euiColorVis1;
     case 'TOOL':
-      return euiThemeVars.euiColorDarkShade;
+      return euiThemeVars.euiColorVis8;
     case 'RETRIEVAL':
       return euiThemeVars.euiColorVis4;
     case 'OTHER':

@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
+import { useUnmount } from 'react-use';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
@@ -78,6 +79,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
+  const [isSendingToolResult, setIsSendingToolResult] = useState(false);
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -114,6 +116,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           onTimelineUpdate: setTimeline,
           onStreamingStateChange: setIsStreaming,
           onStartResponse: setStartResponse,
+          onSendToolResultStateChange: setIsSendingToolResult,
           getTimeline: () => timelineRef.current,
         },
       }),
@@ -241,6 +244,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       chatService.saveConversation(timeline);
     }
   }, [timeline, chatService, isLoading]);
+
+  // Clear thread ID so next mount can restore the latest conversation
+  useUnmount(() => {
+    services.core.chat.resetThreadId()
+  });
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
@@ -673,6 +681,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             input={input}
             isCapturing={isCapturing}
             isStreaming={isStreaming}
+            isSendingToolResult={isSendingToolResult}
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}

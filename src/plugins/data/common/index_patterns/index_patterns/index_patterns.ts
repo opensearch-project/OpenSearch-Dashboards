@@ -422,7 +422,11 @@ export class IndexPatternsService {
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFields: FieldSpec[] = Array.isArray(fields)
+      ? fields
+      : fields
+      ? JSON.parse(fields)
+      : [];
     const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 

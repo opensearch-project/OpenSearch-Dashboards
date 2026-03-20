@@ -187,6 +187,8 @@ jobs:
         with:
           repository: ${{ env.SOURCE_REPO }}
           ref: '${{ env.SOURCE_BRANCH }}'
+          fetch-depth: 1
+          filter: blob:none
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -201,7 +203,14 @@ jobs:
           yarn config set network-timeout 1000000 -g
 
       - name: Run bootstrap
-        run: yarn osd bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
@@ -214,6 +223,8 @@ jobs:
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
           clean: true
+          fetch-depth: 1
+          filter: blob:none
 
       - name: Setup spec files by input
         if: ${{ inputs.specs != '' }}
@@ -387,6 +398,19 @@ jobs:
           path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
 
+      # Upload JUnit XML results separately (uncompressed) so AI agents and humans
+      # can read failures directly via `gh run download -n ftr-cypress-junit-<group>`
+      # without extracting the tar.gz first.
+      - name: Upload FT repo Cypress JUnit results
+        if: always() && matrix.test_location == 'ftr'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftr-cypress-junit-${{ matrix.group }}
+          path: ${{ env.FTR_PATH }}/cypress/results/**/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
+          overwrite: true
+
       - name: Compress OSD repo artifacts
         if: always() && matrix.test_location == 'source'
         run: |
@@ -406,6 +430,19 @@ jobs:
           name: osd-cypress-artifacts-${{ matrix.group }}
           path: osd-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
+          overwrite: true
+
+      # Upload JUnit XML results separately (uncompressed) so AI agents and humans
+      # can read failures directly via `gh run download -n cypress-junit-<group>`
+      # without extracting the tar.gz first.
+      - name: Upload Cypress JUnit results
+        if: always() && matrix.test_location == 'source'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-junit-${{ matrix.group }}
+          path: cypress/results/**/*.xml
+          retention-days: 7
+          if-no-files-found: ignore
           overwrite: true
 
   add-comment:
