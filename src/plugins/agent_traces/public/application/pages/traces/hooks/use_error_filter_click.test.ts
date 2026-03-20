@@ -6,7 +6,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { useErrorFilterClick } from './use_error_filter_click';
 
-const mockDispatch = jest.fn();
+const mockDispatch = jest.fn().mockImplementation((action: any) => {
+  if (typeof action === 'function')
+    return action(mockDispatch, () => ({ query: {}, legacy: { sort: [] }, results: {} }));
+  return action;
+});
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
 }));
@@ -18,9 +22,10 @@ jest.mock('../../../hooks', () => ({
   useSetEditorTextWithQuery: () => mockSetEditorTextWithQuery,
 }));
 
-const mockServices = { tabRegistry: {} };
+const mockServices = { tabRegistry: { getTab: jest.fn() } };
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({ services: mockServices }),
+  withOpenSearchDashboards: (Component: any) => Component,
 }));
 
 const mockLoadQueryActionCreator = jest.fn(
@@ -32,6 +37,14 @@ jest.mock('../../../utils/state_management/actions/query_editor', () => ({
 
 jest.mock('../../../utils/state_management/slices', () => ({
   setActiveTab: (id: string) => ({ type: 'ui/setActiveTab', payload: id }),
+  clearQueryStatusMapByKey: (key: string) => ({
+    type: 'queryEditor/clearQueryStatusMapByKey',
+    payload: key,
+  }),
+}));
+
+jest.mock('../../../utils/state_management/actions/query_actions', () => ({
+  executeTabQuery: jest.fn(() => ({ type: 'executeTabQuery' })),
 }));
 
 describe('useErrorFilterClick', () => {
@@ -40,11 +53,11 @@ describe('useErrorFilterClick', () => {
     mockGetEditorText.mockReturnValue('source = my_index');
   });
 
-  it('appends error filter and dispatches setActiveTab for traces', () => {
+  it('appends error filter and dispatches setActiveTab for traces', async () => {
     const { result } = renderHook(() => useErrorFilterClick());
 
-    act(() => {
-      result.current('traces');
+    await act(async () => {
+      await result.current('traces');
     });
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'ui/setActiveTab', payload: 'traces' });
@@ -55,11 +68,11 @@ describe('useErrorFilterClick', () => {
     );
   });
 
-  it('appends error filter and dispatches setActiveTab for spans', () => {
+  it('appends error filter and dispatches setActiveTab for spans', async () => {
     const { result } = renderHook(() => useErrorFilterClick());
 
-    act(() => {
-      result.current('spans');
+    await act(async () => {
+      await result.current('spans');
     });
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'ui/setActiveTab', payload: 'spans' });
@@ -70,13 +83,13 @@ describe('useErrorFilterClick', () => {
     );
   });
 
-  it('does not duplicate filter if already present', () => {
+  it('does not duplicate filter if already present', async () => {
     mockGetEditorText.mockReturnValue('source = my_index | where `status.code` = 2');
 
     const { result } = renderHook(() => useErrorFilterClick());
 
-    act(() => {
-      result.current('traces');
+    await act(async () => {
+      await result.current('traces');
     });
 
     expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
