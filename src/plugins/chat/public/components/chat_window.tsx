@@ -732,6 +732,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             isCapturing={isCapturing}
             isStreaming={isStreaming}
             isSendingToolResult={isSendingToolResult}
+            pendingConfirmation={pendingConfirmation}
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}

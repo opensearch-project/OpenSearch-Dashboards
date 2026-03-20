@@ -15,6 +15,7 @@ import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
+import { ConfirmationRequest } from '../services/confirmation_service';
 
 import './chat_input.scss';
 
@@ -24,6 +25,7 @@ interface ChatInputProps {
   isCapturing: boolean;
   isStreaming: boolean;
   isSendingToolResult?: boolean;
+  pendingConfirmation?: ConfirmationRequest | null;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
@@ -38,6 +40,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   isCapturing,
   isStreaming,
   isSendingToolResult = false,
+  pendingConfirmation,
   onInputChange,
   onSend,
   onStop,
@@ -105,7 +108,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chatInput__fieldWrapper">
           <EuiTextArea
             inputRef={inputRef}
-            placeholder="How can I help you today?"
+            placeholder={
+              pendingConfirmation
+                ? i18n.translate('chat.input.waitingForConfirmation', {
+                    defaultMessage: 'Waiting for confirmation...',
+                  })
+                : i18n.translate('chat.input.placeholder', {
+                    defaultMessage: 'How can I help you today?',
+                  })
+            }
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
