@@ -139,10 +139,11 @@ jobs:
 
       - name: Create source archive
         run: |
-          tar czf cypress-source-archive.tar.gz \
+          tar czf /tmp/cypress-source-archive.tar.gz \
             --exclude=.git --exclude=node_modules --exclude='**/node_modules' \
             --exclude='*/target/public' \
             .
+          mv /tmp/cypress-source-archive.tar.gz .
 
       - name: Upload source archive
         uses: actions/upload-artifact@v4
@@ -272,7 +273,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf cypress-source-archive.tar.gz && rm cypress-source-archive.tar.gz
+        run: |
+          tar xzf cypress-source-archive.tar.gz && rm cypress-source-archive.tar.gz
+          git init -q
 
       - name: Download plugin bundles
         uses: actions/download-artifact@v4

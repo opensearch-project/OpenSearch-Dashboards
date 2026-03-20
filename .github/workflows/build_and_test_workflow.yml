@@ -114,7 +114,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -199,7 +201,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -324,7 +328,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -412,7 +418,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -521,9 +529,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       - name: Run bootstrap
         shell: bash
@@ -630,7 +638,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -780,7 +790,9 @@ jobs:
 
       - name: Extract source archive
         shell: bash
-        run: tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -945,7 +957,9 @@ jobs:
       - name: Extract source archive
         shell: bash
         working-directory: .
-        run: mkdir -p artifacts && tar xzf source-archive.tar.gz -C artifacts && rm source-archive.tar.gz
+        run: |
+          mkdir -p artifacts && tar xzf source-archive.tar.gz -C artifacts && rm source-archive.tar.gz
+          git -C artifacts init -q
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -1069,7 +1083,9 @@ jobs:
       - name: Extract source archive
         shell: bash
         working-directory: .
-        run: mkdir -p artifacts && tar xzf source-archive.tar.gz -C artifacts && rm source-archive.tar.gz
+        run: |
+          mkdir -p artifacts && tar xzf source-archive.tar.gz -C artifacts && rm source-archive.tar.gz
+          git -C artifacts init -q
 
       - run: echo Running backwards compatibility tests for version ${{ matrix.version }}
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
