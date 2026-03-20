@@ -77,6 +77,7 @@ describe('ChatInput', () => {
     onKeyDown: jest.fn(),
     onFilesSelected: jest.fn(),
     fileUploadEnabled: true,
+    includeScreenshotEnabled: false,
     maxFileUploadBytes: 10 * 1024 * 1024,
     attachmentCount: 0,
   };
@@ -540,14 +541,20 @@ describe('ChatInput', () => {
   });
 
   describe('feature flag interactions', () => {
-    it('should show popover when file upload is disabled but screenshot button is registered', () => {
+    it('should show popover when file upload is disabled but includeScreenshotEnabled is true', () => {
       const { queryByLabelText } = render(
-        <ChatInput {...defaultProps} fileUploadEnabled={false} />
+        <ChatInput {...defaultProps} fileUploadEnabled={false} includeScreenshotEnabled={true} />
       );
 
-      // screenshotButton is non-null (registered by the screenshot service),
-      // so the popover shows the screenshot option even when file upload is off.
       expect(queryByLabelText('Add context')).toBeTruthy();
+    });
+
+    it('should not show context popover when file upload and screenshot are both unavailable', () => {
+      const { queryByLabelText } = render(
+        <ChatInput {...defaultProps} fileUploadEnabled={false} includeScreenshotEnabled={false} />
+      );
+
+      expect(queryByLabelText('Add context')).toBeNull();
     });
 
     it('should show popover when file upload is enabled', () => {

@@ -37,6 +37,7 @@ interface ChatInputProps {
   onCaptureScreenshot: () => void;
   onFilesSelected: (files: File[]) => void;
   fileUploadEnabled: boolean;
+  includeScreenshotEnabled: boolean;
   maxFileUploadBytes: number;
   maxFileAttachments?: number;
   attachmentCount: number;
@@ -55,6 +56,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onCaptureScreenshot,
   onFilesSelected,
   fileUploadEnabled,
+  includeScreenshotEnabled,
   maxFileUploadBytes,
   maxFileAttachments = DEFAULT_MAX_FILE_ATTACHMENTS,
   attachmentCount,
@@ -77,6 +79,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   }, [chat]);
 
   const screenshotButton = useObservable(screenshotButtonObservable$, null);
+
+  const showScreenshotInContextMenu =
+    includeScreenshotEnabled && screenshotButton != null && screenshotButton.enabled !== false;
 
   // Use custom hook for command menu keyboard handling
   const {
@@ -188,7 +193,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const chatContextPopoverOptions = useMemo(() => {
     return [
-      ...(screenshotButton
+      ...(showScreenshotInContextMenu && screenshotButton
         ? [
             {
               title: screenshotButton.title,
@@ -207,7 +212,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           ]
         : []),
     ];
-  }, [screenshotButton, onCaptureScreenshot, fileUploadEnabled]);
+  }, [showScreenshotInContextMenu, screenshotButton, onCaptureScreenshot, fileUploadEnabled]);
 
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
