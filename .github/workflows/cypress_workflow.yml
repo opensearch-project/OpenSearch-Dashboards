@@ -140,7 +140,7 @@ jobs:
       - name: Create source archive
         run: |
           tar czf /tmp/cypress-source-archive.tar.gz \
-            --exclude=.git \
+            --exclude='./.git' \
             --exclude='./node_modules' \
             --exclude='./src/plugins/*/node_modules' \
             --exclude='./packages/*/node_modules' \

@@ -80,16 +80,16 @@ jobs:
       - name: Create source archive
         run: |
           tar czf /tmp/source-archive.tar.gz \
-            --exclude=.git \
+            --exclude='./.git' \
             --exclude='./node_modules' \
             --exclude='./src/plugins/*/node_modules' \
             --exclude='./packages/*/node_modules' \
             --exclude='./test/*/plugins/*/node_modules' \
             --exclude='./examples/*/node_modules' \
-            --exclude=target --exclude='**/target' \
-            --exclude=cypress --exclude=data \
-            --exclude='.github' --exclude=coverage \
-            --exclude='.opensearch' --exclude=opensearch-build \
+            --exclude='./cypress' --exclude='./data' \
+            --exclude='./.github' --exclude='./coverage' \
+            --exclude='./.opensearch' --exclude='./opensearch-build' \
+            --exclude='**/target' \
             .
           mv /tmp/source-archive.tar.gz .
           ls -lh source-archive.tar.gz
