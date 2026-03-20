@@ -1,2 +1,0 @@
-fix:
-- Scope history is out of scope for in-context editor ([#11596](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11596))

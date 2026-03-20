@@ -1,2 +1,0 @@
-fix:
-- StateTransfer not added when creating visualization from dashboard create visualization dropdown ([#11551](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11551))

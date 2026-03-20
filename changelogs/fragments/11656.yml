@@ -1,2 +1,0 @@
-fix:
-- Fix double counting tokens in flyout in agent traces ([#11656](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11656))
