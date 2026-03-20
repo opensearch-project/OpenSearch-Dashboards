@@ -12,6 +12,7 @@ import { VisData } from './visualization_builder.types';
 import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
 import { defaultTableChartStyles } from './table/table_vis_config';
+import { defaultMetricChartStyles } from './metric/metric_vis_config';
 import { createVisSpec } from './utils/create_vis_spec';
 
 jest.mock('./table/table_vis', () => ({
@@ -30,6 +31,12 @@ jest.mock('./utils/create_vis_spec', () => ({
 
 jest.mock('./echarts_render', () => ({
   EchartsRender: jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>),
+}));
+
+jest.mock('./metric/metric_component', () => ({
+  MetricChartRender: jest.fn(() => (
+    <div data-test-subj="metricChartRender">Metric Chart Render</div>
+  )),
 }));
 
 jest.mock('../../services/services', () => ({
@@ -101,7 +108,7 @@ describe('VisualizationRender', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
+    (createVisSpec as jest.Mock).mockReturnValue({ spec: { type: 'bar' }, axisColumnMappings: {} });
   });
 
   it('returns null when no visualization data is provided', () => {
@@ -117,8 +124,6 @@ describe('VisualizationRender', () => {
   });
 
   it('renders table visualization when config type is table', () => {
-    (createVisSpec as jest.Mock).mockReturnValue({ type: 'table' });
-
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
@@ -131,8 +136,6 @@ describe('VisualizationRender', () => {
   });
 
   it('renders EchartsRender when there is a selection mapping', () => {
-    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
-
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
@@ -145,8 +148,6 @@ describe('VisualizationRender', () => {
   });
 
   it('renders empty state when there is no selection mapping', () => {
-    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
-
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>({
       ...mockChartConfig,
@@ -191,5 +192,61 @@ describe('VisualizationRender', () => {
     );
 
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
+  });
+
+  it('returns null when data has no columns', () => {
+    const emptyColumnsData: VisData = {
+      transformedData: [{ field1: 'value1' }],
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(emptyColumnsData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    const { container } = render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders MetricChartRender when config type is metric', () => {
+    (createVisSpec as jest.Mock).mockReturnValue({
+      spec: { type: 'metric' },
+      axisColumnMappings: {},
+    });
+
+    const metricConfig: RenderChartConfig = {
+      type: 'metric',
+      styles: { ...defaultMetricChartStyles },
+      axesMapping: { value: 'count' },
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(metricConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(screen.getByTestId('metricChartRender')).toBeInTheDocument();
+  });
+
+  it('returns null when createVisSpec returns no spec', () => {
+    (createVisSpec as jest.Mock).mockReturnValue({ spec: undefined, axisColumnMappings: {} });
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    const { container } = render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(container.firstChild).toBeNull();
   });
 });
