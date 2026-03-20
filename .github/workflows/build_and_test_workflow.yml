@@ -79,16 +79,20 @@ jobs:
 
       - name: Create source archive
         run: |
-          tar czf source-archive.tar.gz \
-            --exclude=node_modules --exclude='**/node_modules' \
+          tar czf /tmp/source-archive.tar.gz \
+            --exclude=.git \
+            --exclude='./node_modules' \
+            --exclude='./src/plugins/*/node_modules' \
+            --exclude='./packages/*/node_modules' \
+            --exclude='./test/*/plugins/*/node_modules' \
+            --exclude='./examples/*/node_modules' \
             --exclude=target --exclude='**/target' \
-            src packages test scripts config typings examples common utilities \
-            plugins tasks dev-tools licenses baselines \
-            package.json yarn.lock .nvmrc .yarnrc \
-            tsconfig.json tsconfig.base.json tsconfig.browser.json \
-            tsconfig.check.json tsconfig.refs.json tsconfig.types.json \
-            opensearch_dashboards.d.ts preinstall_check.js Gruntfile.js \
-            github_checks_reporter.json api-documenter.json
+            --exclude=cypress --exclude=data \
+            --exclude='.github' --exclude=coverage \
+            --exclude='.opensearch' --exclude=opensearch-build \
+            .
+          mv /tmp/source-archive.tar.gz .
+          ls -lh source-archive.tar.gz
 
       - name: Upload source archive
         uses: actions/upload-artifact@v4
