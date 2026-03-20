@@ -60,7 +60,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
   const {
     services: { application, injectedMetadata },
   } = useOpenSearchDashboards<CoreStart>();
-  const branding = injectedMetadata.getBranding();
+  const branding = injectedMetadata?.getBranding() ?? {};
   const applicationTitle = branding.applicationTitle || 'OpenSearch Dashboards';
   const gettingStartedGraphicURL = `/plugins/${PLUGIN_ID}/assets/opensearch_dashboards_montage_${
     isDarkTheme ? 'dark' : 'light'

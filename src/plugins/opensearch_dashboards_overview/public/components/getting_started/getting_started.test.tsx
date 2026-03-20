@@ -135,4 +135,20 @@ describe('GettingStarted', () => {
     );
     expect(component).toMatchSnapshot();
   });
+  test('renders with custom branding title', () => {
+    const { useOpenSearchDashboards } = jest.requireMock(
+      '../../../../../../src/plugins/opensearch_dashboards_react/public'
+    );
+    useOpenSearchDashboards.mockReturnValueOnce({
+      services: {
+        injectedMetadata: {
+          getBranding: jest.fn().mockReturnValue({ applicationTitle: 'My Custom Analytics' }),
+        },
+      },
+    });
+    const component = shallowWithIntl(
+      <GettingStarted addBasePath={addBasePathMock} isDarkTheme={false} apps={mockApps} />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });

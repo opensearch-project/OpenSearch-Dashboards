@@ -405,3 +405,206 @@ exports[`GettingStarted render 1`] = `
   </EuiFlexGroup>
 </section>
 `;
+
+exports[`GettingStarted renders with custom branding title 1`] = `
+<section
+  aria-labelledby="osdOverviewGettingStarted__title"
+  className="osdOverviewGettingStarted"
+>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <EuiFlexItem
+      className="osdOverviewGettingStarted__content"
+    >
+      <div>
+        <EuiTitle
+          size="s"
+        >
+          <h2
+            id="osdOverviewGettingStarted__title"
+          >
+            <FormattedMessage
+              defaultMessage="Getting started with {applicationTitle}"
+              id="opensearchDashboardsOverview.gettingStarted.title"
+              values={
+                Object {
+                  "applicationTitle": "My Custom Analytics",
+                }
+              }
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer
+          size="m"
+        />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              defaultMessage="{applicationTitle} empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
+              id="opensearchDashboardsOverview.gettingStarted.description"
+              values={
+                Object {
+                  "applicationTitle": "My Custom Analytics",
+                }
+              }
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="xl"
+        />
+        <EuiFlexGrid
+          className="osdOverviewGettingStarted__apps"
+          columns={2}
+        >
+          <EuiFlexItem
+            key="Dashboard"
+          >
+            <EuiCard
+              description="Analyze data in dashboards."
+              display="plain"
+              icon={
+                <EuiIcon
+                  color="text"
+                  size="l"
+                  type="dashboardApp"
+                />
+              }
+              layout="horizontal"
+              paddingSize="none"
+              title="Dashboard"
+              titleElement="h3"
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            key="Discover"
+          >
+            <EuiCard
+              description="Search and find insights."
+              display="plain"
+              icon={
+                <EuiIcon
+                  color="text"
+                  size="l"
+                  type="discoverApp"
+                />
+              }
+              layout="horizontal"
+              paddingSize="none"
+              title="Discover"
+              titleElement="h3"
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            key="Canvas"
+          >
+            <EuiCard
+              description="Design pixel-perfect reports."
+              display="plain"
+              icon={
+                <EuiIcon
+                  color="text"
+                  size="l"
+                  type="canvasApp"
+                />
+              }
+              layout="horizontal"
+              paddingSize="none"
+              title="Canvas"
+              titleElement="h3"
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            key="Maps"
+          >
+            <EuiCard
+              description="Plot geographic data."
+              display="plain"
+              icon={
+                <EuiIcon
+                  color="text"
+                  size="l"
+                  type="gisApp"
+                />
+              }
+              layout="horizontal"
+              paddingSize="none"
+              title="Maps"
+              titleElement="h3"
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            key="Machine Learning"
+          >
+            <EuiCard
+              description="Model, predict, and detect."
+              display="plain"
+              icon={
+                <EuiIcon
+                  color="text"
+                  size="l"
+                  type="machineLearningApp"
+                />
+              }
+              layout="horizontal"
+              paddingSize="none"
+              title="Machine Learning"
+              titleElement="h3"
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            key="Graph"
+          >
+            <EuiCard
+              description="Reveal patterns and relationships."
+              display="plain"
+              icon={
+                <EuiIcon
+                  color="text"
+                  size="l"
+                  type="graphApp"
+                />
+              }
+              layout="horizontal"
+              paddingSize="none"
+              title="Graph"
+              titleElement="h3"
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
+        <EuiSpacer
+          size="xl"
+        />
+        <Component>
+          <EuiSmallButton
+            fill={true}
+            href="/app/management/opensearch-dashboards/indexPatterns"
+            iconType="indexOpen"
+          >
+            <FormattedMessage
+              defaultMessage="Add your data"
+              id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
+              values={Object {}}
+            />
+          </EuiSmallButton>
+        </Component>
+      </div>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="osdOverviewGettingStarted__graphic"
+    >
+      <EuiImage
+        alt="My Custom Analytics visualizations illustration"
+        url="/plugins/opensearchDashboardsOverview/assets/opensearch_dashboards_montage_light.svg"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</section>
+`;
