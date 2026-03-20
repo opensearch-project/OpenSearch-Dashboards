@@ -12,7 +12,7 @@ import {
 } from '../../../../core/server';
 import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { ISearchStrategy } from '../../../data/server';
-import { API } from '../../common';
+import { API, URI } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
@@ -114,6 +114,53 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
 }
 
 /**
+ * Defines route for PPL grammar bundle endpoint
+ * Forwards requests to OpenSearch /_plugins/_ppl/_grammar
+ */
+export function definePPLBundleRoute(logger: Logger, router: IRouter) {
+  router.get(
+    {
+      path: API.PPL_GRAMMAR,
+      validate: {
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        const { dataSourceId } = req.query;
+        if (dataSourceId && !context.dataSource?.opensearch?.getClient) {
+          return res.custom({
+            statusCode: 400,
+            body: 'dataSourceId is not supported because data source plugin is unavailable',
+          });
+        }
+        const opensearchClient = dataSourceId
+          ? await context.dataSource.opensearch.getClient(dataSourceId)
+          : context.core.opensearch.client.asCurrentUser;
+        const result = await opensearchClient.transport.request({
+          method: 'GET',
+          path: URI.PPL_BUNDLE,
+        });
+        const body = result?.body ?? result;
+
+        return res.ok({ body });
+      } catch (err: any) {
+        // Don't try to return 304 - let frontend handle caching from localStorage
+        // The OSD framework treats 304 as a redirect which requires a location header
+        logger.debug(`PPL grammar bundle fetch error: ${err.message || err}`);
+
+        return res.custom({
+          statusCode: coerceStatusCode(err.status || err.statusCode || err?.meta?.statusCode),
+          body: err.message || 'Failed to fetch PPL grammar bundle',
+        });
+      }
+    }
+  );
+}
+
+/**
  * Defines routes for various search strategies and registers additional routes.
  *
  * @experimental This function is experimental and might change in future releases.
@@ -139,4 +186,6 @@ export function defineRoutes(
   registerDataSourceConnectionsRoutes(router, client);
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
+
+  definePPLBundleRoute(logger, router);
 }

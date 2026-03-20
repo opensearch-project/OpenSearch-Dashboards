@@ -1,0 +1,2 @@
+feat:
+- Adopt backend grammar bundle as runtime source for PPL autocomplete ([#11428](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11428))
