@@ -37,12 +37,16 @@ describe('detectAndSetOptimalTab', () => {
       },
     } as any) as AgentTracesServices);
 
-  const createMockState = (queryString: string, results: Record<string, any> = {}) => ({
+  const createMockState = (
+    queryString: string,
+    results: Record<string, any> = {},
+    activeTabId = ''
+  ) => ({
     query: { query: queryString },
     results,
     legacy: { sort: [['endTime', 'desc']] },
     queryEditor: { queryStatusMap: {} },
-    ui: { activeTabId: '' },
+    ui: { activeTabId },
   });
 
   beforeEach(() => {
@@ -117,6 +121,30 @@ describe('detectAndSetOptimalTab', () => {
       cacheKey: 'prepared-cache-key',
       queryString: 'prepared-cache-key',
     });
+  });
+
+  it('preserves user-selected spans tab for non-stats query', async () => {
+    const services = createMockServices();
+    mockGetState.mockReturnValue(
+      createMockState('source = idx | where status.code = 2', {}, 'spans')
+    );
+
+    const thunk = detectAndSetOptimalTab({ services });
+    await thunk(mockDispatch, mockGetState, undefined);
+
+    expect(mockSetActiveTab).toHaveBeenCalledWith('spans');
+  });
+
+  it('switches from visualization to traces for non-stats query', async () => {
+    const services = createMockServices();
+    mockGetState.mockReturnValue(
+      createMockState('source = idx', {}, AGENT_TRACES_VISUALIZATION_TAB_ID)
+    );
+
+    const thunk = detectAndSetOptimalTab({ services });
+    await thunk(mockDispatch, mockGetState, undefined);
+
+    expect(mockSetActiveTab).toHaveBeenCalledWith(AGENT_TRACES_TRACES_TAB_ID);
   });
 
   it('handles tab without prepareQuery', async () => {

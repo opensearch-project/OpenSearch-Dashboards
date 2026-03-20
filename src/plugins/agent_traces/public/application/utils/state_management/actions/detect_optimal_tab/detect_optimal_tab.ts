@@ -30,10 +30,16 @@ export const detectAndSetOptimalTab = createAsyncThunk<
 >('ui/detectAndSetOptimalTab', async ({ services }, { getState, dispatch }) => {
   const state = getState();
   const queryString = typeof state.query.query === 'string' ? state.query.query : '';
+  const currentTabId = state.ui.activeTabId;
 
-  const targetTabId = hasStatsPipe(queryString)
-    ? AGENT_TRACES_VISUALIZATION_TAB_ID
-    : AGENT_TRACES_TRACES_TAB_ID;
+  let targetTabId: string;
+  if (hasStatsPipe(queryString)) {
+    targetTabId = AGENT_TRACES_VISUALIZATION_TAB_ID;
+  } else if (!currentTabId || currentTabId === AGENT_TRACES_VISUALIZATION_TAB_ID) {
+    targetTabId = AGENT_TRACES_TRACES_TAB_ID;
+  } else {
+    targetTabId = currentTabId;
+  }
 
   dispatch(setActiveTab(targetTabId));
 
