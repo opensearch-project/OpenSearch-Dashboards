@@ -83,7 +83,7 @@ jobs:
             --exclude=node_modules --exclude='**/node_modules' \
             --exclude=target --exclude='**/target' \
             src packages test scripts config typings examples common utilities \
-            plugins tasks dev-tools build licenses baselines \
+            plugins tasks dev-tools licenses baselines \
             package.json yarn.lock .nvmrc .yarnrc \
             tsconfig.json tsconfig.base.json tsconfig.browser.json \
             tsconfig.check.json tsconfig.refs.json tsconfig.types.json \
