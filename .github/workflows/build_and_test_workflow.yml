@@ -86,7 +86,7 @@ jobs:
             --exclude='./packages/*/node_modules' \
             --exclude='./test/*/plugins/*/node_modules' \
             --exclude='./examples/*/node_modules' \
-            --exclude='./cypress/test_data' --exclude='./cypress/fixtures' \
+            --exclude='./cypress' \
             --exclude='./data' \
             --exclude='./.github' --exclude='./coverage' \
             --exclude='./.opensearch' --exclude='./opensearch-build' \
