@@ -32,6 +32,12 @@ import { SerializedFieldFormat } from '../../../../expressions/common/types';
 import { IFieldFormat } from '../index';
 
 export { asPrettyString } from './as_pretty_string';
-export { getHighlightHtml, getHighlightRequest } from './highlight';
+export {
+  getHighlightHtml,
+  getHighlightRequest,
+  highlightTags,
+  parseHighlightedValue,
+  getDisplayValue,
+} from './highlight';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

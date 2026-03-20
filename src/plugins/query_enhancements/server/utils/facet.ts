@@ -56,6 +56,7 @@ export class Facet {
       const meta = dataSource?.meta;
       const { format, lang, fetchSize } = request.body;
       const compressionHeaders = this.getCompressionHeaders();
+      const { highlight } = request.body;
       const params = {
         body: {
           query: query.query,
@@ -65,6 +66,7 @@ export class Facet {
             sessionId: meta.sessionId,
           }),
           ...(lang && { lang }),
+          ...(highlight && { highlight }),
         },
         ...(format !== 'jdbc' && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
