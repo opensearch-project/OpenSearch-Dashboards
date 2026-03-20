@@ -1119,6 +1119,51 @@ describe('promqlSearchStrategy', () => {
       expect(result.body.size).toBe(1);
     });
 
+    it('should use custom step from options when provided for range query', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'server1' },
+                values: [[1638316800, 100]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+            options: {
+              step: 60,
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.options.queryType).toBe('range');
+      expect(callArgs.body.options.step).toBe('60');
+    });
+
     it('should still use range query when no options are provided', async () => {
       const mockResponse = {
         queryId: 'query-1',

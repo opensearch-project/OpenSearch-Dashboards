@@ -81,7 +81,7 @@ export const promqlSearchStrategyProvider = (
         const datasetId = dataset?.id ?? '';
 
         const requestOptions = requestBody.options as
-          | { queryType?: string; time?: string }
+          | { queryType?: string; time?: string; step?: number }
           | undefined;
         const isInstantQuery = requestOptions?.queryType?.toUpperCase() === 'INSTANT';
 
@@ -113,7 +113,7 @@ export const promqlSearchStrategyProvider = (
             queryType: 'range' as const,
             timeRange,
             step: (
-              requestBody.step ?? calculateStep((timeRange.end - timeRange.start) * 1000)
+              requestOptions?.step ?? calculateStep((timeRange.end - timeRange.start) * 1000)
             ).toString(),
           };
         }
