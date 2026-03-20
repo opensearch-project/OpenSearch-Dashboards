@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import fs from 'fs';
+import { execSync } from 'child_process';
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
@@ -19,7 +21,7 @@ module.exports = defineConfig({
   viewportWidth: 1920,
   viewportHeight: 1080,
   video: true,
-  videoCompression: 15,
+  videoCompression: false,
   trashAssetsBeforeRuns: false,
   videosFolder: 'cypress/videos',
   screenshotsFolder: 'cypress/screenshots',
@@ -121,6 +123,37 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+
+  // Delete video files for specs where all tests passed.
+  // For failures, compress the video with ffmpeg to reduce artifact size.
+  on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
+    if (results && results.video) {
+      const hasFailures = results.tests?.some((test) =>
+        test.attempts?.some((attempt) => attempt.state === 'failed')
+      );
+      if (!hasFailures) {
+        fs.unlinkSync(results.video);
+      } else {
+        // Compress failure video from ~100-300MB to ~5-15MB using ffmpeg.
+        // CRF 32 + faster preset keeps quality adequate for debugging while
+        // minimizing file size and compression time (~10-20s per video).
+        const compressedPath = results.video.replace('.mp4', '-compressed.mp4');
+        try {
+          execSync(
+            `ffmpeg -i "${results.video}" -vcodec libx264 -crf 32 -preset faster -an "${compressedPath}"`,
+            { stdio: 'ignore', timeout: 120000 }
+          );
+          fs.unlinkSync(results.video);
+          fs.renameSync(compressedPath, results.video);
+        } catch (e) {
+          // If ffmpeg fails, keep the uncompressed video rather than losing it.
+          if (fs.existsSync(compressedPath)) {
+            fs.unlinkSync(compressedPath);
+          }
+        }
+      }
+    }
+  });
 
   return config;
 }

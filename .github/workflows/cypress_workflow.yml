@@ -194,7 +194,10 @@ jobs:
           - group: 9
             config: standard
             test_location: ftr
-          - group: 10
+          - group: 10Fast
+            config: query_enhanced
+            test_location: source
+          - group: 10Slow
             config: query_enhanced
             test_location: source
           # Dashboard tests with no query enhanced
