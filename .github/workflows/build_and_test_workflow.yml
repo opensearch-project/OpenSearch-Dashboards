@@ -116,7 +116,7 @@ jobs:
         shell: bash
         run: |
           tar xzf source-archive.tar.gz && rm source-archive.tar.gz
-          git init -q
+          git init -q && git commit -q --allow-empty -m "source archive"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -203,7 +203,7 @@ jobs:
         shell: bash
         run: |
           tar xzf source-archive.tar.gz && rm source-archive.tar.gz
-          git init -q
+          git init -q && git commit -q --allow-empty -m "source archive"
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -330,7 +330,7 @@ jobs:
         shell: bash
         run: |
           tar xzf source-archive.tar.gz && rm source-archive.tar.gz
-          git init -q
+          git init -q && git commit -q --allow-empty -m "source archive"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -420,7 +420,7 @@ jobs:
         shell: bash
         run: |
           tar xzf source-archive.tar.gz && rm source-archive.tar.gz
-          git init -q
+          git init -q && git commit -q --allow-empty -m "source archive"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -640,7 +640,7 @@ jobs:
         shell: bash
         run: |
           tar xzf source-archive.tar.gz && rm source-archive.tar.gz
-          git init -q
+          git init -q && git commit -q --allow-empty -m "source archive"
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -792,7 +792,7 @@ jobs:
         shell: bash
         run: |
           tar xzf source-archive.tar.gz && rm source-archive.tar.gz
-          git init -q
+          git init -q && git commit -q --allow-empty -m "source archive"
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -959,7 +959,7 @@ jobs:
         working-directory: .
         run: |
           mkdir -p artifacts && tar xzf source-archive.tar.gz -C artifacts && rm source-archive.tar.gz
-          git -C artifacts init -q
+          git -C artifacts init -q && git -C artifacts commit -q --allow-empty -m "source archive"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -1085,7 +1085,7 @@ jobs:
         working-directory: .
         run: |
           mkdir -p artifacts && tar xzf source-archive.tar.gz -C artifacts && rm source-archive.tar.gz
-          git -C artifacts init -q
+          git -C artifacts init -q && git -C artifacts commit -q --allow-empty -m "source archive"
 
       - run: echo Running backwards compatibility tests for version ${{ matrix.version }}
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
