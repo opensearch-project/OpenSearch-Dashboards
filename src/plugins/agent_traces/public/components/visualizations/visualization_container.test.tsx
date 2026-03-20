@@ -4,14 +4,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 
 import { VisualizationContainer } from './visualization_container';
 import * as VB from './visualization_builder_singleton';
 import * as TabResultsHooks from '../../application/utils/hooks/use_tab_results';
 import { BehaviorSubject } from 'rxjs';
-import { VisFieldType } from '../../../../explore/public';
-import { VisData } from '../../../../explore/public';
 
 // Mock react-redux before importing any components
 jest.mock('react-redux', () => ({
@@ -43,7 +41,7 @@ jest.mock('../query_panel/utils/use_search_context', () => ({
 
 // Mock the visualization builder
 const mockVisualizationBuilder = {
-  data$: new BehaviorSubject<VisData | undefined>({
+  data$: new BehaviorSubject<any>({
     transformedData: [
       { field1: 'value1', count: 10 },
       { field1: 'value2', count: 20 },
@@ -52,7 +50,7 @@ const mockVisualizationBuilder = {
       {
         id: 1,
         name: 'count',
-        schema: VisFieldType.Numerical,
+        schema: 'numerical',
         column: 'count',
         validValuesCount: 2,
         uniqueValuesCount: 2,
@@ -62,7 +60,7 @@ const mockVisualizationBuilder = {
       {
         id: 2,
         name: 'field1',
-        schema: VisFieldType.Categorical,
+        schema: 'categorical',
         column: 'field1',
         validValuesCount: 2,
         uniqueValuesCount: 2,
@@ -87,12 +85,22 @@ const mockVisualizationBuilder = {
 
 describe('VisualizationContainer', () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(mockVisualizationBuilder as any);
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders the visualization container', () => {
     render(<VisualizationContainer />);
+
+    // handleData is deferred via setTimeout(..., 0), flush it
+    act(() => {
+      jest.runAllTimers();
+    });
 
     expect(screen.getByTestId('agentTracesVisualizationLoader')).toBeInTheDocument();
     expect(mockVisualizationBuilder.init).toHaveBeenCalled();

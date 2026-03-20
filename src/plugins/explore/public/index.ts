@@ -23,5 +23,3 @@ export { createAutoDetectedDatasets, CreateDatasetsResult } from './utils/create
 // Visualization system for use by other plugins
 export { VisualizationBuilder } from './components/visualizations/visualization_builder';
 export type { AxisColumnMappings } from './components/visualizations/types';
-export { VisFieldType } from './components/visualizations/types';
-export type { VisData } from './components/visualizations/visualization_builder.types';
