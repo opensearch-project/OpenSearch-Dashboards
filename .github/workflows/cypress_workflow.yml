@@ -275,7 +275,7 @@ jobs:
         shell: bash
         run: |
           tar xzf cypress-source-archive.tar.gz && rm cypress-source-archive.tar.gz
-          git init -q && git commit -q --allow-empty -m "source archive"
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
       - name: Download plugin bundles
         uses: actions/download-artifact@v4
