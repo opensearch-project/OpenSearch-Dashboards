@@ -1,0 +1,2 @@
+chore:
+- Add prepare-source and prepare-cypress jobs for CI reliability ([#11560](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11560))
