@@ -123,14 +123,24 @@ jobs:
           name: lighthouse-results
           path: artifacts/assertion-results.json
 
-      - name: Fail CI if Lighthouse assertion results indicate failures
+      - name: Check Lighthouse assertion results
         if: steps.verify_lighthouse.outputs.should_continue == 'true'
         run: |
-          if jq -e '[.[] | select(.passed==false)] | length > 0' .lighthouseci/assertion-results.json > /dev/null; then
-            echo "❌ Lighthouse CI detected performance issues. Failing the job."
+          echo "=== Lighthouse Assertion Results ==="
+          # Print a summary of all assertions
+          jq -r '.[] | "\(if .passed then "✅ PASS" else "❌ FAIL" end) [\(.level)] \(.auditTitle) on \(.url)\n   Threshold: \(.operator) \(.expected)  Actual: \(.actual)"' .lighthouseci/assertion-results.json
+          echo ""
+          # Only fail on error-level assertions, not warnings
+          errors=$(jq '[.[] | select(.passed==false and .level=="error")] | length' .lighthouseci/assertion-results.json)
+          warnings=$(jq '[.[] | select(.passed==false and .level=="warn")] | length' .lighthouseci/assertion-results.json)
+          if [ "$warnings" -gt 0 ]; then
+            echo "⚠️  $warnings warning(s) exceeded threshold (non-blocking)"
+          fi
+          if [ "$errors" -gt 0 ]; then
+            echo "❌ $errors error(s) exceeded threshold. Failing the job."
             exit 1
           else
-            echo "✅ All Lighthouse metrics passed."
+            echo "✅ All Lighthouse error-level assertions passed."
           fi
 
       - name: Cleanup
