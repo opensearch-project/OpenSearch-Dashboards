@@ -19,5 +19,5 @@ export const loadQueryActionCreator = (
 ) => (dispatch: AppDispatch) => {
   dispatch(clearLastExecutedData());
   setEditorTextWithQuery(query);
-  dispatch(runQueryActionCreator(services, query));
+  return dispatch(runQueryActionCreator(services, query));
 };

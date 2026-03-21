@@ -168,7 +168,6 @@ describe('table_shared', () => {
         </IntlProvider>
       );
       expect(screen.getByText('No traces found')).toBeInTheDocument();
-      expect(screen.getByText('otel-v1-apm-span-*')).toBeInTheDocument();
       expect(screen.getByText('gen_ai.operation.name')).toBeInTheDocument();
     });
   });

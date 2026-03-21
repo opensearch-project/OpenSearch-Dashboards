@@ -38,6 +38,9 @@ import * as columnActions from '../application/legacy/discover/application/utils
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
+import { addPPLSourceClause } from '../application/utils/languages/ppl/get_query_string_with_source';
+import { VisualizationBuilder } from '../../../explore/public';
+import { ExecutionContextSearch } from '../../../expressions/common';
 
 export interface SearchProps {
   description?: string;
@@ -59,6 +62,8 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
+  visualizationBuilder?: VisualizationBuilder;
+  searchContext?: ExecutionContextSearch;
 }
 
 interface AgentTracesEmbeddableConfig {
@@ -93,6 +98,7 @@ export class AgentTracesEmbeddable
   };
   private node?: HTMLElement;
   private root?: Root;
+  private visualizationBuilder?: VisualizationBuilder;
 
   constructor(
     {
@@ -147,6 +153,23 @@ export class AgentTracesEmbeddable
   private initializeSearchProps() {
     const { searchSource } = this.savedAgentTraces;
     const indexPattern = searchSource.getField('index');
+
+    // Parse saved visualization config
+    const visualization = JSON.parse(this.savedAgentTraces.visualization || '{}');
+    const isVisualizationTab = visualization.chartType && visualization.axesMapping;
+
+    // Set up VisualizationBuilder for visualization tabs
+    if (isVisualizationTab) {
+      this.visualizationBuilder = new VisualizationBuilder({
+        getExpressions: () => this.services.expressions,
+      });
+      this.visualizationBuilder.setVisConfig({
+        type: visualization.chartType,
+        styles: visualization.params,
+        axesMapping: visualization.axesMapping,
+      });
+    }
+
     const searchProps: SearchProps = {
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
@@ -156,6 +179,7 @@ export class AgentTracesEmbeddable
       isLoading: false,
       displayTimeColumn: this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       title: this.savedAgentTraces.title,
+      visualizationBuilder: this.visualizationBuilder,
     };
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
@@ -167,8 +191,14 @@ export class AgentTracesEmbeddable
     searchSource.setParent(this.filtersSearchSource);
     const query = this.savedAgentTraces.searchSource.getField('query');
     if (query) {
-      // Data tabs (logs, traces, spans) strip stats to fetch raw rows.
-      query.query = defaultPrepareQueryString(query);
+      if (isVisualizationTab) {
+        // Visualization tabs keep the full query (including stats) to get aggregated data.
+        // Only add the source clause without stripping stats.
+        query.query = addPPLSourceClause(query).query;
+      } else {
+        // Data tabs (logs, traces, spans) strip stats to fetch raw rows.
+        query.query = defaultPrepareQueryString(query);
+      }
     }
     searchSource.setFields({
       index: indexPattern,
@@ -317,6 +347,18 @@ export class AgentTracesEmbeddable
         }),
     });
     const rows = resp.hits.hits;
+
+    // Feed data to VisualizationBuilder for visualization tabs
+    if (this.visualizationBuilder) {
+      const fieldSchema = searchSource.getDataFrame()?.schema ?? [];
+      this.visualizationBuilder.handleData(rows, fieldSchema);
+      this.searchProps.searchContext = {
+        query: this.input.query,
+        filters: this.input.filters,
+        timeRange: this.input.timeRange,
+      };
+    }
+
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
     this.searchProps.rows = rows;
@@ -343,6 +385,9 @@ export class AgentTracesEmbeddable
 
     if (this.abortController) {
       this.abortController.abort();
+    }
+    if (this.visualizationBuilder) {
+      this.visualizationBuilder.reset();
     }
     if (this.searchProps) {
       delete this.searchProps;

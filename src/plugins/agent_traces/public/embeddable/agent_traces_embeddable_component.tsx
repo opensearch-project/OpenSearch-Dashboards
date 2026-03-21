@@ -83,6 +83,16 @@ export const AgentTracesEmbeddableComponent = ({ searchProps }: AgentTracesEmbed
       );
     }
 
+    // Render visualization chart if saved from a visualization tab
+    if (searchProps.visualizationBuilder) {
+      const visElement = searchProps.visualizationBuilder.renderVisualization({
+        searchContext: searchProps.searchContext,
+      });
+      if (visElement) {
+        return <EuiFlexItem style={{ minHeight: 0, flex: '1 1 auto' }}>{visElement}</EuiFlexItem>;
+      }
+    }
+
     return (
       <DataTable
         columns={displayedColumns}
