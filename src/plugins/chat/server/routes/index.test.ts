@@ -22,13 +22,27 @@ describe('Chat Proxy Routes', () => {
   const testSetup = async (
     agUiUrl?: string,
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
-    mlCommonsAgentId?: string
+    mlCommonsAgentId?: string,
+    observabilityAgentId?: string,
+    fileUploadEnabled: boolean = true,
+    maxFileUploadBytes?: number,
+    maxFileAttachments?: number
   ) => {
     const { server: testServer, httpSetup } = await setupServer();
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
-    defineRoutes(router, mockLogger, agUiUrl, getCapabilitiesResolver, mlCommonsAgentId);
+    defineRoutes(
+      router,
+      mockLogger,
+      agUiUrl,
+      getCapabilitiesResolver,
+      mlCommonsAgentId,
+      observabilityAgentId,
+      fileUploadEnabled,
+      maxFileUploadBytes,
+      maxFileAttachments
+    );
 
     // Mock dynamicConfigService required by server.start()
     const dynamicConfigService = {
@@ -432,6 +446,940 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('File MIME type validation', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should reject binary attachments with disallowed MIME types', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithBadFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'application/x-executable',
+                  data: 'AAAA',
+                  filename: 'malicious.exe',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithBadFile)
+          .expect(400);
+
+        expect(response.body.message).toContain(
+          "File type 'application/x-executable' is not allowed"
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow binary attachments with permitted MIME types', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithGoodFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/csv',
+                  data: 'bmFtZSxhZ2U=',
+                  filename: 'data.csv',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithGoodFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should allow messages with non-binary content (plain text)', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should validate MIME type on parts missing type field but having data+mimeType', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithMalformed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  // No type: 'binary' — normalization should catch this
+                  mimeType: 'application/x-executable',
+                  data: 'AAAA',
+                  filename: 'sneaky.exe',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMalformed)
+          .expect(400);
+
+        expect(response.body.message).toContain(
+          "File type 'application/x-executable' is not allowed"
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Base64 data validation', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should reject binary attachments with invalid base64 characters', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithBadBase64 = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: '!!!not-base64!!!',
+                  filename: 'bad.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithBadBase64)
+          .expect(400);
+
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(response.body.message).toContain('bad.txt');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject base64 with incorrect padding length', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithBadPadding = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  // Valid chars but length not a multiple of 4
+                  data: 'abc',
+                  filename: 'padded.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithBadPadding)
+          .expect(400);
+
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow valid base64 data', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithValidBase64 = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'good.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithValidBase64)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should use fallback filename when filename is not provided', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestNoFilename = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: '$$invalid$$',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestNoFilename)
+          .expect(400);
+
+        expect(response.body.message).toContain('attachment');
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject empty base64 data', async () => {
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithEmptyData = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: '',
+                  filename: 'empty.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithEmptyData)
+          .expect(400);
+
+        expect(response.body.message).toContain('invalid base64 data');
+        expect(response.body.message).toContain('empty.txt');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('File size validation', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should reject binary attachments exceeding maxFileUploadBytes', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // maxFileUploadBytes=100; base64 decodes to 112 bytes (exceeds limit).
+        // proxyMaxBytes=1400 so the request body passes the parser.
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          100
+        );
+
+        const oversizedBase64 = Buffer.from('x'.repeat(112)).toString('base64');
+        const requestWithOversizedFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: oversizedBase64,
+                  filename: 'large.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithOversizedFile)
+          .expect(400);
+
+        expect(response.body.message).toContain('exceeds the');
+        expect(response.body.message).toContain('size limit');
+        expect(response.body.message).toContain('large.txt');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow binary attachments within maxFileUploadBytes', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // maxFileUploadBytes=20; "aGVsbG8=" decodes to "hello" (5 bytes)
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          20
+        );
+
+        const requestWithValidFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/csv',
+                  data: 'bmFtZSxhZ2U=',
+                  filename: 'data.csv',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithValidFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should not validate file size when maxFileUploadBytes is undefined', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // No maxFileUploadBytes - size check is skipped
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithLargeFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8gd29ybGQ=',
+                  filename: 'large.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithLargeFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+    });
+
+    describe('File attachment count limit', () => {
+      // Use a large maxFileUploadBytes so the payload size limit (413) doesn't
+      // trigger before our count validation (400) runs.
+      const largeMaxBytes = 100 * 1024 * 1024; // 100MB
+
+      it('should reject requests with more than 10 binary attachments', async () => {
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          largeMaxBytes
+        );
+
+        const tooManyFiles = Array.from({ length: 11 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithTooManyFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: tooManyFiles,
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithTooManyFiles)
+          .expect(400);
+
+        expect(response.body.message).toContain('Too many file attachments (11)');
+        expect(response.body.message).toContain('Maximum allowed: 10');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow exactly 10 binary attachments', async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          largeMaxBytes
+        );
+
+        const tenFiles = Array.from({ length: 10 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithTenFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: tenFiles,
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithTenFiles)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should enforce custom maxFileAttachments when configured', async () => {
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          largeMaxBytes,
+          5
+        );
+
+        const sixFiles = Array.from({ length: 6 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithSixFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: sixFiles,
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithSixFiles)
+          .expect(400);
+
+        expect(response.body.message).toContain('Too many file attachments (6)');
+        expect(response.body.message).toContain('Maximum allowed: 5');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow exactly maxFileAttachments when custom limit is set', async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          largeMaxBytes,
+          5
+        );
+
+        const fiveFiles = Array.from({ length: 5 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        const requestWithFiveFiles = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: fiveFiles,
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithFiveFiles)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should only count attachments in the newest user message', async () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          largeMaxBytes
+        );
+
+        const fiveFiles = Array.from({ length: 5 }, (_, i) => ({
+          type: 'binary',
+          mimeType: 'text/plain',
+          data: 'aGVsbG8=',
+          filename: `file${i}.txt`,
+        }));
+
+        // Two user messages with 5 files each — total 10 but newest has only 5
+        const requestWithHistory = {
+          ...validRequest,
+          messages: [
+            { role: 'user', id: 'msg-1', content: fiveFiles },
+            { role: 'assistant', id: 'msg-2', content: 'I see your files.' },
+            { role: 'user', id: 'msg-3', content: [...fiveFiles] },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithHistory)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+    });
+
+    describe('fileUploadEnabled flag', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      const setupDisabled = () =>
+        testSetup('http://test-agui:3000', undefined, undefined, undefined, false);
+
+      const setupEnabled = () =>
+        testSetup('http://test-agui:3000', undefined, undefined, undefined, true);
+
+      it('should reject file uploads (binary with filename) when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'test.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithFile)
+          .expect(400);
+
+        expect(response.body.message).toBe('File upload is disabled by the administrator');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should allow text-only messages when disabled', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupDisabled();
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should allow file uploads when enabled', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupEnabled();
+
+        const requestWithFile = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'test.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithFile)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should allow screenshot (image/jpeg, no filename) when disabled', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupDisabled();
+
+        const requestWithScreenshot = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'image/jpeg',
+                  data: 'aGVsbG8=',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithScreenshot)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should reject non-jpeg binary without filename when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithNonJpeg = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithNonJpeg)
+          .expect(400);
+
+        expect(response.body.message).toContain('Only screenshots');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject message with screenshot + file upload when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithMixed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                { type: 'binary', mimeType: 'image/jpeg', data: 'aGVsbG8=' },
+                {
+                  type: 'binary',
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'notes.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMixed)
+          .expect(400);
+
+        expect(response.body.message).toBe('File upload is disabled by the administrator');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should treat empty string filename as screenshot (falsy)', async () => {
+        mockSuccessfulAgUiResponse();
+        const httpSetup = await setupDisabled();
+
+        const requestWithEmptyFilename = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'image/jpeg',
+                  data: 'aGVsbG8=',
+                  filename: '',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithEmptyFilename)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should reject multiple screenshots per message when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithTwoScreenshots = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                { type: 'binary', mimeType: 'image/jpeg', data: 'aGVsbG8=' },
+                { type: 'binary', mimeType: 'image/jpeg', data: 'd29ybGQ=' },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithTwoScreenshots)
+          .expect(400);
+
+        expect(response.body.message).toContain('Too many screenshots');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject malformed binary-like parts missing type field when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithMalformed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                  filename: 'sneaky.txt',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMalformed)
+          .expect(400);
+
+        expect(response.body.message).toBe('File upload is disabled by the administrator');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should reject malformed binary-like parts without filename or type when disabled', async () => {
+        const httpSetup = await setupDisabled();
+
+        const requestWithMalformed = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              id: 'msg-1',
+              content: [
+                {
+                  mimeType: 'text/plain',
+                  data: 'aGVsbG8=',
+                },
+              ],
+            },
+          ],
+        };
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithMalformed)
+          .expect(400);
+
+        expect(response.body.message).toContain('Only screenshots');
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+    });
+
     describe('System Prompt Injection', () => {
       const mockSuccessfulAgUiResponse = () => {
         mockFetch.mockResolvedValue({
@@ -490,6 +1438,72 @@ describe('Chat Proxy Routes', () => {
 
         expect(requestBody.messages).toHaveLength(1);
         expect(requestBody.messages[0]).toEqual(validRequest.messages[0]);
+      });
+    });
+
+    describe('maxFileUploadBytes configuration', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should accept large payloads when maxFileUploadBytes is configured', async () => {
+        mockSuccessfulAgUiResponse();
+
+        // Configure with 1MB limit → maxBytes = ceil(1MB * 1.4) = 1468007
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          undefined,
+          true,
+          1048576
+        );
+
+        // Create a payload under the limit (should succeed)
+        const requestWithAttachment = {
+          ...validRequest,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'binary',
+                  mimeType: 'text/csv',
+                  data: 'a'.repeat(100000), // ~100KB base64
+                  filename: 'test.csv',
+                },
+              ],
+            },
+          ],
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithAttachment)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should use default payload limit when maxFileUploadBytes is not configured', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        expect(mockFetch).toHaveBeenCalled();
       });
     });
   });

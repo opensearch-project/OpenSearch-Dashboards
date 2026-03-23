@@ -6,6 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
+import { CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES, CHAT_MAX_FILE_ATTACHMENTS } from '../../common';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ChatLayoutMode } from '../types';
@@ -18,6 +19,7 @@ import {
   WorkspacesStart,
   Event,
   EventType,
+  HttpSetup,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
@@ -59,13 +61,25 @@ export class ChatService {
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
 
+  /** Whether file upload is enabled (injected from plugin config, immutable). */
+  public readonly fileUploadEnabled: boolean;
+  /** Max file upload size in bytes (injected from plugin config, immutable). */
+  public readonly maxFileUploadBytes: number;
+  /** Max number of file attachments per message (injected from plugin config, immutable). */
+  public readonly maxFileAttachments: number;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
-    workspaces?: WorkspacesStart
+    workspaces?: WorkspacesStart,
+    http?: HttpSetup,
+    fileUploadEnabled: boolean = true,
+    maxFileUploadBytes: number = CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+    maxFileAttachments: number = CHAT_MAX_FILE_ATTACHMENTS
   ) {
-    // No need to pass URL anymore - agent will use the proxy endpoint
-    this.agent = new AgUiAgent();
+    // Use basePath.prepend so the proxy URL works when OSD runs with a basePath (e.g. dev mode).
+    const proxyUrl = http ? http.basePath.prepend('/api/chat/proxy') : '/api/chat/proxy';
+    this.agent = new AgUiAgent(proxyUrl);
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
@@ -81,6 +95,10 @@ export class ChatService {
     this.toolSubscription = assistantActionService.getState$().subscribe((state) => {
       this.availableTools = state.toolDefinitions;
     });
+
+    this.fileUploadEnabled = fileUploadEnabled;
+    this.maxFileUploadBytes = maxFileUploadBytes;
+    this.maxFileAttachments = maxFileAttachments;
   }
 
   public getThreadId = () => {

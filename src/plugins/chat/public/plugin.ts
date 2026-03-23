@@ -27,6 +27,7 @@ import { ChatHeaderButton } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
+import { CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES, CHAT_MAX_FILE_ATTACHMENTS } from '../common';
 import { CommandRegistryService } from './services/command_registry_service';
 import { ConfirmationService } from './services/confirmation_service';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
@@ -38,7 +39,7 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
     typeof state === 'object' &&
     !!state &&
     typeof state.isWindowOpen === 'boolean' &&
-    (ChatLayoutMode.SIDECAR === state.windowMode ||
+    (state.windowMode === ChatLayoutMode.SIDECAR ||
       state.windowMode === ChatLayoutMode.FULLSCREEN) &&
     (typeof state.paddingSize === 'number' || typeof state.paddingSize === 'undefined')
   );
@@ -121,6 +122,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       enabled: boolean;
       agUiUrl?: string;
       mlCommonsAgentId?: string;
+      fileUploadEnabled?: boolean;
+      maxFileUploadBytes?: number;
+      maxFileAttachments?: number;
     }>();
     const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
@@ -131,8 +135,17 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.application.capabilities
     );
 
-    // Always initialize chat service - core service handles enablement
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+    // Always initialize chat service - core service handles enablement.
+    // Pass core.http so the proxy URL includes basePath (required in dev when OSD uses a random basePath).
+    this.chatService = new ChatService(
+      core.uiSettings,
+      core.chat,
+      core.workspaces,
+      core.http,
+      chatConfig.fileUploadEnabled ?? true,
+      chatConfig.maxFileUploadBytes ?? CHAT_DEFAULT_MAX_FILE_UPLOAD_BYTES,
+      chatConfig.maxFileAttachments ?? CHAT_MAX_FILE_ATTACHMENTS
+    );
 
     if (!isEnabled) {
       return {
@@ -146,6 +159,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
+        openWindow: async () => {
+          await this.chatService!.openWindow();
+        },
+        closeWindow: this.chatService.closeWindow.bind(this.chatService),
       });
     }
 

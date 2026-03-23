@@ -1,4 +1,15 @@
+.chatWindow__fileAttachments {
+  padding: 8px 8px 0;
+  margin-bottom: 8px;
+  grid-area: files;
+}
+
+.chatWindow__fileAttachment {
+  max-width: 200px;
+}
+
 .chatWindow__loadingContainer {
+  grid-area: messages;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,6 +19,7 @@
 }
 
 .chatWindow__errorContainer {
+  grid-area: messages;
   display: flex;
   flex-direction: column;
   align-items: center;

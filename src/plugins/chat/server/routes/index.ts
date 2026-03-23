@@ -9,12 +9,36 @@ import {
   IRouter,
   Logger,
   OpenSearchDashboardsRequest,
+  OpenSearchDashboardsResponseFactory,
   Capabilities,
 } from '../../../../core/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { injectSystemPrompt } from '../prompts';
 import { getMemoryContainerId } from './utils/get_memory_container_id';
+import {
+  CHAT_ALLOWED_FILE_TYPES,
+  CHAT_MAX_FILE_ATTACHMENTS as DEFAULT_MAX_FILE_ATTACHMENTS,
+  CHAT_SCREENSHOT_MIME_TYPE,
+  CHAT_MAX_SCREENSHOTS_PER_MESSAGE,
+  ONE_MB,
+} from '../../common';
+
+const ALLOWED_MIME_TYPES = new Set(Object.keys(CHAT_ALLOWED_FILE_TYPES));
+/** Base64 encoding increases payload size by ~33%; 1.4 provides margin. */
+const BASE64_OVERHEAD_FACTOR = 1.4;
+/** RFC 4648 strict base64 alphabet (no whitespace, correct padding). */
+const BASE64_RE = /^[A-Za-z0-9+/]*={0,2}$/;
+
+/**
+ * Compute decoded byte length of base64 string without allocating a buffer.
+ * Use after structure validation (length % 4, BASE64_RE) so padding is valid.
+ * Avoids Buffer.from() DoS: decoding large strings into memory for every request.
+ */
+function getBase64DecodedLength(encoded: string): number {
+  const padding = encoded.endsWith('==') ? 2 : encoded.endsWith('=') ? 1 : 0;
+  return Math.floor(((encoded.length - padding) * 3) / 4);
+}
 
 /**
  * Forward request to external AG-UI server
@@ -22,12 +46,14 @@ import { getMemoryContainerId } from './utils/get_memory_container_id';
 async function forwardToAgUI(
   agUiUrl: string,
   request: OpenSearchDashboardsRequest,
-  response: any,
+  response: OpenSearchDashboardsResponseFactory,
   dataSourceId?: string,
   logger?: Logger
 ) {
   // Prepare request body - include dataSourceId if provided
-  const requestBody = dataSourceId ? { ...(request.body || {}), dataSourceId } : request.body;
+  const requestBody = dataSourceId
+    ? { ...((request.body as Record<string, unknown>) || {}), dataSourceId }
+    : request.body;
 
   logger?.debug('Forwarding to external AG-UI', { agUiUrl, dataSourceId });
 
@@ -88,7 +114,10 @@ export function defineRoutes(
     | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
     | undefined,
   mlCommonsAgentId?: string,
-  observabilityAgentId?: string
+  observabilityAgentId?: string,
+  fileUploadEnabled: boolean = true,
+  maxFileUploadBytes?: number,
+  maxFileAttachments: number = DEFAULT_MAX_FILE_ATTACHMENTS
 ) {
   // Route for searching agent memory sessions (conversation history)
   router.post(
@@ -183,6 +212,18 @@ export function defineRoutes(
     }
   );
 
+  /**
+   * Body parser limit for the proxy route. Applies to the entire request body
+   * (conversation history + attachments), not just new attachments.
+   * Formula: max attachments × max size per file × base64 overhead (~1.4×).
+   * Operators should consider memory and DoS implications when configuring very
+   * high limits.
+   */
+  const proxyMaxBytes =
+    maxFileUploadBytes !== undefined
+      ? Math.ceil(maxFileUploadBytes * maxFileAttachments * BASE64_OVERHEAD_FACTOR)
+      : undefined;
+
   // Proxy route for AG-UI requests
   router.post(
     {
@@ -203,11 +244,127 @@ export function defineRoutes(
           })
         ),
       },
+      options: {
+        body: {
+          ...(proxyMaxBytes ? { maxBytes: proxyMaxBytes } : {}),
+        },
+      },
     },
     async (context, request, response) => {
       const dataSourceId = request.query?.dataSourceId;
 
       try {
+        // Normalize: treat any content part with data+mimeType as binary so that
+        // all downstream checks (feature flag, MIME whitelist, base64, size, count)
+        // apply consistently regardless of whether the client set type: 'binary'.
+        for (const msg of request.body.messages) {
+          const parts = Array.isArray(msg.content) ? msg.content : [];
+          for (const part of parts) {
+            if (part.type !== 'binary' && part.data && part.mimeType) {
+              part.type = 'binary';
+            }
+          }
+        }
+
+        // Reject file uploads when disabled; allow screenshots (no filename, image/jpeg, max 1).
+        if (!fileUploadEnabled) {
+          for (const msg of request.body.messages) {
+            const parts = Array.isArray(msg.content) ? msg.content : [];
+            for (const part of parts) {
+              if (part.type !== 'binary') continue;
+
+              if (part.filename) {
+                return response.badRequest({
+                  body: {
+                    message: 'File upload is disabled by the administrator',
+                  },
+                });
+              }
+
+              if (part.mimeType !== CHAT_SCREENSHOT_MIME_TYPE) {
+                return response.badRequest({
+                  body: {
+                    message: `File upload is disabled. Only screenshots (${CHAT_SCREENSHOT_MIME_TYPE}) are allowed.`,
+                  },
+                });
+              }
+            }
+
+            const screenshotCount = parts.filter((p: any) => p.type === 'binary' && !p.filename)
+              .length;
+            if (screenshotCount > CHAT_MAX_SCREENSHOTS_PER_MESSAGE) {
+              return response.badRequest({
+                body: {
+                  message: `Too many screenshots (${screenshotCount}). Maximum allowed: ${CHAT_MAX_SCREENSHOTS_PER_MESSAGE}`,
+                },
+              });
+            }
+          }
+        }
+
+        // Validate MIME types and per-file size across all messages
+        for (const msg of request.body.messages) {
+          const parts = Array.isArray(msg.content) ? msg.content : [];
+          for (const part of parts) {
+            if (part.type !== 'binary') continue;
+
+            if (!ALLOWED_MIME_TYPES.has(part.mimeType)) {
+              return response.badRequest({
+                body: {
+                  message: `File type '${part.mimeType}' is not allowed. Allowed types: ${[
+                    ...ALLOWED_MIME_TYPES,
+                  ].join(', ')}`,
+                },
+              });
+            }
+
+            // Reject payloads that are not valid base64 before forwarding downstream
+            if (
+              typeof part.data === 'string' &&
+              (part.data.length === 0 || part.data.length % 4 !== 0 || !BASE64_RE.test(part.data))
+            ) {
+              const filename = part.filename ?? 'attachment';
+              return response.badRequest({
+                body: {
+                  message: `File '${filename}' contains invalid base64 data`,
+                },
+              });
+            }
+
+            // Defense-in-depth; client also enforces this
+            if (maxFileUploadBytes !== undefined && typeof part.data === 'string') {
+              // Fail fast before decoding: base64 encodes 3 bytes → 4 chars (padded to 4-char blocks)
+              const maxEncodedLength = 4 * Math.ceil(maxFileUploadBytes / 3);
+              const decodedLength = getBase64DecodedLength(part.data);
+              if (part.data.length > maxEncodedLength || decodedLength > maxFileUploadBytes) {
+                const limitMB = (maxFileUploadBytes / ONE_MB).toFixed(1);
+                const filename = part.filename ?? 'attachment';
+                return response.badRequest({
+                  body: {
+                    message: `File '${filename}' exceeds the ${limitMB} MB size limit`,
+                  },
+                });
+              }
+            }
+          }
+        }
+
+        // Enforce attachment limit on the newest user message only (not full history)
+        const messages = request.body.messages;
+        for (let i = messages.length - 1; i >= 0; i--) {
+          if (messages[i].role === 'user' && Array.isArray(messages[i].content)) {
+            const binaryCount = messages[i].content.filter((p: any) => p.type === 'binary').length;
+            if (binaryCount > maxFileAttachments) {
+              return response.badRequest({
+                body: {
+                  message: `Too many file attachments (${binaryCount}). Maximum allowed: ${maxFileAttachments}`,
+                },
+              });
+            }
+            break;
+          }
+        }
+
         // Inject server-side system prompt if present
         injectSystemPrompt(request.body.messages, request.body.forwardedProps?.queryAssistLanguage);
 
