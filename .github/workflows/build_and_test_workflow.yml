@@ -25,6 +25,7 @@ jobs:
   prepare-source:
     name: Prepare source and warm cache
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -105,6 +106,7 @@ jobs:
     name: Warm Windows yarn cache
     needs: [prepare-source]
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - name: Configure git's autocrlf
         run: |
@@ -112,6 +114,7 @@ jobs:
 
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: source-archive
 
@@ -199,6 +202,7 @@ jobs:
 
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: source-archive
 
@@ -323,9 +327,11 @@ jobs:
     name: Build plugin bundles
     needs: [prepare-source]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: source-archive
 
@@ -416,6 +422,7 @@ jobs:
 
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: source-archive
 
@@ -506,6 +513,7 @@ jobs:
   lint-and-validate:
     name: Lint and validate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -636,6 +644,7 @@ jobs:
 
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: source-archive
 
@@ -736,6 +745,7 @@ jobs:
 
       - name: Download plugin bundles
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: plugin-bundles
 
@@ -760,6 +770,7 @@ jobs:
   plugin-functional-tests:
     name: Run plugin functional tests on ${{ matrix.name }}
     needs: [prepare-source, prepare-windows-cache]
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -788,6 +799,7 @@ jobs:
 
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: source-archive
 

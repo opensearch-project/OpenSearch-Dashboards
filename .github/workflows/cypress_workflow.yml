@@ -162,6 +162,7 @@ jobs:
   cypress-tests:
     needs: [prepare-cypress]
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -291,6 +292,7 @@ jobs:
     steps:
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: cypress-source-archive
 
@@ -302,6 +304,7 @@ jobs:
 
       - name: Download plugin bundles
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: cypress-plugin-bundles
 
@@ -337,8 +340,6 @@ jobs:
             sleep 10
           done
           exit 1
-
-      # Build plugins step REMOVED — downloaded from prepare-cypress artifact
 
       - name: Checkout FT repo
         if: matrix.test_location == 'ftr'
