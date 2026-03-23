@@ -205,7 +205,7 @@ jobs:
           - group: 11
             config: dashboard
             test_location: source
-          # Query enhanced tests (split from groups 2-5 for <20min target)
+          # Query enhanced tests
           - group: 12
             config: query_enhanced
             test_location: source
@@ -230,7 +230,7 @@ jobs:
           - group: 19
             config: query_enhanced
             test_location: source
-          # Explore tests (split for <20min target)
+          # Explore tests
           - group: 10Explore
             config: explore
             test_location: source

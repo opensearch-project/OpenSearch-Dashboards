@@ -913,5 +913,3 @@ jobs:
             test/*/failure_debug/
             test/*/screenshots/
           overwrite: true
-
-  # Build artifact jobs and BWC tests moved to post_merge_test.yml (run on push to main only).
