@@ -59,6 +59,8 @@ export const convertResult = ({
     },
   };
 
+  const highlightData = data?.meta?.highlights;
+
   if (data && data.fields && data.fields.length > 0) {
     for (let index = 0; index < data.size; index++) {
       const hit: { [key: string]: any } = {};
@@ -122,6 +124,7 @@ export const convertResult = ({
       hits.push({
         _index: data.name,
         _source: hit,
+        ...(highlightData?.[index] && { highlight: highlightData[index] }),
       });
     }
   }

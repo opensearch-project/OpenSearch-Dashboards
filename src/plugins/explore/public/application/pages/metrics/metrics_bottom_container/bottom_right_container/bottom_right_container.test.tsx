@@ -57,6 +57,20 @@ jest.mock('../../../../utils/state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
 }));
 
+// Mock onEditorRunActionCreator
+const mockOnEditorRunAction = jest.fn(() => ({ type: 'mock/onEditorRun' }));
+jest.mock(
+  '../../../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run',
+  () => ({
+    onEditorRunActionCreator: (...args: any[]) => mockOnEditorRunAction(...args),
+  })
+);
+
+// Mock useEditorRef hook
+jest.mock('../../../../hooks', () => ({
+  useEditorRef: jest.fn(() => ({ current: { getValue: jest.fn(() => 'test editor text') } })),
+}));
+
 // Mock useFlavorId hook
 jest.mock('../../../../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
@@ -69,7 +83,6 @@ import { useDatasetContext } from '../../../../context';
 import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { useFlavorId } from '../../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../../common';
-import { executeQueries } from '../../../../utils/state_management/actions/query_actions';
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
@@ -122,6 +135,7 @@ describe('BottomRightContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOnEditorRunAction.mockClear();
     mockUseOpenSearchDashboards.mockReturnValue({
       services: mockServices,
     } as any);
@@ -159,7 +173,7 @@ describe('BottomRightContainer', () => {
     expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
   });
 
-  it('calls executeQueries when onRefresh is triggered', () => {
+  it('calls onEditorRunActionCreator when onRefresh is triggered', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
@@ -171,10 +185,10 @@ describe('BottomRightContainer', () => {
     const refreshButton = screen.getByRole('button', { name: 'Refresh' });
     fireEvent.click(refreshButton);
 
-    expect(executeQueries).toHaveBeenCalledWith({ services: mockServices });
+    expect(mockOnEditorRunAction).toHaveBeenCalledWith(mockServices, 'test editor text');
   });
 
-  it('does not call executeQueries when services is undefined', () => {
+  it('does not call onEditorRunActionCreator when services is undefined', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
@@ -189,7 +203,7 @@ describe('BottomRightContainer', () => {
     const refreshButton = screen.getByRole('button', { name: 'Refresh' });
     fireEvent.click(refreshButton);
 
-    expect(executeQueries).not.toHaveBeenCalled();
+    expect(mockOnEditorRunAction).not.toHaveBeenCalled();
   });
 
   it('renders loading spinner when status is LOADING', () => {

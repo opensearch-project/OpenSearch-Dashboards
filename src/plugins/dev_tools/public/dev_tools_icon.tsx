@@ -41,7 +41,9 @@ export function DevToolsIcon({
 
   useEffect(() => {
     const subscription = core.overlays.sidecar.getSidecarConfig$().subscribe((config) => {
-      setSidecarPaddingRight(config?.dockedMode === 'right' ? `${config.paddingSize}px` : '0px');
+      setSidecarPaddingRight(
+        config?.dockedMode === 'right' && !config.isHidden ? `${config.paddingSize}px` : '0px'
+      );
     });
     return () => subscription.unsubscribe();
   }, [core.overlays.sidecar]);

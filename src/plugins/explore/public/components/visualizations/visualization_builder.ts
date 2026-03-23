@@ -17,7 +17,6 @@ import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
 import { normalizeResultRows } from './utils/normalize_result_rows';
 import { ChartConfig, VisData } from './visualization_builder.types';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { VisualizationRender } from './visualization_render';
 import { ExpressionsStart } from '../../../../expressions/public';
 import { StylePanelRender } from './style_panel_render';
@@ -34,24 +33,21 @@ interface VisState {
 
 interface Options {
   getUrlStateStorage?: () => IOsdUrlStateStorage | undefined;
-  getExpressions: () => ExpressionsStart;
 }
 
 export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
-  private getExpression: Options['getExpressions'];
   private subscriptions = Array<Subscription>();
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
 
-  constructor({ getUrlStateStorage, getExpressions }: Options) {
+  constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
-    this.getExpression = getExpressions;
   }
 
   init() {
@@ -377,23 +373,17 @@ export class VisualizationBuilder {
   }
 
   renderVisualization({
-    searchContext,
+    timeRange,
     onSelectTimeRange,
   }: {
-    searchContext?: ExecutionContextSearch;
+    timeRange?: TimeRange;
     onSelectTimeRange?: (range?: TimeRange) => void;
   }) {
-    const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
-    if (!ExpressionRenderer) {
-      return null;
-    }
-
     return React.createElement(VisualizationRender, {
       data$: this.data$,
       config$: this.getRenderConfig$(),
       showRawTable$: this.showRawTable$,
-      searchContext,
-      ExpressionRenderer,
+      timeRange,
       onSelectTimeRange,
       onStyleChange: this.updateStyles.bind(this),
     });
@@ -417,7 +407,6 @@ export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
     visualizationBuilder = new VisualizationBuilder({
       getUrlStateStorage: () => getServices().osdUrlStateStorage,
-      getExpressions: () => getServices().expressions,
     });
   }
   return visualizationBuilder;

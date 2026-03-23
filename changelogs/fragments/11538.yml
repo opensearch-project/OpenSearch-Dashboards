@@ -1,0 +1,2 @@
+fix:
+- Add defensive guards that handle fields as array ([#11538](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11538))

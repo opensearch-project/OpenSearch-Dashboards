@@ -4,5 +4,9 @@
  */
 
 .agentTracesMetrics__bar {
-  padding: $ouiSizeXS 0 $ouiSizeS;
+  padding: $ouiSizeXS 0 $ouiSizeXS 0;
+}
+
+.agentTracesMetrics__content {
+  padding-top: 2px;
 }

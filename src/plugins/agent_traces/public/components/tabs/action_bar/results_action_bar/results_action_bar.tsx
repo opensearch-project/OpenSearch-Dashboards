@@ -12,6 +12,7 @@ import { DiscoverDownloadCsv } from '../download_csv';
 import { DataView as Dataset } from '../../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SlotItemsForType } from '../../../../services/slot_registry';
+import { SaveAndAddButtonWithModal } from '../../../../components/add_to_dashboard';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -91,6 +92,9 @@ export const DiscoverResultsActionBar = ({
                     <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
                   </EuiFlexItem>
                 )}
+                <EuiFlexItem grow={false}>
+                  <SaveAndAddButtonWithModal dataset={dataset} />
+                </EuiFlexItem>
                 {extraActions?.map((item) => (
                   <EuiFlexItem grow={false} key={item.id}>
                     {item.render()}

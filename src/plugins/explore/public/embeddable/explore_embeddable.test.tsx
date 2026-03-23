@@ -67,11 +67,6 @@ jest.mock('../components/visualizations/utils/use_visualization_types', () => ({
   }),
 }));
 
-// Mock the toExpression function
-jest.mock('../components/visualizations/utils/to_expression', () => ({
-  toExpression: jest.fn().mockReturnValue('test expression'),
-}));
-
 // Mock the visualization container utils
 jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),

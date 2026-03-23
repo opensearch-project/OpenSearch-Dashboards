@@ -29,6 +29,7 @@
  */
 
 import { TypeOf, schema } from '@osd/config-schema';
+import { LOOSE_CSP_RULES_DEFAULT_VALUE } from '../constants';
 
 /**
  * @internal
@@ -41,13 +42,16 @@ export const config = {
   path: 'csp',
   schema: schema.object({
     rules: schema.arrayOf(schema.string(), {
-      defaultValue: [
-        `script-src 'unsafe-eval' 'self'`,
-        `worker-src blob: 'self'`,
-        `style-src 'unsafe-inline' 'self'`,
-      ],
+      defaultValue: LOOSE_CSP_RULES_DEFAULT_VALUE,
     }),
     strict: schema.boolean({ defaultValue: false }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
+    nonceDirectives: schema.arrayOf(schema.string(), {
+      defaultValue: ['style-src-elem'],
+    }),
+    allowedFrameAncestorSources: schema.maybe(schema.arrayOf(schema.string())),
+    allowedConnectSources: schema.maybe(schema.arrayOf(schema.string())),
+    allowedImgSources: schema.maybe(schema.arrayOf(schema.string())),
+    loosenCspDirectives: schema.maybe(schema.arrayOf(schema.string())),
   }),
 };

@@ -10,22 +10,19 @@ import dateMath from '@elastic/datemath';
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
-import { ExpressionsStart } from '../../../../expressions/public';
 import { VisualizationEmptyState } from './visualization_empty_state';
 import { RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
-import { VegaRender } from './vega_render';
 import { EchartsRender } from './echarts_render';
 import { createVisSpec } from './utils/create_vis_spec';
-import { getChartRender } from './utils/utils';
+import { MetricChartRender } from './metric/metric_component';
+import { MetricChartStyle } from './metric/metric_vis_config';
 
 interface Props {
   data$: Observable<VisData | undefined>;
   config$: Observable<RenderChartConfig | undefined>;
   showRawTable$: Observable<boolean>;
-  searchContext?: ExecutionContextSearch;
-  ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+  timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
 }
@@ -42,15 +39,21 @@ export const VisualizationRender = ({
   data$,
   config$,
   showRawTable$,
-  searchContext,
-  ExpressionRenderer,
+  timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
 }: Props) => {
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
   const showRawTable = useObservable(showRawTable$);
-  const { from, to } = searchContext?.timeRange || {};
+  const { from, to } = inputTimeRange || {};
+
+  const timeRange = useMemo(() => {
+    return {
+      from: from ? dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+      to: to ? dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+    };
+  }, [from, to]);
 
   const rows = useMemo(() => {
     return visualizationData?.transformedData ?? [];
@@ -67,13 +70,6 @@ export const VisualizationRender = ({
     visualizationData?.categoricalColumns,
     visualizationData?.dateColumns,
   ]);
-
-  const timeRange = useMemo(() => {
-    return {
-      from: from ? dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
-      to: to ? dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
-    };
-  }, [from, to]);
 
   if (!visualizationData || columns.length === 0) {
     return null;
@@ -113,8 +109,6 @@ export const VisualizationRender = ({
         data={visualizationData}
         config={visConfig}
         timeRange={timeRange}
-        ExpressionRenderer={ExpressionRenderer}
-        searchContext={searchContext}
         onSelectTimeRange={onSelectTimeRange}
       />
     );
@@ -128,30 +122,28 @@ const ChartRender = ({
   config,
   timeRange,
   onSelectTimeRange,
-  searchContext,
-  ExpressionRenderer,
 }: {
   data?: VisData;
   config?: RenderChartConfig;
   timeRange: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
-  searchContext?: ExecutionContextSearch;
-  ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
 }) => {
-  const spec = useMemo(() => {
+  const { spec, axisColumnMappings } = useMemo(() => {
     return createVisSpec({ data, config, timeRange });
   }, [config, data, timeRange]);
 
-  if (getChartRender() === 'echarts') {
-    return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+  if (!spec) {
+    return null;
   }
 
-  return (
-    <VegaRender
-      searchContext={searchContext}
-      ExpressionRenderer={ExpressionRenderer}
-      onSelectTimeRange={onSelectTimeRange}
-      spec={spec}
-    />
-  );
+  if (config?.type === 'metric') {
+    return (
+      <MetricChartRender
+        spec={spec}
+        styles={config.styles as MetricChartStyle}
+        axisColumnMappings={axisColumnMappings}
+      />
+    );
+  }
+  return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
 };

@@ -16,7 +16,7 @@ import {
   calculateTimelineRange,
   TIMELINE_ROW_HEIGHT,
 } from './tree_helpers';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('../../../../services/span_categorization', () => ({
   getSpanCategory: jest.fn(() => 'OTHER'),

@@ -12,12 +12,24 @@ import {
   setTabState,
   setUiState,
 } from '../../slices';
+import { setOverallQueryStatus } from '../../slices/query_editor/query_editor_slice';
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { executeQueries } from '../query_actions';
 import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 
 jest.mock('../../utils/redux_persistence');
-jest.mock('../../slices');
+jest.mock('../../slices', () => ({
+  setUiState: jest.fn(),
+  setResultsState: jest.fn(),
+  setTabState: jest.fn(),
+  setLegacyState: jest.fn(),
+  setQueryState: jest.fn(),
+  setQueryEditorState: jest.fn(),
+  setSort: jest.fn(),
+}));
+jest.mock('../../slices/query_editor/query_editor_slice', () => ({
+  setOverallQueryStatus: jest.fn(),
+}));
 jest.mock('../query_actions');
 jest.mock('../detect_optimal_tab');
 
@@ -44,6 +56,9 @@ describe('resetAgentTracesStateActionCreator', () => {
     ((setLegacyState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_LEGACY' });
     ((setQueryState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
     ((setQueryEditorState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY_EDITOR' });
+    ((setOverallQueryStatus as unknown) as jest.Mock).mockReturnValue({
+      type: 'SET_OVERALL_QUERY_STATUS',
+    });
     ((executeQueries as unknown) as jest.Mock).mockReturnValue({ type: 'EXECUTE_QUERIES' });
     ((detectAndSetOptimalTab as unknown) as jest.Mock).mockReturnValue({
       type: 'DETECT_OPTIMAL_TAB',
@@ -62,7 +77,8 @@ describe('resetAgentTracesStateActionCreator', () => {
     expect(mockDispatch).toHaveBeenNthCalledWith(4, { type: 'SET_LEGACY' });
     expect(mockDispatch).toHaveBeenNthCalledWith(5, { type: 'SET_QUERY' });
     expect(mockDispatch).toHaveBeenNthCalledWith(6, { type: 'SET_QUERY_EDITOR' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(7, { type: 'EXECUTE_QUERIES' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(8, { type: 'DETECT_OPTIMAL_TAB' });
+    expect(mockDispatch).toHaveBeenNthCalledWith(7, { type: 'SET_OVERALL_QUERY_STATUS' });
+    expect(mockDispatch).toHaveBeenNthCalledWith(8, { type: 'EXECUTE_QUERIES' });
+    expect(mockDispatch).toHaveBeenNthCalledWith(9, { type: 'DETECT_OPTIMAL_TAB' });
   });
 });

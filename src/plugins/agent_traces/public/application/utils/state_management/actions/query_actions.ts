@@ -184,6 +184,7 @@ export const executeQueries = createAsyncThunk<
   const query = state.query;
   const activeTabId = state.ui.activeTabId;
   const results = state.results;
+  const sort = state.legacy.sort;
 
   if (!services) {
     return;
@@ -202,11 +203,7 @@ export const executeQueries = createAsyncThunk<
     const activeTab = services.tabRegistry.getTab(activeTabId);
     // Skip tabs that handle their own data fetching (no prepareQuery)
     if (activeTab?.prepareQuery) {
-      const prepareQuery = activeTab.prepareQuery;
-      const activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(queryParam);
-      };
-      const activeTabCacheKey = activeTabPrepareQuery(query);
+      const activeTabCacheKey = activeTab.prepareQuery(query, sort);
       if (!results[activeTabCacheKey]) {
         tabCacheKeysToExecute.add(activeTabCacheKey);
       }
@@ -217,7 +214,7 @@ export const executeQueries = createAsyncThunk<
     const allTabs = services.tabRegistry.getAllTabs();
     for (const tab of allTabs) {
       if (tab.prepareQuery) {
-        const tabCacheKey = tab.prepareQuery(query);
+        const tabCacheKey = tab.prepareQuery(query, sort);
         if (!results[tabCacheKey]) {
           tabCacheKeysToExecute.add(tabCacheKey);
         }

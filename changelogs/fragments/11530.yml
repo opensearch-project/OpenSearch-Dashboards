@@ -1,0 +1,2 @@
+fix:
+- Prevent duplicate save requests in index pattern field editor ([#11530](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11530))

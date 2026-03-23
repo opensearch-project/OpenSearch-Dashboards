@@ -14,15 +14,141 @@ import './_table_header.scss';
 import { i18n } from '@osd/i18n';
 import React, { ReactNode } from 'react';
 import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
+import { SortOrder } from '../../../helpers/data_table_helper';
+
+interface ColumnFieldMapping {
+  label: string;
+  field: string;
+}
+
+/** Returns raw-field mappings for agent traces default columns, or null for other columns. */
+const getColumnFieldMappings = (
+  columnName: string,
+  displayName: ReactNode
+): ColumnFieldMapping[] | null => {
+  // Time column: displayName is 'Time' but columnName is the dataset's timeFieldName
+  if (displayName === 'Time') {
+    return [{ label: 'Time', field: columnName }];
+  }
+  switch (columnName) {
+    case 'kind':
+      return [{ label: 'Kind', field: 'attributes.gen_ai.operation.name' }];
+    case 'name':
+      return [{ label: 'Name', field: 'name' }];
+    case 'status':
+      return [{ label: 'Status', field: 'status.code' }];
+    case 'latency':
+      return [{ label: 'Latency', field: 'durationInNanos' }];
+    case 'totalTokens':
+      return [
+        { label: 'Input token', field: 'attributes.gen_ai.usage.input_tokens' },
+        { label: 'Output token', field: 'attributes.gen_ai.usage.output_tokens' },
+      ];
+    case 'input':
+      return [{ label: 'Input', field: 'attributes.gen_ai.input.messages' }];
+    case 'output':
+      return [{ label: 'Output', field: 'attributes.gen_ai.output.messages' }];
+    default:
+      return null;
+  }
+};
+
+const buildColumnTooltip = (columnName: string, displayName: ReactNode): ReactNode => {
+  const mappings = getColumnFieldMappings(columnName, displayName);
+  if (!mappings) return displayName;
+  return (
+    <div>
+      <div>{displayName}</div>
+      <hr
+        style={{ margin: '4px 0', border: 'none', borderTop: '1px solid rgba(255,255,255,0.3)' }}
+      />
+      {mappings.map((m) => (
+        <div key={m.field}>
+          {m.label}: {m.field}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const sortDirectionToIcon: Record<string, string> = {
+  desc: 'sortDown',
+  asc: 'sortUp',
+  '': 'sortable',
+};
 
 interface Props {
   displayName: ReactNode;
   isRemoveable: boolean;
+  isSortable?: boolean;
   name: string;
+  onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onRemoveColumn?: (name: string) => void;
+  sortOrder?: SortOrder[];
 }
 
-export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveColumn }: Props) {
+export function TableHeaderColumn({
+  displayName,
+  isRemoveable,
+  isSortable,
+  name,
+  onChangeSortOrder,
+  onRemoveColumn,
+  sortOrder = [],
+}: Props) {
+  const currentColumnSort = sortOrder.find((pair) => pair[0] === name);
+  const currentColumnSortDirection = (currentColumnSort && currentColumnSort[1]) || '';
+
+  const btnSortIcon = sortDirectionToIcon[currentColumnSortDirection];
+  const btnSortClassName =
+    currentColumnSortDirection !== '' ? '' : 'agentTracesDocTableHeader__sortChange';
+
+  const handleChangeSortOrder = () => {
+    if (!onChangeSortOrder) return;
+
+    // Single-column sort only. Cycle: Unsorted → Asc → Desc → Unsorted
+    if (currentColumnSort === undefined) {
+      onChangeSortOrder([[name, 'asc']]);
+    } else if (currentColumnSortDirection === 'asc') {
+      onChangeSortOrder([[name, 'desc']]);
+    } else {
+      // desc → clear sorting (empty array triggers default time desc)
+      onChangeSortOrder([]);
+    }
+  };
+
+  const getSortButtonAriaLabel = () => {
+    const sortAscendingMessage = i18n.translate(
+      'agentTraces.docTable.tableHeader.sortByColumnAscendingAriaLabel',
+      {
+        defaultMessage: 'Sort {columnName} ascending',
+        values: { columnName: name },
+      }
+    );
+    const sortDescendingMessage = i18n.translate(
+      'agentTraces.docTable.tableHeader.sortByColumnDescendingAriaLabel',
+      {
+        defaultMessage: 'Sort {columnName} descending',
+        values: { columnName: name },
+      }
+    );
+    const stopSortingMessage = i18n.translate(
+      'agentTraces.docTable.tableHeader.sortByColumnUnsortedAriaLabel',
+      {
+        defaultMessage: 'Stop sorting on {columnName}',
+        values: { columnName: name },
+      }
+    );
+
+    if (currentColumnSort === undefined) {
+      return sortAscendingMessage;
+    } else if (currentColumnSortDirection === 'asc') {
+      return sortDescendingMessage;
+    } else {
+      return stopSortingMessage;
+    }
+  };
+
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(name);
@@ -38,6 +164,16 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
 
   // action buttons displayed on the right side of the column name
   const buttons = [
+    // Sort Button
+    {
+      active: isSortable && typeof onChangeSortOrder === 'function',
+      ariaLabel: getSortButtonAriaLabel(),
+      className: btnSortClassName,
+      onClick: handleChangeSortOrder,
+      testSubject: `docTableHeaderFieldSort_${name}`,
+      tooltip: getSortButtonAriaLabel(),
+      iconType: btnSortIcon,
+    },
     // Copy Button
     {
       active: true,
@@ -45,6 +181,7 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
         defaultMessage: 'Copy {columnName} column name',
         values: { columnName: name },
       }),
+      className: '',
       onClick: handleCopyToClipboard,
       testSubject: `docTableCopyHeader-${name}`,
       tooltip: i18n.translate('agentTraces.docTable.tableHeader.copyColumnButtonTooltip', {
@@ -59,6 +196,7 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
       }),
+      className: '',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('agentTraces.docTable.tableHeader.removeColumnButtonTooltip', {
@@ -79,7 +217,7 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
       })}
     >
       <span data-test-subj={`docTableHeader-${name}`}>
-        <EuiToolTip content={displayName} position="top">
+        <EuiToolTip content={buildColumnTooltip(name, displayName)} position="top">
           <span className="header-text">{displayName}</span>
         </EuiToolTip>
         {buttons
@@ -93,7 +231,9 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
               <EuiSmallButtonIcon
                 iconType={`${button.iconType}`}
                 aria-label={button.ariaLabel}
-                className="agentTracesDocTableHeaderField__actionButton"
+                className={`agentTracesDocTableHeaderField__actionButton${
+                  button.className ? ` ${button.className}` : ''
+                }`}
                 data-test-subj={button.testSubject}
                 onClick={button.onClick}
                 iconSize="s"

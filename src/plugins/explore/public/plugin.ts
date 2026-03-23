@@ -76,6 +76,8 @@ import { SlotRegistryService } from './services/slot_registry';
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
+import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
+import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 
 export class ExplorePlugin
   implements
@@ -249,11 +251,13 @@ export class ExplorePlugin
           this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
         appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
       }
-
+      const flavorSuffix = flavor ? `/${flavor}` : '';
+      const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
+      const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-        baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
+        baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
-        storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
+        storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
         stateParams: [
@@ -584,6 +588,12 @@ export class ExplorePlugin
     // Always register Ask AI action - let isCompatible handle enablement logic
     const askAiAction = createAskAiAction(core.chat);
     logActionRegistry.registerAction(askAiAction);
+
+    if (core.chat && plugins.contextProvider) {
+      const askAIEmbeddableAction = new AskAIEmbeddableAction(core, plugins.contextProvider);
+      plugins.uiActions.registerAction(askAIEmbeddableAction);
+      plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
+    }
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,

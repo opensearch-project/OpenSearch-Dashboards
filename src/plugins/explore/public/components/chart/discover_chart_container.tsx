@@ -18,6 +18,7 @@ import {
 import { prepareTraceCacheKeys } from '../../application/utils/state_management/actions/trace_query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
+import { resultsCache } from '../../application/utils/state_management/slices';
 import { Chart, createHistogramConfigs } from './utils';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { processTraceAggregationResults } from '../../application/utils/state_management/actions/processors/trace_aggregation_processor';
@@ -35,7 +36,6 @@ export const DiscoverChartContainer = () => {
 
   const { interval } = useSelector((state: RootState) => state.legacy);
   const query = useSelector((state: RootState) => state.query);
-  const results = useSelector((state: RootState) => state.results);
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const queryStatusMap = useSelector((state: RootState) => state.queryEditor.queryStatusMap);
   const showHistogram = useSelector(selectShowHistogram);
@@ -66,7 +66,10 @@ export const DiscoverChartContainer = () => {
     return breakdownCacheKey;
   }, [hasBreakdownError, breakdownCacheKey, standardCacheKey]);
 
-  const rawResults = cacheKey ? results[cacheKey] : null;
+  const rawResultsMetadata = useSelector((state: RootState) =>
+    cacheKey ? state.results[cacheKey] : null
+  );
+  const rawResults = rawResultsMetadata ? resultsCache.get(cacheKey) ?? null : null;
 
   const actualInterval = useMemo(() => {
     if (flavorId === ExploreFlavor.Traces && dataset && services?.data && interval) {
@@ -94,9 +97,18 @@ export const DiscoverChartContainer = () => {
     return prepareTraceCacheKeys(query);
   }, [flavorId, query, dataset, services]);
 
-  const requestResults = requestCacheKey ? results[requestCacheKey] : null;
-  const errorResults = errorCacheKey ? results[errorCacheKey] : null;
-  const latencyResults = latencyCacheKey ? results[latencyCacheKey] : null;
+  const requestResultsMetadata = useSelector((state: RootState) =>
+    requestCacheKey ? state.results[requestCacheKey] : null
+  );
+  const errorResultsMetadata = useSelector((state: RootState) =>
+    errorCacheKey ? state.results[errorCacheKey] : null
+  );
+  const latencyResultsMetadata = useSelector((state: RootState) =>
+    latencyCacheKey ? state.results[latencyCacheKey] : null
+  );
+  const requestResults = requestResultsMetadata ? resultsCache.get(requestCacheKey!) ?? null : null;
+  const errorResults = errorResultsMetadata ? resultsCache.get(errorCacheKey!) ?? null : null;
+  const latencyResults = latencyResultsMetadata ? resultsCache.get(latencyCacheKey!) ?? null : null;
 
   // Get error states for each trace query
   const requestError = requestCacheKey ? queryStatusMap[requestCacheKey]?.error : null;

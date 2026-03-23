@@ -153,4 +153,35 @@ describe('<DevToolsIcon />', () => {
       });
     });
   });
+
+  describe('sidecar padding', () => {
+    it('should not apply sidecar padding when sidecar is hidden even if docked right', async () => {
+      const coreStartMock = coreMock.createStart();
+      const sidecarConfig$ = coreStartMock.overlays.sidecar.getSidecarConfig$();
+
+      const { getByTestId, findByText } = render(
+        <DevToolsIcon
+          core={coreStartMock}
+          devTools={[]}
+          deps={createDepsMock()}
+          title="Dev tools title"
+        />
+      );
+
+      // Emit sidecar config with dockedMode 'right' but isHidden true
+      act(() => {
+        (sidecarConfig$ as any).next({
+          dockedMode: 'right',
+          paddingSize: 400,
+          isHidden: true,
+        });
+      });
+
+      fireEvent.click(getByTestId('openDevToolsModal'));
+      const modalContainer = await findByText('Dev tools title');
+      const modalWrapper = modalContainer.closest('[style*="margin-right"]');
+
+      expect(modalWrapper).toHaveStyle({ marginRight: '0px' });
+    });
+  });
 });

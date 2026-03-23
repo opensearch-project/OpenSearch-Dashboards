@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { formatDuration, traceHitToAgentSpan, AgentSpan } from './span_transforms';
+import { formatDuration, traceHitToAgentSpan, unflattenSource, AgentSpan } from './span_transforms';
 
 describe('span_transforms', () => {
   describe('formatDuration', () => {
@@ -87,7 +87,7 @@ describe('span_transforms', () => {
       const minimalHit: any = {};
       const span = traceHitToAgentSpan(minimalHit, 5);
 
-      expect(span.spanId).toBe('span-5');
+      expect(span.spanId).toBe('');
       expect(span.traceId).toBe('');
       expect(span.parentSpanId).toBeNull();
       expect(span.name).toBe('');
@@ -115,6 +115,68 @@ describe('span_transforms', () => {
       };
       const span2 = traceHitToAgentSpan(hitWithInputValue, 0);
       expect(span2.input).toBe('input value');
+    });
+
+    it('handles flat dotted attribute keys', () => {
+      const flatHit: any = {
+        spanId: 'flat-span',
+        name: 'POST /plan',
+        kind: 'SERVER',
+        attributes: {
+          'gen_ai.operation.name': 'invoke_agent',
+          'gen_ai.system': 'openai',
+          'gen_ai.request.model': 'gpt-4',
+          'gen_ai.usage.input_tokens': 200,
+          'gen_ai.usage.output_tokens': 80,
+          'gen_ai.input.messages': 'hello',
+          'gen_ai.output.messages': 'world',
+        },
+      };
+      const span = traceHitToAgentSpan(flatHit, 0);
+
+      expect(span.operationName).toBe('invoke_agent');
+      expect(span.genAiSystem).toBe('openai');
+      expect(span.genAiRequestModel).toBe('gpt-4');
+      expect(span.genAiInputTokens).toBe(200);
+      expect(span.genAiOutputTokens).toBe(80);
+      expect(span.input).toBe('hello');
+      expect(span.output).toBe('world');
+    });
+  });
+
+  describe('unflattenSource', () => {
+    it('unflattens top-level dotted keys', () => {
+      const result = unflattenSource({ 'a.b.c': 1 });
+      expect(result).toEqual({ a: { b: { c: 1 } } });
+    });
+
+    it('preserves non-dotted keys', () => {
+      const result = unflattenSource({ name: 'test', kind: 'SERVER' });
+      expect(result).toEqual({ name: 'test', kind: 'SERVER' });
+    });
+
+    it('recursively unflattens nested objects with dotted keys', () => {
+      const result = unflattenSource({
+        attributes: {
+          'gen_ai.operation.name': 'chat',
+          'gen_ai.system': 'openai',
+        },
+      });
+      expect(result).toEqual({
+        attributes: {
+          gen_ai: { operation: { name: 'chat' }, system: 'openai' },
+        },
+      });
+    });
+
+    it('passes through already-nested objects unchanged', () => {
+      const input = { attributes: { gen_ai: { operation: { name: 'chat' } } } };
+      expect(unflattenSource(input)).toEqual(input);
+    });
+
+    it('does not recurse into arrays', () => {
+      const result = unflattenSource({ items: [1, 2, 3] });
+      expect(result).toEqual({ items: [1, 2, 3] });
     });
   });
 });

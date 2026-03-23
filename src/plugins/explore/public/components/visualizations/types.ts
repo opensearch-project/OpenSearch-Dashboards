@@ -273,8 +273,6 @@ export interface ThresholdOptions {
   thresholdStyle?: ThresholdMode;
 }
 
-export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
-
 export type PercentageColor = 'standard' | 'inverted';
 
 export enum FilterOperator {
@@ -291,11 +289,16 @@ export enum FilterOperator {
 export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
 
 export type CellAlignment = 'auto' | 'left' | 'center' | 'right';
+
+export interface UnitDisplay {
+  label: string | number;
+  segments?: Array<{ type: 'unit' | 'value'; value: number | string }>;
+}
 export interface UnitItem {
   id: string;
   name: string;
   symbol?: string;
-  display?: (value: number, symbol?: string) => any;
+  display?: (value: number, symbol?: string) => UnitDisplay;
   fontScale?: number;
 }
 
@@ -334,4 +337,10 @@ export interface DisconnectValuesOption {
 export interface ConnectNullValuesOption {
   connectMode: DisableMode;
   threshold: string;
+}
+
+export interface RendererSpecConfig {
+  spec?: echarts.EChartsOption;
+  name: string;
+  data: Array<Record<string, any>>;
 }

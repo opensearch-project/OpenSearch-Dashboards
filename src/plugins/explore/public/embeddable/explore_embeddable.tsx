@@ -35,8 +35,7 @@ import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
-import { VisColumn } from '../components/visualizations/types';
-import { toExpression } from '../components/visualizations/utils/to_expression';
+import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
@@ -65,16 +64,11 @@ export interface SearchProps {
   isLoading?: boolean;
   services: ExploreServices;
   spec?: any;
-  expression?: string;
   sharedItemTitle?: string;
-  searchContext?: {
-    query: Query | undefined;
-    filters: Filter[] | undefined;
-    timeRange: TimeRange | undefined;
-  };
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -411,6 +405,7 @@ export class ExploreEmbeddable
           };
         } else {
           const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          this.searchProps.axisColumnMappings = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
             visualization.axesMapping,
             allColumns
@@ -425,7 +420,6 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
 
           let styles = adaptLegacyData({
@@ -450,8 +444,6 @@ export class ExploreEmbeddable
             searchContext.timeRange
           );
           this.searchProps.spec = spec;
-          const exp = toExpression(searchContext, spec);
-          this.searchProps.expression = exp;
         }
       }
     }
