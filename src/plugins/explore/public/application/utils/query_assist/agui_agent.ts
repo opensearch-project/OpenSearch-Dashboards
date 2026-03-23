@@ -123,8 +123,12 @@ export class AgUiAgent {
         .pipe(parseSSEStream)
         .subscribe({
           next: (event: BaseEvent) => observer.next(event),
-          error: (error: Error) => {
-            if (error.name === 'AbortError') {
+          error: (rawErr: unknown) => {
+            // @ag-ui/client uses RxJS 7 throwError(() => err) factory syntax,
+            // but OSD bundles RxJS 6 which emits the factory function as the error.
+            const error =
+              typeof rawErr === 'function' ? (rawErr as () => Error)() : (rawErr as Error);
+            if (error?.name === 'AbortError') {
               observer.complete();
               return;
             }
