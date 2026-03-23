@@ -16,9 +16,8 @@ jest.mock('../../../helpers/shorten_dotted_string', () => ({
   shortenDottedString: jest.fn((str) => `short_${str}`),
 }));
 
-jest.mock('dompurify', () => ({
-  sanitize: jest.fn((str) => str),
-}));
+const PRE = '@opensearch-dashboards-highlighted-field@';
+const POST = '@/opensearch-dashboards-highlighted-field@';
 
 describe('SourceFieldTableCell', () => {
   const mockDataset = {
@@ -64,12 +63,39 @@ describe('SourceFieldTableCell', () => {
     expect(cell).toHaveClass('exploreDocTableCell__source');
   });
 
-  it('calls formatHit with the correct row', () => {
+  it('calls formatHit with the correct row and text type', () => {
     mockDataset.formatHit.mockReturnValue({ field1: 'value1' });
 
     renderInTable(defaultProps);
 
     expect(mockDataset.formatHit).toHaveBeenCalledWith(mockRow, 'text');
+  });
+
+  it('renders highlighted content from row.highlight as mark elements', () => {
+    mockDataset.formatHit.mockReturnValue({ firstname: 'Holmes' });
+    const rowWithHighlight = {
+      ...mockRow,
+      highlight: {
+        firstname: [`${PRE}Holmes${POST}`],
+      },
+    };
+
+    renderInTable({ ...defaultProps, row: rowWithHighlight });
+
+    const valueEl = screen.getByTestId('sourceFieldValue');
+    const mark = valueEl.querySelector('mark');
+    expect(mark).toBeInTheDocument();
+    expect(mark!.textContent).toBe('Holmes');
+  });
+
+  it('renders plain text when no highlight exists for field', () => {
+    mockDataset.formatHit.mockReturnValue({ firstname: 'Holmes' });
+
+    renderInTable(defaultProps);
+
+    const valueEl = screen.getByTestId('sourceFieldValue');
+    expect(valueEl.textContent).toBe('Holmes');
+    expect(valueEl.querySelector('mark')).toBeNull();
   });
 
   it('renders field names and values', () => {

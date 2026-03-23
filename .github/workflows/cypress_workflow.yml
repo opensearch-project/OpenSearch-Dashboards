@@ -50,7 +50,117 @@ env:
   LATEST_VERSION: '3.4.0'
 
 jobs:
+  prepare-cypress:
+    name: Prepare Cypress source and plugins
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get source information from PR number
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+        id: get_pr_info
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: result } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ inputs.pr_number }}
+            });
+            core.setOutput('head_name', result.head.repo.full_name);
+            core.setOutput('head_ref', result.head.ref);
+
+      - name: Set source repo from PR number
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+        run: |
+          echo "SOURCE_REPO=${{ steps.get_pr_info.outputs.head_name }}" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=${{ steps.get_pr_info.outputs.head_ref }}" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.SOURCE_REPO }}
+          ref: '${{ env.SOURCE_BRANCH }}'
+          fetch-depth: 1
+          filter: blob:none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@^1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        shell: bash
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Restore Yarn Cache
+        id: yarn-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-cypress-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-Linux-cypress-
+
+      - name: Run bootstrap
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Save Yarn Cache
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-cypress-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+
+      - name: Upload plugin bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-plugin-bundles
+          path: |
+            src/core/target/public
+            src/plugins/*/target/public
+            packages/*/target/public
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Create source archive
+        run: |
+          tar czf /tmp/cypress-source-archive.tar.gz \
+            --exclude='./.git' \
+            --exclude='./node_modules' \
+            --exclude='./src/plugins/*/node_modules' \
+            --exclude='./packages/*/node_modules' \
+            --exclude='./test/*/plugins/*/node_modules' \
+            --exclude='./examples/*/node_modules' \
+            --exclude='*/target/public' \
+            .
+          mv /tmp/cypress-source-archive.tar.gz .
+          ls -lh cypress-source-archive.tar.gz
+
+      - name: Upload source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-source-archive
+          path: cypress-source-archive.tar.gz
+          retention-days: 1
+          if-no-files-found: error
+
   cypress-tests:
+    needs: [prepare-cypress]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -162,31 +272,21 @@ jobs:
       TERM: xterm
     name: Run cypress tests (osd:ciGroup${{ matrix.group }})
     steps:
-      - name: Get source information from PR number
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
-        id: get_pr_info
-        uses: actions/github-script@v6
+      - name: Download source archive
+        uses: actions/download-artifact@v4
         with:
-          script: |
-            const { data: result } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: ${{ inputs.pr_number }}
-            });
-            core.setOutput('head_name', result.head.repo.full_name);
-            core.setOutput('head_ref', result.head.ref);
+          name: cypress-source-archive
 
-      - name: Set source repo from PR number
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
+      - name: Extract source archive
+        shell: bash
         run: |
-          echo "SOURCE_REPO=${{ steps.get_pr_info.outputs.head_name }}" >> $GITHUB_ENV
-          echo "SOURCE_BRANCH=${{ steps.get_pr_info.outputs.head_ref }}" >> $GITHUB_ENV
+          tar xzf cypress-source-archive.tar.gz && rm cypress-source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download plugin bundles
+        uses: actions/download-artifact@v4
         with:
-          repository: ${{ env.SOURCE_REPO }}
-          ref: '${{ env.SOURCE_BRANCH }}'
+          name: cypress-plugin-bundles
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -200,6 +300,17 @@ jobs:
           npm i -g yarn@^1.22.10
           yarn config set network-timeout 1000000 -g
 
+      - name: Configure Yarn Cache
+        shell: bash
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Restore Yarn Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-cypress-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-Linux-cypress-
+
       - name: Run bootstrap
         shell: bash
         run: |
@@ -210,8 +321,7 @@ jobs:
           done
           exit 1
 
-      - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+      # Build plugins step REMOVED — downloaded from prepare-cypress artifact
 
       - name: Checkout FT repo
         if: matrix.test_location == 'ftr'
@@ -221,6 +331,8 @@ jobs:
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
           clean: true
+          fetch-depth: 1
+          filter: blob:none
 
       - name: Setup spec files by input
         if: ${{ inputs.specs != '' }}
