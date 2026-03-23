@@ -32,6 +32,12 @@ import { i18n } from '@osd/i18n';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
 
+if (process.env.NODE_ENV === 'development') {
+  import('react-grab').then(({ registerPlugin }) => {
+    registerPlugin({ name: 'osd-grab-config', theme: { toolbar: { enabled: false } } });
+  });
+}
+
 /** @internal */
 export async function __osdBootstrap__() {
   const injectedMetadata = JSON.parse(
