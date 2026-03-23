@@ -12,7 +12,6 @@ import { DashboardEditor, DashboardListing, DashboardNoMatch } from './component
 export const DashboardApp = () => {
   return (
     <Switch>
-      {/* Route for in-context Explore editor */}
       <Route path={[DashboardConstants.CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl(':id')]}>
         <div className="app-container dshAppContainer">
           <DashboardEditor />

@@ -33,8 +33,8 @@ import {
   ExploreFlavor,
   PLUGIN_ID,
   PLUGIN_NAME,
-  IN_CONTEXT_EDITOR_APP_NAME,
-  IN_CONTEXT_EDITOR_APP_ID,
+  VISUALIZATION_EDITOR_APP_ID,
+  VISUALIZATION_EDITOR_APP_NAME,
 } from '../common';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
@@ -412,9 +412,9 @@ export class ExplorePlugin
 
     const createExploreInContextEditorApp = () => {
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-        baseUrl: core.http.basePath.prepend(`/app/${IN_CONTEXT_EDITOR_APP_ID}`),
+        baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
-        storageKey: `lastUrl:${core.http.basePath.get()}:${IN_CONTEXT_EDITOR_APP_ID}`,
+        storageKey: `lastUrl:${core.http.basePath.get()}:${VISUALIZATION_EDITOR_APP_ID}`,
         navLinkUpdater$: this.editorAppStateUpdater,
         toastNotifications: core.notifications.toasts,
         stateParams: [
@@ -442,8 +442,8 @@ export class ExplorePlugin
       };
 
       return {
-        id: IN_CONTEXT_EDITOR_APP_ID,
-        title: IN_CONTEXT_EDITOR_APP_NAME,
+        id: VISUALIZATION_EDITOR_APP_ID,
+        title: VISUALIZATION_EDITOR_APP_NAME,
         navLinkStatus: AppNavLinkStatus.hidden,
         defaultPath: '#/',
         mount: async (params: AppMountParameters) => {
@@ -486,9 +486,10 @@ export class ExplorePlugin
           // Add scopedHistory to services
           services.scopedHistory = this.currentHistory;
 
-          const editorAbortActionId = IN_CONTEXT_EDITOR_APP_ID;
+          const editorAbortActionId = VISUALIZATION_EDITOR_APP_ID;
           const abortAction = createAbortDataQueryAction(editorAbortActionId);
           services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
+
           appMounted();
           const unmount = renderEditor(params, services);
 
@@ -748,11 +749,11 @@ export class ExplorePlugin
     // Register explore visualization as visualization alias
     setupDeps.visualizations.registerAlias({
       name: this.DISCOVER_VISUALIZATION_NAME,
-      // Create new visulization
+      // Create new visualization
       // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
       // Need to define a two-way route
-      aliasPath: '#/',
-      aliasApp: 'in-context-editor',
+      aliasPath: '#/edit/',
+      aliasApp: VISUALIZATION_EDITOR_APP_ID,
       title: exploreVisDisplayName,
       description: i18n.translate('explore.visualization.description', {
         defaultMessage: 'Create visualization with Discover',
@@ -785,14 +786,13 @@ export class ExplorePlugin
 
             const adjustEditApp = attributes.type
               ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
-              : 'in-context-editor';
+              : VISUALIZATION_EDITOR_APP_ID;
             const adjustEditUrl = attributes.type
               ? `#/view/${encodeURIComponent(id)}` // regular explore vis
-              : `#/edit/${encodeURIComponent(id)}`; // in-context-editor
+              : `#/edit/${encodeURIComponent(id)}`; // visualization editor
 
             return {
               description: `${attributes?.description || ''}`,
-              // Open a visulization
               editApp: adjustEditApp,
               editUrl: adjustEditUrl,
               icon: iconType,

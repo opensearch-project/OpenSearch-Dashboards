@@ -76,7 +76,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         queryBuilder.updateQueryState({ query: getEditorText() });
       }
 
-      await queryBuilder.onEditorRunActionCreator();
+      await queryBuilder.onQueryExecutionSubmit();
     },
     [queryBuilder, queryEditorState.editorMode, getEditorText]
   );

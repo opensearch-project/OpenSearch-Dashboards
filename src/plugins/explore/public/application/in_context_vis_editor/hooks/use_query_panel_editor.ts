@@ -148,7 +148,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       queryBuilder.updateQueryState({ query: editorTextRef.current });
     }
 
-    queryBuilder.onEditorRunActionCreator().catch((error) => {
+    queryBuilder.onQueryExecutionSubmit().catch((error) => {
       services.notifications?.toasts.addError(error, {
         title: 'Query execution failed',
       });

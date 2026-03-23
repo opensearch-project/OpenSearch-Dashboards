@@ -81,6 +81,9 @@ export interface DetailedDataset extends Dataset {
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset | undefined) => void;
   supportedTypes?: string[];
+  // signalType can support string, null and string[]
+  // if it is an array, it will fetch all the mentioned signal type
+  // in such case created dataset should not have signal type labeled
   signalType: string | null | string[];
   showNonTimeFieldDatasets?: boolean;
   appName?: string;
@@ -308,8 +311,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   const currentDataset = currentQuery.dataset;
 
   // Handle signal type changes (e.g., navigating from logs to traces)
+  const normalize = (value: string | string[] | null) =>
+    Array.isArray(value) ? [...new Set(value)].sort() : value;
+
   useEffect(() => {
-    const signalTypeChanged = !isEqual(previousSignalType.current, signalType);
+    const signalTypeChanged = !isEqual(
+      normalize(previousSignalType.current),
+      normalize(signalType)
+    );
     if (signalTypeChanged) {
       previousSignalType.current = signalType;
       // Reset initial load flag AND clear datasets to force refetch with new signal type
@@ -443,26 +452,19 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       );
 
       const onFilter = (detailedDataset: DetailedDataset) => {
-        // Filter by signal type
-        let signalTypeMatch: boolean;
+        const types = Array.isArray(signalType) ? signalType : [signalType];
 
-        if (Array.isArray(signalType)) {
-          signalTypeMatch = signalType.some((type) => {
-            if (type === CORE_SIGNAL_TYPES.TRACES) {
-              return detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
-            } else if (type === CORE_SIGNAL_TYPES.METRICS) {
-              return detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS;
-            }
-            return detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
-          });
-        } else {
-          signalTypeMatch =
-            signalType === CORE_SIGNAL_TYPES.TRACES
-              ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
-              : signalType === CORE_SIGNAL_TYPES.METRICS
-              ? detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS
-              : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
-        }
+        const signalTypeMatch = types.some((type) => {
+          if (type === CORE_SIGNAL_TYPES.TRACES) {
+            return detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+          }
+
+          if (type === CORE_SIGNAL_TYPES.METRICS) {
+            return detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS;
+          }
+
+          return detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+        });
 
         if (!signalTypeMatch) {
           return false;
@@ -678,9 +680,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                 <AdvancedSelector
                   useConfiguratorV2
                   alwaysShowDatasetFields
-                  // only for in-context editor, signal types can be array
-                  // such created dataset should not have signal type labeled
-                  signalType={typeof signalType === 'string' ? signalType : undefined}
+                  signalType={(typeof signalType === 'string' && signalType) || undefined}
                   services={services}
                   showNonTimeFieldDatasets={showNonTimeFieldDatasets}
                   onSelect={async (query: Partial<Query>, saveDataset) => {
@@ -691,14 +691,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                           await datasetService.saveDataset(
                             query.dataset,
                             services,
-                            typeof signalType === 'string' ? signalType : undefined
+                            (typeof signalType === 'string' && signalType) || undefined
                           );
                         } else {
                           await datasetService.cacheDataset(
                             query.dataset,
                             services,
                             false,
-                            typeof signalType === 'string' ? signalType : undefined
+                            (typeof signalType === 'string' && signalType) || undefined
                           );
                         }
                         const dataView = await data.dataViews.get(

@@ -190,7 +190,6 @@ export interface DashboardStart {
     type: string,
     options: AttributeServiceOptions<A>
   ) => AttributeService<A, V, R>;
-  editorRegistry: EditorRegistryServiceStart;
 }
 
 declare module '../../../plugins/ui_actions/public' {

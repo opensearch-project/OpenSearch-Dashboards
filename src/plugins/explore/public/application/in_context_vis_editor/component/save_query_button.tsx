@@ -97,7 +97,7 @@ export const SaveQueryButton = () => {
     } catch (error) {
       services.notifications.toasts.addDanger(
         i18n.translate('explore.queryPanel.saveQuery.failedToSaveQuery', {
-          defaultMessage: 'An error occured while saving your query{errorMessage}',
+          defaultMessage: 'An error occurred while saving your query{errorMessage}',
           values: { errorMessage: (error as Error).message ? `: ${(error as Error).message}` : '' },
         })
       );

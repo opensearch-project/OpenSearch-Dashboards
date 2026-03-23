@@ -23,7 +23,7 @@ import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { VisualizationRegistryService } from '../services/visualization_registry_service';
-import { ExploreFlavor } from '../../common';
+import { ExploreFlavor, VISUALIZATION_EDITOR_APP_ID } from '../../common';
 import { SavedExplore } from '../saved_explore';
 
 interface StartServices {
@@ -102,7 +102,7 @@ export class ExploreEmbeddableFactory
         ? `#/edit/${savedObjectId}`
         : `#/view/${savedObjectId}`;
 
-      const adjustApp = !savedObject.type ? `in-context-editor` : `explore/${flavor}`;
+      const adjustApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
 
       return new ExploreEmbeddableClass(
         {

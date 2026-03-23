@@ -77,7 +77,6 @@ export interface QueryEditorState {
   lastExecutedTranslatedQuery?: string; // last generated query
 }
 
-// TODO cache previous query results
 export type QueryResultState = ISearchResult | undefined;
 
 export interface DatasetViewState {
@@ -106,7 +105,7 @@ const initialQueryEditorState: QueryEditorState = {
 };
 
 /**
- * QueryBuilder manages query state for in-context Explore editor.
+ * QueryBuilder manages query state for query editor component.
  */
 export class QueryBuilder {
   public queryState$ = new BehaviorSubject<QueryState>({
@@ -141,7 +140,6 @@ export class QueryBuilder {
     this.setupGlobalDataRangeSync();
     this.setupQuerySync();
     this.setupLanguageSync();
-    this.consoleResult();
 
     this.setIsInitialized(true);
   }
@@ -182,7 +180,7 @@ export class QueryBuilder {
     }
   }
 
-  // Subscribe to sync data range with global time filter
+  // Subscribe to sync date range with global time filter
   private setupGlobalDataRangeSync() {
     const dataRangeSyncSub = this.queryEditorState$
       .pipe(
@@ -310,20 +308,6 @@ export class QueryBuilder {
     }
   }
 
-  // TODO remove Debug
-  private consoleResult() {
-    const syncResult = combineLatest([
-      this.datasetView$,
-      this.queryState$,
-      this.queryEditorState$,
-      this.resultState$,
-    ]).subscribe(([valA, valB, queryEditorState, resultState]) => {
-      console.log('sync Result', valA, valB, queryEditorState, resultState);
-    });
-
-    this.subscriptions.push(syncResult);
-  }
-
   private async fetchDataView(dataset: Dataset) {
     const {
       dataViews,
@@ -354,7 +338,7 @@ export class QueryBuilder {
 
   // This is used when user proactively submits a query or a prompt.
   // This called executeQuery under the hood
-  async onEditorRunActionCreator() {
+  async onQueryExecutionSubmit() {
     const queryEditorState = this.queryEditorState$.value;
     // Set flag to indicate user has initiated a query
     this.updateQueryEditorState({ userInitiatedQuery: true });
@@ -367,13 +351,13 @@ export class QueryBuilder {
         return;
       }
 
-      await this.callAgentActionCreator();
+      await this.callAgent();
     } else {
       await this.executeQuery();
     }
   }
 
-  async callAgentActionCreator() {
+  async callAgent() {
     if (!this.editorRef) return;
 
     // for prompt mode, we won't store the prompt and generated query
@@ -408,7 +392,6 @@ export class QueryBuilder {
 
         this.updateQueryEditorState({
           queryStatus: initialQueryStatus,
-          // isQueryEditorDirty: false,
           lastExecutedTranslatedQuery: queryString,
         });
 
@@ -451,7 +434,6 @@ export class QueryBuilder {
 
       this.updateQueryEditorState({
         queryStatus: initialQueryStatus,
-        // isQueryEditorDirty: false,
         lastExecutedTranslatedQuery: queryString,
       });
 
@@ -570,7 +552,6 @@ export class QueryBuilder {
     });
 
     this.queryEditorState$ = new BehaviorSubject<QueryEditorState>(initialQueryEditorState);
-
     this.resultState$ = new BehaviorSubject<QueryResultState>(undefined);
     this.datasetView$ = new BehaviorSubject<DatasetViewState>({
       dataView: undefined,
