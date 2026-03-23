@@ -10,17 +10,12 @@ import { Dataset } from '../../../../../data/common';
 import { ExploreServices } from '../../../types';
 
 import { EditorMode } from '../../../application/utils/state_management/types';
-import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
+import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { resolveDatasetByLanguage, getPreloadedQueryState } from '../query_builder/utils';
 import { useEditorOperations } from '../hooks/use_editor_operations';
 import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useQueryBuilderState } from './use_query_builder_state';
-import {
-  QueryEditorState,
-  SupportLanguageType,
-  QueryState,
-  getQueryBuilder,
-} from '../query_builder/query_builder';
+import { QueryEditorState, SupportLanguageType, QueryState } from '../query_builder/query_builder';
 
 export const useInitialSaveExplore = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -28,7 +23,7 @@ export const useInitialSaveExplore = () => {
   const { savedExplore, error } = useSavedExplore(exploreId);
   const { setEditorText } = useEditorOperations();
 
-  const visualizationBuilder = getVisualizationBuilder();
+  const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const { queryBuilder } = useQueryBuilderState();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -110,12 +105,13 @@ export const useInitialSaveExplore = () => {
           };
         }
         if (baseQueryState) {
+          queryBuilder.updateQueryState(baseQueryState);
+          queryBuilder.updateQueryEditorState({ editorMode: EditorMode.Query });
           // init builders once query state and vis config are synced
           // avoid the useless url sync
           queryBuilder.init();
           visualizationBuilder.init();
-          queryBuilder.updateQueryState(baseQueryState);
-          queryBuilder.updateQueryEditorState({ editorMode: EditorMode.Query });
+          queryBuilder.clearResultState();
           setEditorText(baseQueryState.query.query);
           await queryBuilder.waitForDatasetReady();
 

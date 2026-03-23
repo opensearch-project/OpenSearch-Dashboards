@@ -5,23 +5,28 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiPanel, EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
+import { EuiPanel, EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
-import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
-
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-
+import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import '../in_context_editor.scss';
 
 export const RightStyleOptionsPanel = () => {
   const { queryEditorState } = useQueryBuilderState();
-
   const queryStatus = queryEditorState.queryStatus;
+  const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
 
-  const visualizationBuilder = getVisualizationBuilder();
   const displayEmptyState =
     queryStatus.status === QueryExecutionStatus.UNINITIALIZED ||
     queryStatus.status === QueryExecutionStatus.NO_RESULTS;
+
+  // Unmount the style panel to ensure outdated component state doesn't override current styles
+  if (queryStatus.status === QueryExecutionStatus.LOADING)
+    return (
+      <EuiPanel paddingSize="s" style={{ height: '100%' }} borderRadius="none" hasShadow={false}>
+        <StylePanelLoadingState />
+      </EuiPanel>
+    );
 
   if (displayEmptyState) {
     return (
@@ -65,4 +70,8 @@ export const StylePanelEmptyState = () => {
       }
     />
   );
+};
+
+export const StylePanelLoadingState = () => {
+  return <EuiEmptyPrompt icon={<EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />} />;
 };

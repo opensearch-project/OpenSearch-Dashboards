@@ -18,6 +18,7 @@ import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useEditorOperations } from '../hooks/use_editor_operations';
 import { EditorMode } from '../../utils/state_management/types';
 import '../../../components/query_panel/query_panel_widgets/save_query/save_query.scss';
+import { QueryState } from '../query_builder/query_builder';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -108,7 +109,7 @@ export const SaveQueryButton = () => {
   const handleLoadSavedQuery = useCallback(
     async (savedQuery: SavedQuery) => {
       setCurrentSavedQueryId(savedQuery.id);
-      queryBuilder.updateQueryState(savedQuery.attributes.query);
+      queryBuilder.updateQueryState(savedQuery.attributes.query as QueryState);
 
       // Update editor text
       setEditorText(savedQuery.attributes.query.query as string);

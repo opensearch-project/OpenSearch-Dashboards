@@ -7,11 +7,11 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useObservable } from 'react-use';
-import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 import { SaveVisButton } from './save_vis_button';
+import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 export const VisActionBar = () => {
-  const visualizationBuilder = getVisualizationBuilder();
+  const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = useObservable(visualizationBuilder.visConfig$);
   const showRawTable = useObservable(visualizationBuilder.showRawTable$);
 

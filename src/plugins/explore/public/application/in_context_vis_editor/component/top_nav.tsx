@@ -26,7 +26,6 @@ export interface TopNavProps {
 
 export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-
   const { queryBuilder, datasetView, queryEditorState } = useQueryBuilderState();
   const { getEditorText } = useEditorOperations();
 
@@ -75,7 +74,6 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       if (queryEditorState.editorMode !== EditorMode.Prompt) {
         queryBuilder.updateQueryState({ query: getEditorText() });
       }
-
       await queryBuilder.onQueryExecutionSubmit();
     },
     [queryBuilder, queryEditorState.editorMode, getEditorText]

@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 import { ExploreServices } from '../../../types';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { DiscoverNoResults } from '../../../application/legacy/discover/application/components/no_results/no_results';
@@ -26,6 +25,7 @@ import { QueryPanel } from './in_context_query_panel';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
 import { EditorPanel } from './editor_panel';
+import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import '../in_context_editor.scss';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
@@ -113,28 +113,14 @@ export const ResizableQueryPanelAndVisualization = () => {
       {(EuiResizablePanel, EuiResizableButton) => {
         return (
           <>
-            <EuiResizablePanel
-              className="visualization_panel"
-              initialSize={70}
-              minSize="60%"
-              paddingSize="none"
-            >
+            <EuiResizablePanel initialSize={70} minSize="60%" paddingSize="none">
               {renderVis()}
             </EuiResizablePanel>
 
             <EuiResizableButton />
 
-            <EuiResizablePanel
-              className="query_panel"
-              initialSize={30}
-              minSize="20%"
-              paddingSize="none"
-            >
-              <QueryPanel
-                queryEditorState$={queryBuilder.queryEditorState$}
-                queryState$={queryBuilder.queryState$}
-                dataView$={queryBuilder.datasetView$}
-              />
+            <EuiResizablePanel initialSize={30} minSize="20%" paddingSize="none" hasBorder={false}>
+              <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
             </EuiResizablePanel>
           </>
         );
@@ -146,7 +132,7 @@ export const ResizableQueryPanelAndVisualization = () => {
 export const VisualizationContainer = () => {
   const searchContext = useSearchContext();
 
-  const visualizationBuilder = getVisualizationBuilder();
+  const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const { resultState: results, queryBuilder } = useQueryBuilderState();
 
   useEffect(() => {

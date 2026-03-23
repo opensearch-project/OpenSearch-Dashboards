@@ -16,7 +16,6 @@ import { ExploreServices } from '../../../types';
 
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
-import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
 import { Query } from '../../../../../data/common';
 
@@ -24,6 +23,7 @@ import { SavedExplore } from '../../../saved_explore';
 import { SaveVisModal } from './save_vis_modal';
 import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useInContextEditor } from '../../context';
+import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -46,7 +46,7 @@ const saveButtonWithoutBackText = i18n.translate('explore.topNav.saveVisButton.s
 
 export const SaveVisButton = () => {
   const { queryEditorState, datasetView } = useQueryBuilderState();
-  const visualizationBuilder = getVisualizationBuilder();
+  const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -67,15 +67,27 @@ export const SaveVisButton = () => {
 
   const navigateTo = useCallback(
     ({ id, newTitle }: { id: string; newTitle: string }) => {
-      toastNotifications.addSuccess({
-        title: i18n.translate('inContextEditor.saveVisualization.successNotificationText', {
-          defaultMessage: exploreId === undefined ? `Saved '{visTitle}'` : `Updated '{visTitle}'`,
-          values: {
-            visTitle: newTitle,
-          },
-        }),
-        'data-test-subj': 'saveVisualizationSuccess',
-      });
+      if (exploreId === undefined) {
+        toastNotifications.addSuccess({
+          title: i18n.translate('explore.editor.saveVisualization.successNotificationText', {
+            defaultMessage: `Saved '{visTitle}'`,
+            values: {
+              visTitle: newTitle,
+            },
+          }),
+          'data-test-subj': 'saveVisualizationSuccess',
+        });
+      } else {
+        toastNotifications.addSuccess({
+          title: i18n.translate('explore.editor.updateVisualization.successNotificationText', {
+            defaultMessage: `Updated '{visTitle}'`,
+            values: {
+              visTitle: newTitle,
+            },
+          }),
+          'data-test-subj': 'saveVisualizationSuccess',
+        });
+      }
       if (originatingApp) {
         // add a new panel or update existing panel
         const embeddablePackage =
@@ -150,13 +162,12 @@ export const SaveVisButton = () => {
         }
       } catch (error) {
         toastNotifications.add({
-          title: i18n.translate('explore.addToDashboard.notification.fail', {
-            defaultMessage: 'Fail to add to dashboard',
+          title: i18n.translate('explore.editor.saveVisualization.notification.fail', {
+            defaultMessage: 'Fail to update visualization',
           }),
           color: 'danger',
           iconType: 'alert',
           text: toMountPoint(error),
-          'data-test-subj': 'addToNewDashboarddFailToast',
         });
         savedExploreToSave.title = currentTitle;
         setShowModal(false);

@@ -24,7 +24,6 @@ import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
-import { ExploreServices } from '../../types';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -410,11 +409,6 @@ export class VisualizationBuilder {
       onChartTypeChange: this.setCurrentChartType.bind(this),
     });
   }
-
-  // option method for in-context editor to replace getUrlStateStorage
-  updateServices(getUrlStateStorage: Options['getUrlStateStorage']) {
-    this.getUrlStateStorage = getUrlStateStorage;
-  }
 }
 
 let visualizationBuilder: VisualizationBuilder;
@@ -426,9 +420,4 @@ export const getVisualizationBuilder = () => {
     });
   }
   return visualizationBuilder;
-};
-
-export const updateVisualizationBuilderServices = (services: ExploreServices) => {
-  const builder = getVisualizationBuilder();
-  builder.updateServices(() => services.osdUrlStateStorage);
 };
