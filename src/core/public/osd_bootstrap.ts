@@ -32,6 +32,9 @@ import { i18n } from '@osd/i18n';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
 
+// React Grab lets developers select context for coding agents directly from
+// website. It will only be active for development mode. Its UI is hidden to
+// not affect all developers, hold Command-C or Control-C to invoke.
 if (process.env.NODE_ENV === 'development') {
   import('react-grab').then(({ registerPlugin }) => {
     registerPlugin({ name: 'osd-grab-config', theme: { toolbar: { enabled: false } } });
