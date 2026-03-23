@@ -45,9 +45,7 @@ export const useIndexFetcher = ({ services, path, onError }: UseIndexFetcherOpti
 
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
-        const query: any = {
-          expand_wildcards: 'all',
-        };
+        const query: any = {};
 
         if (dataSourceId && dataSourceId !== '') {
           query.data_source = dataSourceId;
