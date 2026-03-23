@@ -68,7 +68,7 @@ describe('Serializer', () => {
 
     it('should write to file when filepath is provided', () => {
       const def = buildSampleDashboard();
-      Serializer.toJSON(def, '/tmp/test-dashboard.json');
+      Serializer.toJSON(def, 'built/test-dashboard.json');
 
       expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(1);
       expect(mockedFs.writeFileSync).toHaveBeenCalledWith(
@@ -80,7 +80,7 @@ describe('Serializer', () => {
 
     it('should return JSON string even when writing to file', () => {
       const def = buildSampleDashboard();
-      const json = Serializer.toJSON(def, '/tmp/test.json');
+      const json = Serializer.toJSON(def, 'built/test.json');
       expect(typeof json).toBe('string');
       expect(JSON.parse(json).kind).toBe('Dashboard');
     });
@@ -99,7 +99,7 @@ describe('Serializer', () => {
 
     it('should write to file when filepath is provided', () => {
       const def = buildSampleDashboard();
-      Serializer.toYAML(def, '/tmp/test-dashboard.yaml');
+      Serializer.toYAML(def, 'built/test-dashboard.yaml');
 
       expect(mockedFs.writeFileSync).toHaveBeenCalledTimes(1);
       expect(mockedFs.writeFileSync).toHaveBeenCalledWith(
@@ -111,7 +111,7 @@ describe('Serializer', () => {
 
     it('should return YAML string even when writing to file', () => {
       const def = buildSampleDashboard();
-      const yaml = Serializer.toYAML(def, '/tmp/test.yaml');
+      const yaml = Serializer.toYAML(def, 'built/test.yaml');
       expect(typeof yaml).toBe('string');
       expect(yaml).toContain('Dashboard');
     });
@@ -168,8 +168,8 @@ describe('Serializer', () => {
         .build();
 
       const yaml = Serializer.toYAML(def);
-      // The colon-containing string should be quoted
-      expect(yaml).toContain('"Title: with colon"');
+      // The colon-containing string should be quoted (js-yaml uses single quotes)
+      expect(yaml).toContain("'Title: with colon'");
     });
   });
 
@@ -177,7 +177,7 @@ describe('Serializer', () => {
     it('should create directories when they do not exist', () => {
       mockedFs.existsSync.mockReturnValue(false);
       const def = buildSampleDashboard();
-      Serializer.toJSON(def, '/tmp/nested/dir/dashboard.json');
+      Serializer.toJSON(def, 'built/nested/dir/dashboard.json');
 
       expect(mockedFs.mkdirSync).toHaveBeenCalledWith(
         expect.any(String),

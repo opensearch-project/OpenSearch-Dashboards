@@ -107,6 +107,7 @@ export class OsdClient {
         port: url.port || (isHttps ? 443 : 80),
         path: url.pathname + url.search,
         method: options.method,
+        timeout: 30000,
         headers: {
           'Content-Type': 'application/json',
           'osd-xsrf': 'true',
@@ -135,6 +136,11 @@ export class OsdClient {
             resolve(body as unknown as T);
           }
         });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new ClientError('Request timed out', 408, ''));
       });
 
       req.on('error', (err: Error) => {
@@ -166,24 +172,40 @@ export class OsdClient {
 
   /**
    * Validate saved objects against server-side schema.
+   * The server endpoint accepts a single object at a time, so we call it per-object.
    */
-  async validate(objects: SavedObject[]): Promise<ValidationResult[]> {
-    return this.request<ValidationResult[]>({
-      method: 'POST',
-      path: '/api/saved_objects/_validate',
-      body: { objects },
-    });
+  async validate(
+    objects: Array<{ type: string; attributes: Record<string, unknown> }>
+  ): Promise<ValidationResult[]> {
+    const results: ValidationResult[] = [];
+    for (const obj of objects) {
+      const result = await this.request<ValidationResult>({
+        method: 'POST',
+        path: '/api/saved_objects/_validate',
+        body: { type: obj.type, attributes: obj.attributes },
+      });
+      results.push(result);
+    }
+    return results;
   }
 
   /**
    * Diff local objects against deployed versions.
+   * The server endpoint accepts a single object at a time, so we call it per-object.
    */
-  async diff(objects: SavedObject[]): Promise<DiffResult[]> {
-    return this.request<DiffResult[]>({
-      method: 'POST',
-      path: '/api/saved_objects/_diff',
-      body: { objects },
-    });
+  async diff(
+    objects: Array<{ type: string; id: string; attributes: Record<string, unknown> }>
+  ): Promise<DiffResult[]> {
+    const results: DiffResult[] = [];
+    for (const obj of objects) {
+      const result = await this.request<DiffResult>({
+        method: 'POST',
+        path: '/api/saved_objects/_diff',
+        body: { type: obj.type, id: obj.id, attributes: obj.attributes },
+      });
+      results.push(result);
+    }
+    return results;
   }
 
   /**
@@ -197,8 +219,8 @@ export class OsdClient {
       method: 'POST',
       path: '/api/saved_objects/_bulk_apply',
       body: {
-        objects,
-        dryRun: options?.dryRun || false,
+        resources: objects,
+        options: { dryRun: options?.dryRun || false },
       },
     });
   }
@@ -208,14 +230,14 @@ export class OsdClient {
    */
   async exportClean(options?: {
     types?: string[];
-    labels?: Record<string, string>;
+    search?: string;
   }): Promise<SavedObject[]> {
     return this.request<SavedObject[]>({
       method: 'POST',
       path: '/api/saved_objects/_export_clean',
       body: {
-        types: options?.types,
-        labels: options?.labels,
+        type: options?.types,
+        ...(options?.search ? { search: options.search } : {}),
       },
     });
   }

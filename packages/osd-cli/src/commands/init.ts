@@ -16,31 +16,29 @@ export interface InitOptions {
 const SUPPORTED_LANGUAGES = ['typescript'];
 const COMING_SOON_LANGUAGES = ['python', 'go', 'java'];
 
-const EXAMPLE_DASHBOARD = {
-  type: 'dashboard',
-  id: 'example-dashboard',
-  attributes: {
-    title: 'Example Dashboard',
-    description: 'An example dashboard created with osdctl',
-    panels: [
-      {
-        panelIndex: '1',
-        gridData: { x: 0, y: 0, w: 24, h: 15, i: '1' },
-        type: 'visualization',
-        id: 'example-viz',
-      },
-    ],
-    options: '{"hidePanelTitles":false,"useMargins":true}',
-  },
-  labels: {
-    'managed-by': 'osdctl',
-    team: 'my-team',
-  },
-  annotations: {
-    'osdctl.opensearch.org/source': 'dashboards-as-code',
-  },
-  references: [],
-};
+const EXAMPLE_DASHBOARD_SDK = `import { Dashboard, Panel, Query } from '@osd/dashboards-sdk';
+
+const dashboard = Dashboard.create('example-dashboard')
+  .title('Example Dashboard')
+  .description('Created with osdctl init')
+  .labels({ team: 'my-team', env: 'development' })
+  .addPanel(
+    Panel.create('panel-1')
+      .title('Sample Visualization')
+      .visualization('line')
+      .gridPosition({ x: 0, y: 0, w: 24, h: 12 })
+      .query(Query.ppl('source = logs | stats count() by host'))
+  )
+  .addPanel(
+    Panel.create('panel-2')
+      .title('Error Rate')
+      .visualization('metric')
+      .gridPosition({ x: 0, y: 12, w: 12, h: 8 })
+      .query(Query.dql('level: error'))
+  );
+
+console.log(JSON.stringify(dashboard.build(), null, 2));
+`;
 
 const PROJECT_OSDCTL_YAML = {
   defaultProfile: 'dev',
@@ -113,40 +111,13 @@ function createTsConfig(): object {
   };
 }
 
-function createExampleTsFile(): string {
+function createOsdctlConfigTs(): string {
   return `/*
- * Example dashboard definition using TypeScript.
- * Run: osdctl build -f src/dashboards/example.ts
+ * osdctl.config.ts - Entry point for Dashboards-as-Code project.
+ * This file is loaded by osdctl to discover and build all dashboard definitions.
  */
 
-const dashboard = {
-  type: 'dashboard',
-  id: 'example-dashboard',
-  attributes: {
-    title: 'Example Dashboard',
-    description: 'An example dashboard created with osdctl',
-    panels: [
-      {
-        panelIndex: '1',
-        gridData: { x: 0, y: 0, w: 24, h: 15, i: '1' },
-        type: 'visualization',
-        id: 'example-viz',
-      },
-    ],
-    options: JSON.stringify({ hidePanelTitles: false, useMargins: true }),
-  },
-  labels: {
-    'managed-by': 'osdctl',
-    team: 'my-team',
-  },
-  annotations: {
-    'osdctl.opensearch.org/source': 'dashboards-as-code',
-  },
-  references: [],
-};
-
-// Output the dashboard definition
-console.log(JSON.stringify(dashboard, null, 2));
+import './dashboards/example';
 `;
 }
 
@@ -205,15 +176,15 @@ export async function initCommand(options: InitOptions): Promise<void> {
   fs.writeFileSync(gitignorePath, GITIGNORE_CONTENT);
   printStatus('CREATE', '.gitignore', 'green');
 
-  // Create example dashboard TypeScript file
+  // Create example dashboard TypeScript file using SDK builder pattern
   const exampleTsPath = path.join(baseDir, 'src', 'dashboards', 'example.ts');
-  fs.writeFileSync(exampleTsPath, createExampleTsFile());
+  fs.writeFileSync(exampleTsPath, EXAMPLE_DASHBOARD_SDK);
   printStatus('CREATE', 'src/dashboards/example.ts', 'green');
 
-  // Create example dashboard JSON
-  const exampleJsonPath = path.join(baseDir, 'src', 'dashboards', 'example.json');
-  fs.writeFileSync(exampleJsonPath, JSON.stringify(EXAMPLE_DASHBOARD, null, 2) + '\n');
-  printStatus('CREATE', 'src/dashboards/example.json', 'green');
+  // Create osdctl.config.ts entry point
+  const configTsPath = path.join(baseDir, 'osdctl.config.ts');
+  fs.writeFileSync(configTsPath, createOsdctlConfigTs());
+  printStatus('CREATE', 'osdctl.config.ts', 'green');
 
   printSuccess(`Project "${projectName}" initialized successfully!`);
   console.log(`\nNext steps:`);

@@ -11,7 +11,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
-import { getAllSchemas, getSchema } from './validate';
+import { getSchemaRegistry } from './validate';
 
 export const registerSchemasRoute = (router: IRouter) => {
   // GET /api/saved_objects/_schemas - list all registered schemas
@@ -21,8 +21,14 @@ export const registerSchemasRoute = (router: IRouter) => {
       validate: false,
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const schemas = getAllSchemas();
-      return res.ok({ body: schemas });
+      const registry = getSchemaRegistry();
+      const allSchemas = registry.getAllSchemas();
+      const result = allSchemas.map((def) => ({
+        type: def.type,
+        version: def.version,
+        url: `/api/saved_objects/_schemas/${def.type}/${def.version}`,
+      }));
+      return res.ok({ body: { schemas: result } });
     })
   );
 
@@ -39,7 +45,8 @@ export const registerSchemasRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, version } = req.params;
-      const jsonSchema = getSchema(type, version);
+      const registry = getSchemaRegistry();
+      const jsonSchema = registry.getSchema(type, version);
 
       if (!jsonSchema) {
         return res.notFound({

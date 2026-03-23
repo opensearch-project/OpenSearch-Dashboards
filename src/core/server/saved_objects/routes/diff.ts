@@ -11,6 +11,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { deepEqual } from './utils';
 
 interface DiffEntry {
   op: 'add' | 'remove' | 'replace';
@@ -49,10 +50,10 @@ function computeDiff(
         )
       );
     } else if (Array.isArray(oldVal) && Array.isArray(newVal)) {
-      if (!arraysEqual(oldVal, newVal)) {
+      if (!deepEqual(oldVal, newVal)) {
         diffs.push({ op: 'replace', path: currentPath, oldValue: oldVal, newValue: newVal });
       }
-    } else if (!strictEqual(oldVal, newVal)) {
+    } else if (!deepEqual(oldVal, newVal)) {
       diffs.push({ op: 'replace', path: currentPath, oldValue: oldVal, newValue: newVal });
     }
   }
@@ -64,28 +65,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function strictEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (typeof a !== typeof b) return false;
-  if (a === null || b === null) return a === b;
-  if (isPlainObject(a) && isPlainObject(b)) {
-    const aObj = a as Record<string, unknown>;
-    const bObj = b as Record<string, unknown>;
-    const aKeys = Object.keys(aObj);
-    const bKeys = Object.keys(bObj);
-    if (aKeys.length !== bKeys.length) return false;
-    return aKeys.every((key) => strictEqual(aObj[key], bObj[key]));
-  }
-  if (Array.isArray(a) && Array.isArray(b)) {
-    return arraysEqual(a, b);
-  }
-  return false;
-}
-
-function arraysEqual(a: unknown[], b: unknown[]): boolean {
-  if (a.length !== b.length) return false;
-  return a.every((val, idx) => strictEqual(val, b[idx]));
-}
+// strictEqual and arraysEqual are now provided by the shared deepEqual utility from ./utils
 
 export const registerDiffRoute = (router: IRouter) => {
   router.post(

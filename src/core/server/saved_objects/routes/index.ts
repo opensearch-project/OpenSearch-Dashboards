@@ -50,6 +50,7 @@ import { registerDiffRoute } from './diff';
 import { registerBulkApplyRoute } from './bulk_apply';
 import { registerExportCleanRoute } from './export_clean';
 import { registerSchemasRoute } from './schemas';
+import { registerManagedLockRoute } from './managed_lock';
 
 export function registerRoutes({
   http,
@@ -78,9 +79,10 @@ export function registerRoutes({
   registerResolveImportErrorsRoute(router, config);
   registerValidateRoute(router);
   registerDiffRoute(router);
-  registerBulkApplyRoute(router);
+  registerBulkApplyRoute(router, config);
   registerExportCleanRoute(router, config);
   registerSchemasRoute(router);
+  registerManagedLockRoute(router);
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 

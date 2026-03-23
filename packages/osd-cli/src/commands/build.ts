@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { printStatus, printHeader, printError, printSuccess } from '../utils/output';
 import { toYaml } from '../utils/yaml';
 
@@ -47,10 +47,10 @@ function buildFile(filePath: string): unknown {
   }
 
   try {
-    const output = execSync(`npx tsx "${absPath}"`, {
+    const output = execFileSync('npx', ['tsx', absPath], {
       encoding: 'utf-8',
       timeout: 30000,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: path.dirname(absPath),
     });
 
     return JSON.parse(output.trim());

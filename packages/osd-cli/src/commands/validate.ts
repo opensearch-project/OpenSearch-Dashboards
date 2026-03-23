@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as yaml from 'js-yaml';
 import { OsdClient, SavedObject } from '../client';
 import { OsdctlConfig, getActiveProfile } from '../config';
 import { printStatus, printHeader, printError } from '../utils/output';
@@ -36,7 +37,9 @@ export function readBuiltFiles(inputDir: string): Array<{ filePath: string; obje
     const filePath = path.join(absDir, entry.name);
     try {
       const content = fs.readFileSync(filePath, 'utf-8');
-      const parsed = JSON.parse(content);
+      const parsed = (ext === '.yaml' || ext === '.yml')
+        ? yaml.load(content)
+        : JSON.parse(content);
       results.push({ filePath, object: parsed as SavedObject });
     } catch {
       // Skip files that can't be parsed

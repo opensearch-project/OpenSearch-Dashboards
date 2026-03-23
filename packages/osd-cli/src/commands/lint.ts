@@ -96,12 +96,34 @@ export function lintObject(obj: SavedObject, rules: LintRuleConfig): LintMessage
 
   // naming-convention rule
   if (rules['naming-convention']) {
-    const pattern = new RegExp(rules['naming-convention']);
-    if (!pattern.test(obj.id)) {
+    const rawPattern = rules['naming-convention'];
+    let pattern: RegExp | null = null;
+    try {
+      // Reject patterns with obvious catastrophic backtracking risks
+      if (
+        typeof rawPattern === 'string' &&
+        rawPattern.length <= 200 &&
+        !/(\+|\*|\{)\1/.test(rawPattern) &&
+        !/\(\?[^:)]/.test(rawPattern)
+      ) {
+        pattern = new RegExp(rawPattern);
+      }
+    } catch {
+      pattern = null;
+    }
+    if (pattern) {
+      if (!pattern.test(obj.id)) {
+        messages.push({
+          level: 'WARN',
+          rule: 'naming-convention',
+          message: `Object id "${obj.id}" does not match naming convention: ${rules['naming-convention']}`,
+        });
+      }
+    } else {
       messages.push({
-        level: 'WARN',
+        level: 'ERROR',
         rule: 'naming-convention',
-        message: `Object id "${obj.id}" does not match naming convention: ${rules['naming-convention']}`,
+        message: `Invalid or unsafe naming convention pattern: ${rules['naming-convention']}`,
       });
     }
   }

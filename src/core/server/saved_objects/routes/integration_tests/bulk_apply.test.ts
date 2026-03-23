@@ -15,8 +15,14 @@ import { registerBulkApplyRoute } from '../bulk_apply';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';
 import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
+import { SavedObjectConfig } from '../../saved_objects_config';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+
+const config = {
+  maxImportExportSize: 10000,
+  maxImportPayloadBytes: 26214400,
+} as SavedObjectConfig;
 
 describe('POST /api/saved_objects/_bulk_apply', () => {
   let server: SetupServerReturn['server'];
@@ -29,7 +35,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
     savedObjectsClient = handlerContext.savedObjects.client;
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerBulkApplyRoute(router);
+    registerBulkApplyRoute(router, config);
 
     const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
     await server.start({ dynamicConfigService });
@@ -51,11 +57,15 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValue({
-      id: 'new-pattern',
-      type: 'index-pattern',
-      attributes: { title: 'logstash-*' },
-      references: [],
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'new-pattern',
+          type: 'index-pattern',
+          attributes: { title: 'logstash-*', labels: { 'managed-by': 'osdctl' } },
+          references: [],
+        },
+      ],
     });
 
     const result = await supertest(httpSetup.server.listener)
@@ -74,7 +84,17 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
     expect(result.body.results).toEqual([
       { type: 'index-pattern', id: 'new-pattern', status: 'created' },
     ]);
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: 'index-pattern',
+          id: 'new-pattern',
+          attributes: { title: 'logstash-*', labels: { 'managed-by': 'osdctl' } },
+        }),
+      ],
+      { overwrite: true }
+    );
   });
 
   it('updates existing objects with changed attributes', async () => {
@@ -88,11 +108,15 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         },
       ],
     });
-    savedObjectsClient.update.mockResolvedValue({
-      id: 'existing-pattern',
-      type: 'index-pattern',
-      attributes: { title: 'new-title' },
-      references: [],
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'existing-pattern',
+          type: 'index-pattern',
+          attributes: { title: 'new-title', labels: { 'managed-by': 'osdctl' } },
+          references: [],
+        },
+      ],
     });
 
     const result = await supertest(httpSetup.server.listener)
@@ -111,7 +135,17 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
     expect(result.body.results).toEqual([
       { type: 'index-pattern', id: 'existing-pattern', status: 'updated' },
     ]);
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: 'index-pattern',
+          id: 'existing-pattern',
+          attributes: { title: 'new-title', labels: { 'managed-by': 'osdctl' } },
+        }),
+      ],
+      { overwrite: true }
+    );
   });
 
   it('returns unchanged for existing objects with identical attributes', async () => {
@@ -120,7 +154,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'existing-pattern',
           type: 'index-pattern',
-          attributes: { title: 'logstash-*' },
+          attributes: { title: 'logstash-*', labels: { 'managed-by': 'osdctl' } },
           references: [],
         },
       ],
@@ -142,11 +176,10 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
     expect(result.body.results).toEqual([
       { type: 'index-pattern', id: 'existing-pattern', status: 'unchanged' },
     ]);
-    expect(savedObjectsClient.create).not.toHaveBeenCalled();
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
   });
 
-  it('handles mixed create and update operations', async () => {
+  it('handles mixed create and update operations using bulkCreate', async () => {
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
         {
@@ -164,17 +197,21 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         },
       ],
     });
-    savedObjectsClient.update.mockResolvedValue({
-      id: 'existing-1',
-      type: 'index-pattern',
-      attributes: { title: 'new-title' },
-      references: [],
-    });
-    savedObjectsClient.create.mockResolvedValue({
-      id: 'new-1',
-      type: 'search',
-      attributes: { title: 'My Search' },
-      references: [],
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'existing-1',
+          type: 'index-pattern',
+          attributes: { title: 'new-title', labels: { 'managed-by': 'osdctl' } },
+          references: [],
+        },
+        {
+          id: 'new-1',
+          type: 'search',
+          attributes: { title: 'My Search', labels: { 'managed-by': 'osdctl' } },
+          references: [],
+        },
+      ],
     });
 
     const result = await supertest(httpSetup.server.listener)
@@ -201,6 +238,15 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         { type: 'index-pattern', id: 'existing-1', status: 'updated' },
         { type: 'search', id: 'new-1', status: 'created' },
       ])
+    );
+    // Both writes should be in a single bulkCreate call
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'index-pattern', id: 'existing-1' }),
+        expect.objectContaining({ type: 'search', id: 'new-1' }),
+      ]),
+      { overwrite: true }
     );
   });
 
@@ -234,12 +280,144 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
     expect(result.body.results).toEqual([
       { type: 'index-pattern', id: 'new-1', status: 'created' },
     ]);
-    // In dry run mode, no create or update calls should be made
-    expect(savedObjectsClient.create).not.toHaveBeenCalled();
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    // In dry run mode, no bulkCreate calls should be made
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
   });
 
-  it('handles partial failures gracefully', async () => {
+  it('returns 400 atomically when overwrite is disabled and object exists', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'existing-1',
+          type: 'index-pattern',
+          attributes: { title: 'old-title' },
+          references: [],
+        },
+      ],
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_apply')
+      .send({
+        resources: [
+          {
+            type: 'index-pattern',
+            id: 'existing-1',
+            attributes: { title: 'new-title' },
+          },
+        ],
+        options: { overwrite: false },
+      })
+      .expect(400);
+
+    expect(result.body.message).toBe('Apply failed: one or more resources had errors');
+    expect(result.body.results).toEqual([
+      {
+        type: 'index-pattern',
+        id: 'existing-1',
+        status: 'error',
+        error: 'Object already exists and overwrite is disabled',
+      },
+    ]);
+    // No writes should happen when there are errors (atomic)
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('does not write any objects if any resource has an overwrite conflict (atomic)', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'new-1',
+          type: 'index-pattern',
+          error: { statusCode: 404, message: 'Not found' },
+          attributes: {},
+          references: [],
+        },
+        {
+          id: 'existing-1',
+          type: 'search',
+          attributes: { title: 'old-title' },
+          references: [],
+        },
+      ],
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_apply')
+      .send({
+        resources: [
+          {
+            type: 'index-pattern',
+            id: 'new-1',
+            attributes: { title: 'logstash-*' },
+          },
+          {
+            type: 'search',
+            id: 'existing-1',
+            attributes: { title: 'new-title' },
+          },
+        ],
+        options: { overwrite: false },
+      })
+      .expect(400);
+
+    // Even though new-1 would be a valid create, the entire batch fails atomically
+    expect(result.body.message).toBe('Apply failed: one or more resources had errors');
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('preserves references when creating objects via bulkCreate', async () => {
+    const refs = [{ name: 'ref_0', type: 'index-pattern', id: 'logstash-*' }];
+
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'new-search',
+          type: 'search',
+          error: { statusCode: 404, message: 'Not found' },
+          attributes: {},
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'new-search',
+          type: 'search',
+          attributes: { title: 'My Search', labels: { 'managed-by': 'osdctl' } },
+          references: refs,
+        },
+      ],
+    });
+
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_apply')
+      .send({
+        resources: [
+          {
+            type: 'search',
+            id: 'new-search',
+            attributes: { title: 'My Search' },
+            references: refs,
+          },
+        ],
+      })
+      .expect(200);
+
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          type: 'search',
+          id: 'new-search',
+          references: refs,
+        }),
+      ],
+      { overwrite: true }
+    );
+  });
+
+  it('handles bulkCreate per-object errors', async () => {
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
         {
@@ -258,16 +436,22 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockImplementation(async (type) => {
-      if (type === 'search') {
-        throw new Error('Permission denied');
-      }
-      return {
-        id: 'good-1',
-        type: 'index-pattern',
-        attributes: { title: 'logstash-*' },
-        references: [],
-      };
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'good-1',
+          type: 'index-pattern',
+          attributes: { title: 'logstash-*', labels: { 'managed-by': 'osdctl' } },
+          references: [],
+        },
+        {
+          id: 'bad-1',
+          type: 'search',
+          attributes: {},
+          references: [],
+          error: { statusCode: 403, message: 'Permission denied' },
+        },
+      ],
     });
 
     const result = await supertest(httpSetup.server.listener)
@@ -300,83 +484,5 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
       status: 'error',
       error: 'Permission denied',
     });
-  });
-
-  it('preserves references when creating objects', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'new-search',
-          type: 'search',
-          error: { statusCode: 404, message: 'Not found' },
-          attributes: {},
-          references: [],
-        },
-      ],
-    });
-    savedObjectsClient.create.mockResolvedValue({
-      id: 'new-search',
-      type: 'search',
-      attributes: { title: 'My Search' },
-      references: [{ name: 'ref_0', type: 'index-pattern', id: 'logstash-*' }],
-    });
-
-    const refs = [{ name: 'ref_0', type: 'index-pattern', id: 'logstash-*' }];
-
-    await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_apply')
-      .send({
-        resources: [
-          {
-            type: 'search',
-            id: 'new-search',
-            attributes: { title: 'My Search' },
-            references: refs,
-          },
-        ],
-      })
-      .expect(200);
-
-    expect(savedObjectsClient.create).toHaveBeenCalledWith(
-      'search',
-      { title: 'My Search' },
-      expect.objectContaining({ references: refs })
-    );
-  });
-
-  it('returns error when overwrite is disabled and object exists', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'existing-1',
-          type: 'index-pattern',
-          attributes: { title: 'old-title' },
-          references: [],
-        },
-      ],
-    });
-
-    const result = await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_apply')
-      .send({
-        resources: [
-          {
-            type: 'index-pattern',
-            id: 'existing-1',
-            attributes: { title: 'new-title' },
-          },
-        ],
-        options: { overwrite: false },
-      })
-      .expect(200);
-
-    expect(result.body.results).toEqual([
-      {
-        type: 'index-pattern',
-        id: 'existing-1',
-        status: 'error',
-        error: 'Object already exists and overwrite is disabled',
-      },
-    ]);
   });
 });
