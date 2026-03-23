@@ -797,7 +797,7 @@ describe('echarts_histogram_utils', () => {
     it('configures dashed style on y-axis grid lines', () => {
       const spec = createHistogramSpec(mockChartData as any, defaultOptions);
 
-      expect((spec.yAxis as any).splitLine.show).toBe(false);
+      expect((spec.yAxis as any).splitLine.show).toBe(true);
       expect((spec.yAxis as any).splitLine.lineStyle.type).toBe('dashed');
     });
   });
