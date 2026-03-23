@@ -393,7 +393,8 @@ export const ManageDirectQueryDataConnectionsTable = ({
           featureFlagStatus &&
           record.connectionType !== DataSourceConnectionType.OpenSearchConnection &&
           // Prometheus data-connections are shown on top level
-          record.type !== DataConnectionType.Prometheus
+          record.type !== DataConnectionType.Prometheus &&
+          record.type !== DataConnectionType.AWSPrometheus
             ? { marginLeft: '20px' }
             : {};
         if (
