@@ -332,7 +332,7 @@ describe('createNewVisActions', () => {
       await aliasActionCall![1].execute({} as ActionExecutionContext<{}>);
 
       expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('otherApp', {
-        path: 'otherApp',
+        path: '/path',
         state: { originatingApp: 'dashboard' },
       });
     });
