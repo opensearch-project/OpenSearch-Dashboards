@@ -398,7 +398,8 @@ export const ManageDirectQueryDataConnectionsTable = ({
             : {};
         if (
           record.type === DataConnectionType.SecurityLake ||
-          record.type === DataConnectionType.CloudWatch
+          record.type === DataConnectionType.CloudWatch ||
+          record.type === DataConnectionType.AWSPrometheus
         ) {
           // TODO: link to details page for security lake and cloudwatch
           return <span style={indentStyle}> {name}</span>;
