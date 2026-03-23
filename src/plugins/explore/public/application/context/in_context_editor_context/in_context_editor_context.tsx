@@ -3,38 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MountPoint } from 'opensearch-dashboards/public';
 import React, { createContext, useContext, FC, ReactNode } from 'react';
 
 interface InContextEditorContextValue {
-  exploreId?: string;
-  containerId?: string;
-  isInContextEditor: boolean;
-  setHeaderActionMenu?: (menuMount: MountPoint | undefined) => void;
+  originatingApp?: string;
 }
 
-const InContextEditorContext = createContext<InContextEditorContextValue>({
-  isInContextEditor: false,
-});
+const InContextEditorContext = createContext<InContextEditorContextValue>({});
 
 interface InContextEditorProviderProps {
-  exploreId?: string;
-  containerId?: string;
+  originatingApp?: string;
   children: ReactNode;
-  setHeaderActionMenu?: (menuMount: MountPoint | undefined) => void;
 }
 
 export const InContextEditorProvider: FC<InContextEditorProviderProps> = ({
-  exploreId,
-  containerId,
+  originatingApp,
   children,
-  setHeaderActionMenu,
 }) => {
   const value: InContextEditorContextValue = {
-    exploreId,
-    containerId,
-    isInContextEditor: true,
-    setHeaderActionMenu,
+    originatingApp,
   };
 
   return (

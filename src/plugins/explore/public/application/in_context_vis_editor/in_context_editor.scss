@@ -49,13 +49,6 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
       & > .euiResizableContainer {
         gap: $euiSizeXS;
         height: 100%;
-
-        .visualization_panel {
-          // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-          .euiPanel {
-            border-top: 0;
-          }
-        }
       }
     }
   }
@@ -105,4 +98,25 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 .exploreDatasetSelectWrapper {
   // Wrapper div should not affect layout
   display: contents;
+}
+
+.editor-panel {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiFlexItem {
+    margin-left: $ouiSizeM;
+    margin-right: $ouiSizeXS;
+    margin-top: $ouiSizeXS;
+  }
+
+  .editor-container {
+    height: 100%;
+    /* stylelint-disable-next-line */
+    container-type: inline-size; // containment context
+    /* stylelint-disable-next-line */
+    container-name: canvas;
+  }
 }

@@ -9,9 +9,7 @@ export const DASHBOARD_ADD_PANEL_TRIGGER = 'DASHBOARD_ADD_PANEL_TRIGGER';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    [DASHBOARD_ADD_PANEL_TRIGGER]: {
-      containerInfo?: { containerId?: string; containerName?: string };
-    };
+    [DASHBOARD_ADD_PANEL_TRIGGER]: {};
   }
 }
 

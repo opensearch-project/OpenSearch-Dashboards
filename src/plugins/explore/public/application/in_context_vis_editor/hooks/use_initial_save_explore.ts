@@ -11,16 +11,20 @@ import { ExploreServices } from '../../../types';
 
 import { EditorMode } from '../../../application/utils/state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
-
-import { useInContextEditor } from '../../context';
 import { resolveDatasetByLanguage, getPreloadedQueryState } from '../query_builder/utils';
 import { useEditorOperations } from '../hooks/use_editor_operations';
+import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useQueryBuilderState } from './use_query_builder_state';
-import { QueryEditorState, SupportLanguageType, QueryState } from '../query_builder/query_builder';
+import {
+  QueryEditorState,
+  SupportLanguageType,
+  QueryState,
+  getQueryBuilder,
+} from '../query_builder/query_builder';
 
 export const useInitialSaveExplore = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const exploreId = useInContextEditor().exploreId;
+  const exploreId = useCurrentExploreId();
   const { savedExplore, error } = useSavedExplore(exploreId);
   const { setEditorText } = useEditorOperations();
 
@@ -31,15 +35,19 @@ export const useInitialSaveExplore = () => {
   useEffect(() => {
     const initialize = async () => {
       // Load language type from URL
-      const queryEditorStateFromUrl = services.osdUrlStateStorage?.get(
-        '_e'
-      ) as QueryEditorState | null;
-
-      const languageType = queryEditorStateFromUrl?.languageType ?? SupportLanguageType.ppl;
-
-      // Load from saved explore
-      let baseQueryState;
       if (savedExplore && !error) {
+        const queryEditorStateFromUrl = services.osdUrlStateStorage?.get(
+          '_e'
+        ) as QueryEditorState | null;
+
+        if (queryEditorStateFromUrl) {
+          queryBuilder.updateQueryEditorState(queryEditorStateFromUrl);
+        }
+
+        const languageType = queryEditorStateFromUrl?.languageType ?? SupportLanguageType.ppl;
+
+        // Load from saved explore
+        let baseQueryState;
         baseQueryState = await getPreloadedQueryState(services, languageType);
 
         if (savedExplore.id) {
@@ -54,7 +62,6 @@ export const useInitialSaveExplore = () => {
               ...savedQuery,
             };
           }
-
           // Load visualization config
           const visualization = savedExplore.visualization;
           if (visualization) {
@@ -102,25 +109,24 @@ export const useInitialSaveExplore = () => {
             query: datasetChanged ? '' : queryStateFromUrl?.query,
           };
         }
-      }
+        if (baseQueryState) {
+          // init builders once query state and vis config are synced
+          // avoid the useless url sync
+          queryBuilder.init();
+          visualizationBuilder.init();
+          queryBuilder.updateQueryState(baseQueryState);
+          queryBuilder.updateQueryEditorState({ editorMode: EditorMode.Query });
+          setEditorText(baseQueryState.query.query);
+          await queryBuilder.waitForDatasetReady();
 
-      if (baseQueryState) {
-        queryBuilder.updateQueryState(baseQueryState);
-        if (queryEditorStateFromUrl) {
-          queryBuilder.updateQueryEditorState(queryEditorStateFromUrl);
+          if (savedExplore?.id) {
+            // for existing saved explore, should execute query on page load
+            // for in-context editor, here isn't tabs, user need to implict input query
+            await queryBuilder.executeQuery();
+          }
+          setIsInitialized(true);
+          queryBuilder.startUrlSync();
         }
-        queryBuilder.init();
-        visualizationBuilder.init();
-        queryBuilder.clearResultState();
-        queryBuilder.updateQueryEditorState({ editorMode: EditorMode.Query });
-        setEditorText(baseQueryState.query.query);
-        await queryBuilder.waitForDatasetReady();
-        if (savedExplore?.id) {
-          // for existing saved explore, should execute query on page load
-          // for in-context editor, here isn't tabs, user need to implict input query
-          await queryBuilder.executeQuery();
-        }
-        setIsInitialized(true);
       }
     };
     initialize();

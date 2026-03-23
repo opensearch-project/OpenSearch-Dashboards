@@ -18,35 +18,31 @@ export const VisActionBar = () => {
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   const isNonTableChart = !!visConfig?.type && visConfig.type !== 'table' && hasSelectionMapping;
 
-  if (!hasSelectionMapping) return null;
-
   return (
     <EuiFlexGroup
-      // className="canvas-action-bar"
       direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
       alignItems="center"
     >
       <EuiFlexItem>
-        {isNonTableChart && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('explore.discover.showRawDataTooltip', {
-                defaultMessage: 'View raw data table for this visualization',
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('explore.discover.showRawDataTooltip', {
+              defaultMessage: 'View raw data table for this visualization',
+            })}
+          >
+            <EuiSwitch
+              label={i18n.translate('explore.discover.showRawData', {
+                defaultMessage: 'Show raw data',
               })}
-            >
-              <EuiSwitch
-                label={i18n.translate('explore.discover.showRawData', {
-                  defaultMessage: 'Show raw data',
-                })}
-                checked={!!showRawTable}
-                onChange={(e) => visualizationBuilder.setShowRawTable(e.target.checked)}
-                data-test-subj="exploreShowRawDataSwitch"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
+              disabled={!isNonTableChart}
+              checked={!!showRawTable}
+              onChange={(e) => visualizationBuilder.setShowRawTable(e.target.checked)}
+              data-test-subj="exploreShowRawDataSwitch"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexItem>
 
       <EuiFlexItem>

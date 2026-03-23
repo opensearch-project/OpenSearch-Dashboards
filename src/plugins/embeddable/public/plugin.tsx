@@ -169,6 +169,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       undefined,
       this.appList
     );
+
     this.isRegistryReady = true;
 
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({

@@ -99,10 +99,10 @@ export class ExploreEmbeddableFactory
 
       // for in-context created visulization
       const adjustEditPath = !savedObject.type
-        ? `#/view_explore/${savedObjectId}`
+        ? `#/edit/${savedObjectId}`
         : `#/view/${savedObjectId}`;
 
-      const adjustApp = !savedObject.type ? `dashboards` : `explore/${flavor}`;
+      const adjustApp = !savedObject.type ? `in-context-editor` : `explore/${flavor}`;
 
       return new ExploreEmbeddableClass(
         {

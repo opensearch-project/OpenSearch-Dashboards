@@ -4,28 +4,15 @@
  */
 
 import './app.scss';
-import React, { useMemo, useRef, useEffect } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
 import { DashboardEditor, DashboardListing, DashboardNoMatch } from './components';
-import { DashboardServices } from '../types';
-import { ExploreEditorWrapper } from './explore_editor_wrapper';
 
 export const DashboardApp = () => {
-  const { services } = useOpenSearchDashboards<DashboardServices>();
-
-  const EditorComponent = useMemo(
-    () => services.editorRegistryService.start().getEditor('exploreEditor')?.render(),
-    [services.editorRegistryService]
-  );
-
   return (
     <Switch>
       {/* Route for in-context Explore editor */}
-      <Route path="/view_explore" exact={false}>
-        <ExploreEditorWrapper EditorComponent={EditorComponent} services={services} />
-      </Route>
       <Route path={[DashboardConstants.CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl(':id')]}>
         <div className="app-container dshAppContainer">
           <DashboardEditor />

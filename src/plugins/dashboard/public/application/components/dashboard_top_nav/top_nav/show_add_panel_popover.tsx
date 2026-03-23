@@ -17,11 +17,6 @@ let root: Root | null = null;
 
 const container = document.createElement('div');
 
-interface ContainerInfo {
-  containerName?: string;
-  containerId?: string;
-}
-
 const unmount = () => {
   if (root) {
     root.unmount();
@@ -29,24 +24,21 @@ const unmount = () => {
   }
   isMount = false;
 };
+const triggerContext = {
+  trigger: dashboardAddPanelTrigger,
+};
 
 const PanelPopover = ({
   onClose,
   button,
   onAddExistingPanelFlyout,
   uiActions,
-  getContainerInfo,
 }: {
   onClose: () => void;
   button: HTMLElement;
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
-  getContainerInfo: () => ContainerInfo | undefined;
 }) => {
-  const triggerContext = {
-    trigger: dashboardAddPanelTrigger,
-    containerInfo: getContainerInfo(),
-  };
   const actionsRef = useRef(uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER));
 
   const panels = useAsync(() => {
@@ -93,12 +85,10 @@ export function showAddPanelPopover({
   anchorElement,
   onAddExistingPanelFlyout,
   uiActions,
-  containerInfo,
 }: {
   anchorElement: HTMLElement;
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
-  containerInfo?: ContainerInfo;
 }) {
   if (isMount) {
     unmount();
@@ -111,7 +101,6 @@ export function showAddPanelPopover({
   root = createRoot(container);
   root.render(
     <PanelPopover
-      getContainerInfo={() => containerInfo}
       onAddExistingPanelFlyout={onAddExistingPanelFlyout}
       button={anchorElement}
       onClose={unmount}

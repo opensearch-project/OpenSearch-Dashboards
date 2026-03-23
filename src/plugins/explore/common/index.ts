@@ -24,6 +24,8 @@ export const EXPLORE_LOGS_TAB_ID = 'logs';
 export const EXPLORE_PATTERNS_TAB_ID = 'explore_patterns_tab';
 export const EXPLORE_VISUALIZATION_TAB_ID = 'explore_visualization_tab';
 export const EXPLORE_FIELD_STATS_TAB_ID = 'explore_field_stats_tab';
+export const IN_CONTEXT_EDITOR_APP_ID = 'in-context-editor';
+export const IN_CONTEXT_EDITOR_APP_NAME = 'InContextEditor';
 
 export enum ExploreFlavor {
   Logs = 'logs',

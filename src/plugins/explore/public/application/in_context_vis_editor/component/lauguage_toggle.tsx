@@ -42,7 +42,7 @@ const getLanguageDisplayLabel = (languageType: SupportLanguageType): string => {
 export const LanguageToggle = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { focusEditor, switchEditorMode } = useEditorOperations();
-  const { queryBuilder, queryState, queryEditorState } = useQueryBuilderState();
+  const { queryBuilder, queryEditorState } = useQueryBuilderState();
 
   const [languageLabel, setlanguageLabel] = useState<string>(
     getLanguageDisplayLabel(queryEditorState.languageType)
@@ -51,7 +51,7 @@ export const LanguageToggle = () => {
 
   const promptModeIsAvailable = queryEditorState.promptModeIsAvailable;
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
-  const language = queryState.language;
+  const language = queryEditorState.languageType;
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);

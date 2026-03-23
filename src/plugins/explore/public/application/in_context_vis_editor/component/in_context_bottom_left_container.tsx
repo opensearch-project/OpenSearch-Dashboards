@@ -18,7 +18,6 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 import { ExploreServices } from '../../../types';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
-import { CanvasPanel } from '../../../components/panel/canvas_panel';
 import { DiscoverNoResults } from '../../../application/legacy/discover/application/components/no_results/no_results';
 import { DiscoverUninitialized } from '../../../application/legacy/discover/application/components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
@@ -26,7 +25,7 @@ import { useSearchContext } from '../../../components/query_panel/utils/use_sear
 import { QueryPanel } from './in_context_query_panel';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
-import { VisActionBar } from './vis_action_bar';
+import { EditorPanel } from './editor_panel';
 import '../in_context_editor.scss';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
@@ -55,30 +54,32 @@ export const ResizableQueryPanelAndVisualization = () => {
   const renderVis = () => {
     if (queryStatus.status === QueryExecutionStatus.NO_RESULTS) {
       return (
-        <CanvasPanel>
+        <EditorPanel>
           <DiscoverNoResults
             queryString={services?.data?.query?.queryString}
             query={services?.data?.query?.queryString?.getQuery()}
             savedQuery={services?.data?.query?.savedQueries}
             timeFieldName={dataview?.timeFieldName}
           />
-        </CanvasPanel>
+        </EditorPanel>
       );
     }
 
     if (queryStatus.status === QueryExecutionStatus.UNINITIALIZED) {
       return (
-        <CanvasPanel>
-          <DiscoverUninitialized onRefresh={onRefresh} />
-        </CanvasPanel>
+        <EditorPanel>
+          <div style={{ height: '100%' }}>
+            <DiscoverUninitialized onRefresh={onRefresh} />
+          </div>
+        </EditorPanel>
       );
     }
 
     if (queryStatus.status === QueryExecutionStatus.LOADING) {
       return (
-        <CanvasPanel>
+        <EditorPanel>
           <LoadingSpinner />
-        </CanvasPanel>
+        </EditorPanel>
       );
     }
 
@@ -86,20 +87,22 @@ export const ResizableQueryPanelAndVisualization = () => {
       const error = queryStatus.error;
       return (
         <EuiErrorBoundary>
-          <EuiFlexGroup direction="column" alignItems="center" className="exploreErrorGuard">
-            <EuiIcon type="alert" size="xl" color="red" />
-            <EuiTitle size="l">
-              <h1>{error?.message.reason || errorDefaultTitle}</h1>
-            </EuiTitle>
-            <div className="exploreErrorGuard__errorsSection">
-              {error?.message.details ? (
-                <ErrorCodeBlock title={detailsText} text={error.message.details} />
-              ) : null}
-              {error?.message.type ? (
-                <ErrorCodeBlock title={typeText} text={error?.message.type} />
-              ) : null}
-            </div>
-          </EuiFlexGroup>
+          <EditorPanel>
+            <EuiFlexGroup direction="column" alignItems="center" className="exploreErrorGuard">
+              <EuiIcon type="alert" size="xl" color="red" />
+              <EuiTitle size="l">
+                <h1>{error?.message.reason || errorDefaultTitle}</h1>
+              </EuiTitle>
+              <div className="exploreErrorGuard__errorsSection">
+                {error?.message.details ? (
+                  <ErrorCodeBlock title={detailsText} text={error.message.details} />
+                ) : null}
+                {error?.message.type ? (
+                  <ErrorCodeBlock title={typeText} text={error?.message.type} />
+                ) : null}
+              </div>
+            </EuiFlexGroup>
+          </EditorPanel>
         </EuiErrorBoundary>
       );
     }
@@ -150,6 +153,7 @@ export const VisualizationContainer = () => {
     if (results) {
       const rows = results.hits?.hits || [];
       const fieldSchema = results.fieldSchema || [];
+
       visualizationBuilder.handleData(rows, fieldSchema);
     }
   }, [visualizationBuilder, results]);
@@ -180,9 +184,11 @@ export const VisualizationContainer = () => {
   );
 
   return (
-    <CanvasPanel>
-      <VisActionBar />
-      {visualizationBuilder.renderVisualization({ searchContext, onSelectTimeRange })}
-    </CanvasPanel>
+    <EditorPanel>
+      {visualizationBuilder.renderVisualization({
+        timeRange: searchContext?.timeRange,
+        onSelectTimeRange,
+      })}
+    </EditorPanel>
   );
 };

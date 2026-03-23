@@ -143,18 +143,36 @@ export class QueryBuilder {
     this.setupLanguageSync();
     this.consoleResult();
 
-    this.subscriptions.push(
-      combineLatest([this.queryState$, this.queryEditorState$])
-        .pipe(debounceTime(500))
-        .subscribe(([queryState, queryEditorState]) => {
-          this.syncToUrl('_eq', queryState);
-          this.syncToUrl('_e', {
-            languageType: queryEditorState.languageType,
-          });
-        })
-    );
-
     this.setIsInitialized(true);
+  }
+
+  startUrlSync() {
+    if (!this.isInitialized) {
+      return;
+    }
+
+    // Sync _eq only when queryState changes
+    const queryStateUrlSync = this.queryState$
+      .pipe(
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        debounceTime(500)
+      )
+      .subscribe((queryState) => {
+        this.syncToUrl('_eq', queryState);
+      });
+
+    // Sync _e only when languageType changes
+    const editorStateUrlSync = this.queryEditorState$
+      .pipe(
+        map((state) => state.languageType),
+        distinctUntilChanged(),
+        debounceTime(500)
+      )
+      .subscribe((languageType) => {
+        this.syncToUrl('_e', { languageType });
+      });
+
+    this.subscriptions.push(queryStateUrlSync, editorStateUrlSync);
   }
 
   private syncToUrl(place: string, state: QueryState | Partial<QueryEditorState>) {

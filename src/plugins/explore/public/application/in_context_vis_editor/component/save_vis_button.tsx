@@ -5,8 +5,8 @@
  */
 
 import { useObservable } from 'react-use';
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useOpenSearchDashboards,
@@ -22,8 +22,8 @@ import { Query } from '../../../../../data/common';
 
 import { SavedExplore } from '../../../saved_explore';
 import { SaveVisModal } from './save_vis_modal';
+import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useInContextEditor } from '../../context';
-import { addToDashboard } from '../../../components/visualizations/utils/add_to_dashboard';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -50,32 +50,57 @@ export const SaveVisButton = () => {
   const visConfig = visualizationBuilder.visConfig$.value;
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { exploreId, containerId } = useInContextEditor();
+
+  const exploreId = useCurrentExploreId();
 
   const { savedExplore } = useSavedExplore(exploreId);
 
-  const { toastNotifications, dashboard, core } = services;
-
+  const { toastNotifications, chrome, embeddable } = services;
+  const stateTransfer = embeddable.getStateTransfer();
   const [showModal, setShowModal] = useState(false);
 
   const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
   const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
 
+  const originatingApp = useInContextEditor().originatingApp;
   const searchContext = useSearchContext();
 
-  // open a visualization from visualization list, containerId will be undefined
-  // in such case, back to visualization list
-  const dashboardUrl = useMemo(() => {
-    if (containerId) {
-      return core.application.getUrlForApp('dashboards', {
-        path: `#/view/${containerId}`,
+  const navigateTo = useCallback(
+    ({ id, newTitle }: { id: string; newTitle: string }) => {
+      toastNotifications.addSuccess({
+        title: i18n.translate('inContextEditor.saveVisualization.successNotificationText', {
+          defaultMessage: exploreId === undefined ? `Saved '{visTitle}'` : `Updated '{visTitle}'`,
+          values: {
+            visTitle: newTitle,
+          },
+        }),
+        'data-test-subj': 'saveVisualizationSuccess',
       });
-    } else {
-      return core.application.getUrlForApp('visualize', {
-        path: `#/`,
-      });
-    }
-  }, [core.application, containerId]);
+      if (originatingApp) {
+        // add a new panel or update existing panel
+        const embeddablePackage =
+          exploreId === undefined
+            ? [
+                {
+                  state: { type: 'explore', input: { savedObjectId: id } },
+                },
+              ]
+            : [];
+        stateTransfer.navigateToWithEmbeddablePackage(originatingApp, ...embeddablePackage);
+      } else {
+        // The in-context editor may not have originatingApp in cases such as a page reload
+        // or when opened directly from the visualization list
+        // In this case, just save the visualization without navigating back
+
+        if (exploreId === undefined) {
+          chrome.docTitle.change('changed');
+          chrome.setBreadcrumbs([{ text: newTitle }]);
+          services.scopedHistory?.push(`#/edit/${encodeURIComponent(id)}`);
+        }
+      }
+    },
+    [stateTransfer, exploreId, chrome, services.scopedHistory, toastNotifications, originatingApp]
+  );
 
   const handleSave = useCallback(
     async ({
@@ -85,7 +110,7 @@ export const SaveVisButton = () => {
       onTitleDuplicate,
     }: OnSaveProps) => {
       const axesMapping = visConfig?.axesMapping;
-
+      const currentTitle = savedExploreToSave.title;
       savedExploreToSave.title = newTitle;
       savedExploreToSave.type = undefined; // save explores created in in-context editor don't have flavor
       savedExploreToSave.visualization = JSON.stringify({
@@ -99,64 +124,30 @@ export const SaveVisButton = () => {
       savedExploreToSave.searchSourceFields = {
         index: datasetView.dataView,
       };
+      savedExploreToSave.copyOnSave = false;
+      if (exploreId === undefined) {
+        savedExploreToSave.copyOnSave = true; // always save a new copy for new explore visulization
+      }
+      const searchSourceInstance = savedExploreToSave.searchSourceFields;
+
+      if (searchSourceInstance) {
+        searchSourceInstance.query = searchContext.query as Query;
+        searchSourceInstance.filter = searchContext.filters;
+      }
 
       const saveOptions = {
+        confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
+        returnToOrigin: true,
       };
       try {
-        savedExploreToSave.title = newTitle;
-        if (exploreId === undefined) {
-          savedExploreToSave.copyOnSave = true;
-        }
-        const searchSourceInstance = savedExploreToSave.searchSourceFields;
-
-        if (searchSourceInstance) {
-          searchSourceInstance.query = searchContext.query as Query;
-          searchSourceInstance.filter = searchContext.filters;
-        }
-
         const id = await savedExploreToSave.save(saveOptions);
+        if (id) {
+          setShowModal(false);
 
-        // add to dashboard for new save explore
-        if (id && exploreId === undefined) {
-          const props = {
-            existingDashboardId: containerId,
-          };
-
-          const dashboardId = await addToDashboard(
-            dashboard,
-            { id, type: 'explore' },
-            'existing',
-            props
-          );
-
-          if (dashboardId) {
-            const toastContent = (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate('explore.addToDashboard.notification.success.message', {
-                    defaultMessage: `Explore '{newTitle}' is successfully added to the dashboard.`,
-                    values: { newTitle },
-                  })}
-                </p>
-              </EuiText>
-            );
-
-            toastNotifications.add({
-              title: i18n.translate('explore.addToDashboard.notification.success.message.toast', {
-                defaultMessage: 'Panel added to dashboard',
-              }),
-              color: 'success',
-              iconType: 'check',
-              text: toMountPoint(toastContent),
-              'data-test-subj': 'addToExistingDashboardSuccessToastInContext',
-            });
-          }
+          navigateTo({ id, newTitle });
         }
-
-        setShowModal(false);
-        window.location.href = dashboardUrl;
       } catch (error) {
         toastNotifications.add({
           title: i18n.translate('explore.addToDashboard.notification.fail', {
@@ -167,7 +158,7 @@ export const SaveVisButton = () => {
           text: toMountPoint(error),
           'data-test-subj': 'addToNewDashboarddFailToast',
         });
-
+        savedExploreToSave.title = currentTitle;
         setShowModal(false);
       }
     },
@@ -175,25 +166,31 @@ export const SaveVisButton = () => {
       visConfig,
       datasetView.dataView,
       exploreId,
-      containerId,
+      navigateTo,
       searchContext.query,
       searchContext.filters,
-      dashboard,
-      dashboardUrl,
       toastNotifications,
     ]
   );
 
   const handleDiscard = useCallback(() => {
-    window.location.href = dashboardUrl;
-  }, [dashboardUrl]);
+    if (originatingApp) {
+      stateTransfer.navigateToWithEmbeddablePackage(originatingApp);
+    } else {
+      // Reload the current edit page to discard changes
+      const url =
+        exploreId !== undefined && savedExplore ? `#/edit/${encodeURIComponent(exploreId)}` : '#/';
+      services.scopedHistory?.push(url);
+      window.location.reload();
+    }
+  }, [stateTransfer, services.scopedHistory, exploreId, savedExplore, originatingApp]);
 
   const handleSaveButtonClick = useCallback(async () => {
     // If exploreId is defined, we're editing an existing saved visualization
     // Directly save without showing the modal
     if (exploreId !== undefined && savedExplore) {
       if (!isVisDirty && !isQueryEditorDirty) {
-        window.location.href = dashboardUrl;
+        navigateTo({ id: exploreId, newTitle: savedExplore.title });
         return;
       }
       await handleSave({
@@ -206,7 +203,7 @@ export const SaveVisButton = () => {
       // Show modal for new visualizations
       setShowModal(true);
     }
-  }, [exploreId, savedExplore, handleSave, isVisDirty, isQueryEditorDirty, dashboardUrl]);
+  }, [exploreId, savedExplore, handleSave, isVisDirty, isQueryEditorDirty, navigateTo]);
 
   const saveButton = (
     <EuiButtonEmpty
@@ -215,7 +212,7 @@ export const SaveVisButton = () => {
       color="primary"
       size="s"
     >
-      {containerId ? saveButtonText : saveButtonWithoutBackText}
+      {originatingApp ? saveButtonText : saveButtonWithoutBackText}
     </EuiButtonEmpty>
   );
 

@@ -128,10 +128,6 @@ import {
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
-import {
-  EditorRegistryService,
-  EditorRegistryServiceStart,
-} from './services/register_in_context_editor_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -220,7 +216,6 @@ export class DashboardPlugin
 
   private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
-  private editorRegistryService = new EditorRegistryService();
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -450,7 +445,6 @@ export class DashboardPlugin
           savedObjectsPublic: savedObjects,
           restorePreviousUrl,
           toastNotifications: coreStart.notifications.toasts,
-          editorRegistryService: this.editorRegistryService,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
@@ -667,7 +661,6 @@ export class DashboardPlugin
           options,
           embeddable.getEmbeddableFactory
         ),
-      editorRegistry: this.editorRegistryService.start(),
     };
   }
 
