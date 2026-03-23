@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { fromYaml } from './utils/yaml';
+import { resolveVariables } from './utils/variables';
 
 /**
  * Lint rule configuration.
@@ -25,8 +26,10 @@ export interface LintRuleConfig {
 export interface ProfileConfig {
   url: string;
   token?: string;
+  token_command?: string; // shell command that outputs a token
   username?: string;
   password?: string;
+  variables?: Record<string, string>;
 }
 
 /**
@@ -37,6 +40,7 @@ export interface OsdctlConfig {
   defaultProfile: string;
   outputDir: string;
   lint?: LintRuleConfig;
+  variables?: Record<string, string>;
 }
 
 const DEFAULT_CONFIG: OsdctlConfig = {
@@ -105,6 +109,9 @@ function mergeConfig(base: OsdctlConfig, overrides: Partial<OsdctlConfig>): Osdc
     defaultProfile: overrides.defaultProfile || base.defaultProfile,
     outputDir: overrides.outputDir || base.outputDir,
     lint: overrides.lint ? { ...base.lint, ...overrides.lint } : base.lint,
+    variables: overrides.variables
+      ? { ...(base.variables || {}), ...overrides.variables }
+      : base.variables,
   };
 }
 
@@ -151,4 +158,13 @@ export function getActiveProfile(config: OsdctlConfig): ProfileConfig {
     );
   }
   return profile;
+}
+
+/**
+ * Get the resolved variables for the active profile.
+ * Profile-level variables override top-level variables.
+ */
+export function getResolvedVariables(config: OsdctlConfig): Record<string, string> {
+  const profile = getActiveProfile(config);
+  return resolveVariables(config.variables, profile.variables);
 }

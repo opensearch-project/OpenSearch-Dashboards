@@ -43,15 +43,30 @@ console.log(JSON.stringify(dashboard.build(), null, 2));
 const PROJECT_OSDCTL_YAML = {
   defaultProfile: 'dev',
   outputDir: './built',
+  variables: {
+    cluster_name: 'default-cluster',
+  },
   profiles: {
     dev: {
       url: 'http://localhost:5601',
+      variables: {
+        cluster_name: 'dev-cluster',
+        data_source: 'metrics-dev',
+      },
     },
     staging: {
       url: 'https://staging.example.com',
+      variables: {
+        cluster_name: 'staging-cluster',
+        data_source: 'metrics-staging',
+      },
     },
     prod: {
       url: 'https://prod.example.com',
+      variables: {
+        cluster_name: 'prod-cluster',
+        data_source: 'metrics-prod',
+      },
     },
   },
   lint: {

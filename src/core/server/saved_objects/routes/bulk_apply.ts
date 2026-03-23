@@ -12,7 +12,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { deepEqual } from './utils';
+import { deepEqual, resolveDependencyOrder } from './utils';
 
 interface ApplyResult {
   type: string;
@@ -85,8 +85,20 @@ export const registerBulkApplyRoute = (router: IRouter, config: SavedObjectConfi
         });
       }
 
+      // Phase 1.5: Resolve dependency order using topological sort
+      const dependencyResult = resolveDependencyOrder(resources);
+      if (dependencyResult.circular) {
+        return res.badRequest({
+          body: {
+            message: 'Circular dependency detected among resources',
+            circular: dependencyResult.circular,
+          },
+        });
+      }
+      const orderedResources = dependencyResult.ordered as typeof resources;
+
       // Phase 2: Bulk get existing objects to determine which exist
-      const bulkGetInput = resources.map(({ type, id }) => ({ type, id }));
+      const bulkGetInput = orderedResources.map(({ type, id }) => ({ type, id }));
       let existingObjects: Map<string, Record<string, unknown>> = new Map();
 
       try {
@@ -115,8 +127,8 @@ export const registerBulkApplyRoute = (router: IRouter, config: SavedObjectConfi
       const writeIndexToResultIndex: Map<number, number> = new Map();
       let hasErrors = false;
 
-      for (let i = 0; i < resources.length; i++) {
-        const resource = resources[i];
+      for (let i = 0; i < orderedResources.length; i++) {
+        const resource = orderedResources[i];
         const key = `${resource.type}:${resource.id}`;
         const existing = existingObjects.get(key);
 

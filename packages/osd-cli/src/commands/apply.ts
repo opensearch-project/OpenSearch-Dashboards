@@ -6,8 +6,9 @@
 import * as readline from 'readline';
 import * as path from 'path';
 import { OsdClient, ApplyResult, SavedObject } from '../client';
-import { OsdctlConfig, getActiveProfile } from '../config';
+import { OsdctlConfig, getActiveProfile, getResolvedVariables } from '../config';
 import { printStatus, printHeader, printError, printTable } from '../utils/output';
+import { substituteVariables } from '../utils/variables';
 import { readBuiltFiles } from './validate';
 
 export interface ApplyOptions {
@@ -64,7 +65,13 @@ export async function applyCommand(options: ApplyOptions): Promise<void> {
     return;
   }
 
-  const objects = stampManagedBy(files.map((f) => f.object));
+  // Apply variable substitution before sending to the server
+  const variables = getResolvedVariables(config);
+  const profileName = config.defaultProfile;
+  const rawObjects = stampManagedBy(files.map((f) => f.object));
+  const objects = rawObjects.map(
+    (obj) => substituteVariables(obj, variables, profileName) as SavedObject
+  );
 
   console.log(`Found ${objects.length} object(s) to apply.\n`);
 

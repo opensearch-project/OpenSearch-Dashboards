@@ -13,6 +13,7 @@ import { readBuiltFiles } from './validate';
 export interface DiffOptions {
   inputDir: string;
   outputDir?: string;
+  output?: 'text' | 'json';
   config: OsdctlConfig;
 }
 
@@ -20,9 +21,12 @@ export interface DiffOptions {
  * Execute the diff command to compare local definitions against deployed versions.
  */
 export async function diffCommand(options: DiffOptions): Promise<void> {
-  const { inputDir, outputDir, config } = options;
+  const { inputDir, outputDir, output = 'text', config } = options;
+  const isJson = output === 'json';
 
-  printHeader('Diffing local vs. deployed dashboards');
+  if (!isJson) {
+    printHeader('Diffing local vs. deployed dashboards');
+  }
 
   const files = readBuiltFiles(inputDir);
 
@@ -43,6 +47,25 @@ export async function diffCommand(options: DiffOptions): Promise<void> {
     const error = err as Error;
     printError(`Diff failed: ${error.message}`);
     process.exitCode = 1;
+    return;
+  }
+
+  // Determine if there is drift
+  const hasDrift = results.some((r) => r.status !== 'UNCHANGED');
+
+  if (hasDrift) {
+    process.exitCode = 2;
+  }
+
+  // JSON output mode: print machine-readable JSON and return early
+  if (isJson) {
+    const jsonResults = results.map((result) => ({
+      type: result.type,
+      id: result.id,
+      status: result.status.toLowerCase(),
+      changes: result.diff ? [{ raw: result.diff }] : [],
+    }));
+    console.log(JSON.stringify({ hasDrift, results: jsonResults }, null, 2));
     return;
   }
 

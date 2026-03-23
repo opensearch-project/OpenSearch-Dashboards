@@ -6,6 +6,7 @@
 import * as http from 'http';
 import * as https from 'https';
 import { URL } from 'url';
+import { execSync } from 'child_process';
 import { ProfileConfig } from './config';
 
 /**
@@ -85,9 +86,31 @@ export class OsdClient {
 
     if (profile.token) {
       this.authHeaders['Authorization'] = `Bearer ${profile.token}`;
+    } else if (profile.token_command) {
+      const token = this.executeTokenCommand(profile.token_command);
+      this.authHeaders['Authorization'] = `Bearer ${token}`;
     } else if (profile.username && profile.password) {
       const encoded = Buffer.from(`${profile.username}:${profile.password}`).toString('base64');
       this.authHeaders['Authorization'] = `Basic ${encoded}`;
+    }
+  }
+
+  /**
+   * Execute a shell command to retrieve a bearer token.
+   * The token is cached for the lifetime of this client instance.
+   */
+  private executeTokenCommand(command: string): string {
+    try {
+      const result = execSync(command, {
+        timeout: 10000,
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      return result.trim();
+    } catch (err: unknown) {
+      const error = err as { stderr?: string; message?: string };
+      const stderr = error.stderr ? error.stderr.toString().trim() : error.message || 'unknown error';
+      throw new Error(`token_command failed: ${stderr}`);
     }
   }
 
@@ -281,5 +304,22 @@ export class OsdClient {
       method: 'GET',
       path: `/api/saved_objects/_find?${params.toString()}`,
     });
+  }
+
+  /**
+   * Find all saved objects of a given type, paginating through results.
+   */
+  async findAll(type: string, perPage: number = 100): Promise<SavedObject[]> {
+    const allObjects: SavedObject[] = [];
+    let page = 1;
+    let total = Infinity;
+
+    while (allObjects.length < total) {
+      const result = await this.find({ type, perPage, page });
+      allObjects.push(...result.saved_objects);
+      total = result.total;
+      page++;
+    }
+    return allObjects;
   }
 }

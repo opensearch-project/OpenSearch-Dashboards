@@ -14,6 +14,7 @@ export interface PullOptions {
   outputDir: string;
   outputFormat: 'json' | 'yaml';
   labels?: Record<string, string>;
+  perPage?: number;
   config: OsdctlConfig;
 }
 
@@ -45,7 +46,7 @@ function toFileName(obj: SavedObject, format: 'json' | 'yaml'): string {
  * Execute the pull command to export dashboards from an instance.
  */
 export async function pullCommand(options: PullOptions): Promise<void> {
-  const { outputDir, outputFormat, labels, config } = options;
+  const { outputDir, outputFormat, labels, perPage = 100, config } = options;
 
   printHeader('Pulling dashboards from instance');
 
@@ -54,7 +55,13 @@ export async function pullCommand(options: PullOptions): Promise<void> {
 
   let objects: SavedObject[];
   try {
-    objects = await client.exportClean({ labels });
+    if (labels) {
+      // Use exportClean when filtering by labels
+      objects = await client.exportClean({ labels });
+    } else {
+      // Use paginated findAll for pulling all objects
+      objects = await client.findAll('dashboard', perPage);
+    }
   } catch (err: unknown) {
     const error = err as Error;
     printError(`Pull failed: ${error.message}`);

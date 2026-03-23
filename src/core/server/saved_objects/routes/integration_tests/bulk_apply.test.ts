@@ -417,6 +417,163 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
     );
   });
 
+  describe('dependency resolution', () => {
+    it('orders resources so dependencies are created before dependents', async () => {
+      // Dashboard depends on visualization, but dashboard is listed first in the request
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'vis-1',
+            type: 'visualization',
+            error: { statusCode: 404, message: 'Not found' },
+            attributes: {},
+            references: [],
+          },
+          {
+            id: 'dash-1',
+            type: 'dashboard',
+            error: { statusCode: 404, message: 'Not found' },
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'vis-1',
+            type: 'visualization',
+            attributes: { title: 'My Vis', labels: { 'managed-by': 'osdctl' } },
+            references: [],
+          },
+          {
+            id: 'dash-1',
+            type: 'dashboard',
+            attributes: { title: 'My Dashboard', labels: { 'managed-by': 'osdctl' } },
+            references: [{ name: 'panel_0', type: 'visualization', id: 'vis-1' }],
+          },
+        ],
+      });
+
+      const result = await supertest(httpSetup.server.listener)
+        .post('/api/saved_objects/_bulk_apply')
+        .send({
+          resources: [
+            {
+              type: 'dashboard',
+              id: 'dash-1',
+              attributes: { title: 'My Dashboard' },
+              references: [{ name: 'panel_0', type: 'visualization', id: 'vis-1' }],
+            },
+            {
+              type: 'visualization',
+              id: 'vis-1',
+              attributes: { title: 'My Vis' },
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(result.body.results).toHaveLength(2);
+      // bulkCreate should be called with visualization before dashboard (dependency order)
+      const bulkCreateArgs = savedObjectsClient.bulkCreate.mock.calls[0][0];
+      const visIndex = bulkCreateArgs.findIndex(
+        (obj: any) => obj.type === 'visualization' && obj.id === 'vis-1'
+      );
+      const dashIndex = bulkCreateArgs.findIndex(
+        (obj: any) => obj.type === 'dashboard' && obj.id === 'dash-1'
+      );
+      expect(visIndex).toBeLessThan(dashIndex);
+    });
+
+    it('returns 400 when circular dependencies are detected', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post('/api/saved_objects/_bulk_apply')
+        .send({
+          resources: [
+            {
+              type: 'visualization',
+              id: 'vis-a',
+              attributes: { title: 'Vis A' },
+              references: [{ name: 'ref_0', type: 'visualization', id: 'vis-b' }],
+            },
+            {
+              type: 'visualization',
+              id: 'vis-b',
+              attributes: { title: 'Vis B' },
+              references: [{ name: 'ref_0', type: 'visualization', id: 'vis-a' }],
+            },
+          ],
+        })
+        .expect(400);
+
+      expect(result.body.message).toBe('Circular dependency detected among resources');
+      expect(result.body.circular).toEqual(expect.arrayContaining(['vis-a', 'vis-b']));
+      expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('passes through resources with no dependencies in their original order', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ip-1',
+            type: 'index-pattern',
+            error: { statusCode: 404, message: 'Not found' },
+            attributes: {},
+            references: [],
+          },
+          {
+            id: 'ip-2',
+            type: 'index-pattern',
+            error: { statusCode: 404, message: 'Not found' },
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+      savedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ip-1',
+            type: 'index-pattern',
+            attributes: { title: 'pattern-1', labels: { 'managed-by': 'osdctl' } },
+            references: [],
+          },
+          {
+            id: 'ip-2',
+            type: 'index-pattern',
+            attributes: { title: 'pattern-2', labels: { 'managed-by': 'osdctl' } },
+            references: [],
+          },
+        ],
+      });
+
+      const result = await supertest(httpSetup.server.listener)
+        .post('/api/saved_objects/_bulk_apply')
+        .send({
+          resources: [
+            {
+              type: 'index-pattern',
+              id: 'ip-1',
+              attributes: { title: 'pattern-1' },
+            },
+            {
+              type: 'index-pattern',
+              id: 'ip-2',
+              attributes: { title: 'pattern-2' },
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(result.body.results).toHaveLength(2);
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      const bulkCreateArgs = savedObjectsClient.bulkCreate.mock.calls[0][0];
+      expect(bulkCreateArgs[0]).toEqual(expect.objectContaining({ id: 'ip-1' }));
+      expect(bulkCreateArgs[1]).toEqual(expect.objectContaining({ id: 'ip-2' }));
+    });
+  });
+
   it('handles bulkCreate per-object errors', async () => {
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [

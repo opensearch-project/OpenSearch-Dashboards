@@ -8,6 +8,8 @@ import * as path from 'path';
 import { execFileSync } from 'child_process';
 import { printStatus, printHeader, printError, printSuccess } from '../utils/output';
 import { toYaml } from '../utils/yaml';
+import { substituteVariables } from '../utils/variables';
+import { OsdctlConfig, getResolvedVariables } from '../config';
 
 export interface BuildOptions {
   file?: string;
@@ -15,6 +17,7 @@ export interface BuildOptions {
   outputFormat: 'json' | 'yaml';
   outputDir: string;
   stdout: boolean;
+  config?: OsdctlConfig;
 }
 
 /**
@@ -90,7 +93,11 @@ function writeOutput(
  * Execute the build command.
  */
 export async function buildCommand(options: BuildOptions): Promise<void> {
-  const { file, directory, outputFormat, outputDir, stdout } = options;
+  const { file, directory, outputFormat, outputDir, stdout, config } = options;
+
+  // Resolve variables from config for substitution
+  const variables = config ? getResolvedVariables(config) : {};
+  const profileName = config?.defaultProfile;
 
   if (!file && !directory) {
     printError('Either --file (-f) or --directory (-d) must be specified.');
@@ -129,7 +136,8 @@ export async function buildCommand(options: BuildOptions): Promise<void> {
 
   for (const filePath of files) {
     try {
-      const data = buildFile(filePath);
+      const rawData = buildFile(filePath);
+      const data = substituteVariables(rawData, variables, profileName);
 
       if (stdout) {
         const output =

@@ -173,9 +173,15 @@ osdctl diff [options]
 
   Compare local definitions against deployed versions.
 
+  EXIT CODES
+    0    No drift detected (all resources unchanged)
+    1    Error (network failure, auth error, invalid input)
+    2    Drift detected (at least one resource is new or updated)
+
   OPTIONS
-    --input-dir      Input directory [default: ./built]
-    --output-dir     Write .diff files to this directory
+    --input-dir          Input directory [default: ./built]
+    --output-dir         Write .diff files to this directory
+    --output, -o <mode>  Output mode: text or json [default: text]
 `,
     apply: `
 osdctl apply [options]
@@ -196,6 +202,7 @@ osdctl pull [options]
     --output-dir     Output directory [default: ./pulled]
     -o <format>      Output format: json or yaml [default: yaml]
     --label          Filter by labels (format: key=value,key2=value2)
+    --per-page       Number of objects per page for pagination [default: 100]
 `,
     lint: `
 osdctl lint [options]
@@ -266,6 +273,7 @@ export async function main(argv: string[]): Promise<void> {
           outputFormat: ((parsed.flags['o'] as string) || 'yaml') as 'json' | 'yaml',
           outputDir: (parsed.flags['output-dir'] as string) || config.outputDir,
           stdout: parsed.flags['stdout'] === true,
+          config,
         });
         break;
       }
@@ -285,6 +293,7 @@ export async function main(argv: string[]): Promise<void> {
         await diffCommand({
           inputDir: (parsed.flags['input-dir'] as string) || config.outputDir,
           outputDir: (parsed.flags['output-dir'] as string) || undefined,
+          output: ((parsed.flags['output'] as string) || (parsed.flags['o'] as string) || 'text') as 'text' | 'json',
           config,
         });
         break;
@@ -304,10 +313,13 @@ export async function main(argv: string[]): Promise<void> {
       case 'pull': {
         const config = loadConfig(profileName);
         const labelStr = parsed.flags['label'] as string | undefined;
+        const perPageStr = parsed.flags['per-page'] as string | undefined;
+        const perPage = perPageStr ? parseInt(perPageStr, 10) : 100;
         await pullCommand({
           outputDir: (parsed.flags['output-dir'] as string) || './pulled',
           outputFormat: ((parsed.flags['o'] as string) || 'yaml') as 'json' | 'yaml',
           labels: labelStr ? parseLabels(labelStr) : undefined,
+          perPage,
           config,
         });
         break;

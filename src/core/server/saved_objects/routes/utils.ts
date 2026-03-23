@@ -75,6 +75,105 @@ export function validateObjects(
   }
 }
 
+export interface DependencyResolutionResult {
+  ordered: Array<{ type: string; id: string; [key: string]: unknown }>;
+  circular?: string[]; // IDs involved in circular dependency
+}
+
+/**
+ * Resolves the dependency order of resources using topological sort (Kahn's algorithm).
+ * Resources are sorted so that dependencies come before the resources that reference them.
+ * If circular dependencies are detected, the `circular` field contains the IDs involved.
+ */
+export function resolveDependencyOrder(
+  resources: Array<{
+    type: string;
+    id: string;
+    references?: Array<{ type: string; id: string; name: string }>;
+  }>
+): DependencyResolutionResult {
+  // Build a map of composite key -> resource for quick lookup
+  const resourceMap = new Map<string, (typeof resources)[number]>();
+  for (const resource of resources) {
+    resourceMap.set(`${resource.type}:${resource.id}`, resource);
+  }
+
+  // Build adjacency list and in-degree count.
+  // An edge from A -> B means "A must come before B" (B depends on A).
+  const inDegree = new Map<string, number>();
+  const dependents = new Map<string, string[]>(); // key -> list of keys that depend on it
+
+  for (const resource of resources) {
+    const key = `${resource.type}:${resource.id}`;
+    if (!inDegree.has(key)) {
+      inDegree.set(key, 0);
+    }
+    if (!dependents.has(key)) {
+      dependents.set(key, []);
+    }
+  }
+
+  for (const resource of resources) {
+    const key = `${resource.type}:${resource.id}`;
+    if (resource.references) {
+      for (const ref of resource.references) {
+        const refKey = `${ref.type}:${ref.id}`;
+        // Only consider references that point to resources in the batch
+        if (resourceMap.has(refKey)) {
+          inDegree.set(key, (inDegree.get(key) || 0) + 1);
+          if (!dependents.has(refKey)) {
+            dependents.set(refKey, []);
+          }
+          dependents.get(refKey)!.push(key);
+        }
+      }
+    }
+  }
+
+  // Kahn's algorithm
+  const queue: string[] = [];
+  for (const [key, degree] of inDegree) {
+    if (degree === 0) {
+      queue.push(key);
+    }
+  }
+
+  const ordered: Array<{ type: string; id: string; [key: string]: unknown }> = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const resource = resourceMap.get(current);
+    if (resource) {
+      ordered.push(resource);
+    }
+
+    for (const dep of dependents.get(current) || []) {
+      const newDegree = (inDegree.get(dep) || 1) - 1;
+      inDegree.set(dep, newDegree);
+      if (newDegree === 0) {
+        queue.push(dep);
+      }
+    }
+  }
+
+  // If not all resources were processed, there is a circular dependency
+  if (ordered.length < resources.length) {
+    const circular: string[] = [];
+    for (const [key, degree] of inDegree) {
+      if (degree > 0) {
+        // Extract just the id portion from the composite key
+        const resource = resourceMap.get(key);
+        if (resource) {
+          circular.push(resource.id);
+        }
+      }
+    }
+    return { ordered, circular };
+  }
+
+  return { ordered };
+}
+
 /**
  * Recursively compares two values for deep equality.
  * Used by bulk_apply and diff routes to determine if saved object attributes have changed.
