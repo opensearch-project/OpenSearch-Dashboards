@@ -96,6 +96,7 @@ export const ExploreTabs = () => {
                 key={tab.id}
                 isSelected={tab.id === activeRegistryTab.id}
                 onClick={() => onTabClick(tab.id)}
+                id={tab.id}
                 data-test-subj={`exploreTab-${tab.id}`}
               >
                 {tab.label}
