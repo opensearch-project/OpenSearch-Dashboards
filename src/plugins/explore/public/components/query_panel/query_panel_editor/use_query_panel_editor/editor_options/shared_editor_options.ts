@@ -22,4 +22,5 @@ export const sharedEditorOptions: IEditorConstructionOptions = {
   },
   overviewRulerLanes: 0,
   hideCursorInOverviewRuler: true,
+  fixedOverflowWidgets: true,
 };

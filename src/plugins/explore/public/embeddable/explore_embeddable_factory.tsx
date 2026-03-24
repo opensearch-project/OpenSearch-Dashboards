@@ -23,7 +23,7 @@ import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { VisualizationRegistryService } from '../services/visualization_registry_service';
-import { ExploreFlavor } from '../../common';
+import { ExploreFlavor, VISUALIZATION_EDITOR_APP_ID } from '../../common';
 import { SavedExplore } from '../saved_explore';
 
 interface StartServices {
@@ -97,16 +97,21 @@ export class ExploreEmbeddableFactory
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
       const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
 
+      // for in-context created visualization
+      const adjustEditPath = !savedObject.type ? `#/edit/${savedObjectId}` : url;
+
+      const adjustApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
+
       return new ExploreEmbeddableClass(
         {
           savedExplore: savedObject,
           editUrl,
-          editPath: url,
+          editPath: adjustEditPath,
           filterManager,
           editable: services.capabilities.discover?.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
           services,
-          editApp: `explore/${flavor}`,
+          editApp: adjustApp,
         },
         input,
         executeTriggerActions,
