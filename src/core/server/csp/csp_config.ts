@@ -47,12 +47,12 @@ export interface ICspConfig {
    * Specify whether browsers that do not support CSP should be
    * able to use OpenSearch Dashboards. Use `true` to block and `false` to allow.
    * This will also add the STRICT_CSP_RULES
-    * @deprecated Use `enable` instead.
+   * @deprecated Use `enable` instead.
    */
   readonly strict: boolean;
 
   /**
-    * Specify whether CSP hardening mode is enabled.
+   * Specify whether CSP hardening mode is enabled.
    */
   readonly enable: boolean;
 
@@ -85,7 +85,7 @@ export interface ICspConfig {
 
   /**
    * Loosens the specified CSP directives back to the default_values.
-    * This is only used when enable === true
+   * This is only used when enable === true
    */
   readonly loosenCspDirectives?: string[];
 
