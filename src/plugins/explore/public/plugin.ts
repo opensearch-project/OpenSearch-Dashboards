@@ -815,7 +815,7 @@ export class ExplorePlugin
       title: i18n.translate('explore.visualization.editor.title', {
         defaultMessage: 'Add visualization',
       }),
-      description: i18n.translate('explore.visualization.description', {
+      description: i18n.translate('explore.visualization.editor.description', {
         defaultMessage: 'Create visualization with visualization editor',
       }),
       icon: 'visualizeApp',
