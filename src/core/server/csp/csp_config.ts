@@ -135,11 +135,12 @@ export class CspConfig implements ICspConfig {
     this.rules = source.rules;
     this.enable = source.enable;
     this.strict = source.enable;
+    const isCspEnabled = source.enable || source.strict;
     this.warnLegacyBrowsers = source.warnLegacyBrowsers;
     this.nonceDirectives = source.nonceDirectives;
     this.loosenCspDirectives = source.loosenCspDirectives || [];
 
-    if (source.enable) {
+    if (isCspEnabled) {
       this.rules = this.applyLoosenCspRules(
         this.applyAllowedSources(STRICT_CSP_RULES_DEFAULT_VALUE, source)
       );
