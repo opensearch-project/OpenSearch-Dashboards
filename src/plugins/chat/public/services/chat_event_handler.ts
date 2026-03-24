@@ -537,7 +537,7 @@ export class ChatEventHandler {
       // Record error
       this.telemetryRecorder.recordError({
         type: 'ChatInteractionError',
-        message: errorMessage,
+        message: eventMessage,
         context: {
           errorCode: event.code,
         },
