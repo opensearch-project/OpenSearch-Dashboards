@@ -42,6 +42,7 @@ export const API = {
       INDEXES: `${BASE_API}/remote_cluster/indexes`,
     },
   },
+  PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },
@@ -58,6 +59,7 @@ export const URI = {
   ML: '/_plugins/_ml',
   OBSERVABILITY: '/_plugins/_observability',
   DATA_CONNECTIONS: '/_plugins/_query/_datasources',
+  PPL_BUNDLE: '/_plugins/_ppl/_grammar',
 };
 
 export const OPENSEARCH_API = {

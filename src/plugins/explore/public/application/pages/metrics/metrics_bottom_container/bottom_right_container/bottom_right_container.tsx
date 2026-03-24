@@ -2,35 +2,35 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiSpacer } from '@elastic/eui';
+import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
+import { CanvasPanel } from '../../../../../components/panel/canvas_panel';
+import { ExploreServices } from '../../../../../types';
+import { useDatasetContext } from '../../../../context';
+import { useEditorRef } from '../../../../hooks';
+import { LoadingSpinner } from '../../../../legacy/discover/application/components/loading_spinner/loading_spinner';
+import { DiscoverNoIndexPatterns } from '../../../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
+import { DiscoverNoResults } from '../../../../legacy/discover/application/components/no_results/no_results';
+import { DiscoverUninitialized } from '../../../../legacy/discover/application/components/uninitialized/uninitialized';
+import { defaultPrepareQueryString } from '../../../../utils/state_management/actions/query_actions';
+import { onEditorRunActionCreator } from '../../../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { selectQueryStatusMapByKey } from '../../../../utils/state_management/selectors';
 import { RootState } from '../../../../utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../utils/state_management/types';
-import { CanvasPanel } from '../../../../../components/panel/canvas_panel';
-import { DiscoverNoIndexPatterns } from '../../../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
-import { DiscoverUninitialized } from '../../../../legacy/discover/application/components/uninitialized/uninitialized';
-import { LoadingSpinner } from '../../../../legacy/discover/application/components/loading_spinner/loading_spinner';
-import { DiscoverNoResults } from '../../../../legacy/discover/application/components/no_results/no_results';
-import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../../../../../types';
-import {
-  executeQueries,
-  defaultPrepareQueryString,
-} from '../../../../utils/state_management/actions/query_actions';
-import { DiscoverChartContainer } from '../../../../../components/chart/discover_chart_container';
-import { useDatasetContext } from '../../../../context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
   const { dataset } = useDatasetContext();
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const editorRef = useEditorRef();
 
   const onRefresh = () => {
     if (services) {
-      dispatch(executeQueries({ services }));
+      const editorText = editorRef.current?.getValue() || '';
+      dispatch(onEditorRunActionCreator(services, editorText));
     }
   };
 

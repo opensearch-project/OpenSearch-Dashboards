@@ -24,6 +24,9 @@ export const convertQueryToMonacoSuggestion = (queries: QuerySnippetItem[]): Que
     const snippets = extractSnippetsFromQuery(query.query.query as string);
     snippets.forEach((snippet) => {
       const trimmedSnippet = snippet.trim().toLowerCase();
+      if (!trimmedSnippet || !/[a-z0-9_]/i.test(trimmedSnippet)) {
+        return;
+      }
 
       // Only add if we haven't seen this text before
       if (!textMap.has(trimmedSnippet)) {

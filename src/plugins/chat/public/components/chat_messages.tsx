@@ -244,7 +244,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   // No need for separate context display here
 
   const scrollToBottom = useCallback(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && !userHasScrolledUp.current) {
       isAutoScrolling.current = true;
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       // Reset flag after animation completes
@@ -305,7 +305,17 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
     }
   }, [timeline, isNearBottom, scrollToBottom]);
 
-  // Attach scroll listener
+  // Handle user wheel events to detect manual scroll intent
+  // This fires when user actively scrolls, even during auto-scroll animation
+  const handleWheelScroll = useCallback((e: WheelEvent) => {
+    // Scrolling up (negative deltaY) - user wants to stop auto-scroll
+    if (e.deltaY < 0) {
+      userHasScrolledUp.current = true;
+      isAutoScrolling.current = false; // Cancel any ongoing auto-scroll
+    }
+  }, []);
+
+  // Attach scroll and wheel listeners
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) {
@@ -313,11 +323,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
     }
 
     container.addEventListener('scroll', handleScroll, { passive: true });
+    container.addEventListener('wheel', handleWheelScroll as EventListener, { passive: true });
 
     return () => {
       container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('wheel', handleWheelScroll as EventListener);
     };
-  }, [handleScroll]);
+  }, [handleScroll, handleWheelScroll]);
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
