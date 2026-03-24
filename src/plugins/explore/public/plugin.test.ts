@@ -272,7 +272,7 @@ describe('ExplorePlugin', () => {
     it('should register explore applications', () => {
       plugin.setup(coreSetup as any, setupDeps as any);
 
-      expect(coreSetup.application.register).toHaveBeenCalledTimes(4);
+      expect(coreSetup.application.register).toHaveBeenCalledTimes(5);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'explore/logs',
@@ -314,7 +314,7 @@ describe('ExplorePlugin', () => {
       expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'DiscoverVisualization',
-          aliasApp: 'explore',
+          aliasApp: 'visualization-editor',
           title: expect.any(String),
         })
       );

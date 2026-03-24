@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './visualization_container.scss';
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import moment from 'moment';

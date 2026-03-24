@@ -4,7 +4,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
@@ -12,43 +11,28 @@ import {
   SavedQueryManagementComponent,
   SavedQueryMeta,
   SavedQuery,
-} from '../../../../../../data/public';
-import {
-  selectQuery,
-  selectIsPromptEditorMode,
-} from '../../../../application/utils/state_management/selectors';
-import {
-  clearResults,
-  setDateRange,
-  setSavedQuery,
-} from '../../../../application/utils/state_management/slices';
-import { ExploreServices } from '../../../../types';
-import { setQueryState } from '../../../../application/utils/state_management/slices';
-import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
-import { useTimeFilter } from '../../utils';
-import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { RootState } from '../../../../application/utils/state_management/store';
-import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
-import { useEditorText, useSetEditorTextWithQuery } from '../../../../application/hooks';
-import './save_query.scss';
+} from '../../../../../data/public';
+import { ExploreServices } from '../../../types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { useQueryBuilderState } from '../hooks/use_query_builder_state';
+import { useEditorOperations } from '../hooks/use_editor_operations';
+import { EditorMode } from '../../utils/state_management/types';
+import '../../../components/query_panel/query_panel_widgets/save_query/save_query.scss';
+import { QueryState } from '../query_builder/query_builder';
 
 export const SaveQueryButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { timeFilter } = useTimeFilter();
-  const query = useSelector(selectQuery);
-  const getEditorText = useEditorText();
+  const { queryBuilder, queryEditorState, queryState } = useQueryBuilderState();
+  const { getEditorText, setEditorText } = useEditorOperations();
+
   const savedQueryService = services.data.query.savedQueries;
+  const timeFilter = services.data.query.timefilter.timefilter;
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const isPromptMode = useSelector(selectIsPromptEditorMode);
-  const dispatch = useDispatch();
-  const setEditorTextWithQuery = useSetEditorTextWithQuery();
-
-  // Get current saved query ID from Redux state
-  const currentSavedQueryId = useSelector((state: RootState) => state.legacy.savedQuery);
-
-  // Get the actual saved query object if we have an ID
+  const [currentSavedQueryId, setCurrentSavedQueryId] = useState<string | undefined>();
   const [currentSavedQuery, setCurrentSavedQuery] = useState<SavedQuery | undefined>();
-  const saveButtonIsDisabled = isPromptMode;
+
+  const saveButtonIsDisabled = queryEditorState.editorMode === EditorMode.Prompt;
 
   // Load saved query when ID changes
   useEffect(() => {
@@ -57,22 +41,21 @@ export const SaveQueryButton = () => {
         .getSavedQuery(currentSavedQueryId)
         .then(setCurrentSavedQuery)
         .catch(() => {
-          // If saved query doesn't exist, clear the ID
-          dispatch(setSavedQuery(undefined));
           setCurrentSavedQuery(undefined);
         });
     } else {
       setCurrentSavedQuery(undefined);
     }
-  }, [currentSavedQueryId, savedQueryService, dispatch]);
+  }, [currentSavedQueryId, savedQueryService]);
 
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
   const handleSaveQuery = async (meta: SavedQueryMeta, saveAsNew?: boolean) => {
     try {
-      if (!query) return;
-      const clonedQuery = cloneDeep(query);
+      if (!queryState) return;
+
+      const clonedQuery = cloneDeep(queryState);
       delete clonedQuery.dataset;
 
       const queryToSave = {
@@ -103,22 +86,20 @@ export const SaveQueryButton = () => {
         }
       }
 
-      // Save query with overwrite option based on saveAsNew flag
       const savedQuery = await savedQueryService.saveQuery(attributes, {
         overwrite: !saveAsNew && !!currentSavedQueryId,
       });
 
-      // Update Redux state with new saved query ID
-      dispatch(setSavedQuery(savedQuery.id));
+      setCurrentSavedQueryId(savedQuery.id);
 
       services.notifications.toasts.addSuccess(`Your query "${attributes.title}" was saved`);
 
       setIsPopoverOpen(false);
     } catch (error) {
       services.notifications.toasts.addDanger(
-        i18n.translate('explore.editor.queryPanel.saveQuery.saveQueryFailure', {
-          defaultMessage: 'An error occured while saving your query{errorMessage}',
-          values: { errorMessage: error.message ? `: ${error.message}` : '' },
+        i18n.translate('explore.queryPanel.saveQuery.failedToSaveQuery', {
+          defaultMessage: 'An error occurred while saving your query{errorMessage}',
+          values: { errorMessage: (error as Error).message ? `: ${(error as Error).message}` : '' },
         })
       );
       throw error;
@@ -126,40 +107,35 @@ export const SaveQueryButton = () => {
   };
 
   const handleLoadSavedQuery = useCallback(
-    (savedQuery: SavedQuery) => {
-      dispatch(setSavedQuery(savedQuery.id));
-      dispatch(setQueryState(savedQuery.attributes.query));
-      dispatch(
-        loadQueryActionCreator(
-          services,
-          setEditorTextWithQuery,
-          savedQuery.attributes.query.query as string
-        )
-      );
+    async (savedQuery: SavedQuery) => {
+      setCurrentSavedQueryId(savedQuery.id);
+      queryBuilder.updateQueryState(savedQuery.attributes.query as QueryState);
 
+      // Update editor text
+      setEditorText(savedQuery.attributes.query.query as string);
+
+      // Handle time filter if present
       if (savedQuery.attributes.timefilter && timeFilter) {
-        dispatch(
-          setDateRange({
+        queryBuilder.updateQueryEditorState({
+          dateRange: {
             from: savedQuery.attributes.timefilter.from,
             to: savedQuery.attributes.timefilter.to,
-          })
-        );
+          },
+        });
         if (typeof timeFilter.setRefreshInterval === 'function') {
           timeFilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
         }
       }
 
       setIsPopoverOpen(false);
-      dispatch(clearResults());
-      dispatch(executeQueries({ services }));
     },
-    [dispatch, services, setEditorTextWithQuery, timeFilter]
+    [queryBuilder, setEditorText, timeFilter]
   );
 
   const handleClearSavedQuery = useCallback(() => {
-    dispatch(setSavedQuery(undefined));
+    setCurrentSavedQueryId(undefined);
     setIsPopoverOpen(false);
-  }, [dispatch]);
+  }, []);
 
   return (
     <EuiPopover
