@@ -162,6 +162,7 @@ jobs:
   cypress-tests:
     needs: [prepare-cypress]
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -194,11 +195,9 @@ jobs:
           - group: 9
             config: standard
             test_location: ftr
-          # Dashboard tests with query enhanced - group 1
           - group: 10Fast
             config: query_enhanced
             test_location: source
-          # Dashboard tests with query enhanced - group 1 but slow tests
           - group: 10Slow
             config: query_enhanced
             test_location: source
@@ -206,47 +205,66 @@ jobs:
           - group: 11
             config: dashboard
             test_location: source
-          # Dashboard tests with query enhanced - group 2
+          # Query enhanced tests
           - group: 12
             config: query_enhanced
             test_location: source
-          # Dashboard tests with query enhanced - group 3
           - group: 13
             config: query_enhanced
             test_location: source
-          # Dashboard tests with query enhanced - group 4
           - group: 14
             config: query_enhanced
             test_location: source
-          # Dashboard tests with query enhanced - group 5
           - group: 15
             config: query_enhanced
             test_location: source
-          # Explore tests - group 1
+          - group: 16
+            config: query_enhanced
+            test_location: source
+          - group: 17
+            config: query_enhanced
+            test_location: source
+          - group: 18
+            config: query_enhanced
+            test_location: source
+          - group: 19
+            config: query_enhanced
+            test_location: source
+          # Explore tests
           - group: 10Explore
             config: explore
             test_location: source
-          # Explore tests - group 2
           - group: 12Explore
             config: explore
             test_location: source
-          # Explore tests - group 3
           - group: 13Explore
             config: explore
             test_location: source
-          # Explore tests - group 4
           - group: 14Explore
             config: explore
             test_location: source
-          # Explore tests - group 5
           - group: 15Explore
             config: explore
             test_location: source
-
           - group: 16Explore
             config: explore
             test_location: source
           - group: 17Explore
+            config: explore
+            test_location: source
+          - group: 18Explore
+            config: explore
+            test_location: source
+          - group: 19Explore
+            config: explore
+            test_location: source
+          - group: 20Explore
+            config: explore
+            test_location: source
+          - group: 21Explore
+            config: explore
+            test_location: source
+          - group: 22Explore
             config: explore
             test_location: source
     container:
@@ -274,6 +292,7 @@ jobs:
     steps:
       - name: Download source archive
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: cypress-source-archive
 
@@ -285,6 +304,7 @@ jobs:
 
       - name: Download plugin bundles
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: cypress-plugin-bundles
 
@@ -320,8 +340,6 @@ jobs:
             sleep 10
           done
           exit 1
-
-      # Build plugins step REMOVED — downloaded from prepare-cypress artifact
 
       - name: Checkout FT repo
         if: matrix.test_location == 'ftr'
