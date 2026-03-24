@@ -229,7 +229,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             }
           }
         }
-        if(!timelineUpdated){
+        if (!timelineUpdated) {
           setTimeline(messages);
         }
       }
