@@ -48,7 +48,7 @@ export interface ICspConfig {
    * able to use OpenSearch Dashboards. Use `true` to block and `false` to allow.
    * This will also add the STRICT_CSP_RULES
    */
-  readonly strict: boolean;
+  readonly enable: boolean;
 
   /**
    * Specify whether users with legacy browsers should be warned
@@ -112,7 +112,7 @@ export class CspConfig implements ICspConfig {
 
   public readonly rules: string[];
   public readonly nonceDirectives: string[];
-  public readonly strict: boolean;
+  public readonly enable: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly header: string;
   public readonly loosenCspDirectives: string[];
@@ -125,12 +125,12 @@ export class CspConfig implements ICspConfig {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
     this.rules = source.rules;
+    this.enable = source.enable;
     this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.strict = source.strict;
     this.nonceDirectives = source.nonceDirectives;
     this.loosenCspDirectives = source.loosenCspDirectives || [];
 
-    if (source.strict) {
+    if (source.enable) {
       this.rules = this.applyLoosenCspRules(
         this.applyAllowedSources(STRICT_CSP_RULES_DEFAULT_VALUE, source)
       );
