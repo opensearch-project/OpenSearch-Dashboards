@@ -97,10 +97,8 @@ export class ExploreEmbeddableFactory
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
       const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
 
-      // for in-context created visulization
-      const adjustEditPath = !savedObject.type
-        ? `#/edit/${savedObjectId}`
-        : `#/view/${savedObjectId}`;
+      // for in-context created visualization
+      const adjustEditPath = !savedObject.type ? `#/edit/${savedObjectId}` : url;
 
       const adjustApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
 

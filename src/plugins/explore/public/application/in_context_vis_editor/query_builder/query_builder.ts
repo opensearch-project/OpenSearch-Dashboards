@@ -140,7 +140,6 @@ export class QueryBuilder {
     this.setupGlobalDataRangeSync();
     this.setupQuerySync();
     this.setupLanguageSync();
-
     this.setIsInitialized(true);
   }
 
@@ -565,17 +564,10 @@ export class QueryBuilder {
 // Singleton instance
 let queryBuilderInstance: QueryBuilder | null = null;
 
-export function createQueryBuilder(services: ExploreServices): QueryBuilder {
-  queryBuilderInstance = new QueryBuilder(services);
-  return queryBuilderInstance;
-}
-
-let queryBuilder: QueryBuilder;
-
 export function getQueryBuilder(services: ExploreServices): QueryBuilder {
-  if (!queryBuilder) {
-    queryBuilder = createQueryBuilder(services);
+  if (!queryBuilderInstance) {
+    queryBuilderInstance = new QueryBuilder(services);
   }
 
-  return queryBuilder;
+  return queryBuilderInstance;
 }

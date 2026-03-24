@@ -958,8 +958,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           (Array.isArray(signalType) && signalType.includes(CORE_SIGNAL_TYPES.METRICS))
             ? metricsFooterContent
             : defaultFooterContent}
-
-          {/* {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent} */}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>

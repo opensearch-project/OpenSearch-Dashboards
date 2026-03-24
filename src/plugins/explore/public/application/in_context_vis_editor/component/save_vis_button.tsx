@@ -105,7 +105,7 @@ export const SaveVisButton = () => {
         // In this case, just save the visualization without navigating back
 
         if (exploreId === undefined) {
-          chrome.docTitle.change('changed');
+          chrome.docTitle.change(newTitle);
           chrome.setBreadcrumbs([{ text: newTitle }]);
           services.scopedHistory?.push(`#/edit/${encodeURIComponent(id)}`);
         }
