@@ -168,6 +168,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       if (result && result.messages.length > 0) {
         const { messages } = result;
+        let timelineUpdated = false;
 
         // load message and query unfinished tool call
         const lastMessage = messages[messages.length - 1];
@@ -180,6 +181,21 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             );
             return !hasToolResult;
           });
+
+          if (unfinishedToolCalls.length > 0) {
+            // Remove unfinished tool calls from the last message to show a clean timeline.
+            // The unfinished tools will be re-triggered below and may require user confirmation
+            // (e.g., clicking approve/reject buttons), so we need to show the UI early.
+            const lastMessageWithoutUnfinishedTools = {
+              ...lastMessage,
+              toolCalls: lastMessage.toolCalls.filter((toolCall) => !unfinishedToolCalls.includes(toolCall))
+            };
+
+            // Set loading to false early so users can see and interact with confirmation dialogs
+            setIsLoading(false);
+            setTimeline([...messages.slice(0, -1), lastMessageWithoutUnfinishedTools]);
+            timelineUpdated = true;
+          }
 
           // Trigger tool call events for unfinished tool calls
           for (const toolCall of unfinishedToolCalls) {
@@ -213,7 +229,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             }
           }
         }
-        setTimeline(messages);
+        if(!timelineUpdated){
+          setTimeline(messages);
+        }
       }
     } catch (error: any) {
       // Don't show error if aborted
