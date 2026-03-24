@@ -17,8 +17,14 @@ import {
   setSummaryAgentIsAvailable,
   setPatternsField,
   setUsingRegexPatterns,
+  setSort,
 } from '../slices';
-import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/query_editor_slice';
+import {
+  clearQueryStatusMap,
+  setBreakdownField,
+  setOverallQueryStatus,
+} from '../slices/query_editor/query_editor_slice';
+import { QueryExecutionStatus } from '../types';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
@@ -56,6 +62,17 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(setActiveTab(''));
       store.dispatch(clearResults());
       store.dispatch(clearQueryStatusMap());
+      // Immediately signal LOADING so the UI shows a spinner instead of the
+      // empty-state ("No agent traces found") during the async gap before
+      // executeQueries dispatches its own LOADING status.
+      store.dispatch(
+        setOverallQueryStatus({
+          status: QueryExecutionStatus.LOADING,
+          startTime: Date.now(),
+          elapsedMs: undefined,
+          error: undefined,
+        })
+      );
       store.dispatch(clearLastExecutedData());
       store.dispatch(setPatternsField(''));
       store.dispatch(setUsingRegexPatterns(false));
@@ -92,6 +109,16 @@ export const createDatasetChangeMiddleware = (
               },
               false
             );
+          }
+
+          // Initialize default sort for the new dataset so the cache key from
+          // executeQueries matches what useTabResults computes in the component.
+          // Without this, resetLegacyStateActionCreator sets sort to [] but the
+          // component may compute its cache key with the dataset's default sort,
+          // causing a cache miss that shows "No agent traces found".
+          const timeFieldName = currentDataset.timeFieldName;
+          if (timeFieldName) {
+            store.dispatch(setSort([[timeFieldName, 'desc']]) as any);
           }
 
           await store.dispatch(executeQueries({ services }) as any);

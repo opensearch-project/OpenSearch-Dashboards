@@ -41,12 +41,17 @@ export interface PromQLQueryParams {
     language: string;
     maxResults: number;
     timeout: number;
-    options: {
-      queryType: 'range' | 'instant';
-      start: string;
-      end: string;
-      step: string;
-    };
+    options:
+      | {
+          queryType: 'range';
+          start: string;
+          end: string;
+          step: string;
+        }
+      | {
+          queryType: 'instant';
+          time: string;
+        };
   };
   dataconnection: string;
 }
@@ -56,7 +61,8 @@ export interface PromQLQueryParams {
  */
 export interface MetricResult {
   metric: Record<string, string>;
-  values: Array<[number, number]>;
+  values?: Array<[number, number]>;
+  value?: [number, number];
 }
 
 /**
@@ -68,7 +74,7 @@ export interface PromQLQueryResponse {
   results: {
     [connectionId: string]: {
       resultType: string;
-      result: MetricResult[];
+      result: MetricResult[] | [number, string];
     };
   };
 }

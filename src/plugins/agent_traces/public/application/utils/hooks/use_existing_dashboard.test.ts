@@ -6,26 +6,25 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useExistingDashboard } from './use_existing_dashboard';
 import { SavedObjectsClientContract } from 'src/core/public';
-import { DashboardInterface } from '../../../components/visualizations/add_to_dashboard_button';
 
 // Mock saved objects client
 const mockSavedObjectsClient = ({
   find: jest.fn(),
 } as unknown) as SavedObjectsClientContract;
 
-const mockDashboards: DashboardInterface[] = [
+const mockDashboards = [
   {
     id: 'dashboard-1',
     attributes: { title: 'Dashboard 1' },
     type: 'dashboard',
     references: [],
-  } as DashboardInterface,
+  } as any,
   {
     id: 'dashboard-2',
     attributes: { title: 'Dashboard 2' },
     type: 'dashboard',
     references: [],
-  } as DashboardInterface,
+  } as any,
 ];
 
 describe('useExistingDashboard', () => {

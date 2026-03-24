@@ -10,7 +10,7 @@ import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
-import { getServices } from '../../services/services';
+import { getServices } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
@@ -43,6 +43,7 @@ export class VisualizationBuilder {
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
+  isVisDirty$ = new BehaviorSubject<boolean>(false);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
@@ -97,6 +98,10 @@ export class VisualizationBuilder {
 
   setShowRawTable(on: boolean) {
     this.showRawTable$.next(on);
+  }
+
+  setIsVisDirty(on: boolean) {
+    this.isVisDirty$.next(on);
   }
 
   setIsInitialized(isInitialized: boolean) {
@@ -303,6 +308,7 @@ export class VisualizationBuilder {
       return;
     }
     if (currentVisConfig.styles) {
+      this.setIsVisDirty(true);
       this.visConfig$.next({
         ...currentVisConfig,
         styles: { ...currentVisConfig.styles, ...styles },
@@ -317,6 +323,7 @@ export class VisualizationBuilder {
 
   setCurrentChartType(chartType?: ChartType) {
     if (this.visConfig$.value?.type !== chartType) {
+      this.setIsVisDirty(true);
       this.onChartTypeChange(chartType);
     }
   }
@@ -324,6 +331,7 @@ export class VisualizationBuilder {
   setAxesMapping(mapping: Record<string, string>) {
     const config = this.visConfig$.value;
     if (config && !isEqual(config.axesMapping, mapping)) {
+      this.setIsVisDirty(true);
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
   }
@@ -342,6 +350,7 @@ export class VisualizationBuilder {
     this.visConfig$.complete();
     this.data$.complete();
     this.showRawTable$.complete();
+    this.isVisDirty$.complete();
   }
 
   reset(): void {
@@ -350,6 +359,7 @@ export class VisualizationBuilder {
     this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
+    this.isVisDirty$ = new BehaviorSubject<boolean>(false);
     this.isInitialized = false;
   }
 

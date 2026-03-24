@@ -30,3 +30,5 @@
 
 export { getHighlightHtml } from './highlight_html';
 export { getHighlightRequest } from './highlight_request';
+export { highlightTags } from './highlight_tags';
+export { parseHighlightedValue, getDisplayValue } from './highlight_display';

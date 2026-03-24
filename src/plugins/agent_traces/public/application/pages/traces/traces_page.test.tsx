@@ -54,7 +54,7 @@ jest.mock('../../../components/container/bottom_container', () => ({
         <div data-test-subj="tab-agent_traces_traces_tab">
           <div data-test-subj="agentTraces-data-table">Data Table</div>
         </div>
-        <div data-test-subj="tab-agent_traces_visualization_tab">
+        <div data-test-subj="tab-visualization">
           <div data-test-subj="visualization-container">Visualization Container</div>
         </div>
       </div>
