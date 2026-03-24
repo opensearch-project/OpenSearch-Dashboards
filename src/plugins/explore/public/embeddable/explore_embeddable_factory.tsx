@@ -95,23 +95,25 @@ export class ExploreEmbeddableFactory
       const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
-      const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
+      const editUrl = savedObject.type
+        ? services.addBasePath(`/app/explore/${flavor}/${url}`)
+        : services.addBasePath(`/app/${VISUALIZATION_EDITOR_APP_ID}#/edit/${savedObjectId}`);
 
       // for in-context created visualization
-      const adjustEditPath = !savedObject.type ? `#/edit/${savedObjectId}` : url;
+      const editPath = !savedObject.type ? `#/edit/${savedObjectId}` : url;
 
-      const adjustApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
+      const editApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
 
       return new ExploreEmbeddableClass(
         {
           savedExplore: savedObject,
           editUrl,
-          editPath: adjustEditPath,
+          editPath,
           filterManager,
           editable: services.capabilities.discover?.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
           services,
-          editApp: adjustApp,
+          editApp,
         },
         input,
         executeTriggerActions,
