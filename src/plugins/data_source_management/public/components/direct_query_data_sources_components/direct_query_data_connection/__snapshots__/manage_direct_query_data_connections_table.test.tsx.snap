@@ -1782,11 +1782,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, 
                                             <span
                                               className=""
                                               key=".0"
-                                              style={
-                                                Object {
-                                                  "marginLeft": "20px",
-                                                }
-                                              }
+                                              style={Object {}}
                                             >
                                                
                                               Connection 3
@@ -4057,11 +4053,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, 
                                             <span
                                               className=""
                                               key=".0"
-                                              style={
-                                                Object {
-                                                  "marginLeft": "20px",
-                                                }
-                                              }
+                                              style={Object {}}
                                             >
                                                
                                               Connection 3
