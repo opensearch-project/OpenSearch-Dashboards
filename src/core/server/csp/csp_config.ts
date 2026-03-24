@@ -53,7 +53,7 @@ export interface ICspConfig {
   /**
    * Config alias for strict mode used by raw csp config (`csp.enable`).
    */
-  readonly enable?: boolean;
+  readonly enable: boolean;
 
   /**
    * Specify whether users with legacy browsers should be warned
