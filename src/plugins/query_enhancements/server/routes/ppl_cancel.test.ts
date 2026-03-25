@@ -102,7 +102,7 @@ describe('registerPPLCancelRoute', () => {
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'GET',
       path: '/_tasks',
-      querystring: { actions: '*ppl*', detailed: 'true' },
+      querystring: { actions: 'cluster:admin/opensearch/ppl', detailed: 'true' },
     });
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'POST',
