@@ -428,10 +428,11 @@ describe('echarts_histogram_utils', () => {
       expect(series.stack).toBeUndefined();
     });
 
-    it('caps bar max width at 50 pixels', () => {
+    it('sets bar width to 94% for balanced density', () => {
       const series = createBarSeries('test-id', 'Test', testData, '#54B399');
 
-      expect(series.barMaxWidth).toBe(50);
+      expect(series.barWidth).toBe('94%');
+      expect(series.barMaxWidth).toBe(80);
     });
 
     it('includes emphasis.focus set to series for legend hover highlighting', () => {
@@ -796,7 +797,7 @@ describe('echarts_histogram_utils', () => {
     it('configures dashed style on y-axis grid lines', () => {
       const spec = createHistogramSpec(mockChartData as any, defaultOptions);
 
-      expect((spec.yAxis as any).splitLine.show).toBe(false);
+      expect((spec.yAxis as any).splitLine.show).toBe(true);
       expect((spec.yAxis as any).splitLine.lineStyle.type).toBe('dashed');
     });
   });
