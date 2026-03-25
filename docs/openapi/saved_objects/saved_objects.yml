@@ -9,6 +9,8 @@ info:
 tags:
   - name: saved objects
     description: Manage Dashboards saved objects, including dashboards, visualizations, saved search, and more.
+  - name: dashboards-as-code
+    description: Programmatic dashboard management — bulk apply, diff, validate, export clean, and schema registry endpoints.
 paths:
   /api/saved_objects/{type}/{id}:
     get:
@@ -830,6 +832,266 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_bulk_apply:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Deploy saved objects with dependency resolution
+      description: >
+        Atomic bulk deploy of saved objects. Validates all resources, resolves dependency order
+        using topological sort, compares against existing objects, and writes in a single batch.
+        Objects are stamped with `managed-by: osdctl` label for managed lock enforcement.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkApplyRequest'
+            examples:
+              deployDashboard:
+                summary: Deploy a dashboard with a visualization
+                value:
+                  resources:
+                    - type: visualization
+                      id: vis-001
+                      attributes:
+                        title: Request Rate
+                        visState: '{"type":"line","aggs":[]}'
+                        uiStateJSON: '{}'
+                        kibanaSavedObjectMeta:
+                          searchSourceJSON: '{"query":{"language":"kuery","query":""}}'
+                      references:
+                        - name: kibanaSavedObjectMeta.searchSourceJSON.index
+                          type: index-pattern
+                          id: logs-*
+                    - type: dashboard
+                      id: dash-001
+                      attributes:
+                        title: Overview Dashboard
+                        panelsJSON: '[{"panelIndex":"1","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"1"},"panelRefName":"panel_0"}]'
+                        optionsJSON: '{"useMargins":true,"hidePanelTitles":false}'
+                      references:
+                        - name: panel_0
+                          type: visualization
+                          id: vis-001
+                  options:
+                    dryRun: false
+                    overwrite: true
+      responses:
+        '200':
+          description: Apply completed (may include per-resource errors).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkApplyResponse'
+        '400':
+          description: Validation failed or circular dependency detected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_diff:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Compare local saved object against deployed version
+      description: >
+        Computes a recursive diff between the provided attributes and the existing saved object.
+        Returns status `new` (object does not exist), `unchanged`, or `updated` with a list of
+        diff entries (add/remove/replace operations with JSON pointer paths).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiffRequest'
+            examples:
+              diffDashboard:
+                summary: Diff a dashboard
+                value:
+                  type: dashboard
+                  id: dash-001
+                  attributes:
+                    title: Updated Dashboard
+                    panelsJSON: '[]'
+                    optionsJSON: '{"useMargins":true}'
+      responses:
+        '200':
+          description: Diff computed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiffResponse'
+  /api/saved_objects/_export_clean:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Export saved objects in clean, deterministic format
+      description: >
+        Exports saved objects stripped of internal metadata, with deterministic key sorting.
+        Designed for Dashboards-as-Code workflows where exported files are stored in Git.
+        Objects are sorted by type then id for stable diffs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportCleanRequest'
+            examples:
+              exportAllDashboards:
+                summary: Export all dashboards
+                value:
+                  type: dashboard
+              exportSpecificObjects:
+                summary: Export specific objects
+                value:
+                  objects:
+                    - type: dashboard
+                      id: dash-001
+                    - type: visualization
+                      id: vis-001
+      responses:
+        '200':
+          description: Clean export successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CleanSavedObject'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_validate:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Validate saved object attributes against JSON Schema
+      description: >
+        Validates a saved object's attributes against the registered JSON Schema for its type.
+        In `schema` mode (default), performs offline schema validation only. In `full` mode,
+        also checks that referenced saved objects exist on the server.
+      parameters:
+        - in: query
+          name: mode
+          description: Validation mode. `schema` for offline validation, `full` to also check references exist.
+          schema:
+            type: string
+            enum:
+              - schema
+              - full
+            default: schema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateRequest'
+            examples:
+              validateDashboard:
+                summary: Validate a dashboard
+                value:
+                  type: dashboard
+                  attributes:
+                    title: My Dashboard
+                    panelsJSON: '[]'
+                    optionsJSON: '{"useMargins":true}'
+      responses:
+        '200':
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResponse'
+        '400':
+          description: Unknown saved object type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_schemas:
+    get:
+      tags:
+        - dashboards-as-code
+      summary: List all registered saved object JSON Schemas
+      description: >
+        Returns a list of all saved object types that have registered JSON Schemas,
+        with their versions and URLs for retrieval.
+      responses:
+        '200':
+          description: Schema list retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaListResponse'
+              example:
+                schemas:
+                  - type: dashboard
+                    version: v1
+                    url: /api/saved_objects/_schemas/dashboard/v1
+                  - type: visualization
+                    version: v1
+                    url: /api/saved_objects/_schemas/visualization/v1
+                  - type: index-pattern
+                    version: v1
+                    url: /api/saved_objects/_schemas/index-pattern/v1
+                  - type: search
+                    version: v1
+                    url: /api/saved_objects/_schemas/search/v1
+  /api/saved_objects/_schemas/{type}/{version}:
+    get:
+      tags:
+        - dashboards-as-code
+      summary: Retrieve a specific saved object JSON Schema
+      parameters:
+        - $ref: '#/components/parameters/type'
+        - in: path
+          name: version
+          required: true
+          description: Schema version (e.g. v1).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: JSON Schema for the requested type and version.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: A JSON Schema document (draft 2020-12).
+        '404':
+          description: Schema not found for the given type and version.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_unlock/{type}/{id}:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Emergency unlock a code-managed saved object
+      description: >
+        Removes the `managed-by: osdctl` label from a saved object, releasing the managed lock
+        so it can be edited through the UI or standard CRUD routes again.
+      parameters:
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Unlock result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnlockResponse'
+        '404':
+          description: Saved object not found.
+          content:
+            application/json:
+              schema:
+                type: object
 components:
   parameters:
     type:
@@ -865,3 +1127,262 @@ components:
           type: integer
           enum:
             - 400
+    SavedObjectReference:
+      type: object
+      required:
+        - name
+        - type
+        - id
+      properties:
+        name:
+          type: string
+          description: Reference name used to map back into saved object attributes.
+        type:
+          type: string
+          description: The saved object type of the referenced object.
+        id:
+          type: string
+          description: The saved object id of the referenced object.
+    BulkApplyRequest:
+      type: object
+      required:
+        - resources
+      properties:
+        resources:
+          type: array
+          description: Array of saved object resources to deploy.
+          items:
+            type: object
+            required:
+              - type
+              - id
+              - attributes
+            properties:
+              type:
+                type: string
+                description: Saved object type (e.g. dashboard, visualization, index-pattern, search).
+              id:
+                type: string
+                description: Unique saved object id.
+              attributes:
+                type: object
+                description: >
+                  Saved object attributes. Schema depends on type — see /_schemas/{type}/{version}
+                  for the JSON Schema definition for each type.
+              labels:
+                type: object
+                description: Key-value labels for tagging and grouping.
+                additionalProperties:
+                  type: string
+              references:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedObjectReference'
+        options:
+          type: object
+          properties:
+            dryRun:
+              type: boolean
+              default: false
+              description: If true, compute what would change without writing.
+            overwrite:
+              type: boolean
+              default: true
+              description: If false, fail when an object already exists with different attributes.
+    BulkApplyResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - id
+              - status
+            properties:
+              type:
+                type: string
+              id:
+                type: string
+              status:
+                type: string
+                enum:
+                  - created
+                  - updated
+                  - unchanged
+                  - error
+              error:
+                type: string
+                description: Error message if status is error.
+    DiffRequest:
+      type: object
+      required:
+        - type
+        - id
+        - attributes
+      properties:
+        type:
+          type: string
+          description: Saved object type.
+        id:
+          type: string
+          description: Saved object id.
+        attributes:
+          type: object
+          description: The local attributes to compare against the deployed version.
+    DiffResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - new
+            - unchanged
+            - updated
+          description: >
+            `new` — object does not exist on server.
+            `unchanged` — attributes are identical.
+            `updated` — differences found.
+        diff:
+          type: array
+          description: List of diff entries (present only when status is `updated`).
+          items:
+            type: object
+            required:
+              - op
+              - path
+            properties:
+              op:
+                type: string
+                enum:
+                  - add
+                  - remove
+                  - replace
+              path:
+                type: string
+                description: Dot-delimited path to the changed field.
+              oldValue:
+                description: Previous value (present for remove and replace).
+              newValue:
+                description: New value (present for add and replace).
+    ExportCleanRequest:
+      type: object
+      properties:
+        type:
+          description: Saved object type(s) to export.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        objects:
+          type: array
+          description: Specific objects to export.
+          items:
+            type: object
+            required:
+              - type
+              - id
+            properties:
+              type:
+                type: string
+              id:
+                type: string
+        search:
+          type: string
+          description: Query string to filter objects.
+    CleanSavedObject:
+      type: object
+      required:
+        - type
+        - id
+        - attributes
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        attributes:
+          type: object
+          description: >
+            Saved object attributes. Schema depends on type — see /_schemas/{type}/{version}
+            for the JSON Schema definition for each type.
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedObjectReference'
+        migrationVersion:
+          type: object
+          description: Migration version metadata.
+    ValidateRequest:
+      type: object
+      required:
+        - type
+        - attributes
+      properties:
+        type:
+          type: string
+          description: Saved object type to validate against.
+        attributes:
+          type: object
+          description: Attributes to validate against the type's JSON Schema.
+        references:
+          type: array
+          description: References to check in `full` mode.
+          items:
+            $ref: '#/components/schemas/SavedObjectReference'
+    ValidateResponse:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+                description: JSON path to the invalid field.
+              message:
+                type: string
+                description: Validation error message.
+              schemaPath:
+                type: string
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Non-fatal warnings (e.g. no schema registered, referenced objects may not exist).
+    SchemaListResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              version:
+                type: string
+              url:
+                type: string
+                description: URL to retrieve the full JSON Schema.
+    UnlockResponse:
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        unlocked:
+          type: boolean
+          description: Whether the lock was actually removed.
+        message:
+          type: string

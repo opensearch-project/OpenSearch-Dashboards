@@ -8,6 +8,29 @@ import * as https from 'https';
 import { URL } from 'url';
 import { execSync } from 'child_process';
 import { ProfileConfig } from './config';
+import type {
+  ValidateResponse,
+  ValidateRequest,
+  DiffRequest,
+  DiffResponse,
+  BulkApplyRequest,
+  BulkApplyResponse,
+  ApplyResult,
+  CleanSavedObject,
+  SchemaListResponse,
+  SavedObject,
+  FindResponse,
+} from '@osd/dashboards-sdk';
+
+// Re-export API types for consumers of the CLI client
+export type {
+  ValidateResponse,
+  DiffResponse,
+  ApplyResult,
+  CleanSavedObject,
+  SchemaListResponse,
+  SavedObject,
+};
 
 /**
  * Typed error for client operations.
@@ -22,48 +45,6 @@ export class ClientError extends Error {
     this.statusCode = statusCode;
     this.responseBody = responseBody;
   }
-}
-
-/**
- * Validation result from the server.
- */
-export interface ValidationResult {
-  valid: boolean;
-  errors?: Array<{ path: string; message: string }>;
-}
-
-/**
- * Diff result from the server.
- */
-export interface DiffResult {
-  status: 'NEW' | 'UPDATED' | 'UNCHANGED';
-  diff?: string;
-  type: string;
-  id: string;
-}
-
-/**
- * Apply result from the server.
- */
-export interface ApplyResult {
-  status: 'CREATED' | 'UPDATED' | 'UNCHANGED' | 'ERROR';
-  type: string;
-  id: string;
-  version?: number;
-  error?: string;
-}
-
-/**
- * Saved object representation.
- */
-export interface SavedObject {
-  type: string;
-  id: string;
-  attributes: Record<string, unknown>;
-  references?: Array<{ type: string; id: string; name: string }>;
-  labels?: Record<string, string>;
-  annotations?: Record<string, string>;
-  [key: string]: unknown;
 }
 
 interface RequestOptions {
@@ -195,14 +176,13 @@ export class OsdClient {
 
   /**
    * Validate saved objects against server-side schema.
-   * The server endpoint accepts a single object at a time, so we call it per-object.
    */
   async validate(
-    objects: Array<{ type: string; attributes: Record<string, unknown> }>
-  ): Promise<ValidationResult[]> {
-    const results: ValidationResult[] = [];
+    objects: Array<Pick<ValidateRequest, 'type' | 'attributes'>>
+  ): Promise<ValidateResponse[]> {
+    const results: ValidateResponse[] = [];
     for (const obj of objects) {
-      const result = await this.request<ValidationResult>({
+      const result = await this.request<ValidateResponse>({
         method: 'POST',
         path: '/api/saved_objects/_validate',
         body: { type: obj.type, attributes: obj.attributes },
@@ -214,14 +194,13 @@ export class OsdClient {
 
   /**
    * Diff local objects against deployed versions.
-   * The server endpoint accepts a single object at a time, so we call it per-object.
    */
   async diff(
-    objects: Array<{ type: string; id: string; attributes: Record<string, unknown> }>
-  ): Promise<DiffResult[]> {
-    const results: DiffResult[] = [];
+    objects: Array<DiffRequest>
+  ): Promise<DiffResponse[]> {
+    const results: DiffResponse[] = [];
     for (const obj of objects) {
-      const result = await this.request<DiffResult>({
+      const result = await this.request<DiffResponse>({
         method: 'POST',
         path: '/api/saved_objects/_diff',
         body: { type: obj.type, id: obj.id, attributes: obj.attributes },
@@ -232,30 +211,30 @@ export class OsdClient {
   }
 
   /**
-   * Apply objects in bulk.
+   * Apply objects in bulk with dependency resolution.
    */
   async bulkApply(
-    objects: SavedObject[],
-    options?: { dryRun?: boolean }
-  ): Promise<ApplyResult[]> {
-    return this.request<ApplyResult[]>({
+    objects: BulkApplyRequest['resources'],
+    options?: BulkApplyRequest['options']
+  ): Promise<BulkApplyResponse> {
+    return this.request<BulkApplyResponse>({
       method: 'POST',
       path: '/api/saved_objects/_bulk_apply',
       body: {
         resources: objects,
-        options: { dryRun: options?.dryRun || false },
+        options: { dryRun: options?.dryRun || false, overwrite: options?.overwrite ?? true },
       },
     });
   }
 
   /**
-   * Export saved objects in a clean format.
+   * Export saved objects in clean, deterministic format.
    */
   async exportClean(options?: {
     types?: string[];
     search?: string;
-  }): Promise<SavedObject[]> {
-    return this.request<SavedObject[]>({
+  }): Promise<CleanSavedObject[]> {
+    return this.request<CleanSavedObject[]>({
       method: 'POST',
       path: '/api/saved_objects/_export_clean',
       body: {
@@ -266,10 +245,10 @@ export class OsdClient {
   }
 
   /**
-   * Get available schemas for saved object types.
+   * List all registered saved object JSON Schemas.
    */
-  async getSchemas(): Promise<Record<string, unknown>> {
-    return this.request<Record<string, unknown>>({
+  async getSchemas(): Promise<SchemaListResponse> {
+    return this.request<SchemaListResponse>({
       method: 'GET',
       path: '/api/saved_objects/_schemas',
     });
@@ -293,7 +272,7 @@ export class OsdClient {
     search?: string;
     perPage?: number;
     page?: number;
-  }): Promise<{ saved_objects: SavedObject[]; total: number }> {
+  }): Promise<FindResponse> {
     const params = new URLSearchParams();
     params.set('type', options.type);
     if (options.search) params.set('search', options.search);

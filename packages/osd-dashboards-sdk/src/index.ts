@@ -23,3 +23,29 @@ export {
   ValidationError,
   BuildOutput,
 } from './types';
+
+// Generated API types from OpenAPI spec
+export type {
+  SavedObjectReference,
+  BulkApplyResource,
+  BulkApplyOptions,
+  BulkApplyRequest,
+  BulkApplyResponse,
+  ApplyResult,
+  ApplyResultStatus,
+  DiffRequest,
+  DiffResponse,
+  DiffStatus,
+  DiffEntry,
+  ExportCleanRequest,
+  CleanSavedObject,
+  ValidationMode,
+  ValidateRequest,
+  ValidateResponse,
+  SchemaEntry,
+  SchemaListResponse,
+  UnlockResponse,
+  SavedObject,
+  FindOptions,
+  FindResponse,
+} from './generated/api';

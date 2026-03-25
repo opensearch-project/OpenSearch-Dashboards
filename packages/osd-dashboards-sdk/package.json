@@ -8,6 +8,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
+    "generate:api": "npx openapi-typescript ../../../docs/openapi/saved_objects/saved_objects.yml -o src/generated/api.d.ts",
     "test": "jest --config jest.config.js"
   },
   "dependencies": {
