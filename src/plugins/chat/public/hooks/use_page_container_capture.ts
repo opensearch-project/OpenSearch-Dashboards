@@ -16,6 +16,18 @@ export interface PageContainerImageData {
   base64: string;
 }
 
+export const MAX_DIMENSION = 8000;
+
+/**
+ * Calculates the scale factor to ensure both width and height stay under MAX_DIMENSION.
+ * The scale is floored to 10 decimal places to guarantee dimensions stay under the limit.
+ */
+export const calculateScale = (width: number, height: number): number => {
+  const scaleX = width > MAX_DIMENSION ? MAX_DIMENSION / width : 1;
+  const scaleY = height > MAX_DIMENSION ? MAX_DIMENSION / height : 1;
+  return Math.floor(Math.min(scaleX, scaleY) * 1e10) / 1e10;
+};
+
 export const usePageContainerCapture = () => {
   const {
     services: {
@@ -73,10 +85,16 @@ export const usePageContainerCapture = () => {
         if (nonce) {
           html2canvas.setCspNonce(nonce);
         }
+        // Limit both width and height to 8000 pixels
+        const elementWidth = (element as HTMLElement).scrollWidth;
+        const elementHeight = (element as HTMLElement).scrollHeight;
+        const scale = calculateScale(elementWidth, elementHeight);
+
         const canvas = await html2canvas(element as HTMLElement, {
           backgroundColor: '#ffffff',
           logging: false,
           useCORS: true,
+          scale,
         });
 
         if (canceled) {
