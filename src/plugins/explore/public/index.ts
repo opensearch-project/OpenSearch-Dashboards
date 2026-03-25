@@ -14,7 +14,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ExplorePlugin(initializerContext);
 }
 
-export { ExplorePluginSetup, ExplorePluginStart } from './types';
+export { ExplorePluginSetup, ExplorePluginStart, ExploreServices } from './types';
 
 // Export trace auto-detection utilities for use by other plugins
 export { detectTraceData, DetectionResult } from './utils/auto_detect_trace_data';

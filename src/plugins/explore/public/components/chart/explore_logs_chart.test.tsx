@@ -293,7 +293,7 @@ describe('DiscoverChart', () => {
     fireEvent.click(changeIntervalButton);
 
     // Should dispatch setInterval, clearResultsByKey, clearQueryStatusMapByKey, and executeHistogramQuery
-    expect(dispatchSpy).toHaveBeenCalledTimes(5);
+    expect(dispatchSpy).toHaveBeenCalledTimes(4);
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'legacy/setInterval' })
     );
