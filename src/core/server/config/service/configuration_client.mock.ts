@@ -49,7 +49,7 @@ const createDynamicConfigurationClientMock = (
     if (getConfigProps.name && getConfigProps.name === 'csp') {
       return Promise.resolve({
         rules: [],
-        strict: false,
+        enable: false,
         warnLegacyBrowsers: false,
       });
     }
