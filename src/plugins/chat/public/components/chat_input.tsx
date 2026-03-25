@@ -124,7 +124,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             fullWidth
             resize="none"
             rows={2}
-            disabled={isSendingToolResult}
+            disabled={isSendingToolResult || !!pendingConfirmation}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
