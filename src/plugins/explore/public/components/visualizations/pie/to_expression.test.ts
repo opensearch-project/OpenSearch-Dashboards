@@ -44,14 +44,7 @@ describe('Pie Chart to_expression', () => {
   };
 
   it('returns an ECharts spec with dataset and series', () => {
-    const result = createPieSpec(
-      mockData,
-      [numericColumn],
-      [categoricalColumn],
-      [],
-      mockStyles,
-      mockAxisMappings
-    );
+    const result = createPieSpec(mockData, mockStyles, mockAxisMappings);
 
     expect(result).toHaveProperty('dataset');
     expect(result).toHaveProperty('series');
@@ -59,14 +52,7 @@ describe('Pie Chart to_expression', () => {
   });
 
   it('produces pie-type series', () => {
-    const result = createPieSpec(
-      mockData,
-      [numericColumn],
-      [categoricalColumn],
-      [],
-      mockStyles,
-      mockAxisMappings
-    );
+    const result = createPieSpec(mockData, mockStyles, mockAxisMappings);
 
     const pieSeries = result.series.filter((s: any) => s.type === 'pie');
     expect(pieSeries.length).toBeGreaterThanOrEqual(1);
@@ -75,9 +61,6 @@ describe('Pie Chart to_expression', () => {
   it('handles title display options', () => {
     const noTitle = createPieSpec(
       mockData,
-      [numericColumn],
-      [categoricalColumn],
-      [],
       { ...mockStyles, titleOptions: { show: false, titleName: '' } },
       mockAxisMappings
     );
@@ -85,9 +68,6 @@ describe('Pie Chart to_expression', () => {
 
     const defaultTitle = createPieSpec(
       mockData,
-      [numericColumn],
-      [categoricalColumn],
-      [],
       { ...mockStyles, titleOptions: { show: true, titleName: '' } },
       mockAxisMappings
     );
@@ -95,9 +75,6 @@ describe('Pie Chart to_expression', () => {
 
     const customTitle = createPieSpec(
       mockData,
-      [numericColumn],
-      [categoricalColumn],
-      [],
       { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Pie' } },
       mockAxisMappings
     );
@@ -110,22 +87,15 @@ describe('Pie Chart to_expression', () => {
       exclusive: { ...mockStyles.exclusive, donut: true },
     };
 
-    const result = createPieSpec(
-      mockData,
-      [numericColumn],
-      [categoricalColumn],
-      [],
-      donutStyles,
-      mockAxisMappings
-    );
+    const result = createPieSpec(mockData, donutStyles, mockAxisMappings);
 
     const pieSeries = result.series.find((s: any) => s.type === 'pie');
     expect(Array.isArray(pieSeries.radius)).toBe(true);
   });
 
   it('throws when color or theta config is missing', () => {
-    expect(() =>
-      createPieSpec(mockData, [numericColumn], [categoricalColumn], [], mockStyles, {})
-    ).toThrow('Missing color or theta config for pie chart');
+    expect(() => createPieSpec(mockData, mockStyles, {})).toThrow(
+      'Missing color or theta config for pie chart'
+    );
   });
 });

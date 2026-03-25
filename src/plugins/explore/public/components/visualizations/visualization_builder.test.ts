@@ -6,6 +6,10 @@
 import { VisualizationBuilder } from './visualization_builder';
 import { visualizationRegistry } from './visualization_registry';
 import { VisColumn, VisFieldType } from './types';
+import { VisualizationRegistryService } from '../../services/visualization_registry_service';
+
+// Register all built-in visualizations into the singleton registry
+new VisualizationRegistryService();
 
 const createMockVisColumns = (
   size: number,

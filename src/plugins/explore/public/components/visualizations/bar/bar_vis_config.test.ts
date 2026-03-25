@@ -12,27 +12,21 @@ describe('bar_vis_config', () => {
   describe('defaultBarChartStyles', () => {
     test('should have the expected default values', () => {
       expect(defaultBarChartStyles).toMatchObject({
-        // Basic controls
         addLegend: true,
         legendPosition: Positions.BOTTOM,
         tooltipOptions: {
           mode: 'all',
         },
-
-        // Bar specific controls
         barWidth: 0.7,
         barPadding: 0.1,
         showBarBorder: false,
         barBorderWidth: 1,
         barBorderColor: '#000000',
-
-        // Threshold and grid
         thresholdOptions: {
           baseColor: '#00BD6B',
           thresholds: [],
           thresholdStyle: ThresholdMode.Off,
         },
-
         titleOptions: {
           show: false,
           titleName: '',
@@ -44,7 +38,6 @@ describe('bar_vis_config', () => {
         useThresholdColor: false,
       });
 
-      // Check axes configuration
       expect(defaultBarChartStyles.standardAxes).toHaveLength(1);
       expect(defaultBarChartStyles.standardAxes[0]).toEqual(
         expect.objectContaining({
@@ -54,11 +47,6 @@ describe('bar_vis_config', () => {
           axisRole: AxisRole.X,
         })
       );
-
-      expect(defaultBarChartStyles.titleOptions).toMatchObject({
-        show: false,
-        titleName: '',
-      });
     });
   });
 
@@ -77,16 +65,14 @@ describe('bar_vis_config', () => {
         },
       });
 
-      // Verify availableMappings exists
-      expect(config.ui.availableMappings).toBeDefined();
-      expect(Array.isArray(config.ui.availableMappings)).toBe(true);
+      expect(typeof config.getRules).toBe('function');
+      expect(Array.isArray(config.getRules())).toBe(true);
     });
 
     test('render function should create a BarVisStyleControls component', () => {
       const config = createBarConfig();
       const mockCreateElement = jest.spyOn(React, 'createElement');
 
-      // Call the render function with some props
       const props = {
         styleOptions: defaultBarChartStyles,
         onStyleChange: jest.fn(),
@@ -95,11 +81,7 @@ describe('bar_vis_config', () => {
       };
       config.ui.style.render(props);
 
-      // Verify React.createElement was called with the right component
-      expect(mockCreateElement).toHaveBeenCalledWith(
-        BarVisStyleControls, // This is the BarVisStyleControls component
-        props
-      );
+      expect(mockCreateElement).toHaveBeenCalledWith(BarVisStyleControls, props);
 
       mockCreateElement.mockRestore();
     });

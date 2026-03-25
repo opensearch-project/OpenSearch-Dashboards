@@ -8,42 +8,29 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AxesSelectPanel, AxisSelector } from './axes_selector';
 import { AxisRole, VisColumn, VisFieldType } from '../../types';
 import { ChartType } from '../../utils/use_visualization_types';
-import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 
 const mockVisualizationRegistry = {
   getVisualizationConfig: jest.fn(),
   findRuleByAxesMapping: jest.fn(),
+  findRulesByColumns: jest.fn(),
 };
 
 jest.mock('../../utils/use_visualization_types', () => ({
   useVisualizationRegistry: () => mockVisualizationRegistry,
 }));
 
-jest.mock('../../rule_repository', () => ({
-  ALL_VISUALIZATION_RULES: [
-    {
-      id: 'rule1',
-      matchIndex: [1, 1, 0],
-    },
-    {
-      id: 'rule2',
-      matchIndex: [2, 0, 1],
-    },
-  ],
-}));
-
 jest.mock('../../visualization_builder_utils', () => {
-  // Import the constants directly to avoid referencing out-of-scope variables
+  const actual = jest.requireActual('../../visualization_builder_utils');
   const X = 'x';
   const CATEGORICAL = 'categorical';
 
   return {
+    ...actual,
     getColumnMatchFromMapping: jest.fn((mapping) => {
-      // Simple mock implementation to return different values based on mapping
       if (mapping && mapping[0] && mapping[0][X] && mapping[0][X].type === CATEGORICAL) {
-        return [1, 1, 0]; // Rule 1
+        return [1, 1, 0];
       }
-      return [2, 0, 1]; // Rule 2
+      return [2, 0, 1];
     }),
   };
 });
@@ -103,6 +90,26 @@ describe('AxesSelectPanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [
+        {
+          visType: 'bar',
+          rules: [
+            {
+              priority: 100,
+              mappings: [
+                {
+                  [AxisRole.X]: { type: VisFieldType.Categorical },
+                  [AxisRole.Y]: { type: VisFieldType.Numerical },
+                },
+              ],
+              render: jest.fn(),
+            },
+          ],
+        },
+      ],
+      exact: [],
+    });
     mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
       ui: {
         availableMappings: [
@@ -121,8 +128,9 @@ describe('AxesSelectPanel', () => {
   });
 
   it('returns null when no available mappings', () => {
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: { availableMappings: [] },
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [],
+      exact: [],
     });
 
     const { container } = render(<AxesSelectPanel {...defaultProps} />);
@@ -148,7 +156,10 @@ describe('AxesSelectPanel', () => {
         [AxisRole.Y]: mockNumericalColumns[0],
       },
     };
-    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue(ALL_VISUALIZATION_RULES[0]);
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
+      id: 'rule1',
+      matchIndex: [1, 1, 0],
+    });
 
     render(<AxesSelectPanel {...propsWithMapping} />);
 
@@ -201,7 +212,10 @@ describe('AxesSelectPanel', () => {
         ],
       },
     });
-    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue(ALL_VISUALIZATION_RULES[0]);
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
+      id: 'rule1',
+      matchIndex: [1, 1, 0],
+    });
 
     // Use props with existing mapping to ensure updateVisualization is called
     const propsWithMapping = {
@@ -219,17 +233,27 @@ describe('AxesSelectPanel', () => {
   });
 
   it('handles multiple axis roles correctly', () => {
-    // Set up a scenario with multiple axis roles
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
-      },
+    // Override findRulesByColumns to return a rule with 3 axis roles
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [
+        {
+          visType: 'bar',
+          rules: [
+            {
+              priority: 100,
+              mappings: [
+                {
+                  [AxisRole.X]: { type: VisFieldType.Date },
+                  [AxisRole.Y]: { type: VisFieldType.Numerical },
+                  [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+                },
+              ],
+              render: jest.fn(),
+            },
+          ],
+        },
+      ],
+      exact: [],
     });
 
     render(<AxesSelectPanel {...defaultProps} />);

@@ -56,7 +56,7 @@ describe('VisualizationRegistryService', () => {
 
       setup.registerVisualization(mockVis);
 
-      expect(mockRegisterVisualization).toHaveBeenCalledTimes(1);
+      expect(mockRegisterVisualization).toHaveBeenCalledTimes(2);
       expect(mockRegisterVisualization).toHaveBeenCalledWith(mockVis);
     });
 
@@ -66,7 +66,7 @@ describe('VisualizationRegistryService', () => {
 
       setup.registerVisualization(mockVisualizations);
 
-      expect(mockRegisterVisualization).toHaveBeenCalledTimes(1);
+      expect(mockRegisterVisualization).toHaveBeenCalledTimes(2);
       expect(mockRegisterVisualization).toHaveBeenCalledWith(mockVisualizations);
     });
   });
@@ -87,7 +87,7 @@ describe('VisualizationRegistryService', () => {
 
       start.registerVisualization(mockVis);
 
-      expect(mockRegisterVisualization).toHaveBeenCalledTimes(1);
+      expect(mockRegisterVisualization).toHaveBeenCalledTimes(2);
       expect(mockRegisterVisualization).toHaveBeenCalledWith(mockVis);
     });
 

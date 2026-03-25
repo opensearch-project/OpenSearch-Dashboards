@@ -64,15 +64,13 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.titleOptions.show).toBe(false);
     expect(defaults.titleOptions.titleName).toBe('');
   });
-  it('should have available mappings configured', () => {
+  it('should have getRules configured', () => {
     const config = createHeatmapConfig();
 
-    expect(config.ui.availableMappings).toBeDefined();
-    expect(config.ui.availableMappings).toHaveLength(1);
-
-    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.X);
-    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.Y);
-    expect(config.ui.availableMappings[0]).toHaveProperty(AxisRole.COLOR);
+    expect(typeof config.getRules).toBe('function');
+    const rules = config.getRules();
+    expect(Array.isArray(rules)).toBe(true);
+    expect(rules.length).toBeGreaterThan(0);
   });
 
   it('should render the HeatmapVisStyleControls component with the provided props', () => {

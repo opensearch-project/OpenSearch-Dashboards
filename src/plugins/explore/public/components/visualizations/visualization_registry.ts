@@ -3,18 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createAreaConfig } from './area/area_vis_config';
-import { createBarConfig } from './bar/bar_vis_config';
-import { createBarGaugeConfig } from './bar_gauge/bar_gauge_vis_config';
-import { createGaugeConfig } from './gauge/gauge_vis_config';
-import { createHeatmapConfig } from './heatmap/heatmap_vis_config';
-import { createHistogramConfig } from './histogram/histogram_vis_config';
-import { createLineConfig } from './line/line_vis_config';
-import { createMetricConfig } from './metric/metric_vis_config';
-import { createPieConfig } from './pie/pie_vis_config';
-import { createScatterConfig } from './scatter/scatter_vis_config';
-import { createStateTimelineConfig } from './state_timeline/state_timeline_config';
-import { createTableConfig } from './table/table_vis_config';
 import { AxisRole, ChartMetadata, VisColumn, VisFieldType } from './types';
 import { VisualizationType, VisRule } from './utils/use_visualization_types';
 import { getColumnsByAxesMapping } from './visualization_builder_utils';
@@ -324,18 +312,3 @@ export class VisualizationRegistry {
 // New code should use the VisualizationRegistryService instead.
 // TODO: refactor existing visualizationRegistry to use VisualizationRegistryService
 export const visualizationRegistry = new VisualizationRegistry();
-
-visualizationRegistry.registerVisualization([
-  createAreaConfig(),
-  createBarConfig(),
-  createBarGaugeConfig(),
-  createGaugeConfig(),
-  createHeatmapConfig(),
-  createHistogramConfig(),
-  createLineConfig(),
-  createMetricConfig(),
-  createPieConfig(),
-  createScatterConfig(),
-  createStateTimelineConfig(),
-  createTableConfig(),
-]);

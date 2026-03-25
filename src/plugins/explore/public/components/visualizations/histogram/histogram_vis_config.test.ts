@@ -72,9 +72,8 @@ describe('bar_vis_config', () => {
         },
       });
 
-      // Verify availableMappings exists
-      expect(config.ui.availableMappings).toBeDefined();
-      expect(Array.isArray(config.ui.availableMappings)).toBe(true);
+      expect(typeof config.getRules).toBe('function');
+      expect(Array.isArray(config.getRules())).toBe(true);
     });
 
     test('render function should create a HistogramVisStyleControls component', () => {

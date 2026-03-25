@@ -8,6 +8,18 @@ import {
   VisualizationRegistry,
 } from '../components/visualizations/visualization_registry';
 import { VisualizationType } from '../components/visualizations/utils/use_visualization_types';
+import { createAreaConfig } from '../components/visualizations/area/area_vis_config';
+import { createBarConfig } from '../components/visualizations/bar/bar_vis_config';
+import { createBarGaugeConfig } from '../components/visualizations/bar_gauge/bar_gauge_vis_config';
+import { createGaugeConfig } from '../components/visualizations/gauge/gauge_vis_config';
+import { createHeatmapConfig } from '../components/visualizations/heatmap/heatmap_vis_config';
+import { createHistogramConfig } from '../components/visualizations/histogram/histogram_vis_config';
+import { createLineConfig } from '../components/visualizations/line/line_vis_config';
+import { createMetricConfig } from '../components/visualizations/metric/metric_vis_config';
+import { createPieConfig } from '../components/visualizations/pie/pie_vis_config';
+import { createStateTimelineConfig } from '../components/visualizations/state_timeline/state_timeline_config';
+import { createScatterConfig } from '../components/visualizations/scatter/scatter_vis_config';
+import { createTableConfig } from '../components/visualizations/table/table_vis_config';
 
 /**
  * Service interface for the visualization registry
@@ -40,6 +52,20 @@ export class VisualizationRegistryService {
   constructor() {
     // TODO: refactor this to not rely on this visualizationRegistry singleton
     this.registry = visualizationRegistry;
+    this.registry.registerVisualization([
+      createAreaConfig(),
+      createBarConfig(),
+      createBarGaugeConfig(),
+      createGaugeConfig(),
+      createHeatmapConfig(),
+      createHistogramConfig(),
+      createLineConfig(),
+      createMetricConfig(),
+      createPieConfig(),
+      createScatterConfig(),
+      createStateTimelineConfig(),
+      createTableConfig(),
+    ]);
   }
 
   public setup(): VisualizationRegistryServiceSetup {
