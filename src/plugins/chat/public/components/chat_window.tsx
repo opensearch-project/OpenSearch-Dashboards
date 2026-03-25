@@ -281,6 +281,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
 
       setTimeline((prev) => [...prev, timelineUserMessage]);
+      setScreenshotData(undefined);
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -305,7 +306,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
-          setScreenshotData(undefined);
         },
       });
 
