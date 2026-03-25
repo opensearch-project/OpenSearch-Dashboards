@@ -107,20 +107,21 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
               console.error('Failed to cancel async query:', cancelError);
             }
           } else if (context.body?.queryId) {
-            // Cancel synchronous PPL query via task cancellation
-            try {
-              await http.fetch({
+            // Fire-and-forget: notify backend to cancel the PPL task.
+            // No need to await — the UI should move on immediately.
+            http
+              .fetch({
                 method: 'POST',
                 path: API.PPL_CANCEL,
                 body: JSON.stringify({
                   queryId: context.body.queryId,
                   dataSourceId: query.dataset?.dataSource?.id,
                 }),
+              })
+              .catch((cancelError) => {
+                // eslint-disable-next-line no-console
+                console.error('Failed to cancel PPL query:', cancelError);
               });
-            } catch (cancelError) {
-              // eslint-disable-next-line no-console
-              console.error('Failed to cancel PPL query:', cancelError);
-            }
           }
         }
         throw error;
