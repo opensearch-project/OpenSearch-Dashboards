@@ -105,6 +105,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     return () => subscription.unsubscribe();
   }, [confirmationService]);
 
+  // Get telemetry recorder from core services
+  const telemetryRecorder = useMemo(
+    () => services.core?.telemetry?.getPluginRecorder('chat'),
+    [services.core?.telemetry]
+  );
+
   // Create the event handler using useMemo
   const eventHandler = useMemo(
     () =>
@@ -112,6 +118,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         assistantActionService: service,
         chatService,
         confirmationService,
+        telemetryRecorder,
         callbacks: {
           onTimelineUpdate: setTimeline,
           onStreamingStateChange: setIsStreaming,
@@ -120,7 +127,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           getTimeline: () => timelineRef.current,
         },
       }),
-    [service, chatService, confirmationService]
+    [service, chatService, confirmationService, telemetryRecorder]
   );
 
   // Subscribe to tool updates from the service
