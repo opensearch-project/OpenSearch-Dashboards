@@ -151,6 +151,83 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
+  // Restore unfinished tool calls by re-triggering their events
+  const restoreUnfinishedToolCalls = useCallback(async (
+    messages: Message[],
+    abortController: AbortController
+  ): Promise<boolean> => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role !== 'assistant' || !lastMessage.toolCalls) {
+      return false;
+    }
+
+    // Find tool calls without corresponding tool result messages
+    const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
+      const hasToolResult = messages.some(msg =>
+        msg.role === 'tool' && msg.toolCallId === toolCall.id
+      );
+      return !hasToolResult;
+    });
+
+    if (unfinishedToolCalls.length === 0) {
+      return false;
+    }
+
+    // Remove unfinished tool calls from the last message to show a clean timeline.
+    // The unfinished tools will be re-triggered below and may require user confirmation
+    // (e.g., clicking approve/reject buttons), so we need to show the UI early.
+    const lastMessageWithoutUnfinishedTools = {
+      ...lastMessage,
+      toolCalls: lastMessage.toolCalls.filter((toolCall) => !unfinishedToolCalls.includes(toolCall))
+    };
+
+    // Set loading to false early so users can see and interact with confirmation dialogs
+    setIsLoading(false);
+    setTimeline([...messages.slice(0, -1), lastMessageWithoutUnfinishedTools]);
+
+    // Helper to apply event only if not aborted
+    const applyEventHandler = async (event: ChatEvent): Promise<void> => {
+      if (abortController.signal.aborted) {
+        return;
+      }
+      await eventHandler.handleEvent(event);
+    };
+
+    // Trigger tool call events for unfinished tool calls
+    for (const toolCall of unfinishedToolCalls) {
+      if (abortController.signal.aborted) {
+        return true;
+      }
+
+      try {
+        await applyEventHandler({
+          type: EventType.TOOL_CALL_START,
+          toolCallId: toolCall.id,
+          toolCallName: toolCall.function.name,
+          parentMessageId: lastMessage.id,
+          timestamp: Date.now(),
+        });
+
+        await applyEventHandler({
+          type: EventType.TOOL_CALL_ARGS,
+          toolCallId: toolCall.id,
+          delta: toolCall.function.arguments,
+          timestamp: Date.now(),
+        });
+
+        await applyEventHandler({
+          type: EventType.TOOL_CALL_END,
+          toolCallId: toolCall.id,
+          timestamp: Date.now(),
+        });
+      } catch (error: any) {
+        console.error(`Error restoring tool call for ${toolCall.function.name}:`, error);
+      }
+    }
+
+    return true;
+  }, [eventHandler]);
+
   // Extracted restoration logic to avoid duplication
   const restoreConversationTimeline = useCallback(async () => {
     // Create abort controller for this loading operation
@@ -176,51 +253,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       if (result && result.messages.length > 0) {
         const { messages } = result;
 
-        // load message and query unfinished tool call
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage.role === 'assistant' && lastMessage.toolCalls) {
-          // restore unfinished tool call by triggering events
-          const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
-            // Check if there's no corresponding tool result message
-            const hasToolResult = messages.some(msg =>
-              msg.role === 'tool' && msg.toolCallId === toolCall.id
-            );
-            return !hasToolResult;
-          });
+        // Restore unfinished tool calls if any exist
+        const timelineUpdated = await restoreUnfinishedToolCalls(messages, abortController);
 
-          // Trigger tool call events for unfinished tool calls
-          for (const toolCall of unfinishedToolCalls) {
-            try {
-              // Trigger TOOL_CALL_START event
-              await eventHandler.handleEvent({
-                type: EventType.TOOL_CALL_START,
-                toolCallId: toolCall.id,
-                toolCallName: toolCall.function.name,
-                parentMessageId: lastMessage.id,
-                timestamp: Date.now(),
-              });
-
-              // Trigger TOOL_CALL_ARGS event with full arguments
-              await eventHandler.handleEvent({
-                type: EventType.TOOL_CALL_ARGS,
-                toolCallId: toolCall.id,
-                delta: toolCall.function.arguments,
-                timestamp: Date.now(),
-              });
-
-              // Trigger TOOL_CALL_END event to execute the tool
-              await eventHandler.handleEvent({
-                type: EventType.TOOL_CALL_END,
-                toolCallId: toolCall.id,
-                timestamp: Date.now(),
-              });
-
-            } catch (error: any) {
-              console.error(`Error restoring tool call for ${toolCall.function.name}:`, error);
-            }
-          }
+        // Check if aborted before setting timeline
+        if (abortController.signal.aborted) {
+          return;
         }
-        setTimeline(messages);
+
+        if (!timelineUpdated) {
+          setTimeline(messages);
+        }
       }
     } catch (error: any) {
       // Don't show error if aborted
@@ -238,7 +281,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         loadingAbortControllerRef.current = null;
       }
     }
-  }, [chatService, eventHandler]);
+  }, [chatService, restoreUnfinishedToolCalls]);
 
   // Restore timeline from latest conversation on component mount
   useEffect(() => {
