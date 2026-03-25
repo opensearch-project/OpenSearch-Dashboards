@@ -86,8 +86,8 @@ export const usePageContainerCapture = () => {
           html2canvas.setCspNonce(nonce);
         }
         // Limit both width and height to 8000 pixels
-        const elementWidth = (element as HTMLElement).scrollWidth;
-        const elementHeight = (element as HTMLElement).scrollHeight;
+        const elementWidth = (element as HTMLElement).offsetWidth;
+        const elementHeight = (element as HTMLElement).offsetHeight;
         const scale = calculateScale(elementWidth, elementHeight);
 
         const canvas = await html2canvas(element as HTMLElement, {
