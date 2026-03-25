@@ -102,7 +102,7 @@ export const DiscoverResultsActionBar = ({
               <EuiFlexGroup
                 alignItems="center"
                 direction="row"
-                gutterSize="none"
+                gutterSize="s"
                 justifyContent="flexStart"
               >
                 {isLogsTab && (
@@ -148,10 +148,7 @@ export const DiscoverResultsActionBar = ({
                   </EuiFlexItem>
                 )}
                 {shouldShowExportButton && (
-                  <EuiFlexItem
-                    grow={false}
-                    className="explore-results-action-bar__explore-download-csv-flex-item"
-                  >
+                  <EuiFlexItem grow={false}>
                     <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
                   </EuiFlexItem>
                 )}

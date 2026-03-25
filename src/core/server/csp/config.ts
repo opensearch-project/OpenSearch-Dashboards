@@ -44,7 +44,7 @@ export const config = {
     rules: schema.arrayOf(schema.string(), {
       defaultValue: LOOSE_CSP_RULES_DEFAULT_VALUE,
     }),
-    strict: schema.boolean({ defaultValue: false }),
+    enable: schema.boolean({ defaultValue: false }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
     nonceDirectives: schema.arrayOf(schema.string(), {
       defaultValue: ['style-src-elem'],
