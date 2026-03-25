@@ -30,7 +30,7 @@ export function registerPPLCancelRoute(router: IRouter, logger: Logger) {
           method: 'GET',
           path: '/_tasks',
           querystring: {
-            actions: 'cluster:admin/opensearch/ppl',
+            actions: '*ppl*',
             detailed: 'true',
           },
         });
