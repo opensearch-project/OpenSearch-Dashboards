@@ -4,7 +4,7 @@
  */
 
 import { AxisRole, ChartMetadata, VisColumn, VisFieldType } from './types';
-import { VisualizationType, VisRule } from './utils/use_visualization_types';
+import { VisualizationType, VisRule, AxisTypeMapping } from './utils/use_visualization_types';
 import { getColumnsByAxesMapping } from './visualization_builder_utils';
 
 interface MatchedVisRules {
@@ -78,22 +78,46 @@ export class VisualizationRegistry {
     return result;
   }
 
+  /**
+   * Finds the first rule for a chart type whose mapping exactly matches the given
+   * axes mapping in both axis roles and field types.
+   */
   public findRuleByAxesMapping(
     chartType: string,
     axesMapping: Partial<Record<string, string>>,
     allColumns: VisColumn[]
   ) {
-    const { numericalColumns, categoricalColumns, dateColumns } = getColumnsByAxesMapping(
-      axesMapping,
-      allColumns
-    );
-    const bestMatch = this.findBestMatch(
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      chartType
-    );
-    return bestMatch?.rule;
+    const rules = this.getVisualization(chartType)?.getRules();
+    if (!rules) {
+      return;
+    }
+
+    // Convert axesMapping to AxisTypeMapping type
+    const axisTypeMapping: AxisTypeMapping = {};
+    Object.entries(axesMapping).forEach(([role, field]) => {
+      const found = allColumns.find((col) => col.name === field);
+      if (found) {
+        axisTypeMapping[role as AxisRole] = { type: found.schema };
+      } else {
+        axisTypeMapping[role as AxisRole] = { type: VisFieldType.Unknown };
+      }
+    });
+
+    const found = rules.find((rule) => {
+      return rule.mappings.some((mapping) => {
+        const mappingKeys = Object.keys(mapping) as AxisRole[];
+        const inputKeys = Object.keys(axisTypeMapping) as AxisRole[];
+
+        if (mappingKeys.length !== inputKeys.length) return false;
+
+        return inputKeys.every((key) => {
+          const mappingEntry = mapping[key];
+          const inputEntry = axisTypeMapping[key];
+          return mappingEntry && inputEntry && mappingEntry.type === inputEntry.type;
+        });
+      });
+    });
+    return found;
   }
 
   /**
