@@ -35,13 +35,13 @@ export const runVisTypeSwitchTests = () => {
     };
 
     const switchVisualizationType = (type) => {
-      cy.get('[placeholder="Select a visualization type"]').click();
+      cy.getElementByTestId('exploreChartTypeSelector').click();
       cy.get(`button[id="${type}"]`).click();
       cy.wait(1000);
     };
 
     const verifyChartType = (expectedType) => {
-      cy.get('[placeholder="Select a visualization type"]')
+      cy.getElementByTestId('exploreChartTypeSelector')
         .should('be.visible')
         .and('contain.text', expectedType);
     };

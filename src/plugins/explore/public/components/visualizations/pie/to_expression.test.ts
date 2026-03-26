@@ -48,13 +48,13 @@ describe('Pie Chart to_expression', () => {
 
     expect(result).toHaveProperty('dataset');
     expect(result).toHaveProperty('series');
-    expect(Array.isArray(result.series)).toBe(true);
+    expect(Array.isArray(result?.series)).toBe(true);
   });
 
   it('produces pie-type series', () => {
     const result = createPieSpec(mockData, mockStyles, mockAxisMappings);
 
-    const pieSeries = result.series.filter((s: any) => s.type === 'pie');
+    const pieSeries = result?.series?.filter((s: any) => s.type === 'pie');
     expect(pieSeries.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -64,21 +64,21 @@ describe('Pie Chart to_expression', () => {
       { ...mockStyles, titleOptions: { show: false, titleName: '' } },
       mockAxisMappings
     );
-    expect(noTitle.title.text).toBeUndefined();
+    expect(noTitle?.title?.text).toBeUndefined();
 
     const defaultTitle = createPieSpec(
       mockData,
       { ...mockStyles, titleOptions: { show: true, titleName: '' } },
       mockAxisMappings
     );
-    expect(defaultTitle.title.text).toBe('Value by Category');
+    expect(defaultTitle?.title?.text).toBe('Value by Category');
 
     const customTitle = createPieSpec(
       mockData,
       { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Pie' } },
       mockAxisMappings
     );
-    expect(customTitle.title.text).toBe('Custom Pie');
+    expect(customTitle?.title?.text).toBe('Custom Pie');
   });
 
   it('configures donut radius when donut option is true', () => {
@@ -89,7 +89,7 @@ describe('Pie Chart to_expression', () => {
 
     const result = createPieSpec(mockData, donutStyles, mockAxisMappings);
 
-    const pieSeries = result.series.find((s: any) => s.type === 'pie');
+    const pieSeries = result?.series?.find((s: any) => s.type === 'pie');
     expect(Array.isArray(pieSeries.radius)).toBe(true);
   });
 

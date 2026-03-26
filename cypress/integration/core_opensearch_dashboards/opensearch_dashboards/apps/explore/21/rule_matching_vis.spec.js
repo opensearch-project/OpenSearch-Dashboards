@@ -212,49 +212,6 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'status_code');
     });
 
-    it('should create a heatmap visualization using a query with one metric and two categories', () => {
-      cy.explore.clearQueryEditor();
-
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
-      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
-
-      const query = `source=${datasetName} | stats avg(bytes_transferred) as avg_bytes_transferred by service_endpoint, category`;
-      cy.explore.setQueryEditor(query, { submit: false });
-      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
-
-      // Run the query
-      cy.getElementByTestId('exploreQueryExecutionButton').click();
-      cy.osd.waitForLoader(true);
-      cy.wait(1000);
-
-      // Verify visualization is created
-      cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
-
-      // Verify the heatmap viz is displayed in the chart type selector
-      cy.getElementByTestId('exploreVisStylePanel')
-        .should('be.visible')
-        .within(() => {
-          // Try finding the EuiSuperSelect button directly
-          cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-        });
-      cy.get('[role="option"][aria-selected="true"]')
-        .should('be.visible')
-        .and('contain.text', 'Heatmap');
-
-      // Close dropdown
-      cy.get('body').click(0, 0);
-
-      // Verify the heatmap visualization options are displayed
-      cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
-
-      // Switch to table, the table should correctly render
-      cy.getElementByTestId('exploreChartTypeSelector').click();
-      cy.getElementByTestId('exploreChartTypeSelector-table').click();
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'avg_bytes_transferred');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'service_endpoint');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
-    });
-
     it('should create a two lines visualization using a query with one metric, one category and one date', () => {
       cy.explore.clearQueryEditor();
 

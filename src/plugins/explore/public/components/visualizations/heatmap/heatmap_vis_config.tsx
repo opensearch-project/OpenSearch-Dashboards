@@ -133,7 +133,7 @@ export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
   getRules: () => {
     const rules: Array<VisRule<'heatmap'>> = [
       {
-        priority: 100,
+        priority: 90,
         mappings: [
           {
             [AxisRole.X]: { type: VisFieldType.Categorical },
