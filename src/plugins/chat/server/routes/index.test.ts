@@ -6,7 +6,7 @@
 import supertest from 'supertest';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
-import { defineRoutes, generateOboToken } from './index';
+import { defineRoutes, generateOboToken, getValidOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
 import { RequestHandlerContext, Logger } from '../../../../core/server';
@@ -874,14 +874,14 @@ describe('generateOboToken', () => {
     } as unknown) as RequestHandlerContext;
   });
 
-  it('should return OBO token on successful generation', async () => {
+  it('should return OBO token and duration on successful generation', async () => {
     mockTransportRequest.mockResolvedValue({
-      body: { authenticationToken: 'obo-jwt-token-123' },
+      body: { authenticationToken: 'obo-jwt-token-123', durationSeconds: 300 },
     });
 
-    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
 
-    expect(token).toBe('obo-jwt-token-123');
+    expect(result).toEqual({ token: 'obo-jwt-token-123', durationSeconds: 300 });
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('OBO token generated for credential forwarding to AG-UI endpoint')
     );
@@ -892,14 +892,24 @@ describe('generateOboToken', () => {
     });
   });
 
+  it('should default durationSeconds to 300 when not present in response', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'obo-jwt-token-123' },
+    });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toEqual({ token: 'obo-jwt-token-123', durationSeconds: 300 });
+  });
+
   it('should return undefined and warn when response has no authenticationToken', async () => {
     mockTransportRequest.mockResolvedValue({
       body: { unexpected: 'response' },
     });
 
-    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
 
-    expect(token).toBeUndefined();
+    expect(result).toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'OBO token response did not contain authenticationToken'
     );
@@ -908,9 +918,9 @@ describe('generateOboToken', () => {
   it('should return undefined and warn on 404 (security plugin not installed)', async () => {
     mockTransportRequest.mockRejectedValue({ statusCode: 404, message: 'Not Found' });
 
-    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
 
-    expect(token).toBeUndefined();
+    expect(result).toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('OBO token generation unavailable (HTTP 404)')
     );
@@ -919,9 +929,9 @@ describe('generateOboToken', () => {
   it('should return undefined and warn on 400 (OBO not configured)', async () => {
     mockTransportRequest.mockRejectedValue({ statusCode: 400, message: 'Bad Request' });
 
-    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
 
-    expect(token).toBeUndefined();
+    expect(result).toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('OBO token generation unavailable (HTTP 400)')
     );
@@ -930,9 +940,9 @@ describe('generateOboToken', () => {
   it('should return undefined and log error on unexpected errors', async () => {
     mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
 
-    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
 
-    expect(token).toBeUndefined();
+    expect(result).toBeUndefined();
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to generate OBO token: Connection refused')
     );
@@ -941,11 +951,112 @@ describe('generateOboToken', () => {
   it('should handle error with meta.statusCode for 404', async () => {
     mockTransportRequest.mockRejectedValue({ meta: { statusCode: 404 } });
 
-    const token = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
 
-    expect(token).toBeUndefined();
+    expect(result).toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('OBO token generation unavailable (HTTP 404)')
     );
+  });
+});
+
+describe('getValidOboToken', () => {
+  let mockLogger: Logger;
+  let mockContext: RequestHandlerContext;
+  let mockTransportRequest: jest.Mock;
+
+  beforeEach(() => {
+    mockLogger = ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+    } as unknown) as Logger;
+
+    mockTransportRequest = jest.fn();
+
+    mockContext = ({
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              transport: {
+                request: mockTransportRequest,
+              },
+            },
+          },
+        },
+      },
+    } as unknown) as RequestHandlerContext;
+  });
+
+  it('should mint a new token when cache is empty', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'fresh-token', durationSeconds: 300 },
+    });
+
+    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-a');
+
+    expect(token).toBe('fresh-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return cached token on subsequent calls within TTL', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'cached-token', durationSeconds: 300 },
+    });
+
+    // First call — mints
+    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
+    // Second call — should use cache
+    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
+
+    expect(token1).toBe('cached-token');
+    expect(token2).toBe('cached-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1); // Only one mint call
+    expect(mockLogger.debug).toHaveBeenCalledWith('Using cached OBO token');
+  });
+
+  it('should return undefined when token generation fails', async () => {
+    mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
+
+    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-c');
+
+    expect(token).toBeUndefined();
+  });
+
+  it('should use separate cache entries per user', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-user-d', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-user-e', durationSeconds: 300 },
+      });
+
+    const tokenD = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-d');
+    const tokenE = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-e');
+
+    expect(tokenD).toBe('token-user-d');
+    expect(tokenE).toBe('token-user-e');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('should skip caching when username is undefined to prevent cross-user token sharing', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-call-1', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-call-2', durationSeconds: 300 },
+      });
+
+    // Both calls without username should mint fresh tokens (no caching)
+    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
+    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
+
+    expect(token1).toBe('token-call-1');
+    expect(token2).toBe('token-call-2');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2); // No caching — minted twice
   });
 });
