@@ -36,6 +36,7 @@ import {
   showMissingDatasetWarning,
   handleAgentError,
 } from './utils';
+import { getServices as getExploreServices } from '../../../services/services';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -54,8 +55,6 @@ export enum SupportLanguageType {
   promQL = 'PROMQL',
   ai = 'AI',
 }
-
-// type QueryWithQueryAsString
 
 export interface QueryState {
   query: string;
@@ -85,7 +84,7 @@ export interface DatasetViewState {
   error: string | null;
 }
 
-const initialQueryStatus = {
+export const initialQueryStatus = {
   status: QueryExecutionStatus.UNINITIALIZED,
   elapsedMs: undefined,
   startTime: undefined,
@@ -122,58 +121,91 @@ export class QueryBuilder {
     isLoading: false,
     error: null,
   });
-
-  private services: ExploreServices;
   private isInitialized = false;
   private editorRef: monaco.editor.IStandaloneCodeEditor | null = null;
   private subscriptions = Array<Subscription>();
+  private getServices: () => ExploreServices;
 
-  constructor(services: ExploreServices) {
-    this.services = services;
+  constructor(getServices: () => ExploreServices) {
+    this.getServices = getServices;
   }
 
-  init() {
+  async init(options?: { savedQueryState?: QueryState }) {
     if (this.isInitialized) {
       return;
     }
 
+    let queryEditorStateFromUrl;
+    let queryStateFromUrl;
+
+    const urlStateStorage = this.getServices().osdUrlStateStorage;
+    if (urlStateStorage) {
+      queryEditorStateFromUrl = urlStateStorage?.get<Partial<QueryEditorState>>('_e');
+      queryStateFromUrl = urlStateStorage?.get<QueryState>('_eq');
+    }
+
+    const languageType =
+      queryEditorStateFromUrl?.languageType ??
+      options?.savedQueryState?.language ??
+      SupportLanguageType.ppl;
+
+    const preferredDataset = queryStateFromUrl?.dataset ?? options?.savedQueryState?.dataset;
+
+    // Retrieve the preloaded query state based on the language type for a new explore object,
+    // or validate whether the URL dataset is compatible with the language type before proceeding.
+    // This prevents errors that would otherwise be thrown and avoids invalid operations
+    // that sync to the global query string, which is consumed by other components like the data timepicker.
+    // This ensures that the returned dataset is either valid or explicitly undefined.
+
+    const preloadedQueryState = await getPreloadedQueryState(
+      this.getServices(),
+      languageType as SupportLanguageType,
+      preferredDataset
+    );
+
+    if (queryEditorStateFromUrl?.languageType) {
+      this.updateQueryEditorState(queryEditorStateFromUrl);
+    }
+
+    const finalQuery = queryStateFromUrl?.query ?? options?.savedQueryState?.query ?? '';
+    // apply query
+    const finalQueryState = {
+      ...preloadedQueryState,
+      query: finalQuery,
+    };
+
+    this.updateQueryState(finalQueryState);
+    this.updateQueryEditorState({
+      editorMode: EditorMode.Query,
+      queryStatus: initialQueryStatus,
+    });
+
     this.setupGlobalDataRangeSync();
     this.setupQuerySync();
     this.setupLanguageSync();
+    // start sync until dataview is ready
+    await this.waitForDatasetReady();
+    this.startUrlSync();
     this.setIsInitialized(true);
   }
 
   startUrlSync() {
-    if (!this.isInitialized) {
-      return;
-    }
-
-    // Sync _eq only when queryState changes
-    const queryStateUrlSync = this.queryState$
-      .pipe(
-        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        debounceTime(500)
-      )
-      .subscribe((queryState) => {
+    const urlSync = combineLatest([
+      this.queryState$,
+      this.queryEditorState$.pipe(map((s) => ({ languageType: s.languageType }))),
+    ])
+      .pipe(debounceTime(500))
+      .subscribe(([queryState, editorState]) => {
         this.syncToUrl('_eq', queryState);
+        this.syncToUrl('_e', editorState);
       });
 
-    // Sync _e only when languageType changes
-    const editorStateUrlSync = this.queryEditorState$
-      .pipe(
-        map((state) => state.languageType),
-        distinctUntilChanged(),
-        debounceTime(500)
-      )
-      .subscribe((languageType) => {
-        this.syncToUrl('_e', { languageType });
-      });
-
-    this.subscriptions.push(queryStateUrlSync, editorStateUrlSync);
+    this.subscriptions.push(urlSync);
   }
 
   private syncToUrl(place: string, state: QueryState | Partial<QueryEditorState>) {
-    const urlStateStorage = this.services.osdUrlStateStorage;
+    const urlStateStorage = this.getServices()?.osdUrlStateStorage;
+
     if (urlStateStorage) {
       urlStateStorage.set(place, state, { replace: true });
     }
@@ -187,8 +219,8 @@ export class QueryBuilder {
         distinctUntilChanged((prev, curr) => isEqual(prev, curr))
       )
       .subscribe((dateRange) => {
-        if (dateRange && this.services.data?.query?.timefilter?.timefilter) {
-          const timefilter = this.services.data.query.timefilter.timefilter;
+        if (dateRange && this.getServices().data?.query?.timefilter?.timefilter) {
+          const timefilter = this.getServices().data.query.timefilter.timefilter;
           const currentTimefilterRange = timefilter.getTime();
 
           if (!isEqual(currentTimefilterRange, dateRange)) {
@@ -219,12 +251,12 @@ export class QueryBuilder {
       .pipe(
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         switchMap((newQuery) => {
-          const currentQuery = this.services.data.query.queryString.getQuery();
+          const currentQuery = this.getServices().data.query.queryString.getQuery();
           const isDatasetChanged = !isEqual(currentQuery?.dataset, newQuery?.dataset);
           const isLanguageChanged = !isEqual(currentQuery?.language, newQuery?.language);
 
           // sync query state with global queryStringManager
-          this.services.data.query.queryString.setQuery(newQuery);
+          this.getServices().data.query.queryString.setQuery(newQuery);
 
           // sync dataset change
           // check isLanguageChanged for the initial sync
@@ -251,7 +283,7 @@ export class QueryBuilder {
             isLoading: false,
             error: `Error loading dataset: ${error.message}`,
           });
-          this.services.notifications?.toasts.addError(error, {
+          this.getServices().notifications?.toasts.addError(error, {
             title: 'Error loading dataset',
           });
         },
@@ -270,7 +302,7 @@ export class QueryBuilder {
         switchMap((languageType) => {
           // set loading to block user execution actions during async gap
           this.datasetView$.next({ dataView: undefined, isLoading: true, error: null });
-          return from(getPreloadedQueryState(this.services, languageType));
+          return from(getPreloadedQueryState(this.getServices(), languageType));
         }),
         filter((newQuery) => newQuery !== null && newQuery !== undefined)
       )
@@ -280,7 +312,7 @@ export class QueryBuilder {
         },
         error: (error) => {
           this.datasetView$.next({ dataView: undefined, isLoading: false, error: error.message });
-          this.services.notifications?.toasts.addError(error, {
+          this.getServices().notifications?.toasts.addError(error, {
             title: 'Error switching language',
           });
         },
@@ -291,8 +323,8 @@ export class QueryBuilder {
 
   private async checkAgentAvailability(datasourceId?: string) {
     const [promptMode, summaryAgent] = await Promise.allSettled([
-      getPromptModeIsAvailable(this.services),
-      getSummaryAgentIsAvailable(this.services, datasourceId || ''),
+      getPromptModeIsAvailable(this.getServices()),
+      getSummaryAgentIsAvailable(this.getServices(), datasourceId || ''),
     ]);
 
     const updates: Partial<QueryEditorState> = {};
@@ -311,7 +343,7 @@ export class QueryBuilder {
     const {
       dataViews,
       query: { queryString },
-    } = this.services.data;
+    } = this.getServices().data;
 
     const onlyCheckCache = dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
     let dataView = await dataViews.get(dataset.id, onlyCheckCache);
@@ -320,11 +352,11 @@ export class QueryBuilder {
       await queryString.getDatasetService().cacheDataset(
         dataset,
         {
-          uiSettings: this.services.uiSettings,
-          savedObjects: this.services.savedObjects,
-          notifications: this.services.notifications,
-          http: this.services.http,
-          data: this.services.data,
+          uiSettings: this.getServices().uiSettings,
+          savedObjects: this.getServices().savedObjects,
+          notifications: this.getServices().notifications,
+          http: this.getServices().http,
+          data: this.getServices().data,
         },
         false
       );
@@ -346,7 +378,7 @@ export class QueryBuilder {
     if (editorMode === EditorMode.Prompt) {
       // Handle the unlikely situation where user is on prompt mode but does not have prompt available
       if (!promptModeIsAvailable) {
-        showPromptModeNotAvailableWarning(this.services.notifications.toasts);
+        showPromptModeNotAvailableWarning(this.getServices().notifications.toasts);
         return;
       }
 
@@ -364,13 +396,13 @@ export class QueryBuilder {
     const editorText = this.editorRef.getValue();
 
     if (!editorText.length) {
-      showMissingPromptWarning(this.services.notifications.toasts);
+      showMissingPromptWarning(this.getServices().notifications.toasts);
       return;
     }
 
-    const currentQuery = this.services.data.query.queryString.getQuery();
+    const currentQuery = this.getServices().data.query.queryString.getQuery();
     if (!currentQuery.dataset) {
-      showMissingDatasetWarning(this.services.notifications.toasts);
+      showMissingDatasetWarning(this.getServices().notifications.toasts);
       return;
     }
 
@@ -378,7 +410,7 @@ export class QueryBuilder {
       this.updateQueryEditorState({ promptToQueryIsLoading: true });
       if (currentQuery.dataset.type === 'PROMETHEUS') {
         const result = await generatePromQLWithAgUi({
-          data: this.services.data,
+          data: this.getServices().data,
           question: editorText,
           dataSourceName: currentQuery.dataset.title,
           dataSourceId: currentQuery.dataset.dataSource?.id,
@@ -395,7 +427,7 @@ export class QueryBuilder {
         });
 
         await queryExecution({
-          services: this.services,
+          services: this.getServices(),
           queryString,
           updateEditorStateFn: this.updateQueryEditorState.bind(this),
           updateResultFn: this.updateQueryResultForEditor.bind(this),
@@ -414,7 +446,7 @@ export class QueryBuilder {
         timeField: currentQuery.dataset.timeFieldName,
       };
 
-      const response = await this.services.http.post<QueryAssistResponse>(
+      const response = await this.getServices().http.post<QueryAssistResponse>(
         '/api/enhancements/assist/generate',
         {
           body: JSON.stringify(params),
@@ -425,7 +457,7 @@ export class QueryBuilder {
           from: moment(response.timeRange.from, 'YYYY-MM-DD HH:mm:ss').toISOString(),
           to: moment(response.timeRange.to, 'YYYY-MM-DD HH:mm:ss').toISOString(),
         };
-        this.services.data.query.timefilter.timefilter.setTime(convertedTimeRange);
+        this.getServices().data.query.timefilter.timefilter.setTime(convertedTimeRange);
       }
       const queryString = response.query;
 
@@ -437,14 +469,14 @@ export class QueryBuilder {
       });
 
       await queryExecution({
-        services: this.services,
+        services: this.getServices(),
         queryString,
         updateEditorStateFn: this.updateQueryEditorState.bind(this),
         updateResultFn: this.updateQueryResultForEditor.bind(this),
         activeQueryAbortControllers,
       });
     } catch (error) {
-      handleAgentError(this.services.notifications.toasts, error);
+      handleAgentError(this.getServices().notifications.toasts, error);
     } finally {
       this.updateQueryEditorState({ promptToQueryIsLoading: false });
     }
@@ -503,7 +535,7 @@ export class QueryBuilder {
     const queryString = this.prepareQueryStringToCacheKey(currentQuery);
 
     await queryExecution({
-      services: this.services,
+      services: this.getServices(),
       queryString,
       updateEditorStateFn: this.updateQueryEditorState.bind(this),
       updateResultFn: this.updateQueryResultForEditor.bind(this),
@@ -526,10 +558,6 @@ export class QueryBuilder {
 
   getQueryEditorState() {
     return this.queryEditorState$.value;
-  }
-
-  getDataView() {
-    return this.datasetView$.value.dataView;
   }
 
   dispose(): void {
@@ -557,6 +585,7 @@ export class QueryBuilder {
       isLoading: false,
       error: null,
     });
+    this.editorRef = null;
     this.isInitialized = false;
   }
 }
@@ -564,9 +593,9 @@ export class QueryBuilder {
 // Singleton instance
 let queryBuilderInstance: QueryBuilder | null = null;
 
-export function getQueryBuilder(services: ExploreServices): QueryBuilder {
+export function getQueryBuilder(): QueryBuilder {
   if (!queryBuilderInstance) {
-    queryBuilderInstance = new QueryBuilder(services);
+    queryBuilderInstance = new QueryBuilder(() => getExploreServices());
   }
 
   return queryBuilderInstance;

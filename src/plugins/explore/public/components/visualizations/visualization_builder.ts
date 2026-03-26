@@ -6,7 +6,7 @@
 import React from 'react';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { isEmpty, isEqual } from 'lodash';
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime, map, distinctUntilChanged } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
@@ -402,12 +402,25 @@ export class VisualizationBuilder {
   renderStylePanel({ className }: { className?: string }) {
     return React.createElement(StylePanelRender, {
       className,
-      data$: this.data$,
-      config$: this.getRenderConfig$(),
+      state$: this.getStylePanelState$(),
       onStyleChange: this.updateStyles.bind(this),
       onAxesMappingChange: this.setAxesMapping.bind(this),
       onChartTypeChange: this.setCurrentChartType.bind(this),
     });
+  }
+
+  // ensure that data and config are matching pair
+  getStylePanelState$(): Observable<{ data: VisData; config: RenderChartConfig } | undefined> {
+    return combineLatest([this.data$, this.getRenderConfig$()]).pipe(
+      debounceTime(100),
+      map(([data, config]) => {
+        if (data && config) {
+          return { data, config };
+        }
+        return undefined;
+      }),
+      distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+    );
   }
 }
 

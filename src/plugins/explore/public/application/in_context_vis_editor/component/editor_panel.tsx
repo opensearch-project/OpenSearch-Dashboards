@@ -6,7 +6,7 @@
 import React, { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { VisActionBar } from '../component/vis_action_bar';
-import '../in_context_editor.scss';
+import '../visualization_editor.scss';
 
 interface ICanvasPanelProps {
   children: ReactNode;

@@ -10,7 +10,7 @@ import { LanguageToggle } from './lauguage_toggle';
 import { QueryPanelActions } from '../../../components/query_panel/query_panel_widgets/query_panel_actions';
 
 import { DatasetSelectWidget } from './dataset_select';
-import '../in_context_editor.scss';
+import '../visualization_editor.scss';
 import { SaveQueryButton } from './save_query_button';
 
 export const QueryPanelWidgets = () => {

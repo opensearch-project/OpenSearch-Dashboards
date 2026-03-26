@@ -17,16 +17,16 @@ import { TimeRange } from 'src/plugins/data/common';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
-import { DiscoverNoResults } from '../../../application/legacy/discover/application/components/no_results/no_results';
-import { DiscoverUninitialized } from '../../../application/legacy/discover/application/components/uninitialized/uninitialized';
-import { LoadingSpinner } from '../../../application/legacy/discover/application/components/loading_spinner/loading_spinner';
+import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
+import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
+import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
 import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
-import { QueryPanel } from './in_context_query_panel';
+import { QueryPanel } from './visualization_editor_query_panel';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
 import { EditorPanel } from './editor_panel';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
-import '../in_context_editor.scss';
+import '../visualization_editor.scss';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
   defaultMessage: 'An error occurred while executing the query',
@@ -40,12 +40,9 @@ const typeText = i18n.translate('explore.errorPanel.type', {
 
 export const ResizableQueryPanelAndVisualization = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-
-  const { queryBuilder, queryEditorState } = useQueryBuilderState();
-
+  const { queryBuilder, queryEditorState, datasetView } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
-
-  const dataview = queryBuilder.getDataView();
+  const dataview = datasetView.dataView;
 
   const onRefresh = () => {
     queryBuilder.executeQuery();

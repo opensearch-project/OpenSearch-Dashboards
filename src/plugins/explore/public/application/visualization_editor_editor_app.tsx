@@ -9,8 +9,8 @@ import { Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters } from '../../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../types';
-import { InContextVisEditorPage } from './in_context_vis_editor/in_context_vis_editor_page';
-import { InContextEditorProvider } from './context';
+import { VisualizationEditorPage } from './in_context_vis_editor/visualization_editor_page';
+import { VisualizationEditorProvider } from './context';
 
 export const renderEditor = (
   { element, history, setHeaderActionMenu }: AppMountParameters,
@@ -25,13 +25,13 @@ export const renderEditor = (
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <services.core.i18n.Context>
-          <InContextEditorProvider originatingApp={originatingApp}>
+          <VisualizationEditorProvider originatingApp={originatingApp}>
             <Switch>
               <Route path={[`/edit/:id`, '/']} exact={false}>
-                <InContextVisEditorPage setHeaderActionMenu={setHeaderActionMenu} />
+                <VisualizationEditorPage setHeaderActionMenu={setHeaderActionMenu} />
               </Route>
             </Switch>
-          </InContextEditorProvider>
+          </VisualizationEditorProvider>
         </services.core.i18n.Context>
       </OpenSearchDashboardsContextProvider>
     </Router>
