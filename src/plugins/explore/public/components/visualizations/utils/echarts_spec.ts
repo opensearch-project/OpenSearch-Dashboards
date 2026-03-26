@@ -62,7 +62,7 @@ interface Axis {
 /**
  * Configuration for ECharts axes (after swapping)
  */
-export interface EChartsAxisConfig {
+interface EChartsAxisConfig {
   xAxis?: Axis;
   yAxis?: Axis;
   xAxisStyle?: StandardAxes;
@@ -74,7 +74,7 @@ export interface EChartsAxisConfig {
 /**
  * Input for ECharts spec pipeline
  */
-export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
+interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
   axisConfig?: EChartsAxisConfig;

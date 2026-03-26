@@ -7,12 +7,12 @@ import { AxisRole, ChartMetadata, VisColumn, VisFieldType } from './types';
 import { VisualizationType, VisRule } from './utils/use_visualization_types';
 import { getColumnsByAxesMapping } from './visualization_builder_utils';
 
-export interface MatchedVisRules {
+interface MatchedVisRules {
   visType: string;
   rules: Array<VisRule<any>>;
 }
 
-export interface FindRulesByColumnsResult {
+interface FindRulesByColumnsResult {
   /** Rules where required field counts <= input counts (superset, includes exact) */
   all: MatchedVisRules[];
   /** Rules where required field counts === input counts exactly */
@@ -27,6 +27,23 @@ export class VisualizationRegistry {
   private visualizations: Map<string, VisualizationType<any>> = new Map();
 
   constructor() {}
+
+  /**
+   * Get all available chart types based on registered visualizations
+   */
+  getAvailableChartTypes() {
+    const availableChartTypes: ChartMetadata[] = [];
+    for (const [, vis] of this.visualizations) {
+      if (availableChartTypes.every((t) => t.type !== vis.type)) {
+        availableChartTypes.push({
+          type: vis.type,
+          name: vis.name,
+          icon: vis.icon ?? '',
+        });
+      }
+    }
+    return availableChartTypes;
+  }
 
   getAxesMappingByRule(
     rule: VisRule<any>,
@@ -61,23 +78,6 @@ export class VisualizationRegistry {
     return result;
   }
 
-  /**
-   * Get all available chart types based on registered visualizations
-   */
-  getAvailableChartTypes() {
-    const availableChartTypes: ChartMetadata[] = [];
-    for (const [, vis] of this.visualizations) {
-      if (availableChartTypes.every((t) => t.type !== vis.type)) {
-        availableChartTypes.push({
-          type: vis.type,
-          name: vis.name,
-          icon: vis.icon ?? '',
-        });
-      }
-    }
-    return availableChartTypes;
-  }
-
   public findRuleByAxesMapping(
     chartType: string,
     axesMapping: Partial<Record<string, string>>,
@@ -97,34 +97,10 @@ export class VisualizationRegistry {
   }
 
   /**
-   * Recomputes the axes-to-column mapping when the user switches to a different
-   * chart type while keeping the same set of selected data columns.
-   *
-   * Different chart types have different axis requirements. For example, a bar
-   * chart may expect `{ x: categorical, y: numerical }` while a scatter plot
-   * expects `{ x: numerical, y: numerical }`. When the chart type changes, the
-   * previous mapping may no longer be valid or optimal for the new type.
-   *
-   * This method resolves that by:
-   * 1. Extracting the currently mapped columns from `axesMapping` and classifying
-   *    them by field type (numerical, categorical, date) via `getColumnsByAxesMapping`.
-   * 2. Searching all registered visualization rules for the target `chartType` to
-   *    find the best-matching rule whose field-type requirements exactly match the
-   *    available columns, using `findBestMatch` (which prioritises exact column-count
-   *    matches and higher-priority rules).
-   * 3. Delegating to `getAxesMappingByRule` to produce a fresh axis mapping that
-   *    assigns each column to the correct axis role as defined by the winning rule's
-   *    first mapping template, consuming columns in order per field type.
-   *
-   * @param chartType  - The target chart type the user is switching to (e.g. "bar",
-   *                     "line", "scatter").
-   * @param axesMapping - The current axis-to-column-name mapping from the previous
-   *                      chart type. Column names are resolved against `allColumns`.
-   * @param allColumns  - The full list of available data columns with their metadata
-   *                      (name, field type, etc.).
-   * @returns A new `Record<string, string>` mapping axis roles to column names that
-   *          is compatible with the target chart type, or an empty object if no
-   *          matching rule could be found for the given columns and chart type.
+   * Recomputes the axes-to-column mapping for a new chart type using the currently
+   * mapped columns. Classifies columns by field type, finds the best-matching rule
+   * for the target chart type via `findBestMatch`, then builds a new axis mapping
+   * via `getAxesMappingByRule`. Returns an empty object if no rule matches.
    */
   public updateAxesMappingByChartType(
     chartType: string,
@@ -153,6 +129,10 @@ export class VisualizationRegistry {
     );
   }
 
+  /**
+   * Returns the highest-priority rule with an exact column-count match, optionally
+   * scoped to a specific `chartType`. Returns `null` if no exact match exists.
+   */
   public findBestMatch(
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
@@ -188,17 +168,10 @@ export class VisualizationRegistry {
   }
 
   /**
-   * Find all VisRules from registered visualizations whose mappings are satisfiable
-   * by the given column counts. Returns two sets of results:
-   *
-   * - `all`: Rules where the mapping's required field type counts are <= the input counts
-   *   (compatible matches — the data has enough columns, possibly with surplus).
-   * - `exact`: Rules where the mapping's required field type counts === the input counts
-   *   exactly (no surplus, no deficit — strongest signal for auto-detection).
-   *
-   * For each rule, all alternative mappings are checked. A rule appears in `exact` if any
-   * of its mappings is an exact match; it appears in `all` if any mapping is compatible.
-   * Results are grouped by visualization type. `exact` is always a subset of `all`.
+   * Finds matching VisRules by comparing each mapping's required field counts against
+   * the given column counts. Optionally filters by `chartType`. Results grouped by vis type:
+   * - `all`: rules with at least one compatible mapping (required <= available per type).
+   * - `exact`: subset of `all` with at least one exact-match mapping (required === available).
    */
   public findRulesByColumns(
     numericalColumns: VisColumn[],

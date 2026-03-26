@@ -11,7 +11,7 @@ import { MetricChartStyle, MetricChartStyleOptions } from '../metric/metric_vis_
 import { HeatmapChartStyle, HeatmapChartStyleOptions } from '../heatmap/heatmap_vis_config';
 import { ScatterChartStyle, ScatterChartStyleOptions } from '../scatter/scatter_vis_config';
 import { AreaChartStyle, AreaChartStyleOptions } from '../area/area_vis_config';
-import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
+import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -82,7 +82,7 @@ export interface StyleControlsProps<T extends ChartStyles> {
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
-export interface VisRenderProps<T extends ChartType> {
+interface VisRenderProps<T extends ChartType> {
   transformedData: Array<Record<string, any>>;
   styleOptions: ChartStylesMapping[T];
   axisColumnMappings: AxisColumnMappings;
