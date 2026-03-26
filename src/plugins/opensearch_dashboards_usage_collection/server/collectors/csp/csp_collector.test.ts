@@ -49,7 +49,7 @@ describe('csp collector', () => {
 
     expect((await collector.fetch(mockCallCluster)).strict).toEqual(false);
 
-    updateCsp({ strict: true });
+    updateCsp({ enable: true });
     expect((await collector.fetch(mockCallCluster)).strict).toEqual(true);
   });
 

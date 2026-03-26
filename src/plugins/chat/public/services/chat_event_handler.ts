@@ -22,6 +22,7 @@ import type {
   ToolCall,
   SystemMessage,
 } from '../../common/types';
+import type { PluginTelemetryRecorder } from '../../../../core/public';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
@@ -34,6 +35,7 @@ export interface ChatEventHandlerConfig {
   assistantActionService: AssistantActionService;
   chatService: ChatService;
   confirmationService: ConfirmationService;
+  telemetryRecorder?: PluginTelemetryRecorder;
   callbacks: {
     onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
     onStreamingStateChange: (isStreaming: boolean) => void;
@@ -56,15 +58,20 @@ export class ChatEventHandler {
 
   private assistantActionService: AssistantActionService;
   private chatService: ChatService;
+  private telemetryRecorder?: PluginTelemetryRecorder;
   private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
   private onStreamingStateChange: (isStreaming: boolean) => void;
   private onStartResponse: (flag: boolean) => void;
   private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
 
+  // Telemetry tracking
+  private interactionStartTime: number | null = null;
+
   constructor(config: ChatEventHandlerConfig) {
     this.assistantActionService = config.assistantActionService;
     this.chatService = config.chatService;
+    this.telemetryRecorder = config.telemetryRecorder;
     this.onTimelineUpdate = config.callbacks.onTimelineUpdate;
     this.onStreamingStateChange = config.callbacks.onStreamingStateChange;
     this.onStartResponse = config.callbacks.onStartResponse;
@@ -125,14 +132,17 @@ export class ChatEventHandler {
   }
 
   /**
-   * Handle run started - set streaming state
+   * Handle run started - set streaming state and start timing
    */
   private handleRunStarted(event: any): void {
     this.onStreamingStateChange(true);
+
+    // Start timing for telemetry
+    this.interactionStartTime = Date.now();
   }
 
   /**
-   * Handle run finished - clear streaming state and cleanup
+   * Handle run finished - clear streaming state, cleanup, and record success telemetry
    */
   private handleRunFinished(event: any): void {
     this.onStreamingStateChange(false);
@@ -141,6 +151,32 @@ export class ChatEventHandler {
     // Reset the connection state to allow new chats
     if (this.chatService && (this.chatService as any).resetConnection) {
       (this.chatService as any).resetConnection();
+    }
+
+    // Record success telemetry
+    if (this.telemetryRecorder) {
+      // Record successful interaction event
+      this.telemetryRecorder.recordEvent({
+        name: 'chat_interaction_success',
+        data: {
+          threadId: event.threadId,
+          runId: event.runId,
+        },
+      });
+
+      // Record duration metric if we have a start time
+      if (this.interactionStartTime !== null) {
+        const duration = Date.now() - this.interactionStartTime;
+        this.telemetryRecorder.recordMetric({
+          name: 'chat_interaction_duration_ms',
+          value: duration,
+          unit: 'ms',
+          labels: {
+            status: 'success',
+          },
+        });
+        this.interactionStartTime = null;
+      }
     }
   }
 
@@ -473,7 +509,7 @@ export class ChatEventHandler {
   }
 
   /**
-   * Handle run errors
+   * Handle run errors and record failure telemetry
    */
   private handleRunError(event: any): void {
     const errorMessage: SystemMessage = {
@@ -484,6 +520,43 @@ export class ChatEventHandler {
 
     this.onTimelineUpdate((prev) => [...prev, errorMessage]);
     this.onStreamingStateChange(false);
+
+    // Record failure telemetry
+    if (this.telemetryRecorder) {
+      const eventMessage = event.message || 'An error occurred';
+
+      // Record failed interaction event
+      this.telemetryRecorder.recordEvent({
+        name: 'chat_interaction_failure',
+        data: {
+          errorMessage: eventMessage,
+          errorCode: event.code,
+        },
+      });
+
+      // Record error
+      this.telemetryRecorder.recordError({
+        type: 'ChatInteractionError',
+        message: eventMessage,
+        context: {
+          errorCode: event.code,
+        },
+      });
+
+      // Record duration metric if we have a start time (with failure status)
+      if (this.interactionStartTime !== null) {
+        const duration = Date.now() - this.interactionStartTime;
+        this.telemetryRecorder.recordMetric({
+          name: 'chat_interaction_duration_ms',
+          value: duration,
+          unit: 'ms',
+          labels: {
+            status: 'failure',
+          },
+        });
+        this.interactionStartTime = null;
+      }
+    }
   }
 
   /**
