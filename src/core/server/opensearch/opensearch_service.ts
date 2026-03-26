@@ -31,6 +31,7 @@
 import { Observable, Subject, of } from 'rxjs';
 import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
 import { merge } from '@osd/std';
+import { Transport } from '@opensearch-project/opensearch';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -73,6 +74,7 @@ export class OpenSearchService
   private legacyClient?: LegacyClusterClient;
 
   private client?: ClusterClient;
+  private customTransportClass?: typeof Transport;
 
   constructor(private readonly coreContext: CoreContext) {
     this.opensearchDashboardsVersion = coreContext.env.packageInfo.version;
@@ -125,6 +127,14 @@ export class OpenSearchService
       },
       opensearchNodesCompatibility$,
       status$: calculateStatus$(opensearchNodesCompatibility$),
+      registerClientTransport: (TransportClass: typeof Transport) => {
+        if (this.customTransportClass) {
+          throw new Error('A custom Transport class has already been registered.');
+        }
+        this.customTransportClass = TransportClass;
+        this.log.info('Custom Transport class registered');
+      },
+      hasClientTransport: () => !!this.customTransportClass,
     };
   }
   public async start({ auditTrail }: StartDeps): Promise<InternalOpenSearchServiceStart> {
@@ -134,6 +144,13 @@ export class OpenSearchService
     }
 
     const config = await this.config$.pipe(first()).toPromise();
+
+    // Recreate the data client with the custom Transport registered during plugin setup.
+    // The old client is kept alive for the version polling observable from setup().
+    if (this.customTransportClass && this.client) {
+      this.log.info('Recreating OpenSearch client with custom Transport class');
+      this.client = this.createClusterClient('data', config);
+    }
 
     const createClient = (
       type: string,
@@ -151,6 +168,7 @@ export class OpenSearchService
         client: this.legacyClient,
         createClient: this.createLegacyCustomClient,
       },
+      getClientTransport: () => this.customTransportClass,
     };
   }
 
@@ -169,7 +187,8 @@ export class OpenSearchService
     return new ClusterClient(
       config,
       this.coreContext.logger.get('opensearch', type),
-      this.getAuthHeaders
+      this.getAuthHeaders,
+      this.customTransportClass
     );
   }
 

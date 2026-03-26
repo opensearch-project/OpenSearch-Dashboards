@@ -116,7 +116,7 @@ export const SaveQueryButton = () => {
       setIsPopoverOpen(false);
     } catch (error) {
       services.notifications.toasts.addDanger(
-        i18n.translate('explore.queryPanel.saveQuery.failedToSaveQuery', {
+        i18n.translate('explore.editor.queryPanel.saveQuery.saveQueryFailure', {
           defaultMessage: 'An error occured while saving your query{errorMessage}',
           values: { errorMessage: error.message ? `: ${error.message}` : '' },
         })

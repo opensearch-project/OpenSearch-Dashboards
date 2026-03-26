@@ -1201,4 +1201,168 @@ describe('ChatEventHandler', () => {
       ).resolves.not.toThrow();
     });
   });
+
+  describe('telemetry', () => {
+    let mockTelemetryRecorder: {
+      recordEvent: jest.Mock;
+      recordMetric: jest.Mock;
+      recordError: jest.Mock;
+    };
+    let chatEventHandlerWithTelemetry: ChatEventHandler;
+
+    beforeEach(() => {
+      mockTelemetryRecorder = {
+        recordEvent: jest.fn(),
+        recordMetric: jest.fn(),
+        recordError: jest.fn(),
+      };
+
+      chatEventHandlerWithTelemetry = new ChatEventHandler({
+        assistantActionService: mockAssistantActionService,
+        chatService: mockChatService,
+        confirmationService: mockConfirmationService,
+        telemetryRecorder: mockTelemetryRecorder,
+        callbacks: {
+          onTimelineUpdate: mockOnTimelineUpdate,
+          onStreamingStateChange: mockOnStreamingStateChange,
+          onStartResponse: mockOnStartResponse,
+          getTimeline: mockGetTimeline,
+        },
+      });
+    });
+
+    it('should record success telemetry when run finishes', async () => {
+      // Start run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Finish run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Verify success event was recorded
+      expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_interaction_success',
+        data: {
+          threadId: 'test-thread',
+          runId: 'test-run',
+        },
+      });
+
+      // Verify duration metric was recorded
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_interaction_duration_ms',
+        value: expect.any(Number),
+        unit: 'ms',
+        labels: {
+          status: 'success',
+        },
+      });
+    });
+
+    it('should record failure telemetry when run errors', async () => {
+      // Start run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Error occurs
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_ERROR,
+        message: 'Something went wrong',
+        code: 'ERR_001',
+      });
+
+      // Verify failure event was recorded
+      expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_interaction_failure',
+        data: {
+          errorMessage: 'Something went wrong',
+          errorCode: 'ERR_001',
+        },
+      });
+
+      // Verify error was recorded
+      expect(mockTelemetryRecorder.recordError).toHaveBeenCalledWith({
+        type: 'ChatInteractionError',
+        message: 'Something went wrong',
+        context: {
+          errorCode: 'ERR_001',
+        },
+      });
+
+      // Verify duration metric was recorded with failure status
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_interaction_duration_ms',
+        value: expect.any(Number),
+        unit: 'ms',
+        labels: {
+          status: 'failure',
+        },
+      });
+    });
+
+    it('should not record telemetry when telemetryRecorder is not provided', async () => {
+      // Use the original handler without telemetry
+      await chatEventHandler.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // The mock should not have been called because original handler has no telemetry
+      expect(mockTelemetryRecorder.recordEvent).not.toHaveBeenCalled();
+    });
+
+    it('should record duration correctly', async () => {
+      // Mock Date.now to control timing
+      const originalDateNow = Date.now;
+      let currentTime = 1000;
+      Date.now = jest.fn(() => currentTime);
+
+      // Start run at time 1000
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Advance time by 500ms
+      currentTime = 1500;
+
+      // Finish run at time 1500
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Verify duration was 500ms
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_interaction_duration_ms',
+        value: 500,
+        unit: 'ms',
+        labels: {
+          status: 'success',
+        },
+      });
+
+      // Restore Date.now
+      Date.now = originalDateNow;
+    });
+  });
 });

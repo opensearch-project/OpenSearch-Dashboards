@@ -47,6 +47,7 @@ describe('CspConfig', () => {
   test('DEFAULT', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
+        "enable": false,
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "loosenCspDirectives": Array [],
         "nonceDirectives": Array [
@@ -66,6 +67,7 @@ describe('CspConfig', () => {
   test('defaults from config', () => {
     expect(new CspConfig()).toMatchInlineSnapshot(`
       CspConfig {
+        "enable": false,
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "loosenCspDirectives": Array [],
         "nonceDirectives": Array [
@@ -82,9 +84,10 @@ describe('CspConfig', () => {
     `);
   });
 
-  test('strict true gives strict csp rules', () => {
-    expect(new CspConfig({ strict: true, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
+  test('enable true gives strict csp rules', () => {
+    expect(new CspConfig({ enable: true, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
       CspConfig {
+        "enable": true,
         "header": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
         "loosenCspDirectives": Array [],
         "nonceDirectives": Array [
@@ -120,6 +123,7 @@ describe('CspConfig', () => {
 
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
+        "enable": false,
         "header": "alpha; beta; gamma",
         "loosenCspDirectives": Array [],
         "nonceDirectives": Array [
@@ -216,6 +220,7 @@ describe('CspConfig', () => {
 
       expect(config).toMatchInlineSnapshot(`
         CspConfig {
+          "enable": false,
           "header": "default-src 'self'; script-src 'unsafe-eval' 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src blob: 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "loosenCspDirectives": Array [
             "script-src",
@@ -243,7 +248,7 @@ describe('CspConfig', () => {
             "form-action 'self'",
             "frame-ancestors 'self'",
           ],
-          "strict": true,
+          "strict": false,
           "warnLegacyBrowsers": true,
         }
       `);

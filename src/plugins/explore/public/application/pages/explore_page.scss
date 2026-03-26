@@ -77,7 +77,8 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   .dscCanvas__chart {
-    margin-bottom: $ouiSizeXXS;
+    // margin-bottom: $euiSizeXS;
+    border-bottom: $ouiBorderThin;
   }
 
   @include euiYScroll;

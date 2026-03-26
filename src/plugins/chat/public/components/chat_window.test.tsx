@@ -92,6 +92,7 @@ describe('ChatWindow', () => {
       approve: jest.fn(),
       reject: jest.fn(),
       cancel: jest.fn(),
+      cleanAll: jest.fn(),
     } as any;
   });
 
@@ -442,6 +443,102 @@ describe('ChatWindow', () => {
 
       // Should be called after timeline updates
       expect(mockChatService.saveConversation).toHaveBeenCalled();
+    });
+
+    it('should show timeline early when restoring conversation with unfinished tool calls', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockHandleEvent = jest.fn();
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: mockHandleEvent,
+        clearState: jest.fn(),
+      }));
+
+      // Create messages with an unfinished tool call (no corresponding tool result)
+      const messagesWithUnfinishedToolCall = [
+        { id: 'user-1', role: 'user' as const, content: 'Run a command' },
+        {
+          id: 'assistant-1',
+          role: 'assistant' as const,
+          content: '',
+          toolCalls: [
+            {
+              id: 'tool-call-1',
+              function: {
+                name: 'execute_command',
+                arguments: '{"command": "ls -la"}',
+              },
+            },
+          ],
+        },
+        // No tool result message - this tool call is unfinished
+      ];
+
+      mockChatService.restoreLatestConversation.mockResolvedValue({
+        threadId: 'test-thread-id',
+        messages: messagesWithUnfinishedToolCall,
+      });
+
+      const { queryByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Wait for restoration to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Loading should be hidden early so users can see and interact with confirmation dialogs
+      expect(queryByText('Loading conversation...')).toBeNull();
+
+      // Event handler should be called to re-trigger the unfinished tool calls
+      expect(mockHandleEvent).toHaveBeenCalled();
+    });
+
+    it('should not overwrite timeline when unfinished tool calls exist', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockHandleEvent = jest.fn();
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: mockHandleEvent,
+        clearState: jest.fn(),
+      }));
+
+      // Create messages with an unfinished tool call
+      const messagesWithUnfinishedToolCall = [
+        { id: 'user-1', role: 'user' as const, content: 'Run a command' },
+        {
+          id: 'assistant-1',
+          role: 'assistant' as const,
+          content: '',
+          toolCalls: [
+            {
+              id: 'tool-call-1',
+              function: {
+                name: 'execute_command',
+                arguments: '{"command": "ls -la"}',
+              },
+            },
+          ],
+        },
+      ];
+
+      mockChatService.restoreLatestConversation.mockResolvedValue({
+        threadId: 'test-thread-id',
+        messages: messagesWithUnfinishedToolCall,
+      });
+
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Wait for restoration to complete
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify that tool call events were triggered for the unfinished tool call
+      // The handleEvent should be called with TOOL_CALL_START, TOOL_CALL_ARGS, and TOOL_CALL_END
+      const toolCallStartEvents = mockHandleEvent.mock.calls.filter(
+        (call: any) => call[0]?.type === 'TOOL_CALL_START'
+      );
+      expect(toolCallStartEvents.length).toBeGreaterThan(0);
     });
   });
 

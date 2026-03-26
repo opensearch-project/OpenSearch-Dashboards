@@ -40,7 +40,7 @@ interface Props {
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
     <I18nProvider>
-      <EuiPage>
+      <EuiPage style={{ height: '100%' }}>
         <EuiPageBody component="main">
           <EuiPageContent horizontalPosition="center">
             <EuiEmptyPrompt
