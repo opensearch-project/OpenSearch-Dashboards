@@ -1,0 +1,5 @@
+security:
+- Updated ajv to fix CVE-2025-69873 ([#11597](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11597))
+
+chore:
+- Updated @microsoft/api-extractor, @microsoft/api-documenter, @microsoft/api-extractor-model ([#11597](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11597))
