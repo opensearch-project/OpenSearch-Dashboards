@@ -155,6 +155,21 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   useEffect(() => {
     // Current selected axis mapping
     const updatedAxes: AxisColumnMappings = {};
+
+    const allColumns = [
+      ...(categoricalColumns ?? []),
+      ...(numericalColumns ?? []),
+      ...(dateColumns ?? []),
+    ];
+
+    // ensure current selections are always compatible with the visualization data
+    // to prevent stale axis mappings from being written back
+    const isValid = Object.values(currentSelections)
+      .filter(Boolean)
+      .every((columnName) => allColumns.some((col) => col?.name === columnName?.name));
+
+    if (!isValid) return;
+
     Object.entries(currentSelections).forEach(([key, value]) => {
       if (value) {
         updatedAxes[key as AxisRole] = value;
