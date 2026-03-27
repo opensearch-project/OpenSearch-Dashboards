@@ -15,7 +15,6 @@ import { getPreloadedState } from '../../utils/redux_persistence';
 import { ExploreServices } from '../../../../../types';
 import { executeQueries } from '../query_actions';
 import { AppDispatch } from '../../store';
-import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 import { useClearEditors } from '../../../../hooks';
 
 /**
@@ -36,5 +35,4 @@ export const resetExploreStateActionCreator = (
   dispatch(setQueryState(state.query));
   dispatch(setQueryEditorState(state.queryEditor));
   await dispatch(executeQueries({ services }));
-  dispatch(detectAndSetOptimalTab({ services }));
 };
