@@ -20,12 +20,19 @@ export const renderEditor = (
     .getStateTransfer(services.scopedHistory)
     .getIncomingEditorState()?.originatingApp;
 
+  const containerInfo = services.embeddable
+    .getStateTransfer(services.scopedHistory)
+    .getIncomingEditorState()?.containerInfo;
+
   const root = createRoot(element);
   root.render(
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <services.core.i18n.Context>
-          <VisualizationEditorProvider originatingApp={originatingApp}>
+          <VisualizationEditorProvider
+            originatingApp={originatingApp}
+            containerInfo={containerInfo}
+          >
             <Switch>
               <Route path={[`/edit/:id`, '/']} exact={false}>
                 <VisualizationEditorPage setHeaderActionMenu={setHeaderActionMenu} />
