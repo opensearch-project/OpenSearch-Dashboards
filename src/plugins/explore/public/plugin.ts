@@ -77,7 +77,6 @@ import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
-import { abortAllActiveQueries as abortAllActiveQueriesOfEditor } from './application/in_context_vis_editor/query_builder/query_builder';
 
 // Log Actions
 import { logActionRegistry } from './services/log_action_registry';
@@ -495,7 +494,6 @@ export class ExplorePlugin
 
           // Render the application
           return () => {
-            abortAllActiveQueriesOfEditor();
             services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, editorAbortActionId);
             appUnMounted();
             unmount();

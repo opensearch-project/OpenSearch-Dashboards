@@ -191,6 +191,7 @@ export const SaveVisButton = () => {
       const url =
         exploreId !== undefined && savedExplore ? `#/edit/${encodeURIComponent(exploreId)}` : '#/';
       services.scopedHistory?.push(url);
+      window.location.reload();
     }
   }, [stateTransfer, services.scopedHistory, exploreId, savedExplore, originatingApp]);
 

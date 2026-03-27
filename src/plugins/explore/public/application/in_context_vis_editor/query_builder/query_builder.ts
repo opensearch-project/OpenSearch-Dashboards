@@ -568,6 +568,7 @@ export class QueryBuilder {
     this.queryState$.complete();
     this.resultState$.complete();
     this.datasetView$.complete();
+    abortAllActiveQueries();
   }
 
   reset(): void {
