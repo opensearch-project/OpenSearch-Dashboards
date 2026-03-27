@@ -5,13 +5,10 @@
 
 import { useMemo } from 'react';
 import { useObservable } from 'react-use';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { getQueryBuilder } from '../query_builder/query_builder';
-import { ExploreServices } from '../../../types';
 
 export const useQueryBuilderState = () => {
-  const services = useOpenSearchDashboards<ExploreServices>();
-  const queryBuilder = getQueryBuilder(services.services);
+  const queryBuilder = getQueryBuilder();
   const queryState = useObservable(queryBuilder.queryState$, queryBuilder.queryState$.getValue());
 
   const queryEditorState = useObservable(

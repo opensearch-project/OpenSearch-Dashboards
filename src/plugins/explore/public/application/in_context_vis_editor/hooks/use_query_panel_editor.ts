@@ -58,7 +58,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const queryLanguageRef = useRef(queryLanguage);
 
-  const { switchEditorMode, setEditorRef: setEditor } = useEditorOperations();
+  const {
+    switchEditorMode,
+    setEditorRef: setEditor,
+    setEditorText: setText,
+  } = useEditorOperations();
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -88,6 +92,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       editorRef.current?.focus();
     },
   });
+
+  // When the query changes from outside the editor, update the editor text as well
+  useEffect(() => {
+    setText(queryState.query);
+  }, [queryState.query, setText]);
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
@@ -141,7 +150,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     };
   }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
 
-  // TODO update
   const handleRun = useCallback(() => {
     // Use ref to get the latest editorMode value, avoiding stale state from React's async updates
     if (!isPromptModeRef.current) {
