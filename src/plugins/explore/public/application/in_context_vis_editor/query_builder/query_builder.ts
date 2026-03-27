@@ -259,8 +259,8 @@ export class QueryBuilder {
           this.getServices().data.query.queryString.setQuery(newQuery);
 
           // sync dataset change
-          // check isLanguageChanged for the initial sync
-          if (isDatasetChanged || isLanguageChanged) {
+          // check isLanguageChanged and isInitialized for the initial sync
+          if (isDatasetChanged || isLanguageChanged || !this.isInitialized) {
             this.datasetView$.next({ ...this.datasetView$.getValue(), isLoading: true });
             return from(this.handleDatasetChange(newQuery.dataset));
           }

@@ -22,9 +22,8 @@ import { VisData } from './visualization_builder.types';
 import { getAxisConfigByColumnMapping } from './utils/axis';
 
 interface StylePanelProps<T> {
-  // data$: Observable<VisData | undefined>;
-  // config$: Observable<RenderChartConfig | undefined>;
-  state$: Observable<{ data: VisData; config: RenderChartConfig } | undefined>;
+  data$: Observable<VisData | undefined>;
+  config$: Observable<RenderChartConfig | undefined>;
   onStyleChange: (changes: Partial<StyleOptions>) => void;
   onChartTypeChange: (type: ChartType) => void;
   onAxesMappingChange: (mappings: Record<string, string>) => void;
@@ -32,15 +31,15 @@ interface StylePanelProps<T> {
 }
 
 export const StylePanelRender = <T extends ChartType>({
-  state$,
+  data$,
+  config$,
   onStyleChange,
   onChartTypeChange,
   onAxesMappingChange,
   className,
 }: StylePanelProps<T>) => {
-  const state = useObservable(state$);
-  const visualizationData = state?.data;
-  const chartConfig = state?.config;
+  const visualizationData = useObservable(data$);
+  const chartConfig = useObservable(config$);
   const axesMapping = chartConfig?.axesMapping;
 
   const updateVisualization = useCallback(
