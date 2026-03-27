@@ -68,6 +68,9 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
       cy.wait(1000);
 
       // Verify visualization is created
@@ -109,6 +112,9 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
       cy.wait(1000);
 
       // Verify visualization is created
@@ -151,6 +157,9 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
       cy.wait(1000);
 
       // Verify visualization is created
@@ -193,6 +202,10 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
+
       cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
 
       cy.get('[role="option"][aria-selected="true"]')
@@ -225,6 +238,9 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
       cy.wait(1000);
 
       // Verify visualization is created
@@ -260,6 +276,9 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
       cy.wait(1000);
 
       // Verify visualization is created
@@ -296,6 +315,9 @@ export const runCreateVisTests = () => {
       // Run the query
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.waitForLoader(true);
+
+      // Navigate to visualization tab
+      cy.get('#explore_visualization_tab').click();
       cy.wait(1000);
 
       // Verify visualization is created

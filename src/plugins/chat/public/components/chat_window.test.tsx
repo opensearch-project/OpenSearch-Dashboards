@@ -92,6 +92,7 @@ describe('ChatWindow', () => {
       approve: jest.fn(),
       reject: jest.fn(),
       cancel: jest.fn(),
+      cleanAll: jest.fn(),
     } as any;
   });
 

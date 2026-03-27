@@ -19,7 +19,7 @@ import { HeaderVariant } from '../../../../../core/public';
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { chrome, uiSettings, keyboardShortcut, chat } = services;
+  const { chrome, uiSettings, keyboardShortcut } = services;
   const { setHeaderVariant } = chrome;
   const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
@@ -55,18 +55,6 @@ export const DashboardEditor = () => {
       setHeaderVariant?.();
     };
   }, [setHeaderVariant, showActionsInGroup]);
-
-  useEffect(() => {
-    chat?.screenshot?.configure({
-      enabled: true,
-      title: i18n.translate('dashboard.editor.chat.addScreenshot', {
-        defaultMessage: 'Add dashboard screenshot',
-      }),
-    });
-    return () => {
-      chat?.screenshot.configure({ enabled: false });
-    };
-  }, [chat]);
 
   const handleFullScreen = useCallback(() => {
     if (appState) {

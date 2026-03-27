@@ -29,6 +29,8 @@ const createMetricVisualization = () => {
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
+  // Navigate to visualization tab
+  cy.get('#explore_visualization_tab').click();
   cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 

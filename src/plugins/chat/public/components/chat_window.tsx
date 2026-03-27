@@ -324,6 +324,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
 
       setTimeline((prev) => [...prev, timelineUserMessage]);
+      setScreenshotData(undefined);
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -348,7 +349,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
-          setScreenshotData(undefined);
         },
       });
 
@@ -464,9 +464,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setCurrentRunId(null);
     setIsStreaming(false);
     setPendingConfirmation(null);
+    confirmationService.cleanAll();
     setShowHistory(false);
     setRestoreError(null);
-  }, [chatService]);
+  }, [chatService, confirmationService]);
 
   const handleStop = useCallback(() => {
     // Abort the current streaming request
@@ -732,6 +733,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             isCapturing={isCapturing}
             isStreaming={isStreaming}
             isSendingToolResult={isSendingToolResult}
+            pendingConfirmation={pendingConfirmation}
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}
