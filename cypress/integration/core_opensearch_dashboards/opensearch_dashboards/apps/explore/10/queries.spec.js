@@ -140,17 +140,14 @@ const queriesTestSuite = () => {
         cy.osd.waitForLoader(true);
         cy.wait(1000);
 
+        // Logs table is displayed by default
+        cy.getElementByTestId('docTable').should('be.visible');
+        // Navigate to visualization
+        cy.get('#explore_visualization_tab').click();
         cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
-        cy.get('button[role="tab"][aria-selected="true"]')
-          .contains('Visualization')
-          .should('be.visible');
-
-        cy.get('button[role="tab"]').contains('Logs').click();
-        cy.get('button[role="tab"][aria-selected="true"]').contains('Logs').should('be.visible');
-
+        // Rerun the query, visualization tab should remain selected
         cy.explore.setTopNavDate(START_TIME, START_TIME);
-
         cy.getElementByTestId('exploreQueryExecutionButton').click();
         cy.osd.waitForLoader(true);
         cy.wait(1000);
