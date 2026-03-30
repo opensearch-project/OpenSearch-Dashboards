@@ -51,7 +51,7 @@ const run = async () => {
     'demo',
     'example',
     'examples',
-    'examples-0.7.x', // avoid CVE-2024-6485 bootstrap-3.3.7.min.js in leaflet-draw/docs/examples-0.7.x/basic.html
+    'examples-0.7.x', // leaflet-draw/docs/examples-0.7.x/basic.html
   ]);
 
   promises.push(
