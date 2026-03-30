@@ -1,0 +1,2 @@
+chore:
+- Fix CVE-2026-28292, CVE-2026-33937, and CVE-2026-25639 ([#11628](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11628))
