@@ -116,8 +116,6 @@ export const VisualizationEditorPage = ({
     savedVisConfig,
     savedQueryState,
     visualizationBuilderForEditor,
-    chrome.docTitle,
-    chrome.recentlyAccessed,
   ]);
 
   useEffect(() => {

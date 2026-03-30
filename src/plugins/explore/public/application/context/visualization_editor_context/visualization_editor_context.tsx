@@ -4,15 +4,11 @@
  */
 
 import React, { createContext, useContext, FC, ReactNode } from 'react';
+import { ContainerInfo } from '../../../application/in_context_vis_editor/utils';
 
 interface VisualizationEditorContextValue {
   originatingApp?: string;
   containerInfo?: ContainerInfo;
-}
-
-interface ContainerInfo {
-  containerName?: string;
-  containerId?: string;
 }
 
 const VisualizationEditorContext = createContext<VisualizationEditorContextValue>({});
