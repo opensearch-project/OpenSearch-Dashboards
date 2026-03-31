@@ -155,7 +155,9 @@ describe(`Workspace routes`, () => {
           },
         })
         .expect(400);
-      expect(result.body.message).toContain('must be 6–20 characters');
+      expect(result.body.message).toContain(
+        'must be 6–20 characters using only letters, numbers, underscores, and hyphens.'
+      );
     });
   });
 
