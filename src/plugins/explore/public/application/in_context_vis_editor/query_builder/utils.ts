@@ -82,7 +82,7 @@ export const getPreloadedQueryState = async (
   languageType: SupportLanguageType,
   preferredDataset?: Dataset
 ): Promise<QueryState> => {
-  // Always resolve the dataset to ensure SignalType validation runs
+  // Always validate the dataset and language type
   const selectedDataset = await resolveDatasetByLanguage(services, languageType, preferredDataset);
 
   // Use toDataset method if available, otherwise extract minimal properties

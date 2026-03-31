@@ -412,7 +412,7 @@ export class ExplorePlugin
       };
     };
 
-    const createExploreInContextEditorApp = () => {
+    const createExploreVisualizationEditorApp = () => {
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
@@ -452,7 +452,6 @@ export class ExplorePlugin
           if (!this.initializeServices) {
             throw Error('Explore plugin method initializeServices is undefined');
           }
-
           // Get start services
           const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
 
@@ -461,7 +460,7 @@ export class ExplorePlugin
           // make sure the index pattern list is up to date
           pluginsStart.data.indexPatterns.clearCache();
 
-          const { renderEditor } = await import('./application/in_context_editor_app');
+          const { renderEditor } = await import('./application/visualization_editor_editor_app');
 
           const services = buildServices(
             coreStart,
@@ -491,7 +490,7 @@ export class ExplorePlugin
           const editorAbortActionId = VISUALIZATION_EDITOR_APP_ID;
           const abortAction = createAbortDataQueryAction(editorAbortActionId);
           services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
-
+          setServices(services);
           appMounted();
           const unmount = renderEditor(params, services);
 
@@ -506,7 +505,7 @@ export class ExplorePlugin
       };
     };
 
-    core.application.register(createExploreInContextEditorApp());
+    core.application.register(createExploreVisualizationEditorApp());
 
     // Create updaters for Traces and Metrics to control visibility
     if (!this.stateUpdaterByApp[ExploreFlavor.Traces]) {

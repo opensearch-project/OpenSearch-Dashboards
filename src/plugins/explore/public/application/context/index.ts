@@ -5,4 +5,4 @@
 
 export * from './dataset_context';
 export * from './editor_context';
-export * from './in_context_editor_context';
+export * from './visualization_editor_context';

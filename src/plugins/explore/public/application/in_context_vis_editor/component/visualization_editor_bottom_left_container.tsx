@@ -19,12 +19,12 @@ import { VisEditorUninitialized } from './vis_editor_uninitialized';
 import { VisEditorNoResults } from './vis_editor_no_results';
 import { VisEditorLoadingState } from './vis_editor_loading_state';
 import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
-import { QueryPanel } from './in_context_query_panel';
+import { QueryPanel } from './visualization_editor_query_panel';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
 import { EditorPanel } from './editor_panel';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
-import '../in_context_editor.scss';
+import '../visualization_editor.scss';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
   defaultMessage: 'An error occurred while executing the query',

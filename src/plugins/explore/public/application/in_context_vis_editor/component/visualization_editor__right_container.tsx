@@ -9,7 +9,7 @@ import { EuiPanel, EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner } from '@elastic/e
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
-import '../in_context_editor.scss';
+import '../visualization_editor.scss';
 
 export const RightStyleOptionsPanel = () => {
   const { queryEditorState } = useQueryBuilderState();
