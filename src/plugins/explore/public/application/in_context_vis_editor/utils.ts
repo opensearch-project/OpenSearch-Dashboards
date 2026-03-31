@@ -6,6 +6,13 @@
 import { i18n } from '@osd/i18n';
 import { NavigateToAppOptions } from 'opensearch-dashboards/public';
 
+export const CONTAINER_URL_KEY = '_c';
+
+export interface ContainerState {
+  originatingApp: string | undefined;
+  containerInfo: ContainerInfo | undefined;
+}
+
 export interface ContainerInfo {
   containerName: string;
   containerId: string;

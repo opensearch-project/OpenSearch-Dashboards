@@ -130,13 +130,7 @@ export const VisualizationEditorPage = ({
     return () => {
       stop();
     };
-  }, [
-    osdUrlStateStorage,
-    queryBuilder.queryEditorState$,
-    data.query,
-    visualizationBuilderForEditor.visConfig$,
-    queryBuilder.queryState$,
-  ]);
+  }, [osdUrlStateStorage, data.query]);
 
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 

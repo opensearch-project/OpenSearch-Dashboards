@@ -5,14 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { getServices } from '../../../services/services';
-import { ContainerInfo } from '../utils';
-
-const CONTAINER_URL_KEY = '_c';
-
-export interface ContainerState {
-  originatingApp: string | undefined;
-  containerInfo: ContainerInfo | undefined;
-}
+import { ContainerState, CONTAINER_URL_KEY } from '../utils';
 
 export const useInitialContainerContext = () => {
   const services = getServices();
