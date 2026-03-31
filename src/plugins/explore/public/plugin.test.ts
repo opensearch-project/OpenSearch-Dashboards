@@ -313,8 +313,16 @@ describe('ExplorePlugin', () => {
 
       expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'DiscoverVisualization',
+          name: 'VisualizationEditor',
           aliasApp: 'visualization-editor',
+          title: expect.any(String),
+        })
+      );
+
+      expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'DiscoverVisualization',
+          aliasApp: 'explore',
           title: expect.any(String),
         })
       );
