@@ -47,7 +47,12 @@ const patchFile = async (file, patch) => {
 };
 
 const run = async () => {
-  const promises = await removeUnwantedFolders('node_modules', ['demo', 'example', 'examples']);
+  const promises = await removeUnwantedFolders('node_modules', [
+    'demo',
+    'example',
+    'examples',
+    'examples-0.7.x', // leaflet-draw/docs/examples-0.7.x/basic.html
+  ]);
 
   promises.push(
     patchFile('node_modules/font-awesome/scss/_variables.scss', {
