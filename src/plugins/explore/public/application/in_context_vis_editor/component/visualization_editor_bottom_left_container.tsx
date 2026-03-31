@@ -14,12 +14,10 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/common';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../../../types';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
-import { DiscoverNoResults } from '../../legacy/discover/application/components/no_results/no_results';
-import { DiscoverUninitialized } from '../../legacy/discover/application/components/uninitialized/uninitialized';
-import { LoadingSpinner } from '../../legacy/discover/application/components/loading_spinner/loading_spinner';
+import { VisEditorUninitialized } from './vis_editor_uninitialized';
+import { VisEditorNoResults } from './vis_editor_no_results';
+import { VisEditorLoadingState } from './vis_editor_loading_state';
 import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
 import { QueryPanel } from './visualization_editor_query_panel';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
@@ -39,25 +37,15 @@ const typeText = i18n.translate('explore.errorPanel.type', {
 });
 
 export const ResizableQueryPanelAndVisualization = () => {
-  const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder, queryEditorState, datasetView } = useQueryBuilderState();
-  const queryStatus = queryEditorState.queryStatus;
-  const dataview = datasetView.dataView;
+  const { queryBuilder, queryEditorState } = useQueryBuilderState();
 
-  const onRefresh = () => {
-    queryBuilder.executeQuery();
-  };
+  const queryStatus = queryEditorState.queryStatus;
 
   const renderVis = () => {
     if (queryStatus.status === QueryExecutionStatus.NO_RESULTS) {
       return (
         <EditorPanel>
-          <DiscoverNoResults
-            queryString={services?.data?.query?.queryString}
-            query={services?.data?.query?.queryString?.getQuery()}
-            savedQuery={services?.data?.query?.savedQueries}
-            timeFieldName={dataview?.timeFieldName}
-          />
+          <VisEditorNoResults />
         </EditorPanel>
       );
     }
@@ -65,9 +53,7 @@ export const ResizableQueryPanelAndVisualization = () => {
     if (queryStatus.status === QueryExecutionStatus.UNINITIALIZED) {
       return (
         <EditorPanel>
-          <div style={{ height: '100%' }}>
-            <DiscoverUninitialized onRefresh={onRefresh} />
-          </div>
+          <VisEditorUninitialized />
         </EditorPanel>
       );
     }
@@ -75,7 +61,7 @@ export const ResizableQueryPanelAndVisualization = () => {
     if (queryStatus.status === QueryExecutionStatus.LOADING) {
       return (
         <EditorPanel>
-          <LoadingSpinner />
+          <VisEditorLoadingState />
         </EditorPanel>
       );
     }
