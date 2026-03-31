@@ -102,6 +102,15 @@ const workspaceNameSchema = schema.string({
 });
 
 const createWorkspaceAttributesSchema = schema.object({
+  id: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (!/^[a-zA-Z0-9_-]{6,20}$/.test(value)) {
+          return 'must be 6–20 characters using only letters, numbers, underscores, and hyphens.';
+        }
+      },
+    })
+  ),
   name: workspaceNameSchema,
   features: featuresSchema,
   ...workspaceOptionalAttributesSchema,
@@ -210,6 +219,7 @@ export function registerRoutes({
       const { attributes, settings } = req.body;
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+        id?: string;
         dataSources?: string[];
         dataConnections?: string[];
       } = attributes;

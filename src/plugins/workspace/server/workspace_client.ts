@@ -114,13 +114,14 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      id?: string;
       dataSources?: string[];
       dataConnections?: string[];
     }
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const { permissions, dataSources, dataConnections, ...attributes } = payload;
-      const id = generateRandomId(WORKSPACE_ID_SIZE);
+      const { permissions, dataSources, dataConnections, id: payloadId, ...attributes } = payload;
+      const id = payloadId || generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const clientWithoutPermission = this.getScopedClientWithoutPermission(requestDetail);
       const existingWorkspaceRes = await clientWithoutPermission?.find({
