@@ -26,8 +26,8 @@ import { useQueryBuilderState } from './hooks/use_query_builder_state';
 import { useVisualizationBuilder } from './hooks/use_visualization_builder';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
-import { useVisualizationEditor } from '../context';
 import { getPreviousBreadcrumbs } from './utils';
+import { useInitialContainerContext } from './hooks/use_initial_container_context';
 
 export const VisualizationEditorPage = ({
   setHeaderActionMenu,
@@ -45,8 +45,12 @@ export const VisualizationEditorPage = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { queryBuilder } = useQueryBuilderState();
   const { visualizationBuilderForEditor } = useVisualizationBuilder();
+
+  const {
+    context: { containerInfo, originatingApp },
+  } = useInitialContainerContext();
+
   const [initialized, setInitialized] = useState(false);
-  const { containerInfo, originatingApp } = useVisualizationEditor();
 
   const {
     savedExplore,

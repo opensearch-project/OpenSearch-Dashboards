@@ -22,8 +22,8 @@ import { Query } from '../../../../../data/common';
 import { SavedExplore } from '../../../saved_explore';
 import { SaveVisModal } from './save_vis_modal';
 import { useCurrentExploreId } from '../hooks/use_explore_id';
-import { useVisualizationEditor } from '../../context';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
+import { useInitialContainerContext } from '../hooks/use_initial_container_context';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -62,7 +62,7 @@ export const SaveVisButton = () => {
   const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
   const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
 
-  const originatingApp = useVisualizationEditor().originatingApp;
+  const originatingApp = useInitialContainerContext().context.originatingApp;
   const searchContext = useSearchContext();
 
   const navigateTo = useCallback(
