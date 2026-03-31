@@ -64,7 +64,6 @@ export const HealthCheckNavButton = ({
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: '1.5px',
       }}
       type="dot"
       color={mapTaskStatusToHealthColor(status)}
@@ -144,6 +143,7 @@ export const HealthCheckNavButton = ({
         setPopoverOpen(false);
       }}
       panelPaddingSize="m"
+      panelStyle={{ marginLeft: '-1px' }}
     >
       {contextMenuPanel}
     </EuiPopover>
