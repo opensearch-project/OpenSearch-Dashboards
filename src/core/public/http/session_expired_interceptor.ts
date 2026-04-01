@@ -9,6 +9,7 @@
  * GitHub history for details.
  */
 
+import { i18n } from '@osd/i18n';
 import { HttpSetup } from './types';
 import { NotificationsSetup } from '../notifications';
 
@@ -29,8 +30,13 @@ export function setupSessionExpiredInterceptor(http: HttpSetup, notifications: N
 
           notifications.toasts.addWarning(
             {
-              title: 'Session expired',
-              text: 'Your session has expired. Redirecting to the login page...',
+              title: i18n.translate('core.http.sessionExpiredToastTitle', {
+                defaultMessage: 'Session expired',
+              }),
+              text: i18n.translate('core.http.sessionExpiredToastText', {
+                defaultMessage:
+                  'Your session has expired. Redirecting to the login page in 5 secs...',
+              }),
             },
             { toastLifeTimeMs: SESSION_REDIRECT_DELAY_MS }
           );
