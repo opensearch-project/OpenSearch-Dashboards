@@ -33,6 +33,8 @@ export const typeAndVerifySuggestion = (input, expectedSuggestion) => {
   if (input) {
     cy.get('.inputarea').type(input, { force: true });
   }
+  // Wait for resizable button to be in stable position
+  cy.get('[data-test-subj="euiResizableButton"]').should('exist');
   cy.get('.suggest-widget')
     .should('be.visible')
     .within(() => {

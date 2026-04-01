@@ -158,7 +158,10 @@ const traceTestSuite = () => {
       cy.explore.setQueryEditor("| WHERE spanId = '58f52f0436530c7c'");
       cy.osd.verifyResultsCount(1);
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.getElementByTestId('traceFlyoutButton').first().click();
+      // Wait for button to be ready and clickable
+      cy.getElementByTestId('traceFlyoutButton').first().should('be.visible').click();
+      // Wait for flyout to open
+      cy.getElementByTestId('traceFlyout').should('be.visible');
 
       // Verify flyout header
       cy.getElementByTestId('traceFlyout').should(
@@ -209,6 +212,8 @@ const traceTestSuite = () => {
 
   describe('Trace Details Interactive Tests', () => {
     beforeEach(() => {
+      // Ensure traceUrl is defined before visiting
+      expect(traceUrl).to.not.be.undefined;
       cy.visit(traceUrl);
       cy.osd.waitForLoader(true);
     });
