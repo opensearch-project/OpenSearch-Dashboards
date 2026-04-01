@@ -194,9 +194,8 @@ export const verifyVisualizationsWithInspectOption = (visualizationTitlesWithIns
       .findElementByTestId('embeddablePanelToggleMenuIcon')
       .click();
 
-    // Wait for the context menu to open and ensure only one inspect action is visible
-    cy.getElementByTestId('embeddablePanelContextMenuOpen').should('exist');
-    cy.getElementByTestId('embeddablePanelAction-openInspector').should('exist').click();
+    // Wait for menu to open and ensure only one inspect button exists (previous menus closed)
+    cy.getElementByTestId('embeddablePanelAction-openInspector').should('have.length', 1).click();
     cy.getElementByTestId('inspectorPanel').findElementByTestId('inspectorTable').should('exist');
     cy.getElementByTestId('inspectorPanel')
       .findElementByTestId('inspectorViewChooser')
