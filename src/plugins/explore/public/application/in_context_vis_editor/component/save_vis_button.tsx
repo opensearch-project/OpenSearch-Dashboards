@@ -22,7 +22,7 @@ import { Query } from '../../../../../data/common';
 import { SavedExplore } from '../../../saved_explore';
 import { SaveVisModal } from './save_vis_modal';
 import { useCurrentExploreId } from '../hooks/use_explore_id';
-import { useInContextEditor } from '../../context';
+import { useVisualizationEditor } from '../../context';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 export interface OnSaveProps {
@@ -32,16 +32,16 @@ export interface OnSaveProps {
   onTitleDuplicate: () => void;
 }
 
-const saveButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
-  defaultMessage: 'Save and back to dashboard',
+const saveAndBackButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
+  defaultMessage: 'Save and back',
 });
 
 const discardButtonText = i18n.translate('explore.topNav.saveVisButton.discard', {
-  defaultMessage: 'Discard panel changes',
+  defaultMessage: 'Discard changes',
 });
 
-const saveButtonWithoutBackText = i18n.translate('explore.topNav.saveVisButton.save', {
-  defaultMessage: 'Save visualization',
+const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
+  defaultMessage: 'Save',
 });
 
 export const SaveVisButton = () => {
@@ -62,7 +62,7 @@ export const SaveVisButton = () => {
   const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
   const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
 
-  const originatingApp = useInContextEditor().originatingApp;
+  const originatingApp = useVisualizationEditor().originatingApp;
   const searchContext = useSearchContext();
 
   const navigateTo = useCallback(
@@ -157,7 +157,6 @@ export const SaveVisButton = () => {
         const id = await savedExploreToSave.save(saveOptions);
         if (id) {
           setShowModal(false);
-
           navigateTo({ id, newTitle });
         }
       } catch (error) {
@@ -219,11 +218,11 @@ export const SaveVisButton = () => {
   const saveButton = (
     <EuiButtonEmpty
       onClick={handleSaveButtonClick}
-      data-test-subj="saveInContextVisButton"
+      data-test-subj="saveVisualizationEditorButton"
       color="primary"
       size="s"
     >
-      {originatingApp ? saveButtonText : saveButtonWithoutBackText}
+      {originatingApp ? saveAndBackButtonText : saveButtonText}
     </EuiButtonEmpty>
   );
 
@@ -231,9 +230,8 @@ export const SaveVisButton = () => {
 
   const discardButton = (
     <EuiButtonEmpty
-      isDisabled={!isQueryEditorDirty && !isVisDirty}
       onClick={handleDiscard}
-      data-test-subj="discardInContextVisButton"
+      data-test-subj="discardVisualizationEditorButton"
       color={discardButtonColor}
       size="s"
     >

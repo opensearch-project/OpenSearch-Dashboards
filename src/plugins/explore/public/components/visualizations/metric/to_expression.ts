@@ -25,10 +25,6 @@ export const createSingleMetric = (
     throw Error('Missing value for metric chart');
   }
 
-  if (!numericField) {
-    throw Error('Missing value for metric chart');
-  }
-
   if (!dateField) {
     return { spec: undefined, name: numericFieldName, data: transformedData };
   }

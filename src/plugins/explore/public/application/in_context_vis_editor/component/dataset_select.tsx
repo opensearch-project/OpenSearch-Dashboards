@@ -13,7 +13,7 @@ import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useEditorOperations } from '../hooks/use_editor_operations';
 import { SupportLanguageType } from '../query_builder/query_builder';
 import { getRequiredSignalType } from '../query_builder/utils';
-import '../in_context_editor.scss';
+import '../visualization_editor.scss';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();

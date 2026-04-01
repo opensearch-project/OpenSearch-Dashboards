@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './in_context_editor_context';
+export * from './visualization_editor_context';
