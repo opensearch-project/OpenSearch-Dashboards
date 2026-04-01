@@ -121,5 +121,13 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
     container-type: inline-size; // containment context
     /* stylelint-disable-next-line */
     container-name: canvas;
+
+    .visEditorEmptyPrompt {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
   }
 }

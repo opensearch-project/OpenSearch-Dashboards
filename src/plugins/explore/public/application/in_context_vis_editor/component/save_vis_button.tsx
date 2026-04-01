@@ -33,16 +33,16 @@ export interface OnSaveProps {
   onTitleDuplicate: () => void;
 }
 
-const saveButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
-  defaultMessage: 'Save and back to dashboard',
+const saveAndBackButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
+  defaultMessage: 'Save and back',
 });
 
 const discardButtonText = i18n.translate('explore.topNav.saveVisButton.discard', {
-  defaultMessage: 'Discard panel changes',
+  defaultMessage: 'Discard changes',
 });
 
-const saveButtonWithoutBackText = i18n.translate('explore.topNav.saveVisButton.save', {
-  defaultMessage: 'Save visualization',
+const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
+  defaultMessage: 'Save',
 });
 
 export const SaveVisButton = () => {
@@ -235,7 +235,7 @@ export const SaveVisButton = () => {
       color="primary"
       size="s"
     >
-      {originatingApp ? saveButtonText : saveButtonWithoutBackText}
+      {originatingApp ? saveAndBackButtonText : saveButtonText}
     </EuiButtonEmpty>
   );
 
@@ -243,7 +243,6 @@ export const SaveVisButton = () => {
 
   const discardButton = (
     <EuiButtonEmpty
-      isDisabled={!isQueryEditorDirty && !isVisDirty}
       onClick={handleDiscard}
       data-test-subj="discardVisualizationEditorButton"
       color={discardButtonColor}

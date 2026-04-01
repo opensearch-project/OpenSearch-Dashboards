@@ -32,7 +32,7 @@ export interface OnSaveProps {
 }
 
 interface SaveVisModalProps {
-  onConfirm: (props: OnSaveProps) => void;
+  onConfirm: (props: OnSaveProps) => Promise<void>;
   onCancel: () => void;
   savedExploreId: string | undefined;
 }
