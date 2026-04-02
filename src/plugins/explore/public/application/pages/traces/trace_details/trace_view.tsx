@@ -68,6 +68,8 @@ export interface TraceDetailsProps {
   isEmbedded?: boolean;
   isFlyout?: boolean;
   defaultDataset?: DataView;
+  defaultTraceId?: string;
+  defaultSpanId?: string;
 }
 // Displaying only 10 logs in the tab
 export const LOGS_DATA = 10;
@@ -77,6 +79,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   isEmbedded = false,
   isFlyout = false,
   defaultDataset,
+  defaultTraceId,
+  defaultSpanId,
 }) => {
   const {
     services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
@@ -103,7 +107,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
     return createTraceAppState({
       stateDefaults: {
-        traceId: '',
+        traceId: defaultTraceId || '',
         dataset: defaultDataset
           ? getDatasetFromDataView(defaultDataset)
           : {
@@ -112,7 +116,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               type: 'INDEX_PATTERN',
               timeFieldName: 'endTime',
             },
-        spanId: undefined,
+        spanId: defaultSpanId,
       },
       osdUrlStateStorage: osdUrlStateStorage!,
     });
