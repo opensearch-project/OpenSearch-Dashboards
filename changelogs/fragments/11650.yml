@@ -1,0 +1,2 @@
+feat:
+- Add automated CVE resolution skill with multi-platform support ([#11650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11650))
