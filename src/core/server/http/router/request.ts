@@ -200,7 +200,7 @@ export class OpenSearchDashboardsRequest<
   };
 
   /** @internal */
-  protected readonly [requestSymbol]: Request;
+  protected readonly [requestSymbol]!: Request;
 
   constructor(
     request: Request,

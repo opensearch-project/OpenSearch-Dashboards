@@ -172,7 +172,7 @@ const createSuccessTransportRequestPromise = <T>(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {}
 ): MockedTransportRequestPromise<ApiResponse<T>> => {
-  const response = createApiResponse({ body, statusCode });
+  const response = createApiResponse({ body: body as any, statusCode });
   const promise = Promise.resolve(response);
   (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
 
