@@ -119,9 +119,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         spanId: defaultSpanId,
       },
       osdUrlStateStorage: osdUrlStateStorage!,
+      disableUrlSync: isFlyout,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [osdUrlStateStorage]);
+  }, [osdUrlStateStorage, isFlyout]);
 
   // Get current state values and subscribe to changes
   const [appState, setAppState] = useState(() => stateContainer.get());
