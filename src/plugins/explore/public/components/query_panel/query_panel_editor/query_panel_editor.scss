@@ -90,3 +90,26 @@
     color: $ouiColorPrimary;
   }
 }
+
+// PPL error highlighting
+.monaco-editor {
+  // Error text highlight
+  .ppl-error-highlight {
+    background-color: rgba($ouiColorDanger, 0.15);
+    border-bottom: 2px wavy $ouiColorDanger;
+  }
+
+  // Error glyph in the margin
+  .glyph-margin-widgets .cgmr.ppl-error-glyph {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+    &::before {
+      content: "⚠";
+      font-size: 14px;
+      color: $ouiColorDanger;
+    }
+  }
+}
