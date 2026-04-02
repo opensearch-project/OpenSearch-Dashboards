@@ -71,19 +71,6 @@ export const countSpans = (nodes: TreeNode[]): number => {
   return count;
 };
 
-export const sumTokens = (nodes: TreeNode[]): number => {
-  let total = 0;
-  nodes.forEach((node) => {
-    if (typeof node.tokens === 'number') {
-      total += node.tokens;
-    }
-    if (node.children) {
-      total += sumTokens(node.children);
-    }
-  });
-  return total;
-};
-
 export const extractTimestamps = (node: TreeNode): { startMs: number; endMs: number } => {
   const raw = node.traceRow?.rawDocument;
   if (raw) {
