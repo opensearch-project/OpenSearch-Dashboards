@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
-import { visualizationRegistry } from '../visualization_registry';
 import { ScatterVisStyleControls } from './scatter_vis_options';
 import {
   StandardAxes,

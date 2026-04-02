@@ -51,31 +51,33 @@ export class VisualizationRegistry {
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
   ) {
-    let result: Record<string, string> = {};
-    const mapping = rule.mappings[0] || {};
-    numericalColumns = [...numericalColumns];
-    categoricalColumns = [...categoricalColumns];
-    dateColumns = [...dateColumns];
+    for (const mapping of rule.mappings) {
+      let result: Record<string, string> = {};
+      const numCols = [...numericalColumns];
+      const categoricalCols = [...categoricalColumns];
+      const dateCols = [...dateColumns];
 
-    for (const [axisRole, { type }] of Object.entries(mapping)) {
-      let column: VisColumn | undefined;
-      if (type === VisFieldType.Categorical) {
-        column = categoricalColumns.shift();
+      for (const [axisRole, { type }] of Object.entries(mapping)) {
+        let column: VisColumn | undefined;
+        if (type === VisFieldType.Categorical) {
+          column = categoricalCols.shift();
+        }
+        if (type === VisFieldType.Numerical) {
+          column = numCols.shift();
+        }
+        if (type === VisFieldType.Date) {
+          column = dateCols.shift();
+        }
+        // No available column fits the mapping, cannot create axis mapping for the given columns
+        if (!column) {
+          result = {};
+          break;
+        }
+        result[axisRole] = column.name;
       }
-      if (type === VisFieldType.Numerical) {
-        column = numericalColumns.shift();
-      }
-      if (type === VisFieldType.Date) {
-        column = dateColumns.shift();
-      }
-      // No available column fits the mapping, cannot create axis mapping for the given columns
-      if (!column) {
-        result = {};
-        break;
-      }
-      result[axisRole] = column.name;
+      return result;
     }
-    return result;
+    return {};
   }
 
   /**
@@ -94,14 +96,11 @@ export class VisualizationRegistry {
 
     // Convert axesMapping to AxisTypeMapping type
     const axisTypeMapping: AxisTypeMapping = {};
-    Object.entries(axesMapping).forEach(([role, field]) => {
+    for (const [role, field] of Object.entries(axesMapping)) {
       const found = allColumns.find((col) => col.name === field);
-      if (found) {
-        axisTypeMapping[role as AxisRole] = { type: found.schema };
-      } else {
-        axisTypeMapping[role as AxisRole] = { type: VisFieldType.Unknown };
-      }
-    });
+      if (!found) return undefined;
+      axisTypeMapping[role as AxisRole] = { type: found.schema };
+    }
 
     const found = rules.find((rule) => {
       return rule.mappings.some((mapping) => {
@@ -163,13 +162,12 @@ export class VisualizationRegistry {
     dateColumns: VisColumn[],
     chartType?: string
   ) {
-    const { exact } = this.findRulesByColumns(
+    const { exact: matchedVisRules } = this.findRulesByColumns(
       numericalColumns,
       categoricalColumns,
       dateColumns,
       chartType
     );
-    const matchedVisRules = chartType ? exact.filter((r) => r.visType === chartType) : exact;
 
     let bestRule: VisRule<any> | null = null;
     let bestChartType: string | null = null;
@@ -223,24 +221,15 @@ export class VisualizationRegistry {
         for (const mapping of rule.mappings) {
           const required = this.countMappingFieldTypes(mapping);
 
-          const isExact =
+          exactMatch =
             required.numerical === numCount &&
             required.categorical === catCount &&
             required.date === dateCount;
 
-          const isCompatible =
+          compatibleMatch =
             required.numerical <= numCount &&
             required.categorical <= catCount &&
             required.date <= dateCount;
-
-          if (isExact) {
-            exactMatch = true;
-            compatibleMatch = true;
-          }
-
-          if (isCompatible && !compatibleMatch) {
-            compatibleMatch = true;
-          }
         }
 
         if (compatibleMatch) {

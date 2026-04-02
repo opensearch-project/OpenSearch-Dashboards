@@ -128,11 +128,11 @@ const ChartRender = ({
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
 }) => {
   if (!data) {
-    return;
+    return null;
   }
 
   if (!config?.type) {
-    return;
+    return null;
   }
 
   const columns = [
@@ -147,7 +147,7 @@ const ChartRender = ({
     columns
   );
   if (!rule) {
-    return;
+    return null;
   }
   const standardAxes = 'standardAxes' in config.styles ? config.styles.standardAxes : [];
   const axisColumnMappings = convertStringsToMappings(config?.axesMapping ?? {}, columns);

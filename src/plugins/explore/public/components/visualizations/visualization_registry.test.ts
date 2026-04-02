@@ -254,6 +254,135 @@ describe('VisualizationRegistry', () => {
     });
   });
 
+  describe('findRuleByAxesMapping', () => {
+    const numCol: VisColumn = {
+      id: 1,
+      name: 'value',
+      schema: VisFieldType.Numerical,
+      column: 'value',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    };
+    const catCol: VisColumn = {
+      id: 2,
+      name: 'category',
+      schema: VisFieldType.Categorical,
+      column: 'category',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    };
+    const dateCol: VisColumn = {
+      id: 3,
+      name: 'timestamp',
+      schema: VisFieldType.Date,
+      column: 'timestamp',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    };
+    const allColumns = [numCol, catCol, dateCol];
+
+    it('should return the matching rule when axes mapping matches exactly', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('bar', 'Bar', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'bar',
+        { [AxisRole.X]: 'category', [AxisRole.Y]: 'value' },
+        allColumns
+      );
+      expect(result).toBe(rule);
+    });
+
+    it('should return undefined when field types do not match', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // Passing a categorical column for X, but rule expects date
+      const result = registry.findRuleByAxesMapping(
+        'line',
+        { [AxisRole.X]: 'category', [AxisRole.Y]: 'value' },
+        allColumns
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when axis count differs', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('bar', 'Bar', [rule]));
+
+      // Only one axis provided, rule requires two
+      const result = registry.findRuleByAxesMapping('bar', { [AxisRole.Y]: 'value' }, allColumns);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when a column is not found in allColumns', () => {
+      const rule = makeRule(100, [{ [AxisRole.Y]: { type: VisFieldType.Numerical } }]);
+      registry.registerVisualization(makeVisType('metric', 'Metric', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'metric',
+        { [AxisRole.Y]: 'nonexistent_column' },
+        allColumns
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for an unregistered chart type', () => {
+      const result = registry.findRuleByAxesMapping(
+        'unknown_chart',
+        { [AxisRole.Y]: 'value' },
+        allColumns
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when axesMapping is empty', () => {
+      const rule = makeRule(100, [{ [AxisRole.Y]: { type: VisFieldType.Numerical } }]);
+      registry.registerVisualization(makeVisType('metric', 'Metric', [rule]));
+
+      const result = registry.findRuleByAxesMapping('metric', {}, allColumns);
+      expect(result).toBeUndefined();
+    });
+
+    it('should match against the correct mapping in a rule with multiple mappings', () => {
+      const rule = makeRule(100, [
+        // First mapping: date + numerical
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+        // Second mapping: categorical + numerical
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('bar', 'Bar', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'bar',
+        { [AxisRole.X]: 'category', [AxisRole.Y]: 'value' },
+        allColumns
+      );
+      expect(result).toBe(rule);
+    });
+  });
+
   describe('getVisualization', () => {
     it('should return undefined for unregistered type', () => {
       expect(registry.getVisualization('nonexistent')).toBeUndefined();

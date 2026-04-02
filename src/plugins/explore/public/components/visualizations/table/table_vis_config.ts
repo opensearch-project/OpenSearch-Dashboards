@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
-import { visualizationRegistry } from '../visualization_registry';
 import { TableVisStyleControls } from './table_vis_options';
 import { CellAlignment, ColorMode, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
