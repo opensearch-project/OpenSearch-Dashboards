@@ -4,7 +4,11 @@
 /.opensearch
 /.chromium
 /package.json.bak
+*.bak
 .claude/
+!.claude/settings.json
+!.claude/skills/
+.claude/settings.local.json
 CLAUDE.local.md
 .DS_Store
 .node_binaries

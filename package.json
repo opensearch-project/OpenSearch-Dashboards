@@ -186,7 +186,10 @@
     "**/body-parser": "^2.2.1",
     "**/@tootallnate/once": "^3.0.1",
     "**/fast-xml-parser": "^5.3.8",
-    "**/grunt/minimatch": "^3.1.5"
+    "**/grunt/minimatch": "^3.1.5",
+    "**/selenium-webdriver/tmp": "^0.2.4",
+    "**/@lhci/cli/tmp": "^0.2.4",
+    "**/external-editor/tmp": "^0.2.4"
   },
   "workspaces": {
     "packages": [
