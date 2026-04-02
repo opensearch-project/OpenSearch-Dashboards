@@ -15,6 +15,25 @@ import { NotificationsSetup } from '../notifications';
 
 const SESSION_REDIRECT_DELAY_MS = 5000;
 
+/**
+ * Validates that a redirect URL is safe to navigate to.
+ * Only allows relative URLs or URLs on the same origin to prevent open redirect attacks.
+ */
+function isValidRedirectURL(url: string): boolean {
+  // Allow relative URLs (starting with /)
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    return true;
+  }
+
+  // Allow same-origin absolute URLs
+  try {
+    const parsed = new URL(url);
+    return parsed.origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 export function setupSessionExpiredInterceptor(http: HttpSetup, notifications: NotificationsSetup) {
   let isRedirecting = false;
 
@@ -25,7 +44,7 @@ export function setupSessionExpiredInterceptor(http: HttpSetup, notifications: N
       if (response && response.status === 401 && !isRedirecting) {
         const redirectURL = response.headers.get('X-Auth-Redirect-URL');
 
-        if (redirectURL) {
+        if (redirectURL && isValidRedirectURL(redirectURL)) {
           isRedirecting = true;
 
           notifications.toasts.addWarning(
@@ -34,18 +53,23 @@ export function setupSessionExpiredInterceptor(http: HttpSetup, notifications: N
                 defaultMessage: 'Session expired',
               }),
               text: i18n.translate('core.http.sessionExpiredToastText', {
-                defaultMessage:
-                  'Your session has expired. Redirecting to the login page in 5 secs...',
+                defaultMessage: 'Your session has expired. Redirecting to the login page...',
               }),
             },
             { toastLifeTimeMs: SESSION_REDIRECT_DELAY_MS }
           );
 
+          // Halt the interceptor chain first to prevent downstream error handlers
+          // from firing for this 401 response.
+          controller.halt();
+
           setTimeout(() => {
+            // Reset the flag before redirecting so that if the redirect fails
+            // (e.g. navigation is blocked), subsequent 401s can still trigger
+            // the toast and redirect flow again.
+            isRedirecting = false;
             window.location.href = redirectURL;
           }, SESSION_REDIRECT_DELAY_MS);
-
-          controller.halt();
         }
       }
     },

@@ -163,4 +163,114 @@ describe('setupSessionExpiredInterceptor', () => {
     expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
     expect(controller.halt).not.toHaveBeenCalled();
   });
+
+  it('rejects absolute URLs to external domains (open redirect protection)', () => {
+    const mockHeaders = new Headers({
+      'X-Auth-Redirect-URL': 'https://evil.com/phishing',
+    });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(controller.halt).not.toHaveBeenCalled();
+  });
+
+  it('rejects protocol-relative URLs (open redirect protection)', () => {
+    const mockHeaders = new Headers({
+      'X-Auth-Redirect-URL': '//evil.com/phishing',
+    });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(controller.halt).not.toHaveBeenCalled();
+  });
+
+  it('allows same-origin absolute URLs', () => {
+    // In jsdom, window.location.origin is typically 'http://localhost'
+    (window as any).location = { href: '', origin: 'http://localhost' };
+    const sameOriginURL = 'http://localhost/auth/login';
+    const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': sameOriginURL });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(controller.halt).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(5000);
+    expect(window.location.href).toBe(sameOriginURL);
+  });
+
+  it('resets isRedirecting flag after redirect timeout so subsequent 401s can retrigger', () => {
+    const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': '/auth/login' });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+    const errorResponse = {
+      error: new Error('Unauthorized'),
+      response: mockResponse,
+      request: {} as Request,
+      fetchOptions: { path: '/api/test' } as any,
+      body: undefined,
+    };
+
+    // First 401
+    interceptor.responseError!(errorResponse, controller);
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+
+    // Advance past the redirect timeout — flag resets
+    jest.advanceTimersByTime(5000);
+
+    // Second 401 after reset should trigger again
+    interceptor.responseError!(errorResponse, controller);
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls controller.halt() before the redirect timeout fires', () => {
+    const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': '/auth/login' });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    // halt() is called synchronously, before the setTimeout fires
+    expect(controller.halt).toHaveBeenCalledTimes(1);
+    expect(window.location.href).toBe('');
+  });
 });
