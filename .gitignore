@@ -10,7 +10,6 @@
 
 # Temporary files and directories
 tmp/
-cve.md
 .claude/settings.local.json
 CLAUDE.local.md
 .DS_Store
