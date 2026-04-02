@@ -41,6 +41,7 @@ export const VisualizationEditorPage = ({
     chrome,
     osdUrlStateStorage,
     data,
+    embeddable,
   } = services;
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { queryBuilder } = useQueryBuilderState();
@@ -80,7 +81,12 @@ export const VisualizationEditorPage = ({
       }
 
       chrome.setBreadcrumbs([
-        ...getPreviousBreadcrumbs(application.navigateToApp, originatingApp, containerInfo),
+        ...getPreviousBreadcrumbs(
+          application.navigateToApp,
+          embeddable,
+          originatingApp,
+          containerInfo
+        ),
         { text: savedExplore?.title },
       ]);
 
@@ -108,6 +114,7 @@ export const VisualizationEditorPage = ({
       visualizationBuilderForEditor.reset();
     };
   }, [
+    embeddable,
     containerInfo,
     originatingApp,
     application?.navigateToApp,

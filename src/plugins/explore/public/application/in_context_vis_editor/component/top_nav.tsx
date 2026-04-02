@@ -47,7 +47,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const [screenTitle, setScreenTitle] = useState<string>('');
 
   useEffect(() => {
-    setScreenTitle(savedExplore?.title ? `${savedExplore?.title}` : '');
+    setScreenTitle(savedExplore?.title ? `Edit ${savedExplore?.title}` : 'Create');
   }, [savedExplore?.title]);
 
   const showDatePicker = useMemo(() => {
