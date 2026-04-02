@@ -1,200 +1,36 @@
-# CVE Resolution Skill
+# Claude Skills Directory
 
-Automated tool for identifying and resolving security vulnerabilities (CVEs) in OpenSearch Dashboards dependencies.
+This directory contains Claude Code skills for OpenSearch Dashboards development. 
 
-## 🔧 What it does
+**Multi-Platform Support**: Skills are available for both Claude Code and Kiro users through corresponding prompt formats.
 
-The CVE resolution skill automatically:
-- 🔍 **Finds open CVE issues** from GitHub  
-- 🔎 **Verifies which affect your code** by analyzing package.json and yarn.lock
-- 🛠️ **Attempts multiple fix strategies** (direct updates, lock manipulation, resolutions)
-- ✅ **Validates the fixes work** by running builds and audits
-- 📋 **Documents everything** in a comprehensive report for your PR
+## Available Skills
 
-## 🚀 Usage
+### `resolve-cve` ([resolve_cve.md](resolve_cve.md))
+Automatically identify and resolve security vulnerabilities (CVEs) in project dependencies.
 
-### Basic Commands
+- **Documentation**: [resolve-cve-README.md](resolve-cve-README.md)
+- **Claude Usage**: `/resolve-cve [--cve_id CVE-2024-12345]`
+- **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/resolve_cve.md](../../.kiro/prompts/resolve_cve.md)
+- **Purpose**: Scans GitHub issues for CVEs, verifies presence in codebase, attempts automated fixes
 
-```bash
-# Scan and fix ALL open CVEs
-/resolve-cve
+## Adding New Skills
 
-# Target a specific CVE
-/resolve-cve --cve_id CVE-2025-54798
+When adding new skills to this directory:
 
-# Get help on available options
-/resolve-cve --help
-```
+1. **Claude skill file**: `skill-name.md` (the actual skill definition)
+2. **Kiro prompt file**: `../../.kiro/prompts/skill-name.md` (Kiro-format prompt that delegates to Claude skill)
+3. **Documentation**: `skill-name-README.md` (comprehensive user guide)  
+4. **Update this README**: Add entry to "Available Skills" section with both usage formats
 
-### Example Workflow
+## Skill Development Guidelines
 
-1. **Run the skill:**
-   ```bash
-   /resolve-cve --cve_id CVE-2025-54798
-   ```
-
-2. **Review the generated `cve.md` file** for details on what was fixed
-
-3. **Test your changes:**
-   ```bash
-   yarn osd bootstrap
-   yarn test:jest  # optional
-   ```
-
-4. **Commit and create PR** with the generated documentation
-
-## 📋 Prerequisites
-
-Make sure you have:
-- ✅ **Clean working directory** (commit any pending changes)
-- ✅ **Yarn installed** (the skill uses `yarn osd bootstrap`)
-- ✅ **GitHub access** (for searching CVE issues)
-- ✅ **Node.js 20+** (required by OpenSearch Dashboards)
-
-## 🔍 How it works
-
-### Step 1: CVE Discovery
-- Searches https://github.com/opensearch-project/OpenSearch-Dashboards/issues
-- Filters for open issues containing "CVE"
-- Extracts vulnerability details (package, versions, severity)
-
-### Step 2: Impact Analysis  
-- Checks if vulnerable packages exist in your `package.json`
-- Analyzes `yarn.lock` for vulnerable transitive dependencies
-- Uses `yarn why <package>` to understand dependency chains
-
-### Step 3: Smart Remediation
-The skill tries multiple strategies in order:
-
-**Strategy A: Direct Updates** 
-- For packages explicitly in `package.json`
-- Updates to safe versions with caret ranges
-
-**Strategy B: Lock File Manipulation**
-- For transitive dependencies  
-- Removes vulnerable entries, lets yarn regenerate with latest
-
-**Strategy C: Parent Dependency Updates**
-- When Strategy B fails due to constraints
-- Updates parent dependencies that pull in vulnerable packages  
-
-**Strategy D: Yarn Resolutions** ⭐
-- Last resort for stubborn vulnerabilities
-- Forces specific safe versions using targeted resolutions
-- Example: `"**/selenium-webdriver/tmp": "^0.2.4"`
-
-### Step 4: Validation
-- ✅ Runs `yarn osd bootstrap` to ensure build works
-- ✅ Checks `yarn audit` to confirm CVE is resolved  
-- ✅ Verifies no new vulnerabilities introduced
-- ✅ Creates backup files for easy rollback
-
-## 📄 Generated Documentation
-
-The skill creates a comprehensive `cve.md` file containing:
-
-```markdown
-# CVE Resolution Report
-
-## CVE: CVE-2025-54798
-**Status**: ✅ RESOLVED
-**Severity**: Low (CVSS 2.5)
-
-## Changes Made
-- Updated tmp@0.0.30 → tmp@0.2.5 
-- Added yarn resolution: "**/selenium-webdriver/tmp": "^0.2.4"
-
-## Verification Results  
-- ✅ Build passes
-- ✅ Audit clean
-- ✅ No new vulnerabilities
-
-## Commands to validate:
-yarn why tmp
-yarn audit --level moderate
-```
-
-## 🛡️ Safety Features
-
-- **🔙 Automatic backups**: Creates `*.bak` files before any changes
-- **🚫 Never breaks builds**: Validates changes before proceeding  
-- **📝 Complete audit trail**: Documents every action taken
-- **🔄 Easy rollback**: Restore from backups if needed
-- **🎯 Targeted fixes**: Uses least invasive resolution strategies
-
-## 🐛 Troubleshooting
-
-### "Unknown skill: resolve-cve"
-The skill needs to be in your global skills directory:
-```bash
-# Check if skill exists
-ls ~/.claude/skills/resolve-cve/
-
-# If not, skills may be project-local only
-ls .claude/skills/resolve-cve.md
-```
-
-### "Build fails after CVE fix"
-1. **Restore backups:**
-   ```bash
-   mv package.json.bak package.json
-   mv yarn.lock.bak yarn.lock
-   yarn osd bootstrap
-   ```
-
-2. **Check the `cve.md` file** for manual steps required
-
-3. **Try a different strategy** - some CVEs need manual intervention
-
-### "CVE still shows in audit"
-- Check if multiple packages have the same vulnerability
-- Some audit tools cache results - try `yarn audit --force`
-- Verify you're checking the right CVE ID
-
-### "Skill doesn't find CVE issues"  
-- Ensure you have internet access for GitHub API calls
-- Check if the CVE issue still exists and is open
-- Try searching GitHub manually: "repo:opensearch-project/OpenSearch-Dashboards CVE"
-
-## 💡 Pro Tips
-
-1. **Run regularly**: Use `/resolve-cve` weekly to catch new vulnerabilities early
-
-2. **Test thoroughly**: Always run the full test suite after CVE fixes:
-   ```bash
-   yarn test:jest
-   yarn test:jest_integration  
-   ```
-
-3. **Review yarn resolutions**: If Strategy D was used, periodically check if resolutions can be removed after dependency updates
-
-4. **Batch related CVEs**: If multiple CVEs affect the same package, fix them together
-
-5. **Keep backups**: The `*.bak` files are your safety net - don't delete them until your PR is merged
-
-## 🔗 Related Commands
-
-```bash
-# Check current vulnerabilities
-yarn audit --level moderate
-
-# Find why a package is installed  
-yarn why <package-name>
-
-# Update all dependencies (careful!)
-yarn upgrade-interactive --latest
-
-# Clean build after fixes
-yarn osd clean && yarn osd bootstrap
-```
-
-## 📞 Getting Help
-
-- **Skill issues**: Check the skill file at `.claude/skills/resolve-cve.md`
-- **CVE questions**: Review the generated `cve.md` documentation
-- **Build problems**: See OpenSearch Dashboards troubleshooting in `CLAUDE.md`
-- **Security concerns**: Consult with security team before merging CVE fixes
+- Follow the existing skill template format with frontmatter
+- Include clear usage examples and error handling
+- Document all parameters and expected outputs
+- Test thoroughly before committing
+- Keep skills focused on specific, well-defined tasks
 
 ---
 
-**Happy CVE hunting! 🛡️**
+For general Claude Code documentation, see [CLAUDE.md](../../CLAUDE.md) in the project root.

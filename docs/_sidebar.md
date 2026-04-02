@@ -230,5 +230,4 @@
   - [TESTING](../TESTING.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
-  - [Cve](../cve.md)
   - [Testing_strategy](../testing_strategy.md)

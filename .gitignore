@@ -6,8 +6,11 @@
 /package.json.bak
 *.bak
 .claude/
-!.claude/settings.json
 !.claude/skills/
+
+# Temporary files and directories
+tmp/
+cve.md
 .claude/settings.local.json
 CLAUDE.local.md
 .DS_Store
@@ -54,7 +57,8 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
-.kiro
+.kiro/
+!.kiro/prompts/
 *.sublime-*
 npm-debug.log*
 .tern-project
