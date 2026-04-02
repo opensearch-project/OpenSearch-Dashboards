@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Client } from '@opensearch-project/opensearch';
+import { Client, Transport } from '@opensearch-project/opensearch';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isOpenSearchDashboardsRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
@@ -84,19 +84,22 @@ export class ClusterClient implements ICustomClusterClient {
   constructor(
     private readonly config: OpenSearchClientConfig,
     logger: Logger,
-    private readonly getAuthHeaders: GetAuthHeaders = noop
+    private readonly getAuthHeaders: GetAuthHeaders = noop,
+    customTransport?: typeof Transport
   ) {
-    this.asInternalUser = configureClient(config, { logger });
-    this.rootScopedClient = configureClient(config, { logger, scoped: true });
+    this.asInternalUser = configureClient(config, { logger, customTransport });
+    this.rootScopedClient = configureClient(config, { logger, scoped: true, customTransport });
 
     this.asInternalUserWithLongNumeralsSupport = configureClient(config, {
       logger,
       withLongNumeralsSupport: true,
+      customTransport,
     });
     this.rootScopedClientWithLongNumeralsSupport = configureClient(config, {
       logger,
       scoped: true,
       withLongNumeralsSupport: true,
+      customTransport,
     });
   }
 

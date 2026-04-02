@@ -219,6 +219,7 @@
 /* Ensure consistent width for Monaco Editor suggestion widget components */
 .monaco-editor .suggest-widget {
   /* We don't override the width here to maintain Monaco's default behavior */
+  z-index: 9999;
 
   /* Target the suggestion list to ensure it has the same width as the widget */
   .monaco-list {

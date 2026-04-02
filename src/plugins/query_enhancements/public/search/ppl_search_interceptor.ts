@@ -4,6 +4,7 @@
  */
 
 import { trimEnd } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
@@ -54,6 +55,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
+    const isAsync = strategy === SEARCH_STRATEGY.PPL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
@@ -61,6 +63,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       body: {
         pollQueryResultsParams: request.params?.pollQueryResultsParams,
         timeRange: request.params?.body?.timeRange,
+        ...(!isAsync && { queryId: uuidv4() }),
       },
     };
 

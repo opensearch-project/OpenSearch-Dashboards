@@ -73,7 +73,7 @@ describe('ExploreEmbeddableFactory', () => {
   });
 
   test('has the correct display name', () => {
-    expect(factory.getDisplayName()).toBe('visualization in discover');
+    expect(factory.getDisplayName()).toBe('visualization');
   });
 
   test('cannot create new embeddables directly', () => {

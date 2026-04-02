@@ -29,6 +29,7 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
+import { VisTypeAlias } from '../../visualizations/public';
 import {
   ExploreFlavor,
   PLUGIN_ID,
@@ -102,6 +103,7 @@ export class ExplorePlugin
   private stopUrlTrackingCallbackByApp: Partial<Record<ExploreFlavor | 'explore', () => void>> = {};
   private currentHistory?: ScopedHistory;
   private readonly DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
+  private readonly VISUALIZATION_EDITOR_NAME = 'VisualizationEditor';
 
   /** discover */
   private docViewsRegistry: DocViewsRegistry | null = null;
@@ -410,7 +412,7 @@ export class ExplorePlugin
       };
     };
 
-    const createExploreInContextEditorApp = () => {
+    const createExploreVisualizationEditorApp = () => {
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
@@ -450,7 +452,6 @@ export class ExplorePlugin
           if (!this.initializeServices) {
             throw Error('Explore plugin method initializeServices is undefined');
           }
-
           // Get start services
           const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
 
@@ -459,7 +460,7 @@ export class ExplorePlugin
           // make sure the index pattern list is up to date
           pluginsStart.data.indexPatterns.clearCache();
 
-          const { renderEditor } = await import('./application/in_context_editor_app');
+          const { renderEditor } = await import('./application/visualization_editor_editor_app');
 
           const services = buildServices(
             coreStart,
@@ -489,7 +490,7 @@ export class ExplorePlugin
           const editorAbortActionId = VISUALIZATION_EDITOR_APP_ID;
           const abortAction = createAbortDataQueryAction(editorAbortActionId);
           services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
-
+          setServices(services);
           appMounted();
           const unmount = renderEditor(params, services);
 
@@ -504,7 +505,7 @@ export class ExplorePlugin
       };
     };
 
-    core.application.register(createExploreInContextEditorApp());
+    core.application.register(createExploreVisualizationEditorApp());
 
     // Create updaters for Traces and Metrics to control visibility
     if (!this.stateUpdaterByApp[ExploreFlavor.Traces]) {
@@ -743,69 +744,82 @@ export class ExplorePlugin
   }
 
   private registerExploreVisualizationAlias(setupDeps: ExploreSetupDependencies) {
-    const exploreVisDisplayName = i18n.translate('explore.visualization.title', {
-      defaultMessage: 'Visualize with Discover',
-    });
+    const appExtensions: VisTypeAlias['appExtensions'] = {
+      visualizations: {
+        docTypes: [SAVED_OBJECT_TYPE],
+        toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+          let iconType = '';
+          let chartName = '';
+          try {
+            const vis = JSON.parse(attributes.visualization as string);
+            const chart = this.visualizationRegistryService
+              .getRegistry()
+              .getAvailableChartTypes()
+              .find((t) => t.type === vis.chartType);
+            if (chart) {
+              iconType = chart.icon;
+              chartName = chart.name;
+            }
+          } catch (e) {
+            iconType = '';
+          }
+
+          const adjustEditApp = attributes.type
+            ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
+            : VISUALIZATION_EDITOR_APP_ID;
+          const adjustEditUrl = attributes.type
+            ? `#/view/${encodeURIComponent(id)}` // regular explore vis
+            : `#/edit/${encodeURIComponent(id)}`; // visualization editor
+
+          return {
+            description: `${attributes?.description || ''}`,
+            editApp: adjustEditApp,
+            editUrl: adjustEditUrl,
+            icon: iconType,
+            id,
+            savedObjectType: SAVED_OBJECT_TYPE,
+            title: `${attributes?.title || ''}`,
+            typeTitle: chartName,
+            updated_at: updatedAt,
+            stage: 'production',
+          };
+        },
+      },
+    };
     // Register explore visualization as visualization alias
     setupDeps.visualizations.registerAlias({
       name: this.DISCOVER_VISUALIZATION_NAME,
       // Create new visualization
       // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
       // Need to define a two-way route
-      aliasPath: '#/edit/',
-      aliasApp: VISUALIZATION_EDITOR_APP_ID,
-      title: exploreVisDisplayName,
+      aliasPath: '#/',
+      aliasApp: PLUGIN_ID,
+      title: i18n.translate('explore.visualization.title', {
+        defaultMessage: 'Visualize with Discover',
+      }),
       description: i18n.translate('explore.visualization.description', {
         defaultMessage: 'Create visualization with Discover',
       }),
+      icon: 'discoverApp',
+      stage: 'production',
+      appExtensions,
+    });
+    setupDeps.visualizations.registerAlias({
+      name: this.VISUALIZATION_EDITOR_NAME,
+      // Create new visualization
+      // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
+      // Need to define a two-way route
+      aliasPath: '#/edit/',
+      aliasApp: VISUALIZATION_EDITOR_APP_ID,
+      title: i18n.translate('explore.visualization.editor.title', {
+        defaultMessage: 'Add visualization',
+      }),
+      description: i18n.translate('explore.visualization.editor.description', {
+        defaultMessage: 'Create visualization with visualization editor',
+      }),
       icon: 'visualizeApp',
       stage: 'production',
-      promotion: {
-        buttonText: exploreVisDisplayName,
-        description: 'Build query-powered visualizations',
-      },
-      appExtensions: {
-        visualizations: {
-          docTypes: [SAVED_OBJECT_TYPE],
-          toListItem: ({ id, attributes, updated_at: updatedAt }) => {
-            let iconType = '';
-            let chartName = '';
-            try {
-              const vis = JSON.parse(attributes.visualization as string);
-              const chart = this.visualizationRegistryService
-                .getRegistry()
-                .getAvailableChartTypes()
-                .find((t) => t.type === vis.chartType);
-              if (chart) {
-                iconType = chart.icon;
-                chartName = chart.name;
-              }
-            } catch (e) {
-              iconType = '';
-            }
-
-            const adjustEditApp = attributes.type
-              ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
-              : VISUALIZATION_EDITOR_APP_ID;
-            const adjustEditUrl = attributes.type
-              ? `#/view/${encodeURIComponent(id)}` // regular explore vis
-              : `#/edit/${encodeURIComponent(id)}`; // visualization editor
-
-            return {
-              description: `${attributes?.description || ''}`,
-              editApp: adjustEditApp,
-              editUrl: adjustEditUrl,
-              icon: iconType,
-              id,
-              savedObjectType: SAVED_OBJECT_TYPE,
-              title: `${attributes?.title || ''}`,
-              typeTitle: chartName,
-              updated_at: updatedAt,
-              stage: 'production',
-            };
-          },
-        },
-      },
+      appExtensions,
     });
   }
 
@@ -830,15 +844,16 @@ export class ExplorePlugin
         }
       });
     } else {
-      const registeredVisAlias = plugins.visualizations
+      plugins.visualizations
         .getAliases()
-        .find((v) => v.name === this.DISCOVER_VISUALIZATION_NAME);
-
-      // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
-      if (registeredVisAlias) {
-        // Do not display it in the create vis modal
-        registeredVisAlias.hidden = true;
-      }
+        .filter(
+          (v) =>
+            v.name === this.DISCOVER_VISUALIZATION_NAME || v.name === this.VISUALIZATION_EDITOR_NAME
+        )
+        .forEach((visAlias) => {
+          // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
+          visAlias.hidden = true;
+        });
     }
   }
 

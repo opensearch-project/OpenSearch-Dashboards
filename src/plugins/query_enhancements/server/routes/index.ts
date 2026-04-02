@@ -16,6 +16,7 @@ import { API, URI } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
+import { registerPPLCancelRoute } from './ppl_cancel';
 
 /**
  * Coerce status code to 503 for 500 errors from dependency services. Only use
@@ -90,6 +91,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             timeRange: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             highlight: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            queryId: schema.maybe(schema.string()),
           }),
         },
       },
@@ -187,6 +189,7 @@ export function defineRoutes(
   registerDataSourceConnectionsRoutes(router, client);
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
+  registerPPLCancelRoute(router, logger);
 
   definePPLBundleRoute(logger, router);
 }
