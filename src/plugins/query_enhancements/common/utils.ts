@@ -47,25 +47,47 @@ export const removeKeyword = (queryString: string | undefined) => {
 };
 
 export const throwFacetError = (response: any) => {
-  let errorMessage = response.data.body?.message ?? response.data.body ?? response.data;
+  // Preserve the full error body for rich error context
+  const errorBody = response.data.body ?? response.data;
 
-  // Check if errorMessage is an object and handle Error objects
-  if (typeof errorMessage === 'object') {
-    if (errorMessage instanceof Error) {
-      // If errorMessage is an instance of Error, extract its message
-      errorMessage = errorMessage.message;
-    } else if (errorMessage.message) {
-      // If errorMessage has a message property, extract that message
-      errorMessage = JSON.stringify(errorMessage.message);
+  // Extract error details if they exist (OpenSearch enhanced error format)
+  let errorMessage: string;
+  let errorContext: any;
+
+  if (typeof errorBody === 'object' && errorBody !== null) {
+    if (errorBody instanceof Error) {
+      errorMessage = errorBody.message;
+    } else if (errorBody.error) {
+      // OpenSearch enhanced error format with error.details, error.context, etc.
+      const errObj = errorBody.error;
+      errorMessage = errObj.details ?? errObj.message ?? JSON.stringify(errObj);
+      errorContext = {
+        ...(errObj.context && { context: errObj.context }),
+        ...(errObj.code && { code: errObj.code }),
+        ...(errObj.type && { type: errObj.type }),
+        ...(errObj.location && { location: errObj.location }),
+      };
+    } else if (errorBody.message) {
+      errorMessage = errorBody.message;
     } else {
-      // If errorMessage is a plain object, stringify it
-      errorMessage = JSON.stringify(errorMessage);
+      errorMessage = JSON.stringify(errorBody);
     }
+  } else {
+    errorMessage = String(errorBody);
   }
 
   const error = new Error(errorMessage);
   error.name = response.data.status ?? response.status ?? response.data.statusCode;
   (error as any).status = error.name;
+
+  // Attach full error body for consumers that need rich context
+  (error as any).errorBody = errorBody;
+
+  // Attach structured context if available
+  if (errorContext && Object.keys(errorContext).length > 0) {
+    (error as any).errorContext = errorContext;
+  }
+
   throw error;
 };
 

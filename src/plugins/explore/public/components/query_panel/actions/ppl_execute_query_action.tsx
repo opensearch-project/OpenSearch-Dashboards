@@ -124,12 +124,21 @@ export function usePPLExecuteQueryAction(
             const errorMessage = msg
               ? `${msg.type ? `${msg.type}: ` : ''}${msg.details}`
               : 'Query execution failed';
+
+            // Extract rich error context if available (for AI agent to learn from)
+            // errorBody structure: { error: { context: { available_fields, requested_field, ... }, details, code } }
+            // errorContext structure: { context: {...}, code, type, location }
+            const errorObj = queryStatus.error?.errorBody?.error;
+            const contextData = errorObj?.context || queryStatus.error?.errorContext?.context;
+
             return {
               success: false,
               executed: false,
               query: args.query,
               message: `Query execution failed: ${errorMessage}`,
               error: errorMessage,
+              // Include rich context for AI agent to make better suggestions
+              ...(contextData && { errorContext: contextData }),
             };
           }
 

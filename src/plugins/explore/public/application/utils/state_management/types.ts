@@ -20,6 +20,14 @@ export interface QueryResultStatus {
       type?: string;
     };
     originalErrorMessage: string;
+    // Rich error context from OpenSearch (PPL field errors, etc.)
+    errorBody?: any;
+    errorContext?: {
+      context?: any;
+      code?: string;
+      type?: string;
+      location?: string[];
+    };
   };
   elapsedMs?: number;
   startTime?: number;

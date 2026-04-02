@@ -688,6 +688,17 @@ const executeQueryBase = async (
               },
               statusCode: error.body?.statusCode,
               originalErrorMessage: error.body?.message,
+              // Preserve rich error context from parsed JSON error (PPL field errors with available_fields, etc.)
+              // The full error object is in parsedError.error from the JSON-stringified message
+              ...(parsedError?.error && {
+                errorBody: parsedError,
+                errorContext: {
+                  ...(parsedError.error.context && { context: parsedError.error.context }),
+                  ...(parsedError.error.code && { code: parsedError.error.code }),
+                  ...(parsedError.error.type && { type: parsedError.error.type }),
+                  ...(parsedError.error.location && { location: parsedError.error.location }),
+                },
+              }),
             },
           },
         })
@@ -745,7 +756,12 @@ export const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
-  const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
+  const histogramConfigs = createHistogramConfigs(
+    dataView,
+    customInterval,
+    services.data,
+    services.uiSettings
+  );
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());
   }
