@@ -11,8 +11,8 @@ import {
   createFacetedTimeBarChart,
   createDoubleNumericalBarChart,
 } from './to_expression';
-import { defaultBarChartStyles } from './bar_vis_config';
-import { VisColumn, VisFieldType, AxisRole, ThresholdMode } from '../types';
+import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
+import { VisColumn, VisFieldType, AxisRole, ThresholdMode, AggregationType } from '../types';
 
 describe('bar to_expression', () => {
   const mockNumericalColumn: VisColumn = {
@@ -255,8 +255,6 @@ describe('bar to_expression', () => {
       test('with bucketing, aggregates data into fewer rows', () => {
         const bucketedSpec = createTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockDateColumn],
           defaultBarChartStyles,
           axisMappings
         );
@@ -271,13 +269,7 @@ describe('bar to_expression', () => {
           bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
         };
 
-        const noBucketSpec = createTimeBarChart(
-          sameBucketData,
-          [mockNumericalColumn],
-          [mockDateColumn],
-          noBucketStyles,
-          axisMappings
-        );
+        const noBucketSpec = createTimeBarChart(sameBucketData, noBucketStyles, axisMappings);
 
         // No bucketing: all 3 raw data points preserved (header + 3 data rows)
         expect(noBucketSpec.dataset.source.length).toBe(4);
@@ -340,9 +332,6 @@ describe('bar to_expression', () => {
       test('with bucketing, merges same-bucket timestamps into fewer rows', () => {
         const bucketedSpec = createGroupedTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [mockDateColumn],
           defaultBarChartStyles,
           axisMappings
         );
@@ -359,9 +348,6 @@ describe('bar to_expression', () => {
 
         const noBucketSpec = createGroupedTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [mockDateColumn],
           noBucketStyles,
           axisMappings
         );
@@ -428,14 +414,7 @@ describe('bar to_expression', () => {
       };
 
       test('with bucketing, merges same-bucket timestamps within each facet', () => {
-        const spec = createFacetedTimeBarChart(
-          sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [mockDateColumn],
-          defaultBarChartStyles,
-          axisMappings
-        );
+        const spec = createFacetedTimeBarChart(sameBucketData, defaultBarChartStyles, axisMappings);
 
         const bucketedTotalRows = spec.dataset.reduce(
           (sum: number, ds: any) => sum + ds.source.length - 1,
@@ -454,9 +433,6 @@ describe('bar to_expression', () => {
 
         const noBucketSpec = createFacetedTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [mockDateColumn],
           noBucketStyles,
           axisMappings
         );
