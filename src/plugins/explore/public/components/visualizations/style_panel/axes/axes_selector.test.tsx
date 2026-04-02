@@ -10,7 +10,6 @@ import { AxisRole, VisColumn, VisFieldType } from '../../types';
 import { ChartType } from '../../utils/use_visualization_types';
 
 const mockVisualizationRegistry = {
-  getVisualizationConfig: jest.fn(),
   findRuleByAxesMapping: jest.fn(),
   findRulesByColumns: jest.fn(),
 };
@@ -110,16 +109,6 @@ describe('AxesSelectPanel', () => {
       ],
       exact: [],
     });
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
-      },
-    });
   });
 
   it('renders without crashing', () => {
@@ -181,18 +170,6 @@ describe('AxesSelectPanel', () => {
   // New tests to improve coverage
 
   it('renders X and Y axes', () => {
-    // Set up a basic mapping with X and Y axes
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
-      },
-    });
-
     render(<AxesSelectPanel {...defaultProps} />);
 
     // X and Y axes should be available
@@ -202,16 +179,6 @@ describe('AxesSelectPanel', () => {
 
   it('updates available axis options when selection changes', () => {
     // Set up a scenario with multiple possible mappings
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
-      },
-    });
     mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
       id: 'rule1',
       matchIndex: [1, 1, 0],

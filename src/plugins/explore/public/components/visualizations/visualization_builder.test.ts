@@ -81,14 +81,14 @@ describe('VisualizationBuilder', () => {
 
     test('should do nothing if no config for chart type', () => {
       // Mock no chart type config
-      const getVisualizationConfigSpy = jest
+      const getVisualizationSpy = jest
         .spyOn(visualizationRegistry, 'getVisualization')
         .mockReturnValue(undefined);
       const builder = new VisualizationBuilder({});
       const setVisConfigSpy = jest.spyOn(builder, 'setVisConfig');
       builder.onChartTypeChange('line');
       expect(setVisConfigSpy).toHaveBeenCalledWith(undefined);
-      getVisualizationConfigSpy.mockRestore();
+      getVisualizationSpy.mockRestore();
     });
 
     test('should reset styles to defaults if chart type changed', () => {

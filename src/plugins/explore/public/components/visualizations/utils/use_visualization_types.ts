@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 import { LineChartStyle, LineChartStyleOptions } from '../line/line_vis_config';
 import { PieChartStyle, PieChartStyleOptions } from '../pie/pie_vis_config';
@@ -95,7 +95,7 @@ export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType }>>;
 export interface VisRule<T extends ChartType> {
   priority: number;
   mappings: AxisTypeMapping[];
-  render: (props: VisRenderProps<T>) => any;
+  render: (props: VisRenderProps<T>) => React.ReactNode;
 }
 
 export interface VisualizationType<T extends ChartType> {

@@ -52,7 +52,7 @@ export class VisualizationRegistry {
     dateColumns: VisColumn[]
   ) {
     for (const mapping of rule.mappings) {
-      let result: Record<string, string> = {};
+      const result: Record<string, string> = {};
       const numCols = [...numericalColumns];
       const categoricalCols = [...categoricalColumns];
       const dateCols = [...dateColumns];
@@ -70,12 +70,14 @@ export class VisualizationRegistry {
         }
         // No available column fits the mapping, cannot create axis mapping for the given columns
         if (!column) {
-          result = {};
           break;
         }
         result[axisRole] = column.name;
       }
-      return result;
+      // Only return if we successfully mapped ALL axes
+      if (Object.keys(result).length === Object.keys(mapping).length) {
+        return result;
+      }
     }
     return {};
   }
@@ -221,12 +223,12 @@ export class VisualizationRegistry {
         for (const mapping of rule.mappings) {
           const required = this.countMappingFieldTypes(mapping);
 
-          exactMatch =
+          exactMatch ||=
             required.numerical === numCount &&
             required.categorical === catCount &&
             required.date === dateCount;
 
-          compatibleMatch =
+          compatibleMatch ||=
             required.numerical <= numCount &&
             required.categorical <= catCount &&
             required.date <= dateCount;

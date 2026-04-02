@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
-import { visualizationRegistry } from '../visualization_registry';
 import { StateTimeLineVisStyleControls } from './state_timeline_vis_options';
 import {
   StandardAxes,
