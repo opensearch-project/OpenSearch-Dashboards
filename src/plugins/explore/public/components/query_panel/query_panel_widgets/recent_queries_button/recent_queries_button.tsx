@@ -11,6 +11,7 @@ import { Query, RecentQueriesTable, TimeRange } from '../../../../../../data/pub
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { loadQueryActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
+import { AppDispatch } from '../../../../application/utils/state_management/store';
 import { useTimeFilter } from '../../utils';
 import { useSetEditorTextWithQuery } from '../../../../application/hooks';
 import './recent_queries_button.scss';
@@ -23,7 +24,7 @@ export const RecentQueriesButton = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   const { handleTimeChange } = useTimeFilter();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const handleTogglePopover = useCallback(() => {
     setPopoverIsOpen((state) => !state);
