@@ -8,16 +8,14 @@ import { getServices } from '../../../services/services';
 import { ContainerState, CONTAINER_URL_KEY } from '../utils';
 
 export const useInitialContainerContext = () => {
-  const services = getServices();
-
-  const { osdUrlStateStorage, embeddable, scopedHistory } = services;
-
   const [context, setContext] = useState<ContainerState>({
     originatingApp: undefined,
     containerInfo: undefined,
   });
 
   useEffect(() => {
+    const services = getServices();
+    const { osdUrlStateStorage, embeddable, scopedHistory } = services;
     const urlContainerState = osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY);
 
     const incomingStates = embeddable.getStateTransfer(scopedHistory).getIncomingEditorState();
@@ -33,8 +31,6 @@ export const useInitialContainerContext = () => {
       osdUrlStateStorage?.set<ContainerState>(CONTAINER_URL_KEY, newState, { replace: true });
 
     setContext(newState);
-    // only sync once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { context };

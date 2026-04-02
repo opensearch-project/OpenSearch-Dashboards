@@ -19,7 +19,7 @@ export interface ContainerInfo {
   containerId: string;
 }
 
-export function getPreviousBreadcrumbs(
+export function getBreadcrumbs(
   navigateToApp: (appId: string, options?: NavigateToAppOptions) => Promise<void>,
   embeddable: EmbeddableStart,
   originatingApp?: string,
@@ -47,10 +47,7 @@ export function getPreviousBreadcrumbs(
     },
     {
       text: containerInfo?.containerId
-        ? i18n.translate('explore.visualization.editor.originatingApp.containerName.breadcrumb', {
-            defaultMessage: '{containerName}',
-            values: { containerName: containerInfo.containerName },
-          })
+        ? containerInfo.containerName
         : i18n.translate('explore.visualization.editor.originatingApp.newDashboard.breadcrumb', {
             defaultMessage: 'New dashboard',
           }),

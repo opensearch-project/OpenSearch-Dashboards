@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPreviousBreadcrumbs } from './utils';
+import { getBreadcrumbs } from './utils';
 
 const mockNavigateToApp = jest.fn();
 const mockNavigateToWithEmbeddablePackage = jest.fn();
@@ -13,11 +13,11 @@ const mockEmbeddable = {
   }),
 } as any;
 
-describe('getPreviousBreadcrumbs', () => {
+describe('getBreadcrumbs', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns visualize list breadcrumb when no originatingApp', () => {
-    const breadcrumbs = getPreviousBreadcrumbs(mockNavigateToApp, mockEmbeddable);
+    const breadcrumbs = getBreadcrumbs(mockNavigateToApp, mockEmbeddable);
     expect(breadcrumbs).toHaveLength(1);
     expect(breadcrumbs[0].text).toBe('Visualize');
     breadcrumbs[0].onClick();
@@ -25,7 +25,7 @@ describe('getPreviousBreadcrumbs', () => {
   });
 
   it('returns correct breadcrumbs for new dashboard', () => {
-    const breadcrumbs = getPreviousBreadcrumbs(mockNavigateToApp, mockEmbeddable, 'dashboard');
+    const breadcrumbs = getBreadcrumbs(mockNavigateToApp, mockEmbeddable, 'dashboard');
     expect(breadcrumbs).toHaveLength(2);
     expect(breadcrumbs[0].text).toBe('Dashboards');
     expect(breadcrumbs[1].text).toBe('New dashboard');
@@ -35,7 +35,7 @@ describe('getPreviousBreadcrumbs', () => {
 
   it('returns correct breadcrumbs for existing dashboard', () => {
     const containerInfo = { containerName: 'My Dashboard', containerId: 'dash-1' };
-    const breadcrumbs = getPreviousBreadcrumbs(
+    const breadcrumbs = getBreadcrumbs(
       mockNavigateToApp,
       mockEmbeddable,
       'dashboard',

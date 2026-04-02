@@ -130,9 +130,14 @@ export const createNewVisActions = (services: {
         uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
           ...actionConfig,
           order: 10 * (visTypes.length - i),
-          execute: async () => {
+          execute: async (context) => {
             const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
-            await navigateTo(visType.aliasApp, visType.aliasPath, currentAppId);
+            await navigateTo(
+              visType.aliasApp,
+              visType.aliasPath,
+              currentAppId,
+              context?.containerInfo
+            );
           },
         });
       }

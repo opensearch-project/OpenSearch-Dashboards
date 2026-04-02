@@ -26,7 +26,7 @@ import { useQueryBuilderState } from './hooks/use_query_builder_state';
 import { useVisualizationBuilder } from './hooks/use_visualization_builder';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
-import { getPreviousBreadcrumbs } from './utils';
+import { getBreadcrumbs } from './utils';
 import { useInitialContainerContext } from './hooks/use_initial_container_context';
 
 export const VisualizationEditorPage = ({
@@ -81,12 +81,7 @@ export const VisualizationEditorPage = ({
       }
 
       chrome.setBreadcrumbs([
-        ...getPreviousBreadcrumbs(
-          application.navigateToApp,
-          embeddable,
-          originatingApp,
-          containerInfo
-        ),
+        ...getBreadcrumbs(application.navigateToApp, embeddable, originatingApp, containerInfo),
         { text: savedExplore?.title },
       ]);
 
