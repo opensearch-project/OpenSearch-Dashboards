@@ -104,16 +104,19 @@ export const createTimeBarChart = (
 
   const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
   const result = pipe(
-    transform(
-      aggregate({
-        groupBy: timeField,
-        field: valueField,
-        timeUnit,
-        aggregationType,
-      }),
-      convertTo2DArray()
-    ),
+    skipBucketing
+      ? transform(convertTo2DArray())
+      : transform(
+          aggregate({
+            groupBy: timeField,
+            field: valueField,
+            timeUnit,
+            aggregationType,
+          }),
+          convertTo2DArray()
+        ),
     createBaseConfig({
       title: `${axisColumnMappings?.y?.name} Over Time`,
       legend: { show: false },
@@ -173,6 +176,7 @@ export const createGroupedTimeBarChart = (
 
   const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
 
   if (!colorField) {
     throw new Error('Color column is required for grouped time bar chart');
@@ -184,8 +188,9 @@ export const createGroupedTimeBarChart = (
         groupBy: timeField,
         pivot: colorField,
         field: valueField,
-        timeUnit,
-        aggregationType,
+        timeUnit: skipBucketing ? undefined : timeUnit,
+        // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
+        aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
       convertTo2DArray()
     ),
@@ -251,6 +256,7 @@ export const createFacetedTimeBarChart = (
 
   const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
 
   const result = pipe(
     facetTransform(
@@ -259,8 +265,9 @@ export const createFacetedTimeBarChart = (
         groupBy: timeField,
         pivot: colorField,
         field: valueField,
-        timeUnit,
-        aggregationType,
+        timeUnit: skipBucketing ? undefined : timeUnit,
+        // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
+        aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
       convertTo2DArray()
     ),

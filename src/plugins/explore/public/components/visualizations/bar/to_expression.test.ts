@@ -238,6 +238,51 @@ describe('bar to_expression', () => {
       expect(seriesWithMarkLine).toBeDefined();
       expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });
+
+    describe('bucketing vs skip bucketing', () => {
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      // Timestamps within the same second — auto-inferred interval will bucket them together
+      const sameBucketData = [
+        { count: 10, category: 'A', date: '2023-01-01T08:00:00.100Z' },
+        { count: 20, category: 'B', date: '2023-01-01T08:00:00.200Z' },
+        { count: 30, category: 'C', date: '2023-01-01T08:00:00.300Z' },
+      ];
+
+      test('with bucketing, aggregates data into fewer rows', () => {
+        const bucketedSpec = createTimeBarChart(
+          sameBucketData,
+          [mockNumericalColumn],
+          [mockDateColumn],
+          defaultBarChartStyles,
+          axisMappings
+        );
+
+        // Bucketing merges all 3 into 1 row (same second bucket): header + 1 data row
+        expect(bucketedSpec.dataset.source.length).toBe(2);
+      });
+
+      test('without bucketing, preserves all raw data points', () => {
+        const noBucketStyles: BarChartStyle = {
+          ...defaultBarChartStyles,
+          bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
+        };
+
+        const noBucketSpec = createTimeBarChart(
+          sameBucketData,
+          [mockNumericalColumn],
+          [mockDateColumn],
+          noBucketStyles,
+          axisMappings
+        );
+
+        // No bucketing: all 3 raw data points preserved (header + 3 data rows)
+        expect(noBucketSpec.dataset.source.length).toBe(4);
+      });
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {
@@ -276,6 +321,54 @@ describe('bar to_expression', () => {
         axisMappings
       );
       expect(defaultTitleResult.title.text).toBe('Count Over Time by Category');
+    });
+
+    describe('bucketing vs skip bucketing', () => {
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      };
+
+      // Timestamps within the same second — auto-inferred interval will bucket them together
+      const sameBucketData = [
+        { count: 10, category: 'A', date: '2023-01-01T08:00:00.100Z' },
+        { count: 20, category: 'B', date: '2023-01-01T08:00:00.200Z' },
+        { count: 30, category: 'A', date: '2023-01-01T08:00:00.300Z' },
+      ];
+
+      test('with bucketing, merges same-bucket timestamps into fewer rows', () => {
+        const bucketedSpec = createGroupedTimeBarChart(
+          sameBucketData,
+          [mockNumericalColumn],
+          [mockCategoricalColumn],
+          [mockDateColumn],
+          defaultBarChartStyles,
+          axisMappings
+        );
+
+        // Bucketing merges all 3 into 1 time bucket: header + 1 data row
+        expect(bucketedSpec.dataset.source.length).toBe(2);
+      });
+
+      test('without bucketing, preserves all raw timestamps', () => {
+        const noBucketStyles: BarChartStyle = {
+          ...defaultBarChartStyles,
+          bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
+        };
+
+        const noBucketSpec = createGroupedTimeBarChart(
+          sameBucketData,
+          [mockNumericalColumn],
+          [mockCategoricalColumn],
+          [mockDateColumn],
+          noBucketStyles,
+          axisMappings
+        );
+
+        // No bucketing: pivot groups by raw timestamp strings (3 unique = header + 3 data rows)
+        expect(noBucketSpec.dataset.source.length).toBe(4);
+      });
     });
   });
 
@@ -318,6 +411,64 @@ describe('bar to_expression', () => {
       expect(defaultTitleResult.title.text).toBe(
         'Count Over Time by Category (Faceted by Category2)'
       );
+    });
+
+    describe('bucketing vs skip bucketing', () => {
+      // Timestamps within the same second — auto-inferred interval will bucket them together
+      const sameBucketData = [
+        { count: 10, category: 'A', category2: 'X', date: '2023-01-01T08:00:00.100Z' },
+        { count: 20, category: 'B', category2: 'X', date: '2023-01-01T08:00:00.200Z' },
+        { count: 30, category: 'A', category2: 'Y', date: '2023-01-01T08:00:00.300Z' },
+      ];
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.FACET]: mockCategoricalColumn2,
+      };
+
+      test('with bucketing, merges same-bucket timestamps within each facet', () => {
+        const spec = createFacetedTimeBarChart(
+          sameBucketData,
+          [mockNumericalColumn],
+          [mockCategoricalColumn, mockCategoricalColumn2],
+          [mockDateColumn],
+          defaultBarChartStyles,
+          axisMappings
+        );
+
+        const bucketedTotalRows = spec.dataset.reduce(
+          (sum: number, ds: any) => sum + ds.source.length - 1,
+          0
+        );
+
+        // Each facet: bucketing merges timestamps into 1 row per facet
+        expect(bucketedTotalRows).toBe(spec.dataset.length);
+      });
+
+      test('without bucketing, preserves raw timestamps within each facet', () => {
+        const noBucketStyles: BarChartStyle = {
+          ...defaultBarChartStyles,
+          bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
+        };
+
+        const noBucketSpec = createFacetedTimeBarChart(
+          sameBucketData,
+          [mockNumericalColumn],
+          [mockCategoricalColumn, mockCategoricalColumn2],
+          [mockDateColumn],
+          noBucketStyles,
+          axisMappings
+        );
+
+        const unbucketedTotalRows = noBucketSpec.dataset.reduce(
+          (sum: number, ds: any) => sum + ds.source.length - 1,
+          0
+        );
+
+        // No bucketing: raw timestamps preserved, more data rows than facet count
+        expect(unbucketedTotalRows).toBeGreaterThan(noBucketSpec.dataset.length);
+      });
     });
   });
 
