@@ -6,30 +6,54 @@ This directory contains Claude Code skills for OpenSearch Dashboards development
 
 ## Available Skills
 
-### `resolve-cve` ([resolve_cve.md](resolve_cve.md))
+### `resolve_cve` ([resolve_cve/](resolve_cve/))
 Automatically identify and resolve security vulnerabilities (CVEs) in project dependencies.
 
-- **Documentation**: [resolve_cve_readme.md](resolve_cve_readme.md)
-- **Claude Usage**: `/resolve-cve [--cve_id CVE-2024-12345]`
+- **Skill Definition**: [resolve_cve/SKILL.md](resolve_cve/SKILL.md)
+- **Documentation**: [resolve_cve/README.md](resolve_cve/README.md)
+- **Claude Usage**: `/resolve_cve [--cve_id CVE-2024-12345]`
 - **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/resolve_cve.md](../../.kiro/prompts/resolve_cve.md)
 - **Purpose**: Scans GitHub issues for CVEs, verifies presence in codebase, attempts automated fixes
+
+### `retry_flaky_tests` ([retry_flaky_tests/](retry_flaky_tests/))
+Automatically retry failed required CI checks on GitHub PRs with smart waiting and filtering logic.
+
+- **Skill Definition**: [retry_flaky_tests/SKILL.md](retry_flaky_tests/SKILL.md)
+- **Documentation**: [retry_flaky_tests/README.md](retry_flaky_tests/README.md)
+- **Claude Usage**: `/retry_flaky_tests [--pr_number 123] [--wait_for_completion true]`
+- **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/retry_flaky_tests.md](../../.kiro/prompts/retry_flaky_tests.md)
+- **Purpose**: Identifies required vs optional checks, waits for completion, selectively retries failed required checks
+
+## Directory Structure
+
+Each skill is organized in its own subdirectory with the following structure:
+
+```
+.claude/skills/
+├── skill_name/
+│   ├── SKILL.md      # The actual skill definition with frontmatter
+│   └── README.md     # Comprehensive user documentation
+└── README.md         # This main skills index
+```
 
 ## Adding New Skills
 
 When adding new skills to this directory:
 
-1. **Claude skill file**: `skill-name.md` (the actual skill definition)
-2. **Kiro prompt file**: `../../.kiro/prompts/skill-name.md` (Kiro-format prompt that delegates to Claude skill)
-3. **Documentation**: `skill_name_readme.md` (comprehensive user guide)  
-4. **Update this README**: Add entry to "Available Skills" section with both usage formats
+1. **Create skill directory**: `mkdir .claude/skills/skill_name/`
+2. **Claude skill file**: `skill_name/SKILL.md` (the actual skill definition with frontmatter)
+3. **Documentation**: `skill_name/README.md` (comprehensive user guide)
+4. **Kiro prompt file**: `../../.kiro/prompts/skill_name.md` (Kiro-format prompt that delegates to Claude skill)
+5. **Update this README**: Add entry to "Available Skills" section with both usage formats
 
 ## Skill Development Guidelines
 
-- Follow the existing skill template format with frontmatter
+- Follow the existing skill template format with frontmatter in `SKILL.md`
 - Include clear usage examples and error handling
-- Document all parameters and expected outputs
+- Document all parameters and expected outputs in `README.md`
 - Test thoroughly before committing
 - Keep skills focused on specific, well-defined tasks
+- Use underscores in directory names and skill names (e.g., `retry_flaky_tests`)
 
 ---
 

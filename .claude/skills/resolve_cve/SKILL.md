@@ -1,5 +1,5 @@
 ---
-name: resolve-cve
+name: resolve_cve
 description: Automatically resolve CVEs by checking GitHub issues, verifying presence in codebase, and attempting various remediation strategies while documenting the process.
 arguments:
   - name: cve_id
