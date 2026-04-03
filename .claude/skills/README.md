@@ -6,6 +6,15 @@ This directory contains Claude Code skills for OpenSearch Dashboards development
 
 ## Available Skills
 
+### `create_pr_description` ([create_pr_description/](create_pr_description/))
+Generate comprehensive PR descriptions by analyzing code changes and adhering to the project's pull request template.
+
+- **Skill Definition**: [create_pr_description/SKILL.md](create_pr_description/SKILL.md)
+- **Documentation**: [create_pr_description/README.md](create_pr_description/README.md)
+- **Claude Usage**: `/create_pr_description [--pr_number 123] [--include_diff] [--auto_commit_message]`
+- **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/create_pr_description.md](../../.kiro/prompts/create_pr_description.md)
+- **Purpose**: Analyzes code changes, commit history, and project context to generate template-compliant, comprehensive PR descriptions
+
 ### `resolve_cve` ([resolve_cve/](resolve_cve/))
 Automatically identify and resolve security vulnerabilities (CVEs) in project dependencies.
 
