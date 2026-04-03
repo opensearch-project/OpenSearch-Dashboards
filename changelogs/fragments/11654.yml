@@ -1,0 +1,2 @@
+fix:
+- Fix span flyout race condition in Explore trace details ([#11654](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11654))

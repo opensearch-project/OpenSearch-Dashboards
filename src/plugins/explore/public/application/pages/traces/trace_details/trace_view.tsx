@@ -68,6 +68,8 @@ export interface TraceDetailsProps {
   isEmbedded?: boolean;
   isFlyout?: boolean;
   defaultDataset?: DataView;
+  defaultTraceId?: string;
+  defaultSpanId?: string;
 }
 // Displaying only 10 logs in the tab
 export const LOGS_DATA = 10;
@@ -77,6 +79,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   isEmbedded = false,
   isFlyout = false,
   defaultDataset,
+  defaultTraceId,
+  defaultSpanId,
 }) => {
   const {
     services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
@@ -86,24 +90,30 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const { stateContainer, stopStateSync } = useMemo(() => {
     // Convert DataView to Dataset format if needed
     const getDatasetFromDataView = (dataView: DataView): Dataset => {
+      // Check if already a Dataset with dataSource (not DataView with dataSourceRef)
+      const existingDataSource = (dataView as any).dataSource;
+      const dataSourceRef = (dataView as any).dataSourceRef;
+
       return {
         id: dataView.id || 'default-dataset-id',
         title: dataView.title,
         type: dataView.type || 'INDEX_PATTERN',
         timeFieldName: dataView.timeFieldName,
-        dataSource: dataView.dataSourceRef
-          ? {
-              id: dataView.dataSourceRef.id,
-              title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
-              type: dataView.dataSourceRef.type || 'OpenSearch',
-            }
-          : undefined,
+        dataSource:
+          existingDataSource ||
+          (dataSourceRef
+            ? {
+                id: dataSourceRef.id,
+                title: dataSourceRef.name || dataSourceRef.id,
+                type: dataSourceRef.type || 'OpenSearch',
+              }
+            : undefined),
       };
     };
 
     return createTraceAppState({
       stateDefaults: {
-        traceId: '',
+        traceId: defaultTraceId || '',
         dataset: defaultDataset
           ? getDatasetFromDataView(defaultDataset)
           : {
@@ -112,12 +122,13 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               type: 'INDEX_PATTERN',
               timeFieldName: 'endTime',
             },
-        spanId: undefined,
+        spanId: defaultSpanId,
       },
       osdUrlStateStorage: osdUrlStateStorage!,
+      disableUrlSync: isFlyout,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [osdUrlStateStorage]);
+  }, [osdUrlStateStorage, isFlyout]);
 
   // Get current state values and subscribe to changes
   const [appState, setAppState] = useState(() => stateContainer.get());

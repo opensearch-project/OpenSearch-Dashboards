@@ -653,4 +653,109 @@ describe('TraceAppState', () => {
       expect(state.dataset.title).toBe('');
     });
   });
+
+  describe('disableUrlSync option', () => {
+    it('disables URL sync when disableUrlSync is true', () => {
+      mockOsdUrlStateStorage.get.mockReturnValue(null);
+
+      const stateDefaults = {
+        traceId: 'test-trace-id',
+        dataset: createMockDataset(),
+        spanId: 'test-span-id',
+      };
+
+      createTraceAppState({
+        stateDefaults,
+        osdUrlStateStorage: mockOsdUrlStateStorage,
+        disableUrlSync: true,
+      });
+
+      // Should not attempt to read from URL
+      expect(mockOsdUrlStateStorage.get).not.toHaveBeenCalled();
+      // Should not attempt to write to URL
+      expect(mockOsdUrlStateStorage.set).not.toHaveBeenCalled();
+      // Should not set up sync
+      expect(syncState).not.toHaveBeenCalled();
+    });
+
+    it('uses only defaults when disableUrlSync is true, ignoring URL state', () => {
+      const urlState = {
+        traceId: 'url-trace-id',
+        spanId: 'url-span-id',
+        dataset: createMockDataset(),
+      };
+      mockOsdUrlStateStorage.get.mockReturnValue(urlState);
+
+      const stateDefaults = {
+        traceId: 'default-trace-id',
+        dataset: createMockDataset(),
+        spanId: 'default-span-id',
+      };
+
+      createTraceAppState({
+        stateDefaults,
+        osdUrlStateStorage: mockOsdUrlStateStorage,
+        disableUrlSync: true,
+      });
+
+      // Should use defaults, not URL state
+      expect(createStateContainer).toHaveBeenCalledWith(stateDefaults, expect.any(Object));
+    });
+
+    it('returns no-op stopStateSync when disableUrlSync is true', () => {
+      const stateDefaults = {
+        traceId: 'test-trace-id',
+        dataset: createMockDataset(),
+        spanId: undefined,
+      };
+
+      const { stopStateSync } = createTraceAppState({
+        stateDefaults,
+        osdUrlStateStorage: mockOsdUrlStateStorage,
+        disableUrlSync: true,
+      });
+
+      // Should not throw when called
+      expect(() => stopStateSync()).not.toThrow();
+      // syncState should not have been called
+      expect(syncState).not.toHaveBeenCalled();
+    });
+
+    it('enables URL sync by default when disableUrlSync is not provided', () => {
+      mockOsdUrlStateStorage.get.mockReturnValue(null);
+
+      const stateDefaults = {
+        traceId: 'test-trace-id',
+        dataset: createMockDataset(),
+        spanId: undefined,
+      };
+
+      createTraceAppState({
+        stateDefaults,
+        osdUrlStateStorage: mockOsdUrlStateStorage,
+      });
+
+      // Should set up sync when disableUrlSync is not provided
+      expect(syncState).toHaveBeenCalled();
+    });
+
+    it('enables URL sync when disableUrlSync is explicitly false', () => {
+      mockOsdUrlStateStorage.get.mockReturnValue(null);
+
+      const stateDefaults = {
+        traceId: 'test-trace-id',
+        dataset: createMockDataset(),
+        spanId: undefined,
+      };
+
+      createTraceAppState({
+        stateDefaults,
+        osdUrlStateStorage: mockOsdUrlStateStorage,
+        disableUrlSync: false,
+      });
+
+      // Should set up sync when disableUrlSync is false
+      expect(syncState).toHaveBeenCalled();
+    });
+  });
 });
