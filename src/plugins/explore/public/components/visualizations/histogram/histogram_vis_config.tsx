@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 
 import {
   ThresholdMode,
@@ -20,6 +20,8 @@ import {
 import { HistogramVisStyleControls } from './histogram_vis_options';
 import { DEFAULT_X_AXIS_CONFIG } from '../constants';
 import { getColors } from '../theme/default_colors';
+import { createNumericalHistogramChart, createSingleHistogramChart } from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface HistogramChartStyleOptions {
   // Basic controls
@@ -85,21 +87,51 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
-  name: 'histogram',
+  name: 'Histogram',
   type: 'histogram',
+  icon: 'visBarVertical',
+  getRules: () => {
+    const rules: Array<VisRule<'histogram'>> = [
+      {
+        priority: 80,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createNumericalHistogramChart(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} />;
+        },
+      },
+      {
+        priority: 60,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createSingleHistogramChart(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultHistogramChartStyles,
       render: (props) => React.createElement(HistogramVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
-      },
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-      },
-    ],
   },
 });

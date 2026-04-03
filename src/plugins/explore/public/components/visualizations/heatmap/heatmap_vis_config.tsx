@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { VisualizationType } from '../utils/use_visualization_types';
+import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
 import {
   StandardAxes,
@@ -21,6 +21,8 @@ import {
 } from '../types';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
+import { createRegularHeatmap } from './to_expression';
+import { EchartsRender } from '../echarts_render';
 
 export interface HeatmapLabels {
   show: boolean;
@@ -125,19 +127,36 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
 };
 
 export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({
-  name: 'heatmap',
+  name: 'Heatmap',
   type: 'heatmap',
+  icon: 'heatmap',
+  getRules: () => {
+    const rules: Array<VisRule<'heatmap'>> = [
+      {
+        priority: 90,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Categorical },
+            [AxisRole.Y]: { type: VisFieldType.Categorical },
+            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const spec = createRegularHeatmap(
+            props.transformedData,
+            props.styleOptions,
+            props.axisColumnMappings
+          );
+          return <EchartsRender spec={spec ?? {}} />;
+        },
+      },
+    ];
+    return rules;
+  },
   ui: {
     style: {
       defaults: defaultHeatmapChartStyles,
       render: (props) => React.createElement(HeatmapVisStyleControls, props),
     },
-    availableMappings: [
-      {
-        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 1 },
-        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
-      },
-    ],
   },
 });

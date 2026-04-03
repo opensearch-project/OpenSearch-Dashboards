@@ -4,16 +4,13 @@
  */
 
 import { GaugeChartStyle } from './gauge_vis_config';
-import { VisColumn, AxisRole, AxisColumnMappings } from '../types';
+import { AxisRole, AxisColumnMappings } from '../types';
 import { createGaugeSeries, assembleGaugeSpec } from './gauge_chart_utils';
 import { pipe, createBaseConfig } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: GaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {

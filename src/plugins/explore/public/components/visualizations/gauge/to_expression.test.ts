@@ -24,14 +24,7 @@ describe('createGauge', () => {
   };
 
   it('creates an ECharts gauge spec with series and dataset', () => {
-    const spec = createGauge(
-      mockData,
-      [mockNumericalColumn],
-      [],
-      [],
-      defaultGaugeChartStyles,
-      mockAxisColumnMappings
-    );
+    const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
     expect(spec).toHaveProperty('dataset');
     expect(spec).toHaveProperty('series');
@@ -40,22 +33,15 @@ describe('createGauge', () => {
   });
 
   it('produces gauge-type series', () => {
-    const spec = createGauge(
-      mockData,
-      [mockNumericalColumn],
-      [],
-      [],
-      defaultGaugeChartStyles,
-      mockAxisColumnMappings
-    );
+    const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
     const gaugeSeries = spec.series.filter((s: any) => s.type === 'gauge');
     expect(gaugeSeries.length).toBeGreaterThanOrEqual(1);
   });
 
   it('throws when no value column is provided', () => {
-    expect(() =>
-      createGauge(mockData, [mockNumericalColumn], [], [], defaultGaugeChartStyles, {})
-    ).toThrow('Missing value for metric chart');
+    expect(() => createGauge(mockData, defaultGaugeChartStyles, {})).toThrow(
+      'Missing value for metric chart'
+    );
   });
 });

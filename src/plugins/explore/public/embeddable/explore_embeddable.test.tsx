@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
@@ -597,11 +596,9 @@ describe('ExploreEmbeddable', () => {
 
   test('should be able to adapt deprecated styles', async () => {
     jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce({
-      id: 'test-rule',
-      name: 'Test Rule',
-      matches: jest.fn(),
-      chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
-      toSpec: jest.fn(),
+      priority: 100,
+      mappings: [],
+      render: jest.fn(),
     });
 
     const adaptLegacyDataSpy = jest.spyOn(

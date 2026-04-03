@@ -11,31 +11,14 @@ import { ChartTypeSelector } from './chart_type_selector';
 import { VisColumn, VisFieldType } from './types';
 import { VisData } from './visualization_builder.types';
 
-jest.mock('./rule_repository', () => ({
-  ALL_VISUALIZATION_RULES: [
-    {
-      id: 'rule1',
-      name: 'Bar Chart Rule',
-      matchIndex: [1, 1, 0],
-      chartTypes: [{ type: 'bar', name: 'Bar Chart' }],
-    },
-    {
-      id: 'rule2',
-      name: 'Line Chart Rule',
-      matchIndex: [1, 0, 1],
-      chartTypes: [{ type: 'line', name: 'Line Chart' }],
-    },
-  ],
-}));
+const mockGetAvailableChartTypes = jest.fn();
+const mockFindRulesByColumns = jest.fn();
 
-jest.mock('./constants', () => ({
-  CHART_METADATA: {
-    metric: { type: 'metric' },
+jest.mock('./visualization_registry', () => ({
+  visualizationRegistry: {
+    getAvailableChartTypes: (...args: any[]) => mockGetAvailableChartTypes(...args),
+    findRulesByColumns: (...args: any[]) => mockFindRulesByColumns(...args),
   },
-}));
-
-jest.mock('../../application/utils/state_management/selectors', () => ({
-  selectChartType: jest.fn(() => 'bar'),
 }));
 
 // Create a mock store
@@ -103,6 +86,14 @@ describe('ChartTypeSelector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetAvailableChartTypes.mockReturnValue([
+      { type: 'bar', name: 'Bar Chart', icon: 'visBarVertical' },
+      { type: 'line', name: 'Line Chart', icon: 'visLine' },
+    ]);
+    mockFindRulesByColumns.mockReturnValue({
+      all: [{ visType: 'bar', rules: [{ id: 'rule1' }] }],
+      exact: [],
+    });
   });
 
   it('renders without crashing', () => {
