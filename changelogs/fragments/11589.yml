@@ -1,2 +1,0 @@
-refactor:
-- Colocate visualization rules with chart configs and simplify registry ([#11589](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11589))

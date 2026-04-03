@@ -1,2 +1,0 @@
-fix:
-- Pass data source id to agentic memory provider for multi-data-source support ([#11529](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11529))
