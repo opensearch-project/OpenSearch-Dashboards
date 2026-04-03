@@ -86,7 +86,6 @@
     "osd:bootstrap": "scripts/use_node scripts/build_ts_refs && scripts/use_node scripts/register_git_hook",
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
     "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
-    "release_note:generate": "scripts/use_node scripts/generate_release_note",
     "cy": "yarn cypress:run-without-security --env HEADLESS=1",
     "cypress:run-without-security": "env -u DISPLAY TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=false",
     "cypress:run-with-security": "env -u DISPLAY TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
