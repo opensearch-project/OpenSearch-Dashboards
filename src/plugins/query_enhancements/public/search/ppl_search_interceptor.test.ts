@@ -16,7 +16,7 @@ import { dataPluginMock } from '../../../data/public/mocks';
 import { DATASET, SEARCH_STRATEGY } from '../../common';
 import * as fetchModule from '../../common/utils';
 import { PPLFilterUtils } from './filters';
-import { PPLSearchInterceptor } from './ppl_search_interceptor';
+import { PPLSearchInterceptor, DEFAULT_PPL_ASYNC_HEAD_SIZE } from './ppl_search_interceptor';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../common/utils', () => ({
@@ -892,6 +892,57 @@ describe('PPLSearchInterceptor', () => {
       const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
 
       expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
+    });
+
+    describe('S3 default head limit', () => {
+      const setupS3Test = (query: string, datasetType: string = DATASET.S3) => {
+        const mockQuery = {
+          language: 'PPL',
+          query,
+          dataset: { type: datasetType },
+        };
+
+        const mockRequest: IOpenSearchDashboardsSearchRequest = {
+          params: {
+            body: {
+              query: { queries: [mockQuery] },
+            },
+          },
+        };
+
+        (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+        (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue(mockQuery);
+        (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+          getType: jest.fn().mockReturnValue({
+            languageOverrides: { PPL: { hideDatePicker: true } },
+          }),
+        });
+        mockIsPPLSearchQuery.mockReturnValue(true);
+        mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
+        mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue('');
+
+        return mockRequest;
+      };
+
+      it('should append head for S3 dataset without trailing head', async () => {
+        const request = setupS3Test('source=s3_table | fields name, age');
+        const result = await (pplSearchInterceptor as any).buildQuery(request);
+        expect(result.query).toBe(
+          `source=s3_table | fields name, age | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
+        );
+      });
+
+      it('should not append head for S3 dataset with existing trailing head', async () => {
+        const request = setupS3Test('source=s3_table | head 500');
+        const result = await (pplSearchInterceptor as any).buildQuery(request);
+        expect(result.query).toBe('source=s3_table | head 500');
+      });
+
+      it('should not append head for non-S3 dataset', async () => {
+        const request = setupS3Test('source=test_index | fields name', 'DEFAULT');
+        const result = await (pplSearchInterceptor as any).buildQuery(request);
+        expect(result.query).toBe('source=test_index | fields name');
+      });
     });
   });
 
