@@ -3,10 +3,8 @@
 
 name: Build and test
 
-# trigger on every commit push and PR for all branches except pushes for backport branches
+# trigger on every PR for all branches.
 on:
-  push:
-    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
   pull_request:
     branches: ['**']
 
@@ -24,8 +22,155 @@ env:
   NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
 
 jobs:
+  prepare-source:
+    name: Prepare source and warm cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Restore Yarn Cache
+        id: yarn-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-Linux-
+
+      # Only bootstrap + save on cache miss (yarn.lock changed).
+      # On cache hit, skip both — downstream jobs already have a warm cache.
+      - name: Run bootstrap
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Save Yarn Cache
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Create source archive
+        run: |
+          tar czf /tmp/source-archive.tar.gz \
+            --exclude='./.git' \
+            --exclude='./node_modules' \
+            --exclude='./src/plugins/*/node_modules' \
+            --exclude='./packages/*/node_modules' \
+            --exclude='./test/*/plugins/*/node_modules' \
+            --exclude='./examples/*/node_modules' \
+            --exclude='./cypress' \
+            --exclude='./data' \
+            --exclude='./.github' --exclude='./coverage' \
+            --exclude='./.opensearch' --exclude='./opensearch-build' \
+            --exclude='**/target' \
+            .
+          mv /tmp/source-archive.tar.gz .
+          ls -lh source-archive.tar.gz
+
+      - name: Upload source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-archive
+          path: source-archive.tar.gz
+          retention-days: 1
+          if-no-files-found: error
+
+  prepare-windows-cache:
+    name: Warm Windows yarn cache
+    needs: [prepare-source]
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Configure git's autocrlf
+        run: |
+          git config --global core.autocrlf false
+
+      - name: Download source archive
+        uses: actions/download-artifact@v4
+        timeout-minutes: 5
+        with:
+          name: source-archive
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        shell: bash
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Restore Yarn Cache
+        id: yarn-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Windows-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-Windows-
+
+      # Only bootstrap + save on cache miss (yarn.lock changed).
+      # On cache hit, downstream Windows jobs already have a warm cache.
+      - name: Run bootstrap
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          for i in 1 2 3; do
+            yarn osd bootstrap && exit 0
+            echo "Bootstrap attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+
+      - name: Save Yarn Cache
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Windows-${{ hashFiles('**/yarn.lock') }}
+
   build-test:
     name: Build and Verify on ${{ matrix.name }} (ciGroup${{ matrix.group }})
+    needs: [prepare-source, prepare-windows-cache]
     strategy:
       fail-fast: false
       matrix:
@@ -55,11 +200,17 @@ jobs:
           maximum-size: 64GB
           disk-root: 'C:'
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download source archive
+        uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
-          fetch-depth: 1
-          filter: blob:none
+          name: source-archive
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -83,8 +234,20 @@ jobs:
         shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
+      # Linux: restore-only (prepare-source handles the save)
+      - name: Restore Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      # Windows: restore-only (prepare-windows-cache handles the save)
+      - name: Restore Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
@@ -162,13 +325,21 @@ jobs:
 
   build-plugins-artifact:
     name: Build plugin bundles
+    needs: [prepare-source]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download source archive
+        uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
-          fetch-depth: 1
-          filter: blob:none
+          name: source-archive
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -185,8 +356,8 @@ jobs:
       - name: Configure Yarn Cache
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
+      - name: Restore Yarn Cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-Linux-${{ hashFiles('**/yarn.lock') }}
@@ -219,6 +390,7 @@ jobs:
 
   integration-tests:
     name: Run integration tests on ${{ matrix.name }}
+    needs: [prepare-source, prepare-windows-cache]
     strategy:
       fail-fast: false
       matrix:
@@ -248,11 +420,17 @@ jobs:
           maximum-size: 64GB
           disk-root: 'C:'
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download source archive
+        uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
-          fetch-depth: 1
-          filter: blob:none
+          name: source-archive
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -276,8 +454,20 @@ jobs:
         shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
+      # Linux: restore-only (prepare-source handles the save)
+      - name: Restore Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      # Windows: restore-only (prepare-windows-cache handles the save)
+      - name: Restore Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
@@ -323,6 +513,7 @@ jobs:
   lint-and-validate:
     name: Lint and validate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -345,13 +536,13 @@ jobs:
       - name: Configure Yarn Cache
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
+      - name: Restore Yarn Cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            yarn-
+            yarn-${{ runner.os }}-
 
       - name: Run bootstrap
         shell: bash
@@ -404,7 +595,7 @@ jobs:
 
   functional-tests:
     name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    needs: [build-plugins-artifact]
+    needs: [prepare-source, prepare-windows-cache, build-plugins-artifact]
     strategy:
       fail-fast: false
       matrix:
@@ -451,11 +642,17 @@ jobs:
           maximum-size: 64GB
           disk-root: 'C:'
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download source archive
+        uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
-          fetch-depth: 1
-          filter: blob:none
+          name: source-archive
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -479,8 +676,20 @@ jobs:
         shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
+      # Linux: restore-only (prepare-source handles the save)
+      - name: Restore Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      # Windows: restore-only (prepare-windows-cache handles the save)
+      - name: Restore Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
@@ -536,6 +745,7 @@ jobs:
 
       - name: Download plugin bundles
         uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
           name: plugin-bundles
 
@@ -559,6 +769,8 @@ jobs:
 
   plugin-functional-tests:
     name: Run plugin functional tests on ${{ matrix.name }}
+    needs: [prepare-source, prepare-windows-cache]
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -585,11 +797,17 @@ jobs:
           maximum-size: 64GB
           disk-root: 'C:'
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download source archive
+        uses: actions/download-artifact@v4
+        timeout-minutes: 5
         with:
-          fetch-depth: 1
-          filter: blob:none
+          name: source-archive
+
+      - name: Extract source archive
+        shell: bash
+        run: |
+          tar xzf source-archive.tar.gz && rm source-archive.tar.gz
+          git init -q && git -c user.name=ci -c user.email=ci commit -q --allow-empty -m "source archive"
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -613,8 +831,20 @@ jobs:
         shell: bash
         run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
 
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
+      # Linux: restore-only (prepare-source handles the save)
+      - name: Restore Yarn Cache (Linux)
+        if: matrix.os != 'windows-latest'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      # Windows: restore-only (prepare-windows-cache handles the save)
+      - name: Restore Yarn Cache (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
@@ -683,218 +913,3 @@ jobs:
             test/*/failure_debug/
             test/*/screenshots/
           overwrite: true
-
-  build-min-artifact-tests:
-    name: Build min release artifacts on ${{ matrix.name }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            name: Linux x64
-            ext: tar.gz
-            suffix: linux-x64
-            script: build-platform --linux --skip-os-packages
-          - os: ubuntu-latest
-            name: Linux ARM64
-            ext: tar.gz
-            suffix: linux-arm64
-            script: build-platform --linux-arm --skip-os-packages
-          - os: macos-latest
-            name: macOS x64
-            ext: tar.gz
-            suffix: darwin-x64
-            script: build-platform --darwin --skip-os-packages
-          - os: macos-latest
-            name: macOS ARM64
-            ext: tar.gz
-            suffix: darwin-arm64
-            script: build-platform --darwin-arm --skip-os-packages
-          - os: windows-latest
-            name: Windows x64
-            ext: zip
-            suffix: windows-x64
-            script: build-platform --windows --skip-os-packages
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: ./artifacts
-    steps:
-      - name: Configure git's autocrlf (Windows only)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git config --global core.autocrlf false
-        working-directory: .
-
-      - name: Configure pagefile size (Windows only)
-        if: matrix.os == 'windows-latest'
-        uses: al-cheb/configure-pagefile-action@v1.3
-        with:
-          minimum-size: 16GB
-          maximum-size: 64GB
-          disk-root: 'C:'
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          path: ./artifacts
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: './artifacts/.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache
-        shell: bash
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-${{ runner.os }}-
-
-      - name: Get package version (Linux)
-        if: matrix.os != 'windows-latest'
-        run: |
-          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
-
-      - name: Get artifact build name (Linux)
-        if: matrix.os != 'windows-latest'
-        run: |
-          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $GITHUB_ENV
-
-      - name: Get package version (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "VERSION=$(yarn --silent pkg-version)" >> $env:GITHUB_ENV
-
-      - name: Get artifact build name (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "ARTIFACT_BUILD_NAME=opensearch-dashboards-${{ env.VERSION }}-${{ matrix.suffix }}.${{ matrix.ext }}" >> $env:GITHUB_ENV
-
-      - name: Run bootstrap
-        shell: bash
-        run: |
-          for i in 1 2 3; do
-            yarn osd bootstrap && exit 0
-            echo "Bootstrap attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
-          exit 1
-
-      - name: Build `${{ matrix.name }}`
-        run: yarn ${{ matrix.script }} --release
-
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ${{ matrix.suffix }}-${{ env.VERSION }}
-          path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
-          retention-days: 1
-          overwrite: true
-
-  bwc-tests:
-    needs: [build-min-artifact-tests]
-    runs-on: ubuntu-latest
-    container:
-      image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
-    name: Run backwards compatibility tests
-    defaults:
-      run:
-        working-directory: ./artifacts
-    strategy:
-      matrix:
-        version:
-          [
-            osd_2.0.0,
-            osd_2.1.0,
-            osd_2.2.0,
-            osd_2.3.0,
-            osd_2.4.0,
-            osd_2.5.0,
-            osd_2.6.0,
-            osd_2.7.0,
-            osd_2.8.0,
-            osd_2.9.0,
-          ]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          path: ./artifacts
-
-      - run: echo Running backwards compatibility tests for version ${{ matrix.version }}
-      - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: './artifacts/.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Get package version
-        run: |
-          echo "VERSION=$(yarn --silent pkg-version)" >> $GITHUB_ENV
-
-      - name: Set OpenSearch URL
-        run: |
-          echo "OPENSEARCH_URL=https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.VERSION }}-SNAPSHOT/opensearch-min-${{ env.VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz" >> $GITHUB_ENV
-
-      - name: Verify if OpenSearch is available for version
-        id: verify-opensearch-exists
-        run: |
-          if curl -I -L ${{ env.OPENSEARCH_URL }}; then
-            echo "version-exists=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Skipping tests
-        if: steps.verify-opensearch-exists.outputs.version-exists != 'true'
-        run: echo Tests were skipped because an OpenSearch release build does not exist for this version yet!
-
-      - name: Setting environment variable to run tests for ${{ matrix.version }}
-        if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
-        run: echo "BWC_VERSIONS=${{ matrix.version }}" >> $GITHUB_ENV
-
-      - name: Download OpenSearch Dashboards
-        uses: actions/download-artifact@v4
-        id: download
-        with:
-          name: linux-x64-${{ env.VERSION }}
-          path: ./artifacts/
-        if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
-
-      - name: Run tests
-        if: steps.verify-opensearch-exists.outputs.version-exists == 'true'
-        run: |
-          ./bwctest.sh -s false -o ${{ env.OPENSEARCH_URL }} -d ${{ steps.download.outputs.download-path }}/opensearch-dashboards-${{ env.VERSION }}-linux-x64.tar.gz
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ failure() && steps.verify-opensearch-exists.outputs.version-exists == 'true' }}
-        with:
-          name: ${{ matrix.version }}-test-failures
-          path: |
-            ./artifacts/bwc_tmp/test/cypress/videos/*
-            ./artifacts/bwc_tmp/test/cypress/screenshots/*
-            ./artifacts/bwc_tmp/test/cypress/results/*
-          retention-days: 1
-          overwrite: true
-

@@ -83,11 +83,11 @@ export function HitsCounter({
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size="xs" color="subdued">
             {hits ? (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
-                defaultMessage="{rowsCount} of {hits} results in {elapsedMs} ms"
+                defaultMessage="{rowsCount} / {hits} hits · {elapsedMs} ms"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
@@ -105,7 +105,7 @@ export function HitsCounter({
             ) : (
               <FormattedMessage
                 id="explore.discover.noHitsResultTitle"
-                defaultMessage="{rowsCount} results in {elapsedMs} ms"
+                defaultMessage="{rowsCount} hits · {elapsedMs} ms"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">

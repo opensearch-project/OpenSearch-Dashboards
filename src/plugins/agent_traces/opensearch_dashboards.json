@@ -6,8 +6,10 @@
   "ui": true,
   "requiredPlugins": [
     "charts",
+    "dashboard",
     "data",
     "embeddable",
+    "explore",
     "home",
     "inspector",
     "navigation",
