@@ -21,14 +21,18 @@ const STATE_STORAGE_KEY = '_a';
 export const createTraceAppState = ({
   stateDefaults,
   osdUrlStateStorage,
+  disableUrlSync = false,
 }: {
   stateDefaults: TraceAppState;
   osdUrlStateStorage: IOsdUrlStateStorage;
+  disableUrlSync?: boolean;
 }) => {
-  const initialStateFromUrl = osdUrlStateStorage.get<TraceAppState>(STATE_STORAGE_KEY);
+  const initialStateFromUrl = disableUrlSync
+    ? null
+    : osdUrlStateStorage.get<TraceAppState>(STATE_STORAGE_KEY);
   const initialState: TraceAppState = {
     ...stateDefaults,
-    ...initialStateFromUrl,
+    ...(initialStateFromUrl || {}),
   };
 
   const stateContainer = createStateContainer(initialState, {
@@ -50,29 +54,38 @@ export const createTraceAppState = ({
     }),
   });
 
-  if (!initialStateFromUrl) {
-    osdUrlStateStorage.set<TraceAppState>(STATE_STORAGE_KEY, initialState, {
-      replace: true,
+  // Only sync with URL if not disabled
+  if (!disableUrlSync) {
+    if (!initialStateFromUrl) {
+      osdUrlStateStorage.set<TraceAppState>(STATE_STORAGE_KEY, initialState, {
+        replace: true,
+      });
+    }
+
+    const { start: startStateSync, stop: stopStateSync } = syncState({
+      stateStorage: osdUrlStateStorage,
+      stateContainer: {
+        ...stateContainer,
+        set: (state: TraceAppState | null) => {
+          if (state) {
+            stateContainer.set(state);
+          }
+        },
+      },
+      storageKey: STATE_STORAGE_KEY,
     });
+
+    startStateSync();
+
+    return {
+      stateContainer,
+      stopStateSync,
+    };
   }
 
-  const { start: startStateSync, stop: stopStateSync } = syncState({
-    stateStorage: osdUrlStateStorage,
-    stateContainer: {
-      ...stateContainer,
-      set: (state: TraceAppState | null) => {
-        if (state) {
-          stateContainer.set(state);
-        }
-      },
-    },
-    storageKey: STATE_STORAGE_KEY,
-  });
-
-  startStateSync();
-
+  // Return no-op stopStateSync when URL sync is disabled
   return {
     stateContainer,
-    stopStateSync,
+    stopStateSync: () => {},
   };
 };
