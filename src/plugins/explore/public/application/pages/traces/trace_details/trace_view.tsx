@@ -90,18 +90,24 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const { stateContainer, stopStateSync } = useMemo(() => {
     // Convert DataView to Dataset format if needed
     const getDatasetFromDataView = (dataView: DataView): Dataset => {
+      // Check if already a Dataset with dataSource (not DataView with dataSourceRef)
+      const existingDataSource = (dataView as any).dataSource;
+      const dataSourceRef = (dataView as any).dataSourceRef;
+
       return {
         id: dataView.id || 'default-dataset-id',
         title: dataView.title,
         type: dataView.type || 'INDEX_PATTERN',
         timeFieldName: dataView.timeFieldName,
-        dataSource: dataView.dataSourceRef
-          ? {
-              id: dataView.dataSourceRef.id,
-              title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
-              type: dataView.dataSourceRef.type || 'OpenSearch',
-            }
-          : undefined,
+        dataSource:
+          existingDataSource ||
+          (dataSourceRef
+            ? {
+                id: dataSourceRef.id,
+                title: dataSourceRef.name || dataSourceRef.id,
+                type: dataSourceRef.type || 'OpenSearch',
+              }
+            : undefined),
       };
     };
 
