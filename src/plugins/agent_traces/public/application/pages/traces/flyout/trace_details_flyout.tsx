@@ -30,7 +30,6 @@ import {
   buildTreeFromTraceRow,
   flattenTree,
   countSpans,
-  sumTokens,
   flattenVisibleNodes,
   calculateTimelineRange,
 } from './tree_helpers';
@@ -100,10 +99,6 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
   );
 
   const totalSpans = useMemo(() => countSpans(traceTreeData), [traceTreeData]);
-  const totalTokens = useMemo(() => {
-    const sum = sumTokens(traceTreeData);
-    return sum > 0 ? sum : trace.totalTokens;
-  }, [traceTreeData, trace.totalTokens]);
 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
@@ -290,7 +285,7 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
               })}
             </EuiText>
             <EuiText size="xs" className="agentTracesFlyout__metaValue">
-              {totalTokens || '—'}
+              {rootTrace.totalTokens || '—'}
             </EuiText>
           </div>
         </div>

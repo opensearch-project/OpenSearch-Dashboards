@@ -4,16 +4,13 @@
  */
 
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { VisColumn, AxisColumnMappings, VisFieldType } from '../types';
+import { AxisColumnMappings, VisFieldType } from '../types';
 import { getBarOrientation, createBarGaugeSeries, assembleBarGaugeSpec } from './bar_gauge_utils';
 import { pipe, createBaseConfig } from '../utils/echarts_spec';
 import { aggregate, transform } from '../utils/data_transformation';
 
 export const createBarGaugeSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarGaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

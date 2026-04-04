@@ -4,7 +4,13 @@
 /.opensearch
 /.chromium
 /package.json.bak
-.claude/
+*.bak
+.claude/*
+!.claude/skills/
+
+# Temporary files and directories
+tmp/
+.claude/settings.local.json
 CLAUDE.local.md
 .DS_Store
 .node_binaries
@@ -50,7 +56,8 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
-.kiro
+.kiro/
+!.kiro/prompts/
 *.sublime-*
 npm-debug.log*
 .tern-project

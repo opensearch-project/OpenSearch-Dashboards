@@ -407,6 +407,54 @@ describe('AgUiAgent', () => {
       // Simulate abort by completing without error
       subject.complete();
     });
+
+    it('should unwrap factory function errors from RxJS 7 throwError syntax', (done) => {
+      const actualError = new Error('HTTP 403: Query assist not enabled');
+      const errorFactory = () => actualError;
+
+      const subject = new Subject<BaseEvent>();
+      mockRunHttpRequest.mockReturnValue(subject);
+
+      const events: BaseEvent[] = [];
+      agent.runAgent(mockInput).subscribe({
+        next: (event) => events.push(event),
+        error: (err) => {
+          expect(err).toBe(actualError);
+          expect(err.message).toBe('HTTP 403: Query assist not enabled');
+
+          const errorEvent = events.find((e) => e.type === EventType.RUN_ERROR) as any;
+          expect(errorEvent).toBeDefined();
+          expect(errorEvent.message).toBe('HTTP 403: Query assist not enabled');
+          done();
+        },
+      });
+
+      // Emit the factory function as the error (simulates RxJS 6/7 mismatch)
+      subject.error(errorFactory);
+    });
+
+    it('should use regular Error objects as-is', (done) => {
+      const error = new Error('Network failure');
+
+      const subject = new Subject<BaseEvent>();
+      mockRunHttpRequest.mockReturnValue(subject);
+
+      const events: BaseEvent[] = [];
+      agent.runAgent(mockInput).subscribe({
+        next: (event) => events.push(event),
+        error: (err) => {
+          expect(err).toBe(error);
+          expect(err.message).toBe('Network failure');
+
+          const errorEvent = events.find((e) => e.type === EventType.RUN_ERROR) as any;
+          expect(errorEvent).toBeDefined();
+          expect(errorEvent.message).toBe('Network failure');
+          done();
+        },
+      });
+
+      subject.error(error);
+    });
   });
 
   describe('thread ID format', () => {

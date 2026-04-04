@@ -14,12 +14,10 @@ import {
 } from '../../slices';
 import { getPreloadedState } from '../../utils/redux_persistence';
 import { executeQueries } from '../query_actions';
-import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 
 jest.mock('../../utils/redux_persistence');
 jest.mock('../../slices');
 jest.mock('../query_actions');
-jest.mock('../detect_optimal_tab');
 
 describe('resetExploreStateActionCreator', () => {
   const services = {} as any;
@@ -45,9 +43,6 @@ describe('resetExploreStateActionCreator', () => {
     ((setQueryState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
     ((setQueryEditorState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY_EDITOR' });
     ((executeQueries as unknown) as jest.Mock).mockReturnValue({ type: 'EXECUTE_QUERIES' });
-    ((detectAndSetOptimalTab as unknown) as jest.Mock).mockReturnValue({
-      type: 'DETECT_OPTIMAL_TAB',
-    });
   });
 
   it('dispatches actions in correct order with preloaded state', async () => {
@@ -62,6 +57,5 @@ describe('resetExploreStateActionCreator', () => {
     expect(mockDispatch).toHaveBeenNthCalledWith(5, { type: 'SET_QUERY' });
     expect(mockDispatch).toHaveBeenNthCalledWith(6, { type: 'SET_QUERY_EDITOR' });
     expect(mockDispatch).toHaveBeenNthCalledWith(7, { type: 'EXECUTE_QUERIES' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(8, { type: 'DETECT_OPTIMAL_TAB' });
   });
 });

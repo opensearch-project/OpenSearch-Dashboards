@@ -9,7 +9,7 @@ import { isEmpty, isEqual } from 'lodash';
 import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
-import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
+import { isValidMapping } from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
@@ -18,7 +18,6 @@ import { visualizationRegistry } from './visualization_registry';
 import { normalizeResultRows } from './utils/normalize_result_rows';
 import { ChartConfig, VisData } from './visualization_builder.types';
 import { VisualizationRender } from './visualization_render';
-import { ExpressionsStart } from '../../../../expressions/public';
 import { StylePanelRender } from './style_panel_render';
 import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
@@ -43,6 +42,7 @@ export class VisualizationBuilder {
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
+  isVisDirty$ = new BehaviorSubject<boolean>(false);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
@@ -99,6 +99,10 @@ export class VisualizationBuilder {
     this.showRawTable$.next(on);
   }
 
+  setIsVisDirty(on: boolean) {
+    this.isVisDirty$.next(on);
+  }
+
   setIsInitialized(isInitialized: boolean) {
     this.isInitialized = isInitialized;
   }
@@ -116,7 +120,7 @@ export class VisualizationBuilder {
     const currentVisConfig = this.visConfig$.value;
     const newVisConfig: ChartConfig = { type: chartType };
 
-    const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    const visConfig = visualizationRegistry.getVisualization(chartType);
     if (!visConfig) {
       this.setVisConfig(undefined);
       return;
@@ -174,17 +178,16 @@ export class VisualizationBuilder {
       return;
     }
 
-    const axesColumnMapping = visualizationRegistry.getDefaultAxesMapping(
+    const axesMapping = visualizationRegistry.getAxesMappingByRule(
       bestMatch.rule,
-      bestMatch.chartType.type,
       numericalColumns,
       categoricalColumns,
       dateColumns
     );
 
     return {
-      chartType: bestMatch.chartType.type as ChartType,
-      axesMapping: convertMappingsToStrings(axesColumnMapping),
+      chartType: bestMatch.chartType as ChartType,
+      axesMapping,
     };
   }
 
@@ -202,27 +205,11 @@ export class VisualizationBuilder {
       ...(data?.categoricalColumns ?? []),
       ...(data?.dateColumns ?? []),
     ];
-    const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    const visConfig = visualizationRegistry.getVisualization(chartType);
     if (!visConfig) {
       return;
     }
-
-    const currentRule = visualizationRegistry.findRuleByAxesMapping(axesMapping, allColumns);
-    if (!isEmpty(axesMapping) && currentRule) {
-      const columns = Object.values(axesMapping);
-      const columnMapping = visualizationRegistry.getDefaultAxesMapping(
-        currentRule,
-        chartType,
-        (data?.numericalColumns ?? []).filter((c) => columns.includes(c.name)),
-        (data?.categoricalColumns ?? []).filter((c) => columns.includes(c.name)),
-        (data?.dateColumns ?? []).filter((c) => columns.includes(c.name))
-      );
-      const updatedAxesMapping: Record<string, string> = {};
-      Object.entries(columnMapping).forEach(([role, value]) => {
-        updatedAxesMapping[role] = value.name;
-      });
-      return updatedAxesMapping;
-    }
+    return visualizationRegistry.updateAxesMappingByChartType(chartType, axesMapping, allColumns);
   }
 
   /**
@@ -250,7 +237,7 @@ export class VisualizationBuilder {
     if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
       const autoVis = this.createAutoVis(data);
       if (autoVis) {
-        const chartTypeConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
+        const chartTypeConfig = visualizationRegistry.getVisualization(autoVis.chartType);
         if (chartTypeConfig) {
           const newVisConfig: ChartConfig = {
             type: autoVis.chartType,
@@ -260,7 +247,7 @@ export class VisualizationBuilder {
           this.setVisConfig(newVisConfig);
         }
       } else {
-        const chartTypeConfig = visualizationRegistry.getVisualizationConfig('table');
+        const chartTypeConfig = visualizationRegistry.getVisualization('table');
         if (!chartTypeConfig) {
           this.setVisConfig(undefined);
         }
@@ -303,6 +290,7 @@ export class VisualizationBuilder {
       return;
     }
     if (currentVisConfig.styles) {
+      this.setIsVisDirty(true);
       this.visConfig$.next({
         ...currentVisConfig,
         styles: { ...currentVisConfig.styles, ...styles },
@@ -317,6 +305,7 @@ export class VisualizationBuilder {
 
   setCurrentChartType(chartType?: ChartType) {
     if (this.visConfig$.value?.type !== chartType) {
+      this.setIsVisDirty(true);
       this.onChartTypeChange(chartType);
     }
   }
@@ -324,6 +313,7 @@ export class VisualizationBuilder {
   setAxesMapping(mapping: Record<string, string>) {
     const config = this.visConfig$.value;
     if (config && !isEqual(config.axesMapping, mapping)) {
+      this.setIsVisDirty(true);
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
   }
@@ -342,6 +332,7 @@ export class VisualizationBuilder {
     this.visConfig$.complete();
     this.data$.complete();
     this.showRawTable$.complete();
+    this.isVisDirty$.complete();
   }
 
   reset(): void {
@@ -350,6 +341,7 @@ export class VisualizationBuilder {
     this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
+    this.isVisDirty$ = new BehaviorSubject<boolean>(false);
     this.isInitialized = false;
   }
 
@@ -361,7 +353,7 @@ export class VisualizationBuilder {
     return this.visConfig$.pipe(
       map((config) => {
         if (config?.type) {
-          const vis = visualizationRegistry.getVisualizationConfig(config.type);
+          const vis = visualizationRegistry.getVisualization(config.type);
           if (vis) {
             const styles: ChartStyles = mergeStyles(vis.ui.style.defaults, config.styles);
             return { styles, type: config.type, axesMapping: config.axesMapping };

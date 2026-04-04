@@ -9,12 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { ChartTypeSelector } from './chart_type_selector';
-import {
-  ChartStylesMapping,
-  ChartType,
-  StyleOptions,
-  VisualizationType,
-} from './utils/use_visualization_types';
+import { ChartStylesMapping, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { AxisColumnMappings, RenderChartConfig } from './types';
 import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
@@ -76,16 +71,8 @@ export const StylePanelRender = <T extends ChartType>({
   }
 
   const visConfig = chartConfig?.type
-    ? (visualizationRegistry.getVisualizationConfig(chartConfig?.type) as
-        | VisualizationType<T>
-        | undefined)
+    ? visualizationRegistry.getVisualization(chartConfig?.type)
     : null;
-
-  const bestMatch = visualizationRegistry.findBestMatch(
-    visualizationData.numericalColumns,
-    visualizationData.categoricalColumns,
-    visualizationData.dateColumns
-  );
 
   if (!chartConfig?.styles || !visConfig || !styleOptions) {
     return null;
@@ -105,8 +92,6 @@ export const StylePanelRender = <T extends ChartType>({
         numericalColumns: visualizationData.numericalColumns,
         categoricalColumns: visualizationData.categoricalColumns,
         dateColumns: visualizationData.dateColumns,
-        availableChartTypes: bestMatch?.rule.chartTypes,
-        selectedChartType: chartConfig.type,
         axisColumnMappings,
         updateVisualization,
       })}

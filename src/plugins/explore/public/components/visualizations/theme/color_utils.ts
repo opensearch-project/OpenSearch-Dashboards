@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { darkMode } from '@osd/ui-shared-deps/theme';
-import { getColors } from './default_colors';
-
 export function hexToRgb(hex: string) {
   hex = hex.replace(/^#/, '');
   if (hex.length === 3) {
@@ -57,10 +54,6 @@ export const getColorGroups = () => {
     blue: generateColorGroup('#5C7FFF', '#c0d8ff', 'blue'),
     purple: generateColorGroup('#A669E2', '#deb7f2', 'purple'),
   };
-};
-
-export const getCategoryNextColor = (index: number) => {
-  return getColors().categories[index % getColors().categories.length];
 };
 
 // Resolve color name to hex value

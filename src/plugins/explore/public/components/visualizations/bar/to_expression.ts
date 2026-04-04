@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  AxisColumnMappings,
-  AxisRole,
-  VisColumn,
-  VisFieldType,
-  TimeUnit,
-  AggregationType,
-} from '../types';
+import { AxisColumnMappings, AxisRole, VisFieldType, TimeUnit, AggregationType } from '../types';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { getSwappedAxisRole } from '../utils/utils';
 
@@ -33,9 +26,6 @@ import {
 
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -90,17 +80,10 @@ export const createBarSpec = (
  */
 export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || dateColumns.length === 0) {
-    throw new Error('Time bar chart requires at least one numerical column and one date column');
-  }
-
   const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
   const xAxis = axisConfig.xAxis;
   const yAxis = axisConfig.yAxis;
@@ -121,16 +104,19 @@ export const createTimeBarChart = (
 
   const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
   const result = pipe(
-    transform(
-      aggregate({
-        groupBy: timeField,
-        field: valueField,
-        timeUnit,
-        aggregationType,
-      }),
-      convertTo2DArray()
-    ),
+    skipBucketing
+      ? transform(convertTo2DArray())
+      : transform(
+          aggregate({
+            groupBy: timeField,
+            field: valueField,
+            timeUnit,
+            aggregationType,
+          }),
+          convertTo2DArray()
+        ),
     createBaseConfig({
       title: `${axisColumnMappings?.y?.name} Over Time`,
       legend: { show: false },
@@ -162,9 +148,6 @@ export const createTimeBarChart = (
  */
 export const createGroupedTimeBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -193,6 +176,7 @@ export const createGroupedTimeBarChart = (
 
   const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
 
   if (!colorField) {
     throw new Error('Color column is required for grouped time bar chart');
@@ -204,8 +188,9 @@ export const createGroupedTimeBarChart = (
         groupBy: timeField,
         pivot: colorField,
         field: valueField,
-        timeUnit,
-        aggregationType,
+        timeUnit: skipBucketing ? undefined : timeUnit,
+        // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
+        aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
       convertTo2DArray()
     ),
@@ -242,9 +227,6 @@ export const createGroupedTimeBarChart = (
  */
 export const createFacetedTimeBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -274,6 +256,7 @@ export const createFacetedTimeBarChart = (
 
   const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
   const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
 
   const result = pipe(
     facetTransform(
@@ -282,8 +265,9 @@ export const createFacetedTimeBarChart = (
         groupBy: timeField,
         pivot: colorField,
         field: valueField,
-        timeUnit,
-        aggregationType,
+        timeUnit: skipBucketing ? undefined : timeUnit,
+        // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
+        aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
       }),
       convertTo2DArray()
     ),
@@ -313,9 +297,6 @@ export const createFacetedTimeBarChart = (
 
 export const createStackedBarSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -384,7 +365,6 @@ export const createStackedBarSpec = (
 
 export const createDoubleNumericalBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

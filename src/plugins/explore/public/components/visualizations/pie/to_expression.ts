@@ -4,16 +4,13 @@
  */
 
 import { PieChartStyle } from './pie_vis_config';
-import { VisColumn, AxisColumnMappings, AxisRole, AggregationType } from '../types';
+import { AxisColumnMappings, AxisRole, AggregationType } from '../types';
 import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
 import { aggregate, convertTo2DArray, transform } from '../utils/data_transformation';
 import { createPieSeries } from './pie_chart_utils';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: PieChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {

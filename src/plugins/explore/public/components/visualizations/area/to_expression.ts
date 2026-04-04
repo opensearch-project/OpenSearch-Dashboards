@@ -4,7 +4,7 @@
  */
 
 import { AreaChartStyle } from './area_vis_config';
-import { VisColumn, AxisColumnMappings, AxisRole, TimeUnit, AggregationType } from '../types';
+import { AxisColumnMappings, AxisRole, TimeUnit, AggregationType } from '../types';
 import { getSwappedAxisRole } from '../utils/utils';
 import {
   pipe,
@@ -35,8 +35,6 @@ import {
  */
 export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -77,9 +75,6 @@ export const createSimpleAreaChart = (
  */
 export const createMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -133,9 +128,6 @@ export const createMultiAreaChart = (
  */
 export const createFacetedMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -195,9 +187,6 @@ export const createFacetedMultiAreaChart = (
  */
 export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -242,9 +231,6 @@ export const createCategoryAreaChart = (
 
 export const createStackedAreaChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

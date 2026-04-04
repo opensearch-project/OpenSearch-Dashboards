@@ -67,14 +67,7 @@ describe('Scatter Chart to_expression', () => {
     };
 
     it('returns an ECharts spec with dataset, series, and axes', () => {
-      const result = createTwoMetricScatter(
-        mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createTwoMetricScatter(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
@@ -83,14 +76,7 @@ describe('Scatter Chart to_expression', () => {
     });
 
     it('produces scatter-type series', () => {
-      const result = createTwoMetricScatter(
-        mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createTwoMetricScatter(mockData, mockStyles, mockAxisMappings);
 
       const scatterSeries = result.series.filter((s: any) => s.type === 'scatter');
       expect(scatterSeries.length).toBeGreaterThanOrEqual(1);
@@ -99,9 +85,6 @@ describe('Scatter Chart to_expression', () => {
     it('handles title display options', () => {
       const noTitle = createTwoMetricScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisMappings
       );
@@ -109,9 +92,6 @@ describe('Scatter Chart to_expression', () => {
 
       const defaultTitle = createTwoMetricScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: true, titleName: '' } },
         mockAxisMappings
       );
@@ -119,9 +99,6 @@ describe('Scatter Chart to_expression', () => {
 
       const customTitle = createTwoMetricScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Scatter' } },
         mockAxisMappings
       );
@@ -139,9 +116,6 @@ describe('Scatter Chart to_expression', () => {
     it('returns an ECharts spec with colored scatter series', () => {
       const result = createTwoMetricOneCateScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: true, titleName: '' } },
         mockAxisMappings
       );
@@ -154,9 +128,6 @@ describe('Scatter Chart to_expression', () => {
     it('handles title display options', () => {
       const noTitle = createTwoMetricOneCateScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisMappings
       );
@@ -165,14 +136,10 @@ describe('Scatter Chart to_expression', () => {
 
     it('throws when color field is missing', () => {
       expect(() =>
-        createTwoMetricOneCateScatter(
-          mockData,
-          mockNumericalColumns,
-          [mockCategoricalColumn],
-          [],
-          mockStyles,
-          { [AxisRole.X]: mockNumericalColumns[0], [AxisRole.Y]: mockNumericalColumns[1] }
-        )
+        createTwoMetricOneCateScatter(mockData, mockStyles, {
+          [AxisRole.X]: mockNumericalColumns[0],
+          [AxisRole.Y]: mockNumericalColumns[1],
+        })
       ).toThrow();
     });
   });
@@ -188,9 +155,6 @@ describe('Scatter Chart to_expression', () => {
     it('returns an ECharts spec with size-encoded scatter series', () => {
       const result = createThreeMetricOneCateScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: true, titleName: '' } },
         mockAxisMappings
       );
@@ -203,9 +167,6 @@ describe('Scatter Chart to_expression', () => {
     it('handles title display options', () => {
       const noTitle = createThreeMetricOneCateScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisMappings
       );
@@ -213,9 +174,6 @@ describe('Scatter Chart to_expression', () => {
 
       const customTitle = createThreeMetricOneCateScatter(
         mockData,
-        mockNumericalColumns,
-        [mockCategoricalColumn],
-        [],
         { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Bubble' } },
         mockAxisMappings
       );
@@ -224,18 +182,11 @@ describe('Scatter Chart to_expression', () => {
 
     it('throws when size field is missing', () => {
       expect(() =>
-        createThreeMetricOneCateScatter(
-          mockData,
-          mockNumericalColumns,
-          [mockCategoricalColumn],
-          [],
-          mockStyles,
-          {
-            [AxisRole.X]: mockNumericalColumns[0],
-            [AxisRole.Y]: mockNumericalColumns[1],
-            [AxisRole.COLOR]: mockCategoricalColumn,
-          }
-        )
+        createThreeMetricOneCateScatter(mockData, mockStyles, {
+          [AxisRole.X]: mockNumericalColumns[0],
+          [AxisRole.Y]: mockNumericalColumns[1],
+          [AxisRole.COLOR]: mockCategoricalColumn,
+        })
       ).toThrow();
     });
   });

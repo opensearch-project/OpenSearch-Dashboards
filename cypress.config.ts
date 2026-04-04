@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import fs from 'fs';
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
@@ -19,7 +20,7 @@ module.exports = defineConfig({
   viewportWidth: 1920,
   viewportHeight: 1080,
   video: true,
-  videoCompression: 15,
+  videoCompression: false,
   trashAssetsBeforeRuns: false,
   videosFolder: 'cypress/videos',
   screenshotsFolder: 'cypress/screenshots',
@@ -121,6 +122,19 @@ function setupNodeEvents(
       webpackOptions,
     })
   );
+
+  // Delete video files for specs where all tests passed.
+  // Keeps compressed videos only for failures to aid debugging.
+  on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
+    if (results && results.video) {
+      const hasFailures = results.tests?.some((test) =>
+        test.attempts?.some((attempt) => attempt.state === 'failed')
+      );
+      if (!hasFailures) {
+        fs.unlinkSync(results.video);
+      }
+    }
+  });
 
   return config;
 }
