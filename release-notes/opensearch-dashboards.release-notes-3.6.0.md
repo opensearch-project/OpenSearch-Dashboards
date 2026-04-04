@@ -134,7 +134,6 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.6.0
 * Update agent traces graph library to use celestial map ([#11450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11450))
 * Update agent traces styles and fix loading saved search ([#11532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11532))
 * Improve agent traces usability with sorting, color updates, and Cypress tests ([#11432](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11432))
-* Add 3.5 release notes ([#11322](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11322))
 
 ### Refactoring
 
