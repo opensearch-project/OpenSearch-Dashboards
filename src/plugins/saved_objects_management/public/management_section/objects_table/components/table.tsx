@@ -48,6 +48,7 @@ import {
   EuiTableActionsColumnType,
   EuiSearchBarProps,
   EuiButtonIcon,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -254,8 +255,38 @@ export class Table extends PureComponent<TableProps, TableState> {
         render: (title: string, object: SavedObjectWithMetadata) => {
           const { path = '' } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
+          const attrs = object.attributes as Record<string, unknown> | undefined;
+          const labels = attrs?.labels as Record<string, string> | undefined;
+          const isManaged = labels?.['managed-by'] === 'osdctl';
+          const managedBadge = isManaged ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'savedObjectsManagement.objectsTable.table.managedBadgeTooltip',
+                {
+                  defaultMessage:
+                    'This object is managed by code via osdctl. Edit through the _bulk_apply API or unlock it first.',
+                }
+              )}
+            >
+              <EuiBadge
+                color="hollow"
+                iconType="lock"
+                data-test-subj="savedObjectsManagedBadge"
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.table.managedBadgeLabel"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            </EuiToolTip>
+          ) : null;
+
           if (!canGoInApp) {
-            return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
+            return (
+              <EuiText size="s">
+                {title || getDefaultTitle(object)} {managedBadge}
+              </EuiText>
+            );
           }
           let finalPath = path;
           if (this.props.useUpdatedUX && finalPath) {
@@ -279,7 +310,12 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             }
           }
-          return <EuiLink href={inAppUrl}>{title || getDefaultTitle(object)}</EuiLink>;
+          return (
+            <span>
+              <EuiLink href={inAppUrl}>{title || getDefaultTitle(object)}</EuiLink>{' '}
+              {managedBadge}
+            </span>
+          );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {

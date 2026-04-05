@@ -30,7 +30,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiSpacer, EuiPageContent, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiPageContent, EuiTitle, EuiCallOut } from '@elastic/eui';
 import {
   ApplicationStart,
   SavedObjectsClientContract,
@@ -113,11 +113,18 @@ export class SavedObjectEdition extends Component<
     const { HeaderControl } = navigationUI;
     const typeWithFirstLetterToUpperCase = type.charAt(0).toUpperCase() + type.slice(1);
 
+    // Check if object is managed by code
+    const attrs = object?.attributes as Record<string, unknown> | undefined;
+    const labels = attrs?.labels as Record<string, string> | undefined;
+    const isManaged = labels?.['managed-by'] === 'osdctl';
+    const effectiveCanEdit = canEdit && !isManaged;
+    const effectiveCanDelete = canDelete && !isManaged;
+
     return (
       <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
         <Header
-          canEdit={canEdit}
-          canDelete={canDelete}
+          canEdit={effectiveCanEdit}
+          canDelete={effectiveCanDelete}
           canViewInApp={canView}
           type={type}
           onDeleteClick={() => this.delete()}
@@ -126,6 +133,29 @@ export class SavedObjectEdition extends Component<
           navigationUI={navigationUI}
           application={application}
         />
+        {isManaged && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={i18n.translate('savedObjectsManagement.view.managedObjectWarningTitle', {
+                defaultMessage: 'This object is managed by code',
+              })}
+              color="warning"
+              iconType="lock"
+              data-test-subj="savedObjectsManagedCallout"
+            >
+              <p>
+                {i18n.translate('savedObjectsManagement.view.managedObjectWarningDescription', {
+                  defaultMessage:
+                    'This saved object is managed via osdctl and cannot be edited or deleted through the UI. ' +
+                    'To modify it, update your code and run `osdctl apply`, or unlock it via ' +
+                    'POST /api/saved_objects/_unlock/{type}/{id}.',
+                  values: { type, id },
+                })}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
         {notFoundType &&
           (useUpdatedUX ? (
             <HeaderControl
@@ -142,7 +172,7 @@ export class SavedObjectEdition extends Component<
               <NotFoundErrors type={notFoundType} />
             </>
           ))}
-        {canEdit &&
+        {effectiveCanEdit &&
           (useUpdatedUX ? (
             <HeaderControl
               controls={[
@@ -176,7 +206,7 @@ export class SavedObjectEdition extends Component<
               object={object}
               savedObjectsClient={savedObjectsClient}
               service={service}
-              editionEnabled={canEdit}
+              editionEnabled={effectiveCanEdit}
               onSave={this.saveChanges}
             />
           </>

@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
 
 export const registerCreateRoute = (router: IRouter) => {
   router.post(
@@ -42,6 +43,7 @@ export const registerCreateRoute = (router: IRouter) => {
         }),
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
+          force: schema.boolean({ defaultValue: false }),
         }),
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
@@ -62,8 +64,20 @@ export const registerCreateRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
-      const { overwrite } = req.query;
+      const { overwrite, force } = req.query;
       const { attributes, migrationVersion, references, initialNamespaces, workspaces } = req.body;
+
+      // Check managed lock when overwriting an existing object
+      if (overwrite && id && !force) {
+        try {
+          const existing = await context.core.savedObjects.client.get(type, id);
+          if (isManagedByCode(existing.attributes as Record<string, unknown>)) {
+            return res.conflict({ body: managedLockConflictMessage(type, id) });
+          }
+        } catch (e) {
+          // Object doesn't exist yet — safe to create
+        }
+      }
 
       const options = {
         id,

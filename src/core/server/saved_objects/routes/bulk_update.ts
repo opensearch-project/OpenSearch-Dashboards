@@ -30,12 +30,16 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
 
 export const registerBulkUpdateRoute = (router: IRouter) => {
   router.put(
     {
       path: '/_bulk_update',
       validate: {
+        query: schema.object({
+          force: schema.boolean({ defaultValue: false }),
+        }),
         body: schema.arrayOf(
           schema.object({
             type: schema.string(),
@@ -57,6 +61,30 @@ export const registerBulkUpdateRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      const { force } = req.query;
+
+      // Check managed lock before allowing bulk update
+      if (!force) {
+        const existingObjects = await context.core.savedObjects.client.bulkGet(
+          req.body.map((obj) => ({ type: obj.type, id: obj.id }))
+        );
+        const lockedObjects = existingObjects.saved_objects.filter(
+          (obj) => !obj.error && isManagedByCode(obj.attributes as Record<string, unknown>)
+        );
+        if (lockedObjects.length > 0) {
+          return res.conflict({
+            body: {
+              statusCode: 409,
+              error: 'Conflict',
+              message:
+                `${lockedObjects.length} object(s) are managed by code and cannot be updated: ` +
+                lockedObjects.map((obj) => `[${obj.type}/${obj.id}]`).join(', ') +
+                `. Use the \`_bulk_apply\` endpoint or add \`?force=true\` to override.`,
+            },
+          });
+        }
+      }
+
       const savedObject = await context.core.savedObjects.client.bulkUpdate(req.body);
       return res.ok({ body: savedObject });
     })

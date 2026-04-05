@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
 
 export const registerBulkCreateRoute = (router: IRouter) => {
   router.post(
@@ -38,6 +39,7 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
+          force: schema.boolean({ defaultValue: false }),
           workspaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
@@ -64,10 +66,36 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { overwrite } = req.query;
+      const { overwrite, force } = req.query;
       const workspaces = req.query.workspaces
         ? Array<string>().concat(req.query.workspaces)
         : undefined;
+
+      // Check managed lock when overwriting existing objects
+      if (overwrite && !force) {
+        const objectsWithIds = req.body.filter((obj) => obj.id);
+        if (objectsWithIds.length > 0) {
+          const existingObjects = await context.core.savedObjects.client.bulkGet(
+            objectsWithIds.map((obj) => ({ type: obj.type, id: obj.id! }))
+          );
+          const lockedObjects = existingObjects.saved_objects.filter(
+            (obj) => !obj.error && isManagedByCode(obj.attributes as Record<string, unknown>)
+          );
+          if (lockedObjects.length > 0) {
+            return res.conflict({
+              body: {
+                statusCode: 409,
+                error: 'Conflict',
+                message:
+                  `${lockedObjects.length} object(s) are managed by code and cannot be overwritten: ` +
+                  lockedObjects.map((obj) => `[${obj.type}/${obj.id}]`).join(', ') +
+                  `. Use the \`_bulk_apply\` endpoint or add \`?force=true\` to override.`,
+              },
+            });
+          }
+        }
+      }
+
       const result = await context.core.savedObjects.client.bulkCreate(req.body, {
         overwrite,
         ...(workspaces ? { workspaces } : {}),

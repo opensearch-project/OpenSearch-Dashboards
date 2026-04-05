@@ -1,5 +1,13 @@
 * [Home](/)
 
+  - Dashboards-as-Code
+    - [Overview](dashboards-as-code/README.md)
+    - [Getting Started](dashboards-as-code/getting-started.md)
+    - [CLI Reference](dashboards-as-code/cli-reference.md)
+    - [SDK Reference](dashboards-as-code/sdk-reference.md)
+    - [API Reference](dashboards-as-code/api-reference.md)
+    - [Managed Objects](dashboards-as-code/managed-objects.md)
+    - [CI/CD Integration](dashboards-as-code/cicd-integration.md)
   - Capabilities
     - [Read_only_mode](capabilities/read_only_mode.md)
   - Charts

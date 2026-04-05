@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
 
 export const registerUpdateRoute = (router: IRouter) => {
   router.put(
@@ -39,6 +40,9 @@ export const registerUpdateRoute = (router: IRouter) => {
         params: schema.object({
           type: schema.string(),
           id: schema.string(),
+        }),
+        query: schema.object({
+          force: schema.boolean({ defaultValue: false }),
         }),
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
@@ -57,9 +61,22 @@ export const registerUpdateRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
+      const { force } = req.query;
       const { attributes, version, references } = req.body;
-      const options = { version, references };
 
+      // Check managed lock before allowing update
+      if (!force) {
+        try {
+          const existing = await context.core.savedObjects.client.get(type, id);
+          if (isManagedByCode(existing.attributes as Record<string, unknown>)) {
+            return res.conflict({ body: managedLockConflictMessage(type, id) });
+          }
+        } catch (e) {
+          // Object not found — let the update call handle the error
+        }
+      }
+
+      const options = { version, references };
       const result = await context.core.savedObjects.client.update(type, id, attributes, options);
       return res.ok({ body: result });
     })

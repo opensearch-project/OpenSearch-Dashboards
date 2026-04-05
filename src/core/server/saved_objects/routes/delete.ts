@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
 
 export const registerDeleteRoute = (router: IRouter) => {
   router.delete(
@@ -48,6 +49,19 @@ export const registerDeleteRoute = (router: IRouter) => {
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
+
+      // Check managed lock before allowing delete
+      if (!force) {
+        try {
+          const existing = await context.core.savedObjects.client.get(type, id);
+          if (isManagedByCode(existing.attributes as Record<string, unknown>)) {
+            return res.conflict({ body: managedLockConflictMessage(type, id) });
+          }
+        } catch (e) {
+          // Object not found — let the delete call handle the error
+        }
+      }
+
       const result = await context.core.savedObjects.client.delete(type, id, { force });
       return res.ok({ body: result });
     })
