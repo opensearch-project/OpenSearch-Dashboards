@@ -249,7 +249,13 @@ exports[`Overview renders with news without solutions and without features 1`] =
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -1025,7 +1031,13 @@ exports[`Overview renders with news, solutions, and features 1`] = `
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -1504,7 +1516,13 @@ exports[`Overview renders with news, with solutions, and without features 1`] = 
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -1983,7 +2001,13 @@ exports[`Overview renders with news, without solutions, and with features 1`] = 
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -2591,7 +2615,13 @@ exports[`Overview renders without news and features, with solutions 1`] = `
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -3249,7 +3279,13 @@ exports[`Overview renders without news and solutions, with features 1`] = `
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -4148,7 +4184,13 @@ exports[`Overview renders without news, solutions, and features 1`] = `
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"
@@ -5159,7 +5201,13 @@ exports[`Overview renders without news, with solutions and features 1`] = `
       }
     }
     showIcon={true}
-    title="OpenSearch Dashboards"
+    title={
+      <FormattedMessage
+        defaultMessage="OpenSearch Dashboards"
+        id="opensearchDashboardsOverview.header.title"
+        values={Object {}}
+      />
+    }
   />
   <div
     className="osdOverviewContent"

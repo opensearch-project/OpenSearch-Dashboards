@@ -29,6 +29,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { GettingStarted } from './getting_started';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';
@@ -150,5 +151,9 @@ describe('GettingStarted', () => {
       <GettingStarted addBasePath={addBasePathMock} isDarkTheme={false} apps={mockApps} />
     );
     expect(component).toMatchSnapshot();
+    const titleMessage = component
+      .find(FormattedMessage)
+      .filterWhere((n) => n.prop('id') === 'opensearchDashboardsOverview.gettingStarted.title');
+    expect(titleMessage.prop('values')).toMatchObject({ applicationTitle: 'My Custom Analytics' });
   });
 });

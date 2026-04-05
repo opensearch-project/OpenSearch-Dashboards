@@ -78,7 +78,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, logo
   } = useOpenSearchDashboards<CoreStart & AppPluginStartDependencies>();
   const addBasePath = http.basePath.prepend;
   const branding = injectedMetadata?.getBranding() ?? {};
-  const applicationTitle = branding.applicationTitle || 'OpenSearch Dashboards';
   const indexPatternService = data.indexPatterns;
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
@@ -150,7 +149,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features, logo
         addBasePath={addBasePath}
         hideToolbar={isNewOpenSearchDashboardsInstance}
         showIcon={true}
-        title={applicationTitle}
+        title={
+          branding.applicationTitle || (
+            <FormattedMessage
+              id="opensearchDashboardsOverview.header.title"
+              defaultMessage="OpenSearch Dashboards"
+            />
+          )
+        }
         logos={logos}
       />
 
