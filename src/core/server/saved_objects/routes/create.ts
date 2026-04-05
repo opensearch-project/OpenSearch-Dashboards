@@ -31,6 +31,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
+import { SavedObjectsErrorHelpers } from '../service';
 
 export const registerCreateRoute = (router: IRouter) => {
   router.post(
@@ -74,8 +75,10 @@ export const registerCreateRoute = (router: IRouter) => {
           if (isManagedByCode(existing.attributes as Record<string, unknown>)) {
             return res.conflict({ body: managedLockConflictMessage(type, id) });
           }
-        } catch (e) {
-          // Object doesn't exist yet — safe to create
+        } catch (e: any) {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+            throw e;
+          }
         }
       }
 

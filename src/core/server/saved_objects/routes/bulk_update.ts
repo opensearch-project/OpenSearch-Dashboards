@@ -30,7 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
-import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
+import { isManagedByCode } from './managed_lock';
 
 export const registerBulkUpdateRoute = (router: IRouter) => {
   router.put(
@@ -63,30 +63,53 @@ export const registerBulkUpdateRoute = (router: IRouter) => {
     router.handleLegacyErrors(async (context, req, res) => {
       const { force } = req.query;
 
-      // Check managed lock before allowing bulk update
+      // Check managed lock — filter out locked objects and report per-item errors
+      let objectsToUpdate = req.body;
+      const lockedErrors: Array<{ type: string; id: string; error: { statusCode: number; error: string; message: string } }> = [];
+
       if (!force) {
         const existingObjects = await context.core.savedObjects.client.bulkGet(
           req.body.map((obj) => ({ type: obj.type, id: obj.id }))
         );
-        const lockedObjects = existingObjects.saved_objects.filter(
-          (obj) => !obj.error && isManagedByCode(obj.attributes as Record<string, unknown>)
-        );
-        if (lockedObjects.length > 0) {
-          return res.conflict({
-            body: {
-              statusCode: 409,
-              error: 'Conflict',
-              message:
-                `${lockedObjects.length} object(s) are managed by code and cannot be updated: ` +
-                lockedObjects.map((obj) => `[${obj.type}/${obj.id}]`).join(', ') +
-                `. Use the \`_bulk_apply\` endpoint or add \`?force=true\` to override.`,
-            },
-          });
+        const lockedIds = new Set<string>();
+        existingObjects.saved_objects.forEach((obj) => {
+          if (!obj.error && isManagedByCode(obj.attributes as Record<string, unknown>)) {
+            lockedIds.add(`${obj.type}:${obj.id}`);
+            lockedErrors.push({
+              type: obj.type,
+              id: obj.id,
+              error: {
+                statusCode: 409,
+                error: 'Conflict',
+                message: `Saved object [${obj.type}/${obj.id}] is managed by code. Use \`_bulk_apply\` or add \`?force=true\`.`,
+              },
+            });
+          }
+        });
+        if (lockedIds.size > 0) {
+          objectsToUpdate = req.body.filter(
+            (obj) => !lockedIds.has(`${obj.type}:${obj.id}`)
+          );
         }
       }
 
-      const savedObject = await context.core.savedObjects.client.bulkUpdate(req.body);
-      return res.ok({ body: savedObject });
+      const result = await context.core.savedObjects.client.bulkUpdate(objectsToUpdate);
+
+      // Merge locked errors into the response
+      if (lockedErrors.length > 0) {
+        result.saved_objects = [
+          ...result.saved_objects,
+          ...lockedErrors.map((err) => ({
+            type: err.type,
+            id: err.id,
+            error: err.error as any,
+            attributes: {} as any,
+            references: [],
+          })),
+        ];
+      }
+
+      return res.ok({ body: result });
     })
   );
 };

@@ -49,10 +49,12 @@ import {
   EuiSearchBarProps,
   EuiButtonIcon,
   EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel, isManagedObject } from '../../../lib';
 import { convertIndexPatternTerminology } from '../../../../../opensearch_dashboards_utils/public';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -255,22 +257,27 @@ export class Table extends PureComponent<TableProps, TableState> {
         render: (title: string, object: SavedObjectWithMetadata) => {
           const { path = '' } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
-          const attrs = object.attributes as Record<string, unknown> | undefined;
-          const labels = attrs?.labels as Record<string, string> | undefined;
-          const isManaged = labels?.['managed-by'] === 'osdctl';
+          const isManaged = isManagedObject(object.attributes as Record<string, unknown>);
           const managedBadge = isManaged ? (
             <EuiToolTip
               content={i18n.translate(
                 'savedObjectsManagement.objectsTable.table.managedBadgeTooltip',
                 {
                   defaultMessage:
-                    'This object is managed by code via osdctl. Edit through the _bulk_apply API or unlock it first.',
+                    'This object is managed by an automated pipeline and cannot be edited in the UI.',
                 }
               )}
             >
               <EuiBadge
-                color="hollow"
+                color="warning"
                 iconType="lock"
+                aria-label={i18n.translate(
+                  'savedObjectsManagement.objectsTable.table.managedBadgeAriaLabel',
+                  {
+                    defaultMessage:
+                      'Managed: This object is managed by code and cannot be edited in the UI',
+                  }
+                )}
                 data-test-subj="savedObjectsManagedBadge"
               >
                 <FormattedMessage
@@ -281,11 +288,18 @@ export class Table extends PureComponent<TableProps, TableState> {
             </EuiToolTip>
           ) : null;
 
+          const displayTitle = title || getDefaultTitle(object);
+
           if (!canGoInApp) {
-            return (
-              <EuiText size="s">
-                {title || getDefaultTitle(object)} {managedBadge}
-              </EuiText>
+            return isManaged ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                  <EuiText size="s" className="eui-textTruncate">{displayTitle}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{managedBadge}</EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiText size="s">{displayTitle}</EuiText>
             );
           }
           let finalPath = path;
@@ -310,11 +324,15 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             }
           }
-          return (
-            <span>
-              <EuiLink href={inAppUrl}>{title || getDefaultTitle(object)}</EuiLink>{' '}
-              {managedBadge}
-            </span>
+          return isManaged ? (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                <EuiLink href={inAppUrl} className="eui-textTruncate">{displayTitle}</EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{managedBadge}</EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiLink href={inAppUrl}>{displayTitle}</EuiLink>
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,

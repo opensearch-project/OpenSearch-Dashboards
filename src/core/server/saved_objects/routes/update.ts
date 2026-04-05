@@ -31,6 +31,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
+import { SavedObjectsErrorHelpers } from '../service';
 
 export const registerUpdateRoute = (router: IRouter) => {
   router.put(
@@ -71,8 +72,10 @@ export const registerUpdateRoute = (router: IRouter) => {
           if (isManagedByCode(existing.attributes as Record<string, unknown>)) {
             return res.conflict({ body: managedLockConflictMessage(type, id) });
           }
-        } catch (e) {
-          // Object not found — let the update call handle the error
+        } catch (e: any) {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+            throw e;
+          }
         }
       }
 
