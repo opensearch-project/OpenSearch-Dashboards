@@ -104,10 +104,6 @@ export const VisualizationEditorPage = ({
       setInitialized(true);
     };
     init();
-    return () => {
-      queryBuilder.reset();
-      visualizationBuilderForEditor.reset();
-    };
   }, [
     embeddable,
     containerInfo,
@@ -133,6 +129,13 @@ export const VisualizationEditorPage = ({
       stop();
     };
   }, [osdUrlStateStorage, data.query]);
+
+  useEffect(() => {
+    return () => {
+      queryBuilder.reset();
+      visualizationBuilderForEditor.reset();
+    };
+  }, [queryBuilder, visualizationBuilderForEditor]);
 
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 

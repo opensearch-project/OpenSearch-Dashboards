@@ -16,21 +16,34 @@ export const useInitialContainerContext = () => {
   useEffect(() => {
     const services = getServices();
     const { osdUrlStateStorage, embeddable, scopedHistory } = services;
-    const urlContainerState = osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY);
 
     const incomingStates = embeddable.getStateTransfer(scopedHistory).getIncomingEditorState();
-    const originatingAppFromEmbeddable = incomingStates?.originatingApp;
-    const containerInfoFromEmbeddable = incomingStates?.containerInfo;
-    const newState = {
-      originatingApp: originatingAppFromEmbeddable,
-      containerInfo: containerInfoFromEmbeddable,
-      ...(urlContainerState ?? {}),
-    };
+    const hasIncomingStates = incomingStates?.originatingApp || incomingStates?.containerInfo;
+    if (hasIncomingStates) {
+      // has incoming states from state transfer: use it and update URL
+      const stateFromTransfer: ContainerState = {
+        originatingApp: incomingStates.originatingApp,
+        containerInfo: incomingStates.containerInfo,
+      };
 
-    if (osdUrlStateStorage)
-      osdUrlStateStorage?.set<ContainerState>(CONTAINER_URL_KEY, newState, { replace: true });
+      if (osdUrlStateStorage) {
+        osdUrlStateStorage.set<ContainerState>(CONTAINER_URL_KEY, stateFromTransfer, {
+          replace: true,
+        });
+      }
 
-    setContext(newState);
+      setContext(stateFromTransfer);
+    } else {
+      // No incoming states from state transfer: use URL state
+      const urlContainerState = osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY);
+
+      setContext(
+        urlContainerState ?? {
+          originatingApp: undefined,
+          containerInfo: undefined,
+        }
+      );
+    }
   }, []);
 
   return { context };
