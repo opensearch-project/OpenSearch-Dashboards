@@ -4,7 +4,7 @@
  */
 
 import { ScatterChartStyle } from './scatter_vis_config';
-import { VisColumn, AxisColumnMappings, AxisRole } from '../types';
+import { AxisColumnMappings, AxisRole } from '../types';
 import { getSwappedAxisRole } from '../utils/utils';
 import {
   pipe,
@@ -22,9 +22,6 @@ import { convertTo2DArray, transform, pivot } from '../utils/data_transformation
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -62,9 +59,6 @@ export const createTwoMetricScatter = (
 
 export const createTwoMetricOneCateScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -111,9 +105,6 @@ export const createTwoMetricOneCateScatter = (
 
 export const createThreeMetricOneCateScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

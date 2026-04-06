@@ -13,10 +13,9 @@ import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_conf
 import { VisualizationEmptyState } from './visualization_empty_state';
 import { RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
-import { EchartsRender } from './echarts_render';
-import { createVisSpec } from './utils/create_vis_spec';
-import { MetricChartRender } from './metric/metric_component';
-import { MetricChartStyle } from './metric/metric_vis_config';
+import { visualizationRegistry } from './visualization_registry';
+import { convertStringsToMappings } from './visualization_builder_utils';
+import { getAxisConfigByColumnMapping } from './utils/axis';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -128,22 +127,39 @@ const ChartRender = ({
   timeRange: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
 }) => {
-  const { spec, axisColumnMappings } = useMemo(() => {
-    return createVisSpec({ data, config, timeRange });
-  }, [config, data, timeRange]);
-
-  if (!spec) {
+  if (!data) {
     return null;
   }
 
-  if (config?.type === 'metric') {
-    return (
-      <MetricChartRender
-        spec={spec}
-        styles={config.styles as MetricChartStyle}
-        axisColumnMappings={axisColumnMappings}
-      />
-    );
+  if (!config?.type) {
+    return null;
   }
-  return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+
+  const columns = [
+    ...(data?.numericalColumns ?? []),
+    ...(data?.categoricalColumns ?? []),
+    ...(data?.dateColumns ?? []),
+  ];
+
+  const rule = visualizationRegistry.findRuleByAxesMapping(
+    config.type,
+    config.axesMapping ?? {},
+    columns
+  );
+  if (!rule) {
+    return null;
+  }
+  const standardAxes = 'standardAxes' in config.styles ? config.styles.standardAxes : [];
+  const axisColumnMappings = convertStringsToMappings(config?.axesMapping ?? {}, columns);
+  // initialize axis config
+  const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
+  const styles = { ...config.styles, standardAxes: allAxisConfig };
+
+  return rule.render({
+    transformedData: data.transformedData,
+    styleOptions: styles,
+    axisColumnMappings,
+    timeRange,
+    onSelectTimeRange,
+  });
 };

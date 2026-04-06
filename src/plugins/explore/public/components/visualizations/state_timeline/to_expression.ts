@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisColumnMappings, AxisRole, DisableMode, VisColumn, Threshold } from '../types';
+import { AxisColumnMappings, AxisRole, DisableMode, Threshold } from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
 import { getSwappedAxisRole } from '../utils/utils';
 import {
@@ -39,9 +39,6 @@ const normalizeConfig = (styleOptions: StateTimeLineChartStyle) => {
 
 export const createNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -109,9 +106,6 @@ export const createNumericalStateTimeline = (
 
 export const createCategoricalStateTimeline = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -168,9 +162,6 @@ export const createCategoricalStateTimeline = (
 
 export const createSingleCategoricalStateTimeline = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -226,9 +217,6 @@ export const createSingleCategoricalStateTimeline = (
 
 export const createSingleNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

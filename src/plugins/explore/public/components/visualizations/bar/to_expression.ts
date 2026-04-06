@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  AxisColumnMappings,
-  AxisRole,
-  VisColumn,
-  VisFieldType,
-  TimeUnit,
-  AggregationType,
-} from '../types';
+import { AxisColumnMappings, AxisRole, VisFieldType, TimeUnit, AggregationType } from '../types';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { getSwappedAxisRole } from '../utils/utils';
 
@@ -33,9 +26,6 @@ import {
 
 export const createBarSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -90,17 +80,10 @@ export const createBarSpec = (
  */
 export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || dateColumns.length === 0) {
-    throw new Error('Time bar chart requires at least one numerical column and one date column');
-  }
-
   const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
   const xAxis = axisConfig.xAxis;
   const yAxis = axisConfig.yAxis;
@@ -165,9 +148,6 @@ export const createTimeBarChart = (
  */
 export const createGroupedTimeBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -247,9 +227,6 @@ export const createGroupedTimeBarChart = (
  */
 export const createFacetedTimeBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -320,9 +297,6 @@ export const createFacetedTimeBarChart = (
 
 export const createStackedBarSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -391,7 +365,6 @@ export const createStackedBarSpec = (
 
 export const createDoubleNumericalBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

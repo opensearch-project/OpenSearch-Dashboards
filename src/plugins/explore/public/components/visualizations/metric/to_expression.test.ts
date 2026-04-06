@@ -40,14 +40,7 @@ describe('Metric to_expression', () => {
         [AxisRole.Value]: numericColumn,
       };
 
-      const result = createSingleMetric(
-        mockData,
-        [numericColumn],
-        [],
-        [],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createSingleMetric(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('name', 'Value');
       expect(result).toHaveProperty('data', mockData);
@@ -66,14 +59,7 @@ describe('Metric to_expression', () => {
         [AxisRole.Time]: dateColumn,
       };
 
-      const result = createSingleMetric(
-        timeSeriesData,
-        [numericColumn],
-        [],
-        [dateColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createSingleMetric(timeSeriesData, mockStyles, mockAxisMappings);
 
       expect(result.spec).toBeDefined();
       expect(result.spec).toHaveProperty('series');
@@ -86,20 +72,13 @@ describe('Metric to_expression', () => {
         [AxisRole.Value]: numericColumn,
       };
 
-      const result = createSingleMetric(
-        mockData,
-        [numericColumn],
-        [],
-        [],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createSingleMetric(mockData, mockStyles, mockAxisMappings);
 
       expect(result.spec).toBeUndefined();
     });
 
     it('throws when no value column is provided', () => {
-      expect(() => createSingleMetric(mockData, [numericColumn], [], [], mockStyles, {})).toThrow(
+      expect(() => createSingleMetric(mockData, mockStyles, {})).toThrow(
         'Missing value for metric chart'
       );
     });

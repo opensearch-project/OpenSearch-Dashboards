@@ -11,7 +11,7 @@ import {
   createFacetedTimeBarChart,
   createDoubleNumericalBarChart,
 } from './to_expression';
-import { defaultBarChartStyles, BarChartStyle } from './bar_vis_config';
+import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { VisColumn, VisFieldType, AxisRole, ThresholdMode, AggregationType } from '../types';
 
 describe('bar to_expression', () => {
@@ -59,14 +59,10 @@ describe('bar to_expression', () => {
 
   describe('createBarSpec', () => {
     test('creates an ECharts bar chart spec with dataset and series', () => {
-      const spec = createBarSpec(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [],
-        defaultBarChartStyles,
-        { [AxisRole.X]: mockCategoricalColumn, [AxisRole.Y]: mockNumericalColumn }
-      );
+      const spec = createBarSpec(mockData, defaultBarChartStyles, {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      });
 
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');
@@ -84,9 +80,6 @@ describe('bar to_expression', () => {
 
       const noTitleResult = createBarSpec(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [],
         { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
         axisMappings
       );
@@ -94,9 +87,6 @@ describe('bar to_expression', () => {
 
       const defaultTitleResult = createBarSpec(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [],
         { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
         axisMappings
       );
@@ -104,9 +94,6 @@ describe('bar to_expression', () => {
 
       const customTitleResult = createBarSpec(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [],
         {
           ...defaultBarChartStyles,
           titleOptions: { show: true, titleName: 'Custom Bar Chart Title' },
@@ -126,14 +113,10 @@ describe('bar to_expression', () => {
         },
       };
 
-      const spec = createBarSpec(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [],
-        customStyles,
-        { [AxisRole.X]: mockCategoricalColumn, [AxisRole.Y]: mockNumericalColumn }
-      );
+      const spec = createBarSpec(mockData, customStyles, {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      });
 
       const seriesWithMarkLine = spec.series.find((s: any) => s.markLine);
       expect(seriesWithMarkLine).toBeDefined();
@@ -143,18 +126,11 @@ describe('bar to_expression', () => {
 
   describe('createStackedBarSpec', () => {
     test('creates a stacked bar chart ECharts spec', () => {
-      const spec = createStackedBarSpec(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [],
-        defaultBarChartStyles,
-        {
-          [AxisRole.X]: mockCategoricalColumn,
-          [AxisRole.Y]: mockNumericalColumn,
-          [AxisRole.COLOR]: mockCategoricalColumn2,
-        }
-      );
+      const spec = createStackedBarSpec(mockData, defaultBarChartStyles, {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn2,
+      });
 
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');
@@ -171,9 +147,6 @@ describe('bar to_expression', () => {
 
       const noTitleResult = createStackedBarSpec(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [],
         { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
         axisMappings
       );
@@ -181,9 +154,6 @@ describe('bar to_expression', () => {
 
       const defaultTitleResult = createStackedBarSpec(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [],
         { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
         axisMappings
       );
@@ -191,9 +161,6 @@ describe('bar to_expression', () => {
 
       const customTitleResult = createStackedBarSpec(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [],
         {
           ...defaultBarChartStyles,
           titleOptions: { show: true, titleName: 'Custom Stacked Bar Chart' },
@@ -211,13 +178,7 @@ describe('bar to_expression', () => {
         [AxisRole.Y]: mockNumericalColumn,
       };
 
-      const spec = createTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        axisMappings
-      );
+      const spec = createTimeBarChart(mockData, defaultBarChartStyles, axisMappings);
 
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');
@@ -235,8 +196,6 @@ describe('bar to_expression', () => {
 
       const noTitleResult = createTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
         { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
         axisMappings
       );
@@ -244,8 +203,6 @@ describe('bar to_expression', () => {
 
       const defaultTitleResult = createTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
         { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
         axisMappings
       );
@@ -253,8 +210,6 @@ describe('bar to_expression', () => {
 
       const customTitleResult = createTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
         {
           ...defaultBarChartStyles,
           titleOptions: { show: true, titleName: 'Custom Time Bar Chart' },
@@ -274,13 +229,10 @@ describe('bar to_expression', () => {
         },
       };
 
-      const spec = createTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
-        customStyles,
-        { [AxisRole.X]: mockDateColumn, [AxisRole.Y]: mockNumericalColumn }
-      );
+      const spec = createTimeBarChart(mockData, customStyles, {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      });
 
       const seriesWithMarkLine = spec.series.find((s: any) => s.markLine);
       expect(seriesWithMarkLine).toBeDefined();
@@ -303,8 +255,6 @@ describe('bar to_expression', () => {
       test('with bucketing, aggregates data into fewer rows', () => {
         const bucketedSpec = createTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockDateColumn],
           defaultBarChartStyles,
           axisMappings
         );
@@ -319,13 +269,7 @@ describe('bar to_expression', () => {
           bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
         };
 
-        const noBucketSpec = createTimeBarChart(
-          sameBucketData,
-          [mockNumericalColumn],
-          [mockDateColumn],
-          noBucketStyles,
-          axisMappings
-        );
+        const noBucketSpec = createTimeBarChart(sameBucketData, noBucketStyles, axisMappings);
 
         // No bucketing: all 3 raw data points preserved (header + 3 data rows)
         expect(noBucketSpec.dataset.source.length).toBe(4);
@@ -341,14 +285,7 @@ describe('bar to_expression', () => {
         [AxisRole.COLOR]: mockCategoricalColumn,
       };
 
-      const spec = createGroupedTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        axisMappings
-      );
+      const spec = createGroupedTimeBarChart(mockData, defaultBarChartStyles, axisMappings);
 
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');
@@ -365,9 +302,6 @@ describe('bar to_expression', () => {
 
       const noTitleResult = createGroupedTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [mockDateColumn],
         { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
         axisMappings
       );
@@ -375,9 +309,6 @@ describe('bar to_expression', () => {
 
       const defaultTitleResult = createGroupedTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn],
-        [mockDateColumn],
         { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
         axisMappings
       );
@@ -401,9 +332,6 @@ describe('bar to_expression', () => {
       test('with bucketing, merges same-bucket timestamps into fewer rows', () => {
         const bucketedSpec = createGroupedTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [mockDateColumn],
           defaultBarChartStyles,
           axisMappings
         );
@@ -420,9 +348,6 @@ describe('bar to_expression', () => {
 
         const noBucketSpec = createGroupedTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [mockDateColumn],
           noBucketStyles,
           axisMappings
         );
@@ -442,14 +367,7 @@ describe('bar to_expression', () => {
         [AxisRole.FACET]: mockCategoricalColumn2,
       };
 
-      const spec = createFacetedTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        axisMappings
-      );
+      const spec = createFacetedTimeBarChart(mockData, defaultBarChartStyles, axisMappings);
 
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');
@@ -466,9 +384,6 @@ describe('bar to_expression', () => {
 
       const noTitleResult = createFacetedTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [mockDateColumn],
         { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
         axisMappings
       );
@@ -476,9 +391,6 @@ describe('bar to_expression', () => {
 
       const defaultTitleResult = createFacetedTimeBarChart(
         mockData,
-        [mockNumericalColumn],
-        [mockCategoricalColumn, mockCategoricalColumn2],
-        [mockDateColumn],
         { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
         axisMappings
       );
@@ -502,14 +414,7 @@ describe('bar to_expression', () => {
       };
 
       test('with bucketing, merges same-bucket timestamps within each facet', () => {
-        const spec = createFacetedTimeBarChart(
-          sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [mockDateColumn],
-          defaultBarChartStyles,
-          axisMappings
-        );
+        const spec = createFacetedTimeBarChart(sameBucketData, defaultBarChartStyles, axisMappings);
 
         const bucketedTotalRows = spec.dataset.reduce(
           (sum: number, ds: any) => sum + ds.source.length - 1,
@@ -528,9 +433,6 @@ describe('bar to_expression', () => {
 
         const noBucketSpec = createFacetedTimeBarChart(
           sameBucketData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [mockDateColumn],
           noBucketStyles,
           axisMappings
         );
@@ -557,12 +459,10 @@ describe('bar to_expression', () => {
     };
 
     test('creates a double numerical bar chart ECharts spec', () => {
-      const spec = createDoubleNumericalBarChart(
-        mockData,
-        [mockNumericalColumn, mockNumericalColumn2],
-        defaultBarChartStyles,
-        { [AxisRole.X]: mockNumericalColumn, [AxisRole.Y]: mockNumericalColumn2 }
-      );
+      const spec = createDoubleNumericalBarChart(mockData, defaultBarChartStyles, {
+        [AxisRole.X]: mockNumericalColumn,
+        [AxisRole.Y]: mockNumericalColumn2,
+      });
 
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');

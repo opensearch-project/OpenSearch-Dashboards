@@ -1,2 +1,0 @@
-fix:
-- [Chat] Reset thread ID on chat window unmount to fix conversation restore ([#11526](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11526))
