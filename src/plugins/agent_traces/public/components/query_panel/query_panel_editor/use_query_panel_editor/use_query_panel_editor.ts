@@ -307,7 +307,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        const maxHeight = 100;
+        const containerEl = editor.getDomNode()?.parentElement;
+        const containerHeight = containerEl?.clientHeight || 100;
+        // Use the container height as the max, falling back to 100px
+        const maxHeight = Math.max(containerHeight, 36);
         const finalHeight = Math.min(contentHeight, maxHeight);
 
         editor.layout({

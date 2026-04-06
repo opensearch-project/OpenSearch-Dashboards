@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
+import { monaco } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
@@ -14,7 +14,6 @@ import {
   selectQueryLanguage,
   selectQueryString,
   selectIsQueryEditorDirty,
-  selectDataset,
 } from '../../../../application/utils/state_management/selectors';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 
@@ -35,21 +34,14 @@ import { usePromptIsTyping } from './use_prompt_is_typing';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
 import { getAutocompleteContext } from '../../../../application/utils/multi_query_utils';
-import {
-  attachPPLValidationContext,
-  attachPPLGrammarRefresh,
-  syncPPLValidationContext,
-  pplGrammarCache,
-  shouldUseRuntimeGrammar,
-} from '../../../../../../data/public';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
 
-export const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
+const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
 
-export const languageConfiguration: LanguageConfiguration = {
+const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [
     { open: '(', close: ')' },
     { open: '[', close: ']' },
@@ -113,20 +105,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const queryLanguageRef = useRef(queryLanguage);
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
-  const dataset = useSelector(selectDataset);
-  const detachValidationContextRef = useRef<(() => void) | undefined>();
-  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
-
-  const getValidationContext = useCallback((): PPLValidationContext => {
-    const currentQuery = queryString.getQuery();
-    const dsId = currentQuery.dataset?.dataSource?.id;
-    const dsVersion = currentQuery.dataset?.dataSource?.version;
-    return {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
-      dataSourceId: dsId,
-      dataSourceVersion: dsVersion,
-    };
-  }, [queryString]);
 
   const switchEditorMode = useLanguageSwitch();
 
@@ -143,32 +121,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     queryLanguageRef.current = queryLanguage;
   }, [queryLanguage]);
-
-  // Sync PPL validation context when datasource changes
-  useEffect(() => {
-    const dsId = dataset?.dataSource?.id;
-    const dsVersion = dataset?.dataSource?.version;
-    syncPPLValidationContext(editorRef.current, {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
-      dataSourceId: dsId,
-      dataSourceVersion: dsVersion,
-    });
-    const model = editorRef.current?.getModel();
-    if (model) {
-      void revalidatePPLModel(model);
-    }
-  }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
-
-  // Cleanup validation context on unmount
-  useEffect(
-    () => () => {
-      detachValidationContextRef.current?.();
-      detachValidationContextRef.current = undefined;
-      detachGrammarRefreshRef.current?.();
-      detachGrammarRefreshRef.current = undefined;
-    },
-    []
-  );
 
   keyboardShortcut?.useKeyboardShortcut({
     id: 'focus_query_bar',
@@ -319,24 +271,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (editor: IStandaloneCodeEditor) => {
       setEditorRef(editor);
 
-      // Attach PPL runtime validation context
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
-        editor,
-        getValidationContext,
-        (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
-      );
-
-      // Revalidate immediately so any initial content that was validated before
-      // the context was attached gets re-checked with the runtime grammar.
-      const model = editor.getModel();
-      if (model) {
-        void revalidatePPLModel(model);
-      }
-
       const focusDisposable = editor.onDidFocusEditorText(() => {
         setEditorIsFocused(true);
       });
@@ -373,7 +307,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        const maxHeight = 100;
+        const containerEl = editor.getDomNode()?.parentElement;
+        const containerHeight = containerEl?.clientHeight || 100;
+        // Use the container height as the max, falling back to 100px
+        const maxHeight = Math.max(containerHeight, 36);
         const finalHeight = Math.min(contentHeight, maxHeight);
 
         editor.layout({
@@ -421,7 +358,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       setEditorIsFocused,
       updateDecorations,
       clearDecorations,
-      getValidationContext,
     ]
   );
 
