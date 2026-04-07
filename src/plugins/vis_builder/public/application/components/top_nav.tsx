@@ -153,6 +153,7 @@ export const TopNav = () => {
         config={config}
         setMenuMountPoint={setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : []}
+        // @ts-expect-error TS2869 TODO(ts-upgrade): fixme
         showDatePicker={!!indexPattern?.timeFieldName ?? true}
         showSearchBar={TopNavMenuItemRenderType.IN_PORTAL}
         showSaveQuery={showSaveQuery}

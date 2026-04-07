@@ -285,7 +285,6 @@ export class QueryBuilder {
       .subscribe({
         next: (dataView) => {
           this.datasetView$.next({
-            // @ts-expect-error TS2322 TODO(ts-error): fixme
             dataView,
             isLoading: false,
             error: null,

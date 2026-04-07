@@ -30,6 +30,7 @@
 
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
+// @ts-expect-error TS2307 TODO(ts-upgrade): fixme
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {

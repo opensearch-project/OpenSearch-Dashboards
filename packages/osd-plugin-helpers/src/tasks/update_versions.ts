@@ -90,7 +90,7 @@ function updateObject({ original, updates }: ObjectUpdateContext) {
         updateObject({
           original: original[key],
           updates: updates[key],
-        } as ObjectUpdateContext);
+        } as unknown as ObjectUpdateContext);
         // If the updated value is falsy, skip it
       } else if (updates[key]) {
         original[key] = updates[key];

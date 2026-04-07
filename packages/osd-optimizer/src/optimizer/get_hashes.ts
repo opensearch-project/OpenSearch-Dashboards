@@ -52,7 +52,7 @@ export async function getHashes(paths: Iterable<string>): Promise<Map<string, st
             readFile$(path).pipe(
               map(
                 (buffer) =>
-                  [path, Crypto.createHash('sha1').update(buffer).digest('base64')] as const
+                  [path, Crypto.createHash('sha1').update(new Uint8Array(buffer)).digest('base64')] as const
               ),
               catchError((error: any) =>
                 error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)

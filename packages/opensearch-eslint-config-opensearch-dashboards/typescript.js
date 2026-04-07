@@ -104,7 +104,7 @@ module.exports = {
             'error',
             { default: 'array-simple', readonly: 'array-simple' },
           ],
-          '@typescript-eslint/ban-types': [
+          '@typescript-eslint/no-restricted-types': [
             'error',
             {
               types: {
@@ -124,10 +124,6 @@ module.exports = {
                   message: 'Use FunctionComponent instead.',
                   fixWith: 'React.FunctionComponent',
                 },
-                // used in the codebase in the wild
-                '{}': false,
-                object: false,
-                Function: false,
               },
             },
           ],

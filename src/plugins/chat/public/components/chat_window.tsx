@@ -526,9 +526,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       // Handle array content - look for text content
       if (Array.isArray(msg.content)) {
         const textContent = msg.content.find((item) => item.type === 'text');
-// @ts-expect-error TS2339 TODO(ts-error): fixme
         if (textContent?.text && textContent.text.trim()) {
-// @ts-expect-error TS2339 TODO(ts-error): fixme
           return textContent.text;
         }
       }

@@ -188,11 +188,13 @@ describe('TopNavMenu', () => {
 
     const refresh = () => {
       new Promise(async (resolve) => {
+        // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
         if (dom) {
           act(() => {
             dom.update();
           });
         }
+        // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
         setImmediate(() => resolve(dom)); // flushes any pending promises
       });
     };

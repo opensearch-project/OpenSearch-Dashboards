@@ -39,6 +39,7 @@ describe('<WorkspaceFatalError />', () => {
       // @ts-ignore
       delete window.location;
     }
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = {} as Location;
     Object.defineProperty(window.location, 'href', {
       get: () => 'http://localhost/',
@@ -68,6 +69,7 @@ describe('<WorkspaceFatalError />', () => {
         container: document.body,
       }
     );
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = location;
   });
 });

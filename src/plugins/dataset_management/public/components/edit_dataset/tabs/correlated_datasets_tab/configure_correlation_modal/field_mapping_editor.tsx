@@ -150,7 +150,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
       if (!dataset) return false;
 
       return REQUIRED_FIELDS.every(
-        // @ts-expect-error TS2532 TODO(ts-error): fixme
         (field) => dataset.mappings[field] && dataset.mappings[field].length > 0
       );
     },
@@ -367,7 +366,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
 
       // Validate that all required fields are filled
       const missingFields = REQUIRED_FIELDS.filter(
-        // @ts-expect-error TS2532 TODO(ts-error): fixme
         (field) => !dataset.mappings[field] || dataset.mappings[field].trim() === ''
       );
 

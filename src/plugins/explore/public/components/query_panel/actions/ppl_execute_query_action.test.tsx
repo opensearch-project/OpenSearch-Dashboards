@@ -35,6 +35,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 jest.mock('../../../application/utils/state_management/actions/query_editor/load_query', () => ({
+  // @ts-expect-error TS7019 TODO(ts-upgrade): fixme
   loadQueryActionCreator: (...args) => mockLoadQueryActionCreator(...args),
 }));
 
@@ -65,8 +66,10 @@ import { QueryExecutionStatus } from '../../../application/utils/state_managemen
 import { usePPLExecuteQueryAction } from './ppl_execute_query_action';
 
 describe('usePPLExecuteQueryAction', () => {
+  // @ts-expect-error TS7034 TODO(ts-upgrade): fixme
   let initialCallCount;
 
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   const makeStatus = (status, error) => ({
     status,
     elapsedMs: undefined,
@@ -81,6 +84,7 @@ describe('usePPLExecuteQueryAction', () => {
     mockLoadQueryActionCreator.mockClear();
     mockSetTime.mockClear();
 
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
     mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
   });
@@ -90,6 +94,7 @@ describe('usePPLExecuteQueryAction', () => {
       renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
     });
     const currentCallCount = mockUseAssistantAction.mock.calls.length;
+    // @ts-expect-error TS7005 TODO(ts-upgrade): fixme
     expect(currentCallCount).toBeGreaterThan(initialCallCount);
     return mockUseAssistantAction.mock.calls[currentCallCount - 1][0].handler;
   };
@@ -104,6 +109,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should execute query and return success on READY status', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
     const handler = renderAndGetHandler();
 
@@ -125,6 +131,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should return success with resultsCount 0 on NO_RESULTS status', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.NO_RESULTS));
     const handler = renderAndGetHandler();
 
@@ -175,6 +182,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should use fallback error message when error.message is missing', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.ERROR));
     const handler = renderAndGetHandler();
 
@@ -201,6 +209,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should update time range and include it in response when from/to provided', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
     const handler = renderAndGetHandler();
 
@@ -212,6 +221,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should include time range message in no-results response', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.NO_RESULTS));
     const handler = renderAndGetHandler();
 
@@ -274,6 +284,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should return failure when query is still LOADING (e.g., user navigated away)', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.LOADING));
     const handler = renderAndGetHandler();
 
@@ -289,6 +300,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should return failure when query status is UNINITIALIZED', async () => {
+    // @ts-expect-error TS2554 TODO(ts-upgrade): fixme
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.UNINITIALIZED));
     const handler = renderAndGetHandler();
 

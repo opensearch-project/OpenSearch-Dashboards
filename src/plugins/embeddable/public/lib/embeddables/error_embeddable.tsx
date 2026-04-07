@@ -29,9 +29,7 @@
  */
 
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
-
-// @ts-expect-error TS2307 TODO(ts-error): fixme
-import { createRoot, Root } from 'react-_dom/client';
+import { createRoot, Root } from 'react-dom/client';
 import { Markdown } from '../../../../opensearch_dashboards_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';

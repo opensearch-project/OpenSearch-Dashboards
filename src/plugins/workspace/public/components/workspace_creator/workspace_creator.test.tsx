@@ -196,6 +196,7 @@ describe('WorkspaceCreator', () => {
       // @ts-ignore
       delete window.location;
     }
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = {} as Location;
     Object.defineProperty(window.location, 'href', {
       get: () => 'http://localhost/w/workspace/app/workspace_create',
@@ -204,6 +205,7 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = location as Location;
   });
 

@@ -24,7 +24,6 @@ import {
 import { StyleAccordion } from '../style_accordion';
 import {
   convertMappingsToStrings,
-  getColumnMatchFromMapping,
 } from '../../visualization_builder_utils';
 
 interface VisColumnOption {
