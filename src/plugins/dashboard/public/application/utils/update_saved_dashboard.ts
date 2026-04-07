@@ -47,6 +47,10 @@ export function updateSavedDashboard(
   savedDashboard.timeRestore = appState.timeRestore;
   savedDashboard.panelsJSON = JSON.stringify(appState.panels);
   savedDashboard.optionsJSON = JSON.stringify(appState.options);
+  savedDashboard.variablesJSON =
+    appState.variables && appState.variables.length > 0
+      ? JSON.stringify({ variables: appState.variables })
+      : undefined;
 
   const timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)
@@ -81,6 +85,7 @@ export function updateSavedDashboard(
     timeRestore: appState.timeRestore,
     panels: appState.panels,
     options: appState.options,
+    variables: appState.variables,
     timeFrom,
     timeTo,
     refreshInterval,

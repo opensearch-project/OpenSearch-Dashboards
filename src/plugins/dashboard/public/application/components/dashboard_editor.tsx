@@ -15,6 +15,8 @@ import { DashboardServices } from '../../types';
 import { useDashboardAppAndGlobalState } from '../utils/use/use_dashboard_app_state';
 import { useEditorUpdates } from '../utils/use/use_editor_updates';
 import { HeaderVariant } from '../../../../../core/public';
+import { ViewMode } from '../../../../embeddable/public';
+import { DashboardVariables } from './dashboard_variables';
 
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
@@ -75,21 +77,34 @@ export const DashboardEditor = () => {
     execute: handleFullScreen,
   });
 
+  const variableEnabled = localStorage.getItem('__DEVELOPMENT__.dashboard.variable.enabled');
+
   return (
     <div>
       <div>
         {savedDashboardInstance && appState && currentAppState && currentContainer && dashboard && (
-          <DashboardTopNav
-            isChromeVisible={isChromeVisible}
-            savedDashboardInstance={savedDashboardInstance}
-            appState={appState!}
-            dashboard={dashboard}
-            currentAppState={currentAppState}
-            isEmbeddableRendered={isEmbeddableRendered}
-            indexPatterns={indexPatterns}
-            currentContainer={currentContainer}
-            dashboardIdFromUrl={dashboardIdFromUrl}
-          />
+          <>
+            <DashboardTopNav
+              isChromeVisible={isChromeVisible}
+              savedDashboardInstance={savedDashboardInstance}
+              appState={appState!}
+              dashboard={dashboard}
+              currentAppState={currentAppState}
+              isEmbeddableRendered={isEmbeddableRendered}
+              indexPatterns={indexPatterns}
+              currentContainer={currentContainer}
+              dashboardIdFromUrl={dashboardIdFromUrl}
+            />
+            {/* Hide the variable feature in 3.6.0 */}
+            {variableEnabled && currentContainer.variableService && (
+              <DashboardVariables
+                variableService={currentContainer.variableService}
+                interpolationService={currentContainer.variableInterpolationService}
+                isEditMode={currentAppState?.viewMode === ViewMode.EDIT}
+                getPanelQueries={() => currentContainer.getPanelQueries()}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

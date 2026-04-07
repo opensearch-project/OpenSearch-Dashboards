@@ -28,6 +28,8 @@ import { syncQueryStateWithUrl } from '../../../../data/public';
 import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
 import { getBreadcrumbs } from './utils';
 import { useInitialContainerContext } from './hooks/use_initial_container_context';
+import { useVariableInterpolation } from './hooks/use_variable_interpolation';
+import { useVariableService } from './hooks/use_variable_service';
 
 export const VisualizationEditorPage = ({
   setHeaderActionMenu,
@@ -42,6 +44,7 @@ export const VisualizationEditorPage = ({
     osdUrlStateStorage,
     data,
     embeddable,
+    dashboard,
   } = services;
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { queryBuilder } = useQueryBuilderState();
@@ -50,6 +53,9 @@ export const VisualizationEditorPage = ({
   const {
     context: { containerInfo, originatingApp },
   } = useInitialContainerContext();
+
+  const { variableService, interpolationService } = useVariableService();
+  const { VariablesBar } = dashboard;
 
   const [initialized, setInitialized] = useState(false);
 
@@ -138,6 +144,7 @@ export const VisualizationEditorPage = ({
   }, [queryBuilder, visualizationBuilderForEditor]);
 
   useHeaderVariants(services, HeaderVariant.APPLICATION);
+  useVariableInterpolation(variableService, interpolationService);
 
   if (isLoading || !initialized) {
     return null;
@@ -164,6 +171,9 @@ export const VisualizationEditorPage = ({
                       paddingSize="none"
                       className="resizable-panel-left"
                     >
+                      {variableService && VariablesBar && (
+                        <VariablesBar variableService={variableService} />
+                      )}
                       <ResizableQueryPanelAndVisualization />
                     </EuiResizablePanel>
                     <EuiResizableButton />
