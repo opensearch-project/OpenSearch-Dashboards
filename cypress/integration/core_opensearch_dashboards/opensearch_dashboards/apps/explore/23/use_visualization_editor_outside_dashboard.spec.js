@@ -95,7 +95,6 @@ export const runVisualizationEditorOutsideDashboardTests = () => {
         });
         cy.getElementByTestId('saveVisualizationEditorButton').should('be.visible').click();
 
-        // ensure modal is shown
         cy.getElementByTestId('saveVisModalTitle').should('be.visible');
 
         cy.get('input[placeholder="Enter save search name"]')
@@ -120,8 +119,6 @@ export const runVisualizationEditorOutsideDashboardTests = () => {
         });
 
         cy.get('.euiTableRow').contains(newExploreName).should('be.visible').click();
-        setDatePickerDatesAndSearchIfRelevant('PPL');
-        cy.wait(2000);
       });
 
       it('should load and re-save the saved visualization', () => {

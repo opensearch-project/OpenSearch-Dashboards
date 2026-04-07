@@ -108,7 +108,6 @@ export const runVisualizationEditorInsideDashboardTests = () => {
       });
       cy.getElementByTestId('saveVisualizationEditorButton').should('be.visible').click();
 
-      // ensure modal is shown
       cy.getElementByTestId('saveVisModalTitle').should('be.visible');
 
       cy.get('input[placeholder="Enter save search name"]')
@@ -139,7 +138,7 @@ export const runVisualizationEditorInsideDashboardTests = () => {
           });
         });
     });
-    // embeddablePanelAction-editPanel
+
     it('should load and re-save the saved visualization', () => {
       cy.getElementByTestIdLike(`embeddablePanelHeading-${newExploreName}`)
         .parent()
@@ -181,7 +180,7 @@ export const runVisualizationEditorInsideDashboardTests = () => {
       cy.getElementByTestId('osdExploreContainer')
         .should('be.visible')
         .within(() => {
-          cy.get('canvas').then((canvas) => {
+          cy.get('canvas').should((canvas) => {
             const newUrl = canvas[0].toDataURL();
             expect(newUrl).not.to.be.empty;
             expect(newUrl).not.to.eq(oldDataUrl);
