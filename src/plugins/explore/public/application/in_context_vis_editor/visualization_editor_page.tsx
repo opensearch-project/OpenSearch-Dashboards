@@ -28,8 +28,7 @@ import { syncQueryStateWithUrl } from '../../../../data/public';
 import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
 import { getBreadcrumbs } from './utils';
 import { useInitialContainerContext } from './hooks/use_initial_container_context';
-import { useVariableInterpolation } from './hooks/use_variable_interpolation';
-import { useVariableService } from './hooks/use_variable_service';
+import { useVariables } from './hooks/use_variables';
 
 export const VisualizationEditorPage = ({
   setHeaderActionMenu,
@@ -54,7 +53,7 @@ export const VisualizationEditorPage = ({
     context: { containerInfo, originatingApp },
   } = useInitialContainerContext();
 
-  const { variableService, interpolationService } = useVariableService();
+  const { variableService } = useVariables();
   const { VariablesBar } = dashboard;
 
   const [initialized, setInitialized] = useState(false);
@@ -144,7 +143,6 @@ export const VisualizationEditorPage = ({
   }, [queryBuilder, visualizationBuilderForEditor]);
 
   useHeaderVariants(services, HeaderVariant.APPLICATION);
-  useVariableInterpolation(variableService, interpolationService);
 
   if (isLoading || !initialized) {
     return null;

@@ -68,7 +68,6 @@ jest.mock('../components/visualizations/utils/use_visualization_types', () => ({
 // Mock the visualization container utils
 jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
-  convertMappingsToStrings: jest.fn().mockReturnValue({}),
   isValidMapping: jest.fn().mockReturnValue(true),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
