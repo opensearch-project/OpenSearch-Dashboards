@@ -327,7 +327,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
             spec={s.spec}
             data={s.data}
             styles={styles}
-            name={s.name}
+            name={s.name ?? ''}
             axisColumnMappings={axisColumnMappings}
           />
         </div>

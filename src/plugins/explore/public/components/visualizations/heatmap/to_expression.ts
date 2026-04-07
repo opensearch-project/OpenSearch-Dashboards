@@ -4,7 +4,7 @@
  */
 
 import { HeatmapChartStyle } from './heatmap_vis_config';
-import { VisColumn, AxisColumnMappings, AggregationType } from '../types';
+import { AxisColumnMappings, AggregationType } from '../types';
 import { getSwappedAxisRole } from '../utils/utils';
 import { createHeatmapSeries } from './heatmap_chart_utils';
 
@@ -19,7 +19,6 @@ import { convertTo2DArray, aggregateByGroups, transform } from '../utils/data_tr
 
 export const createRegularHeatmap = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styles: HeatmapChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {

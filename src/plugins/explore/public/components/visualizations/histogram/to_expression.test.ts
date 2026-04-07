@@ -40,7 +40,6 @@ describe('Histogram to_expression', () => {
     it('returns an ECharts spec with dataset, series, and axes', () => {
       const spec = createSingleHistogramChart(
         mockData,
-        [mockNumericalColumn],
         defaultHistogramChartStyles,
         mockAxisColumnMappings
       );
@@ -55,7 +54,6 @@ describe('Histogram to_expression', () => {
     it('produces custom-type series for histogram rendering', () => {
       const spec = createSingleHistogramChart(
         mockData,
-        [mockNumericalColumn],
         defaultHistogramChartStyles,
         mockAxisColumnMappings
       );
@@ -65,9 +63,9 @@ describe('Histogram to_expression', () => {
     });
 
     it('throws when x axis is missing', () => {
-      expect(() =>
-        createSingleHistogramChart(mockData, [mockNumericalColumn], defaultHistogramChartStyles, {})
-      ).toThrow('Missing axis config for Histogram chart');
+      expect(() => createSingleHistogramChart(mockData, defaultHistogramChartStyles, {})).toThrow(
+        'Missing axis config for Histogram chart'
+      );
     });
   });
 
@@ -80,7 +78,6 @@ describe('Histogram to_expression', () => {
     it('returns an ECharts spec with dataset, series, and axes', () => {
       const spec = createNumericalHistogramChart(
         mockData,
-        [mockNumericalColumn, mockNumericalColumn2],
         defaultHistogramChartStyles,
         mockAxisColumnMappings
       );
@@ -95,7 +92,6 @@ describe('Histogram to_expression', () => {
     it('produces custom-type series for histogram rendering', () => {
       const spec = createNumericalHistogramChart(
         mockData,
-        [mockNumericalColumn, mockNumericalColumn2],
         defaultHistogramChartStyles,
         mockAxisColumnMappings
       );
@@ -106,12 +102,7 @@ describe('Histogram to_expression', () => {
 
     it('throws when x axis is missing', () => {
       expect(() =>
-        createNumericalHistogramChart(
-          mockData,
-          [mockNumericalColumn, mockNumericalColumn2],
-          defaultHistogramChartStyles,
-          {}
-        )
+        createNumericalHistogramChart(mockData, defaultHistogramChartStyles, {})
       ).toThrow('Missing axis config for Histogram chart');
     });
   });

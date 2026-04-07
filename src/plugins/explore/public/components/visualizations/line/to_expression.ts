@@ -28,8 +28,6 @@ import {
  */
 export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -70,8 +68,6 @@ export const createSimpleLineChart = (
  */
 export const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -114,9 +110,6 @@ export const createLineBarChart = (
  */
 export const createMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -170,9 +163,6 @@ export const createMultiLineChart = (
  */
 export const createFacetedMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
@@ -230,9 +220,6 @@ export const createFacetedMultiLineChart = (
  */
 export const createCategoryLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
@@ -271,9 +258,6 @@ export const createCategoryLineChart = (
 
 export const createCategoryMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {

@@ -144,23 +144,20 @@ describe('DataViews', () => {
       },
     });
 
-    // Create a normal index patterns
+    // get() is read-only and does not trigger a save
     const pattern = await dataViews.get('foo');
-
-    expect(pattern.version).toBe('fooa');
+    expect(pattern.version).toBe('foo');
     dataViews.clearCache();
 
-    // Create the same one - we're going to handle concurrency
     const samePattern = await dataViews.get('foo');
+    expect(samePattern.version).toBe('foo');
 
-    expect(samePattern.version).toBe('fooaa');
-
-    // This will conflict because samePattern did a save (from refreshFields)
-    // but the resave should work fine
+    // First save succeeds and bumps the version
     pattern.title = 'foo2';
     await dataViews.updateSavedObject(pattern);
+    expect(pattern.version).toBe('fooa');
 
-    // This should not be able to recover
+    // Second save conflicts because samePattern still has the old version
     samePattern.title = 'foo3';
 
     let result;

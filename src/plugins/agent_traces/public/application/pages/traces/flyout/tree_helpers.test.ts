@@ -8,7 +8,6 @@ import {
   buildTreeFromTraceRow,
   flattenTree,
   countSpans,
-  sumTokens,
   parseLatencyMs,
   parseTimestampMs,
   extractTimestamps,
@@ -95,21 +94,6 @@ describe('tree_helpers', () => {
     it('counts all nodes recursively', () => {
       const nodes: TreeNode[] = [makeNode({ children: [makeNode(), makeNode()] }), makeNode()];
       expect(countSpans(nodes)).toBe(4);
-    });
-  });
-
-  describe('sumTokens', () => {
-    it('sums numeric tokens recursively', () => {
-      const nodes: TreeNode[] = [
-        makeNode({ tokens: 5, children: [makeNode({ tokens: 3 })] }),
-        makeNode({ tokens: 2 }),
-      ];
-      expect(sumTokens(nodes)).toBe(10);
-    });
-
-    it('ignores non-numeric tokens', () => {
-      const nodes: TreeNode[] = [makeNode({ tokens: '—' }), makeNode({ tokens: 4 })];
-      expect(sumTokens(nodes)).toBe(4);
     });
   });
 

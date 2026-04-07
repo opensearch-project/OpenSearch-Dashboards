@@ -67,14 +67,7 @@ describe('State Timeline to_expression', () => {
     };
 
     it('returns an ECharts spec with dataset and series', () => {
-      const result = createNumericalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1],
-        [mockTimeColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createNumericalStateTimeline(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
@@ -86,9 +79,6 @@ describe('State Timeline to_expression', () => {
     it('handles title display options', () => {
       const noTitle = createNumericalStateTimeline(
         mockData,
-        [mockNumColumn],
-        [mockCateColumn1],
-        [mockTimeColumn],
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisMappings
       );
@@ -96,9 +86,6 @@ describe('State Timeline to_expression', () => {
 
       const customTitle = createNumericalStateTimeline(
         mockData,
-        [mockNumColumn],
-        [mockCateColumn1],
-        [mockTimeColumn],
         { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Timeline' } },
         mockAxisMappings
       );
@@ -106,16 +93,9 @@ describe('State Timeline to_expression', () => {
     });
 
     it('throws when required fields are missing', () => {
-      expect(() =>
-        createNumericalStateTimeline(
-          mockData,
-          [mockNumColumn],
-          [mockCateColumn1],
-          [mockTimeColumn],
-          mockStyles,
-          {}
-        )
-      ).toThrow('Missing field config for state-timeline chart');
+      expect(() => createNumericalStateTimeline(mockData, mockStyles, {})).toThrow(
+        'Missing field config for state-timeline chart'
+      );
     });
   });
 
@@ -127,14 +107,7 @@ describe('State Timeline to_expression', () => {
     };
 
     it('returns an ECharts spec with dataset and series', () => {
-      const result = createCategoricalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createCategoricalStateTimeline(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
@@ -144,9 +117,6 @@ describe('State Timeline to_expression', () => {
     it('handles title display options', () => {
       const noTitle = createCategoricalStateTimeline(
         mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisMappings
       );
@@ -154,16 +124,9 @@ describe('State Timeline to_expression', () => {
     });
 
     it('throws when required fields are missing', () => {
-      expect(() =>
-        createCategoricalStateTimeline(
-          mockData,
-          [mockNumColumn],
-          [mockCateColumn1, mockCateColumn2],
-          [mockTimeColumn],
-          mockStyles,
-          {}
-        )
-      ).toThrow('Missing field config for state-timeline chart');
+      expect(() => createCategoricalStateTimeline(mockData, mockStyles, {})).toThrow(
+        'Missing field config for state-timeline chart'
+      );
     });
   });
 
@@ -174,14 +137,7 @@ describe('State Timeline to_expression', () => {
     };
 
     it('returns an ECharts spec with dataset and series', () => {
-      const result = createSingleCategoricalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createSingleCategoricalStateTimeline(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
@@ -191,9 +147,6 @@ describe('State Timeline to_expression', () => {
     it('handles title display options', () => {
       const noTitle = createSingleCategoricalStateTimeline(
         mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisMappings
       );
@@ -201,16 +154,9 @@ describe('State Timeline to_expression', () => {
     });
 
     it('throws when required fields are missing', () => {
-      expect(() =>
-        createSingleCategoricalStateTimeline(
-          mockData,
-          [mockNumColumn],
-          [mockCateColumn1, mockCateColumn2],
-          [mockTimeColumn],
-          mockStyles,
-          {}
-        )
-      ).toThrow('Missing field config for single state-timeline chart');
+      expect(() => createSingleCategoricalStateTimeline(mockData, mockStyles, {})).toThrow(
+        'Missing field config for single state-timeline chart'
+      );
     });
   });
 });

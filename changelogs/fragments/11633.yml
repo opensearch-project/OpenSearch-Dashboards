@@ -1,2 +1,0 @@
-fix:
-- Error when faceting data into one group ([#11633](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11633))

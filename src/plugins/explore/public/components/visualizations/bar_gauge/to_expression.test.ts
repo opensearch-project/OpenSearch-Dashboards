@@ -59,14 +59,7 @@ describe('createBarGaugeSpec', () => {
   ];
 
   it('creates an ECharts bar gauge spec with dataset and series', () => {
-    const spec = createBarGaugeSpec(
-      mockTransformedData,
-      [mockNumericalColumn],
-      [mockCategoricalColumn],
-      [],
-      mockStyleOptions,
-      mockAxisColumnMappings
-    );
+    const spec = createBarGaugeSpec(mockTransformedData, mockStyleOptions, mockAxisColumnMappings);
 
     expect(spec).toHaveProperty('dataset');
     expect(spec).toHaveProperty('series');
@@ -74,19 +67,12 @@ describe('createBarGaugeSpec', () => {
   });
 
   it('handles no title', () => {
-    const noTitleStyle = {
+    const noTitleStyle: BarGaugeChartStyle = {
       ...mockStyleOptions,
       titleOptions: { show: false, titleName: '' },
     };
 
-    const spec = createBarGaugeSpec(
-      mockTransformedData,
-      [mockNumericalColumn],
-      [mockCategoricalColumn],
-      [],
-      noTitleStyle,
-      mockAxisColumnMappings
-    );
+    const spec = createBarGaugeSpec(mockTransformedData, noTitleStyle, mockAxisColumnMappings);
 
     expect(spec.title.text).toBeUndefined();
   });

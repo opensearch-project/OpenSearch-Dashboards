@@ -25,8 +25,6 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {

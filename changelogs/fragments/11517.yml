@@ -1,2 +1,0 @@
-fix:
-- [Chat] Auto-load conversation history when content doesn't fill container ([#11517](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11517))

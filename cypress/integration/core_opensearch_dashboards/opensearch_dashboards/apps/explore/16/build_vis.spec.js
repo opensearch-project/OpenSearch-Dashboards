@@ -20,7 +20,7 @@ const datasetId = getRandomizedDatasetId();
 export const runBuildVisTests = () => {
   describe('build visualization manully tests', () => {
     const selectVisualizationType = (type) => {
-      cy.get('[placeholder="Select a visualization type"]').click();
+      cy.getElementByTestId('exploreChartTypeSelector').click();
       cy.get(`button[id="${type}"]`).click();
       cy.wait(500);
     };

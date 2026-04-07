@@ -59,6 +59,7 @@ import {
   MockWorkspacesService,
   TelemetryServiceConstructor,
   MockTelemetryService,
+  MockSetupSessionExpiredInterceptor,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -247,6 +248,15 @@ describe('#setup()', () => {
   it('calls coreApp#setup()', async () => {
     await setupCore();
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls setupSessionExpiredInterceptor with http and notifications', async () => {
+    await setupCore();
+    expect(MockSetupSessionExpiredInterceptor).toHaveBeenCalledTimes(1);
+    expect(MockSetupSessionExpiredInterceptor).toHaveBeenCalledWith(
+      MockHttpService.setup.mock.results[0].value,
+      MockNotificationsService.setup.mock.results[0].value
+    );
   });
 });
 

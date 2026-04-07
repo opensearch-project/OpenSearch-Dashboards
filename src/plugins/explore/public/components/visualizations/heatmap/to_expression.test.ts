@@ -59,12 +59,7 @@ describe('Heatmap to_expression', () => {
     };
 
     it('returns an ECharts spec with dataset, series, and axes', () => {
-      const result = createRegularHeatmap(
-        mockData,
-        mockNumericalColumns,
-        mockStyles,
-        mockAxisColumnMappings
-      );
+      const result = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
@@ -74,12 +69,7 @@ describe('Heatmap to_expression', () => {
     });
 
     it('produces heatmap-type series', () => {
-      const result = createRegularHeatmap(
-        mockData,
-        mockNumericalColumns,
-        mockStyles,
-        mockAxisColumnMappings
-      );
+      const result = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
 
       expect(Array.isArray(result?.series)).toBe(true);
       const heatmapSeries = (result?.series ?? []).filter((s: any) => s.type === 'heatmap');
@@ -89,7 +79,6 @@ describe('Heatmap to_expression', () => {
     it('handles title display options', () => {
       const noTitleResult = createRegularHeatmap(
         mockData,
-        mockNumericalColumns,
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
@@ -97,7 +86,6 @@ describe('Heatmap to_expression', () => {
 
       const defaultTitleResult = createRegularHeatmap(
         mockData,
-        mockNumericalColumns,
         { ...mockStyles, titleOptions: { show: true, titleName: '' } },
         mockAxisColumnMappings
       );
@@ -105,7 +93,6 @@ describe('Heatmap to_expression', () => {
 
       const customTitleResult = createRegularHeatmap(
         mockData,
-        mockNumericalColumns,
         { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Heatmap' } },
         mockAxisColumnMappings
       );
@@ -113,7 +100,7 @@ describe('Heatmap to_expression', () => {
     });
 
     it('throws when axis config is missing', () => {
-      expect(() => createRegularHeatmap(mockData, mockNumericalColumns, mockStyles, {})).toThrow(
+      expect(() => createRegularHeatmap(mockData, mockStyles, {})).toThrow(
         'Missing axis config for heatmap chart'
       );
     });

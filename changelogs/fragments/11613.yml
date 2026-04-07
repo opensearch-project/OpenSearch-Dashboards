@@ -1,2 +1,0 @@
-fix:
-- Vis editor should not import empty state component from legacy discover ([#11613](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11613))
