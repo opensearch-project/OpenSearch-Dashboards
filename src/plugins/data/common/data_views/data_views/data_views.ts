@@ -175,45 +175,9 @@ export class DataViewsService {
         }
 
         const spec = this.savedObjectToSpec(savedObject);
-        const { title, type, typeMeta, dataSourceRef } = spec;
         const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
           ? JSON.parse(savedObject.attributes.fieldFormatMap)
           : {};
-
-        const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-        let isSaveRequired = isFieldRefreshRequired;
-        try {
-          spec.fields = isFieldRefreshRequired
-            ? await this.refreshFieldSpecMap(
-                spec.fields || {},
-                savedObject.id,
-                spec.title as string,
-                {
-                  pattern: title,
-                  metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-                  type,
-                  params: typeMeta && typeMeta.params,
-                  dataSourceId: dataSourceRef?.id,
-                }
-              )
-            : spec.fields;
-        } catch (err) {
-          isSaveRequired = false;
-          if (err instanceof DataViewMissingIndices) {
-            this.onNotification({
-              title: (err as any).message,
-              color: 'danger',
-              iconType: 'alert',
-            });
-          } else {
-            this.onError(err, {
-              title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-                defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-                values: { id: savedObject.id, title },
-              }),
-            });
-          }
-        }
 
         Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
           const field = spec.fields?.[fieldName];
@@ -224,23 +188,6 @@ export class DataViewsService {
 
         const dataView = await this.create(spec, true);
         this.patterns.saveToCache(savedObject.id, dataView);
-
-        if (isSaveRequired) {
-          try {
-            this.updateSavedObject(dataView);
-          } catch (err) {
-            this.onError(err, {
-              title: i18n.translate('data.dataViews.fetchFieldSaveErrorTitle', {
-                defaultMessage:
-                  'Error saving after fetching fields for data view {title} (ID: {id})',
-                values: {
-                  id: dataView.id,
-                  title: dataView.title,
-                },
-              }),
-            });
-          }
-        }
 
         if (dataView.isUnsupportedTimePattern()) {
           this.onUnsupportedTimePattern({
@@ -388,22 +335,6 @@ export class DataViewsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: DataViewFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
@@ -458,39 +389,6 @@ export class DataViewsService {
         }),
       });
     }
-  };
-
-  /**
-   * Refreshes a field list from a spec before an data view instance is created
-   * @param fields
-   * @param id
-   * @param title
-   * @param options
-   */
-  private refreshFieldSpecMap = async (
-    fields: DataViewFieldMap,
-    id: string,
-    title: string,
-    options: DataViewGetFieldsOptions
-  ) => {
-    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
-    try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
-    } catch (err) {
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-        return {};
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id, title },
-        }),
-      });
-    }
-    return fields;
   };
 
   /**
@@ -607,40 +505,9 @@ export class DataViewsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta, dataSourceRef } = spec;
     const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
-    try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: typeMeta && typeMeta.params,
-            dataSourceId: dataSourceRef?.id,
-          })
-        : spec.fields;
-    } catch (err) {
-      isSaveRequired = false;
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification({
-          title: (err as any).message,
-          color: 'danger',
-          iconType: 'alert',
-        });
-      } else {
-        this.onError(err, {
-          title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id, title },
-          }),
-        });
-      }
-    }
 
     Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
       const field = spec.fields?.[fieldName];
@@ -651,21 +518,6 @@ export class DataViewsService {
 
     const dataView = await this.create(spec, true);
     this.patterns.saveToCache(id, dataView);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(dataView);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.dataViews.fetchFieldSaveErrorTitle', {
-            defaultMessage: 'Error saving after fetching fields for data view {title} (ID: {id})',
-            values: {
-              id: dataView.id,
-              title: dataView.title,
-            },
-          }),
-        });
-      }
-    }
 
     if (dataView.isUnsupportedTimePattern()) {
       this.onUnsupportedTimePattern({
