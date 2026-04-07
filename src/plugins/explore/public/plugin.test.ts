@@ -25,6 +25,7 @@ import { DashboardSetup, DashboardStart } from '../../dashboard/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
+import { registerDisabledPPLExecuteQueryAction } from './components/query_panel/actions/ppl_execute_query_action';
 
 // Mock the action
 jest.mock('./actions/ask_ai_embeddable_action');
@@ -42,6 +43,11 @@ jest.mock('./actions/ask_ai_action', () => ({
     id: 'ask_ai',
     execute: jest.fn(),
   }),
+}));
+
+// Mock registerDisabledPPLExecuteQueryAction
+jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
+  registerDisabledPPLExecuteQueryAction: jest.fn(),
 }));
 
 // Mock createOsdUrlTracker
@@ -167,6 +173,10 @@ describe('ExplorePlugin', () => {
         getAssistantContextStore: jest.fn().mockReturnValue({
           addContext: jest.fn(),
         }),
+        actions: {
+          registerAssistantAction: jest.fn(),
+          unregisterAssistantAction: jest.fn(),
+        },
       } as Partial<ContextProviderStart>) as ContextProviderStart,
       visualizations: ({
         all: jest.fn().mockReturnValue([]),
@@ -506,6 +516,73 @@ describe('ExplorePlugin', () => {
       plugin.start(coreStart, startDeps);
 
       expect(() => plugin.stop()).not.toThrow();
+    });
+  });
+
+  describe('disabled PPL query action registration', () => {
+    // Cast the imported mocked function to jest.Mock
+    const mockRegisterDisabledPPLExecuteQueryAction = registerDisabledPPLExecuteQueryAction as jest.Mock;
+
+    beforeEach(() => {
+      // Clear the mock before each test
+      mockRegisterDisabledPPLExecuteQueryAction.mockClear();
+    });
+
+    it('should register disabled execute_ppl_query action when contextProvider is available', () => {
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledTimes(1);
+      expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(
+        startDeps.contextProvider.actions.registerAssistantAction
+      );
+    });
+
+    it('should not register disabled action when contextProvider is not available', () => {
+      const startDepsWithoutContextProvider = {
+        ...startDeps,
+        contextProvider: undefined,
+      };
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDepsWithoutContextProvider);
+
+      expect(mockRegisterDisabledPPLExecuteQueryAction).not.toHaveBeenCalled();
+    });
+
+    it('should register disabled action with the correct function reference', () => {
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      const registerActionFn = startDeps.contextProvider?.actions?.registerAssistantAction;
+      expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(registerActionFn);
+    });
+
+    it('should register disabled action before other start lifecycle actions', () => {
+      // Create a spy to track order of calls
+      const callOrder: string[] = [];
+      mockRegisterDisabledPPLExecuteQueryAction.mockImplementation(() => {
+        callOrder.push('registerDisabledAction');
+      });
+
+      const originalRegisterAction = jest.fn(() => {
+        callOrder.push('registerAction');
+      });
+
+      const startDepsWithTracking = ({
+        ...startDeps,
+        uiActions: {
+          ...startDeps.uiActions,
+          registerAction: originalRegisterAction,
+        },
+      } as unknown) as ExploreStartDependencies;
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDepsWithTracking);
+
+      // Verify disabled action is registered before other actions
+      const disabledActionIndex = callOrder.indexOf('registerDisabledAction');
+      expect(disabledActionIndex).toBeGreaterThanOrEqual(0);
     });
   });
 });

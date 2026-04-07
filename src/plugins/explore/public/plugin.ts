@@ -85,6 +85,7 @@ import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
+import { registerDisabledPPLExecuteQueryAction } from './components/query_panel/actions/ppl_execute_query_action';
 
 export class ExplorePlugin
   implements
@@ -698,6 +699,14 @@ export class ExplorePlugin
       const askAIEmbeddableAction = new AskAIEmbeddableAction(core, plugins.contextProvider);
       plugins.uiActions.registerAction(askAIEmbeddableAction);
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
+    }
+
+    // Register disabled execute_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
+    if (plugins.contextProvider) {
+      registerDisabledPPLExecuteQueryAction(
+        plugins.contextProvider.actions.registerAssistantAction
+      );
     }
 
     const savedExploreLoader = createSavedExploreLoader({

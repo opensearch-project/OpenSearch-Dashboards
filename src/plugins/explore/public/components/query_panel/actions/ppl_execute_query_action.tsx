@@ -4,6 +4,7 @@
  */
 
 import { useDispatch } from 'react-redux';
+import { useUnmount } from 'react-use';
 import { AppDispatch } from '../../../application/utils/state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -22,6 +23,65 @@ interface PPLExecuteQueryArgs {
 
 const NOOP_ASSISTANT_ACTION_HOOK = (_action: any) => {};
 
+// Shared tool definition for execute_ppl_query action
+export const EXECUTE_PPL_QUERY_TOOL_DEFINITION = {
+  name: 'execute_ppl_query',
+  description:
+    'Updates the query bar with a PPL query and executes it in the UI. IMPORTANT: This tool only updates the visual query interface and returns execution status (success/failure) - it does NOT return the actual query results or data. Use this tool when you want to help the user visualize data in the Explore interface. If you need to retrieve actual data for analysis or generating reports, use backend data retrieval tools instead, and make sure to pass the same time range (from/to) to those backend tools for consistent results. The query should NOT contain time filters - use the from/to parameters to specify the time range.',
+  parameters: {
+    type: 'object' as const,
+    properties: {
+      query: {
+        type: 'string',
+        description: 'The PPL query to set in the query bar (without time filters)',
+      },
+      autoExecute: {
+        type: 'boolean',
+        description: 'Whether to automatically execute the query (default: true)',
+      },
+      description: {
+        type: 'string',
+        description: 'Optional description of what the query does',
+      },
+      from: {
+        type: 'string',
+        description:
+          'Start time for the time range (e.g., "now-1h", "now-7d", "2024-01-01"). If provided, the time range will be updated.',
+      },
+      to: {
+        type: 'string',
+        description:
+          'End time for the time range (e.g., "now", "2024-01-31"). If provided along with from, the time range will be updated.',
+      },
+    },
+    required: ['query'],
+  },
+};
+
+// Helper function to register the disabled version of the action
+export function registerDisabledPPLExecuteQueryAction(
+  registerAction: (action: any) => void | undefined
+) {
+  if (!registerAction) return;
+
+  registerAction({
+    ...EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+    available: 'disabled',
+    handler: async () => {
+      return {
+        success: false,
+        error: 'STOP: Tool not available - context has changed',
+        message:
+          'IMPORTANT: The execute_ppl_query tool is no longer available because the user has navigated away from the query panel. ' +
+          'Do not attempt to use any more tools. Instead, please respond directly to the user explaining that you cannot complete this action ' +
+          'because they are no longer in the query panel context. Suggest they navigate to the Logs, Traces, or Metrics explorer view if they want to execute queries.',
+        stop_tool_execution: true,
+        context_lost: true,
+      };
+    },
+  });
+}
+
 export function usePPLExecuteQueryAction(
   setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>
 ) {
@@ -31,37 +91,7 @@ export function usePPLExecuteQueryAction(
     services.contextProvider?.hooks?.useAssistantAction || NOOP_ASSISTANT_ACTION_HOOK;
 
   useAssistantAction<PPLExecuteQueryArgs>({
-    name: 'execute_ppl_query',
-    description:
-      'Updates the query bar with a PPL query and executes it in the UI. IMPORTANT: This tool only updates the visual query interface and returns execution status (success/failure) - it does NOT return the actual query results or data. Use this tool when you want to help the user visualize data in the Explore interface. If you need to retrieve actual data for analysis or generating reports, use backend data retrieval tools instead, and make sure to pass the same time range (from/to) to those backend tools for consistent results. The query should NOT contain time filters - use the from/to parameters to specify the time range.',
-    parameters: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'The PPL query to set in the query bar (without time filters)',
-        },
-        autoExecute: {
-          type: 'boolean',
-          description: 'Whether to automatically execute the query (default: true)',
-        },
-        description: {
-          type: 'string',
-          description: 'Optional description of what the query does',
-        },
-        from: {
-          type: 'string',
-          description:
-            'Start time for the time range (e.g., "now-1h", "now-7d", "2024-01-01"). If provided, the time range will be updated.',
-        },
-        to: {
-          type: 'string',
-          description:
-            'End time for the time range (e.g., "now", "2024-01-31"). If provided along with from, the time range will be updated.',
-        },
-      },
-      required: ['query'],
-    },
+    ...EXECUTE_PPL_QUERY_TOOL_DEFINITION,
     handler: async (args: any) => {
       try {
         const shouldExecute = args.autoExecute !== false;
@@ -141,5 +171,14 @@ export function usePPLExecuteQueryAction(
         };
       }
     },
+  });
+
+  // Cleanup: restore the disabled version when component unmounts
+  useUnmount(() => {
+    // Re-register the disabled version on unmount
+    const registerAction = services.contextProvider?.actions?.registerAssistantAction;
+    if (registerAction) {
+      registerDisabledPPLExecuteQueryAction(registerAction);
+    }
   });
 }
