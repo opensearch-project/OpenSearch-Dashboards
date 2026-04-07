@@ -50,6 +50,10 @@ export interface ShowNewVisModalParams {
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
+  containerInfo?: {
+    containerId: string;
+    containerName: string;
+  };
 }
 
 /**
@@ -62,6 +66,7 @@ export function showNewVisModal({
   onClose,
   originatingApp,
   outsideVisualizeApp,
+  containerInfo,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   const root = createRoot(container);
@@ -93,6 +98,7 @@ export function showNewVisModal({
         usageCollection={getUsageCollector()}
         application={getApplication()}
         data={getDataStart()}
+        containerInfo={containerInfo}
       />
     </I18nProvider>
   );

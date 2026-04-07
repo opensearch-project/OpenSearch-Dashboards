@@ -42,7 +42,12 @@ export const RightStyleOptionsPanel = () => {
     );
   }
   return (
-    <EuiPanel paddingSize="s" style={{ height: '100%' }} borderRadius="none" hasShadow={false}>
+    <EuiPanel
+      paddingSize="s"
+      style={{ height: '100%', overflow: 'auto' }}
+      borderRadius="none"
+      hasShadow={false}
+    >
       {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
     </EuiPanel>
   );
