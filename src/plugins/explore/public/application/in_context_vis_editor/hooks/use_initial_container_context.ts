@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { getServices } from '../../../services/services';
-import { ContainerState, CONTAINER_URL_KEY } from '../utils';
+import { ContainerState, CONTAINER_URL_KEY } from '../types';
 
 export const useInitialContainerContext = () => {
   const [context, setContext] = useState<ContainerState>({

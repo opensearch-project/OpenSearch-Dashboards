@@ -21,7 +21,7 @@ import { TopNav } from './component/top_nav';
 import { useHeaderVariants } from '../utils/hooks/use_header_variants';
 import './visualization_editor.scss';
 
-import { RightStyleOptionsPanel } from './component/visualization_editor__right_container';
+import { RightStyleOptionsPanel } from './component/visualization_editor_right_container';
 import { useQueryBuilderState } from './hooks/use_query_builder_state';
 import { useVisualizationBuilder } from './hooks/use_visualization_builder';
 import { syncQueryStateWithUrl } from '../../../../data/public';
