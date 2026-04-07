@@ -44,6 +44,7 @@ import {
   EmbeddableInput,
   Container,
 } from '../..';
+import { ContainerInfo } from '../state_transfer';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -124,6 +125,17 @@ export class EditPanelAction implements Action<ActionContext> {
     }
   }
 
+  private getContainerState({ embeddable }: ActionContext): ContainerInfo | undefined {
+    const container = embeddable ? embeddable.getRoot() : undefined;
+
+    if (container) {
+      return {
+        containerName: container.getTitle() ?? '',
+        containerId: container.id,
+      };
+    }
+  }
+
   public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
@@ -134,6 +146,7 @@ export class EditPanelAction implements Action<ActionContext> {
           originatingApp: this.currentAppId,
           valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
           embeddableId: embeddable.id,
+          containerInfo: this.getContainerState({ embeddable }),
         };
         return { app, path, state };
       }
