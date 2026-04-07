@@ -89,7 +89,7 @@ function validateNode(
 
   // oneOf
   if (schema.oneOf) {
-    const variants = schema.oneOf as Record<string, unknown>[];
+    const variants = schema.oneOf as Array<Record<string, unknown>>;
     const matchCount = variants.filter((variant) => {
       const subErrors: SchemaValidationError[] = [];
       validateNode(value, variant, path, rootSchema, schemaMap, subErrors);
@@ -103,9 +103,7 @@ function validateNode(
 
   // Type check
   if (schema.type !== undefined) {
-    const types = Array.isArray(schema.type)
-      ? (schema.type as string[])
-      : [schema.type as string];
+    const types = Array.isArray(schema.type) ? (schema.type as string[]) : [schema.type as string];
     if (!matchesType(value, types)) {
       errors.push({ path, message: `must be ${types.join(' or ')}` });
       return; // skip deeper checks on type mismatch
@@ -186,14 +184,7 @@ function validateNode(
       const addPropSchema = additionalProperties as Record<string, unknown>;
       for (const key of Object.keys(obj)) {
         if (!(key in properties)) {
-          validateNode(
-            obj[key],
-            addPropSchema,
-            `${path}/${key}`,
-            rootSchema,
-            schemaMap,
-            errors
-          );
+          validateNode(obj[key], addPropSchema, `${path}/${key}`, rootSchema, schemaMap, errors);
         }
       }
     }
@@ -287,6 +278,15 @@ export class SavedObjectSchemaRegistry implements ISavedObjectSchemaRegistry {
   /** @inheritdoc */
   getVersions(type: string): string[] {
     return this.definitions.filter((d) => d.type === type).map((d) => d.version);
+  }
+
+  /**
+   * Dynamically register a schema at runtime. Used by tests and dynamic schema injection.
+   */
+  registerSchema(type: string, version: string, schemaJson: Record<string, unknown>): void {
+    const key = `${type}/${version}`;
+    this.schemaKeyMap.set(key, schemaJson);
+    this.definitions.push({ type, version, schema: schemaJson });
   }
 
   /**

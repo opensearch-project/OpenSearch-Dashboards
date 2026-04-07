@@ -1,17 +1,13 @@
 * [Home](/)
 
-  - Dashboards-as-Code
-    - [Overview](dashboards-as-code/README.md)
-    - [Getting Started](dashboards-as-code/getting-started.md)
-    - [CLI Reference](dashboards-as-code/cli-reference.md)
-    - [SDK Reference](dashboards-as-code/sdk-reference.md)
-    - [API Reference](dashboards-as-code/api-reference.md)
-    - [Managed Objects](dashboards-as-code/managed-objects.md)
-    - [CI/CD Integration](dashboards-as-code/cicd-integration.md)
   - Capabilities
     - [Read_only_mode](capabilities/read_only_mode.md)
   - Charts
     - [Current_usage](charts/current_usage.md)
+  - [Dashboards as code](dashboards-as-code/README.md)
+  - Design
+    - [Openapi client generation](design/openapi-client-generation.md)
+    - [Perses compatibility layer](design/perses-compatibility-layer.md)
   - Docker dev
     - [Docker dev setup manual](docker-dev/docker-dev-setup-manual.md)
   - Multi datasource
@@ -31,6 +27,9 @@
       - [Explore plugin components](plugins/explore/explore-plugin-components.md)
       - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
+  - Requirements
+    - [RFC](requirements/RFC.md)
+    - [Dashboards as code requirements](requirements/dashboards-as-code-requirements.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry

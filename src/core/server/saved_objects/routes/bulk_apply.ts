@@ -80,7 +80,7 @@ export const registerBulkApplyRoute = (router: IRouter, config: SavedObjectConfi
         return res.badRequest({
           body: {
             message: 'Validation failed for one or more resources',
-            errors: validationErrors,
+            attributes: { errors: validationErrors },
           },
         });
       }
@@ -91,7 +91,7 @@ export const registerBulkApplyRoute = (router: IRouter, config: SavedObjectConfi
         return res.badRequest({
           body: {
             message: 'Circular dependency detected among resources',
-            circular: dependencyResult.circular,
+            attributes: { circular: dependencyResult.circular },
           },
         });
       }
@@ -181,7 +181,7 @@ export const registerBulkApplyRoute = (router: IRouter, config: SavedObjectConfi
         return res.badRequest({
           body: {
             message: 'Apply failed: one or more resources had errors',
-            results,
+            attributes: { results },
           },
         });
       }

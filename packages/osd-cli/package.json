@@ -14,12 +14,11 @@
   },
   "dependencies": {
     "@osd/dashboards-sdk": "0.1.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.1"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
+    "@types/jest": "^28.1.8",
     "@types/js-yaml": "^4.0.5",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^25.5.0"
+    "@types/node": "~20.10.5"
   }
 }

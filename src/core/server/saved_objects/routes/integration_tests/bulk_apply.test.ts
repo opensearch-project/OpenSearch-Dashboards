@@ -51,7 +51,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'new-pattern',
           type: 'index-pattern',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
@@ -191,7 +191,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'new-1',
           type: 'search',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
@@ -256,7 +256,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'new-1',
           type: 'index-pattern',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
@@ -311,7 +311,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
       .expect(400);
 
     expect(result.body.message).toBe('Apply failed: one or more resources had errors');
-    expect(result.body.results).toEqual([
+    expect(result.body.attributes.results).toEqual([
       {
         type: 'index-pattern',
         id: 'existing-1',
@@ -329,7 +329,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'new-1',
           type: 'index-pattern',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
@@ -374,7 +374,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'new-search',
           type: 'search',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
@@ -425,14 +425,14 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
           {
             id: 'vis-1',
             type: 'visualization',
-            error: { statusCode: 404, message: 'Not found' },
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
             attributes: {},
             references: [],
           },
           {
             id: 'dash-1',
             type: 'dashboard',
-            error: { statusCode: 404, message: 'Not found' },
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
             attributes: {},
             references: [],
           },
@@ -508,7 +508,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         .expect(400);
 
       expect(result.body.message).toBe('Circular dependency detected among resources');
-      expect(result.body.circular).toEqual(expect.arrayContaining(['vis-a', 'vis-b']));
+      expect(result.body.attributes.circular).toEqual(expect.arrayContaining(['vis-a', 'vis-b']));
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
@@ -518,14 +518,14 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
           {
             id: 'ip-1',
             type: 'index-pattern',
-            error: { statusCode: 404, message: 'Not found' },
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
             attributes: {},
             references: [],
           },
           {
             id: 'ip-2',
             type: 'index-pattern',
-            error: { statusCode: 404, message: 'Not found' },
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
             attributes: {},
             references: [],
           },
@@ -580,14 +580,14 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
         {
           id: 'good-1',
           type: 'index-pattern',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
         {
           id: 'bad-1',
           type: 'search',
-          error: { statusCode: 404, message: 'Not found' },
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
           attributes: {},
           references: [],
         },
@@ -606,7 +606,7 @@ describe('POST /api/saved_objects/_bulk_apply', () => {
           type: 'search',
           attributes: {},
           references: [],
-          error: { statusCode: 403, message: 'Permission denied' },
+          error: { statusCode: 403, error: 'Forbidden', message: 'Permission denied' },
         },
       ],
     });

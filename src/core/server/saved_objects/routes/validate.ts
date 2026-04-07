@@ -24,6 +24,18 @@ export function getSchemaRegistry(): SavedObjectSchemaRegistry {
   return registry;
 }
 
+/**
+ * Register a JSON Schema for testing or dynamic schema injection.
+ * This adds a schema to the shared registry keyed by type and version.
+ */
+export function registerSchema(
+  type: string,
+  version: string,
+  schemaJson: Record<string, unknown>
+): void {
+  registry.registerSchema(type, version, schemaJson);
+}
+
 export const registerValidateRoute = (router: IRouter) => {
   router.post(
     {
@@ -69,9 +81,7 @@ export const registerValidateRoute = (router: IRouter) => {
       const warnings: string[] = [];
 
       if (versions.length === 0) {
-        warnings.push(
-          `No JSON Schema registered for type "${type}". Skipping schema validation.`
-        );
+        warnings.push(`No JSON Schema registered for type "${type}". Skipping schema validation.`);
         return res.ok({
           body: { valid: true, warnings },
         });

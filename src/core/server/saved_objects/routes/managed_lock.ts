@@ -94,11 +94,15 @@ export const registerManagedLockRoute = (router: IRouter) => {
         });
       }
 
-      // Remove the managed-by label
+      // Remove the managed-by label.
+      // We must explicitly set 'managed-by' to null because the saved objects
+      // client uses OpenSearch's partial doc update, which deep-merges nested
+      // objects. Simply omitting the key would leave it in place.
       const { 'managed-by': _, ...remainingLabels } = labels;
+      const updatedLabels: Record<string, unknown> = { ...remainingLabels, 'managed-by': null };
       const updatedAttributes = {
         ...attributes,
-        labels: Object.keys(remainingLabels).length > 0 ? remainingLabels : undefined,
+        labels: updatedLabels,
       };
 
       // Persist the update
