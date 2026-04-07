@@ -76,6 +76,10 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
+      labels: {
+        type: 'object',
+        dynamic: true,
+      },
     },
   },
   migrations: dashboardSavedObjectTypeMigrations,
