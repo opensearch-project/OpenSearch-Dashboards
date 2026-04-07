@@ -165,6 +165,7 @@ describe('useQueryPanelEditor', () => {
       trigger: jest.fn(),
       focus: jest.fn(),
       getContentHeight: jest.fn(() => 50),
+      getDomNode: jest.fn(() => ({ parentElement: { clientHeight: 100 } })),
       getLayoutInfo: jest.fn(() => ({ width: 800 })),
       layout: jest.fn(),
       updateOptions: jest.fn(),
