@@ -41,6 +41,8 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Ruchi Sharma              | [ruchidh](https://github.com/ruchidh)               | Amazon      |
 | Sumukh Swamy              | [sumukhswamy](https://github.com/sumukhswamy)       | Amazon      |
 | Paul Sebastian            | [paulstn](https://github.com/paulstn)               | Amazon      |
+| Qianxi Yang               | [Qxisylolo](https://github.com/Qxisylolo)           | Amazon      |
+| Yubo Luo                  | [yubonluo](https://github.com/yubonluo)             | Amazon      |
 
 ## Emeritus
 
