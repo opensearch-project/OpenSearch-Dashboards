@@ -63,12 +63,12 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
     return () => clearTimeout(timer);
   }, []);
 
-  console.log(queryPanelSize, 'queryPanelSize');
+  // console.log(queryPanelSize, 'queryPanelSize');
 
   const size = queryPanelSize ?? QUERY_PANEL_FALLBACK_SIZE;
   const minSize = queryPanelSize != null ? `${queryPanelSize}%` : '5%';
 
-  console.log(size, minSize, 'size', 'minSize');
+  // console.log(size, minSize, 'size', 'minSize');
 
   return (
     <div ref={containerRef} className="exploreResizableQueryContainer__wrapper">

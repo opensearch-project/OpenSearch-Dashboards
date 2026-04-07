@@ -6,6 +6,7 @@
 .exploreResizableQueryContainer {
     flex: 1;
     min-height: 0;
+    gap: $ouiSizeXS;
 
     &__wrapper {
         flex: 1;
@@ -16,7 +17,6 @@
 
     &__queryPanel {
         overflow: hidden;
-        margin-bottom: 10px;
     }
 
     &__queryPanelInner {
@@ -59,13 +59,10 @@
         z-index: $ouiZLevel1;
         cursor: row-resize;
         height: $ouiSize;
-        background-color: $ouiColorLightestShade;
+        background: none;
         border: none;
-        border-top: 1px solid $ouiBorderColor;
-        border-bottom: 1px solid $ouiBorderColor;
         padding: 0;
         width: 100%;
-        margin-top: 10px;
 
         &::before,
         &::after {
@@ -134,6 +131,5 @@
 
     &__contentPanel {
         min-height: 0;
-        margin-top: 10px;
     }
 }
