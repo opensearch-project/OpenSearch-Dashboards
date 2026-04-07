@@ -164,7 +164,18 @@ export class QueryBuilder {
     );
 
     if (queryEditorStateFromUrl?.languageType) {
-      this.updateQueryEditorState(queryEditorStateFromUrl);
+      this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
+    }
+
+    // read isQueryEditorDirty from url to prevent losing state after reloading page
+    // only update when isQueryEditorDirty is true
+    if (
+      queryEditorStateFromUrl?.isQueryEditorDirty &&
+      typeof queryEditorStateFromUrl?.isQueryEditorDirty === 'boolean'
+    ) {
+      this.updateQueryEditorState({
+        isQueryEditorDirty: queryEditorStateFromUrl.isQueryEditorDirty,
+      });
     }
 
     const finalQuery = queryStateFromUrl?.query ?? options?.savedQueryState?.query ?? '';
@@ -192,7 +203,9 @@ export class QueryBuilder {
   startUrlSync() {
     const urlSync = combineLatest([
       this.queryState$,
-      this.queryEditorState$.pipe(map((s) => ({ languageType: s.languageType }))),
+      this.queryEditorState$.pipe(
+        map((s) => ({ languageType: s.languageType, isQueryEditorDirty: s.isQueryEditorDirty }))
+      ),
     ])
       .pipe(debounceTime(500))
       .subscribe(([queryState, editorState]) => {

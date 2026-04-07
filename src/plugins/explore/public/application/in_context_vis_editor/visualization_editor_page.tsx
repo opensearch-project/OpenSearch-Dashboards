@@ -26,6 +26,8 @@ import { useQueryBuilderState } from './hooks/use_query_builder_state';
 import { useVisualizationBuilder } from './hooks/use_visualization_builder';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
+import { getBreadcrumbs } from './utils';
+import { useInitialContainerContext } from './hooks/use_initial_container_context';
 
 export const VisualizationEditorPage = ({
   setHeaderActionMenu,
@@ -33,9 +35,22 @@ export const VisualizationEditorPage = ({
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const {
+    core: { application },
+    scopedHistory,
+    chrome,
+    osdUrlStateStorage,
+    data,
+    embeddable,
+  } = services;
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
   const { queryBuilder } = useQueryBuilderState();
   const { visualizationBuilderForEditor } = useVisualizationBuilder();
+
+  const {
+    context: { containerInfo, originatingApp },
+  } = useInitialContainerContext();
+
   const [initialized, setInitialized] = useState(false);
 
   const {
@@ -52,18 +67,23 @@ export const VisualizationEditorPage = ({
 
       if (error) {
         // return to default path
-        services.scopedHistory?.push('/#');
+        scopedHistory?.push('/#');
       }
       if (savedExplore?.id) {
-        services.chrome.docTitle.change(savedExplore.title);
+        chrome.docTitle.change(savedExplore.title);
 
-        services.chrome.recentlyAccessed.add(
+        chrome.recentlyAccessed.add(
           `/app/${VISUALIZATION_EDITOR_APP_ID}/#/edit/${savedExplore.id}`,
           savedExplore.title,
           savedExplore.id,
           { type: 'explore' }
         );
       }
+
+      chrome.setBreadcrumbs([
+        ...getBreadcrumbs(application.navigateToApp, embeddable, originatingApp, containerInfo),
+        { text: savedExplore?.title },
+      ]);
 
       if (savedVisConfig) {
         visualizationBuilderForEditor.setVisConfig({
@@ -84,39 +104,38 @@ export const VisualizationEditorPage = ({
       setInitialized(true);
     };
     init();
-    return () => {
-      queryBuilder.reset();
-      visualizationBuilderForEditor.reset();
-    };
   }, [
-    services.scopedHistory,
+    embeddable,
+    containerInfo,
+    originatingApp,
+    application?.navigateToApp,
+    scopedHistory,
     error,
-    services.chrome,
+    chrome,
     isLoading,
     savedExplore,
     queryBuilder,
     savedVisConfig,
     savedQueryState,
     visualizationBuilderForEditor,
-    services.chrome.docTitle,
-    services.chrome.recentlyAccessed,
   ]);
 
   useEffect(() => {
     // syncs `_g` timeRange of url with query services
-    if (!services.osdUrlStateStorage) return;
-    const { stop } = syncQueryStateWithUrl(services.data.query, services.osdUrlStateStorage);
+    if (!osdUrlStateStorage) return;
+    const { stop } = syncQueryStateWithUrl(data.query, osdUrlStateStorage);
 
     return () => {
       stop();
     };
-  }, [
-    services.osdUrlStateStorage,
-    queryBuilder.queryEditorState$,
-    services.data.query,
-    visualizationBuilderForEditor.visConfig$,
-    queryBuilder.queryState$,
-  ]);
+  }, [osdUrlStateStorage, data.query]);
+
+  useEffect(() => {
+    return () => {
+      queryBuilder.reset();
+      visualizationBuilderForEditor.reset();
+    };
+  }, [queryBuilder, visualizationBuilderForEditor]);
 
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 

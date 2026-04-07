@@ -188,6 +188,10 @@ export const getNavActions = (
               ),
             });
           },
+          containerInfo: {
+            containerId: currentContainer.id,
+            containerName: currentContainer.getTitle(),
+          },
         });
       }
     };

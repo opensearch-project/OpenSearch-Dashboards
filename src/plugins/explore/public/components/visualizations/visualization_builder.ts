@@ -60,8 +60,16 @@ export class VisualizationBuilder {
     // Read state from url
     const urlStateStorage = this.getUrlStateStorage?.();
     if (urlStateStorage) {
-      const urlState = urlStateStorage.get<VisState>('_v');
-      state = { ...state, ...urlState };
+      const urlState = urlStateStorage.get<VisState & { isVisDirty: boolean }>('_v');
+
+      if (urlState) {
+        const { isVisDirty, ...visState } = urlState;
+        state = { ...state, ...visState };
+
+        // sync url isVisDirty state to visualization builder
+        // this is to track user's modification after reloading page
+        if (typeof isVisDirty === 'boolean' && isVisDirty) this.isVisDirty$.next(isVisDirty);
+      }
     }
 
     // update visualization state accordingly
@@ -80,14 +88,17 @@ export class VisualizationBuilder {
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      combineLatest([this.visConfig$])
+      combineLatest([this.visConfig$, this.isVisDirty$])
         .pipe(debounceTime(500))
-        .subscribe(([visConfig]) =>
-          this.syncToUrl({
-            chartType: visConfig?.type,
-            axesMapping: visConfig?.axesMapping,
-            styleOptions: visConfig?.styles,
-          })
+        .subscribe(([visConfig, isVisDirty]) =>
+          this.syncToUrl(
+            {
+              chartType: visConfig?.type,
+              axesMapping: visConfig?.axesMapping,
+              styleOptions: visConfig?.styles,
+            },
+            isVisDirty
+          )
         ),
       this.data$.subscribe((data) => this.onDataChange(data))
     );
@@ -318,10 +329,11 @@ export class VisualizationBuilder {
     }
   }
 
-  syncToUrl<State>(visState: VisState) {
+  syncToUrl<State>(visState: VisState, isVisDirty?: boolean) {
     const urlStateStorage = this.getUrlStateStorage?.();
+
     if (urlStateStorage) {
-      urlStateStorage.set('_v', visState, { replace: true });
+      urlStateStorage.set('_v', { ...visState, isVisDirty }, { replace: true });
     }
   }
 
