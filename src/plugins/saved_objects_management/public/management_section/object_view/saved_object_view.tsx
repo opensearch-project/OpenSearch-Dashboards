@@ -30,7 +30,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiSpacer, EuiPageContent, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiPageContent, EuiTitle, EuiCallOut } from '@elastic/eui';
 import {
   ApplicationStart,
   SavedObjectsClientContract,
@@ -41,7 +41,7 @@ import {
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp } from '../../lib';
+import { canViewInApp, isManagedObject } from '../../lib';
 import { SubmittedFormData } from '../types';
 import { UiActionsStart } from '../../../../ui_actions/public';
 import { SAVED_OBJECT_DELETE_TRIGGER } from '../../triggers';
@@ -113,11 +113,15 @@ export class SavedObjectEdition extends Component<
     const { HeaderControl } = navigationUI;
     const typeWithFirstLetterToUpperCase = type.charAt(0).toUpperCase() + type.slice(1);
 
+    const isManaged = isManagedObject(object?.attributes as Record<string, unknown>);
+    const effectiveCanEdit = canEdit && !isManaged;
+    const effectiveCanDelete = canDelete && !isManaged;
+
     return (
       <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
         <Header
-          canEdit={canEdit}
-          canDelete={canDelete}
+          canEdit={effectiveCanEdit}
+          canDelete={effectiveCanDelete}
           canViewInApp={canView}
           type={type}
           onDeleteClick={() => this.delete()}
@@ -125,7 +129,31 @@ export class SavedObjectEdition extends Component<
           useUpdatedUX={useUpdatedUX}
           navigationUI={navigationUI}
           application={application}
+          isManaged={isManaged}
         />
+        {isManaged && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={i18n.translate('savedObjectsManagement.view.managedObjectWarningTitle', {
+                defaultMessage: 'This object is managed by an automated pipeline',
+              })}
+              color="warning"
+              iconType="lock"
+              role="alert"
+              data-test-subj="savedObjectsManagedCallout"
+            >
+              <p>
+                {i18n.translate('savedObjectsManagement.view.managedObjectWarningDescription', {
+                  defaultMessage:
+                    'This saved object was deployed through an automated pipeline and is locked to ' +
+                    'prevent manual changes. To modify it, update the source definition and redeploy, ' +
+                    'or contact your administrator to unlock it.',
+                })}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
         {notFoundType &&
           (useUpdatedUX ? (
             <HeaderControl
@@ -142,7 +170,7 @@ export class SavedObjectEdition extends Component<
               <NotFoundErrors type={notFoundType} />
             </>
           ))}
-        {canEdit &&
+        {effectiveCanEdit &&
           (useUpdatedUX ? (
             <HeaderControl
               controls={[
@@ -176,7 +204,7 @@ export class SavedObjectEdition extends Component<
               object={object}
               savedObjectsClient={savedObjectsClient}
               service={service}
-              editionEnabled={canEdit}
+              editionEnabled={effectiveCanEdit}
               onSave={this.saveChanges}
             />
           </>
@@ -188,6 +216,14 @@ export class SavedObjectEdition extends Component<
   async delete() {
     const { id, savedObjectsClient, overlays, notifications } = this.props;
     const { type, object } = this.state;
+
+    // Guard against managed objects (defense in depth)
+    if (isManagedObject(object?.attributes as Record<string, unknown>)) {
+      notifications.toasts.addWarning(
+        'This object is managed by an automated pipeline and cannot be deleted from the UI.'
+      );
+      return;
+    }
 
     const confirmed = await overlays.openConfirm(
       i18n.translate('savedObjectsManagement.deleteConfirm.modalDescription', {
@@ -226,6 +262,14 @@ export class SavedObjectEdition extends Component<
   saveChanges = async ({ attributes, references }: SubmittedFormData) => {
     const { savedObjectsClient, notifications } = this.props;
     const { object, type } = this.state;
+
+    // Guard against managed objects (defense in depth)
+    if (isManagedObject(object?.attributes as Record<string, unknown>)) {
+      notifications.toasts.addWarning(
+        'This object is managed by an automated pipeline and cannot be edited from the UI.'
+      );
+      return;
+    }
 
     await savedObjectsClient.update(object!.type, object!.id, attributes, { references });
     notifications.toasts.addSuccess(`Updated ${this.formatTitle(object)} ${type} object`);
