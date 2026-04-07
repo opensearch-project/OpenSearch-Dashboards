@@ -6,7 +6,7 @@
 import * as http from 'http';
 import * as https from 'https';
 import { URL } from 'url';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { ProfileConfig } from './config';
 import type {
   ValidateResponse,
@@ -78,11 +78,15 @@ export class OsdClient {
 
   /**
    * Execute a shell command to retrieve a bearer token.
-   * The token is cached for the lifetime of this client instance.
+   * Uses execFileSync with explicit shell to avoid command injection via
+   * untrusted config values. The command is passed as a single argument to
+   * the shell rather than being parsed by execSync.
    */
   private executeTokenCommand(command: string): string {
     try {
-      const result = execSync(command, {
+      const shell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh';
+      const shellArgs = process.platform === 'win32' ? ['/c', command] : ['-c', command];
+      const result = execFileSync(shell, shellArgs, {
         timeout: 10000,
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -137,7 +141,7 @@ export class OsdClient {
           try {
             resolve(JSON.parse(body) as T);
           } catch {
-            resolve(body as unknown as T);
+            reject(new ClientError(`Invalid JSON response from server`, statusCode, body));
           }
         });
       });

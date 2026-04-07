@@ -107,7 +107,7 @@
           "description": "Reference name linking this panel to an entry in the top-level references array."
         }
       },
-      "required": ["panelIndex", "gridData"],
+      "required": ["panelIndex", "type", "gridData"],
       "additionalProperties": false
     },
     "dashboardOptions": {

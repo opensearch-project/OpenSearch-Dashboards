@@ -149,7 +149,10 @@ export const registerBulkApplyRoute = (router: IRouter, config: SavedObjectConfi
             references: resource.references,
           });
         } else if (deepEqual(existing, attributesWithLabels)) {
-          // Object exists and attributes are identical
+          // Object exists and attributes are identical (including managed-by label).
+          // Note: first _bulk_apply of a manually-created object will show 'updated'
+          // because the existing attributes lack the managed-by label — this is intentional
+          // as the object needs to be stamped as code-managed.
           results.push({ type: resource.type, id: resource.id, status: 'unchanged' });
         } else if (overwrite) {
           // Object exists and attributes differ - will update

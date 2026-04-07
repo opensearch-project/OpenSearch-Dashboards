@@ -148,7 +148,7 @@ export function resolveDependencyOrder(
     }
 
     for (const dep of dependents.get(current) || []) {
-      const newDegree = (inDegree.get(dep) || 1) - 1;
+      const newDegree = (inDegree.get(dep) ?? 0) - 1;
       inDegree.set(dep, newDegree);
       if (newDegree === 0) {
         queue.push(dep);

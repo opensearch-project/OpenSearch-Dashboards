@@ -220,12 +220,29 @@ When a saved object has `attributes.labels['managed-by'] === 'osdctl'`, the stan
 
 | Route | Behavior |
 |-------|----------|
-| `POST /{type}/{id}` (create with overwrite) | Returns `409 Conflict` |
+| `POST /{type}/{id}?overwrite=true` (create with overwrite) | Returns `409 Conflict` |
 | `PUT /{type}/{id}` (update) | Returns `409 Conflict` |
 | `DELETE /{type}/{id}` | Returns `409 Conflict` |
-| `POST /_bulk_create` (with overwrite) | Returns `409 Conflict` for locked objects |
-| `PUT /_bulk_update` | Returns `409 Conflict` for locked objects |
+| `POST /_bulk_create?overwrite=true` | Per-item `409 Conflict` for locked objects |
+| `PUT /_bulk_update` | Per-item `409 Conflict` for locked objects |
 
-**Override:** Add `?force=true` to any of these routes to bypass the lock.
+### `?force=true` Query Parameter
 
-**Unlock:** Use `POST /_unlock/{type}/{id}` to permanently remove the lock.
+Add `?force=true` to any of the above routes to bypass the managed lock. This skips the lock check entirely and allows the operation to proceed.
+
+```bash
+# Force-delete a managed object
+DELETE /api/saved_objects/dashboard/my-dash?force=true
+
+# Force-update a managed object
+PUT /api/saved_objects/dashboard/my-dash?force=true
+
+# Force bulk-create with overwrite on managed objects
+POST /api/saved_objects/_bulk_create?overwrite=true&force=true
+```
+
+**Note:** `force` only controls the lock bypass — it is not forwarded to the underlying saved objects client.
+
+### Permanent Unlock
+
+Use `POST /_unlock/{type}/{id}` to permanently remove the `managed-by` label, returning the object to normal (unmanaged) state.

@@ -9,6 +9,20 @@ import * as yaml from 'js-yaml';
 import { DashboardDefinition } from '../types';
 
 /**
+ * Resolve a filepath and verify it stays within the current working directory.
+ * Uses path.relative() to handle symlinks and '..' traversal safely.
+ */
+function absolutePathWithinCwd(filepath: string): string {
+  const absolutePath = path.resolve(filepath);
+  const cwd = process.cwd();
+  const relative = path.relative(cwd, absolutePath);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`Output path must be within the current working directory. Got: ${absolutePath}`);
+  }
+  return absolutePath;
+}
+
+/**
  * Serializer for dashboard definitions to JSON and YAML formats.
  */
 export class Serializer {
@@ -20,16 +34,7 @@ export class Serializer {
     const json = JSON.stringify(definition, Serializer.sortedReplacer(), 2);
 
     if (filepath) {
-      const absolutePath = path.resolve(filepath);
-      const cwd = process.cwd();
-      if (!absolutePath.startsWith(cwd)) {
-        throw new Error(`Output path must be within the current working directory. Got: ${absolutePath}`);
-      }
-      const dir = path.dirname(absolutePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(absolutePath, json, 'utf-8');
+      Serializer.writeFile(absolutePathWithinCwd(filepath), json);
     }
 
     return json;
@@ -44,19 +49,18 @@ export class Serializer {
     const output = yaml.dump(definition, { sortKeys: true, lineWidth: -1 });
 
     if (filepath) {
-      const absolutePath = path.resolve(filepath);
-      const cwd = process.cwd();
-      if (!absolutePath.startsWith(cwd)) {
-        throw new Error(`Output path must be within the current working directory. Got: ${absolutePath}`);
-      }
-      const dir = path.dirname(absolutePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(absolutePath, output, 'utf-8');
+      Serializer.writeFile(absolutePathWithinCwd(filepath), output);
     }
 
     return output;
+  }
+
+  private static writeFile(absolutePath: string, content: string): void {
+    const dir = path.dirname(absolutePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(absolutePath, content, 'utf-8');
   }
 
   /**

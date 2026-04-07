@@ -99,12 +99,15 @@ export function lintObject(obj: SavedObject, rules: LintRuleConfig): LintMessage
     const rawPattern = rules['naming-convention'];
     let pattern: RegExp | null = null;
     try {
-      // Reject patterns with obvious catastrophic backtracking risks
+      // Reject patterns with catastrophic backtracking risks:
+      // - Nested quantifiers like (a+)+, (a*)+, (a{1,})*
+      // - Overlapping alternation with quantifiers
       if (
         typeof rawPattern === 'string' &&
         rawPattern.length <= 200 &&
-        !/(\+|\*|\{)\1/.test(rawPattern) &&
-        !/\(\?[^:)]/.test(rawPattern)
+        !/(\+|\*|\{[^}]*\})\s*\)[\+\*\{]/.test(rawPattern) &&
+        !/\(\?[^:)]/.test(rawPattern) &&
+        !/(\.\*){2,}/.test(rawPattern)
       ) {
         pattern = new RegExp(rawPattern);
       }

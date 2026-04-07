@@ -109,17 +109,17 @@ export const registerBulkCreateRoute = (router: IRouter) => {
         ...(workspaces ? { workspaces } : {}),
       });
 
-      // Merge locked errors into the response
+      // Merge locked errors into the response using the same shape as bulkCreate errors
       if (lockedErrors.length > 0) {
         result.saved_objects = [
           ...result.saved_objects,
           ...lockedErrors.map((err) => ({
             type: err.type,
             id: err.id,
-            error: err.error,
-            attributes: {} as any,
+            error: err.error as any,
+            attributes: {},
             references: [],
-          })),
+          } as any)),
         ];
       }
 

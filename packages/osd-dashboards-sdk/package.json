@@ -12,15 +12,15 @@
     "test": "jest --config jest.config.js"
   },
   "dependencies": {
-    "jest": "^30.3.0",
-    "js-yaml": "^4.1.1",
-    "ts-jest": "^29.4.6",
-    "typescript": "^6.0.2"
+    "js-yaml": "^4.1.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.19.37"
+    "@types/node": "^20.19.37",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^6.0.2"
   },
   "keywords": [],
   "author": ""
