@@ -90,7 +90,7 @@ interface VisRenderProps<T extends ChartType> {
   onSelectTimeRange?: (timeRange: TimeRange) => void;
 }
 
-export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType }>>;
+export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType; multi?: boolean }>>;
 
 export interface VisRule<T extends ChartType> {
   priority: number;

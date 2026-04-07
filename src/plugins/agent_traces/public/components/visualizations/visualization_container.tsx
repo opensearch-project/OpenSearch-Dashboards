@@ -9,7 +9,6 @@ import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 
-import { AxisColumnMappings } from '../../../../explore/public';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder_singleton';
@@ -24,7 +23,7 @@ import {
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
 export interface UpdateVisualizationProps {
-  mappings: AxisColumnMappings;
+  mappings: Record<string, string>;
 }
 
 export const VisualizationContainer = React.memo(() => {

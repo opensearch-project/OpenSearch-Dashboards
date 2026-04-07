@@ -42,8 +42,6 @@ describe('createGauge', () => {
   });
 
   it('throws when no value column is provided', () => {
-    expect(() => createGauge(mockData, defaultGaugeChartStyles, {})).toThrow(
-      'Missing value for metric chart'
-    );
+    expect(() => createGauge(mockData, defaultGaugeChartStyles, {} as any)).toThrow();
   });
 });

@@ -4,7 +4,7 @@
  */
 
 import { PieChartStyle } from './pie_vis_config';
-import { AxisColumnMappings, AxisRole, AggregationType } from '../types';
+import { AxisRole, VisColumn, AggregationType } from '../types';
 import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
 import { aggregate, convertTo2DArray, transform } from '../utils/data_transformation';
 import { createPieSeries } from './pie_chart_utils';
@@ -12,37 +12,35 @@ import { createPieSeries } from './pie_chart_utils';
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
   styleOptions: PieChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.SIZE]: VisColumn; [AxisRole.COLOR]: VisColumn }
 ) => {
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR]?.column;
-  const thetaColumn = axisColumnMappings?.[AxisRole.SIZE]?.column;
+  const colorCol = axisColumnMappings[AxisRole.COLOR];
+  const sizeCol = axisColumnMappings[AxisRole.SIZE];
 
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = Object.values(axisColumnMappings).map((m) => m.column);
 
-  if (!colorColumn || !thetaColumn) {
-    throw Error('Missing color or theta config for pie chart');
-  }
-
-  const defaultTitle = `${axisColumnMappings?.[AxisRole.SIZE]?.name} by ${
-    axisColumnMappings?.[AxisRole.COLOR]?.name
-  }`;
+  const defaultTitle = `${sizeCol.name} by ${colorCol.name}`;
 
   const result = pipe(
     transform(
       aggregate({
-        groupBy: colorColumn,
-        field: thetaColumn,
+        groupBy: colorCol.column,
+        field: sizeCol.column,
         aggregationType: AggregationType.SUM,
       }),
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({ title: defaultTitle, legend: { show: styleOptions.addLegend } }),
-    createPieSeries({ styles: styleOptions, cateField: colorColumn, valueField: thetaColumn }),
+    createPieSeries({
+      styles: styleOptions,
+      cateField: colorCol.column,
+      valueField: sizeCol.column,
+    }),
     assembleSpec
   )({
     data: transformedData,
     styles: styleOptions,
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisColumnMappings,
   });
 
   return result.spec;

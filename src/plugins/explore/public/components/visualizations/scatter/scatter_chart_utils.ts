@@ -120,7 +120,7 @@ export const createScatterSeries = <T extends BaseChartStyle>({
   const series = [
     {
       type: 'scatter',
-      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings)),
+      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings).flat()),
       symbolSize: 8,
       symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
       symbolRotate: styles.exclusive?.angle || 0,

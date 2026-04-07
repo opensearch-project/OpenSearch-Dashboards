@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisRole, ChartMetadata, VisColumn, VisFieldType } from './types';
+import { AxisFieldNameMappings, AxisRole, ChartMetadata, VisColumn, VisFieldType } from './types';
 import { VisualizationType, VisRule, AxisTypeMapping } from './utils/use_visualization_types';
 import { getColumnsByAxesMapping } from './visualization_builder_utils';
 
@@ -50,32 +50,37 @@ export class VisualizationRegistry {
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[]
-  ) {
+  ): AxisFieldNameMappings {
     for (const mapping of rule.mappings) {
-      const result: Record<string, string> = {};
+      const result: AxisFieldNameMappings = {};
       const numCols = [...numericalColumns];
       const categoricalCols = [...categoricalColumns];
       const dateCols = [...dateColumns];
+      let failed = false;
 
-      for (const [axisRole, { type }] of Object.entries(mapping)) {
-        let column: VisColumn | undefined;
-        if (type === VisFieldType.Categorical) {
-          column = categoricalCols.shift();
-        }
-        if (type === VisFieldType.Numerical) {
-          column = numCols.shift();
-        }
-        if (type === VisFieldType.Date) {
-          column = dateCols.shift();
-        }
-        // No available column fits the mapping, cannot create axis mapping for the given columns
-        if (!column) {
+      for (const [axisRole, { type, multi }] of Object.entries(mapping)) {
+        const pool =
+          type === VisFieldType.Categorical
+            ? categoricalCols
+            : type === VisFieldType.Numerical
+            ? numCols
+            : type === VisFieldType.Date
+            ? dateCols
+            : undefined;
+
+        if (!pool || pool.length === 0) {
+          failed = true;
           break;
         }
-        result[axisRole] = column.name;
+
+        if (multi) {
+          result[axisRole] = pool.splice(0).map((col) => col.name);
+        } else {
+          result[axisRole] = pool.shift()!.name;
+        }
       }
       // Only return if we successfully mapped ALL axes
-      if (Object.keys(result).length === Object.keys(mapping).length) {
+      if (!failed && Object.keys(result).length === Object.keys(mapping).length) {
         return result;
       }
     }
@@ -88,7 +93,7 @@ export class VisualizationRegistry {
    */
   public findRuleByAxesMapping(
     chartType: string,
-    axesMapping: Partial<Record<string, string>>,
+    axesMapping: AxisFieldNameMappings,
     allColumns: VisColumn[]
   ) {
     const rules = this.getVisualization(chartType)?.getRules();
@@ -99,9 +104,12 @@ export class VisualizationRegistry {
     // Convert axesMapping to AxisTypeMapping type
     const axisTypeMapping: AxisTypeMapping = {};
     for (const [role, field] of Object.entries(axesMapping)) {
-      const found = allColumns.find((col) => col.name === field);
-      if (!found) return undefined;
-      axisTypeMapping[role as AxisRole] = { type: found.schema };
+      const names = Array.isArray(field) ? field : [field];
+      const columns = names.map((name) => allColumns.find((col) => col.name === name));
+      if (columns.some((col) => col === undefined)) return undefined;
+      const type = columns[0]!.schema;
+      if (columns.some((col) => col!.schema !== type)) return undefined;
+      axisTypeMapping[role as AxisRole] = { type, ...(names.length > 1 && { multi: true }) };
     }
 
     const found = rules.find((rule) => {
@@ -114,7 +122,12 @@ export class VisualizationRegistry {
         return inputKeys.every((key) => {
           const mappingEntry = mapping[key];
           const inputEntry = axisTypeMapping[key];
-          return mappingEntry && inputEntry && mappingEntry.type === inputEntry.type;
+          if (!mappingEntry || !inputEntry) return false;
+          if (mappingEntry.type !== inputEntry.type) return false;
+          // A multi rule axis accepts both single and multiple fields.
+          // A non-multi rule axis only accepts a single field.
+          if (!mappingEntry.multi && inputEntry.multi) return false;
+          return true;
         });
       });
     });
@@ -129,9 +142,9 @@ export class VisualizationRegistry {
    */
   public updateAxesMappingByChartType(
     chartType: string,
-    axesMapping: Partial<Record<string, string>>,
+    axesMapping: AxisFieldNameMappings,
     allColumns: VisColumn[]
-  ): Record<string, string> {
+  ): AxisFieldNameMappings {
     const { numericalColumns, categoricalColumns, dateColumns } = getColumnsByAxesMapping(
       axesMapping,
       allColumns
@@ -195,7 +208,12 @@ export class VisualizationRegistry {
    * Finds matching VisRules by comparing each mapping's required field counts against
    * the given column counts. Optionally filters by `chartType`. Results grouped by vis type:
    * - `all`: rules with at least one compatible mapping (required <= available per type).
-   * - `exact`: subset of `all` with at least one exact-match mapping (required === available).
+   * - `exact`: subset of `all` with at least one unambiguous mapping where all columns are consumed.
+   *
+   * For multi-field axes (`multi: true`), compatibility requires at least `fixed + 1` columns
+   * of that type (the multi axis needs at least one). Exact matching additionally requires that
+   * no other fixed axis competes for the same type pool — otherwise the assignment is ambiguous
+   * and should be left to the user.
    */
   public findRulesByColumns(
     numericalColumns: VisColumn[],
@@ -205,9 +223,12 @@ export class VisualizationRegistry {
   ): FindRulesByColumnsResult {
     const allMap = new Map<string, Array<VisRule<any>>>();
     const exactMap = new Map<string, Array<VisRule<any>>>();
-    const numCount = numericalColumns.length;
-    const catCount = categoricalColumns.length;
-    const dateCount = dateColumns.length;
+    const counts = {
+      numerical: numericalColumns.length,
+      categorical: categoricalColumns.length,
+      date: dateColumns.length,
+    };
+    const fieldTypes = ['numerical', 'categorical', 'date'] as const;
 
     for (const [type, config] of this.visualizations) {
       if (chartType && chartType !== type) {
@@ -223,15 +244,26 @@ export class VisualizationRegistry {
         for (const mapping of rule.mappings) {
           const required = this.countMappingFieldTypes(mapping);
 
-          exactMatch ||=
-            required.numerical === numCount &&
-            required.categorical === catCount &&
-            required.date === dateCount;
+          // Compatible: enough columns for all fixed axes, plus at least 1 for any multi axis
+          const isCompatible = fieldTypes.every(
+            (ft) => counts[ft] >= required[ft].fixed + (required[ft].hasMulti ? 1 : 0)
+          );
 
-          compatibleMatch ||=
-            required.numerical <= numCount &&
-            required.categorical <= catCount &&
-            required.date <= dateCount;
+          // Exact: all columns are consumed with no ambiguity.
+          // - Non-multi types: available must equal fixed (no leftovers).
+          // - Multi types with fixed > 0: ambiguous (which columns go to fixed vs multi),
+          //   so never exact.
+          // - Multi types with fixed === 0: the multi axis is the sole consumer,
+          //   exact if available >= 1.
+          const isExact = fieldTypes.every((ft) => {
+            const { fixed, hasMulti } = required[ft];
+            if (hasMulti && fixed > 0) return false;
+            if (hasMulti) return counts[ft] >= 1;
+            return counts[ft] === fixed;
+          });
+
+          compatibleMatch ||= isCompatible;
+          exactMatch ||= isExact;
         }
 
         if (compatibleMatch) {
@@ -255,26 +287,35 @@ export class VisualizationRegistry {
   }
 
   private countMappingFieldTypes(
-    mapping: Partial<Record<AxisRole, { type: VisFieldType }>>
-  ): { numerical: number; categorical: number; date: number } {
-    let numerical = 0;
-    let categorical = 0;
-    let date = 0;
+    mapping: Partial<Record<AxisRole, { type: VisFieldType; multi?: boolean }>>
+  ): {
+    numerical: { fixed: number; hasMulti: boolean };
+    categorical: { fixed: number; hasMulti: boolean };
+    date: { fixed: number; hasMulti: boolean };
+  } {
+    const result = {
+      numerical: { fixed: 0, hasMulti: false },
+      categorical: { fixed: 0, hasMulti: false },
+      date: { fixed: 0, hasMulti: false },
+    };
     for (const entry of Object.values(mapping)) {
       if (!entry) continue;
-      switch (entry.type) {
-        case VisFieldType.Numerical:
-          numerical++;
-          break;
-        case VisFieldType.Categorical:
-          categorical++;
-          break;
-        case VisFieldType.Date:
-          date++;
-          break;
+      const key =
+        entry.type === VisFieldType.Numerical
+          ? 'numerical'
+          : entry.type === VisFieldType.Categorical
+          ? 'categorical'
+          : entry.type === VisFieldType.Date
+          ? 'date'
+          : undefined;
+      if (!key) continue;
+      if (entry.multi) {
+        result[key].hasMulti = true;
+      } else {
+        result[key].fixed++;
       }
     }
-    return { numerical, categorical, date };
+    return result;
   }
 
   public registerVisualization(input: VisualizationType<any> | Array<VisualizationType<any>>) {

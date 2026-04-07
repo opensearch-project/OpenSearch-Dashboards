@@ -7,7 +7,6 @@ import { mergeWith, isPlainObject } from 'lodash';
 import {
   StandardAxes,
   AxisRole,
-  Positions,
   VisFieldType,
   VisColumn,
   AxisColumnMappings,
@@ -94,55 +93,31 @@ function getAxisByRole(
   return axes.find((axis) => axis.axisRole === axisRole);
 }
 
-const positionSwapMap: Record<Positions, Positions> = {
-  [Positions.LEFT]: Positions.BOTTOM,
-  [Positions.RIGHT]: Positions.TOP,
-  [Positions.BOTTOM]: Positions.LEFT,
-  [Positions.TOP]: Positions.RIGHT,
-};
-
-const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
-
-export const getSwappedAxisRole = (
-  styles: { standardAxes?: StandardAxes[]; switchAxes?: boolean },
-  axisColumnMappings?: AxisColumnMappings
-): {
-  xAxis?: VisColumn;
-  yAxis?: VisColumn;
-  y2Axis?: VisColumn;
+interface AxisStyleConfig {
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
   y2AxisStyle?: StandardAxes;
-} => {
-  const xAxis = axisColumnMappings?.x;
-  const yAxis = axisColumnMappings?.y;
-  const y2Axis = axisColumnMappings?.y2;
+}
 
+export const getAxisConfig = (styles: { standardAxes?: StandardAxes[] }): AxisStyleConfig => {
   const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
   const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
   const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
 
-  if (!styles?.switchAxes) {
-    return { xAxis, xAxisStyle, yAxis, yAxisStyle, ...(y2Axis && { y2Axis, y2AxisStyle }) };
-  }
+  return { xAxisStyle, yAxisStyle, y2AxisStyle };
+};
 
-  return {
-    xAxis: yAxis,
-    xAxisStyle: yAxisStyle
-      ? {
-          ...yAxisStyle,
-          ...(yAxisStyle?.position ? { position: swapPosition(yAxisStyle.position) } : undefined),
-        }
-      : undefined,
-    yAxis: xAxis,
-    yAxisStyle: xAxisStyle
-      ? {
-          ...xAxisStyle,
-          ...(xAxisStyle?.position ? { position: swapPosition(xAxisStyle.position) } : undefined),
-        }
-      : undefined,
-    ...(y2Axis && { y2Axis, y2AxisStyle }), // switch axes won't apply to y2(line-bar chart)
-  };
+export const getColumnsFromAxisColumnMapping = (
+  axisColumnMappings: {
+    [K in AxisRole]?: VisColumn | VisColumn[];
+  }
+) => {
+  const allColumns = [
+    ...Object.values(axisColumnMappings ?? {}).flatMap((cols) =>
+      Array.isArray(cols) ? cols.map((col) => col.column) : [cols.column]
+    ),
+  ];
+  return allColumns;
 };
 
 export const getSchemaByAxis = (
@@ -264,27 +239,17 @@ const convertThresholdLineStyle = (style: ThresholdMode | undefined) => {
   return style;
 };
 
-export const adjustOppositeSymbol = (switchAxes: boolean, symbol: string) => {
-  if (switchAxes) {
-    return symbol === 'x' ? 'y' : 'x';
-  }
-  return symbol;
-};
-
-const generateThresholdSteps = (thresholds: Threshold[] | undefined, switchAxes?: boolean) => {
+const generateThresholdSteps = (thresholds: Threshold[] | undefined) => {
   return thresholds?.map((t) => ({
-    [switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    yAxis: t.value,
     itemStyle: { color: t.color },
   }));
 };
 
-export const generateThresholdLines = (
-  thresholdOptions: ThresholdOptions,
-  switchAxes?: boolean
-) => {
+export const generateThresholdLines = (thresholdOptions: ThresholdOptions) => {
   if (thresholdOptions.thresholdStyle === ThresholdMode.Off) return {};
 
-  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds, switchAxes);
+  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds);
 
   return {
     markLine: {
