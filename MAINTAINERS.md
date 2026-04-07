@@ -10,18 +10,14 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Kawika (Rocky) Avilla     | [kavilla](https://github.com/kavilla)               | Amazon      |
 | Miki Barahmand            | [AMoo-Miki](https://github.com/AMoo-Miki)           | Amazon      |
 | Ashwin P Chandran         | [ashwin-pc](https://github.com/ashwin-pc)           | Amazon      |
-| Josh Romero               | [joshuarrrr](https://github.com/joshuarrrr)         | Amazon      |
 | Abby Hu                   | [abbyhu2000](https://github.com/abbyhu2000)         | Amazon      |
 | Yan Zeng                  | [zengyan-amazon](https://github.com/zengyan-amazon) | Amazon      |
 | Zhongnan Su               | [zhongnansu](https://github.com/zhongnansu)         | Amazon      |
-| Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
 | Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
 | Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
-| Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
 | Bandini Bhopi             | [bandinib-amzn](https://github.com/bandinib-amzn)   | Amazon      |
 | Su Zhou                   | [SuZhou-Joe](https://github.com/SuZhou-Joe)         | Amazon      |
 | Yulong Ruan               | [ruanyl](https://github.com/ruanyl)                 | Amazon      |
-| Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
 | Xinrui Bai                | [xinruiba](https://github.com/xinruiba)             | Amazon      |
 | Ella Zhu                  | [zhyuanqi](https://github.com/zhyuanqi)             | Amazon      |
 | Eric Wei                  | [mengweieric](https://github.com/mengweieric)       | Amazon      |
@@ -35,7 +31,6 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Joey Liu                  | [Maosaic](https://github.com/Maosaic)               | Amazon      |
 | Lin Wang                  | [wanglam](https://github.com/wanglam)               | Amazon      |
 | Daniel Rowe               | [d-buckner](https://github.com/d-buckner)           | Amazon      |
-| Tianyu Gao                | [raintygao](https://github.com/raintygao)           | Amazon      |
 | Shenoy Pratik             | [ps48](https://github.com/ps48)                     | Amazon      |
 | Adam Tackett              | [TackAdam](https://github.com/TackAdam)             | Amazon      |
 | Ruchi Sharma              | [ruchidh](https://github.com/ruchidh)               | Amazon      |
@@ -54,6 +49,11 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Sean Neumann  | [seanneumann](https://github.com/seanneumann) | Contributor |
 | Kristen Tian  | [kristenTian](https://github.com/kristenTian) | Amazon      |
 | Matt Provost  | [BSFishy](https://github.com/BSFishy)         | Amazon      |
+| Josh Romero               | [joshuarrrr](https://github.com/joshuarrrr)         | Amazon      |
+| Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
+| Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
+| Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
+| Tianyu Gao                | [raintygao](https://github.com/raintygao)           | Amazon      |
 
 ## Responsibilities
 
