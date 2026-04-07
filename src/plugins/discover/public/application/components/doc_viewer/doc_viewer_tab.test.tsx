@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 // @ts-expect-error TS2305 TODO(ts-error): fixme
 import { DocViewerTab, DocViewerTabProps } from './doc_viewer_tab';
@@ -26,6 +25,7 @@ test('DocViewerTab updated when getting new renderProps', () => {
 
   const wrapper = mount(<DocViewerTab {...mockProps} />);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const div = wrapper.find({ 'data-test-subj': 'test-div' });
   expect(div.text()).toEqual('test1');
 

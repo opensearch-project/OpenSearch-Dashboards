@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -152,6 +151,7 @@ const fullTestResult = {
       {
         _id: '1',
         _index: 'test-index',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         _source: { message: 'test log', '@timestamp': '2023-01-01T00:00:00Z' },
       },
     ],
@@ -184,6 +184,7 @@ describe('DiscoverChartContainer', () => {
           isDirty: false,
           lineCount: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: 'logs',
           showHistogram: true,
@@ -217,25 +218,30 @@ describe('DiscoverChartContainer', () => {
         },
         results: hasResults
           ? {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'test-cache-key': { total: 1, elapsedMs: 100, fieldSchema: [], hasResults: true },
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'histogram:test-cache-key': {
                 total: 1,
                 elapsedMs: 100,
                 fieldSchema: [],
                 hasResults: true,
               },
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'trace-requests:test-query': {
                 total: 1,
                 elapsedMs: 100,
                 fieldSchema: [],
                 hasResults: true,
               },
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'trace-errors:test-query': {
                 total: 1,
                 elapsedMs: 100,
                 fieldSchema: [],
                 hasResults: true,
               },
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'trace-latency:test-query': {
                 total: 1,
                 elapsedMs: 100,
@@ -422,6 +428,7 @@ describe('DiscoverChartContainer', () => {
       });
 
       const queryStatusMap = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:breakdown-cache-key': {
           status: QueryExecutionStatus.ERROR,
           error: {
@@ -437,6 +444,7 @@ describe('DiscoverChartContainer', () => {
           elapsedMs: 100,
           startTime: Date.now(),
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:test-cache-key': {
           status: QueryExecutionStatus.READY,
           elapsedMs: 50,
@@ -462,6 +470,7 @@ describe('DiscoverChartContainer', () => {
             isDirty: false,
             lineCount: undefined,
           },
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           ui: {
             activeTabId: 'logs',
             showHistogram: true,
@@ -494,6 +503,7 @@ describe('DiscoverChartContainer', () => {
             hasUserInitiatedQuery: false,
           },
           results: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'histogram:test-cache-key': {
               total: 1,
               elapsedMs: 100,
@@ -531,6 +541,7 @@ describe('DiscoverChartContainer', () => {
       });
 
       const queryStatusMapWithBreakdownError = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:breakdown-cache-key': {
           status: QueryExecutionStatus.ERROR,
           error: {
@@ -546,6 +557,7 @@ describe('DiscoverChartContainer', () => {
           elapsedMs: 100,
           startTime: Date.now(),
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:test-cache-key': {
           status: QueryExecutionStatus.READY,
           elapsedMs: 50,
@@ -571,6 +583,7 @@ describe('DiscoverChartContainer', () => {
             isDirty: false,
             lineCount: undefined,
           },
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           ui: {
             activeTabId: 'logs',
             showHistogram: true,
@@ -603,6 +616,7 @@ describe('DiscoverChartContainer', () => {
             hasUserInitiatedQuery: false,
           },
           results: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'histogram:test-cache-key': {
               total: 1,
               elapsedMs: 100,
@@ -629,6 +643,7 @@ describe('DiscoverChartContainer', () => {
       });
 
       const queryStatusMapWithBothErrors = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:breakdown-cache-key': {
           status: QueryExecutionStatus.ERROR,
           error: {
@@ -644,6 +659,7 @@ describe('DiscoverChartContainer', () => {
           elapsedMs: 100,
           startTime: Date.now(),
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:test-cache-key': {
           status: QueryExecutionStatus.ERROR,
           error: {
@@ -679,6 +695,7 @@ describe('DiscoverChartContainer', () => {
             isDirty: false,
             lineCount: undefined,
           },
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           ui: {
             activeTabId: 'logs',
             showHistogram: true,
@@ -711,6 +728,7 @@ describe('DiscoverChartContainer', () => {
             hasUserInitiatedQuery: false,
           },
           results: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'histogram:breakdown-cache-key': {
               total: 1,
               elapsedMs: 100,
@@ -747,11 +765,13 @@ describe('DiscoverChartContainer', () => {
       });
 
       const queryStatusMapWithSuccess = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:breakdown-cache-key': {
           status: QueryExecutionStatus.READY,
           elapsedMs: 100,
           startTime: Date.now(),
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'histogram:test-cache-key': {
           status: QueryExecutionStatus.READY,
           elapsedMs: 50,
@@ -777,6 +797,7 @@ describe('DiscoverChartContainer', () => {
             isDirty: false,
             lineCount: undefined,
           },
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           ui: {
             activeTabId: 'logs',
             showHistogram: true,
@@ -809,6 +830,7 @@ describe('DiscoverChartContainer', () => {
             hasUserInitiatedQuery: false,
           },
           results: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'histogram:breakdown-cache-key': {
               total: 1,
               elapsedMs: 100,

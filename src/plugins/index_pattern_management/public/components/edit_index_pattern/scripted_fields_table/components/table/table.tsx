@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
@@ -79,6 +79,7 @@ export class Table extends PureComponent<TableProps> {
         ),
         dataType: 'string',
         sortable: true,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'scriptedFieldLang',
       },
       {

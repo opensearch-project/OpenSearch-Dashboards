@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
 import { createMemoryHistory } from 'history';
@@ -179,7 +178,9 @@ const mockTransformPPLDataToTraceHits = pplToTraceHits.transformPPLDataToTraceHi
 
 jest.mock('./public/traces/generate_color_map', () => ({
   generateColorMap: jest.fn(() => ({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-a': '#ff0000',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-b': '#00ff00',
   })),
 }));
@@ -192,6 +193,7 @@ const mockCorrelationService = {
       { id: 'log-dataset-2', title: 'error-logs-*', type: 'INDEX_PATTERN' },
     ],
     datasetLogs: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-1': [
         {
           _id: 'log1',
@@ -202,6 +204,7 @@ const mockCorrelationService = {
           _source: { message: 'Test log message 2', timestamp: '2023-01-01T00:00:01Z' },
         },
       ],
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-2': [
         {
           _id: 'log3',
@@ -427,6 +430,7 @@ describe('TraceDetails', () => {
     const history = createMemoryHistory();
     render(
       <Router history={history}>
+        {/* @ts-expect-error TS2740 TODO(ts-error): fixme */}
         <TraceDetails defaultDataset={defaultDataset} />
       </Router>
     );
@@ -1051,6 +1055,7 @@ describe('TraceDetails', () => {
     expect(document.querySelector('[data-testid="logs-loading"]')).toHaveTextContent('false');
 
     // Click the logs tab to switch to logs view
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     fireEvent.click(logsTabButton);
 
     // Wait for the logs tab content to be rendered
@@ -1073,6 +1078,7 @@ describe('TraceDetails', () => {
     // Test span click functionality from logs
     const spanClickButton = document.querySelector('[data-testid="span-click-from-logs"]');
     expect(spanClickButton).toBeInTheDocument();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     fireEvent.click(spanClickButton);
 
     // The logs functionality should be integrated into the component

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { createRef, Component } from 'react';
+import { createRef, Component } from 'react';
 
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'opensearch-dashboards/public';
 import { ManagementApp } from '../../utils';

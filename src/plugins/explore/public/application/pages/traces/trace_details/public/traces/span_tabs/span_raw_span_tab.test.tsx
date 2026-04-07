@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SpanRawSpanTab } from './span_raw_span_tab';
 
@@ -34,13 +33,17 @@ describe('SpanRawSpanTab', () => {
       message: 'OK',
     },
     tags: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'http.method': 'GET',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'http.url': 'https://example.com/api/test',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'http.status_code': 200,
     },
     process: {
       serviceName: 'test-service',
       tags: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'service.version': '1.0.0',
       },
     },

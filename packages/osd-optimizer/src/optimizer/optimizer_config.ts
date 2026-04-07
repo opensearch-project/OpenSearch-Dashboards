@@ -65,8 +65,8 @@ function pickMaxWorkerCount(dist: boolean) {
 
 function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
   const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
+  for (const [key, value] of Object.entries(obj as Record<string, any>)) {
+    if (!keys.includes(key as K)) {
       result[key] = value;
     }
   }

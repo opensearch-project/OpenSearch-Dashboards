@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSmallButtonEmpty } from '@elastic/eui';
 import { getServices } from '../../../../application/legacy/discover/opensearch_dashboards_services';
@@ -30,6 +30,7 @@ export const useDiscoverDownloadCsvToasts = () => {
         title: i18n.translate('agentTraces.discover.downloadCsvCancelledToast', {
           defaultMessage: 'Download CSV cancelled',
         }),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'dscDownloadCsvToastCancelled',
       });
     }
@@ -57,6 +58,7 @@ export const useDiscoverDownloadCsvToasts = () => {
             })}
           </EuiSmallButtonEmpty>
         ) as unknown) as string,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'dscDownloadCsvToastLoading',
       },
       // TODO: Putting a high number here as Infinity or Number.MAX_SAFE_INTEGER makes the toast go away right away
@@ -73,6 +75,7 @@ export const useDiscoverDownloadCsvToasts = () => {
       title: i18n.translate('agentTraces.discover.downloadCsvSuccessToast', {
         defaultMessage: 'CSV download successful.',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'dscDownloadCsvToastSuccess',
     });
   }, [toastNotifications]);
@@ -86,6 +89,7 @@ export const useDiscoverDownloadCsvToasts = () => {
       title: i18n.translate('agentTraces.discover.downloadCsvErrorToast', {
         defaultMessage: 'Unable to download CSV. Please try again.',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'dscDownloadCsvToastError',
     });
   }, [toastNotifications]);

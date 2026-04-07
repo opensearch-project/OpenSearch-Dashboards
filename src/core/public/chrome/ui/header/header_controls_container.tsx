@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC, useRef, useLayoutEffect, useState } from 'react';
+import { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import classNames from 'classnames';
 import { MountPoint, UnmountCallback } from '../../../types';
@@ -37,6 +37,7 @@ import './header_controls_container.scss';
 interface HeaderControlsContainerProps {
   controls$: Observable<MountPoint | undefined>;
   className?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
 }
 

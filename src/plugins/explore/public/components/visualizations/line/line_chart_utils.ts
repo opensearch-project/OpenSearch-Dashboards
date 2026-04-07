@@ -374,7 +374,7 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
   value2Field: VisColumn;
   categoryField: string;
 }): PipelineFn<T> => (state) => {
-  const { xAxisConfig, yAxisConfig } = state;
+  const { xAxisConfig, yAxisConfig: _yAxisConfig } = state;
   const newState = { ...state };
 
   if (styles.addTimeMarker) {

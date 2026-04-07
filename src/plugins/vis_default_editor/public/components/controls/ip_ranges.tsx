@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
 import { FromToList, FromToObject } from './components/from_to_list';

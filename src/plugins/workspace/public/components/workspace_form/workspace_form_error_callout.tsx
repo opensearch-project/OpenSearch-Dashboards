@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { WorkspaceFormErrors, WorkspaceFormError, WorkspaceFormErrorCode } from './types';

@@ -31,7 +31,6 @@
 /* eslint-disable max-classes-per-file */
 
 import { EuiFlyout } from '@elastic/eui';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -109,6 +108,7 @@ export interface OverlayFlyoutOpenOptions {
   className?: string;
   closeButtonAriaLabel?: string;
   ownFocus?: boolean;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
 }
 

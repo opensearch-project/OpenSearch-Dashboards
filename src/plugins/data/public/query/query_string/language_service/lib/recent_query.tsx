@@ -5,7 +5,7 @@
 
 import './_index.scss';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import moment from 'moment';
 import { RecentQueriesTableProps, RecentQueryItem, RecentQueryTableItem } from '../types';
@@ -29,6 +29,7 @@ export function RecentQueriesTable({
   }, [queryString]);
 
   const getRowProps = (item: any) => ({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `row-${item.id}`,
     className: 'customRowClass',
     onClick: () => {},
@@ -36,6 +37,7 @@ export function RecentQueriesTable({
 
   const getCellProps = (item: any, column: any) => ({
     className: 'customCellClass',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `cell-${item.id}-${column.field}`,
     textOnly: true,
   });
@@ -57,6 +59,7 @@ export function RecentQueriesTable({
               recentQueries.find((recentQuery) => recentQuery.id === item.id)?.timeRange
             );
           },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'action-run',
         },
         {

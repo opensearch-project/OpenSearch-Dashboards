@@ -29,7 +29,7 @@
  */
 
 import { mount, ReactWrapper } from 'enzyme';
-import React from 'react';
+
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
@@ -53,6 +53,7 @@ function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
     href: title,
     baseUrl: '/',
     isActive: true,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': title,
   };
 }

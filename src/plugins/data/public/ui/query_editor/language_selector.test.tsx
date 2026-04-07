@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';

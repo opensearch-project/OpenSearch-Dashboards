@@ -30,7 +30,6 @@
 
 import './vega_data_inspector.scss';
 
-import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -58,12 +57,14 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
       id: 'data-viewer--id',
       name: dataSetsLabel,
       content: <DataViewer vegaAdapter={adapters.vega} />,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'vegaDataInspectorDataViewerButton',
     },
     {
       id: 'signal-viewer--id',
       name: signalValuesLabel,
       content: <SignalViewer vegaAdapter={adapters.vega} />,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'vegaDataInspectorSignalViewerButton',
     },
     {
@@ -72,6 +73,7 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
       content: (
         <SpecViewer className="vgaVegaDataInspector__specViewer" vegaAdapter={adapters.vega} />
       ),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'vegaDataInspectorSpecViewerButton',
     },
   ];

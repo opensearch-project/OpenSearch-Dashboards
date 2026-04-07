@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';

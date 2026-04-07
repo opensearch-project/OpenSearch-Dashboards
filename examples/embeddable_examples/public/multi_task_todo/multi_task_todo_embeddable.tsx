@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
@@ -74,7 +73,6 @@ function getOutput(input: MultiTaskTodoInput) {
 export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, MultiTaskTodoOutput> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
   private subscription: Subscription;
-  private node?: HTMLElement;
   private root: Root | null = null;
 
   constructor(initialInput: MultiTaskTodoInput, parent?: IContainer) {
@@ -94,7 +92,6 @@ export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, Mult
       this.root.unmount();
       this.root = null;
     }
-    this.node = node;
     this.root = createRoot(node);
     this.root.render(<MultiTaskTodoEmbeddableComponent embeddable={this} />);
   }

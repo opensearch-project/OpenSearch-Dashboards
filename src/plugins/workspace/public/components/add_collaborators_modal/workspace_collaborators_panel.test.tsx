@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { WorkspaceCollaboratorsPanel } from './workspace_collaborators_panel';
 
@@ -94,6 +93,7 @@ describe('WorkspaceCollaboratorsPanel', () => {
 
   it('should display error message if provided', () => {
     render(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       <WorkspaceCollaboratorsPanel {...defaultProps} errors={{ 2: 'A test error message' }} />
     );
 

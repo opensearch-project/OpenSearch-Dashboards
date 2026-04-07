@@ -4,14 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  EuiLink,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { CorrelationSavedObject } from '../../../../types/correlations';
@@ -39,9 +32,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
   loading = false,
   message,
 }) => {
-  const { data, uiSettings, savedObjects } = useOpenSearchDashboards<
-    DatasetManagmentContext
-  >().services;
+  const { uiSettings, savedObjects } = useOpenSearchDashboards<DatasetManagmentContext>().services;
   const [datasetTitles, setDatasetTitles] = useState<Record<string, string>>({});
 
   const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
@@ -162,6 +153,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
           icon: 'inspect',
           type: 'icon',
           onClick: (correlation: CorrelationSavedObject) => onView(correlation),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'viewCorrelationButton',
         },
       ],
@@ -171,6 +163,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
   return (
     <EuiInMemoryTable
       items={correlations}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       columns={columns}
       pagination={{
         pageSizeOptions: [10, 25, 50],

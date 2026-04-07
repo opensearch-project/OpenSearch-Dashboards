@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import {
   NoMatchMessage,
@@ -150,6 +149,7 @@ describe('getServiceInfo', () => {
     const otelSpan = {
       resource: {
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'service.name': 'alt-otel-service',
         },
       },

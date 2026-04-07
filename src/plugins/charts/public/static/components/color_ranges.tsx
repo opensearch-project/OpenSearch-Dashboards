@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { last } from 'lodash';
 
 import { i18n } from '@osd/i18n';
@@ -38,6 +38,7 @@ import { RangeValues, RangesParamEditor } from '../../../../vis_default_editor/p
 export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 
 interface ColorRangesProps {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
   colorsRange: RangeValues[];
   setValue: SetColorRangeValue;
@@ -61,6 +62,7 @@ function ColorRanges({
   }, [colorsRange]);
 
   const validateRange = useCallback(
+    // @ts-expect-error TS7031, TS7006 TODO(ts-error): fixme
     ({ from, to }, index) => {
       if (!colorsRange[index]) {
         return [false, false];

@@ -55,9 +55,12 @@ export function createHistogramConfigs(
 
       if (dateHistogramAgg) {
         const customBuckets = new TimeBuckets({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'histogram:barTarget': customBarTarget,
           dateFormat: uiSettings.get(UI_SETTINGS.DATE_FORMAT),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
         });
 
@@ -73,6 +76,7 @@ export function createHistogramConfigs(
         customBuckets.setBounds(bounds);
         customBuckets.setInterval(minInterval || histogramInterval);
 
+        // @ts-expect-error TS2790 TODO(ts-error): fixme
         delete dateHistogramAgg.buckets;
 
         Object.defineProperty(dateHistogramAgg, 'buckets', {

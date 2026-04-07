@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiFormRow,
   EuiButtonGroup,
   EuiSelect,
   EuiSwitch,
   EuiSplitPanel,
-  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';

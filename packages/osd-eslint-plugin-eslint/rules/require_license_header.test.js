@@ -33,7 +33,7 @@ const rule = require('./require_license_header');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('babel-eslint'),
+  parser: require.resolve('@babel/eslint-parser'),
   parserOptions: {
     ecmaVersion: 2015,
   },

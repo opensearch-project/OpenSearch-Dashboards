@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { fireEvent, render, waitFor, act } from '@testing-library/react';
+import { fireEvent, render, act } from '@testing-library/react';
 import {
   WorkspacePermissionSettingPanel,
   WorkspacePermissionSettingPanelProps,
@@ -13,6 +12,7 @@ import { WorkspacePermissionItemType } from './constants';
 import { WorkspacePermissionMode } from '../../../../../core/public';
 
 // Enable React 18 concurrent mode for act() support
+// @ts-expect-error TS7017 TODO(ts-error): fixme
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 const setup = (options?: Partial<WorkspacePermissionSettingPanelProps>) => {
@@ -295,7 +295,9 @@ describe('WorkspacePermissionSettingInput', () => {
   it('should render consistent errors', async () => {
     const { renderResult } = setup({
       errors: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '0': { code: 0, message: 'User permission setting error' },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '1': { code: 0, message: 'Group permission setting error' },
       },
     });

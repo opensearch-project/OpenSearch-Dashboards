@@ -65,6 +65,7 @@ function MetricVizOptions() {
 
   return (
     <>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.params.settingsTitle', { defaultMessage: 'Settings' })}
         initialIsOpen
@@ -95,6 +96,7 @@ function MetricVizOptions() {
           }
         />
       </Option>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option title={i18n.translate('visBuilder.params.rangesTitle', { defaultMessage: 'Ranges' })}>
         <ColorRanges
           data-test-subj="metricColorRange"
@@ -140,6 +142,7 @@ function MetricVizOptions() {
           uiState={new PersistedState({})}
         />
       </Option>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.params.style.styleTitle', { defaultMessage: 'Style' })}
       >

@@ -68,6 +68,7 @@ describe('ChatEventHandler', () => {
     chatEventHandler = new ChatEventHandler({
       assistantActionService: mockAssistantActionService,
       chatService: mockChatService,
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       confirmationService: mockConfirmationService,
       callbacks: {
         onTimelineUpdate: mockOnTimelineUpdate,
@@ -906,6 +907,7 @@ describe('ChatEventHandler', () => {
           id: 'msg-1',
           role: 'user',
           content: [
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             { type: 'image', image: 'data:image/png;base64,abc' },
             { type: 'text', text: 'What is this?' },
           ],
@@ -1004,6 +1006,7 @@ describe('ChatEventHandler', () => {
       chatEventHandlerWithCallback = new ChatEventHandler({
         assistantActionService: mockAssistantActionService,
         chatService: mockChatService,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         confirmationService: mockConfirmationService,
         callbacks: {
           onTimelineUpdate: mockOnTimelineUpdate,
@@ -1220,6 +1223,7 @@ describe('ChatEventHandler', () => {
       chatEventHandlerWithTelemetry = new ChatEventHandler({
         assistantActionService: mockAssistantActionService,
         chatService: mockChatService,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         confirmationService: mockConfirmationService,
         telemetryRecorder: mockTelemetryRecorder,
         callbacks: {

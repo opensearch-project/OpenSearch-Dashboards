@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { act } from 'react';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
@@ -265,6 +265,7 @@ describe('useForm() hook', () => {
         OnUpdateHandler
       >;
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       expect(data.raw).toEqual({ 'user.name': 'John' });
       expect(data.format()).toEqual({ user: { name: 'John' } });
       // As we have touched all fields, the validity went from "undefined" to "true"
@@ -317,6 +318,7 @@ describe('useForm() hook', () => {
       expect(data.raw).toEqual({
         title: defaultValue.title,
         subTitle: 'hasBeenOverridden',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'user.name': defaultValue.user.name,
       });
     });

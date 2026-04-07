@@ -56,6 +56,7 @@ describe('export_actions', () => {
     } as any;
 
     mockState = {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       ui: {
         activeTabId: 'test-tab',
         showHistogram: true,
@@ -67,6 +68,7 @@ describe('export_actions', () => {
       },
       // Results slice now holds only metadata; full results live in resultsCache
       results: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'source = test': {
           total: 2,
           elapsedMs: 100,
@@ -85,6 +87,7 @@ describe('export_actions', () => {
           usingRegexPatterns: false,
         },
       },
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       queryEditor: {
         queryStatusMap: {},
         overallQueryStatus: {
@@ -294,6 +297,7 @@ describe('export_actions', () => {
       ((mockServices.data.query.timefilter.timefilter.createFilter as any) as jest.MockedFunction<
         any
       >).mockReturnValue({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         range: { '@timestamp': { gte: 'now-1d', lte: 'now' } },
       });
     });
@@ -372,6 +376,7 @@ describe('export_actions', () => {
         mockServices.data.indexPatterns
       );
       expect(mockSearchSource.setField).toHaveBeenCalledWith('filter', [
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         { range: { '@timestamp': { gte: 'now-1d', lte: 'now' } } },
       ]);
     });

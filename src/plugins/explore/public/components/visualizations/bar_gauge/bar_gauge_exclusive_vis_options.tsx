@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiSwitch, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import React from 'react';
+
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
@@ -42,6 +42,7 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.valueColor', {
       defaultMessage: 'Value Color',
     }),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `valueDisplayOption-value`,
   },
   {
@@ -49,6 +50,7 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.textColor', {
       defaultMessage: 'Text Color',
     }),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `valueDisplayOption-text`,
   },
   {
@@ -56,6 +58,7 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.hidden', {
       defaultMessage: 'Hidden',
     }),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `valueDisplayOption-hidden`,
   },
 ];

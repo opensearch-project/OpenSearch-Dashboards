@@ -11,7 +11,7 @@ import {
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { MemoryRouter, Route } from 'react-router-dom';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { DataSourceSelectionService } from '../../../service/data_source_selection_service';
@@ -134,6 +134,7 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),
@@ -155,6 +156,7 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'INACTIVE',
       }),
@@ -174,6 +176,7 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),
@@ -223,6 +226,7 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),
@@ -278,6 +282,7 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),

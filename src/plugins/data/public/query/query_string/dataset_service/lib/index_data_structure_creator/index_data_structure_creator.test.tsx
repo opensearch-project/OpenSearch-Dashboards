@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { IndexDataStructureCreator } from './index_data_structure_creator';
@@ -65,7 +64,9 @@ const mockHttp = {
       health: 'green',
       status: 'open',
       index: 'test-index',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'docs.count': '1000',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'store.size': '1mb',
     },
   ]),
@@ -89,6 +90,7 @@ const defaultProps = {
 const renderComponent = (props = {}) =>
   render(
     <I18nProvider>
+      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
       <IndexDataStructureCreator {...defaultProps} {...props} />
     </I18nProvider>
   );
@@ -201,7 +203,7 @@ describe('IndexDataStructureCreator', () => {
 
   describe('Mixed Selection (Single + Wildcard)', () => {
     it('handles mixed selection of single indices and wildcards', async () => {
-      const mockOnSelectionChange = jest.fn();
+      jest.fn();
       const { getByTestId } = renderComponent();
 
       // Add single index first

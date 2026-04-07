@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { AgentTracesEmbeddable } from './agent_traces_embeddable';
 import { AgentTracesInput } from './types';
 import { AGENT_TRACES_EMBEDDABLE_TYPE } from './constants';

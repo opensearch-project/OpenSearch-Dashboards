@@ -29,7 +29,7 @@
  */
 
 import { upperFirst, isFunction } from 'lodash';
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import classNames from 'classnames';
 import {
   EuiToolTip,
@@ -69,8 +69,10 @@ function TopNavMenuLegacyItem(props: TopNavMenuLegacyData) {
     onClick: handleClick,
     iconType: props.iconType,
     iconSide: props.iconSide,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': props.testId,
     className: props.className,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'aria-label': props.ariaLabel,
   };
 
@@ -120,6 +122,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   const getComponent = (addTypeClassName: boolean = false) => {
     const className = classNames(props.className, {
       [`osdTopNavGroup--${props.controlType}`]: addTypeClassName,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdTopNavGroup-isDisabled': isDisabled(),
     });
     switch (props.controlType) {
@@ -191,6 +194,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
 
   if (tooltipContent) {
     const className = classNames(`osdTopNavGroup--${props.controlType}`, {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdTopNavGroup-isDisabled': isDisabled(),
     });
     return (

@@ -5,7 +5,7 @@
 
 import { createRoot } from 'react-dom/client';
 import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiText } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart, AppNavLinkStatus, CoreStart } from '../../../core/public';

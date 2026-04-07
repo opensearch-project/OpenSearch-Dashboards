@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerLinks } from './doc_viewer_links';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';

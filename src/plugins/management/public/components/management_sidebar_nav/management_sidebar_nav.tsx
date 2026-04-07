@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 
@@ -141,6 +141,7 @@ export const ManagementSidebarNav = ({
       name: item.tip ? <TooltipWrapper text={name} tip={item.tip} /> : name,
       isSelected: item.id === selectedId,
       icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': item.id,
       ...customParams,
     };

@@ -59,9 +59,12 @@ export function createHistogramConfigs(
       if (dateHistogramAgg) {
         // Create custom TimeBuckets with the desired barTarget, using date formats from UI settings
         const customBuckets = new TimeBuckets({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'histogram:barTarget': customBarTarget,
           dateFormat: uiSettings.get(UI_SETTINGS.DATE_FORMAT),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
         });
 
@@ -83,6 +86,7 @@ export function createHistogramConfigs(
         // because the original buckets property is defined as a getter on the prototype,
         // so simple assignment won't work. This allows us to inject custom TimeBuckets
         // with a different barTarget for traces charts (~20 buckets instead of default).
+        // @ts-expect-error TS2790 TODO(ts-error): fixme
         delete dateHistogramAgg.buckets;
 
         Object.defineProperty(dateHistogramAgg, 'buckets', {

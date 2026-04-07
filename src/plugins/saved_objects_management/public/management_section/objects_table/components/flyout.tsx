@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import { Component, Fragment, ReactNode } from 'react';
 import { take, get as getField } from 'lodash';
 import {
   EuiFlyout,
@@ -597,7 +597,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
               ({
                 text: indexPattern.title,
                 value: indexPattern.id,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'data-test-subj': `indexPatternOption-${indexPattern.title}`,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
               } as { text: string; value: string; 'data-test-subj'?: string })
           );
 

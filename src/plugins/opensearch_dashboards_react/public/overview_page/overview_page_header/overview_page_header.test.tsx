@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { OverviewPageHeader } from './overview_page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { useOpenSearchDashboards } from '../../context';
@@ -93,6 +92,7 @@ describe('OverviewPageHeader ', () => {
 
     const component = shallowWithIntl(<OverviewPageHeader {...props} />);
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const icons = component.find({ 'data-test-subj': 'osdOverviewPageHeaderLogo' });
     expect(icons.length).toBe(0);
   });
@@ -105,6 +105,7 @@ describe('OverviewPageHeader ', () => {
 
     const component = shallowWithIntl(<OverviewPageHeader {...props} />);
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const icons = component.find({ 'data-test-subj': 'osdOverviewPageHeaderLogo' });
     expect(icons.length).toBe(1);
     expect(icons.first().prop('type')).toEqual(props.logos.Mark.url);

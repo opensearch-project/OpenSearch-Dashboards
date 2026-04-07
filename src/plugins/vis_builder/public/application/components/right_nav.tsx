@@ -67,6 +67,7 @@ export const RightNavUI = () => {
     value: name,
     inputDisplay: <OptionItem icon={icon} title={title} />,
     dropdownDisplay: <OptionItem icon={icon} title={title} />,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `visType-${name}`,
   }));
 

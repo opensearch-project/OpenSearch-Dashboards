@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 import { EuiPanel, EuiProgress } from '@elastic/eui';

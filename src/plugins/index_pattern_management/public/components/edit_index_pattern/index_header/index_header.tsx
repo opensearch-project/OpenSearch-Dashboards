@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';

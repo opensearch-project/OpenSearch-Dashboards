@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import {

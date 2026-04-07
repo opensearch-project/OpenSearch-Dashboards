@@ -74,6 +74,7 @@ describe('PrometheusManager', () => {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: 'node_cpu_seconds_total',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         query: { 'match[]': 'node_cpu_seconds_total' },
       });
 
@@ -175,7 +176,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         resourceName: 'up',
@@ -200,7 +201,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS,
         resourceName: undefined,
@@ -223,7 +224,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS,
         resourceName: undefined,
@@ -248,7 +249,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.RULES,
         resourceName: undefined,
@@ -427,6 +428,7 @@ describe('PrometheusManager', () => {
         queryId: 'test-query-id',
         sessionId: 'test-session-id',
         results: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'prom-conn': {
             resultType: 'matrix',
             result: [
@@ -452,6 +454,7 @@ describe('PrometheusManager', () => {
           timeout: 30,
           options: {
             queryType: 'instant',
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             start: '2021-12-01T00:00:00Z',
             end: '2021-12-01T01:00:00Z',
             step: '15s',
@@ -480,6 +483,7 @@ describe('PrometheusManager', () => {
           timeout: 30,
           options: {
             queryType: 'instant',
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             start: '2021-12-01T00:00:00Z',
             end: '2021-12-01T01:00:00Z',
             step: '15s',

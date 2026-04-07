@@ -28,7 +28,7 @@
  * under the License.
  */
 
-const babelEslint = require('babel-eslint');
+const babelEslint = require('@babel/eslint-parser');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 
@@ -61,23 +61,48 @@ module.exports = {
           const options = context.options[0] || {};
           const licenses = options.licenses;
 
+          // Debug logging to understand the structure
+          if (!licenses) {
+            console.error('require-license-header: licenses option not found');
+            console.error('context.options:', JSON.stringify(context.options, null, 2));
+            console.error('options:', JSON.stringify(options, null, 2));
+          }
+
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
-            const parsed = babelEslint.parse(license);
-            assert(
-              !parsed.body.length,
-              `"licenses[${i}]" option must only include a single comment`
-            );
-            assert(
-              parsed.comments.length === 1,
-              `"licenses[${i}]" option must only include a single comment`
-            );
+            try {
+              const parsed = babelEslint.parse(license, {
+                sourceType: 'module',
+                allowImportExportEverywhere: true,
+                allowReturnOutsideFunction: true,
+                ranges: true,
+                attachComments: true,
+              });
+              assert(
+                !parsed.body.length,
+                `"licenses[${i}]" option must only include a single comment`
+              );
+              assert(
+                parsed.comments.length === 1,
+                `"licenses[${i}]" option must only include a single comment`
+              );
 
-            return {
-              source: license,
-              nodeValue: normalizeWhitespace(parsed.comments[0].value),
-            };
+              return {
+                source: license,
+                nodeValue: normalizeWhitespace(parsed.comments[0].value),
+              };
+            } catch (parseError) {
+              // If babel parsing fails, try a simpler approach
+              const commentMatch = license.match(/\/\*(.*?)\*\//s);
+              if (commentMatch) {
+                return {
+                  source: license,
+                  nodeValue: normalizeWhitespace(commentMatch[1]),
+                };
+              }
+              throw new Error(`Failed to parse license[${i}]: ${parseError.message}`);
+            }
           });
         });
 

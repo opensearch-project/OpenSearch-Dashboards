@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
@@ -78,6 +78,7 @@ test('HelloWorldContainer initializes embeddables', (done) => {
     {
       id: '123',
       panels: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '123': {
           explicitInput: { id: '123', firstName: 'Sam' },
           type: CONTACT_CARD_EMBEDDABLE,

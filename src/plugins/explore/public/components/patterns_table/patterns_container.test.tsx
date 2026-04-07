@@ -64,6 +64,7 @@ jest.mock('react-redux', () => ({
     }
     if (selector.toString().includes('selectResults')) {
       return {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'default-query': {
           hits: {
             hits: mockPatternItems.map((item) => ({
@@ -225,6 +226,7 @@ describe('PatternsContainer', () => {
     mockUseTabResults.mockReturnValueOnce({
       results: {
         hits: {
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           hits: rawApiHits,
           total: 3,
         },

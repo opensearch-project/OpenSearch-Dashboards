@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { UiSettingScope } from 'opensearch-dashboards/public';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';

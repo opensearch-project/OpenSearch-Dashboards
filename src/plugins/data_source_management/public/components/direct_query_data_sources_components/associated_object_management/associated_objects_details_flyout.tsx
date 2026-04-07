@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
@@ -164,6 +164,7 @@ export const AssociatedObjectsDetailsFlyout = ({
     {
       field: 'name',
       name: 'Name',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'accelerationName',
       render: (_: string, item: CachedAcceleration) => {
         // @ts-expect-error TS2554 TODO(ts-error): fixme
@@ -245,11 +246,13 @@ export const AssociatedObjectsDetailsFlyout = ({
     {
       field: 'name',
       name: 'Column Name',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'columnName',
     },
     {
       field: 'dataType',
       name: 'Data Type',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'columnDataType',
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;

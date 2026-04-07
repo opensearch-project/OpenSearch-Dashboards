@@ -12,7 +12,7 @@
 import './_table_header.scss';
 
 import { i18n } from '@osd/i18n';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../../helpers/data_table_helper';
 
@@ -74,6 +74,7 @@ const buildColumnTooltip = (columnName: string, displayName: ReactNode): ReactNo
 const sortDirectionToIcon: Record<string, string> = {
   desc: 'sortDown',
   asc: 'sortUp',
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   '': 'sortable',
 };
 

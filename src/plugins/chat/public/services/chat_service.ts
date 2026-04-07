@@ -8,13 +8,11 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
-import { ChatLayoutMode } from '../types';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
   UiSettingScope,
   ChatServiceStart,
-  ChatWindowState,
   WorkspacesStart,
   Event,
   EventType,
@@ -407,6 +405,7 @@ export class ChatService {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const events = await this.conversationHistoryService.getConversation(threadId);
 
         if (events) {

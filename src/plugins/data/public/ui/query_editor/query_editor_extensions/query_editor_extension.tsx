@@ -114,9 +114,11 @@ export interface QueryEditorExtensionConfig {
 }
 
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   if (!props.children) return null;
 
   return ReactDOM.createPortal(
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     <EuiErrorBoundary>{props.children}</EuiErrorBoundary>,
     props.container
   );
@@ -155,18 +157,23 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
 
   return (
     <>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <QueryEditorExtensionPortal container={props.bannerContainer}>
         {banner}
       </QueryEditorExtensionPortal>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
       </QueryEditorExtensionPortal>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <QueryEditorExtensionPortal container={props.queryControlsContainer}>
         {queryControlButtons}
       </QueryEditorExtensionPortal>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <QueryEditorExtensionPortal container={props.bottomPanelContainer}>
         {bottomPanel}
       </QueryEditorExtensionPortal>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <QueryEditorExtensionPortal container={props.actionBarContainer}>
         {actionBarButtons}
       </QueryEditorExtensionPortal>

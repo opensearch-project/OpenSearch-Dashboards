@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';

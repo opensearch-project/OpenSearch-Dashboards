@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../data/common';
 import { ExploreServices } from '../../../types';

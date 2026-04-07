@@ -29,7 +29,7 @@
  */
 
 import { I18nStart } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavControls, TopNavControlsProps } from './top_nav_controls';
 import { TopNavMenu, TopNavMenuProps } from './top_nav_menu';

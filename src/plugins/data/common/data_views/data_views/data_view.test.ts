@@ -101,6 +101,7 @@ function createWithDataSource(id: string) {
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new DataView({
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
     savedObjectsClient,
     fieldFormats: fieldFormatsMock,
@@ -337,6 +338,7 @@ describe('DataViewWithDataSource', () => {
           id: 'test-nested-array',
           type: 'index-pattern',
           fields: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'nested_test1.d_values': {
               count: 0,
               name: 'nested_test1.d_values',
@@ -352,6 +354,7 @@ describe('DataViewWithDataSource', () => {
                 },
               },
             },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'nested_test1.s_entry': {
               count: 0,
               name: 'nested_test1.s_entry',

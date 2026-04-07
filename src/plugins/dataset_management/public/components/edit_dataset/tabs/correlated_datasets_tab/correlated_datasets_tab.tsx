@@ -4,14 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiCallOut,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataView } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
@@ -74,6 +67,7 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
           action: editingCorrelation ? 'updated' : 'created',
         },
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'correlationSaveSuccessToast',
     });
   }, [editingCorrelation, refetch, onCountChange, notifications]);
@@ -87,6 +81,7 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
           title: i18n.translate('datasetManagement.correlatedDatasets.deleteSuccess', {
             defaultMessage: 'Correlation has been deleted',
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'correlationDeleteSuccessToast',
         });
         await refetch();
@@ -98,6 +93,7 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
           title: i18n.translate('datasetManagement.correlatedDatasets.deleteError', {
             defaultMessage: 'Failed to delete correlation',
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'correlationDeleteErrorToast',
         });
       }

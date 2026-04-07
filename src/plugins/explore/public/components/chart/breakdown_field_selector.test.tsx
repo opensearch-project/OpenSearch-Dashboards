@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -71,6 +70,7 @@ describe('BreakdownFieldSelector', () => {
           isDirty: false,
           lineCount: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: 'logs',
           showHistogram: true,
@@ -84,6 +84,7 @@ describe('BreakdownFieldSelector', () => {
             type: 'INDEX_PATTERN',
           },
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         queryEditor: {
           breakdownField,
           queryStatusMap,
@@ -208,6 +209,7 @@ describe('BreakdownFieldSelector', () => {
 
   it('displays error icon when breakdown query has error and standard query does not', () => {
     const queryStatusMap = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'histogram:breakdown:PPL:source=logs | head 10': {
         status: 'error',
         error: {
@@ -216,6 +218,7 @@ describe('BreakdownFieldSelector', () => {
           },
         },
       },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'histogram:PPL:source=logs | head 10': {
         status: 'success',
       },
@@ -230,6 +233,7 @@ describe('BreakdownFieldSelector', () => {
 
   it('does not display error icon when standard query also has error', () => {
     const queryStatusMap = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'histogram:breakdown:PPL:source=logs | head 10': {
         status: 'error',
         error: {
@@ -238,6 +242,7 @@ describe('BreakdownFieldSelector', () => {
           },
         },
       },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'histogram:PPL:source=logs | head 10': {
         status: 'error',
         error: {
@@ -255,6 +260,7 @@ describe('BreakdownFieldSelector', () => {
 
   it('does not display error icon when no breakdown field is selected', () => {
     const queryStatusMap = {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'histogram:PPL:source=logs | head 10': {
         status: 'success',
       },
@@ -270,6 +276,7 @@ describe('BreakdownFieldSelector', () => {
   it('shows loading state when isLoading is true', () => {
     (useDatasetContext as jest.MockedFunction<typeof useDatasetContext>).mockReturnValueOnce({
       dataset: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         fields: {
           getAll: jest.fn(() => []),
         },
@@ -288,6 +295,7 @@ describe('BreakdownFieldSelector', () => {
     (useDatasetContext as jest.MockedFunction<typeof useDatasetContext>).mockReturnValueOnce({
       dataset: {
         fields: {
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           getAll: jest.fn(() => [
             { name: 'numericField', displayName: 'Numeric Field', type: 'number', scripted: false },
           ]),

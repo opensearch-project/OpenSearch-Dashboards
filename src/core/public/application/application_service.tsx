@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
@@ -512,6 +511,7 @@ export class ApplicationService {
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'appLeaveConfirmModal',
       });
       if (!confirmed) {

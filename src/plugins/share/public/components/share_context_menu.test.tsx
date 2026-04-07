@@ -32,7 +32,6 @@ import { ShareMenuItem } from '../types';
 
 jest.mock('../lib/url_shortener', () => ({}));
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ShareContextMenu } from './share_context_menu';

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, FC, ReactNode } from 'react';
+import { createContext, useContext, FC, ReactNode } from 'react';
 
 interface VisualizationEditorContextValue {
   originatingApp?: string;

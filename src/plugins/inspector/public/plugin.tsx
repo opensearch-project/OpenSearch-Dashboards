@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import * as React from 'react';
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { InspectorViewRegistry } from './view_registry';
@@ -114,6 +114,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
       return core.overlays.openFlyout(
         toMountPoint(<InspectorPanel views={views} adapters={adapters} title={options.title} />),
         {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'inspectorPanel',
           closeButtonAriaLabel: closeButtonLabel,
         }

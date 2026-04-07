@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpanMetadataTab } from './span_metadata_tab';
 
@@ -54,9 +53,13 @@ describe('SpanMetadataTab', () => {
       const spanWithHttpAttributes = {
         spanId: 'test-span-http',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.url': 'https://api.example.com/users',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 200,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.user_agent': 'Mozilla/5.0',
         },
       };
@@ -84,11 +87,17 @@ describe('SpanMetadataTab', () => {
       const spanWithInfraAttributes = {
         spanId: 'test-span-infra',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'aws.region': 'us-west-2',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'aws.availability_zone': 'us-west-2a',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'cloud.provider': 'aws',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'host.name': 'web-server-01',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'k8s.pod.name': 'backend-pod-123',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'container.id': 'abc123def456',
         },
       };
@@ -116,10 +125,15 @@ describe('SpanMetadataTab', () => {
       const spanWithAppAttributes = {
         spanId: 'test-span-app',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'service.version': '1.2.3',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'app.name': 'user-management',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'code.function': 'processUserData',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'thread.id': 12345,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'platform.version': 'Java 11',
         },
       };
@@ -147,7 +161,9 @@ describe('SpanMetadataTab', () => {
       const spanWithGeneralAttributes = {
         spanId: 'test-span-general',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'custom.attribute': 'custom-value',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'business.unit': 'engineering',
           environment: 'production',
           team: 'backend-team',
@@ -180,15 +196,22 @@ describe('SpanMetadataTab', () => {
         spanId: 'test-span-mixed',
         attributes: {
           // HTTP
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'POST',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 201,
           // Infrastructure
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'aws.region': 'eu-west-1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'host.name': 'server-02',
           // Application
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'service.version': '2.0.0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'app.name': 'mixed-app',
           // General
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'custom.field': 'custom-data',
           environment: 'staging',
         },
@@ -215,6 +238,7 @@ describe('SpanMetadataTab', () => {
       const spanWithEmptyValues = {
         spanId: 'test-span-empty',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'valid.value': 'not-empty',
           // Note: empty values are filtered out by formatSpanAttributes, so we only test valid values
         },
@@ -233,7 +257,9 @@ describe('SpanMetadataTab', () => {
       const spanWithObjectValues = {
         spanId: 'test-span-objects',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'simple.object': { key: 'value', number: 42 },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'nested.object': {
             level1: {
               level2: {
@@ -242,7 +268,9 @@ describe('SpanMetadataTab', () => {
               },
             },
           },
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'array.value': ['item1', 'item2', 'item3'],
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'string.value': 'simple-string',
         },
       };
@@ -272,6 +300,7 @@ describe('SpanMetadataTab', () => {
       const spanWithAttributes = {
         spanId: 'test-span-filter',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
         },
       };
@@ -299,8 +328,11 @@ describe('SpanMetadataTab', () => {
         spanId: 'test-span-resource',
         resource: {
           attributes: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'service.name': 'my-service',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'service.version': '1.0.0',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'deployment.environment': 'production',
           },
         },
@@ -330,9 +362,13 @@ describe('SpanMetadataTab', () => {
       const spanWithAttributes = {
         spanId: 'test-span-accordion',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'aws.region': 'us-east-1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'service.version': '1.0.0',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'custom.field': 'value',
         },
       };
@@ -357,6 +393,7 @@ describe('SpanMetadataTab', () => {
       const spanWithAttributes = {
         spanId: 'test-span-toggle',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'POST',
         },
       };
@@ -382,7 +419,9 @@ describe('SpanMetadataTab', () => {
       const spanWithOnlyHttpAttributes = {
         spanId: 'test-span-http-only',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 200,
         },
       };
@@ -501,8 +540,11 @@ describe('SpanMetadataTab', () => {
       const generalAttributes = {
         spanId: 'test-general',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'unknown.attribute': 'value1',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'random.field': 'value2',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'business.logic': 'value3',
         },
       };
@@ -523,10 +565,13 @@ describe('SpanMetadataTab', () => {
       const mixedCaseSpan = {
         spanId: 'mixed-case',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'HTTP.METHOD': 'GET',
           // eslint-disable-next-line @typescript-eslint/naming-convention
           'Http.Status_Code': 200,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'AWS.REGION': 'us-west-2',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'Service.Version': '1.0.0',
         },
       };
@@ -547,12 +592,16 @@ describe('SpanMetadataTab', () => {
       const spanWithBothTypes = {
         spanId: 'test-both',
         attributes: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'custom.field': 'value1',
         },
         resource: {
           attributes: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'service.name': 'my-service',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'deployment.env': 'prod',
           },
         },

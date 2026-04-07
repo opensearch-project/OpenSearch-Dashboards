@@ -10,7 +10,7 @@ import {
   SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { ACCELERATION_INDEX_TYPES } from '../../../../framework/constants';
 import { AssociatedObject, CachedAcceleration } from '../../../../framework/types';
@@ -69,6 +69,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Name',
       }),
       sortable: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'nameCell',
       render: (name: string, item: AssociatedObject) => (
         <EuiLink

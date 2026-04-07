@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
+import { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@osd/i18n';
@@ -98,6 +98,7 @@ const VisLegendItemComponent = ({
         values: { legendDataLabel: item.label },
       }),
       iconType: 'plusInCircle',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': `legend-${item.label}-filterIn`,
     },
     {
@@ -107,6 +108,7 @@ const VisLegendItemComponent = ({
         values: { legendDataLabel: item.label },
       }),
       iconType: 'minusInCircle',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': `legend-${item.label}-filterOut`,
     },
   ];

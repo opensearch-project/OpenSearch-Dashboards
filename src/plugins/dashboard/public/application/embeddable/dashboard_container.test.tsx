@@ -50,7 +50,7 @@ import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helper
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import React from 'react';
+
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from 'test_utils/helpers';
@@ -79,6 +79,7 @@ beforeEach(() => {
 test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,
@@ -129,6 +130,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
 test('Container view mode change propagates to existing children', async () => {
   const initialInput = getSampleDashboardInput({
     panels: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,

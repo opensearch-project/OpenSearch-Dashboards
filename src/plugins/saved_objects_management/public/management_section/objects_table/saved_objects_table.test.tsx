@@ -38,7 +38,6 @@ import {
   saveAsMock,
 } from './saved_objects_table.test.mocks';
 
-import React from 'react';
 import { Query } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
 import { ShallowWrapper } from 'enzyme';
@@ -145,6 +144,7 @@ describe('SavedObjectsTable', () => {
 
     getSavedObjectCountsMock.mockReturnValue({
       type: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'index-pattern': 0,
         visualization: 0,
         dashboard: 0,

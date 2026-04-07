@@ -241,7 +241,7 @@ describe('SavedObjectsService', () => {
           Promise.reject(new opensearchErrors.NoLivingConnectionsError('reason', {} as any))
         )
         .mockImplementationOnce(() =>
-          opensearchClientMock.createSuccessTransportRequestPromise('success')
+          opensearchClientMock.createSuccessTransportRequestPromise({ success: true })
         );
 
       await soService.setup(coreSetup);

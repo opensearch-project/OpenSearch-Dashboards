@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { DefaultDiscoverTable } from './default_discover_table';
@@ -52,12 +51,14 @@ describe('DefaultDiscoverTable', () => {
       fields: {
         textField: `value${key}`,
         longField: key,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '@timestamp': new Date((1720000000 + key) * 1000),
       },
     };
   });
 
   const getDefaultDiscoverTable = (hitsOverride?: OpenSearchSearchHit[]) => (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <DefaultDiscoverTable
         columns={['textField', 'longField', '@timestamp']}

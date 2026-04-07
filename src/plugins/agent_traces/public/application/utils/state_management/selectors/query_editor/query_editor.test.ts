@@ -26,6 +26,7 @@ import { EditorMode, QueryExecutionStatus, QueryResultStatus } from '../../types
 
 describe('query_editor selectors', () => {
   const createMockState = (queryEditorState: Partial<RootState['queryEditor']>): RootState => ({
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     queryEditor: {
       queryStatusMap: {},
       overallQueryStatus: {

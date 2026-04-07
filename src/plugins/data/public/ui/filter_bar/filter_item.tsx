@@ -31,7 +31,7 @@
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl } from '@osd/i18n/react';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect } from 'react';
+import { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -137,10 +137,15 @@ export function FilterItem(props: Props) {
     return classNames(
       'globalFilterItem',
       {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterItem-isDisabled': isDisabled(labelConfig),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterItem-isError': labelConfig.status === FILTER_ITEM_ERROR,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterItem-isWarning': labelConfig.status === FILTER_ITEM_WARNING,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterItem-isPinned': isFilterPinned(filter),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterItem-isExcluded': negate,
       },
       props.className
@@ -179,6 +184,7 @@ export function FilterItem(props: Props) {
               setIsPopoverOpen(false);
               onTogglePinned();
             },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'pinFilter',
           },
           {
@@ -188,6 +194,7 @@ export function FilterItem(props: Props) {
             }),
             icon: 'pencil',
             panel: 1,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'editFilter',
           },
           {
@@ -205,6 +212,7 @@ export function FilterItem(props: Props) {
               setIsPopoverOpen(false);
               onToggleNegated();
             },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'negateFilter',
           },
           {
@@ -222,6 +230,7 @@ export function FilterItem(props: Props) {
               setIsPopoverOpen(false);
               onToggleDisabled();
             },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'disableFilter',
           },
           {
@@ -234,6 +243,7 @@ export function FilterItem(props: Props) {
               setIsPopoverOpen(false);
               props.onRemove();
             },
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'deleteFilter',
           },
         ],

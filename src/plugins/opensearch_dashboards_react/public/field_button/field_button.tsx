@@ -30,7 +30,7 @@
 
 import './field_button.scss';
 import classNames from 'classnames';
-import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { CommonProps } from '@elastic/eui';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
@@ -104,7 +104,9 @@ export function FieldButton({
   const classes = classNames(
     'osdFieldButton',
     size ? sizeToClassNameMap[size] : null,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'osdFieldButton-isActive': isActive },
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'osdFieldButton--isDraggable': isDraggable },
     className
   );

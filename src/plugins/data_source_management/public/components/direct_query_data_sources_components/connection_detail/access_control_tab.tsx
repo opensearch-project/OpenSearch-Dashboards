@@ -11,7 +11,7 @@ import {
   EuiHorizontalRule,
   EuiSmallButton,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectionManagementCallout } from './utils/connection_management_callout';
 import { DataSourceManagementContext, Role } from '../../../types';

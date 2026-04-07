@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { render, mount } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
 
@@ -36,6 +34,7 @@ const props = {
     isHidden: false,
   }),
   options: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'sidecar-component-wrapper',
   },
   setSidecarConfig: jest.fn(),

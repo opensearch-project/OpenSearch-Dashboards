@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { HierarchySpanCell } from './hierarchy_span_cell';
 import { ParsedHit, SpanTableProps } from './types';
@@ -32,6 +31,7 @@ describe('HierarchySpanCell', () => {
     name: 'test-operation',
     level: 0,
     children: [],
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'status.code': 0,
     ...overrides,
   });
@@ -130,6 +130,7 @@ describe('HierarchySpanCell', () => {
   });
 
   it('displays error icon for error spans', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const item = createMockItem({ 'status.code': 2 });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 

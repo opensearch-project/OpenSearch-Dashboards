@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import MetricVisComponent, { MetricVisComponentProps } from './metric_vis_component';
@@ -47,6 +46,7 @@ type Props = MetricVisComponentProps;
 
 const baseVisData = {
   columns: [{ id: 'col-0', name: 'Count' }],
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   rows: [{ 'col-0': 4301021 }],
 } as any;
 
@@ -96,6 +96,7 @@ describe('MetricVisComponent', function () {
           { id: 'col-0', name: '1st percentile of bytes' },
           { id: 'col-1', name: '99th percentile of bytes' },
         ],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
       },
       visParams: {

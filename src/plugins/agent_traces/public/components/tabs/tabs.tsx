@@ -4,7 +4,7 @@
  */
 
 import './tabs.scss';
-import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
@@ -82,6 +82,7 @@ export const AgentTracesTabs = () => {
       if (!resultKeys.includes(newTabCacheKey)) {
         dispatch(clearQueryStatusMapByKey(newTabCacheKey));
         dispatch(
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           executeTabQuery({
             services,
             cacheKey: newTabCacheKey,

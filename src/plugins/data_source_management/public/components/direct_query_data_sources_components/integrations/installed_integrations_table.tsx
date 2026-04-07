@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, CSSProperties, useEffect } from 'react';
+import { useState, CSSProperties, useEffect } from 'react';
 import {
   EuiSpacer,
   EuiPanel,
@@ -88,6 +88,7 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
       <EuiFlexItem grow={false}>
         <EuiText textAlign="center">
           {/* Default margin is too wide -- compress it a bit */}
+          {/* eslint-disable-next-line @typescript-eslint/naming-convention */}
           <p style={{ 'margin-bottom': '8px' } as CSSProperties}>
             <b>There are no installed Integrations</b>
             <br />
@@ -158,7 +159,6 @@ export const InstallIntegrationFlyout = ({
           http={http}
         />
       ) : (
-        // @ts-expect-error TS2786 TODO(ts-error): fixme
         <SetupIntegrationForm
           selectedClusterName={selectedClusterName}
           selectedDataSourceId={selectedDataSourceId}

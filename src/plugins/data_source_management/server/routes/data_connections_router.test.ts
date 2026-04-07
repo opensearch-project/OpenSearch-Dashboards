@@ -4,7 +4,7 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { httpServerMock, coreMock, httpServiceMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { registerDataConnectionsRoute } from './data_connections_router';
 import { DataConnectionType } from '../../../data_source/common/data_connections';
 
@@ -60,6 +60,7 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },
@@ -82,6 +83,7 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },
@@ -163,6 +165,7 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },
@@ -184,6 +187,7 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },

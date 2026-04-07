@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { AggParamType, IAggConfig, AggGroupNames } from '../../../../data/public';

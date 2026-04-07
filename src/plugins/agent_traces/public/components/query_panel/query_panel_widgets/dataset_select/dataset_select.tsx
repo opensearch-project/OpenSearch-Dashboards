@@ -3,25 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
 import { convertIndexPatternTerminology } from '../../../../../../opensearch_dashboards_utils/public';
 import { AgentTracesServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
-import { selectQuery } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
 import { AGENT_TRACES_DEFAULT_LANGUAGE } from '../../../../../common';
 import './dataset_select_terminology.scss';
-import { AgentTracesFlavor } from '../../../../../common';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
   const flavorId = useFlavorId();
   const dispatch = useDispatch();
-  const currentQuery = useSelector(selectQuery);
   const clearEditors = useClearEditors();
   const { isDatasetManagementEnabled } = services;
 

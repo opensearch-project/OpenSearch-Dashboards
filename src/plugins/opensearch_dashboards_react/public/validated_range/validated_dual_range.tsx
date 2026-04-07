@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { Component, ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
@@ -130,6 +130,7 @@ export class ValidatedDualRange extends Component<Props> {
           value={this.state.value}
           onChange={this._onChange}
           minInputProps={{
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'aria-label': i18n.translate(
               'opensearch-dashboards-react.dualRangeControl.minInputAriaLabel',
               {
@@ -138,6 +139,7 @@ export class ValidatedDualRange extends Component<Props> {
             ),
           }}
           maxInputProps={{
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'aria-label': i18n.translate(
               'opensearch-dashboards-react.dualRangeControl.maxInputAriaLabel',
               {

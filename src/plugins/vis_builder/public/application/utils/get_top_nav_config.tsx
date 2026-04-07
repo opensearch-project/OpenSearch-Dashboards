@@ -168,15 +168,10 @@ export const getTopNavConfig = (
 };
 
 export const getOnSave = (
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
   savedVisBuilderVis,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
   originatingApp,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
   visualizationIdFromUrl,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
   dispatch,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
   services
 ) => {
   const onSave = async ({
@@ -224,6 +219,7 @@ export const getOnSave = (
               visTitle: savedVisBuilderVis.title,
             },
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
@@ -275,6 +271,7 @@ export const getOnSave = (
           },
         }),
         text: error.message,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'saveVisualizationError',
       });
 
@@ -326,7 +323,6 @@ export const getNavActions = (
   };
   navActions.saveAndReturn = saveAndReturnNavAction;
 
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const saveNavAction = (_anchorElement) => {
     const saveModal = (
       <SavedObjectSaveModalOrigin

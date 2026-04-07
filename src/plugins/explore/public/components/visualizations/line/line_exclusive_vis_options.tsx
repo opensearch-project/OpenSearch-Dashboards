@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { useDebouncedNumber } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -114,6 +114,7 @@ export const LineExclusiveVisOptions = ({
           options={lineModeOptions.map((option) => ({
             id: option.value,
             label: option.text,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': `lineMode-${option.value}`,
           }))}
           idSelected={lineMode}

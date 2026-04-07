@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
 import { useObservable } from 'react-use';
@@ -196,6 +196,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'agentTracesAddToNewDashboardSuccessToast',
           });
         } else {
@@ -206,6 +207,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'agentTracesAddToExistingDashboardSuccessToast',
           });
         }
@@ -218,6 +220,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
           defaultMessage: 'Fail to add to dashboard',
         }),
         text: (error as Error).message || String(error),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'agentTracesAddToDashboardFailToast',
       });
 

@@ -208,6 +208,7 @@ class SavedObjectFinderUi extends React.Component<
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(
             obj.attributes.title!,
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             obj.references,
             getDataSource
           );
@@ -535,6 +536,7 @@ class SavedObjectFinderUi extends React.Component<
             )}
           </EuiFilterGroup>
         </EuiFlexItem>
+        {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
         {this.props.children ? <EuiFlexItem grow={false}>{this.props.children}</EuiFlexItem> : null}
       </EuiFlexGroup>
     );

@@ -30,7 +30,7 @@
 
 import { EuiHeaderBreadcrumbs, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
@@ -77,6 +77,7 @@ export function HeaderBreadcrumbs({
 
   crumbs = crumbs.map((breadcrumb, i) => ({
     ...breadcrumb,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': classNames(
       'breadcrumb',
       breadcrumb['data-test-subj'],

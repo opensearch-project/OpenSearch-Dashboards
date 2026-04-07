@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment, PureComponent } from 'react';
+import { Fragment, PureComponent } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSearchBar, EuiFormErrorText, Query } from '@elastic/eui';
 import { getCategoryName } from '../../lib';
@@ -79,7 +79,9 @@ export class Search extends PureComponent<SearchProps> {
 
     const box = {
       incremental: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'settingsSearchBar',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'aria-label': i18n.translate('advancedSettings.searchBarAriaLabel', {
         defaultMessage: 'Search advanced settings',
       }), // hack until EuiSearchBar is fixed

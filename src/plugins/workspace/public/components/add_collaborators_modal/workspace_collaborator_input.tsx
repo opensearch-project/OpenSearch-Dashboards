@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -52,6 +52,7 @@ export const WorkspaceCollaboratorInput = ({
   collaboratorIdInputPlaceholder,
 }: WorkspaceCollaboratorInputProps) => {
   const handleCollaboratorIdChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (e) => {
       onCollaboratorIdChange(e.target.value, index);
     },

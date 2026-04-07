@@ -4,7 +4,7 @@
  */
 
 import { Fragment, useEffect, useState, useCallback, useRef } from 'react';
-import React from 'react';
+
 import {
   EuiText,
   EuiModal,
@@ -334,6 +334,7 @@ export const AssociationDataSourceModalContent = ({
           searchable
           listProps={{ bordered: true, onFocusBadge: false }}
           searchProps={{
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'workspace-detail-dataSources-associateModal-search',
             placeholder: i18n.translate(
               'workspace.detail.dataSources.associateModal.searchPlaceholder',

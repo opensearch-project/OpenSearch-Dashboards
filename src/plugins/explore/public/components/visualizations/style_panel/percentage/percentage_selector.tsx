@@ -4,7 +4,7 @@
  */
 
 import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import React from 'react';
+
 import { i18n } from '@osd/i18n';
 import { PercentageColor } from '../../types';
 

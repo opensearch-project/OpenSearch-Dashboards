@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
@@ -230,6 +229,7 @@ describe('TableCell', () => {
           name: 'test-operation',
           startTimeUnixNano: '1634567890000000000',
           endTimeUnixNano: '1634567891000000000',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'status.code': '200',
         },
       },
@@ -321,6 +321,7 @@ describe('TableCell', () => {
           },
           spanId: 'test-span-id-123',
           parentSpanId: 'test-parent-span-id-789',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'status.code': '200',
         },
       };
@@ -349,6 +350,7 @@ describe('TableCell', () => {
             name: 'test-operation',
             startTimeUnixNano: '1634567890000000000',
             endTimeUnixNano: '1634567891000000000',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'status.code': '200',
             // Missing traceId - validation should fail
           },
@@ -420,6 +422,7 @@ describe('TableCell', () => {
           name: 'test-operation',
           startTimeUnixNano: '1634567890000000000',
           endTimeUnixNano: '1634567891000000000',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'status.code': '200',
         },
       },

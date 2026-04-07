@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
@@ -77,6 +76,7 @@ export class ContactCardEmbeddableFactory
           />
         ),
         {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'createContactCardEmbeddable',
         }
       );

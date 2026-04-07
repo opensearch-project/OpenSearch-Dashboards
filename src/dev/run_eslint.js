@@ -28,22 +28,64 @@
  * under the License.
  */
 
-import { parse } from 'eslint/lib/options';
+const { ESLint } = require('eslint');
 
-const options = parse(process.argv);
-process.env.OPENSEARCH_DASHBOARDS_RESOLVER_HARD_CACHE = 'true';
+async function run() {
+  // Parse command line arguments manually since ESLint 8.x doesn't export options parser
+  const args = process.argv.slice(2);
+  const hasFiles = args.some((arg) => !arg.startsWith('-') && arg !== 'scripts/eslint.js');
+  const hasPrintConfig = args.includes('--print-config');
+  const hasCache = !args.includes('--no-cache');
+  const hasExt = args.includes('--ext');
 
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
+  process.env.OPENSEARCH_DASHBOARDS_RESOLVER_HARD_CACHE = 'true';
+
+  // Build ESLint options
+  const options = {
+    cache: hasCache,
+    extensions: hasExt ? undefined : ['.js', '.mjs', '.ts', '.tsx'],
+  };
+
+  // Determine what to lint
+  let filesToLint = ['.'];
+  if (hasFiles && !hasPrintConfig) {
+    filesToLint = args.filter((arg) => !arg.startsWith('-'));
+  }
+
+  try {
+    const eslint = new ESLint(options);
+
+    if (hasPrintConfig) {
+      // Handle --print-config
+      const configFile = args[args.indexOf('--print-config') + 1];
+      const config = await eslint.calculateConfigForFile(configFile || '.');
+      console.log(JSON.stringify(config, null, 2));
+      return;
+    }
+
+    // Lint files
+    const results = await eslint.lintFiles(filesToLint);
+
+    // Output results
+    const formatter = await eslint.loadFormatter('stylish');
+    const resultText = formatter.format(results);
+
+    if (resultText) {
+      console.log(resultText);
+    }
+
+    // Exit with error code if there are errors
+    const hasErrors = results.some((result) => result.errorCount > 0);
+    if (hasErrors) {
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error('ESLint error:', error.message);
+    process.exit(1);
+  }
 }
 
-if (!process.argv.includes('--no-cache')) {
-  process.argv.push('--cache');
-}
-
-if (!process.argv.includes('--ext')) {
-  process.argv.push('--ext', '.js,.mjs,.ts,.tsx');
-}
-
-// common-js is required so that logic before this executes before loading eslint
-require('eslint/bin/eslint');
+run().catch((error) => {
+  console.error('Unexpected error:', error);
+  process.exit(1);
+});

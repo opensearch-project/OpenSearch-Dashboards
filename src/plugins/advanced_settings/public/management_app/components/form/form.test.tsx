@@ -28,12 +28,9 @@
  * under the License.
  */
 
-import React, { act } from 'react';
-import ReactDOM from 'react-dom';
+import { act } from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
-
-import { findTestSubject } from 'test_utils/helpers';
 
 import { notificationServiceMock } from '../../../../../../core/public/mocks';
 import { SettingsChanges } from '../../types';
@@ -54,6 +51,7 @@ beforeAll(() => {
   document.body.appendChild(appWrapper);
 
   const localStorage: Record<string, any> = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'core.chrome.isLocked': true,
   };
 
@@ -238,6 +236,7 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dashboard:test:setting': {
             value: 'changedValue',
           },
@@ -280,6 +279,7 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dashboard:test:setting': {
             value: 'changedValue',
           },
@@ -297,6 +297,7 @@ describe('Form', () => {
     });
 
     expect(save).toHaveBeenCalled();
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     await save({ 'dashboard:test:setting': 'changedValue' });
     expect(toasts.add).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -327,6 +328,7 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'general:test:array': {
             value: '',
           },
@@ -343,6 +345,7 @@ describe('Form', () => {
       saveButton.click();
     });
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(save).toHaveBeenCalledWith({ 'general:test:array': [] });
   });
 
@@ -366,6 +369,7 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'general:test:array': {
             value: 'test1, test2',
           },
@@ -382,6 +386,7 @@ describe('Form', () => {
       saveButton.click();
     });
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(save).toHaveBeenCalledWith({ 'general:test:array': ['test1', 'test2'] });
   });
 });

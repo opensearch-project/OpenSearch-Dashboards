@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { debounce, compact, get, each, cloneDeep, last, map } from 'lodash';
@@ -410,6 +410,7 @@ function TimelineVisComponent({
           filters: [
             {
               range: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 '*': {
                   gte: ranges.xaxis.from,
                   lte: ranges.xaxis.to,

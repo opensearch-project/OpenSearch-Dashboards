@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { act } from 'react';
 import { mount } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react';
 import { MountPoint } from 'opensearch-dashboards/public';

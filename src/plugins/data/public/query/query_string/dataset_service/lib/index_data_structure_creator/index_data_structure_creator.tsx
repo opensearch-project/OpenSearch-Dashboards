@@ -43,7 +43,9 @@ interface IndexInfo {
   health: string;
   status: string;
   index: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'docs.count': string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'store.size': string;
 }
 
@@ -630,6 +632,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                                   onClick={() => handleInfoIconClick(itemIndex, item)}
                                   className="indexDataStructureCreator__wildcardButton"
                                 >
+                                  {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
                                   <EuiText size="xs" color="primary">
                                     {matchingIndices.length}{' '}
                                     {matchingIndices.length === 1 ? 'index' : 'indices'}

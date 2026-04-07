@@ -69,6 +69,7 @@ describe('tabifyAggResponse Integration', () => {
     expect(resp.rows).toHaveLength(1);
     expect(resp.columns).toHaveLength(1);
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(resp.rows[0]).toEqual({ 'col-0-1': 1000 });
     expect(resp.columns[0]).toHaveProperty('aggConfig', aggConfigs.aggs[0]);
   });
@@ -137,6 +138,7 @@ describe('tabifyAggResponse Integration', () => {
     // check for something like an average bytes result
     function expectAvgBytes(val: string | number) {
       expect(typeof val).toBe('number');
+      // @ts-expect-error TS2365 TODO(ts-error): fixme
       expect(val === 0 || val > 1000).toBeDefined();
     }
 

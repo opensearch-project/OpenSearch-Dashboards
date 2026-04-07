@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -62,6 +61,7 @@ const mockOnEditorRunAction = jest.fn(() => ({ type: 'mock/onEditorRun' }));
 jest.mock(
   '../../../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run',
   () => ({
+    // @ts-expect-error TS2556 TODO(ts-error): fixme
     onEditorRunActionCreator: (...args: any[]) => mockOnEditorRunAction(...args),
   })
 );
@@ -94,7 +94,8 @@ describe('BottomRightContainer', () => {
   const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
     const queryStatusMap =
       status === QueryExecutionStatus.LOADING
-        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
+        ? // eslint-disable-next-line @typescript-eslint/naming-convention
+          { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
         : {};
 
     return configureStore({

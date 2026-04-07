@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
@@ -88,7 +87,6 @@ function getHasMatch(search?: string, savedAttributes?: TodoSavedObjectAttribute
 export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
   public readonly type = TODO_REF_EMBEDDABLE;
   private subscription: Subscription;
-  private node?: HTMLElement;
   private root: Root | null = null;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectId?: string;
@@ -137,7 +135,6 @@ export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
       this.root.unmount();
       this.root = null;
     }
-    this.node = node;
     this.root = createRoot(node);
     this.root.render(<TodoRefEmbeddableComponent embeddable={this} />);
   }

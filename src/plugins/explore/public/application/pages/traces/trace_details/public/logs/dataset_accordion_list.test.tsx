@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DatasetAccordionList, DatasetAccordionListProps } from './dataset_accordion_list';
 import { LogHit } from '../../server/ppl_request_logs';
@@ -71,8 +70,11 @@ describe('DatasetAccordionList', () => {
   ];
 
   const mockDatasetLogs: Record<string, LogHit[]> = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dataset-1': mockLogs,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dataset-2': [mockLogs[0]],
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dataset-3': [],
   };
 
@@ -184,6 +186,7 @@ describe('DatasetAccordionList', () => {
       const propsWithMissingLogs = {
         ...defaultProps,
         datasetLogs: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': mockLogs,
           // dataset-2 and dataset-3 missing
         },

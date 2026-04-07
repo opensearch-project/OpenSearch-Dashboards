@@ -4,14 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  EuiInMemoryTable,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiToolTip, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { CorrelationSavedObject } from '../../../../types/correlations';
@@ -37,9 +30,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
   loading = false,
   message,
 }) => {
-  const { data, uiSettings, savedObjects } = useOpenSearchDashboards<
-    DatasetManagmentContext
-  >().services;
+  const { uiSettings, savedObjects } = useOpenSearchDashboards<DatasetManagmentContext>().services;
   const [correlationToDelete, setCorrelationToDelete] = useState<string | null>(null);
   const [datasetTitles, setDatasetTitles] = useState<Record<string, string>>({});
 
@@ -160,6 +151,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           icon: 'pencil',
           type: 'icon',
           onClick: (correlation: CorrelationSavedObject) => onEdit(correlation),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'editCorrelationButton',
         },
         {
@@ -176,6 +168,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           type: 'icon',
           color: 'danger',
           onClick: (correlation: CorrelationSavedObject) => setCorrelationToDelete(correlation.id),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'deleteCorrelationButton',
         },
       ],
@@ -186,6 +179,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
     <>
       <EuiInMemoryTable
         items={correlations}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         columns={columns}
         loading={loading}
         message={message}

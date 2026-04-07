@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';

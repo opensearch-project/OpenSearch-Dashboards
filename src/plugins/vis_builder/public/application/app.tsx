@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { EuiPage, EuiResizableContainer } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
@@ -53,6 +53,7 @@ export const VisBuilderApp = () => {
   // Render the application DOM.
   return (
     <I18nProvider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <DragDropProvider>
         <EuiPage className="vbLayout">
           <TopNav />

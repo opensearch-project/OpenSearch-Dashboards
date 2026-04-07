@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { ViewEventsFlyout } from '../components';
 import { VIEW_EVENTS_FLYOUT_STATE, setFlyoutState } from '../flyout_state';
@@ -27,6 +27,7 @@ export async function openViewEventsFlyout(props: Props) {
       />
     ),
     {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'viewEventsFlyout',
       ownFocus: true,
     }

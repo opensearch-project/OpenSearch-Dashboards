@@ -85,9 +85,13 @@ function ResponsiveGrid({
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout--viewing': isViewMode,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout--editing': !isViewMode,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout-withoutMargins': !useMargins,
   });
 
@@ -95,6 +99,7 @@ function ResponsiveGrid({
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <ReactGridLayout
       width={lastValidGridSize}
       className={classes}

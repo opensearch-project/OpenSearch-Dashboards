@@ -6,6 +6,7 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import { CelestialMap, AgentCardNode } from '@osd/apm-topology';
 import type { NodeProps } from '@xyflow/react';
 

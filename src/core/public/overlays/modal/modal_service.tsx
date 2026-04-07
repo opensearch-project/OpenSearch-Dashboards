@@ -32,7 +32,6 @@
 
 import { i18n as t } from '@osd/i18n';
 import { EuiModal, EuiConfirmModal, EuiConfirmModalProps, EuiModalProps } from '@elastic/eui';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
@@ -79,6 +78,7 @@ export interface OverlayModalConfirmOptions {
   confirmButtonText?: string;
   className?: string;
   closeButtonAriaLabel?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
   buttonColor?: EuiConfirmModalProps['buttonColor'];
@@ -115,6 +115,7 @@ export interface OverlayModalStart {
 export interface OverlayModalOpenOptions extends Pick<EuiModalProps, 'maxWidth'> {
   className?: string;
   closeButtonAriaLabel?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
 }
 

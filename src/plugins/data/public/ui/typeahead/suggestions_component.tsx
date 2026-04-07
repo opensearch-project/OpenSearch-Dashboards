@@ -29,7 +29,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import classNames from 'classnames';
 import styled from 'styled-components';
 import { QuerySuggestion } from '../../autocomplete';
@@ -99,6 +99,7 @@ export default class SuggestionsComponent extends Component<SuggestionsComponent
         verticalListPosition={verticalListPosition}
       >
         <div
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           className={classNames('osdTypeahead', { 'osdTypeahead--small': this.props.size === 's' })}
         >
           <div

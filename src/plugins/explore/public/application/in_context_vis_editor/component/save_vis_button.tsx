@@ -5,7 +5,7 @@
  */
 
 import { useObservable } from 'react-use';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -75,6 +75,7 @@ export const SaveVisButton = () => {
               visTitle: newTitle,
             },
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveVisualizationSuccess',
         });
       } else {
@@ -85,6 +86,7 @@ export const SaveVisButton = () => {
               visTitle: newTitle,
             },
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveVisualizationSuccess',
         });
       }

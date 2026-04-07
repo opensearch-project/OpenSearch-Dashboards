@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -106,6 +105,7 @@ const fullTestResult = {
         _index: 'test-index',
         _type: '_doc',
         _score: 1.0,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         _source: { message: 'test message', '@timestamp': '2023-01-01T00:00:00Z' },
       },
     ],
@@ -137,6 +137,7 @@ describe('ExploreDataTable', () => {
           isDirty: false,
           lineCount: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: 'logs',
           showHistogram: true,
@@ -152,6 +153,7 @@ describe('ExploreDataTable', () => {
         },
         results: hasResults
           ? {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'test-cache-key': {
                 total: 1,
                 elapsedMs: 100,

@@ -30,7 +30,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
-import React from 'react';
+
 import { QuerySuggestion } from '../../autocomplete';
 
 function getEuiIconType(type: string) {

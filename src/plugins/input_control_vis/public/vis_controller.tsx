@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { isEqual } from 'lodash';
 import { createRoot, Root } from 'react-dom/client';
 

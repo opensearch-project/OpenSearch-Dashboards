@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
@@ -286,6 +285,7 @@ export const getNavActions = (
               visTitle: savedVis.title,
             },
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
@@ -331,6 +331,7 @@ export const getNavActions = (
           },
         }),
         text: error.message,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'saveVisualizationError',
       });
       return { error };

@@ -36,8 +36,7 @@
 const semver = require('semver');
 const PKG = require('../../package.json');
 
-const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint')
-  .rules;
+const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.
 // We should remove it as soon as multiple underscores are supported by the linter.
@@ -197,6 +196,23 @@ module.exports = {
               selector: 'enum',
               format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
             },
+            {
+              selector: 'import',
+              format: null,
+            },
+            {
+              selector: ['objectLiteralProperty', 'objectLiteralMethod', 'typeProperty'],
+              format: [
+                'camelCase',
+                'PascalCase',
+                'snake_case',
+                'UPPER_CASE',
+              ],
+              filter: {
+                regex: allowedNameRegexp,
+                match: false,
+              },
+            },
           ],
           '@typescript-eslint/explicit-member-accessibility': [
             'error',
@@ -253,7 +269,8 @@ module.exports = {
           'no-eval': 'error',
           'no-new-wrappers': 'error',
           'no-script-url': 'error',
-          'no-shadow': 'error',
+          'no-shadow': 'off',
+          '@typescript-eslint/no-shadow': 'error',
           'no-throw-literal': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',

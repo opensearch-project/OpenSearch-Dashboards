@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import moment from 'moment';
 import {
   EuiPage,
@@ -484,6 +484,7 @@ export const WorkspaceListInner = ({
       description: i18n.translate('workspace.list.actions.copyId.description', {
         defaultMessage: 'Copy workspace id',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'workspace-list-copy-id-icon',
       onClick: ({ id }: WorkspaceAttribute) => handleCopyId(id),
     },
@@ -498,6 +499,7 @@ export const WorkspaceListInner = ({
       description: i18n.translate('workspace.list.actions.edit.description', {
         defaultMessage: 'Edit workspace',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'workspace-list-edit-icon',
       onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id, WORKSPACE_DETAIL_APP_ID),
     },
@@ -514,6 +516,7 @@ export const WorkspaceListInner = ({
       description: i18n.translate('workspace.list.actions.setDefault.description', {
         defaultMessage: 'Set as my default workspace',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'workspace-list-set-default-icon',
       onClick: (item: WorkspaceAttribute) => handleSetDefaultWorkspace(item),
     },
@@ -528,6 +531,7 @@ export const WorkspaceListInner = ({
       description: i18n.translate('workspace.list.actions.leave.description', {
         defaultMessage: 'Leave workspace',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'workspace-list-leave-icon',
       available: () => false,
     },
@@ -543,6 +547,7 @@ export const WorkspaceListInner = ({
       description: i18n.translate('workspace.list.actions.delete.description', {
         defaultMessage: 'Delete workspace',
       }),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'workspace-list-delete-icon',
       available: () => isDashboardAdmin,
       onClick: (item: WorkspaceAttribute) => {

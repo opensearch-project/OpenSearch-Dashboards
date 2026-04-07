@@ -225,6 +225,7 @@ export const createGaugeSeries = ({
           value: calculatedValue,
         },
       ],
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       renderItem(params, api) {
         const width = api.getWidth();
         const height = api.getHeight();

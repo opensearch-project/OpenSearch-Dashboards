@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCompressedCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
@@ -432,6 +432,7 @@ export const getNavActions = (
             defaultMessage: `Dashboard '{dashTitle}' was saved`,
             values: { dashTitle: savedDashboard.title },
           }),
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveDashboardSuccess',
         });
 
@@ -453,6 +454,7 @@ export const getNavActions = (
             errorMessage: savedDashboard.message,
           },
         }),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'saveDashboardFailure',
       });
       return { error };

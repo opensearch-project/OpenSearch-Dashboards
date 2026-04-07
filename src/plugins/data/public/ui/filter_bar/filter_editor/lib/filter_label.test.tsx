@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import FilterLabel from './filter_label';
 import { render } from '@testing-library/react';
 import { phraseFilter } from '../../../../stubs';
@@ -64,7 +63,7 @@ test('negated alias', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
     </div>
@@ -88,10 +87,10 @@ test('alias with warning status', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
-      : 
+      :
       <span
         class="globalFilterLabel__value"
         data-test-subj="globalFilterLabelValue"
@@ -119,10 +118,10 @@ test('alias with error status', () => {
       <span
         class="euiTextColor euiTextColor--danger"
       >
-         NOT 
+         NOT
       </span>
       geo.coordinates in US
-      : 
+      :
       <span
         class="globalFilterLabel__value"
         data-test-subj="globalFilterLabelValue"
@@ -138,7 +137,7 @@ test('warning', () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       machine.os
-      : 
+      :
       <span
         class="globalFilterLabel__value"
         data-test-subj="globalFilterLabelValue"
@@ -154,7 +153,7 @@ test('error', () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       machine.os
-      : 
+      :
       <span
         class="globalFilterLabel__value"
         data-test-subj="globalFilterLabelValue"

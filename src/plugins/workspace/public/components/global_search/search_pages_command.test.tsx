@@ -27,6 +27,7 @@ describe('<workspaceSearchPagesCommand />', () => {
   };
 
   const navGroup: Record<string, NavGroupItemInMap & { navLinks: ChromeNavLink[] }> = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'foo-group': {
       id: 'foo-group',
       title: 'Foo Group',
@@ -209,6 +210,7 @@ describe('<workspaceSearchPagesCommand />', () => {
 
     const originalBasePath = coreStartMock.http.basePath;
     const basePath = '/foo';
+    // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = basePath;
 
     Object.defineProperty(window, 'location', {
@@ -236,6 +238,7 @@ describe('<workspaceSearchPagesCommand />', () => {
     expect(coreStartMock.application.navigateToApp).not.toBeCalled();
     expect(window.location.assign).toBeCalledWith(testUrl);
 
+    // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = originalBasePath;
   });
 });

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionTitle } from './solution_title';
 import { getLogosMock } from '../../../../../../../core/common/mocks';
@@ -80,6 +79,7 @@ describe('SolutionTitle ', () => {
     };
     const component = shallow(<SolutionTitle {...props} />);
     const elements = component.find({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'dashboardCustomLogo',
     });
     expect(elements.length).toEqual(1);

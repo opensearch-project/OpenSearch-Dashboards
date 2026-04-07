@@ -38,7 +38,6 @@ import {
   saveObjectsMock,
 } from './flyout.test.mocks';
 
-import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { coreMock, notificationServiceMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';

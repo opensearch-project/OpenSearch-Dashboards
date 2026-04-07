@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
@@ -101,6 +100,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
   const container = new HelloWorldContainer(
     {
       id: 'hello',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       panels: { '1': { type: 'idontexist', explicitInput: { id: '1' } } },
     },
     { getEmbeddableFactory } as any
