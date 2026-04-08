@@ -7,8 +7,15 @@
   flex: 1;
   min-height: 0;
 
+  &__wrapper {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   &__queryPanel {
-    overflow: hidden;
+    overflow: auto;
     display: flex;
     flex-direction: column;
   }
@@ -17,6 +24,8 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 
     .exploreQueryPanel {
       flex: 1;
