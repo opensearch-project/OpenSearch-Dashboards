@@ -6,8 +6,7 @@
 import { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import produce from 'immer';
-import { Draft } from 'immer';
+import produce, { Draft } from 'immer';
 import {
   ColorModes,
   ColorRanges,

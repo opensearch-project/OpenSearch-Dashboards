@@ -46,6 +46,7 @@ describe('IndexMigrator', () => {
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
+      // @ts-expect-error TS2322 TODO Fix me
       client: opensearchClientMock.createOpenSearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
@@ -275,6 +276,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -297,6 +299,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -320,6 +323,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -381,6 +385,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -455,6 +460,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -528,6 +534,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -603,6 +610,7 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -780,7 +788,9 @@ function withIndex(
   opts: any = {}
 ) {
   const defaultIndex = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '.kibana_1': {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       aliases: { '.kibana': {} },
       mappings: {
         dynamic: 'strict',
@@ -791,6 +801,7 @@ function withIndex(
     },
   };
   const defaultAlias = {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     '.kibana_1': {},
   };
   const { numOutOfDate = 0 } = opts;
@@ -845,7 +856,6 @@ function withIndex(
       _shards: { successful: 1, total: 1 },
     } as opensearchtypes.CountResponse)
   );
-  // @ts-expect-error error is due to type {} is not compatible with type 'ScrollResponse<unknown>'
   // this setting is fine for test purpose
   client.scroll.mockImplementation(() => {
     if (scrollCallCounter <= docs.length) {

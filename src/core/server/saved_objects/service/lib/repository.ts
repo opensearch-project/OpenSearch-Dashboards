@@ -413,7 +413,6 @@ export class SavedObjectsRepository {
           ? bulkGetResponse?.body.docs[opensearchRequestIndex]
           : undefined;
         const docFound = indexFound && actualResult?.found === true;
-        // @ts-expect-error MultiGetHit._source is optional
         if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
           const { id, type } = object;
           return {
@@ -430,9 +429,7 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces ||
-          // @ts-expect-error MultiGetHit._source is optional
           getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
-        // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, actualResult);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
@@ -590,7 +587,6 @@ export class SavedObjectsRepository {
           type,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-            // @ts-expect-error MultiGetHit._source is optional
             ...(!this.rawDocExistsInNamespace(doc!, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
@@ -623,6 +619,7 @@ export class SavedObjectsRepository {
     let preflightResult: SavedObjectsRawDoc | undefined;
 
     if (this._registry.isMultiNamespace(type)) {
+      // @ts-expect-error TS2345 TODO Fix me
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
       const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult) ?? [];
       if (
@@ -991,7 +988,6 @@ export class SavedObjectsRepository {
         const { type, id, opensearchRequestIndex } = expectedResult.value;
         const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
 
-        // @ts-expect-error MultiGetHit._source is optional
         if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
             id,
@@ -1000,7 +996,6 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
-        // @ts-expect-error MultiGetHit._source is optional
         return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
@@ -1038,17 +1033,21 @@ export class SavedObjectsRepository {
     if (
       !isFoundGetResponse(body) ||
       indexNotFound ||
+      // @ts-expect-error TS2345 TODO Fix me
       !this.rawDocExistsInNamespace(body, namespace)
     ) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    // @ts-expect-error TS2345 TODO Fix me
     const { originId, updated_at: updatedAt, permissions, workspaces } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
+      // @ts-expect-error TS2345 TODO Fix me
       namespaces = body._source.namespaces ?? [
+        // @ts-expect-error TS2345 TODO Fix me
         SavedObjectsUtils.namespaceIdToString(body._source.namespace),
       ];
     }
@@ -1062,8 +1061,11 @@ export class SavedObjectsRepository {
       ...(permissions && { permissions }),
       ...(workspaces && { workspaces }),
       version: encodeHitVersion(body),
+      // @ts-expect-error TS2345 TODO Fix me
       attributes: body._source[type],
+      // @ts-expect-error TS2345 TODO Fix me
       references: body._source.references || [],
+      // @ts-expect-error TS2345 TODO Fix me
       migrationVersion: body._source.migrationVersion,
     };
   }
@@ -1100,6 +1102,7 @@ export class SavedObjectsRepository {
 
     let preflightResult: SavedObjectsRawDoc | undefined;
     if (this._registry.isMultiNamespace(type)) {
+      // @ts-expect-error TS2345 TODO Fix me
       preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     }
 
@@ -1187,6 +1190,7 @@ export class SavedObjectsRepository {
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
+    // @ts-expect-error TS2345 TODO Fix me
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
     // there should never be a case where a multi-namespace object does not have any existing namespaces
     // however, it is a possibility if someone manually modifies the document in OpenSearch
@@ -1201,6 +1205,7 @@ export class SavedObjectsRepository {
       {
         id: rawId,
         index: this.getIndexForType(type),
+        // @ts-expect-error TS2345 TODO Fix me
         ...getExpectedVersionProperties(version, preflightResult),
         refresh,
         body: {
@@ -1250,6 +1255,7 @@ export class SavedObjectsRepository {
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
     const preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
+    // @ts-expect-error TS2345 TODO Fix me
     const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
     // if there are somehow no existing namespaces, allow the operation to proceed and delete this saved object
     const remainingNamespaces = existingNamespaces?.filter((x) => !namespaces.includes(x));
@@ -1267,6 +1273,7 @@ export class SavedObjectsRepository {
         {
           id: rawId,
           index: this.getIndexForType(type),
+          // @ts-expect-error TS2345 TODO Fix me
           ...getExpectedVersionProperties(undefined, preflightResult),
           refresh,
 
@@ -1290,6 +1297,7 @@ export class SavedObjectsRepository {
         {
           id: this._serializer.generateRawId(undefined, type, id),
           refresh,
+          // @ts-expect-error TS2345 TODO Fix me
           ...getExpectedVersionProperties(undefined, preflightResult),
           index: this.getIndexForType(type),
         },
@@ -1452,7 +1460,6 @@ export class SavedObjectsRepository {
           const docFound = indexFound && actualResult?.found === true;
           if (
             !docFound ||
-            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             !this.rawDocExistsInNamespace(actualResult, getNamespaceId(objectNamespace))
           ) {
             return {
@@ -1737,9 +1744,11 @@ export class SavedObjectsRepository {
 
     const indexFound = statusCode !== 404;
     if (indexFound && isFoundGetResponse(body)) {
+      // @ts-expect-error TS2345 TODO Fix me
       if (!this.rawDocExistsInNamespace(body, namespace)) {
         throw SavedObjectsErrorHelpers.createConflictError(type, id);
       }
+      // @ts-expect-error TS2345 TODO Fix me
       return getSavedObjectNamespaces(namespace, body);
     }
     return getSavedObjectNamespaces(namespace);
@@ -1773,6 +1782,7 @@ export class SavedObjectsRepository {
     if (
       !indexFound ||
       !isFoundGetResponse(body) ||
+      // @ts-expect-error TS2345 TODO Fix me
       !this.rawDocExistsInNamespace(body, namespace)
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
