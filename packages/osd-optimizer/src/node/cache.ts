@@ -32,7 +32,6 @@ import Path from 'path';
 import { Writable } from 'stream';
 
 import chalk from 'chalk';
-// @ts-expect-error TS1192 TODO(ts-upgrade): fixme
 import LMDB from 'lmdb';
 import { getMatchingRoot } from '@osd/cross-platform';
 
@@ -41,8 +40,8 @@ const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
-const dbName = (db: LMDB.Database) =>
-  db.name;
+// @ts-expect-error TS2339 TODO: FIX ME
+const dbName = (db: LMDB.Database) => db.name;
 
 export class Cache {
   private readonly codes: LMDB.RootDatabase<string, string>;

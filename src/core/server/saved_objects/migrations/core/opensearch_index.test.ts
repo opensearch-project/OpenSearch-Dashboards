@@ -45,6 +45,7 @@ describe('OpenSearchIndex', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const info = await Index.fetchInfo(client, '.opensearch_dashboards_test');
       expect(info).toEqual({
         aliases: {},
@@ -60,6 +61,7 @@ describe('OpenSearchIndex', () => {
     });
 
     test('fails if the index doc type is unsupported', async () => {
+      // @ts-expect-error TS2345 TODO Fix me
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
         return opensearchClientMock.createSuccessTransportRequestPromise({
@@ -72,12 +74,14 @@ describe('OpenSearchIndex', () => {
         } as opensearchtypes.IndicesGetResponse);
       });
 
+      // @ts-expect-error TS2345 TODO Fix me
       await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
       );
     });
 
     test('fails if there are multiple root types', async () => {
+      // @ts-expect-error TS2345 TODO Fix me
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
         return opensearchClientMock.createSuccessTransportRequestPromise({
@@ -93,12 +97,14 @@ describe('OpenSearchIndex', () => {
         } as opensearchtypes.IndicesGetResponse);
       });
 
+      // @ts-expect-error TS2345 TODO Fix me
       await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
       );
     });
 
     test('decorates index info with exists and indexName', async () => {
+      // @ts-expect-error TS2345 TODO Fix me
       client.indices.get.mockImplementation((params) => {
         const index = params!.index as string;
         return opensearchClientMock.createSuccessTransportRequestPromise({
@@ -110,6 +116,7 @@ describe('OpenSearchIndex', () => {
         } as opensearchtypes.IndicesGetResponse);
       });
 
+      // @ts-expect-error TS2345 TODO Fix me
       const info = await Index.fetchInfo(client, '.baz');
       expect(info).toEqual({
         aliases: { foo: '.baz' },
@@ -123,6 +130,7 @@ describe('OpenSearchIndex', () => {
 
   describe('createIndex', () => {
     test('calls indices.create', async () => {
+      // @ts-expect-error TS2345 TODO Fix me
       await Index.createIndex(client, '.abcd', { foo: 'bar' } as any);
 
       expect(client.indices.create).toHaveBeenCalledTimes(1);
@@ -141,6 +149,7 @@ describe('OpenSearchIndex', () => {
 
   describe('deleteIndex', () => {
     test('calls indices.delete', async () => {
+      // @ts-expect-error TS2345 TODO Fix me
       await Index.deleteIndex(client, '.lotr');
 
       expect(client.indices.delete).toHaveBeenCalledTimes(1);
@@ -156,6 +165,7 @@ describe('OpenSearchIndex', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       await Index.claimAlias(client, '.hola-42', '.hola');
 
       expect(client.indices.getAlias).toHaveBeenCalledWith(
@@ -177,10 +187,12 @@ describe('OpenSearchIndex', () => {
     test('removes existing alias', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       await Index.claimAlias(client, '.ze-index', '.muchacha');
 
       expect(client.indices.getAlias).toHaveBeenCalledTimes(1);
@@ -200,10 +212,12 @@ describe('OpenSearchIndex', () => {
     test('allows custom alias actions', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       await Index.claimAlias(client, '.ze-index', '.muchacha', [
         { remove_index: { index: 'awww-snap!' } },
       ]);
@@ -228,6 +242,7 @@ describe('OpenSearchIndex', () => {
     test('it creates the destination index, then reindexes to it', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
@@ -253,6 +268,7 @@ describe('OpenSearchIndex', () => {
       } as const;
 
       await Index.convertToAlias(
+        // @ts-expect-error TS2345 TODO Fix me
         client,
         info,
         '.muchacha',
@@ -306,6 +322,7 @@ describe('OpenSearchIndex', () => {
     test('throws error if re-index task fails', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
@@ -399,6 +416,7 @@ describe('OpenSearchIndex', () => {
         },
       ];
 
+      // @ts-expect-error TS2345 TODO Fix me
       await Index.write(client, index, docs);
 
       expect(client.bulk).toHaveBeenCalled();
@@ -478,6 +496,7 @@ describe('OpenSearchIndex', () => {
           })
         );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const read = Index.reader(client, index, { batchSize: 100, scrollDuration: '5m' });
 
       expect(await read()).toEqual(batch1);
@@ -531,6 +550,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
@@ -548,6 +568,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
@@ -583,6 +604,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
@@ -612,6 +634,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const hasMigrations = await Index.migrationsUpToDate(client, index, migrations);
       return { hasMigrations };
     }
