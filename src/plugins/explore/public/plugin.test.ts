@@ -48,6 +48,7 @@ jest.mock('./actions/ask_ai_action', () => ({
 // Mock registerDisabledPPLExecuteQueryAction
 jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
   registerDisabledPPLExecuteQueryAction: jest.fn(),
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION: { name: 'execute_ppl_query' },
 }));
 
 // Mock createOsdUrlTracker
@@ -514,6 +515,29 @@ describe('ExplorePlugin', () => {
     it('should call stop callbacks without errors', () => {
       plugin.setup(coreSetup, setupDeps);
       plugin.start(coreStart, startDeps);
+
+      expect(() => plugin.stop()).not.toThrow();
+    });
+
+    it('should unregister execute_ppl_query assistant action on stop', () => {
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      plugin.stop();
+
+      expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
+        'execute_ppl_query'
+      );
+    });
+
+    it('should not throw on stop when contextProvider was not available at start', () => {
+      const startDepsWithoutContextProvider = {
+        ...startDeps,
+        contextProvider: undefined,
+      };
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDepsWithoutContextProvider);
 
       expect(() => plugin.stop()).not.toThrow();
     });

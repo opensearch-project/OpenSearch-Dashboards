@@ -4,7 +4,7 @@
  */
 
 import { useDispatch } from 'react-redux';
-import { useUnmount } from 'react-use';
+import { useMount, useUnmount } from 'react-use';
 import { AppDispatch } from '../../../application/utils/state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -12,16 +12,6 @@ import { loadQueryActionCreator } from '../../../application/utils/state_managem
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
 import { setDateRange } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
-
-interface PPLExecuteQueryArgs {
-  query: string;
-  autoExecute?: boolean;
-  description?: string;
-  from?: string;
-  to?: string;
-}
-
-const NOOP_ASSISTANT_ACTION_HOOK = (_action: any) => {};
 
 // Shared tool definition for execute_ppl_query action
 export const EXECUTE_PPL_QUERY_TOOL_DEFINITION = {
@@ -87,96 +77,97 @@ export function usePPLExecuteQueryAction(
 ) {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch<AppDispatch>();
-  const useAssistantAction =
-    services.contextProvider?.hooks?.useAssistantAction || NOOP_ASSISTANT_ACTION_HOOK;
+  const registerAction = services.contextProvider?.actions?.registerAssistantAction;
 
-  useAssistantAction<PPLExecuteQueryArgs>({
-    ...EXECUTE_PPL_QUERY_TOOL_DEFINITION,
-    handler: async (args: any) => {
-      try {
-        const shouldExecute = args.autoExecute !== false;
-        const timeRangeMessage =
-          args.from && args.to ? ` Time range set to ${args.from} - ${args.to}.` : '';
+  useMount(() => {
+    if (!registerAction) return;
 
-        if (args.from && args.to) {
-          dispatch(setDateRange({ from: args.from, to: args.to }));
-          services.data.query.timefilter.timefilter.setTime({
-            from: args.from,
-            to: args.to,
-          });
-        }
+    registerAction({
+      ...EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+      handler: async (args: any) => {
+        try {
+          const shouldExecute = args.autoExecute !== false;
+          const timeRangeMessage =
+            args.from && args.to ? ` Time range set to ${args.from} - ${args.to}.` : '';
 
-        if (!shouldExecute) {
-          setEditorTextWithQuery(args.query);
-          return {
-            success: true,
-            executed: false,
-            query: args.query,
-            timeRange: args.from && args.to ? { from: args.from, to: args.to } : undefined,
-            message: `Query updated.${timeRangeMessage}`,
-          };
-        }
+          if (args.from && args.to) {
+            dispatch(setDateRange({ from: args.from, to: args.to }));
+            services.data.query.timefilter.timefilter.setTime({
+              from: args.from,
+              to: args.to,
+            });
+          }
 
-        const queryStatus = await dispatch(
-          loadQueryActionCreator(services, setEditorTextWithQuery, args.query)
-        );
+          if (!shouldExecute) {
+            setEditorTextWithQuery(args.query);
+            return {
+              success: true,
+              executed: false,
+              query: args.query,
+              timeRange: args.from && args.to ? { from: args.from, to: args.to } : undefined,
+              message: `Query updated.${timeRangeMessage}`,
+            };
+          }
 
-        // Check for explicit error status
-        if (queryStatus.status === QueryExecutionStatus.ERROR) {
-          const msg = queryStatus.error?.message;
-          const errorMessage = msg
-            ? `${msg.type ? `${msg.type}: ` : ''}${msg.details}`
-            : 'Query execution failed';
+          const queryStatus = await dispatch(
+            loadQueryActionCreator(services, setEditorTextWithQuery, args.query)
+          );
+
+          // Check for explicit error status
+          if (queryStatus.status === QueryExecutionStatus.ERROR) {
+            const msg = queryStatus.error?.message;
+            const errorMessage = msg
+              ? `${msg.type ? `${msg.type}: ` : ''}${msg.details}`
+              : 'Query execution failed';
+            return {
+              success: false,
+              executed: false,
+              query: args.query,
+              message: `Query execution failed: ${errorMessage}`,
+              error: errorMessage,
+            };
+          }
+
+          // Check if query completed successfully (READY or NO_RESULTS)
+          if (
+            queryStatus.status === QueryExecutionStatus.READY ||
+            queryStatus.status === QueryExecutionStatus.NO_RESULTS
+          ) {
+            const noResults = queryStatus.status === QueryExecutionStatus.NO_RESULTS;
+            return {
+              success: true,
+              executed: true,
+              query: args.query,
+              resultsCount: noResults ? 0 : undefined,
+              timeRange: args.from && args.to ? { from: args.from, to: args.to } : undefined,
+              message: noResults
+                ? `Query executed successfully but returned no results.${timeRangeMessage}`
+                : `Query updated and executed successfully.${timeRangeMessage}`,
+            };
+          }
+
+          // Query didn't complete (LOADING, UNINITIALIZED, or unknown status)
+          // This happens when user navigates away or query is cancelled
           return {
             success: false,
             executed: false,
             query: args.query,
-            message: `Query execution failed: ${errorMessage}`,
-            error: errorMessage,
+            message: `Query execution was cancelled or did not complete. Status: ${queryStatus.status}`,
+            error: 'Query execution was interrupted',
           };
-        }
-
-        // Check if query completed successfully (READY or NO_RESULTS)
-        if (
-          queryStatus.status === QueryExecutionStatus.READY ||
-          queryStatus.status === QueryExecutionStatus.NO_RESULTS
-        ) {
-          const noResults = queryStatus.status === QueryExecutionStatus.NO_RESULTS;
+        } catch (error) {
           return {
-            success: true,
-            executed: true,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
             query: args.query,
-            resultsCount: noResults ? 0 : undefined,
-            timeRange: args.from && args.to ? { from: args.from, to: args.to } : undefined,
-            message: noResults
-              ? `Query executed successfully but returned no results.${timeRangeMessage}`
-              : `Query updated and executed successfully.${timeRangeMessage}`,
           };
         }
-
-        // Query didn't complete (LOADING, UNINITIALIZED, or unknown status)
-        // This happens when user navigates away or query is cancelled
-        return {
-          success: false,
-          executed: false,
-          query: args.query,
-          message: `Query execution was cancelled or did not complete. Status: ${queryStatus.status}`,
-          error: 'Query execution was interrupted',
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          query: args.query,
-        };
-      }
-    },
+      },
+    });
   });
 
   // Cleanup: restore the disabled version when component unmounts
   useUnmount(() => {
-    // Re-register the disabled version on unmount
-    const registerAction = services.contextProvider?.actions?.registerAssistantAction;
     if (registerAction) {
       registerDisabledPPLExecuteQueryAction(registerAction);
     }

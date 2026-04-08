@@ -13,7 +13,7 @@ import {
 } from './ppl_execute_query_action';
 
 const mockDispatch = jest.fn();
-const mockUseAssistantAction = jest.fn();
+const mockRegisterAssistantAction = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockSetTime = jest.fn();
@@ -34,7 +34,6 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
       },
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
       contextProvider: {
-        hooks: { useAssistantAction: mockUseAssistantAction },
         actions: { registerAssistantAction: mockRegisterAssistantAction },
       },
     },
@@ -54,8 +53,6 @@ jest.mock(
 
 jest.mock('../../../application/utils/state_management/store', () => ({}));
 
-const mockRegisterAssistantAction = jest.fn();
-
 jest.mock('../../../application/utils/state_management/types', () => ({
   QueryExecutionStatus: {
     UNINITIALIZED: 'uninitialized',
@@ -71,8 +68,6 @@ jest.mock('../../../application/hooks', () => ({
 }));
 
 describe('usePPLExecuteQueryAction', () => {
-  let initialCallCount: number;
-
   const makeStatus = (status: string, error?: any) => ({
     status,
     elapsedMs: undefined,
@@ -81,7 +76,6 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   beforeEach(() => {
-    initialCallCount = mockUseAssistantAction.mock.calls.length;
     mockDispatch.mockClear();
     mockSetEditorTextWithQuery.mockClear();
     mockLoadQueryActionCreator.mockClear();
@@ -96,15 +90,16 @@ describe('usePPLExecuteQueryAction', () => {
     act(() => {
       renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
     });
-    const currentCallCount = mockUseAssistantAction.mock.calls.length;
-    expect(currentCallCount).toBeGreaterThan(initialCallCount);
-    return mockUseAssistantAction.mock.calls[currentCallCount - 1][0].handler;
+    expect(mockRegisterAssistantAction).toHaveBeenCalled();
+    return mockRegisterAssistantAction.mock.calls[
+      mockRegisterAssistantAction.mock.calls.length - 1
+    ][0].handler;
   };
 
   it('should register assistant action with correct name and required parameters', () => {
     renderAndGetHandler();
     const latestCall =
-      mockUseAssistantAction.mock.calls[mockUseAssistantAction.mock.calls.length - 1][0];
+      mockRegisterAssistantAction.mock.calls[mockRegisterAssistantAction.mock.calls.length - 1][0];
     expect(latestCall.name).toBe('execute_ppl_query');
     expect(latestCall.parameters.required).toContain('query');
     expect(latestCall.handler).toBeInstanceOf(Function);
