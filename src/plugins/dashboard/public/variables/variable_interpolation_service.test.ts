@@ -146,6 +146,21 @@ describe('VariableInterpolationService', () => {
       ]);
       expect(svc.interpolate('$region', 'PPL')).toBe("('it''s', 'that''s')");
     });
+
+    it('should return empty PPL IN list when multi-select has no values', () => {
+      const svc = new VariableInterpolationService(() => [makeMultiVar({ current: [] })]);
+      expect(svc.interpolate('where region IN $region', 'PPL')).toBe("where region IN ('')");
+    });
+
+    it('should return empty PromQL group when multi-select has no values', () => {
+      const svc = new VariableInterpolationService(() => [makeMultiVar({ current: [] })]);
+      expect(svc.interpolate('{region=~"$region"}', 'PROMQL')).toBe('{region=~"()"}');
+    });
+
+    it('should return empty string for default when multi-select has no values', () => {
+      const svc = new VariableInterpolationService(() => [makeMultiVar({ current: [] })]);
+      expect(svc.interpolate('$region')).toBe('');
+    });
   });
 
   describe('getCurrentValues', () => {

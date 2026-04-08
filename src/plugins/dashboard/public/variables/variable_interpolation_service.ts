@@ -105,8 +105,8 @@ export class VariableInterpolationService implements IVariableInterpolationServi
           return match;
         }
 
-        if (variable.multi && variable.values && variable.values.length > 0) {
-          return this.formatMultiValue(variable.values, lang);
+        if (variable.multi) {
+          return this.formatMultiValue(variable.values ?? [], lang);
         }
 
         return this.escapeForLanguage(variable.value, lang);
@@ -151,6 +151,17 @@ export class VariableInterpolationService implements IVariableInterpolationServi
    * - Default: value1, value2
    */
   private formatMultiValue(values: string[], language: string): string {
+    if (values.length === 0) {
+      switch (language) {
+        case 'PPL':
+          return "('')";
+        case 'PROMQL':
+          return '()';
+        default:
+          return '';
+      }
+    }
+
     switch (language) {
       case 'PPL': {
         const escaped = values.map((v) => this.escapeForLanguage(v, language));
