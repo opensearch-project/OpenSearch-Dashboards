@@ -86,3 +86,19 @@ export async function executeQueryForOptions(
   const response = await searchSource.fetch({ abortSignal: signal });
   return parseResponseToOptions(response);
 }
+
+/**
+ * Filter options by a regex pattern string.
+ * Supports `/pattern/flags` syntax or plain regex string.
+ * Returns the original array if regex is empty or invalid.
+ */
+export function filterOptionsByRegex(options: string[], regex?: string): string[] {
+  if (!regex) return options;
+  try {
+    const match = regex.match(/^\/(.+)\/([gimsuy]*)$/);
+    const pattern = match ? new RegExp(match[1], match[2]) : new RegExp(regex);
+    return options.filter((opt) => pattern.test(opt));
+  } catch {
+    return options;
+  }
+}

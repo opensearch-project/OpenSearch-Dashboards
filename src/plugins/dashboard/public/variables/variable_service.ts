@@ -11,12 +11,13 @@ import { DataPublicPluginStart } from '../../../data/public';
 import {
   Variable,
   VariableType,
+  VariableSortOrder,
   QueryVariable,
   CustomVariable,
   VariableState,
   VariableWithState,
 } from './types';
-import { executeQueryForOptions } from './variable_query_utils';
+import { executeQueryForOptions, filterOptionsByRegex } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
 
 export type UpdateInputCallback = (input: {
@@ -177,6 +178,13 @@ export class VariableService {
         updatedVariable.current =
           updatedVariable.current.length > 0 ? [updatedVariable.current[0]] : undefined;
       }
+
+      // When sort changes, re-sort the existing options
+      if (updates.sort !== undefined && updates.sort !== existing.sort) {
+        const currentState = this.getRuntimeState(id);
+        const sorted = this.sortOptions(currentState.options, updates.sort);
+        this.runtimeState.set(id, { ...currentState, options: sorted });
+      }
     }
 
     const updatedVariables = [...currentVariables];
@@ -246,14 +254,16 @@ export class VariableService {
     this.updateRuntimeState(id, { loading: true, error: undefined });
 
     try {
-      const options = await this.fetchOptionsForVariable(queryVariable, controller.signal);
+      let options = await this.fetchOptionsForVariable(queryVariable, controller.signal);
+      options = filterOptionsByRegex(options, queryVariable.regex);
+      const sortedOptions = this.sortOptions(options, queryVariable.sort);
       const preservedCurrent = this.resolveCurrentValue(
         queryVariable.current,
-        options,
+        sortedOptions,
         queryVariable.multi
       );
 
-      this.runtimeState.set(id, { options, loading: false, error: undefined });
+      this.runtimeState.set(id, { options: sortedOptions, loading: false, error: undefined });
       this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
 
       // Update current in persisted state if it changed
@@ -298,9 +308,28 @@ export class VariableService {
   private deriveOptions(variable: Variable | Omit<Variable, 'id' | 'current'>): string[] {
     if (variable.type === VariableType.Custom) {
       const customVar = variable as CustomVariable;
-      return customVar.customOptions ?? [];
+      return this.sortOptions(customVar.customOptions ?? [], (variable as any).sort);
     }
     return [];
+  }
+
+  /** Sort options based on the variable's sort setting */
+  private sortOptions(options: string[], sort?: VariableSortOrder): string[] {
+    if (!sort || sort === VariableSortOrder.Disabled) return options;
+
+    const sorted = [...options];
+    switch (sort) {
+      case VariableSortOrder.AlphabeticalAsc:
+        return sorted.sort((a, b) => a.localeCompare(b));
+      case VariableSortOrder.AlphabeticalDesc:
+        return sorted.sort((a, b) => b.localeCompare(a));
+      case VariableSortOrder.NumericalAsc:
+        return sorted.sort((a, b) => parseFloat(a) - parseFloat(b));
+      case VariableSortOrder.NumericalDesc:
+        return sorted.sort((a, b) => parseFloat(b) - parseFloat(a));
+      default:
+        return sorted;
+    }
   }
 
   private resolveCurrentValue(

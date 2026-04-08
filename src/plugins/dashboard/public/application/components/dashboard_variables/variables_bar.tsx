@@ -120,14 +120,31 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     return Math.max(300, Math.min(longestLength * 8 + 60, 700));
   }, [variable.options]);
 
-  const displayText = isAllSelected
-    ? i18n.translate('dashboard.variables.allSelected', { defaultMessage: 'All' })
-    : selectedValues.length > 0
-    ? selectedValues[0]
-    : i18n.translate('dashboard.variables.selectValue', { defaultMessage: 'Select value' });
+  const isLoading = !!variable.loading;
+
+  const getDisplayText = () => {
+    if (isAllSelected) {
+      return i18n.translate('dashboard.variables.allSelected', { defaultMessage: 'All' });
+    }
+    if (selectedValues.length > 0) {
+      return selectedValues[0];
+    }
+    if (isLoading) {
+      return i18n.translate('dashboard.variables.loading', { defaultMessage: 'Loading...' });
+    }
+    if (variable.error) {
+      return i18n.translate('dashboard.variables.error', { defaultMessage: 'Error' });
+    }
+    if (variable.options.length === 0) {
+      return i18n.translate('dashboard.variables.displayNoOptions', {
+        defaultMessage: 'No options',
+      });
+    }
+    return i18n.translate('dashboard.variables.selectValue', { defaultMessage: 'Select value' });
+  };
   const selectedCount = isAllSelected ? variable.options.length : selectedValues.length;
 
-  // Button that triggers the popover (without label)
+  // Button that triggers the popover
   const button = (
     <EuiSmallButtonEmpty
       onClick={() => setIsOpen(!isOpen)}
@@ -135,6 +152,7 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       iconSide="right"
       iconSize="s"
       color="text"
+      isLoading={isLoading}
       style={{ width: 'fit-content', maxWidth: 'none', padding: '0px' }}
       data-test-subj={`variable-${variable.name}`}
       className="euiSuperSelectControl euiSuperSelectControl--compressed euiSuperSelectControl--inGroup"
@@ -149,7 +167,7 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
               textOverflow: 'ellipsis',
             }}
           >
-            {displayText}
+            {getDisplayText()}
           </EuiText>
         </EuiFlexItem>
         {variable.multi && selectedCount > 0 && (
@@ -173,6 +191,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
             {variable.description && (
               <EuiToolTip content={variable.description} position="bottom">
                 <EuiIcon type="iInCircle" style={{ padding: 0, width: 16 }} />
+              </EuiToolTip>
+            )}
+            {variable.error && (
+              <EuiToolTip content={variable.error} position="bottom">
+                <EuiIcon type="alert" color="danger" style={{ padding: 0, width: 16 }} />
               </EuiToolTip>
             )}
           </strong>
@@ -199,6 +222,9 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
             }}
             height={300}
             singleSelection={variable.multi ? false : 'always'}
+            emptyMessage={i18n.translate('dashboard.variables.noOptions', {
+              defaultMessage: 'No options available',
+            })}
           >
             {(list, search) => (
               <div>

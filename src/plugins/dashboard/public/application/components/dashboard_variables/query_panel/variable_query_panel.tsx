@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -22,7 +23,10 @@ import {
   CodeEditor,
 } from '../../../../../../opensearch_dashboards_react/public';
 import { DashboardServices } from '../../../../types';
-import { executeQueryForOptions } from '../../../../variables/variable_query_utils';
+import {
+  executeQueryForOptions,
+  filterOptionsByRegex,
+} from '../../../../variables/variable_query_utils';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
 import { DEFAULT_DATA } from '../../../../../../data/common';
@@ -90,10 +94,11 @@ export interface VariableQueryPanelProps {
   onQueryChange: (query: string) => void;
   onLanguageChange: (language: string) => void;
   onDatasetChange: (dataset: any) => void;
-  /** Names of existing variables for autocomplete suggestions */
   existingVariableNames?: string[];
-  /** Interpolation service for resolving variable references in preview queries */
   interpolationService?: IVariableInterpolationService;
+  /** Regex filter string for preview results */
+  regex?: string;
+  onRegexChange?: (regex: string) => void;
 }
 
 export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
@@ -105,6 +110,8 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   onDatasetChange,
   existingVariableNames = [],
   interpolationService,
+  regex = '',
+  onRegexChange,
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { data } = services;
@@ -349,8 +356,11 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         dataset: dataset || undefined,
       });
 
-      setPreviewValues(options);
-      if (options.length === 0) {
+      // Apply regex filter to preview results
+      const filteredOptions = filterOptionsByRegex(options, regex);
+
+      setPreviewValues(filteredOptions);
+      if (filteredOptions.length === 0) {
         setPreviewError(
           i18n.translate('dashboard.variableQueryPanel.noResults', {
             defaultMessage: 'Query returned no results',
@@ -367,7 +377,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [query, interpolationService, data, language, dataset]);
+  }, [query, interpolationService, data, language, dataset, regex]);
 
   // Keep ref updated for use in editorDidMount closure
   useEffect(() => {
@@ -379,117 +389,137 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   }, []);
 
   return (
-    <EuiFormRow
-      className="variableQueryPanelFormRow"
-      label={i18n.translate('dashboard.variableEditor.queryLabel', {
-        defaultMessage: 'Options Query',
-      })}
-      labelAppend={
-        <EuiSmallButton
-          onClick={handleRunQuery}
-          isLoading={isLoading}
-          data-test-subj="variableQueryPanelRunQuery"
-          minWidth="32px"
-        >
-          {i18n.translate('dashboard.variableQueryPanel.runQuery', {
-            defaultMessage: 'Preview',
-          })}
-        </EuiSmallButton>
-      }
-      helpText={i18n.translate('dashboard.variableEditor.queryHelp', {
-        defaultMessage: 'Select a dataset, write a query, and run it to preview variable options',
-      })}
-      fullWidth
-    >
-      <div>
-        <EuiPanel paddingSize="s" borderRadius="none" className="variableQueryPanel">
-          <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <DatasetSelectWidget
-                    selectedDataset={dataset}
-                    onDatasetChange={onDatasetChange}
-                    language={language}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div className="exploreQueryPanel__editorsWrapper">
-                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-                <div
-                  className={`variableQueryPanelEditor ${
-                    isFocused ? 'variableQueryPanelEditor--focused' : ''
-                  }`}
-                  data-test-subj="variableQueryPanelEditor"
-                  onClick={onEditorClick}
-                >
-                  <CodeEditor
-                    languageId={language}
-                    languageConfiguration={languageConfiguration}
-                    value={query}
-                    onChange={onQueryChange}
-                    width="100%"
-                    editorDidMount={editorDidMount}
-                    suggestionProvider={suggestionProvider}
-                    options={queryEditorOptions}
-                    useLatestTheme
-                    data-test-subj="variableQueryPanelCodeEditor"
-                  />
-                  {!query && (
-                    <div className="variableQueryPanelEditor__placeholder">{placeholder}</div>
-                  )}
-                </div>
-              </div>
-            </EuiFlexItem>
-            <EuiSpacer size="s" />
-          </EuiFlexGroup>
-
-          {isLoading && (
-            <EuiProgress
-              size="xs"
-              color="accent"
-              position="absolute"
-              data-test-subj="variableQueryPanelIsLoading"
-            />
-          )}
-        </EuiPanel>
-
-        {/* Preview of values */}
-        {(previewValues.length > 0 || previewError) && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
-              <EuiText size="xs">
-                <strong>
-                  {i18n.translate('dashboard.variableQueryPanel.previewTitle', {
-                    defaultMessage: 'Preview of values ({count})',
-                    values: { count: previewValues.length },
-                  })}
-                </strong>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              {previewError ? (
-                <EuiText size="xs" color="danger">
-                  {previewError}
-                </EuiText>
-              ) : (
-                <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                  {previewValues.map((val) => (
-                    <EuiFlexItem key={val} grow={false}>
-                      <EuiBadge color="hollow">{val}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
+    <>
+      <EuiFormRow
+        className="variableQueryPanelFormRow"
+        label={i18n.translate('dashboard.variableEditor.queryLabel', {
+          defaultMessage: 'Options Query',
+        })}
+        labelAppend={
+          <EuiSmallButton
+            onClick={handleRunQuery}
+            isLoading={isLoading}
+            data-test-subj="variableQueryPanelRunQuery"
+            minWidth="32px"
+          >
+            {i18n.translate('dashboard.variableQueryPanel.runQuery', {
+              defaultMessage: 'Preview',
+            })}
+          </EuiSmallButton>
+        }
+        helpText={i18n.translate('dashboard.variableEditor.queryHelp', {
+          defaultMessage: 'Select a dataset, write a query, and run it to preview variable options',
+        })}
+        fullWidth
+      >
+        <div>
+          <EuiPanel paddingSize="s" borderRadius="none" className="variableQueryPanel">
+            <EuiFlexGroup gutterSize="xs" direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <DatasetSelectWidget
+                      selectedDataset={dataset}
+                      onDatasetChange={onDatasetChange}
+                      language={language}
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
-              )}
-            </EuiPanel>
-          </>
-        )}
-      </div>
-    </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div className="exploreQueryPanel__editorsWrapper">
+                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+                  <div
+                    className={`variableQueryPanelEditor ${
+                      isFocused ? 'variableQueryPanelEditor--focused' : ''
+                    }`}
+                    data-test-subj="variableQueryPanelEditor"
+                    onClick={onEditorClick}
+                  >
+                    <CodeEditor
+                      languageId={language}
+                      languageConfiguration={languageConfiguration}
+                      value={query}
+                      onChange={onQueryChange}
+                      width="100%"
+                      editorDidMount={editorDidMount}
+                      suggestionProvider={suggestionProvider}
+                      options={queryEditorOptions}
+                      useLatestTheme
+                      data-test-subj="variableQueryPanelCodeEditor"
+                    />
+                    {!query && (
+                      <div className="variableQueryPanelEditor__placeholder">{placeholder}</div>
+                    )}
+                  </div>
+                </div>
+              </EuiFlexItem>
+              <EuiSpacer size="s" />
+            </EuiFlexGroup>
+
+            {isLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="variableQueryPanelIsLoading"
+              />
+            )}
+          </EuiPanel>
+
+          {/* Preview of values */}
+        </div>
+      </EuiFormRow>
+      {/* Regex filter */}
+      {onRegexChange && (
+        <EuiFormRow
+          label={i18n.translate('dashboard.variableQueryPanel.regexLabel', {
+            defaultMessage: 'Regex',
+          })}
+          helpText={i18n.translate('dashboard.variableQueryPanel.regexHelp', {
+            defaultMessage: 'Optional regex to filter options. Only matching values are shown.',
+          })}
+        >
+          <EuiFieldText
+            value={regex}
+            onChange={(e) => onRegexChange(e.target.value)}
+            placeholder="/^prod-/"
+            data-test-subj="variableEditorRegex"
+            compressed
+          />
+        </EuiFormRow>
+      )}
+      <EuiFormRow
+        label={i18n.translate('dashboard.variableQueryPanel.previewTitle', {
+          defaultMessage: 'Preview of values ({count})',
+          values: { count: previewValues.length },
+        })}
+      >
+        <>
+          {(previewValues.length > 0 || previewError) && (
+            <>
+              <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+                {previewError ? (
+                  <EuiText size="xs" color="danger">
+                    {previewError}
+                  </EuiText>
+                ) : (
+                  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                    {previewValues.map((val) => (
+                      <EuiFlexItem key={val} grow={false}>
+                        <EuiBadge color="hollow">{val}</EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                )}
+              </EuiPanel>
+            </>
+          )}
+        </>
+      </EuiFormRow>
+    </>
   );
 };

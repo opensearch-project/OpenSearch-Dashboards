@@ -24,7 +24,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { VariableType, Variable } from '../../../variables/types';
+import { VariableType, Variable, VariableSortOrder } from '../../../variables/types';
 import { VariableQueryPanel } from './query_panel/variable_query_panel';
 import { IVariableInterpolationService } from '../../../variables/variable_interpolation_service';
 
@@ -98,6 +98,10 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   );
   const [multi, setMulti] = useState(existingVariable?.multi || false);
   const [includeAll, setIncludeAll] = useState(existingVariable?.includeAll || false);
+  const [sort, setSort] = useState<VariableSortOrder>(
+    existingVariable?.sort || VariableSortOrder.Disabled
+  );
+  const [regex, setRegex] = useState((existingVariable as any)?.regex || '');
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -209,12 +213,14 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
         type,
         multi,
         includeAll,
+        sort,
       };
 
       if (type === VariableType.Query) {
         (variableConfig as any).query = query.trim();
         (variableConfig as any).language = language;
         (variableConfig as any).dataset = dataset || undefined;
+        (variableConfig as any).regex = regex.trim() || undefined;
       } else if (type === VariableType.Custom) {
         (variableConfig as any).customOptions = customValues.map((v) => v.label);
       }
@@ -237,6 +243,8 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     customValues,
     multi,
     includeAll,
+    sort,
+    regex,
     onSave,
     onClose,
     validateForm,
@@ -279,165 +287,215 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
         </EuiFlexItem>
         <EuiHorizontalRule margin="none" />
         <EuiFlexItem>
-          <EuiForm>
-            {error && (
-              <>
-                <EuiCallOut
-                  title={i18n.translate('dashboard.variableEditor.errorTitle', {
-                    defaultMessage: 'Error',
-                  })}
-                  color="danger"
-                  iconType="alert"
-                >
-                  {error}
-                </EuiCallOut>
-                <EuiSpacer size="s" />
-              </>
-            )}
-
-            <EuiFormRow
-              label={i18n.translate('dashboard.variableEditor.nameLabel', {
-                defaultMessage: 'Name',
-              })}
-              helpText="Use this name to reference the variable: $var or ${var}"
-            >
-              <EuiFieldText
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="service"
-                maxLength={30}
-                data-test-subj="variableEditorName"
-                compressed
-              />
-            </EuiFormRow>
-
-            <EuiFormRow
-              label={i18n.translate('dashboard.variableEditor.labelLabel', {
-                defaultMessage: 'Label',
-              })}
-              helpText={i18n.translate('dashboard.variableEditor.labelHelp', {
-                defaultMessage: 'Optional display name',
-              })}
-            >
-              <EuiFieldText
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="Service"
-                maxLength={40}
-                data-test-subj="variableEditorLabel"
-                compressed
-              />
-            </EuiFormRow>
-
-            <EuiFormRow
-              label={i18n.translate('dashboard.variableEditor.descriptionLabel', {
-                defaultMessage: 'Description',
-              })}
-              helpText={i18n.translate('dashboard.variableEditor.descriptionHelp', {
-                defaultMessage: 'Optional description for the this variable',
-              })}
-            >
-              <EuiFieldText
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Filter by service name"
-                maxLength={100}
-                data-test-subj="variableEditorDescription"
-                compressed
-              />
-            </EuiFormRow>
-
-            <EuiFormRow
-              label={i18n.translate('dashboard.variableEditor.typeLabel', {
-                defaultMessage: 'Type',
-              })}
-              helpText={i18n.translate('dashboard.variableEditor.typeHelp', {
-                defaultMessage: 'Select a variable type',
-              })}
-            >
-              <EuiSuperSelect
-                options={variableTypeOptions}
-                valueOfSelected={type}
-                onChange={(t) => setType(t)}
-                data-test-subj="variableEditorType"
-                compressed
-              />
-            </EuiFormRow>
-
-            {type === VariableType.Query && (
-              <VariableQueryPanel
-                query={query}
-                language={language}
-                dataset={dataset}
-                onQueryChange={setQuery}
-                onLanguageChange={handleLanguageChange}
-                onDatasetChange={setDataset}
-                existingVariableNames={existingVariableNames}
-                interpolationService={interpolationService}
-              />
-            )}
-
-            {type === VariableType.Custom && (
-              <EuiFormRow
-                label={i18n.translate('dashboard.variableEditor.customOptionsLabel', {
-                  defaultMessage: 'Custom options',
+          {error && (
+            <>
+              <EuiCallOut
+                title={i18n.translate('dashboard.variableEditor.errorTitle', {
+                  defaultMessage: 'Error',
                 })}
-                helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
-                  defaultMessage: 'Type a option and press Enter to add it',
-                })}
+                color="danger"
+                iconType="alert"
               >
-                <EuiComboBox
-                  selectedOptions={customValues}
-                  onChange={setCustomValues}
-                  onCreateOption={(value) => {
-                    const trimmed = value.trim();
-                    if (trimmed && !customValues.some((v) => v.label === trimmed)) {
-                      setCustomValues([...customValues, { label: trimmed }]);
-                    }
-                  }}
-                  placeholder="Type and press Enter..."
-                  data-test-subj="variableEditorCustomValues"
-                  compressed
-                />
-              </EuiFormRow>
-            )}
+                {error}
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
+          )}
 
-            {(type === VariableType.Query || type === VariableType.Custom) && (
-              <>
-                <EuiFormRow>
-                  <EuiSwitch
-                    label={i18n.translate('dashboard.variableEditor.multiLabel', {
-                      defaultMessage: 'Allow multiple selections',
-                    })}
-                    checked={multi}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setMulti(checked);
-                      if (!checked) {
-                        setIncludeAll(false);
-                      }
-                    }}
-                    data-test-subj="variableEditorMulti"
-                    compressed
-                  />
-                </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableEditor.nameLabel', {
+              defaultMessage: 'Name',
+            })}
+            helpText="Use this name to reference the variable: $var or ${var}"
+          >
+            <EuiFieldText
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="service"
+              maxLength={30}
+              data-test-subj="variableEditorName"
+              compressed
+            />
+          </EuiFormRow>
 
-                {multi && (
-                  <EuiFormRow>
-                    <EuiSwitch
-                      label={i18n.translate('dashboard.variableEditor.includeAllLabel', {
-                        defaultMessage: 'Include All option',
-                      })}
-                      checked={includeAll}
-                      onChange={(e) => setIncludeAll(e.target.checked)}
-                      data-test-subj="variableEditorIncludeAll"
-                      compressed
-                    />
-                  </EuiFormRow>
-                )}
-              </>
-            )}
-          </EuiForm>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableEditor.labelLabel', {
+              defaultMessage: 'Label',
+            })}
+            helpText={i18n.translate('dashboard.variableEditor.labelHelp', {
+              defaultMessage: 'Optional display name',
+            })}
+          >
+            <EuiFieldText
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="Service"
+              maxLength={40}
+              data-test-subj="variableEditorLabel"
+              compressed
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableEditor.descriptionLabel', {
+              defaultMessage: 'Description',
+            })}
+            helpText={i18n.translate('dashboard.variableEditor.descriptionHelp', {
+              defaultMessage: 'Optional description for the this variable',
+            })}
+          >
+            <EuiFieldText
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Filter by service name"
+              maxLength={100}
+              data-test-subj="variableEditorDescription"
+              compressed
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableEditor.typeLabel', {
+              defaultMessage: 'Type',
+            })}
+            helpText={i18n.translate('dashboard.variableEditor.typeHelp', {
+              defaultMessage: 'Select a variable type',
+            })}
+          >
+            <EuiSuperSelect
+              options={variableTypeOptions}
+              valueOfSelected={type}
+              onChange={(t) => setType(t)}
+              data-test-subj="variableEditorType"
+              compressed
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiHorizontalRule margin="none" />
+        <EuiFlexItem>
+          {type === VariableType.Query && (
+            <VariableQueryPanel
+              query={query}
+              language={language}
+              dataset={dataset}
+              onQueryChange={setQuery}
+              onLanguageChange={handleLanguageChange}
+              onDatasetChange={setDataset}
+              existingVariableNames={existingVariableNames}
+              interpolationService={interpolationService}
+              regex={regex}
+              onRegexChange={setRegex}
+            />
+          )}
+
+          {type === VariableType.Custom && (
+            <EuiFormRow
+              label={i18n.translate('dashboard.variableEditor.customOptionsLabel', {
+                defaultMessage: 'Custom options',
+              })}
+              helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
+                defaultMessage: 'Type a option and press Enter to add it',
+              })}
+            >
+              <EuiComboBox
+                selectedOptions={customValues}
+                onChange={setCustomValues}
+                onCreateOption={(value) => {
+                  const trimmed = value.trim();
+                  if (trimmed && !customValues.some((v) => v.label === trimmed)) {
+                    setCustomValues([...customValues, { label: trimmed }]);
+                  }
+                }}
+                placeholder="Type and press Enter..."
+                data-test-subj="variableEditorCustomValues"
+                compressed
+              />
+            </EuiFormRow>
+          )}
+        </EuiFlexItem>
+
+        <EuiHorizontalRule margin="none" />
+
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableEditor.sortLabel', {
+              defaultMessage: 'Sort',
+            })}
+            helpText={i18n.translate('dashboard.variableEditor.sortLabelHelp', {
+              defaultMessage: 'How options are sorted in the dropdown',
+            })}
+          >
+            <EuiSuperSelect
+              options={[
+                {
+                  value: VariableSortOrder.Disabled,
+                  inputDisplay: i18n.translate('dashboard.variableEditor.sortDisabled', {
+                    defaultMessage: 'Disabled',
+                  }),
+                },
+                {
+                  value: VariableSortOrder.AlphabeticalAsc,
+                  inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaAsc', {
+                    defaultMessage: 'Alphabetical (asc)',
+                  }),
+                },
+                {
+                  value: VariableSortOrder.AlphabeticalDesc,
+                  inputDisplay: i18n.translate('dashboard.variableEditor.sortAlphaDesc', {
+                    defaultMessage: 'Alphabetical (desc)',
+                  }),
+                },
+                {
+                  value: VariableSortOrder.NumericalAsc,
+                  inputDisplay: i18n.translate('dashboard.variableEditor.sortNumAsc', {
+                    defaultMessage: 'Numerical (asc)',
+                  }),
+                },
+                {
+                  value: VariableSortOrder.NumericalDesc,
+                  inputDisplay: i18n.translate('dashboard.variableEditor.sortNumDesc', {
+                    defaultMessage: 'Numerical (desc)',
+                  }),
+                },
+              ]}
+              valueOfSelected={sort}
+              onChange={(v) => setSort(v)}
+              data-test-subj="variableEditorSort"
+              compressed
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate('dashboard.variableEditor.multiLabel', {
+                defaultMessage: 'Allow multiple selections',
+              })}
+              checked={multi}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setMulti(checked);
+                if (!checked) {
+                  setIncludeAll(false);
+                }
+              }}
+              data-test-subj="variableEditorMulti"
+              compressed
+            />
+          </EuiFormRow>
+
+          {multi && (
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate('dashboard.variableEditor.includeAllLabel', {
+                  defaultMessage: 'Include All option',
+                })}
+                checked={includeAll}
+                onChange={(e) => setIncludeAll(e.target.checked)}
+                data-test-subj="variableEditorIncludeAll"
+                compressed
+              />
+            </EuiFormRow>
+          )}
         </EuiFlexItem>
         <EuiHorizontalRule margin="none" />
         <EuiFlexItem grow={false}>

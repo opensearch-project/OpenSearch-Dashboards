@@ -33,6 +33,19 @@ export interface VariableMeta {
   hide?: boolean;
   /** Description */
   description?: string;
+  /** Sort order for options */
+  sort?: VariableSortOrder;
+}
+
+/**
+ * Sort order for variable options
+ */
+export enum VariableSortOrder {
+  Disabled = 'disabled',
+  AlphabeticalAsc = 'alphabetical-asc',
+  AlphabeticalDesc = 'alphabetical-desc',
+  NumericalAsc = 'numerical-asc',
+  NumericalDesc = 'numerical-desc',
 }
 
 /**
@@ -62,6 +75,8 @@ export interface CustomVariable extends VariableMeta {
  */
 export interface QueryVariable extends VariableMeta, VariableQueryParams {
   type: VariableType.Query;
+  /** Regex filter — only options matching this pattern are shown */
+  regex?: string;
 }
 
 /**

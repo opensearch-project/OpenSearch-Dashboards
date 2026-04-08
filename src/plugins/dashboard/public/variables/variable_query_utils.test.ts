@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parseResponseToOptions } from './variable_query_utils';
+import { parseResponseToOptions, filterOptionsByRegex } from './variable_query_utils';
 
 describe('parseResponseToOptions', () => {
   it('should return empty array for undefined response', () => {
@@ -105,5 +105,41 @@ describe('parseResponseToOptions', () => {
       },
     };
     expect(parseResponseToOptions(response)).toEqual([]);
+  });
+});
+
+describe('filterOptionsByRegex', () => {
+  const options = ['prod-api', 'prod-web', 'staging-api', 'dev-worker', 'PROD-DB'];
+
+  it('should return all options when regex is undefined', () => {
+    expect(filterOptionsByRegex(options, undefined)).toEqual(options);
+  });
+
+  it('should return all options when regex is empty string', () => {
+    expect(filterOptionsByRegex(options, '')).toEqual(options);
+  });
+
+  it('should filter options with a plain regex string', () => {
+    expect(filterOptionsByRegex(options, '^prod')).toEqual(['prod-api', 'prod-web']);
+  });
+
+  it('should filter options with /pattern/ syntax', () => {
+    expect(filterOptionsByRegex(options, '/^prod/')).toEqual(['prod-api', 'prod-web']);
+  });
+
+  it('should support /pattern/flags syntax', () => {
+    expect(filterOptionsByRegex(options, '/^prod/i')).toEqual(['prod-api', 'prod-web', 'PROD-DB']);
+  });
+
+  it('should return all options for invalid regex', () => {
+    expect(filterOptionsByRegex(options, '/[invalid')).toEqual(options);
+  });
+
+  it('should return empty array when no options match', () => {
+    expect(filterOptionsByRegex(options, '^xyz')).toEqual([]);
+  });
+
+  it('should work with partial match', () => {
+    expect(filterOptionsByRegex(options, 'api')).toEqual(['prod-api', 'staging-api']);
   });
 });

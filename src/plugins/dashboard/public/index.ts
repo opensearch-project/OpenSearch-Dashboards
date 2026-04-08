@@ -70,6 +70,7 @@ export {
 export {
   Variable,
   VariableType,
+  VariableSortOrder,
   QueryVariable,
   CustomVariable,
   VariableWithState,

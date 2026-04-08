@@ -5,7 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { VariableService } from './variable_service';
-import { Variable, VariableType, CustomVariable, QueryVariable } from './types';
+import { Variable, VariableType, VariableSortOrder, CustomVariable, QueryVariable } from './types';
 
 jest.mock('./variable_query_utils', () => ({
   executeQueryForOptions: jest.fn(),
@@ -445,6 +445,89 @@ describe('VariableService', () => {
 
       await service.refreshAllVariableOptions();
       expect(callOrder).toEqual(['query-1', 'query-2']);
+    });
+  });
+
+  describe('sort options', () => {
+    it('should sort custom variable options alphabetically ascending', () => {
+      const { service } = createConnectedService([
+        makeCustomVariable({
+          customOptions: ['cherry', 'apple', 'banana'],
+          sort: VariableSortOrder.AlphabeticalAsc,
+        }),
+      ]);
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
+    });
+
+    it('should sort custom variable options alphabetically descending', () => {
+      const { service } = createConnectedService([
+        makeCustomVariable({
+          customOptions: ['cherry', 'apple', 'banana'],
+          sort: VariableSortOrder.AlphabeticalDesc,
+        }),
+      ]);
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['cherry', 'banana', 'apple']);
+    });
+
+    it('should sort numerically ascending', () => {
+      const { service } = createConnectedService([
+        makeCustomVariable({
+          customOptions: ['10', '2', '100', '1'],
+          sort: VariableSortOrder.NumericalAsc,
+        }),
+      ]);
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['1', '2', '10', '100']);
+    });
+
+    it('should sort numerically descending', () => {
+      const { service } = createConnectedService([
+        makeCustomVariable({
+          customOptions: ['10', '2', '100', '1'],
+          sort: VariableSortOrder.NumericalDesc,
+        }),
+      ]);
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['100', '10', '2', '1']);
+    });
+
+    it('should not sort when sort is disabled', () => {
+      const { service } = createConnectedService([
+        makeCustomVariable({
+          customOptions: ['cherry', 'apple', 'banana'],
+          sort: VariableSortOrder.Disabled,
+        }),
+      ]);
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['cherry', 'apple', 'banana']);
+    });
+
+    it('should sort query variable options after refresh', async () => {
+      mockExecuteQuery.mockResolvedValue(['zebra', 'apple', 'mango']);
+      const { service } = createConnectedService([
+        makeQueryVariable({ sort: VariableSortOrder.AlphabeticalAsc }),
+      ]);
+
+      await service.refreshVariableOptions('query-1');
+
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['apple', 'mango', 'zebra']);
+    });
+
+    it('should re-sort options when sort setting changes', async () => {
+      const { service } = createConnectedService([
+        makeCustomVariable({
+          customOptions: ['cherry', 'apple', 'banana'],
+          sort: VariableSortOrder.Disabled,
+        }),
+      ]);
+
+      await service.updateVariable('custom-1', { sort: VariableSortOrder.AlphabeticalAsc });
+
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
     });
   });
 });
