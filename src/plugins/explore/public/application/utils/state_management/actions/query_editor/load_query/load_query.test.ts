@@ -6,9 +6,8 @@
 import { loadQueryActionCreator } from './load_query';
 import { runQueryActionCreator } from '../run_query';
 import { clearLastExecutedData } from '../../../slices';
-import { QueryExecutionStatus, QueryResultStatus } from '../../../types';
 import { ExploreServices } from '../../../../../../types';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch } from '../../../store';
 
 jest.mock('../run_query', () => ({
   runQueryActionCreator: jest.fn(),
@@ -27,30 +26,14 @@ const mockClearLastExecutedData = clearLastExecutedData as jest.MockedFunction<
 
 describe('loadQueryActionCreator', () => {
   let mockDispatch: jest.MockedFunction<AppDispatch>;
-  let mockGetState: jest.MockedFunction<() => RootState>;
   let mockServices: ExploreServices;
   let mockSetEditorTextWithQuery: jest.Mock;
   const testQuery = '| where field="b"';
-
-  const makeOverallQueryStatus = (
-    status: QueryExecutionStatus,
-    error?: QueryResultStatus['error']
-  ): QueryResultStatus => ({
-    status,
-    elapsedMs: undefined,
-    startTime: undefined,
-    error,
-  });
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockDispatch = jest.fn().mockResolvedValue(undefined) as jest.MockedFunction<AppDispatch>;
-    mockGetState = jest.fn().mockReturnValue({
-      queryEditor: {
-        overallQueryStatus: makeOverallQueryStatus(QueryExecutionStatus.READY),
-      },
-    } as RootState) as jest.MockedFunction<() => RootState>;
 
     mockServices = {
       data: {},
@@ -74,7 +57,7 @@ describe('loadQueryActionCreator', () => {
       mockSetEditorTextWithQuery,
       testQuery
     );
-    await actionCreator(mockDispatch, mockGetState);
+    await actionCreator(mockDispatch);
     expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
   });
 
@@ -84,7 +67,7 @@ describe('loadQueryActionCreator', () => {
       mockSetEditorTextWithQuery,
       testQuery
     );
-    await actionCreator(mockDispatch, mockGetState);
+    await actionCreator(mockDispatch);
     expect(mockDispatch).toHaveBeenCalledWith(mockClearLastExecutedData());
   });
 
@@ -97,7 +80,7 @@ describe('loadQueryActionCreator', () => {
       mockSetEditorTextWithQuery,
       testQuery
     );
-    await actionCreator(mockDispatch, mockGetState);
+    await actionCreator(mockDispatch);
 
     expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, testQuery);
     expect(mockDispatch).toHaveBeenCalledWith(mockRunAction);
@@ -125,96 +108,8 @@ describe('loadQueryActionCreator', () => {
       mockSetEditorTextWithQuery,
       testQuery
     );
-    await actionCreator(mockDispatch, mockGetState);
+    await actionCreator(mockDispatch);
 
     expect(calls).toEqual(['clearLastExecutedData', 'setEditorTextWithQuery', 'runQuery']);
-  });
-
-  it('should return overallQueryStatus after execution completes', async () => {
-    const expectedStatus = makeOverallQueryStatus(QueryExecutionStatus.READY);
-    mockGetState.mockReturnValue({
-      queryEditor: { overallQueryStatus: expectedStatus },
-    } as RootState);
-
-    const actionCreator = loadQueryActionCreator(
-      mockServices,
-      mockSetEditorTextWithQuery,
-      testQuery
-    );
-    const result = await actionCreator(mockDispatch, mockGetState);
-
-    expect(result).toEqual(expectedStatus);
-  });
-
-  it('should return ERROR status from Redux state when query fails', async () => {
-    // createAsyncThunk catches errors internally - dispatch never throws for query errors.
-    // The error is stored in Redux state and returned via overallQueryStatus.
-    const errorStatus = makeOverallQueryStatus(QueryExecutionStatus.ERROR, {
-      statusCode: 400,
-      error: 'Bad Request',
-      message: { type: 'SyntaxError', details: 'Invalid syntax', reason: 'Parse error' },
-      originalErrorMessage: 'Invalid syntax',
-    });
-    mockGetState.mockReturnValue({
-      queryEditor: { overallQueryStatus: errorStatus },
-    } as RootState);
-
-    const actionCreator = loadQueryActionCreator(
-      mockServices,
-      mockSetEditorTextWithQuery,
-      testQuery
-    );
-    const result = await actionCreator(mockDispatch, mockGetState);
-
-    expect(result.status).toBe(QueryExecutionStatus.ERROR);
-    expect(result.error?.message?.type).toBe('SyntaxError');
-  });
-
-  it('should return NO_RESULTS status when query succeeds with no data', async () => {
-    const noResultsStatus = makeOverallQueryStatus(QueryExecutionStatus.NO_RESULTS);
-    mockGetState.mockReturnValue({
-      queryEditor: { overallQueryStatus: noResultsStatus },
-    } as RootState);
-
-    const actionCreator = loadQueryActionCreator(
-      mockServices,
-      mockSetEditorTextWithQuery,
-      testQuery
-    );
-    const result = await actionCreator(mockDispatch, mockGetState);
-
-    expect(result.status).toBe(QueryExecutionStatus.NO_RESULTS);
-  });
-
-  it('should await runQueryActionCreator before reading state', async () => {
-    const callOrder: string[] = [];
-
-    (mockDispatch as jest.Mock).mockImplementation(async (action: any) => {
-      if (typeof action === 'function') {
-        callOrder.push('runQuery dispatched');
-        await Promise.resolve();
-        callOrder.push('runQuery resolved');
-      }
-    });
-
-    mockGetState.mockImplementation(() => {
-      callOrder.push('getState called');
-      return {
-        queryEditor: {
-          overallQueryStatus: makeOverallQueryStatus(QueryExecutionStatus.READY),
-        },
-      } as RootState;
-    });
-
-    const actionCreator = loadQueryActionCreator(
-      mockServices,
-      mockSetEditorTextWithQuery,
-      testQuery
-    );
-    await actionCreator(mockDispatch, mockGetState);
-
-    const runQueryIdx = callOrder.indexOf('runQuery resolved');
-    const getStateIdx = callOrder.indexOf('getState called');
-    expect(runQueryIdx).toBeLessThan(getStateIdx);
   });
 });
