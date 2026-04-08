@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { FC } from 'react';
 import {
   EuiFormRow,
   EuiButtonGroup,
@@ -41,7 +42,7 @@ const y2AxisLabel = i18n.translate('explore.vis.standardAxes.y2Axis', {
   defaultMessage: 'Y-Axis(2nd)',
 });
 
-export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
+export const AllAxesOptions: FC<AllAxesOptionsProps> = ({
   standardAxes = [],
   onStandardAxesChange,
   axisColumnMappings,
