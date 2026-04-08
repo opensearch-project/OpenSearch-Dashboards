@@ -284,7 +284,6 @@ export class ExploreEmbeddable
           {
             // @ts-expect-error TS2353 TODO(ts-error): fixme
             range: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               '*': {
                 mode: 'absolute',
                 gte: moment(range.from),

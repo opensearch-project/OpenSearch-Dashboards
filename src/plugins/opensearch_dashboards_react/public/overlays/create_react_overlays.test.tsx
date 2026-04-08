@@ -113,13 +113,11 @@ test('passes through flyout options when opening flyout', () => {
   });
 
   overlays.openFlyout(<>foo</>, {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'foo',
     closeButtonAriaLabel: 'bar',
   });
 
   expect(coreOverlays.openFlyout.mock.calls[0][1]).toEqual({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'foo',
     closeButtonAriaLabel: 'bar',
   });
@@ -132,13 +130,11 @@ test('passes through modal options when opening modal', () => {
   });
 
   overlays.openModal(<>foo</>, {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'foo2',
     closeButtonAriaLabel: 'bar2',
   });
 
   expect(coreOverlays.openModal.mock.calls[0][1]).toEqual({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'foo2',
     closeButtonAriaLabel: 'bar2',
   });
@@ -151,7 +147,6 @@ test('passes through sidecar options when opening sidecar', () => {
   });
 
   overlays.sidecar().open(toMountPoint(<>foo</>), {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'foo2',
     config: {
       dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
@@ -160,7 +155,6 @@ test('passes through sidecar options when opening sidecar', () => {
   });
 
   expect(coreOverlays.sidecar.open.mock.calls[0][1]).toEqual({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'foo2',
     config: {
       dockedMode: SIDECAR_DOCKED_MODE.RIGHT,

@@ -28,14 +28,10 @@ export const Sidecar = ({ sidecarConfig$, options, setSidecarConfig, i18n, mount
   const classes = classNames(
     'osdSidecarFlyout',
     {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdSidecarFlyout--dockedRight': sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdSidecarFlyout--dockedLeft': sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.LEFT,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdSidecarFlyout--dockedTakeover':
         sidecarConfig?.dockedMode === SIDECAR_DOCKED_MODE.TAKEOVER,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdSidecarFlyout--hide': sidecarConfig?.isHidden === true,
     },
     options.className

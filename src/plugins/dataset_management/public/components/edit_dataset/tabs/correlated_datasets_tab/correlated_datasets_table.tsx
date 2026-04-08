@@ -151,7 +151,6 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           icon: 'pencil',
           type: 'icon',
           onClick: (correlation: CorrelationSavedObject) => onEdit(correlation),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'editCorrelationButton',
         },
         {
@@ -168,7 +167,6 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           type: 'icon',
           color: 'danger',
           onClick: (correlation: CorrelationSavedObject) => setCorrelationToDelete(correlation.id),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'deleteCorrelationButton',
         },
       ],

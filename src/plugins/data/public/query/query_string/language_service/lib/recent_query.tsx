@@ -29,7 +29,6 @@ export function RecentQueriesTable({
   }, [queryString]);
 
   const getRowProps = (item: any) => ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `row-${item.id}`,
     className: 'customRowClass',
     onClick: () => {},
@@ -37,7 +36,6 @@ export function RecentQueriesTable({
 
   const getCellProps = (item: any, column: any) => ({
     className: 'customCellClass',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `cell-${item.id}-${column.field}`,
     textOnly: true,
   });
@@ -59,7 +57,6 @@ export function RecentQueriesTable({
               recentQueries.find((recentQuery) => recentQuery.id === item.id)?.timeRange
             );
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'action-run',
         },
         {

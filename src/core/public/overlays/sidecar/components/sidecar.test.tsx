@@ -34,7 +34,6 @@ const props = {
     isHidden: false,
   }),
   options: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': 'sidecar-component-wrapper',
   },
   setSidecarConfig: jest.fn(),

@@ -93,7 +93,6 @@ describe('WorkspaceCollaboratorsPanel', () => {
 
   it('should display error message if provided', () => {
     render(
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       <WorkspaceCollaboratorsPanel {...defaultProps} errors={{ 2: 'A test error message' }} />
     );
 

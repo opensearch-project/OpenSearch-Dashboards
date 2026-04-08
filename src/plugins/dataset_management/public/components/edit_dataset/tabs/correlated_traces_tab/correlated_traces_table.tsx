@@ -153,7 +153,6 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
           icon: 'inspect',
           type: 'icon',
           onClick: (correlation: CorrelationSavedObject) => onView(correlation),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'viewCorrelationButton',
         },
       ],

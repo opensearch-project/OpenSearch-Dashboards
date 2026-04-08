@@ -40,7 +40,6 @@ describe('SpanListTable', () => {
       serviceName: 'service-1',
       name: 'operation-1',
       durationInNanos: 1000000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
       startTime: '2023-01-01T00:00:00.000Z',
       endTime: '2023-01-01T00:00:01.000Z',
@@ -51,7 +50,6 @@ describe('SpanListTable', () => {
       serviceName: 'service-2',
       name: 'operation-2',
       durationInNanos: 2000000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 2,
       startTime: '2023-01-01T00:00:02.000Z',
       endTime: '2023-01-01T00:00:04.000Z',

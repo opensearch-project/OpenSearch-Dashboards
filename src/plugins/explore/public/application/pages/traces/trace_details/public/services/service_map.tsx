@@ -182,7 +182,6 @@ const ServiceNode = ({
             }`}
             style={
               {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 '--service-color': serviceColor,
               } as React.CSSProperties
             }
@@ -226,7 +225,6 @@ const ServiceNode = ({
                     className="exploreMetricBar__fill"
                     style={
                       {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         '--fill-width': `${requestRateIntensity * 100}%`,
                         backgroundColor: `rgba(0, 0, 255, ${0.3 + requestRateIntensity * 0.7})`,
                       } as React.CSSProperties
@@ -246,7 +244,6 @@ const ServiceNode = ({
                     className="exploreMetricBar__fill"
                     style={
                       {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         '--fill-width': `${errorRateIntensity * 100}%`,
                         backgroundColor: `rgba(255, 0, 0, ${0.3 + errorRateIntensity * 0.7})`,
                       } as React.CSSProperties
@@ -266,7 +263,6 @@ const ServiceNode = ({
                     className="exploreMetricBar__fill"
                     style={
                       {
-                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         '--fill-width': `${durationIntensity * 100}%`,
                         backgroundColor: `rgba(128, 0, 128, ${0.3 + durationIntensity * 0.7})`,
                       } as React.CSSProperties

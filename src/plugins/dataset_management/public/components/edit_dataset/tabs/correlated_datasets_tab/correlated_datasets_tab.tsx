@@ -67,7 +67,6 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
           action: editingCorrelation ? 'updated' : 'created',
         },
       }),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'correlationSaveSuccessToast',
     });
   }, [editingCorrelation, refetch, onCountChange, notifications]);
@@ -81,7 +80,6 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
           title: i18n.translate('datasetManagement.correlatedDatasets.deleteSuccess', {
             defaultMessage: 'Correlation has been deleted',
           }),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'correlationDeleteSuccessToast',
         });
         await refetch();
@@ -93,7 +91,6 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
           title: i18n.translate('datasetManagement.correlatedDatasets.deleteError', {
             defaultMessage: 'Failed to delete correlation',
           }),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'correlationDeleteErrorToast',
         });
       }

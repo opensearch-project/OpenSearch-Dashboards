@@ -95,7 +95,6 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-1',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 0,
         durationInNanos: 1000000000, // 1 second
         startTime: '1640995200000000000',
@@ -112,7 +111,6 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-2',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 0,
         durationInNanos: 2000000000, // 2 seconds
         startTime: '1640995200000000000',
@@ -130,9 +128,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-error',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Internal server error',
         durationInNanos: 1000000000,
         startTime: '1640995200000000000',
@@ -178,7 +174,6 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-events',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 0,
         durationInNanos: 1000000000,
         startTime: '1640995200000000000',
@@ -187,9 +182,7 @@ describe('SpanIssuesTab', () => {
             name: 'database.error',
             timestamp: '1640995201000000000',
             attributes: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'error.type': 'ConnectionTimeout',
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'error.message': 'Database connection timed out',
             },
           },
@@ -197,9 +190,7 @@ describe('SpanIssuesTab', () => {
             name: 'http.error',
             timestamp: '1640995202000000000',
             attributes: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'http.status_code': 500,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'error.message': 'Internal server error',
             },
           },
@@ -221,7 +212,6 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-long',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 0,
         durationInNanos: 10000000000, // 10 seconds (exceeds 5 second threshold)
         startTime: '1640995200000000000',
@@ -240,9 +230,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-multiple',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Request failed',
         durationInNanos: 8000000000, // 8 seconds (exceeds threshold)
         startTime: '1640995200000000000',
@@ -251,9 +239,7 @@ describe('SpanIssuesTab', () => {
             name: 'validation.error',
             timestamp: '1640995201000000000',
             attributes: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'error.type': 'ValidationError',
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'error.message': 'Invalid input parameters',
             },
           },
@@ -273,9 +259,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-no-timestamp',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Error without timestamp',
         durationInNanos: 1000000000,
         // No startTime provided
@@ -370,9 +354,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-spacing',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'First issue',
         durationInNanos: 8000000000, // Second issue (duration)
         startTime: '1640995200000000000',
@@ -397,9 +379,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-timestamp',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Test error',
         startTime: '1640995200000000000', // Jan 1, 2022 00:00:00 UTC in nanoseconds
         events: [],
@@ -419,9 +399,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-timestamp-2',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Test error',
         startTime: '1641081600000000000', // Jan 2, 2022 00:00:00 UTC in nanoseconds
         events: [],
@@ -442,9 +420,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-copyable',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Test error for copyable',
         startTime: '1640995200000000000',
         events: [],
@@ -465,9 +441,7 @@ describe('SpanIssuesTab', () => {
         spanId: 'test-span-styling',
         serviceName: 'test-service',
         name: 'test-operation',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.message': 'Test error for styling',
         startTime: '1640995200000000000',
         events: [],

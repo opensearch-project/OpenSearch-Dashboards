@@ -410,7 +410,6 @@ function TimelineVisComponent({
           filters: [
             {
               range: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 '*': {
                   gte: ranges.xaxis.from,
                   lte: ranges.xaxis.to,

@@ -69,7 +69,6 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
         defaultMessage: 'Name',
       }),
       sortable: true,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'nameCell',
       render: (name: string, item: AssociatedObject) => (
         <EuiLink

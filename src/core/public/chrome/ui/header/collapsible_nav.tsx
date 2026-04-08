@@ -201,7 +201,6 @@ export function CollapsibleNav({
 
               return {
                 ...hydratedLink,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'data-test-subj': 'collapsibleNavAppLink--recent',
                 onClick: (event) => {
                   if (!isModifiedOrPrevented(event)) {

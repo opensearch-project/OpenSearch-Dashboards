@@ -295,9 +295,7 @@ describe('WorkspacePermissionSettingInput', () => {
   it('should render consistent errors', async () => {
     const { renderResult } = setup({
       errors: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '0': { code: 0, message: 'User permission setting error' },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '1': { code: 0, message: 'Group permission setting error' },
       },
     });

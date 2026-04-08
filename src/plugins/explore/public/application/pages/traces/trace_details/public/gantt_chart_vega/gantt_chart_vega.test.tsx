@@ -85,7 +85,6 @@ describe('GanttChart', () => {
       startTime: '2023-01-01T10:00:00.000Z',
       endTime: '2023-01-01T10:00:00.100Z',
       durationInNanos: 100000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
     },
     {
@@ -97,15 +96,12 @@ describe('GanttChart', () => {
       startTime: '2023-01-01T10:00:00.020Z',
       endTime: '2023-01-01T10:00:00.080Z',
       durationInNanos: 60000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
     },
   ];
 
   const mockColorMap = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-a': '#ff0000',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-b': '#00ff00',
   };
 

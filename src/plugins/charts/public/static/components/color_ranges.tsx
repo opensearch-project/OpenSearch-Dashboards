@@ -38,7 +38,6 @@ import { RangeValues, RangesParamEditor } from '../../../../vis_default_editor/p
 export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 
 interface ColorRangesProps {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
   colorsRange: RangeValues[];
   setValue: SetColorRangeValue;

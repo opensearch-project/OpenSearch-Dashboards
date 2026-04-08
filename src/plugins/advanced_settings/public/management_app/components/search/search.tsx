@@ -79,9 +79,7 @@ export class Search extends PureComponent<SearchProps> {
 
     const box = {
       incremental: true,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'settingsSearchBar',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'aria-label': i18n.translate('advancedSettings.searchBarAriaLabel', {
         defaultMessage: 'Search advanced settings',
       }), // hack until EuiSearchBar is fixed

@@ -181,7 +181,6 @@ function FilterBarUI(props: Props) {
     defaultMessage: 'Filters',
   });
   const filterGroupClassName = classNames('globalFilterGroup', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'globalFilterGroup--compressed': useNewHeader && props.isFilterBarPortable,
   });
 

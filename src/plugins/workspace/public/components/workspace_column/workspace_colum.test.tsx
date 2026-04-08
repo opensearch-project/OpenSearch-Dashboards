@@ -52,8 +52,7 @@ describe('workspace column in saved objects page', () => {
               data-test-subj="workspace-column-more-workspaces-badge"
               title="+ 1 more"
             >
-              +
-              1
+              + 1
                more
             </button>
             <button

@@ -84,7 +84,6 @@ describe('SpanOverviewTab', () => {
         name: 'getUserData',
         durationInNanos: 5000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
       };
 
@@ -105,7 +104,6 @@ describe('SpanOverviewTab', () => {
         serviceName: 'test-service',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
       };
 
@@ -123,7 +121,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
       };
 
@@ -143,7 +140,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 5000000, // 5ms
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
       };
 
@@ -160,7 +156,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         // Missing startTime
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
       };
 
@@ -179,7 +174,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1, // OK status
       };
 
@@ -199,7 +193,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2, // Error status
       };
 
@@ -219,7 +212,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2, // Error status
       };
 
@@ -238,7 +230,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2, // Error status
       };
 
@@ -257,14 +248,10 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.url': 'https://api.example.com/users',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 200,
         },
       };
@@ -284,7 +271,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         // No HTTP attributes
       };
@@ -301,10 +287,8 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.url': 'https://api.example.com/users/123',
         },
       };
@@ -328,10 +312,8 @@ describe('SpanOverviewTab', () => {
         name: 'getUserData',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'POST',
         },
       };
@@ -354,10 +336,8 @@ describe('SpanOverviewTab', () => {
         name: 'getUserData',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.url': 'https://api.example.com/users',
           // No http.method
         },
@@ -385,12 +365,9 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 200,
         },
       };
@@ -410,12 +387,9 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 301,
         },
       };
@@ -434,12 +408,9 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 404,
         },
       };
@@ -458,12 +429,9 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.status_code': 500,
         },
       };
@@ -482,10 +450,8 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 2, // Error status
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
           // No http.status_code
         },
@@ -507,10 +473,8 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1, // OK status
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'GET',
           // No http.status_code
         },
@@ -548,7 +512,6 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 0,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
       };
 
@@ -564,10 +527,8 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.url': 'https://api.example.com/test',
           // No http.method
         },
@@ -590,10 +551,8 @@ describe('SpanOverviewTab', () => {
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 1,
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'http.method': 'POST',
           // No http.url
         },

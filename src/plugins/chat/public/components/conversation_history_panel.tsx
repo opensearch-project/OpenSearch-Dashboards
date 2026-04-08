@@ -270,7 +270,6 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
                         size="s"
                         extraAction={{
                           iconType: 'boxesHorizontal',
-                          // eslint-disable-next-line @typescript-eslint/naming-convention
                           'aria-label': i18n.translate(
                             'chat.conversationHistory.actionsAriaLabel',
                             {

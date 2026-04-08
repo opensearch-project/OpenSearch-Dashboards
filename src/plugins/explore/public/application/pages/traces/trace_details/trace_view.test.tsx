@@ -178,9 +178,7 @@ const mockTransformPPLDataToTraceHits = pplToTraceHits.transformPPLDataToTraceHi
 
 jest.mock('./public/traces/generate_color_map', () => ({
   generateColorMap: jest.fn(() => ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-a': '#ff0000',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-b': '#00ff00',
   })),
 }));
@@ -193,7 +191,6 @@ const mockCorrelationService = {
       { id: 'log-dataset-2', title: 'error-logs-*', type: 'INDEX_PATTERN' },
     ],
     datasetLogs: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-1': [
         {
           _id: 'log1',
@@ -204,7 +201,6 @@ const mockCorrelationService = {
           _source: { message: 'Test log message 2', timestamp: '2023-01-01T00:00:01Z' },
         },
       ],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-2': [
         {
           _id: 'log3',

@@ -134,7 +134,6 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),
@@ -156,7 +155,6 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'INACTIVE',
       }),
@@ -176,7 +174,6 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),
@@ -226,7 +223,6 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),
@@ -282,7 +278,6 @@ describe('DirectQueryDataConnectionDetail', () => {
         description: 'Test description',
         name: 'Test datasource',
         connector: 'PROMETHEUS',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         properties: { 'prometheus.uri': 'placeholder' },
         status: 'ACTIVE',
       }),

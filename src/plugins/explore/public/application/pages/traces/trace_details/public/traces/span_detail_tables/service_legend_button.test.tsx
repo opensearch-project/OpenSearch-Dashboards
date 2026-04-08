@@ -8,11 +8,8 @@ import { ServiceLegendButton } from './service_legend_button';
 
 describe('ServiceLegendButton', () => {
   const mockColorMap = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-1': '#FF0000',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-2': '#00FF00',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'service-3': '#0000FF',
   };
 

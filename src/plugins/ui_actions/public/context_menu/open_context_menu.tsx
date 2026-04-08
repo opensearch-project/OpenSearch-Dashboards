@@ -173,7 +173,6 @@ export function openContextMenu(
   props: {
     closeButtonAriaLabel?: string;
     onClose?: () => void;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj'?: string;
   } = {}
 ): ContextMenuSession {

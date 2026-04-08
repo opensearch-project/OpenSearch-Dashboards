@@ -72,9 +72,7 @@ describe('SpanDetailPanel', () => {
     spanFilters: [],
     payloadData: JSON.stringify(mockSpanData),
     colorMap: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'service-a': '#FF0000',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'service-b': '#00FF00',
     },
     onSpanSelect: jest.fn(),

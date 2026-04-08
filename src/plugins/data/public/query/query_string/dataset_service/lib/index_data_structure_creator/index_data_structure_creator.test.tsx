@@ -64,9 +64,7 @@ const mockHttp = {
       health: 'green',
       status: 'open',
       index: 'test-index',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'docs.count': '1000',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'store.size': '1mb',
     },
   ]),

@@ -276,7 +276,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -299,7 +298,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -323,7 +321,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -385,7 +382,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -460,7 +456,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -534,7 +529,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -610,7 +604,6 @@ describe('IndexMigrator', () => {
 
     withIndex(client, {
       index: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '.kibana_1': {
           aliases: {},
           mappings: {
@@ -788,9 +781,7 @@ function withIndex(
   opts: any = {}
 ) {
   const defaultIndex = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     '.kibana_1': {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       aliases: { '.kibana': {} },
       mappings: {
         dynamic: 'strict',
@@ -801,7 +792,6 @@ function withIndex(
     },
   };
   const defaultAlias = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     '.kibana_1': {},
   };
   const { numOutOfDate = 0 } = opts;

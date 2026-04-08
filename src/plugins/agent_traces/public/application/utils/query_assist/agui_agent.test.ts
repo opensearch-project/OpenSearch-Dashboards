@@ -142,10 +142,8 @@ describe('AgUiAgent', () => {
             expect.objectContaining({
               method: 'POST',
               headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'Content-Type': 'application/json',
                 Accept: 'text/event-stream',
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'osd-xsrf': 'true',
               },
             })

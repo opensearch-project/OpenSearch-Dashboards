@@ -42,7 +42,6 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.valueColor', {
       defaultMessage: 'Value Color',
     }),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `valueDisplayOption-value`,
   },
   {
@@ -50,7 +49,6 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.textColor', {
       defaultMessage: 'Text Color',
     }),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `valueDisplayOption-text`,
   },
   {
@@ -58,7 +56,6 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.hidden', {
       defaultMessage: 'Hidden',
     }),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `valueDisplayOption-hidden`,
   },
 ];

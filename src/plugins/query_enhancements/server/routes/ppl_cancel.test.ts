@@ -45,7 +45,6 @@ describe('registerPPLCancelRoute', () => {
       nodes: {
         node1: {
           tasks: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'node1:12345': {
               description: `PPL [queryId=${queryId}]: source=test`,
               action: 'indices:data/read/ppl',
@@ -61,7 +60,6 @@ describe('registerPPLCancelRoute', () => {
       nodes: {
         node1: {
           tasks: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'node1:99999': {
               description: 'PPL [queryId=other-id]: source=test',
               action: 'indices:data/read/ppl',
@@ -218,7 +216,6 @@ describe('registerPPLCancelRoute', () => {
           nodes: {
             node1: {
               tasks: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'node1:111': {
                   description: `PPL [queryId=${queryId}]: source=test`,
                 },
@@ -226,11 +223,9 @@ describe('registerPPLCancelRoute', () => {
             },
             node2: {
               tasks: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'node2:222': {
                   description: `PPL [queryId=${queryId}]: source=test | stats count()`,
                 },
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'node2:333': {
                   description: 'PPL [queryId=other]: source=other',
                 },

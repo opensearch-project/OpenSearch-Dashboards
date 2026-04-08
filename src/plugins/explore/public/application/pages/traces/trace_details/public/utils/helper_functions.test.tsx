@@ -149,7 +149,6 @@ describe('getServiceInfo', () => {
     const otelSpan = {
       resource: {
         attributes: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'service.name': 'alt-otel-service',
         },
       },

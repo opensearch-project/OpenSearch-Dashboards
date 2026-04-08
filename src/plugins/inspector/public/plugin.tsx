@@ -114,7 +114,6 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
       return core.overlays.openFlyout(
         toMountPoint(<InspectorPanel views={views} adapters={adapters} title={options.title} />),
         {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'inspectorPanel',
           closeButtonAriaLabel: closeButtonLabel,
         }

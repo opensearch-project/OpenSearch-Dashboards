@@ -79,7 +79,6 @@ beforeEach(() => {
 test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,
@@ -130,7 +129,6 @@ test('DashboardContainer.addNewEmbeddable', async () => {
 test('Container view mode change propagates to existing children', async () => {
   const initialInput = getSampleDashboardInput({
     panels: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
         explicitInput: { firstName: 'Sam', id: '123' },
         type: CONTACT_CARD_EMBEDDABLE,

@@ -88,7 +88,6 @@ const NoInstalledIntegrations = ({ toggleFlyout }: { toggleFlyout: () => void })
       <EuiFlexItem grow={false}>
         <EuiText textAlign="center">
           {/* Default margin is too wide -- compress it a bit */}
-          {/* eslint-disable-next-line @typescript-eslint/naming-convention */}
           <p style={{ 'margin-bottom': '8px' } as CSSProperties}>
             <b>There are no installed Integrations</b>
             <br />

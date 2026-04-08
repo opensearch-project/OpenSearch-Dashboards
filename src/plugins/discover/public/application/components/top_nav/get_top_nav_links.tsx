@@ -109,7 +109,6 @@ const getLegacyTopNavLinks = (
                   savedSearchTitle: savedSearch.title,
                 },
               }),
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'data-test-subj': 'saveSearchSuccess',
             });
 
@@ -393,7 +392,6 @@ export const getTopNavLinks = (
                     savedSearchTitle: savedSearch.title,
                   },
                 }),
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'data-test-subj': 'saveSearchSuccess',
               });
 

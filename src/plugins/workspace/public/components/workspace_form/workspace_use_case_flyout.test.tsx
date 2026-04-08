@@ -55,7 +55,6 @@ const setup = ({
 }> = {}) => {
   const coreStartMock = coreMock.createStart();
   const navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'use-case-1': {
       id: 'use-case-1',
       title: 'Use case 1',
@@ -71,7 +70,6 @@ const setup = ({
         },
       ],
     },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'use-case-2': {
       id: 'use-case-2',
       title: 'Use case 2',

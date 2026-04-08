@@ -119,7 +119,6 @@ export const DiscoverChart = ({
       direction="column"
       gutterSize="none"
       className={classNames('dscChart__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dscChart__wrapper--enhancement': isEnhancementsEnabled,
       })}
       data-test-subj="dscChartWrapper"

@@ -53,7 +53,6 @@ function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
     href: title,
     baseUrl: '/',
     isActive: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': title,
   };
 }

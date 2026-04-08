@@ -285,7 +285,6 @@ export const getNavActions = (
               visTitle: savedVis.title,
             },
           }),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
@@ -331,7 +330,6 @@ export const getNavActions = (
           },
         }),
         text: error.message,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'saveVisualizationError',
       });
       return { error };

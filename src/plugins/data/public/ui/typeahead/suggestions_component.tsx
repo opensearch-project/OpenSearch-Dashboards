@@ -99,7 +99,6 @@ export default class SuggestionsComponent extends Component<SuggestionsComponent
         verticalListPosition={verticalListPosition}
       >
         <div
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           className={classNames('osdTypeahead', { 'osdTypeahead--small': this.props.size === 's' })}
         >
           <div

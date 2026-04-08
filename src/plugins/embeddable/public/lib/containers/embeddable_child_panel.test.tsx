@@ -100,7 +100,6 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
   const container = new HelloWorldContainer(
     {
       id: 'hello',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       panels: { '1': { type: 'idontexist', explicitInput: { id: '1' } } },
     },
     { getEmbeddableFactory } as any

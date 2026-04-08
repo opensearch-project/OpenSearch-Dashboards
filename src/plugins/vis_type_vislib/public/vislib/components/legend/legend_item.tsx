@@ -98,7 +98,6 @@ const VisLegendItemComponent = ({
         values: { legendDataLabel: item.label },
       }),
       iconType: 'plusInCircle',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': `legend-${item.label}-filterIn`,
     },
     {
@@ -108,7 +107,6 @@ const VisLegendItemComponent = ({
         values: { legendDataLabel: item.label },
       }),
       iconType: 'minusInCircle',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': `legend-${item.label}-filterOut`,
     },
   ];
@@ -200,7 +198,6 @@ const VisLegendItemComponent = ({
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
               className={classNames('visLegend__valueColorPickerDot', {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
               })}
               style={{ color }}

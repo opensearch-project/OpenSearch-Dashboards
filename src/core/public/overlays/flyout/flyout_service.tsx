@@ -108,7 +108,6 @@ export interface OverlayFlyoutOpenOptions {
   className?: string;
   closeButtonAriaLabel?: string;
   ownFocus?: boolean;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
 }
 

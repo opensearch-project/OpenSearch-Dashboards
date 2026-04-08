@@ -51,7 +51,6 @@ beforeAll(() => {
   document.body.appendChild(appWrapper);
 
   const localStorage: Record<string, any> = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'core.chrome.isLocked': true,
   };
 
@@ -236,7 +235,6 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dashboard:test:setting': {
             value: 'changedValue',
           },
@@ -279,7 +277,6 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dashboard:test:setting': {
             value: 'changedValue',
           },
@@ -297,7 +294,6 @@ describe('Form', () => {
     });
 
     expect(save).toHaveBeenCalled();
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     await save({ 'dashboard:test:setting': 'changedValue' });
     expect(toasts.add).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -328,7 +324,6 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'general:test:array': {
             value: '',
           },
@@ -345,7 +340,6 @@ describe('Form', () => {
       saveButton.click();
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(save).toHaveBeenCalledWith({ 'general:test:array': [] });
   });
 
@@ -369,7 +363,6 @@ describe('Form', () => {
     act(() => {
       (wrapper.instance() as Form).setState({
         unsavedChanges: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'general:test:array': {
             value: 'test1, test2',
           },
@@ -386,7 +379,6 @@ describe('Form', () => {
       saveButton.click();
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(save).toHaveBeenCalledWith({ 'general:test:array': ['test1', 'test2'] });
   });
 });

@@ -187,7 +187,6 @@ describe('OpenSearchIndex', () => {
     test('removes existing alias', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
@@ -212,7 +211,6 @@ describe('OpenSearchIndex', () => {
     test('allows custom alias actions', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
@@ -242,7 +240,6 @@ describe('OpenSearchIndex', () => {
     test('it creates the destination index, then reindexes to it', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );
@@ -322,7 +319,6 @@ describe('OpenSearchIndex', () => {
     test('throws error if re-index task fails', async () => {
       client.indices.getAlias.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           '.my-fanci-index': { aliases: { '.muchacha': {} } },
         })
       );

@@ -39,11 +39,8 @@ const table = {
     },
   ] as FormattedColumn[],
   rows: [
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'col-0-2': 'Alice', 'col-1-1': 3 },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'col-0-2': 'Anthony', 'col-1-1': 1 },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'col-0-2': 'Timmy', 'col-1-1': 1 },
   ],
   columns: [

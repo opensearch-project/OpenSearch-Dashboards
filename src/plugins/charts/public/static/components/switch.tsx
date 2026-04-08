@@ -31,7 +31,6 @@
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 interface SwitchOptionProps<ParamName extends string> {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
   label?: string;
   tooltip?: string;

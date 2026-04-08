@@ -267,19 +267,14 @@ export function CollapsibleNavGroupEnabled({
         }
         <div
           className={classNames({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'bottom-container': true,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'eui-xScroll': isNavOpen,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'bottom-container-collapsed': !isNavOpen,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'bottom-container-expanded': isNavOpen,
           })}
         >
           <HeaderNavControls
             navControls$={observables.navControlsLeftBottom$}
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             className={classNames({ 'nav-controls-padding': isNavOpen })}
           />
         </div>

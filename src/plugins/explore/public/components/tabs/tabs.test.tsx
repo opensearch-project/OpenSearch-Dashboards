@@ -158,7 +158,6 @@ describe('ExploreTabsComponent', () => {
         showHistogram: true,
       },
       results: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'cache-key-SELECT * FROM logs': {
           hits: { hits: [{ _source: { test: 'value' } }] },
           fieldSchema: [{ name: 'test', type: 'string' }],

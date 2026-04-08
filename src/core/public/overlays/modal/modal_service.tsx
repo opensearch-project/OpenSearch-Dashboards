@@ -78,7 +78,6 @@ export interface OverlayModalConfirmOptions {
   confirmButtonText?: string;
   className?: string;
   closeButtonAriaLabel?: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
   buttonColor?: EuiConfirmModalProps['buttonColor'];
@@ -115,7 +114,6 @@ export interface OverlayModalStart {
 export interface OverlayModalOpenOptions extends Pick<EuiModalProps, 'maxWidth'> {
   className?: string;
   closeButtonAriaLabel?: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
 }
 

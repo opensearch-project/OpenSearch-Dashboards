@@ -65,7 +65,6 @@ describe('SpanLogsTab', () => {
   ];
 
   const mockDatasetLogs = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'logs-dataset-id': mockLogs,
   };
 

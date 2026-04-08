@@ -197,17 +197,13 @@ module.exports = {
               format: null,
             },
             {
-              selector: ['objectLiteralProperty', 'objectLiteralMethod', 'typeProperty'],
-              format: [
-                'camelCase',
-                'PascalCase',
-                'snake_case',
-                'UPPER_CASE',
-              ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              selector: ['objectLiteralProperty', 'objectLiteralMethod'],
+              format: null,
+            },
+            {
+              selector: 'typeProperty',
+              modifiers: ['requiresQuotes'],
+              format: null,
             },
           ],
           '@typescript-eslint/explicit-member-accessibility': [

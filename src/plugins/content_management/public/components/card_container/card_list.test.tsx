@@ -27,9 +27,7 @@ test('render list of cards', () => {
           {
             id: 'card',
             panels: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'card-id-1': { type: CARD_EMBEDDABLE, explicitInput: { id: 'card-id-1' } },
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'card-id-2': { type: CARD_EMBEDDABLE, explicitInput: { id: 'card-id-2' } },
             },
           },
@@ -56,13 +54,9 @@ test('render list of cards with grid', () => {
           {
             id: 'card',
             panels: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'card-id-1': { type: CARD_EMBEDDABLE, explicitInput: { id: 'card-id-1' } },
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'card-id-2': { type: CARD_EMBEDDABLE, explicitInput: { id: 'card-id-2' } },
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'card-id-3': { type: CARD_EMBEDDABLE, explicitInput: { id: 'card-id-3' } },
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'card-id-4': { type: CARD_EMBEDDABLE, explicitInput: { id: 'card-id-4' } },
             },
             grid: true,

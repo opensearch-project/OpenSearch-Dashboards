@@ -212,9 +212,7 @@ describe('MetricsRawTable', () => {
             _source: {
               Metric: 'multi_value_metric{label="test"}',
               Time: 1638316800000,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'Value #A': 10.5,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'Value #B': 20.3,
             },
           },

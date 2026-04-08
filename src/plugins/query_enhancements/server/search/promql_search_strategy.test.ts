@@ -47,7 +47,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -135,7 +134,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [],
@@ -174,7 +172,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -220,7 +217,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -271,7 +267,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -322,7 +317,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -377,7 +371,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: resultSeries,
@@ -443,7 +436,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-a',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -460,7 +452,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-b',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -515,7 +506,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -563,7 +553,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-a',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -580,7 +569,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-b',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -635,7 +623,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-a',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -691,7 +678,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -746,7 +732,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -813,7 +798,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-a',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -871,7 +855,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-a',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -928,7 +911,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'vector',
             result: [
@@ -974,7 +956,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'vector',
             result: [
@@ -1029,7 +1010,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'scalar',
             result: [1773874502, '1'],
@@ -1098,7 +1078,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'vector',
             result: [
@@ -1141,7 +1120,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'vector',
             result: [
@@ -1186,7 +1164,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [
@@ -1232,7 +1209,6 @@ describe('promqlSearchStrategy', () => {
         queryId: 'query-1',
         sessionId: 'session-1',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'dataset-1': {
             resultType: 'matrix',
             result: [

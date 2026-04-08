@@ -126,7 +126,6 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
             width: 190,
             items: availableUseCases.map((useCase) => {
               return {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'data-test-subj': `workspace-initial-button-create-${useCase.id}-workspace`,
                 name: useCase.title,
                 icon: useCase.icon,

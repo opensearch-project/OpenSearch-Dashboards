@@ -65,7 +65,6 @@ describe('export_actions', () => {
         dataset: undefined,
       },
       results: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'source = test': {
           hits: {
             total: 2,
@@ -175,7 +174,6 @@ describe('export_actions', () => {
       mockGetState.mockReturnValue({
         ...mockState,
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'source = test': {
             hits: null,
           } as any,
@@ -196,7 +194,6 @@ describe('export_actions', () => {
       mockGetState.mockReturnValue({
         ...mockState,
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'PREPARED QUERY': {
             hits: {
               total: 1,
@@ -253,7 +250,6 @@ describe('export_actions', () => {
       mockGetState.mockReturnValue({
         ...mockState,
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'source = test': {
             hits: {
               total: 1,
@@ -304,7 +300,6 @@ describe('export_actions', () => {
       ((mockServices.data.query.timefilter.timefilter.createFilter as any) as jest.MockedFunction<
         any
       >).mockReturnValue({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         range: { '@timestamp': { gte: 'now-1d', lte: 'now' } },
       });
     });
@@ -383,7 +378,6 @@ describe('export_actions', () => {
         mockServices.data.indexPatterns
       );
       expect(mockSearchSource.setField).toHaveBeenCalledWith('filter', [
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         { range: { '@timestamp': { gte: 'now-1d', lte: 'now' } } },
       ]);
     });

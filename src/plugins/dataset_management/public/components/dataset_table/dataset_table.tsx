@@ -190,7 +190,6 @@ export const DatasetTable = ({ canSave, history }: Props) => {
       return {
         ...column.euiColumn,
         sortable: false,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': `datasetTableColumn-${column.id}`,
       };
     }),

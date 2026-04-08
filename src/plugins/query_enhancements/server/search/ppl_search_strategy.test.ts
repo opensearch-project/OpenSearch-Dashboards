@@ -478,7 +478,6 @@ describe('pplSearchStrategyProvider', () => {
               min_doc_count: 1,
             },
             qs: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               '2': 'source = empty_table | stats count() by span(timestamp, 12h)',
             },
           },
@@ -500,7 +499,6 @@ describe('pplSearchStrategyProvider', () => {
           { name: 'field2', type: 'text', values: [] },
         ],
         aggs: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           '2': [
             { key: 'value1', value: 1 },
             { key: 'value2', value: 2 },
@@ -513,7 +511,6 @@ describe('pplSearchStrategyProvider', () => {
             time_zone: 'America/Los_Angeles',
             min_doc_count: 1,
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           qs: { '2': 'source = empty_table | stats count() by span(timestamp, 12h)' },
         },
         size: 2,
@@ -565,7 +562,6 @@ describe('pplSearchStrategyProvider', () => {
               min_doc_count: 1,
             },
             qs: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               '2': 'source = empty_table | stats count() by span(timestamp, 12h)',
             },
           },
@@ -593,7 +589,6 @@ describe('pplSearchStrategyProvider', () => {
             time_zone: 'America/Los_Angeles',
             min_doc_count: 1,
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           qs: { '2': 'source = empty_table | stats count() by span(timestamp, 12h)' },
         },
         size: 2,

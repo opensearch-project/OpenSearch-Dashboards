@@ -39,7 +39,6 @@ describe('DataSelectorRefresher', () => {
 
   it('applies additional button properties', () => {
     const buttonProps = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'aria-label': 'Custom Aria Label',
     };
 

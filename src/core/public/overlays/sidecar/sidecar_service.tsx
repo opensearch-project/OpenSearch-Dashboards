@@ -96,7 +96,6 @@ export interface OverlaySidecarStart {
  */
 export interface OverlaySidecarOpenOptions {
   className?: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
   config: ISidecarConfig;
 }

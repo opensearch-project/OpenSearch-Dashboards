@@ -60,9 +60,7 @@ describe('QueryEditorExtensions', () => {
 
   it('correctly orders configurations based on order property', () => {
     const configMap = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       '1': { id: '1', order: 2, isEnabled$: jest.fn(), getComponent: jest.fn() },
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       '2': { id: '2', order: 1, isEnabled$: jest.fn(), getComponent: jest.fn() },
     };
 
@@ -78,7 +76,6 @@ describe('QueryEditorExtensions', () => {
 
   it('passes dependencies correctly to QueryEditorExtension', async () => {
     const configMap = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       '1': { id: '1', order: 1, isEnabled$: jest.fn(), getComponent: jest.fn() },
     };
 

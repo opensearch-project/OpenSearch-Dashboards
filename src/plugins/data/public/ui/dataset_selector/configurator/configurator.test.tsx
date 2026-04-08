@@ -98,9 +98,7 @@ const mockBaseDataset: Dataset = {
 };
 
 const messages = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'app.welcome': 'Welcome to our application!',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'app.logout': 'Log Out',
 };
 

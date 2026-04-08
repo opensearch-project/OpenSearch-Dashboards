@@ -94,8 +94,7 @@ describe('BottomRightContainer', () => {
   const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
     const queryStatusMap =
       status === QueryExecutionStatus.LOADING
-        ? // eslint-disable-next-line @typescript-eslint/naming-convention
-          { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
+        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
         : {};
 
     return configureStore({

@@ -31,7 +31,6 @@ describe('HierarchySpanCell', () => {
     name: 'test-operation',
     level: 0,
     children: [],
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'status.code': 0,
     ...overrides,
   });
@@ -130,7 +129,6 @@ describe('HierarchySpanCell', () => {
   });
 
   it('displays error icon for error spans', () => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const item = createMockItem({ 'status.code': 2 });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 

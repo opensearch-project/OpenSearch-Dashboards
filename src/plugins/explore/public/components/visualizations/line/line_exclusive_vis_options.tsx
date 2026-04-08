@@ -114,7 +114,6 @@ export const LineExclusiveVisOptions = ({
           options={lineModeOptions.map((option) => ({
             id: option.value,
             label: option.text,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': `lineMode-${option.value}`,
           }))}
           idSelected={lineMode}

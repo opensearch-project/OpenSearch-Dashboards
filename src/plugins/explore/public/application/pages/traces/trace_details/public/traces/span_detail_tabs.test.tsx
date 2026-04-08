@@ -82,11 +82,8 @@ describe('SpanDetailTabs', () => {
     startTime: '2023-01-01T00:00:00.000Z',
     endTime: '2023-01-01T00:00:01.000Z',
     events: [{ name: 'test-event', timestamp: 1234567890 }],
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'http.method': 'GET',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'http.url': 'http://test.com',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'status.code': 0,
     traceId: 'test-trace-id',
     traceGroup: 'test-trace-group',
@@ -256,7 +253,6 @@ describe('SpanDetailTabs', () => {
   it('handles span with error status', () => {
     const spanWithError = {
       ...mockSpan,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 2,
     };
 
@@ -342,7 +338,6 @@ describe('SpanDetailTabs', () => {
   it('displays issue count badge when span has errors', () => {
     const spanWithError = {
       ...mockSpan,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 2,
     };
 
@@ -364,7 +359,6 @@ describe('SpanDetailTabs', () => {
   it('does not display issue count badge when span has no errors', () => {
     const spanWithoutError = {
       ...mockSpan,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
     };
 
@@ -430,7 +424,6 @@ describe('SpanDetailTabs', () => {
     ];
 
     const datasetLogs = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-1': [
         {
           _id: 'log1',
@@ -443,7 +436,6 @@ describe('SpanDetailTabs', () => {
           spanId: 'test-span-id',
         },
       ],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-2': [
         {
           _id: 'log3',
@@ -518,7 +510,6 @@ describe('SpanDetailTabs', () => {
     const logDatasets = [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }];
 
     const datasetLogs = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'log-dataset-1': [
         {
           _id: 'log1',

@@ -74,7 +74,6 @@ describe('PrometheusManager', () => {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: 'node_cpu_seconds_total',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         query: { 'match[]': 'node_cpu_seconds_total' },
       });
 
@@ -428,7 +427,6 @@ describe('PrometheusManager', () => {
         queryId: 'test-query-id',
         sessionId: 'test-session-id',
         results: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'prom-conn': {
             resultType: 'matrix',
             result: [

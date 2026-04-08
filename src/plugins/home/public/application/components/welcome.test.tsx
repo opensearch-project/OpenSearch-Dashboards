@@ -129,7 +129,6 @@ describe('Welcome page', () => {
       const component = shallow(<Welcome {...props} />);
 
       const elements = component.find({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'welcomeCustomLogo',
       });
       expect(elements.length).toEqual(1);

@@ -43,9 +43,7 @@ interface IndexInfo {
   health: string;
   status: string;
   index: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'docs.count': string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'store.size': string;
 }
 

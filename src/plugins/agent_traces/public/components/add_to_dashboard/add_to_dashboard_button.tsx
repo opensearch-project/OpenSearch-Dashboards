@@ -196,7 +196,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'agentTracesAddToNewDashboardSuccessToast',
           });
         } else {
@@ -207,7 +206,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'agentTracesAddToExistingDashboardSuccessToast',
           });
         }
@@ -220,7 +218,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
           defaultMessage: 'Fail to add to dashboard',
         }),
         text: (error as Error).message || String(error),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'agentTracesAddToDashboardFailToast',
       });
 

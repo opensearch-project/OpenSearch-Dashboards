@@ -334,7 +334,6 @@ export const AssociationDataSourceModalContent = ({
           searchable
           listProps={{ bordered: true, onFocusBadge: false }}
           searchProps={{
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'workspace-detail-dataSources-associateModal-search',
             placeholder: i18n.translate(
               'workspace.detail.dataSources.associateModal.searchPlaceholder',

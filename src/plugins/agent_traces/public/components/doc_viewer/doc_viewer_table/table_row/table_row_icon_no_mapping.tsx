@@ -28,7 +28,6 @@ export function DocViewTableRowIconNoMapping() {
       iconProps={{
         // @ts-expect-error TS2353 TODO(ts-error): fixme
         className: 'agentTracesDocViewer__warning',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'noMappingWarning',
       }}
       size="s"

@@ -144,7 +144,6 @@ describe('SavedObjectsTable', () => {
 
     getSavedObjectCountsMock.mockReturnValue({
       type: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'index-pattern': 0,
         visualization: 0,
         dashboard: 0,

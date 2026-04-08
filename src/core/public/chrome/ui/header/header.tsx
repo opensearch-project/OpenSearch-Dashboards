@@ -235,7 +235,6 @@ export function Header({
   const navId = htmlIdGenerator()();
 
   const className = classnames('hide-for-sharing', 'headerGlobalNav', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'headerGlobalNav--withBanner': !!globalBanner,
   });
   const { useExpandedHeader = true } = branding;

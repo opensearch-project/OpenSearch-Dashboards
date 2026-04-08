@@ -168,7 +168,6 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         dataType: 'string',
         sortable: false,
         width: '125px',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'directRelationship',
         render: (relationship: string) => {
           if (relationship === 'parent') {
@@ -242,7 +241,6 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
             ),
             type: 'icon',
             icon: 'inspect',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'relationshipsTableAction-inspect',
             onClick: (object: SavedObjectWithMetadata) => goInspectObject(object),
             available: (object: SavedObjectWithMetadata) => !!object.meta.editUrl,
@@ -329,7 +327,6 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           pagination={true}
           search={search}
           rowProps={() => ({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': `relationshipsTableRow`,
           })}
         />

@@ -37,7 +37,6 @@ describe('renderSpanCellValue', () => {
     durationInNanos: 1500000000,
     startTime: '2023-01-01T12:00:00.000Z',
     endTime: '2023-01-01T12:00:01.500Z',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'status.code': 0,
     children: [],
   };
@@ -48,7 +47,6 @@ describe('renderSpanCellValue', () => {
     durationMs: 2000,
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const mockColorMap = { 'test-service': '#ff0000' };
 
   it('returns dash for null item', () => {
@@ -57,7 +55,6 @@ describe('renderSpanCellValue', () => {
   });
 
   it('renders error status correctly', () => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const errorSpan = { ...mockSpan, 'status.code': 2 };
     const result = renderSpanCellValue({ item: errorSpan, columnId: 'status.code' });
     expect(result.props.color).toBe('danger');
@@ -132,7 +129,6 @@ describe('SpanCell', () => {
       serviceName: 'test-service',
       operationName: 'test-operation',
       durationInNanos: 1000000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
       children: [],
     },
@@ -218,7 +214,6 @@ describe('SpanCell', () => {
 
   it('passes traceTimeRange and colorMap to renderSpanCellValue', () => {
     const traceTimeRange = { startTimeMs: 0, endTimeMs: 1000, durationMs: 1000 };
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const colorMap = { 'test-service': '#ff0000' };
 
     render(

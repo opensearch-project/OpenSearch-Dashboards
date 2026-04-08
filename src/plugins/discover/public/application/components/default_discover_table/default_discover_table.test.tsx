@@ -51,7 +51,6 @@ describe('DefaultDiscoverTable', () => {
       fields: {
         textField: `value${key}`,
         longField: key,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '@timestamp': new Date((1720000000 + key) * 1000),
       },
     };

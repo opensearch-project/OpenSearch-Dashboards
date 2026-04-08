@@ -24,7 +24,6 @@ test('DocViewerTab updated when getting new renderProps', () => {
 
   const wrapper = mount(<DocViewerTab {...mockProps} />);
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const div = wrapper.find({ 'data-test-subj': 'test-div' });
   expect(div.text()).toEqual('test1');
 

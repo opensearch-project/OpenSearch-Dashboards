@@ -83,7 +83,6 @@ export const WorkspaceDetailFormContent = ({
     .map((useCase) => ({
       value: useCase.id,
       inputDisplay: useCase.title,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': useCase.id,
     }));
 

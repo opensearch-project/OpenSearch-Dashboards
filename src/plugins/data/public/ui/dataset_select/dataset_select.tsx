@@ -603,7 +603,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       key: id,
       checked: isSelected ? ('on' as const) : undefined,
       prepend: <EuiIcon size="s" type={iconType} />,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': `datasetSelectOption-${title}`,
       append: isDefault ? (
         <EuiBadge>

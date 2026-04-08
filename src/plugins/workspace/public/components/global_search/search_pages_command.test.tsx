@@ -27,7 +27,6 @@ describe('<workspaceSearchPagesCommand />', () => {
   };
 
   const navGroup: Record<string, NavGroupItemInMap & { navLinks: ChromeNavLink[] }> = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'foo-group': {
       id: 'foo-group',
       title: 'Foo Group',

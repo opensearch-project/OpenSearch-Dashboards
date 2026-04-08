@@ -79,7 +79,6 @@ export class Table extends PureComponent<TableProps> {
         ),
         dataType: 'string',
         sortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'scriptedFieldLang',
       },
       {

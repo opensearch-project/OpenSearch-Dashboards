@@ -52,9 +52,7 @@ export function DocViewTableRow({
   };
 
   const valueClassName = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     agentTracesDocViewer__value: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'truncate-by-height': isCollapsible && isCollapsed,
   });
 

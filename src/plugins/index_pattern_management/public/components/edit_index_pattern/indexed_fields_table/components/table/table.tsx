@@ -239,7 +239,6 @@ export class Table extends PureComponent<IndexedFieldProps> {
           return this.renderFieldName(value, field);
         },
         width: '38%',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'indexedFieldName',
       },
       {
@@ -250,7 +249,6 @@ export class Table extends PureComponent<IndexedFieldProps> {
         render: (value: string) => {
           return this.renderFieldType(value, value === 'conflict');
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'indexedFieldType',
       },
       {
@@ -292,7 +290,6 @@ export class Table extends PureComponent<IndexedFieldProps> {
             icon: 'pencil',
             onClick: editField,
             type: 'icon',
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'editFieldFormat',
           },
         ],

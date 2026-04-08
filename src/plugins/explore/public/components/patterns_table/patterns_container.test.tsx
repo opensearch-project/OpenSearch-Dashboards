@@ -64,7 +64,6 @@ jest.mock('react-redux', () => ({
     }
     if (selector.toString().includes('selectResults')) {
       return {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'default-query': {
           hits: {
             hits: mockPatternItems.map((item) => ({

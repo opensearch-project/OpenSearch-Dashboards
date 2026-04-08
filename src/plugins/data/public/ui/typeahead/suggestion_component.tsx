@@ -72,7 +72,6 @@ export function SuggestionComponent(props: Props) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={classNames({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         osdTypeahead__item: true,
         active: props.selected,
       })}

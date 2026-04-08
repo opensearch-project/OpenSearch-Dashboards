@@ -436,7 +436,6 @@ export const getNavActions = (
             defaultMessage: `Dashboard '{dashTitle}' was saved`,
             values: { dashTitle: savedDashboard.title },
           }),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveDashboardSuccess',
         });
 
@@ -458,7 +457,6 @@ export const getNavActions = (
             errorMessage: savedDashboard.message,
           },
         }),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'saveDashboardFailure',
       });
       return { error };

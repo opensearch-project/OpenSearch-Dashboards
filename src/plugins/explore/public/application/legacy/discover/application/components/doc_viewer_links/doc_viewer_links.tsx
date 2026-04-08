@@ -14,7 +14,6 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     .map((item) => {
       const { generateCb, href, ...props } = item;
       const listItem: EuiListGroupItemProps = {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': `docTableRowAction`,
         ...props,
         href: generateCb ? generateCb(renderProps).url : href,

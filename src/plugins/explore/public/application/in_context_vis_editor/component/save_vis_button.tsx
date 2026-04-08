@@ -79,7 +79,6 @@ export const SaveVisButton = () => {
               visTitle: newTitle,
             },
           }),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'saveVisualizationSuccess',
         });
       } else {
@@ -90,7 +89,6 @@ export const SaveVisButton = () => {
               visTitle: newTitle,
             },
           }),
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': 'updateVisualizationSuccess',
         });
       }

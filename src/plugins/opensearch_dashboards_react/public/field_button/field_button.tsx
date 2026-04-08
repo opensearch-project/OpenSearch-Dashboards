@@ -104,9 +104,7 @@ export function FieldButton({
   const classes = classNames(
     'osdFieldButton',
     size ? sizeToClassNameMap[size] : null,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'osdFieldButton-isActive': isActive },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     { 'osdFieldButton--isDraggable': isDraggable },
     className
   );

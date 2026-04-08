@@ -345,7 +345,6 @@ describe('IndexPatternWithDataSource', () => {
           id: 'test-nested-array',
           type: 'index-pattern',
           fields: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'nested_test1.d_values': {
               count: 0,
               name: 'nested_test1.d_values',
@@ -361,7 +360,6 @@ describe('IndexPatternWithDataSource', () => {
                 },
               },
             },
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'nested_test1.s_entry': {
               count: 0,
               name: 'nested_test1.s_entry',

@@ -164,7 +164,6 @@ export const AssociatedObjectsDetailsFlyout = ({
     {
       field: 'name',
       name: 'Name',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'accelerationName',
       render: (_: string, item: CachedAcceleration) => {
         // @ts-expect-error TS2554 TODO(ts-error): fixme
@@ -246,13 +245,11 @@ export const AssociatedObjectsDetailsFlyout = ({
     {
       field: 'name',
       name: 'Column Name',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'columnName',
     },
     {
       field: 'dataType',
       name: 'Data Type',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'columnDataType',
     },
   ] as Array<EuiTableFieldDataColumnType<any>>;

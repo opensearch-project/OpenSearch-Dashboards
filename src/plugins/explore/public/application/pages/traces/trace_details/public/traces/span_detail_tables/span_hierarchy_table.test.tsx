@@ -56,7 +56,6 @@ describe('SpanHierarchyTable', () => {
       serviceName: 'service-1',
       name: 'parent-operation',
       durationInNanos: 2000000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
       startTime: '2023-01-01T00:00:00.000Z',
       endTime: '2023-01-01T00:00:02.000Z',
@@ -68,7 +67,6 @@ describe('SpanHierarchyTable', () => {
       serviceName: 'service-2',
       name: 'child-operation',
       durationInNanos: 1000000000,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'status.code': 0,
       startTime: '2023-01-01T00:00:00.500Z',
       endTime: '2023-01-01T00:00:01.500Z',

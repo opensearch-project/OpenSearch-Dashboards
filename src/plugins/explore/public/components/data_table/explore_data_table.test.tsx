@@ -105,7 +105,6 @@ const fullTestResult = {
         _index: 'test-index',
         _type: '_doc',
         _score: 1.0,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         _source: { message: 'test message', '@timestamp': '2023-01-01T00:00:00Z' },
       },
     ],
@@ -153,7 +152,6 @@ describe('ExploreDataTable', () => {
         },
         results: hasResults
           ? {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'test-cache-key': {
                 total: 1,
                 elapsedMs: 100,

@@ -37,7 +37,6 @@ import './header_controls_container.scss';
 interface HeaderControlsContainerProps {
   controls$: Observable<MountPoint | undefined>;
   className?: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj'?: string;
 }
 

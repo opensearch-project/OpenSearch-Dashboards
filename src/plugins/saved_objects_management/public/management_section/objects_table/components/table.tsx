@@ -221,7 +221,6 @@ export class Table extends PureComponent<TableProps, TableState> {
           { defaultMessage: 'Type of the saved object' }
         ),
         sortable: false,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = convertIndexPatternTerminology(
@@ -251,7 +250,6 @@ export class Table extends PureComponent<TableProps, TableState> {
         ),
         dataType: 'string',
         sortable: false,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'savedObjectsTableRowTitle',
         render: (title: string, object: SavedObjectWithMetadata) => {
           const { path = '' } = object.meta.inAppUrl || {};
@@ -295,7 +293,6 @@ export class Table extends PureComponent<TableProps, TableState> {
           'savedObjectsManagement.objectsTable.table.columnUpdatedAtDescription',
           { defaultMessage: 'Last update of the saved object' }
         ),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'updated-at',
         render: (updatedAt: string) => updatedAt && moment(updatedAt).format(dateFormat),
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
@@ -303,7 +300,6 @@ export class Table extends PureComponent<TableProps, TableState> {
         return {
           ...column.euiColumn,
           sortable: false,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'data-test-subj': `savedObjectsTableColumn-${column.id}`,
         };
       }),
@@ -326,7 +322,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             icon: 'inspect',
             onClick: (object) => goInspectObject(object),
             available: (object) => !!object.meta.editUrl,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
@@ -344,7 +339,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             type: 'icon',
             icon: 'kqlSelector',
             onClick: (object) => onShowRelationships(object),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...(showDuplicate
@@ -362,7 +356,6 @@ export class Table extends PureComponent<TableProps, TableState> {
                   icon: 'copy',
                   onClick: (object: SavedObjectWithMetadata) => onDuplicateSingle(object),
                   available: (object: SavedObjectWithMetadata) => object.type !== 'config',
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
                   'data-test-subj': 'savedObjectsTableAction-duplicate',
                 },
               ]
@@ -370,7 +363,6 @@ export class Table extends PureComponent<TableProps, TableState> {
           ...actionRegistry.getAll().map((action) => {
             return {
               ...action.euiAction,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
               onClick: (object: SavedObjectWithMetadata) => {
                 this.setState({
@@ -443,7 +435,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       <Fragment>
         {activeActionContents}
         <EuiSearchBar
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           compressed
           filters={filters}
@@ -548,7 +539,6 @@ export class Table extends PureComponent<TableProps, TableState> {
             selection={selection}
             onChange={onTableChange}
             rowProps={(item) => ({
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'data-test-subj': `savedObjectsTableRow row-${item.id}`,
             })}
           />

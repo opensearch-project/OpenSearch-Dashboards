@@ -79,7 +79,6 @@ describe('SolutionTitle ', () => {
     };
     const component = shallow(<SolutionTitle {...props} />);
     const elements = component.find({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': 'dashboardCustomLogo',
     });
     expect(elements.length).toEqual(1);

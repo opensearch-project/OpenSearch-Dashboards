@@ -103,7 +103,6 @@ const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, 
     name: txtMore,
     panel: morePanelId,
     icon: 'boxesHorizontal',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': `embeddablePanelMore-${id}`,
     _order: -1,
   };
@@ -215,7 +214,6 @@ export async function buildContextMenuForActions({
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'data-test-subj': `embeddablePanelAction-${action.id}`,
       onClick: onClick(action, context, closeMenu),
       href: action.getHref ? await action.getHref(context) : undefined,

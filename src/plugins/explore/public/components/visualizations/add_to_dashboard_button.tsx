@@ -186,7 +186,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'addToNewDashboardSuccessToast',
           });
         } else {
@@ -197,7 +196,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
             color: 'success',
             iconType: 'check',
             text: toMountPoint(toastContent),
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'data-test-subj': 'addToExistingDashboardSuccessToast',
           });
         }
@@ -212,7 +210,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
         color: 'danger',
         iconType: 'alert',
         text: toMountPoint(error),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'addToNewDashboarddFailToast',
       });
 

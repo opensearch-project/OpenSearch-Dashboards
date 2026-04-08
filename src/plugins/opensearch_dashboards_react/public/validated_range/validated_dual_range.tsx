@@ -130,7 +130,6 @@ export class ValidatedDualRange extends Component<Props> {
           value={this.state.value}
           onChange={this._onChange}
           minInputProps={{
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'aria-label': i18n.translate(
               'opensearch-dashboards-react.dualRangeControl.minInputAriaLabel',
               {
@@ -139,7 +138,6 @@ export class ValidatedDualRange extends Component<Props> {
             ),
           }}
           maxInputProps={{
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'aria-label': i18n.translate(
               'opensearch-dashboards-react.dualRangeControl.maxInputAriaLabel',
               {

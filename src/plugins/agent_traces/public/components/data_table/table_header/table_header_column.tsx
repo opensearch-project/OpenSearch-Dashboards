@@ -74,7 +74,6 @@ const buildColumnTooltip = (columnName: string, displayName: ReactNode): ReactNo
 const sortDirectionToIcon: Record<string, string> = {
   desc: 'sortDown',
   asc: 'sortUp',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   '': 'sortable',
 };
 

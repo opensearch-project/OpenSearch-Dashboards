@@ -85,13 +85,9 @@ function ResponsiveGrid({
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout--viewing': isViewMode,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout--editing': !isViewMode,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'dshLayout-withoutMargins': !useMargins,
   });
 
@@ -271,9 +267,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
       const classes = classNames({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--expanded': expandPanel,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (

@@ -187,7 +187,6 @@ describe('table_shared', () => {
         startTime: '2025-01-01T00:00:00Z',
         endTime: '2025-01-01T00:00:01Z',
         durationInNanos: 1000000000,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'status.code': 0,
         ...overrides,
       },

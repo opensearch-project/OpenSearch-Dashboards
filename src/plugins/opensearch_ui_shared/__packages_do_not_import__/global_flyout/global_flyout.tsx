@@ -56,7 +56,6 @@ interface Content<P extends object = { [key: string]: any }> {
 const FlyoutMultiContentContext = createContext<Context | undefined>(undefined);
 
 const DEFAULT_FLYOUT_PROPS = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'data-test-subj': 'flyout',
   size: 'm' as 'm',
   maxWidth: 500,

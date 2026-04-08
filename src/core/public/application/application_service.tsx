@@ -511,7 +511,6 @@ export class ApplicationService {
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'appLeaveConfirmModal',
       });
       if (!confirmed) {

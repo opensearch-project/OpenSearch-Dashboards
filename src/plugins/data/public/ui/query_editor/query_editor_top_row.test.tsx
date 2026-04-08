@@ -193,7 +193,6 @@ describe('QueryEditorTopRow', () => {
     dataPlugin.query.queryString.getQuery = jest.fn().mockReturnValue(query);
     datasetService.getType.mockReturnValue(({
       meta: { supportsTimeFilter: true },
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       languageOverrides: { 'test-language': { hideDatePicker: false } },
     } as unknown) as DatasetTypeConfig);
 

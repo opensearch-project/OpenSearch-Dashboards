@@ -129,7 +129,6 @@ export class AttributeService<
             errorMessage: error.message,
           },
         }),
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'data-test-subj': 'attributeServiceSaveFailure',
       });
       return Promise.reject({ error });

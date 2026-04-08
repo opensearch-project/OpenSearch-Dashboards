@@ -73,7 +73,6 @@ export const SavedQueryListItem = ({
     : `load-saved-query-${savedQuery.attributes.title}-button`;
 
   const classes = classNames('osdSavedQueryListItem', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'osdSavedQueryListItem-selected': isSelected,
   });
 
@@ -119,7 +118,6 @@ export const SavedQueryListItem = ({
                 onClick: () => setShowDeletionConfirmationModal(true),
                 iconType: 'trash',
                 iconSize: 's',
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'aria-label': i18n.translate(
                   'data.search.searchBar.savedQueryPopoverDeleteButtonAriaLabel',
                   {
@@ -134,7 +132,6 @@ export const SavedQueryListItem = ({
                     values: { savedQueryName: savedQuery.attributes.title },
                   }
                 ),
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'data-test-subj': `delete-saved-query-${savedQuery.attributes.title}-button`,
               }
             : undefined

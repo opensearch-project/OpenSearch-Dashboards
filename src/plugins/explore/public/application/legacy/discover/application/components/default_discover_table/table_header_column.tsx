@@ -32,7 +32,6 @@ interface Props {
 const sortDirectionToIcon: Record<string, string> = {
   desc: 'sortDown',
   asc: 'sortUp',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   '': 'sortable',
 };
 

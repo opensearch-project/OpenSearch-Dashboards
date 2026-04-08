@@ -77,7 +77,6 @@ export function HeaderBreadcrumbs({
 
   crumbs = crumbs.map((breadcrumb, i) => ({
     ...breadcrumb,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'data-test-subj': classNames(
       'breadcrumb',
       breadcrumb['data-test-subj'],

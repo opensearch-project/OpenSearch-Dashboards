@@ -78,7 +78,6 @@ test('HelloWorldContainer initializes embeddables', (done) => {
     {
       id: '123',
       panels: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         '123': {
           explicitInput: { id: '123', firstName: 'Sam' },
           type: CONTACT_CARD_EMBEDDABLE,

@@ -60,7 +60,6 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },
@@ -83,7 +82,6 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },
@@ -165,7 +163,6 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },
@@ -187,7 +184,6 @@ describe('data_connections_router', () => {
           connector: 'prometheus',
           allowedRoles: ['admin'],
           properties: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'prometheus.uri': 'http://localhost:9090',
           },
         },

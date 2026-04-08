@@ -597,9 +597,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
               ({
                 text: indexPattern.title,
                 value: indexPattern.id,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
               } as { text: string; value: string; 'data-test-subj'?: string })
           );
 

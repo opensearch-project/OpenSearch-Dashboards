@@ -82,7 +82,6 @@ describe('TraceLogsTab', () => {
     logDatasets: mockLogDatasets,
     logsData: mockLogs,
     datasetLogs: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'logs-dataset-id': mockLogs,
     },
     isLoading: false,
