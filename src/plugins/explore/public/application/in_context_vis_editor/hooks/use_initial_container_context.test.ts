@@ -6,7 +6,7 @@
 import { renderHook } from '@testing-library/react';
 import { useInitialContainerContext } from './use_initial_container_context';
 import { getServices } from '../../../services/services';
-import { CONTAINER_URL_KEY } from '../utils';
+import { CONTAINER_URL_KEY } from '../types';
 
 jest.mock('../../../services/services');
 

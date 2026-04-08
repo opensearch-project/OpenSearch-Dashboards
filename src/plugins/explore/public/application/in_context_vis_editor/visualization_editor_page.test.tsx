@@ -40,7 +40,7 @@ jest.mock('./component/visualization_editor_bottom_left_container', () => ({
 jest.mock('./component/top_nav', () => ({
   TopNav: () => <div data-test-subj="top-nav" />,
 }));
-jest.mock('./component/visualization_editor__right_container', () => ({
+jest.mock('./component/visualization_editor_right_container', () => ({
   RightStyleOptionsPanel: () => <div data-test-subj="right-panel" />,
 }));
 

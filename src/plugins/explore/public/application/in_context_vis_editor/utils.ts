@@ -6,18 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { NavigateToAppOptions } from 'opensearch-dashboards/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
-
-export const CONTAINER_URL_KEY = '_c';
-
-export interface ContainerState {
-  originatingApp: string | undefined;
-  containerInfo: ContainerInfo | undefined;
-}
-
-export interface ContainerInfo {
-  containerName: string;
-  containerId: string;
-}
+import { ContainerInfo } from './types';
 
 export function getBreadcrumbs(
   navigateToApp: (appId: string, options?: NavigateToAppOptions) => Promise<void>,
