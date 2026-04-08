@@ -24,7 +24,7 @@ import { SaveVisModal } from './save_vis_modal';
 import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { EditorMode } from '../../utils/state_management/types';
-import { ContainerState, CONTAINER_URL_KEY } from '../utils';
+import { ContainerState, CONTAINER_URL_KEY } from '../types';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;

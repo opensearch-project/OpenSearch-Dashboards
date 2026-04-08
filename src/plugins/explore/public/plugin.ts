@@ -85,6 +85,10 @@ import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
+import {
+  registerDisabledPPLExecuteQueryAction,
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+} from './components/query_panel/actions/ppl_execute_query_action';
 
 export class ExplorePlugin
   implements
@@ -124,6 +128,7 @@ export class ExplorePlugin
   private slotRegistryService = new SlotRegistryService();
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
+  private unregisterPPLExecuteQueryAction?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -700,6 +705,18 @@ export class ExplorePlugin
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }
 
+    // Register disabled execute_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
+    if (plugins.contextProvider) {
+      registerDisabledPPLExecuteQueryAction(
+        plugins.contextProvider.actions.registerAssistantAction
+      );
+      this.unregisterPPLExecuteQueryAction = () =>
+        plugins.contextProvider!.actions.unregisterAssistantAction(
+          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
+        );
+    }
+
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: plugins.data.indexPatterns,
@@ -722,6 +739,7 @@ export class ExplorePlugin
     if (this.editorStopUrlTracking) {
       this.editorStopUrlTracking();
     }
+    this.unregisterPPLExecuteQueryAction?.();
   }
 
   private registerEmbeddable(
