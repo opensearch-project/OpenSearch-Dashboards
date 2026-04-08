@@ -340,7 +340,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       } catch {
         // Skip embeddables that can't be accessed or aren't loaded yet
-        return [];
+        continue;
       }
     }
     return queries;

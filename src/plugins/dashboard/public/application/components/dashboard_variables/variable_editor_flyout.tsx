@@ -6,7 +6,6 @@
 import React, { useState, useCallback } from 'react';
 import {
   EuiTitle,
-  EuiForm,
   EuiFormRow,
   EuiFieldText,
   EuiFlexGroup,
@@ -90,18 +89,28 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   const [label, setLabel] = useState(existingVariable?.label || '');
   const [description, setDescription] = useState(existingVariable?.description || '');
   const [type, setType] = useState<VariableType>(existingVariable?.type || VariableType.Query);
-  const [query, setQuery] = useState((existingVariable as any)?.query || '');
-  const [language, setLanguage] = useState((existingVariable as any)?.language || 'PPL');
-  const [dataset, setDataset] = useState<any>((existingVariable as any)?.dataset || null);
+  const [query, setQuery] = useState(
+    existingVariable?.type === VariableType.Query ? existingVariable.query : ''
+  );
+  const [language, setLanguage] = useState(
+    existingVariable?.type === VariableType.Query ? existingVariable.language : 'PPL'
+  );
+  const [dataset, setDataset] = useState<any>(
+    existingVariable?.type === VariableType.Query ? existingVariable.dataset ?? null : null
+  );
   const [customValues, setCustomValues] = useState<Array<{ label: string }>>(
-    ((existingVariable as any)?.customOptions ?? []).map((v: string) => ({ label: v }))
+    existingVariable?.type === VariableType.Custom
+      ? (existingVariable.customOptions ?? []).map((v: string) => ({ label: v }))
+      : []
   );
   const [multi, setMulti] = useState(existingVariable?.multi || false);
   const [includeAll, setIncludeAll] = useState(existingVariable?.includeAll || false);
   const [sort, setSort] = useState<VariableSortOrder>(
     existingVariable?.sort || VariableSortOrder.Disabled
   );
-  const [regex, setRegex] = useState((existingVariable as any)?.regex || '');
+  const [regex, setRegex] = useState(
+    existingVariable?.type === VariableType.Query ? existingVariable.regex ?? '' : ''
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -217,12 +226,16 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       };
 
       if (type === VariableType.Query) {
-        (variableConfig as any).query = query.trim();
-        (variableConfig as any).language = language;
-        (variableConfig as any).dataset = dataset || undefined;
-        (variableConfig as any).regex = regex.trim() || undefined;
+        Object.assign(variableConfig, {
+          query: query.trim(),
+          language,
+          dataset: dataset || undefined,
+          regex: regex.trim() || undefined,
+        });
       } else if (type === VariableType.Custom) {
-        (variableConfig as any).customOptions = customValues.map((v) => v.label);
+        Object.assign(variableConfig, {
+          customOptions: customValues.map((v) => v.label),
+        });
       }
 
       await onSave(variableConfig);
@@ -306,7 +319,9 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
             label={i18n.translate('dashboard.variableEditor.nameLabel', {
               defaultMessage: 'Name',
             })}
-            helpText="Use this name to reference the variable: $var or ${var}"
+            helpText={i18n.translate('dashboard.variableEditor.nameHelp', {
+              defaultMessage: 'Use this name to reference the variable: $var or $\\{var\\}',
+            })}
           >
             <EuiFieldText
               value={name}
@@ -341,7 +356,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               defaultMessage: 'Description',
             })}
             helpText={i18n.translate('dashboard.variableEditor.descriptionHelp', {
-              defaultMessage: 'Optional description for the this variable',
+              defaultMessage: 'Optional description for this variable',
             })}
           >
             <EuiFieldText

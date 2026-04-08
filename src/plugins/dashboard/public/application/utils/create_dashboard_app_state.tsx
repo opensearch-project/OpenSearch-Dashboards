@@ -102,8 +102,10 @@ export const createDashboardGlobalAndAppState = ({
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
           if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
-          const mergedState = { ...stateDefaults, ...state };
-          stateContainer.set(mergedState);
+          stateContainer.set({
+            ...stateDefaults,
+            ...state,
+          });
         } else {
           // TODO: This logic was ported over this but can be handled more gracefully and intentionally
           // Sync from state url should be refactored within this application. The app is syncing from

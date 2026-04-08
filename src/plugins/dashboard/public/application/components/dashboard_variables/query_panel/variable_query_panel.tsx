@@ -8,7 +8,8 @@ import { monaco } from '@osd/monaco';
 import {
   EuiPanel,
   EuiProgress,
-  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
@@ -395,18 +396,6 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         label={i18n.translate('dashboard.variableEditor.queryLabel', {
           defaultMessage: 'Options Query',
         })}
-        labelAppend={
-          <EuiSmallButton
-            onClick={handleRunQuery}
-            isLoading={isLoading}
-            data-test-subj="variableQueryPanelRunQuery"
-            minWidth="32px"
-          >
-            {i18n.translate('dashboard.variableQueryPanel.runQuery', {
-              defaultMessage: 'Preview',
-            })}
-          </EuiSmallButton>
-        }
         helpText={i18n.translate('dashboard.variableEditor.queryHelp', {
           defaultMessage: 'Select a dataset, write a query, and run it to preview variable options',
         })}
@@ -416,7 +405,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           <EuiPanel paddingSize="s" borderRadius="none" className="variableQueryPanel">
             <EuiFlexGroup gutterSize="xs" direction="column">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
                   </EuiFlexItem>
@@ -426,6 +415,21 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
                       onDatasetChange={onDatasetChange}
                       language={language}
                     />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {isLoading ? (
+                      <EuiLoadingSpinner size="m" />
+                    ) : (
+                      <EuiSmallButtonEmpty
+                        onClick={handleRunQuery}
+                        data-test-subj="variableQueryPanelRunQuery"
+                        flush="right"
+                      >
+                        {i18n.translate('dashboard.variableQueryPanel.runQuery', {
+                          defaultMessage: 'Preview',
+                        })}
+                      </EuiSmallButtonEmpty>
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

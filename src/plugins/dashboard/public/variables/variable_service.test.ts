@@ -8,6 +8,7 @@ import { VariableService } from './variable_service';
 import { Variable, VariableType, VariableSortOrder, CustomVariable, QueryVariable } from './types';
 
 jest.mock('./variable_query_utils', () => ({
+  ...jest.requireActual('./variable_query_utils'),
   executeQueryForOptions: jest.fn(),
 }));
 

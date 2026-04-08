@@ -358,6 +358,7 @@ export class VariableService {
       includeAll: input.includeAll,
       hide: input.hide,
       description: input.description,
+      sort: input.sort,
     };
 
     switch (input.type) {
@@ -369,6 +370,7 @@ export class VariableService {
           query: v.query ?? '',
           language: v.language,
           dataset: v.dataset,
+          regex: v.regex,
         } as QueryVariable;
       }
       case VariableType.Custom: {
