@@ -5,9 +5,15 @@
 
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
+import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+import {
+  usePPLExecuteQueryAction,
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+  registerDisabledPPLExecuteQueryAction,
+} from './ppl_execute_query_action';
 
 const mockDispatch = jest.fn();
-const mockUseAssistantAction = jest.fn();
+const mockRegisterAssistantAction = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockSetTime = jest.fn();
@@ -28,14 +34,14 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
       },
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
       contextProvider: {
-        hooks: { useAssistantAction: mockUseAssistantAction },
+        actions: { registerAssistantAction: mockRegisterAssistantAction },
       },
     },
   }),
 }));
 
 jest.mock('../../../application/utils/state_management/actions/query_editor/load_query', () => ({
-  loadQueryActionCreator: (...args) => mockLoadQueryActionCreator(...args),
+  loadQueryActionCreator: (...args: any[]) => mockLoadQueryActionCreator(...args),
 }));
 
 jest.mock(
@@ -61,13 +67,8 @@ jest.mock('../../../application/hooks', () => ({
   useSetEditorTextWithQuery: jest.fn(),
 }));
 
-import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
-import { usePPLExecuteQueryAction } from './ppl_execute_query_action';
-
 describe('usePPLExecuteQueryAction', () => {
-  let initialCallCount;
-
-  const makeStatus = (status, error) => ({
+  const makeStatus = (status: string, error?: any) => ({
     status,
     elapsedMs: undefined,
     startTime: undefined,
@@ -75,11 +76,11 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   beforeEach(() => {
-    initialCallCount = mockUseAssistantAction.mock.calls.length;
     mockDispatch.mockClear();
     mockSetEditorTextWithQuery.mockClear();
     mockLoadQueryActionCreator.mockClear();
     mockSetTime.mockClear();
+    mockRegisterAssistantAction.mockClear();
 
     mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
     mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
@@ -89,15 +90,16 @@ describe('usePPLExecuteQueryAction', () => {
     act(() => {
       renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
     });
-    const currentCallCount = mockUseAssistantAction.mock.calls.length;
-    expect(currentCallCount).toBeGreaterThan(initialCallCount);
-    return mockUseAssistantAction.mock.calls[currentCallCount - 1][0].handler;
+    expect(mockRegisterAssistantAction).toHaveBeenCalled();
+    return mockRegisterAssistantAction.mock.calls[
+      mockRegisterAssistantAction.mock.calls.length - 1
+    ][0].handler;
   };
 
   it('should register assistant action with correct name and required parameters', () => {
     renderAndGetHandler();
     const latestCall =
-      mockUseAssistantAction.mock.calls[mockUseAssistantAction.mock.calls.length - 1][0];
+      mockRegisterAssistantAction.mock.calls[mockRegisterAssistantAction.mock.calls.length - 1][0];
     expect(latestCall.name).toBe('execute_ppl_query');
     expect(latestCall.parameters.required).toContain('query');
     expect(latestCall.handler).toBeInstanceOf(Function);
@@ -301,5 +303,133 @@ describe('usePPLExecuteQueryAction', () => {
       message: 'Query execution was cancelled or did not complete. Status: uninitialized',
       error: 'Query execution was interrupted',
     });
+  });
+
+  it('should replace action with disabled version after unmount', () => {
+    const { unmount } = renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
+
+    expect(mockRegisterAssistantAction).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        available: 'disabled',
+      })
+    );
+
+    unmount();
+
+    expect(mockRegisterAssistantAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        available: 'disabled',
+      })
+    );
+  });
+});
+
+describe('EXECUTE_PPL_QUERY_TOOL_DEFINITION', () => {
+  it('should have the correct tool name', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.name).toBe('execute_ppl_query');
+  });
+
+  it('should have a description', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description).toContain('PPL query');
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description).toContain('time range');
+  });
+
+  it('should have correct parameter properties', () => {
+    const { parameters } = EXECUTE_PPL_QUERY_TOOL_DEFINITION;
+
+    expect(parameters.type).toBe('object');
+    expect(parameters.properties).toHaveProperty('query');
+    expect(parameters.properties).toHaveProperty('autoExecute');
+    expect(parameters.properties).toHaveProperty('description');
+    expect(parameters.properties).toHaveProperty('from');
+    expect(parameters.properties).toHaveProperty('to');
+    expect(parameters.required).toEqual(['query']);
+  });
+
+  it('should have query parameter as string type', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.query.type).toBe('string');
+  });
+
+  it('should have autoExecute parameter as boolean type', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.autoExecute.type).toBe(
+      'boolean'
+    );
+  });
+
+  it('should have time range parameters with descriptions', () => {
+    const fromParam = EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.from;
+    const toParam = EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.to;
+
+    expect(fromParam.type).toBe('string');
+    expect(fromParam.description).toContain('Start time');
+    expect(toParam.type).toBe('string');
+    expect(toParam.description).toContain('End time');
+  });
+});
+
+describe('registerDisabledPPLExecuteQueryAction', () => {
+  it('should not throw if registerAction is undefined', () => {
+    expect(() => registerDisabledPPLExecuteQueryAction(undefined as any)).not.toThrow();
+  });
+
+  it('should call registerAction with correct structure', () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    expect(mockRegisterAction).toHaveBeenCalledTimes(1);
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+
+    expect(registeredAction.name).toBe('execute_ppl_query');
+    expect(registeredAction.available).toBe('disabled');
+    expect(registeredAction.handler).toBeDefined();
+    expect(typeof registeredAction.handler).toBe('function');
+  });
+
+  it('should register action with same parameters as enabled version', () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+    expect(registeredAction.description).toBe(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description);
+    expect(registeredAction.parameters).toEqual(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters);
+  });
+
+  it('should return error when handler is called', async () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+    const result = await registeredAction.handler({ query: 'test' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('STOP');
+    expect(result.error).toContain('Tool not available');
+    expect(result.message).toContain('IMPORTANT');
+    expect(result.message).toContain('Do not attempt to use any more tools');
+    expect(result.stop_tool_execution).toBe(true);
+    expect(result.context_lost).toBe(true);
+  });
+
+  it('should provide explicit instruction to stop tool execution', async () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+    const result = await registeredAction.handler({ query: 'test' });
+
+    // Should tell agent to stop using tools and respond directly
+    expect(result.message).toContain('Do not attempt to use any more tools');
+    expect(result.message).toContain('respond directly to the user');
+    expect(result.message).toContain('Logs');
+    expect(result.message).toContain('Traces');
+    expect(result.message).toContain('Metrics');
+
+    // Should have flags for programmatic handling
+    expect(result.stop_tool_execution).toBe(true);
+    expect(result.context_lost).toBe(true);
   });
 });
