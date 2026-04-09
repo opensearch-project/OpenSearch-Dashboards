@@ -19,7 +19,7 @@ import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { ErrorGuard } from './error_guard/error_guard';
-import { EXPLORE_PATTERNS_TAB_ID } from '../../../common';
+import { EXPLORE_PATTERNS_TAB_ID, EXPLORE_FIELD_STATS_TAB_ID } from '../../../common';
 import { DEFAULT_DATA } from '../../../../data/common';
 
 export const EXPLORE_ACTION_BAR_SLOT_ID = 'explore-action-bar-slot';
@@ -62,11 +62,12 @@ export const ExploreTabs = () => {
     return registryTabs.filter((registryTab) => {
       const registeredFlavor = registryTab.flavor.includes(flavorId);
       const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
+      const isFieldStatsTab = registryTab.id === EXPLORE_FIELD_STATS_TAB_ID;
       const isDefaultDataset =
         query?.dataset &&
         (query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ||
           query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX);
-      if (isPatternsTab) {
+      if (isPatternsTab || isFieldStatsTab) {
         return registeredFlavor && isDefaultDataset;
       }
       return registeredFlavor;
