@@ -153,6 +153,7 @@ import {
   selectQueryLanguage,
   selectQueryString,
   selectIsQueryEditorDirty,
+  selectDataset,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
