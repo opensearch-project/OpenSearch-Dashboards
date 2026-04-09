@@ -35,20 +35,17 @@ describe('IdentitySourceService', () => {
       expect(logger.info).toHaveBeenCalledWith('Register sourceA type identity source handler');
     });
 
-    it('should override an existing handler when registering with the same source', () => {
+    it('should throw an error when registering with the same source', () => {
       const logger = loggingSystemMock.create().get();
       const service = new IdentitySourceService(logger);
       const mockHandler1 = createMockHandler();
       const mockHandler2 = createMockHandler();
 
       service.registerIdentitySourceHandler(sourceA, mockHandler1);
-      service.registerIdentitySourceHandler(sourceA, mockHandler2);
 
-      const handler = service.getIdentitySourceHandler(sourceA);
-
-      expect(handler).toBe(mockHandler2);
-      expect(handler).not.toBe(mockHandler1);
-      expect(logger.info).toHaveBeenCalledTimes(2);
+      expect(() => {
+        service.registerIdentitySourceHandler(sourceA, mockHandler2);
+      }).toThrow("Identity source 'sourceA' has already been registered");
     });
 
     it('should support registering multiple different sources', () => {

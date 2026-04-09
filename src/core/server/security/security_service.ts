@@ -31,7 +31,7 @@ export class SecurityService implements CoreService<InternalSecurityServiceSetup
     this.logger.debug('Setting up Security service');
 
     const securityService = this;
-    const router = setupDeps.http.createRouter('/api/security/');
+    const router = setupDeps.http.createRouter('/api/security');
 
     registerRoutes({
       router,

@@ -19,6 +19,9 @@ export class IdentitySourceService {
    * Register a new identity source handler
    */
   public registerIdentitySourceHandler(source: string, handler: IdentitySourceHandler): void {
+    if (this.identitySource[source]) {
+      throw new Error(`Identity source '${source}' has already been registered`);
+    }
     this.identitySource[source] = handler;
     this.logger.info(`Register ${source} type identity source handler`);
   }

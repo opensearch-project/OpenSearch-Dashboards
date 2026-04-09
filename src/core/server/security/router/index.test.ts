@@ -41,14 +41,14 @@ describe('Security router', () => {
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: 'identity/_entries',
+          path: '/identity/_entries',
         }),
         expect.any(Function)
       );
       expect(router.post).toHaveBeenCalledTimes(1);
       expect(router.post).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: 'identity/_entries',
+          path: '/identity/_entries',
         }),
         expect.any(Function)
       );

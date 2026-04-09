@@ -23,7 +23,7 @@ export function registerRoutes({
   // Register a GET route for retrieving identity entries with pagination and filtering
   router.get(
     {
-      path: 'identity/_entries',
+      path: '/identity/_entries',
       validate: {
         query: schema.object({
           source: schema.string(),
@@ -51,7 +51,7 @@ export function registerRoutes({
   // Register a POST route for retrieving identity entries by IDs
   router.post(
     {
-      path: 'identity/_entries',
+      path: '/identity/_entries',
       validate: {
         body: schema.object({
           source: schema.string(),
