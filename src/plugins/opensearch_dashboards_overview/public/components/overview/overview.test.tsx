@@ -45,8 +45,8 @@ jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', ()
   }),
   withOpenSearchDashboards: jest.fn((component: React.Component) => component),
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
+  OverviewPageFooter: jest.fn().mockReturnValue(React.createElement(React.Fragment)),
+  OverviewPageHeader: jest.fn().mockReturnValue(React.createElement(React.Fragment)),
 }));
 
 afterAll(() => jest.clearAllMocks());

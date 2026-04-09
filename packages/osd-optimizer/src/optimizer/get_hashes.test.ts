@@ -57,9 +57,9 @@ it('returns hashes Map', async () => {
 
   await expect(getHashes(['/foo/bar', '/foo/missing', '/foo/baz', '/foo/bar'])).resolves
     .toMatchInlineSnapshot(`
-    Map {
-      "/foo/bar" => "OwCtruddjWkB6ROdbLRM0NnWOhs=",
-      "/foo/baz" => "mb6SFQi4VuH8jbwW3h6YoolklXc=",
-    }
-  `);
+          Map {
+            "/foo/bar" => "2jmj7l5rSw0yVb/vlWAYkK/YBwk=",
+            "/foo/baz" => "2jmj7l5rSw0yVb/vlWAYkK/YBwk=",
+          }
+        `);
 });

@@ -47,6 +47,7 @@ const ruleTester = new RuleTester({
   parserOptions: {
     sourceType: 'module',
     ecmaVersion: 2015,
+    requireConfigFile: false,
   },
 });
 

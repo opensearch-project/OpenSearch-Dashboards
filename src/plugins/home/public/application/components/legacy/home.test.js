@@ -54,11 +54,14 @@ jest.mock('../../opensearch_dashboards_services', () => ({
   }),
 }));
 
-jest.mock('../../../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
-  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  OverviewPageHeader: jest.fn().mockReturnValue(<></>),
-  withOpenSearchDashboards: jest.fn((component) => component),
-}));
+jest.mock('../../../../../../../src/plugins/opensearch_dashboards_react/public', () => {
+  const React = require('react');
+  return {
+    OverviewPageFooter: jest.fn().mockReturnValue(React.createElement(React.Fragment)),
+    OverviewPageHeader: jest.fn().mockReturnValue(React.createElement(React.Fragment)),
+    withOpenSearchDashboards: jest.fn((component) => component),
+  };
+});
 
 describe('home', () => {
   let defaultProps;

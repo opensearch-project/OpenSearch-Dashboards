@@ -190,6 +190,7 @@ export function sourceHasUsageCollector(sourceFile: ts.SourceFile) {
 
   const identifiers = (sourceFile as any).identifiers;
   if (
+    !identifiers ||
     (!identifiers.get('makeUsageCollector') && !identifiers.get('type')) ||
     !identifiers.get('fetch')
   ) {

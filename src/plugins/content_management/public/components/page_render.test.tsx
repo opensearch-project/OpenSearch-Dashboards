@@ -11,9 +11,13 @@ import { Page } from '../services';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 
 jest.mock('./section_render', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const React = require('react');
   return {
     ...jest.requireActual('./section_render'),
-    SectionRender: jest.fn().mockReturnValue(<span>MockSectionRender</span>),
+    SectionRender: jest
+      .fn()
+      .mockReturnValue(React.createElement('span', null, 'MockSectionRender')),
   };
 });
 
