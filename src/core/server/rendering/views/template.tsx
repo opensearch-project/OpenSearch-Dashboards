@@ -139,7 +139,8 @@ export const Template: FunctionComponent<Props> = ({
 
         <script src={startupScriptUrl} />
       </head>
-      <body>
+      {/*Added custom theme class*/}
+      <body className="midnightTheme">
         {createElement('osd-csp', {
           data: JSON.stringify({ strictCsp }),
         })}
