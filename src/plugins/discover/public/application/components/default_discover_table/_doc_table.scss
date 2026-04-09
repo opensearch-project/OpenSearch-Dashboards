@@ -95,6 +95,14 @@ doc-table {
   }
 }
 
+.osdDocTable__row--inspected {
+  td {
+    background-color: tintOrShade($euiColorPrimary, 92%, 75%);
+    border-top-color: tintOrShade($euiColorPrimary, 80%, 60%);
+    border-bottom-color: tintOrShade($euiColorPrimary, 80%, 60%);
+  }
+}
+
 .osdDocTable__bar {
   margin: $euiSizeXS $euiSizeXS 0;
 }

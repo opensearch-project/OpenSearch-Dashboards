@@ -15,7 +15,21 @@
   }
 
   .osdDocViewer__field {
-    padding-top: 8px;
+    padding-top: 4px;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: top;
+  }
+
+  .osdDocViewer__fieldInner {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    max-width: calc(100% - 20px);
+    vertical-align: middle;
   }
 
   .dscFieldName {
@@ -32,8 +46,12 @@
   }
 
   tr:hover {
-    .osdDocViewer__actionButton {
-      opacity: 1;
+    .osdDocViewer__copyBtn {
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 1;
+      }
     }
   }
 }
@@ -44,21 +62,29 @@
 }
 
 .osdDocViewer__buttons {
-  width: 60px;
+  width: 28px;
+  vertical-align: top;
+  padding-top: 2px;
+}
 
-  // Show all icons if one is focused,
-  // IE doesn't support, but the fallback is just the focused button becomes visible
-  &:focus-within {
-    .osdDocViewer__actionButton {
-      opacity: 1;
-    }
+// Filter trigger button: always visible
+.osdDocViewer__filterBtn {
+  opacity: 0.5;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
   }
 }
 
-.osdDocViewer__field {
-  width: 160px;
+// Inside the popover, all action buttons must be fully visible
+.osdDocViewer__filterPopover {
+  .osdDocViewer__actionButton {
+    opacity: 1 !important;
+  }
 }
 
+// Hidden by default (used for collapse toggle in value cell)
 .osdDocViewer__actionButton {
   opacity: 0;
 
@@ -67,6 +93,47 @@
   }
 }
 
+.osdDocViewer__copyBtn {
+  opacity: 0;
+  transition: opacity 100ms ease;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
 .osdDocViewer__warning {
   margin-right: $euiSizeS;
+}
+
+.osdDocViewer__fastTooltip {
+  position: fixed;
+  z-index: 9999;
+  max-width: 480px;
+  max-height: 200px;
+  overflow: hidden;
+  padding: 4px 8px;
+  border-radius: $euiBorderRadius;
+  background-color: $euiColorDarkestShade;
+  color: $euiColorGhost;
+  font-size: $euiFontSizeXS;
+  font-family: $euiCodeFontFamily;
+  line-height: 1.4;
+  word-break: break-all;
+  white-space: pre-wrap;
+  pointer-events: none;
+  box-shadow: $euiShadowSmall;
+  transform: translate(-50%, -100%);
+}
+
+.osdDocViewer__fastTooltipArrow {
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 5px solid $euiColorDarkestShade;
 }

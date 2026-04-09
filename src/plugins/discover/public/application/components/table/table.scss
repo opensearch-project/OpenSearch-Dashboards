@@ -1,3 +1,31 @@
 .truncate-by-height {
   overflow: hidden;
+  max-height: 3.9em;
+}
+
+.osdDocViewerTable__colHeader {
+  th {
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightMedium;
+    color: $euiColorMediumShade;
+    padding: 2px 4px;
+    border-bottom: $ouiBorderThin;
+    user-select: none;
+  }
+}
+
+.osdDocViewerTable__colResizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: 0;
+  width: 5px;
+  cursor: col-resize;
+  z-index: 1;
+
+  &:hover,
+  &:active {
+    background-color: $euiColorPrimary;
+    opacity: 0.4;
+  }
 }

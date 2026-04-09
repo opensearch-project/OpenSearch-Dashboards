@@ -1,0 +1,97 @@
+.dscTable__container {
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+}
+
+.dscTable__tableSection {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.dscTable__resizeHandle {
+  flex: 0 0 4px;
+  cursor: col-resize;
+  background-color: transparent;
+  border-left: $ouiBorderThin;
+  transition: background-color 150ms ease;
+
+  &:hover,
+  &:active {
+    background-color: $euiColorPrimary;
+  }
+}
+
+.dscTable__inspectorPanel {
+  flex: 0 0 auto;
+  overflow: hidden;
+  background-color: $euiColorEmptyShade;
+}
+
+.dscTable__inspector {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.dscTable__inspectorHeader {
+  padding: $euiSizeXS $euiSizeS;
+  border-bottom: $ouiBorderThin;
+  flex: 0 0 auto;
+}
+
+.dscTable__inspectorNav .dscTable__inspectorNavGroup {
+  gap: 0;
+}
+
+.dscTable__inspectorPos {
+  font-variant-numeric: tabular-nums;
+  padding: 0 $euiSizeXS;
+  white-space: nowrap;
+}
+
+.dscTable__inspectorNavBtn {
+  min-width: 0;
+  padding: 0 2px;
+  font-weight: bold;
+  font-size: $euiFontSizeM;
+  line-height: 1;
+}
+
+.dscTable__inspectorSearch {
+  min-width: 80px;
+  max-width: 200px;
+  margin: 0 $euiSizeXS;
+}
+
+.dscTable__inspectorBody {
+  flex: 1 1 auto;
+  overflow-y: auto;
+
+  @include euiScrollBar;
+
+  .osdDocViewerTable {
+    margin-top: 0;
+    font-size: $euiFontSizeXS;
+
+    td {
+      padding: 2px 4px;
+      line-height: 1.3;
+    }
+  }
+
+  .osdDocViewer__value {
+    padding-top: 0;
+  }
+}
+
+.dscTable__inspectorTabs {
+  padding: 0 $euiSizeXS;
+}
+
+.dscTable__inspectorTab {
+  padding: $euiSizeXS $euiSizeS;
+  font-size: $euiFontSizeXS;
+}

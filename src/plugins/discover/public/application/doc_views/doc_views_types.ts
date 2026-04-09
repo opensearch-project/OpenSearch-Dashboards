@@ -57,6 +57,7 @@ export interface DocViewRenderProps {
   indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
+  fieldNameFilter?: string;
 }
 export type DocViewerComponent = ComponentType<DocViewRenderProps>;
 export type DocViewRenderFn = (

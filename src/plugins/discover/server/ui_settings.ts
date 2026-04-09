@@ -44,6 +44,7 @@ import {
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
+  DOC_INSPECTOR_PANEL_SETTING,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -185,5 +186,20 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [DOC_INSPECTOR_PANEL_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.discover.docInspectorPanelTitle', {
+      defaultMessage: 'Document explorer panel',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.discover.docInspectorPanelText', {
+      defaultMessage:
+        'Enable an inline document inspector side panel in Discover. When enabled, clicking a row opens a resizable ' +
+        'panel on the right side of the table to browse document fields, filter values, and navigate between documents ' +
+        'without leaving the search results. This feature is experimental',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    type: 'boolean',
   },
 };

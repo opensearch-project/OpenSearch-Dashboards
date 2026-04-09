@@ -28,14 +28,30 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { escapeRegExp } from 'lodash';
 import { DocViewTableRow } from './table_row';
 import { arrayContainsObjects } from './table_helper';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 import './table.scss';
 
+function fuzzyMatch(needle: string, haystack: string): boolean {
+  const nLower = needle.toLowerCase();
+  const hLower = haystack.toLowerCase();
+  if (hLower.includes(nLower)) return true;
+  let hi = 0;
+  for (let ni = 0; ni < nLower.length; ni++) {
+    const ch = nLower[ni];
+    while (hi < hLower.length && hLower[hi] !== ch) hi++;
+    if (hi >= hLower.length) return false;
+    hi++;
+  }
+  return true;
+}
+
 const COLLAPSE_LINE_LENGTH = 350;
+const FIELD_COL_DEFAULT = 160;
+const FIELD_COL_MIN = 80;
 
 export function DocViewTable({
   hit,
@@ -44,22 +60,80 @@ export function DocViewTable({
   columns,
   onAddColumn,
   onRemoveColumn,
+  fieldNameFilter,
 }: DocViewRenderProps) {
   const mapping = indexPattern.fields.getByName;
   const flattened = indexPattern.flattenHit(hit);
   const formatted = indexPattern.formatHit(hit, 'html');
+  const needle = fieldNameFilter?.trim() ?? '';
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
+  const [fieldColWidth, setFieldColWidth] = useState(FIELD_COL_DEFAULT);
+  const isColResizing = useRef(false);
 
   function toggleValueCollapse(field: string) {
     fieldRowOpen[field] = fieldRowOpen[field] !== true;
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
+  const onColResizeMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      isColResizing.current = true;
+      const startX = e.clientX;
+      const startWidth = fieldColWidth;
+
+      const onMouseMove = (moveEvent: MouseEvent) => {
+        if (!isColResizing.current) return;
+        const delta = moveEvent.clientX - startX;
+        setFieldColWidth(Math.max(FIELD_COL_MIN, startWidth + delta));
+      };
+
+      const onMouseUp = () => {
+        isColResizing.current = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    },
+    [fieldColWidth]
+  );
+
   return (
-    <table className="table table-condensed osdDocViewerTable" data-test-subj="osdDocViewerTable">
+    <table
+      className="table table-condensed osdDocViewerTable"
+      data-test-subj="osdDocViewerTable"
+      style={{ tableLayout: 'fixed' }}
+    >
+      <colgroup>
+        {filter && <col style={{ width: 28 }} />}
+        <col style={{ width: fieldColWidth }} />
+        <col />
+      </colgroup>
+      <thead>
+        <tr className="osdDocViewerTable__colHeader">
+          {filter && <th />}
+          <th style={{ position: 'relative' }}>
+            Field
+            <div className="osdDocViewerTable__colResizer" onMouseDown={onColResizeMouseDown} />
+          </th>
+          <th>Value</th>
+        </tr>
+      </thead>
       <tbody>
         {Object.keys(flattened)
           .sort()
+          .filter((field) => {
+            if (!needle) return true;
+            if (fuzzyMatch(needle, field)) return true;
+            const raw = String(flattened[field] ?? '');
+            return fuzzyMatch(needle, raw);
+          })
           .map((field) => {
             const valueRaw = flattened[field];
             const value = String(formatted[field]);
