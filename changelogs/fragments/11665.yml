@@ -1,2 +1,0 @@
-feat:
-- Add default head limit for S3 PPL async queries ([#11665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11665))
