@@ -208,13 +208,12 @@ export const DatasetSelector = ({
       button={
         <EuiToolTip
           display="block"
-          content={`${
-            selectedDataset?.displayName ??
-            selectedDataset?.title ??
+          content={
+            datasetTitle ||
             i18n.translate('data.dataSelector.defaultTitle', {
               defaultMessage: 'Select data',
             })
-          }`}
+          }
         >
           <RootComponent
             appearance={appearance}

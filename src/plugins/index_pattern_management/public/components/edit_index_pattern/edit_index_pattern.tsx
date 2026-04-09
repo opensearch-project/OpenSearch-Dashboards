@@ -105,6 +105,7 @@ export const EditIndexPattern = withRouter(
       chrome,
       data,
       docLinks,
+      notifications,
       navigationUI: { HeaderControl },
       application,
     } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
@@ -141,10 +142,20 @@ export const EditIndexPattern = withRouter(
     }, [uiSettings, indexPattern.id]);
 
     const saveDisplayName = useCallback(async () => {
-      indexPattern.displayName = displayName || undefined;
-      await data.indexPatterns.updateSavedObject(indexPattern);
-      setIsDisplayNameDirty(false);
-    }, [data.indexPatterns, displayName, indexPattern]);
+      const previousDisplayName = indexPattern.displayName;
+      try {
+        indexPattern.displayName = displayName || undefined;
+        await data.indexPatterns.updateSavedObject(indexPattern);
+        setIsDisplayNameDirty(false);
+      } catch (e) {
+        indexPattern.displayName = previousDisplayName;
+        notifications.toasts.addDanger(
+          i18n.translate('indexPatternManagement.editIndexPattern.saveDisplayNameError', {
+            defaultMessage: 'Failed to save display name.',
+          })
+        );
+      }
+    }, [data.indexPatterns, displayName, indexPattern, notifications.toasts]);
 
     const refreshFields = () => {
       overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {

@@ -32,11 +32,13 @@ const ConnectedDatasetSelector = ({
   );
 
   // Enrich dataset with displayName if missing (e.g., from cached URL state)
+  const enrichedIdsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const enrichDataset = async (dataset: Dataset | undefined) => {
-      if (!dataset || dataset.displayName) {
+      if (!dataset || dataset.displayName || enrichedIdsRef.current.has(dataset.id)) {
         return;
       }
+      enrichedIdsRef.current.add(dataset.id);
       try {
         const indexPattern = await indexPatterns.get(dataset.id);
         if (indexPattern.displayName) {

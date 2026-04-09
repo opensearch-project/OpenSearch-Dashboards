@@ -43,7 +43,6 @@ interface IndexHeaderProps {
   setDefault?: () => void;
   refreshFields?: () => void;
   deleteIndexPatternClick?: () => void;
-  onDisplayNameChange?: (displayName: string) => void;
 }
 
 const setDefaultAriaLabel = i18n.translate(
@@ -82,7 +81,6 @@ export function IndexHeader({
   setDefault,
   refreshFields,
   deleteIndexPatternClick,
-  onDisplayNameChange,
 }: IndexHeaderProps) {
   const {
     uiSettings,
