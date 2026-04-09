@@ -28,6 +28,7 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
 import { CommandRegistryService } from './services/command_registry_service';
+import { starterSuggestionsRegistry } from './services/starter_suggestions_registry';
 import { ConfirmationService } from './services/confirmation_service';
 import { AgenticMemoryProvider } from './services/agentic_memory_provider';
 import { ChatMountService } from './services/chat_mount_service';
@@ -112,6 +113,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     return {
       suggestedActionsService: suggestedActionsSetup,
       commandRegistry: commandRegistrySetup,
+      registerStarterSuggestions: (appId, suggestions) =>
+        starterSuggestionsRegistry.register(appId, suggestions),
     };
   }
 

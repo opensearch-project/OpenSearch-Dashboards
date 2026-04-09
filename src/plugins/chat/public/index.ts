@@ -15,6 +15,6 @@ import { ChatPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ChatPlugin(initializerContext);
 }
-export { ChatPluginSetup, ChatPluginStart } from './types';
+export { ChatPluginSetup, ChatPluginStart, StarterSuggestionItem } from './types';
 export { SlashCommand } from './services/slash_commands';
 export { ChatService } from './services/chat_service';

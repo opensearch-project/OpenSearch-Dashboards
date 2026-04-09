@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback, useState } from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { ChatLayoutMode } from '../types';
 import { MessageRow } from './message_row';
@@ -14,6 +14,11 @@ import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
 import { AssistantActionService } from '../../../context_provider/public';
+import type { AssistantContextStore } from '../../../context_provider/public';
+import {
+  starterSuggestionsRegistry,
+  StarterSuggestionItem,
+} from '../services/starter_suggestions_registry';
 
 /**
  * Determine tool status based on tool call and result
@@ -27,14 +32,7 @@ function getToolStatus(
   return 'completed';
 }
 
-interface SuggestionItem {
-  icon: string;
-  iconColor?: string;
-  text: string;
-  prompt: string;
-}
-
-const STARTER_SUGGESTIONS: SuggestionItem[] = [
+const STARTER_SUGGESTIONS: StarterSuggestionItem[] = [
   {
     icon: 'search',
     iconColor: 'primary',
@@ -54,6 +52,27 @@ const STARTER_SUGGESTIONS: SuggestionItem[] = [
     prompt: 'Explain [concept or feature] in OpenSearch Dashboards',
   },
 ];
+
+function getStarterSuggestions(): StarterSuggestionItem[] {
+  const contextStore = (window as any).assistantContextStore as AssistantContextStore | undefined;
+  if (contextStore) {
+    const pageContexts = contextStore.getContextsByCategory('page');
+    for (const ctx of pageContexts) {
+      try {
+        const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
+        if (value?.appId) {
+          const registered = starterSuggestionsRegistry.getSuggestions(value.appId);
+          if (registered) {
+            return registered;
+          }
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }
+  return STARTER_SUGGESTIONS;
+}
 
 interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
@@ -235,6 +254,17 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onFillInput,
   startResponse,
 }) => {
+  const [suggestions, setSuggestions] = useState<StarterSuggestionItem[]>(getStarterSuggestions);
+
+  useEffect(() => {
+    const contextStore = (window as any).assistantContextStore as AssistantContextStore | undefined;
+    if (!contextStore) return;
+    const unsubscribe = contextStore.subscribe(() => {
+      setSuggestions(getStarterSuggestions());
+    });
+    return unsubscribe;
+  }, []);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const userHasScrolledUp = useRef<boolean>(false);
@@ -373,7 +403,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
               </EuiText>
             </div>
             <div className="chatMessages__suggestions">
-              {STARTER_SUGGESTIONS.map((suggestion, index) => (
+              {suggestions.map((suggestion, index) => (
                 <EuiPanel
                   key={index}
                   paddingSize="m"
