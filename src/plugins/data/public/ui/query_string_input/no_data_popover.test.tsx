@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { NoDataPopover } from './no_data_popover';
 import { EuiTourStep } from '@elastic/eui';

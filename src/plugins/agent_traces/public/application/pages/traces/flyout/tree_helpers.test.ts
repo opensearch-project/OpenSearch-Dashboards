@@ -23,6 +23,7 @@ jest.mock('../../../../services/span_categorization', () => ({
   SpanCategory: {},
 }));
 
+// @ts-expect-error TS2322 TODO(ts-error): fixme
 const makeTraceRow = (overrides: Partial<TraceRow> = {}): TraceRow => ({
   id: 'r1',
   spanId: 's1',

@@ -12,6 +12,7 @@ export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
     visualizationBuilder = new VisualizationBuilder({
       getUrlStateStorage: () => getServices().osdUrlStateStorage,
+      // @ts-expect-error TS2353 TODO(ts-error): fixme
       getExpressions: () => getServices().expressions,
     });
   }

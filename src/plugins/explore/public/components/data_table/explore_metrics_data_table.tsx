@@ -23,5 +23,6 @@ export const ExploreMetricsDataTable: React.FC = () => {
   const searchResult = metadata
     ? (resultsCache.get(cacheKey) as IPrometheusSearchResult) ?? null
     : null;
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return <MetricsDataTable searchResult={searchResult} />;
 };

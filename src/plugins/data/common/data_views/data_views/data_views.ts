@@ -468,6 +468,7 @@ export class DataViewsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: parsedSchemaMappings,
     };

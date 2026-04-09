@@ -241,14 +241,14 @@ describe('SavedObjectsService', () => {
           Promise.reject(new opensearchErrors.NoLivingConnectionsError('reason', {} as any))
         )
         .mockImplementationOnce(() =>
-          opensearchClientMock.createSuccessTransportRequestPromise('success')
+          opensearchClientMock.createSuccessTransportRequestPromise({ success: true })
         );
 
       await soService.setup(coreSetup);
       await soService.start(coreStart, 1);
 
       const response = await OpenSearchDashboardsMigratorMock.mock.calls[0][0].client.indices.create();
-      return expect(response.body).toBe('success');
+      return expect(response.body).toEqual({ success: true });
     });
 
     it('skips OpenSearchDashboardsMigrator migrations when pluginsInitialized=false', async () => {

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import SearchBar from './search_bar';
 import { queryServiceMock } from '../../query/mocks';
 

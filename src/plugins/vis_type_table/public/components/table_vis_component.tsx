@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { FormattedTableContext } from '../table_vis_response_handler';
 import { TableVisConfig } from '../types';

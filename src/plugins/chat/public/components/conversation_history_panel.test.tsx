@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import {
@@ -289,6 +288,7 @@ describe('ConversationHistoryPanel', () => {
       const mockHttp = {
         post: jest.fn(),
       } as any;
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const agenticProvider = new AgenticMemoryProvider(mockHttp);
       mockService.getMemoryProvider = jest.fn().mockReturnValue(agenticProvider);
 

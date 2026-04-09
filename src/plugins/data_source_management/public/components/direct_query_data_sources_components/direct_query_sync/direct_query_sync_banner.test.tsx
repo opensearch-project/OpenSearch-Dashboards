@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { httpServiceMock, notificationServiceMock } from '../../../../../../core/public/mocks';
 import { savedObjectsServiceMock } from '../../../../../../core/public/mocks';

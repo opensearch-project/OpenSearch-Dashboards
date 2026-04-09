@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { VisualizationEditorPage } from './visualization_editor_page';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';

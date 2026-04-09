@@ -77,6 +77,7 @@ test('redirects to app using state transfer with by value mode', async () => {
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
   embeddable.getRoot = jest.fn(() => ({
     getTitle: () => 'containerTitle',
     id: 'containerId',
@@ -110,6 +111,7 @@ test('redirects to app using state transfer without by value mode', async () => 
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
   embeddable.getRoot = jest.fn(() => ({
     getTitle: () => 'containerTitle',
     id: 'containerId',

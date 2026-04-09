@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
+import { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';

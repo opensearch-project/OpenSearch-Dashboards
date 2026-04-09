@@ -4,14 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiCallOut,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataView } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';

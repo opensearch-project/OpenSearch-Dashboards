@@ -42,6 +42,7 @@ import dedent from 'dedent';
 import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
+// @ts-expect-error TS1192 TODO(ts-upgrade): fixme
 import getopts from 'getopts';
 
 const log = new ToolingLog({
@@ -226,6 +227,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     default: {
       project: undefined,
     },
+    // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
     unknown(name) {
       extraFlags.push(name);
       return false;

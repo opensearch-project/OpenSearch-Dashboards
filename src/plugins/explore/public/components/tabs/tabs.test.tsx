@@ -91,6 +91,7 @@ describe('ExploreTabsComponent', () => {
         results: resultsReducer,
       },
       preloadedState: {
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: '',
           showHistogram: true,

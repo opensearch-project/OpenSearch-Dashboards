@@ -31,7 +31,7 @@
 import './index.scss';
 import 'brace/mode/json';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { i18n } from '@osd/i18n';
 

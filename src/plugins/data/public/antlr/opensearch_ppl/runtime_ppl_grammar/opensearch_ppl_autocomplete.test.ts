@@ -173,6 +173,7 @@ function createMockGrammar(overrides?: Partial<CachedGrammar>): CachedGrammar {
     modeNames: ['DEFAULT_MODE'],
     startRuleIndex: R.root,
     grammarHash: 'test-hash',
+    // @ts-expect-error TS2740 TODO(ts-error): fixme
     tokenDictionary: {
       SOURCE: T.SOURCE,
       EQUAL: T.EQUAL,

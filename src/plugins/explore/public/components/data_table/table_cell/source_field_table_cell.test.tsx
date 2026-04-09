@@ -7,7 +7,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SourceFieldTableCell } from './source_field_table_cell';
 

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 // @ts-ignore
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { IndexPatternField } from '../../../../../data/common';

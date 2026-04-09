@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DSM_APP_ID } from '../../plugin';

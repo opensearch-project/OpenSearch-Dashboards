@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getCurrentAppId } from '../../../../helpers/get_flavor_from_app_id';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { AgentTracesServices } from '../../../../types';
@@ -252,6 +251,7 @@ const resolveDataset = async (
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = undefined;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
   // If we have an existing dataset, validate SignalType compatibility

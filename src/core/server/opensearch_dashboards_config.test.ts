@@ -44,6 +44,7 @@ const applyOpenSearchDashboardsDeprecations = (
   _config[path] = settings;
   const migrated = applyDeprecations(
     _config,
+    // @ts-expect-error TS2345 TODO Fix me
     deprecations.map((deprecation) => ({
       deprecation,
       path,

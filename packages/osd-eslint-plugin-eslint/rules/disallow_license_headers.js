@@ -28,7 +28,7 @@
  * under the License.
  */
 
-const babelEslint = require('babel-eslint');
+const babelEslint = require('@babel/eslint-parser');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 
@@ -60,7 +60,24 @@ module.exports = {
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
-            const parsed = babelEslint.parse(license);
+            let parsed;
+            try {
+              parsed = babelEslint.parse(license, {
+                sourceType: 'module',
+                requireConfigFile: false,
+                allowImportExportEverywhere: true,
+                allowReturnOutsideFunction: true,
+                ranges: true,
+                attachComments: true,
+              });
+            } catch (parseError) {
+              // If babel parsing fails, try a simpler regex approach
+              const commentMatch = license.match(/\/\*(.*?)\*\//s);
+              if (commentMatch) {
+                return normalizeWhitespace(commentMatch[1]);
+              }
+              throw new Error(`Failed to parse license[${i}]: ${parseError.message}`);
+            }
 
             assert(
               !parsed.body.length,

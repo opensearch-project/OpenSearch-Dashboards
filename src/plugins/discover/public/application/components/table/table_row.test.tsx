@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import DOMPurify from 'dompurify';
 import { DocViewTableRow } from './table_row';

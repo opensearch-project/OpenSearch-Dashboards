@@ -169,7 +169,7 @@ describe('ChatWindow', () => {
 
   describe('loading message functionality', () => {
     it('should add loading message to timeline when sending a message', async () => {
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const { container: _container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Mock the sendMessage to return a controllable observable
       const loadingObservable = {
@@ -185,7 +185,9 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      const { rerender } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+      const { rerender: _rerender } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
 
       await act(async () => {
         // Send a message
@@ -733,10 +735,8 @@ describe('ChatWindow', () => {
 
     it('should clean up subscriptions on unmount', async () => {
       const unsubscribeMock = jest.fn();
-      let subscriptionCallbacks: any;
       const observableWithCleanup = {
         subscribe: jest.fn((callbacks) => {
-          subscriptionCallbacks = callbacks;
           return { unsubscribe: unsubscribeMock };
         }),
       };
@@ -1019,10 +1019,10 @@ describe('ChatWindow', () => {
   describe('conversation loading abort functionality', () => {
     it('should abort ongoing restoring latest after show history click', async () => {
       // Mock a long-running restoration that never resolves
-      let resolveRestore: any;
       mockChatService.restoreLatestConversation.mockImplementation(
         () =>
           new Promise((resolve) => {
+            // @ts-expect-error TS2304 TODO(ts-error): fixme
             resolveRestore = resolve;
           })
       );
@@ -1069,10 +1069,10 @@ describe('ChatWindow', () => {
 
     it('should abort conversation loading when handleCloseHistory is called', async () => {
       // Mock a long-running restoration that never resolves
-      let resolveRestore: any;
       mockChatService.restoreLatestConversation.mockImplementation(
         () =>
           new Promise((resolve) => {
+            // @ts-expect-error TS2304 TODO(ts-error): fixme
             resolveRestore = resolve;
           })
       );
@@ -1136,10 +1136,10 @@ describe('ChatWindow', () => {
       });
 
       // Mock loadConversation to never resolve
-      let resolveLoad: any;
       mockChatService.loadConversation.mockImplementation(
         () =>
           new Promise((resolve) => {
+            // @ts-expect-error TS2304 TODO(ts-error): fixme
             resolveLoad = resolve;
           })
       );
@@ -1585,7 +1585,7 @@ describe('ChatWindow', () => {
     it('should handle stop when no subscription exists', async () => {
       mockChatService.abort = jest.fn();
 
-      const { getByLabelText, queryByLabelText } = renderWithContext(
+      const { getByLabelText: _getByLabelText, queryByLabelText } = renderWithContext(
         <ChatWindow onClose={jest.fn()} />
       );
 

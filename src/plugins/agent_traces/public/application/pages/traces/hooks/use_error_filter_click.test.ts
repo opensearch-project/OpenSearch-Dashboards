@@ -32,6 +32,7 @@ const mockLoadQueryActionCreator = jest.fn(
   (_services: any, _setEditor: any, _query: string) => () => {}
 );
 jest.mock('../../../utils/state_management/actions/query_editor', () => ({
+  // @ts-expect-error TS2556 TODO(ts-error): fixme
   loadQueryActionCreator: (...args: any[]) => mockLoadQueryActionCreator(...args),
 }));
 

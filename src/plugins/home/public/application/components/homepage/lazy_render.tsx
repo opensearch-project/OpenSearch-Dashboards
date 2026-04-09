@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useRef, useEffect } from 'react';
+import { FC, useRef, useEffect } from 'react';
 import { RenderFn } from '../../../services/section_type/section_type';
 
 interface Props {

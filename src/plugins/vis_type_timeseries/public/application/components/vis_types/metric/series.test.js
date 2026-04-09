@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { MetricSeries } from './series';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 

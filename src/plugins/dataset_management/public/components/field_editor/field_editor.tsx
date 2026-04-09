@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { PureComponent, Fragment } from 'react';
+import { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
 import {
@@ -35,6 +35,7 @@ import {
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   DatasetField,
   FieldFormatInstanceType,
   DataView,

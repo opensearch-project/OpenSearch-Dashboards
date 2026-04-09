@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { EuiButton } from '@elastic/eui';
@@ -44,6 +43,7 @@ export const PatternsFlyoutUpdateSearch = ({ patternString }: PatternsFlyoutUpda
     dispatch(setQueryStringWithHistory(query)); // sets query to be ran
     setEditorText(query); // sets the text in the editor
     dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID)); // moves tab over to logs
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(executeQueries({ services }));
     closePatternsTableFlyout();
   };

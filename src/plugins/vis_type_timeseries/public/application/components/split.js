@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
 import { SplitByTerms } from './splits/terms';

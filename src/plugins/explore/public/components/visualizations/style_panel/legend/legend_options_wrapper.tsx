@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { LegendOptions, LegendOptionsPanel } from './legend';
 import { Positions } from '../../types';

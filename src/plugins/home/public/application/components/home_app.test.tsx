@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { setServices } from '../opensearch_dashboards_services';
 import { getMockedServices } from '../opensearch_dashboards_services.mock';

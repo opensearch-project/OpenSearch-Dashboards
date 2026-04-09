@@ -104,6 +104,7 @@ describe('sync_query_state_with_url', () => {
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
+      // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
       defaultSearchInterceptor: mockSearchInterceptor,
       application: setupMock.application,
       notifications: setupMock.notifications,

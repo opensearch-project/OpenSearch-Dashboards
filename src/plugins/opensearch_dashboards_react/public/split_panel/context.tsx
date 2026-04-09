@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { PanelRegistry } from './registry';
 
 const PanelContext = createContext({ registry: new PanelRegistry() });

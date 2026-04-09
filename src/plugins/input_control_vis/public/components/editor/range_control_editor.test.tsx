@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert } from 'sinon';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

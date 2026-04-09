@@ -23,7 +23,7 @@ import {
   Pager,
   copyToClipboard,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from 'opensearch-dashboards/public';
 import { SavedQuery, SavedQueryService } from '../../query';

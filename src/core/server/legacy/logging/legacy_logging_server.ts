@@ -29,6 +29,7 @@
  */
 
 import { ServerExtType } from '@hapi/hapi';
+// @ts-expect-error TS2345 TODO Fix me
 import Podium = require('@hapi/podium');
 import { cleanControlSequences } from '@osd/std';
 // @ts-expect-error: implicit any for JS file
