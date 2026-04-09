@@ -1,2 +1,0 @@
-fix:
-- [Chat] Handle PPL query execution status correctly in assistant actions ([#11652](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11652))
