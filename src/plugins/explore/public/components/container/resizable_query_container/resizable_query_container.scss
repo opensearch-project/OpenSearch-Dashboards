@@ -6,32 +6,33 @@
 .exploreResizableQueryContainer {
   flex: 1;
   min-height: 0;
-
-  &__wrapper {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
+  gap: $ouiSizeXS;
 
   &__queryPanel {
-    overflow: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: relative;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    >.euiResizablePanel__content {
+      overflow: hidden;
+      position: relative;
+    }
   }
 
   &__queryPanelInner {
-    height: 100%;
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
 
     .exploreQueryPanel {
       flex: 1;
       display: flex;
       flex-direction: column;
       min-height: 0;
+      overflow: hidden;
     }
 
     .exploreQueryPanel__editorsWrapper {

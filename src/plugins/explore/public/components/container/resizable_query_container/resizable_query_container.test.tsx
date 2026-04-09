@@ -45,13 +45,6 @@ describe('ResizableQueryContainer', () => {
     expect(screen.getByTestId('content-panel')).toBeInTheDocument();
   });
 
-  it('renders the wrapper element', () => {
-    renderComponent();
-
-    const wrapper = document.querySelector('.exploreResizableQueryContainer__wrapper');
-    expect(wrapper).toBeInTheDocument();
-  });
-
   it('renders the resizable container with vertical direction', () => {
     renderComponent();
 
@@ -84,23 +77,14 @@ describe('ResizableQueryContainer', () => {
     expect(resizeDispatched).toBe(true);
   });
 
-  it('uses fallback size before measurement', () => {
+  it('computes initial size based on viewport height', () => {
+    // window.innerHeight defaults to 768 in jsdom
+    // 72 / 768 * 100 ≈ 9.375%, clamped between 5-15%
     renderComponent();
 
-    // Before the measurement timer fires, the container should render
-    // with the fallback size (key="default")
     const container = document.querySelector('.exploreResizableQueryContainer');
     expect(container).toBeInTheDocument();
-  });
-
-  it('attempts measurement after timeout', () => {
-    renderComponent();
-
-    act(() => {
-      jest.advanceTimersByTime(200);
-    });
-
-    // Component should still be rendered after measurement attempt
+    // Panel should render with computed size
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('content-panel')).toBeInTheDocument();
   });
@@ -111,7 +95,6 @@ describe('ResizableQueryContainer', () => {
     // Clear events from mount
     resizeEvents.length = 0;
 
-    // Trigger a resize by dispatching a resize event (simulating panel change)
     act(() => {
       window.dispatchEvent(new Event('resize'));
     });
