@@ -12,6 +12,7 @@ import { loadQueryActionCreator } from '../../../application/utils/state_managem
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
 import { setDateRange } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
 
 // Shared tool definition for execute_ppl_query action
 export const EXECUTE_PPL_QUERY_TOOL_DEFINITION = {
@@ -109,9 +110,13 @@ export function usePPLExecuteQueryAction(
             };
           }
 
-          const queryStatus = await dispatch(
-            loadQueryActionCreator(services, setEditorTextWithQuery, args.query)
-          );
+          await dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
+          // Read queryStatusMap from state after execution and derive the cache key using
+          // prepareQueryForLanguage (same as visualization tab). For tabs, cache key IS the query string,
+          // which keeps stats commands that PPL queries may generate.
+          const state = services.store.getState();
+          const cacheKey = prepareQueryForLanguage({ ...state.query, query: args.query }).query;
+          const queryStatus = state.queryEditor.queryStatusMap[cacheKey];
 
           // Check for explicit error status
           if (queryStatus.status === QueryExecutionStatus.ERROR) {

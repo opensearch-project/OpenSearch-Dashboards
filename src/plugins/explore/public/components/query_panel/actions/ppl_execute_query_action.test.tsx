@@ -17,6 +17,8 @@ const mockRegisterAssistantAction = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
 const mockSetTime = jest.fn();
+const mockGetState = jest.fn();
+const mockPrepareQueryForLanguage = jest.fn();
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -33,6 +35,7 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
         },
       },
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      store: { getState: mockGetState },
       contextProvider: {
         actions: { registerAssistantAction: mockRegisterAssistantAction },
       },
@@ -42,6 +45,10 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
 
 jest.mock('../../../application/utils/state_management/actions/query_editor/load_query', () => ({
   loadQueryActionCreator: (...args: any[]) => mockLoadQueryActionCreator(...args),
+}));
+
+jest.mock('../../../application/utils/languages', () => ({
+  prepareQueryForLanguage: (...args: any[]) => mockPrepareQueryForLanguage(...args),
 }));
 
 jest.mock(
@@ -67,13 +74,18 @@ jest.mock('../../../application/hooks', () => ({
   useSetEditorTextWithQuery: jest.fn(),
 }));
 
+const TEST_CACHE_KEY = 'source=logs | head 10';
+
 describe('usePPLExecuteQueryAction', () => {
-  const makeStatus = (status: string, error?: any) => ({
-    status,
-    elapsedMs: undefined,
-    startTime: undefined,
-    error,
-  });
+  const makeQueryState = (status: string, error?: any) =>
+    ({
+      query: { language: 'PPL', query: 'source=logs | head 10' },
+      queryEditor: {
+        queryStatusMap: {
+          [TEST_CACHE_KEY]: { status, error },
+        },
+      },
+    } as any);
 
   beforeEach(() => {
     mockDispatch.mockClear();
@@ -81,9 +93,13 @@ describe('usePPLExecuteQueryAction', () => {
     mockLoadQueryActionCreator.mockClear();
     mockSetTime.mockClear();
     mockRegisterAssistantAction.mockClear();
+    mockGetState.mockClear();
+    mockPrepareQueryForLanguage.mockClear();
 
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
+    mockDispatch.mockResolvedValue(undefined);
     mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
+    mockPrepareQueryForLanguage.mockReturnValue({ query: TEST_CACHE_KEY });
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.READY));
   });
 
   const renderAndGetHandler = () => {
@@ -106,7 +122,6 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should execute query and return success on READY status', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs | head 10' });
@@ -126,8 +141,24 @@ describe('usePPLExecuteQueryAction', () => {
     });
   });
 
+  it('should use prepareQueryForLanguage to derive cache key from state', async () => {
+    const handler = renderAndGetHandler();
+    const stateQuery = { language: 'PPL', query: 'source=logs | head 10' };
+    mockGetState.mockReturnValue({
+      query: stateQuery,
+      queryEditor: { queryStatusMap: { [TEST_CACHE_KEY]: { status: QueryExecutionStatus.READY } } },
+    } as any);
+
+    await handler({ query: 'source=logs | head 10' });
+
+    expect(mockPrepareQueryForLanguage).toHaveBeenCalledWith({
+      ...stateQuery,
+      query: 'source=logs | head 10',
+    });
+  });
+
   it('should return success with resultsCount 0 on NO_RESULTS status', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.NO_RESULTS));
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.NO_RESULTS));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs | head 10' });
@@ -142,10 +173,9 @@ describe('usePPLExecuteQueryAction', () => {
     });
   });
 
-  it('should return failure using Redux error status when query is invalid', async () => {
-    // loadQueryActionCreator swallows the re-throw and returns ERROR status from Redux
-    mockDispatch.mockResolvedValue(
-      makeStatus(QueryExecutionStatus.ERROR, {
+  it('should return failure on ERROR status with full error message', async () => {
+    mockGetState.mockReturnValue(
+      makeQueryState(QueryExecutionStatus.ERROR, {
         message: { type: 'SyntaxError', details: 'Invalid syntax', reason: 'Parse error' },
       })
     );
@@ -163,8 +193,8 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should format error without type when type is missing', async () => {
-    mockDispatch.mockResolvedValue(
-      makeStatus(QueryExecutionStatus.ERROR, {
+    mockGetState.mockReturnValue(
+      makeQueryState(QueryExecutionStatus.ERROR, {
         message: { details: 'Something went wrong', reason: 'Unknown' },
       })
     );
@@ -177,7 +207,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should use fallback error message when error.message is missing', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.ERROR));
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.ERROR));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs' });
@@ -203,7 +233,6 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should update time range and include it in response when from/to provided', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.READY));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs', from: 'now-1h', to: 'now' });
@@ -214,7 +243,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should include time range message in no-results response', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.NO_RESULTS));
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.NO_RESULTS));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs', from: 'now-7d', to: 'now' });
@@ -233,7 +262,6 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should catch unexpected errors thrown outside of query execution', async () => {
-    // This simulates a truly unexpected error (e.g. services unavailable before dispatch)
     mockLoadQueryActionCreator.mockImplementation(() => {
       throw new Error('Unexpected setup error');
     });
@@ -275,8 +303,8 @@ describe('usePPLExecuteQueryAction', () => {
     );
   });
 
-  it('should return failure when query is still LOADING (e.g., user navigated away)', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.LOADING));
+  it('should return failure when query is still LOADING', async () => {
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.LOADING));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs | head 10' });
@@ -291,7 +319,7 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should return failure when query status is UNINITIALIZED', async () => {
-    mockDispatch.mockResolvedValue(makeStatus(QueryExecutionStatus.UNINITIALIZED));
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.UNINITIALIZED));
     const handler = renderAndGetHandler();
 
     const result = await handler({ query: 'source=logs' });
