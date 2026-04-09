@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 
 import { Dataset, Query, TimeRange } from '../../../common';
 import {
@@ -26,9 +26,30 @@ const ConnectedDatasetSelector = ({
   (DatasetSelectorUsingButtonProps | DatasetSelectorUsingButtonEmptyProps)) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
+  const indexPatterns = services.data.indexPatterns;
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
     () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
   );
+
+  // Enrich dataset with displayName if missing (e.g., from cached URL state)
+  useEffect(() => {
+    const enrichDataset = async (dataset: Dataset | undefined) => {
+      if (!dataset || dataset.displayName) {
+        return;
+      }
+      try {
+        const indexPattern = await indexPatterns.get(dataset.id);
+        if (indexPattern.displayName) {
+          setSelectedDataset((prev) =>
+            prev?.id === dataset.id ? { ...prev, displayName: indexPattern.displayName } : prev
+          );
+        }
+      } catch {
+        // Index pattern not found, ignore
+      }
+    };
+    enrichDataset(selectedDataset);
+  }, [selectedDataset, indexPatterns]);
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {

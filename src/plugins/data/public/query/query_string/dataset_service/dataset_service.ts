@@ -8,6 +8,7 @@ import LRUCache from 'lru-cache';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   CachedDataStructure,
+  DATA_STRUCTURE_META_TYPES,
   Dataset,
   DataStorage,
   DataStructure,
@@ -373,6 +374,10 @@ export class DatasetService {
           id: indexPattern.id,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            displayName: indexPattern.displayName,
+          },
           parent: dataSource
             ? {
                 id: dataSource.id,

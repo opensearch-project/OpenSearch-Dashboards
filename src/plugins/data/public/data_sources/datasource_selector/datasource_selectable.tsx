@@ -42,7 +42,7 @@ const mapToOption = (
   if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
       ...baseOption,
-      label: dataSet.title as string,
+      label: (dataSet.displayName || dataSet.title) as string,
       value: dataSet.id as string,
       key: dataSet.id as string,
     };

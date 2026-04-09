@@ -51,4 +51,41 @@ describe('test getTitle', () => {
     const title = await getTitle(client, 'indexPatternId', dataSourceIdToTitle);
     expect(title).toEqual('acquiredDataSourceTitle::indexTitle');
   });
+
+  it('returns displayName when set', async () => {
+    const dataSourceIdToTitle = new Map();
+    client = {
+      get: jest.fn().mockResolvedValue({
+        attributes: { title: 'indexTitle', displayName: 'Friendly Name' },
+        references: [],
+      }),
+    } as any;
+    const title = await getTitle(client, 'indexPatternId', dataSourceIdToTitle);
+    expect(title).toEqual('Friendly Name');
+  });
+
+  it('returns displayName with data source when both are set', async () => {
+    const dataSourceIdToTitle = new Map();
+    dataSourceIdToTitle.set('dataSourceId', 'dataSourceTitle');
+    client = {
+      get: jest.fn().mockResolvedValue({
+        attributes: { title: 'indexTitle', displayName: 'Friendly Name' },
+        references: [{ type: 'data-source', id: 'dataSourceId' }],
+      }),
+    } as any;
+    const title = await getTitle(client, 'indexPatternId', dataSourceIdToTitle);
+    expect(title).toEqual('dataSourceTitle::Friendly Name');
+  });
+
+  it('falls back to title when displayName is not set', async () => {
+    const dataSourceIdToTitle = new Map();
+    client = {
+      get: jest.fn().mockResolvedValue({
+        attributes: { title: 'indexTitle' },
+        references: [],
+      }),
+    } as any;
+    const title = await getTitle(client, 'indexPatternId', dataSourceIdToTitle);
+    expect(title).toEqual('indexTitle');
+  });
 });

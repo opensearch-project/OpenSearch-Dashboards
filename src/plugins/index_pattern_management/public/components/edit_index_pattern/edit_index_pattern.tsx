@@ -40,6 +40,9 @@ import {
   EuiLink,
   EuiCallOut,
   EuiPanel,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiSmallButton,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -111,6 +114,8 @@ export const EditIndexPattern = withRouter(
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
+    const [displayName, setDisplayName] = useState<string>(indexPattern.displayName || '');
+    const [isDisplayNameDirty, setIsDisplayNameDirty] = useState(false);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
@@ -134,6 +139,12 @@ export const EditIndexPattern = withRouter(
         setDefaultIndex(indexPattern.id || '');
       }
     }, [uiSettings, indexPattern.id]);
+
+    const saveDisplayName = useCallback(async () => {
+      indexPattern.displayName = displayName || undefined;
+      await data.indexPatterns.updateSavedObject(indexPattern);
+      setIsDisplayNameDirty(false);
+    }, [data.indexPatterns, displayName, indexPattern]);
 
     const refreshFields = () => {
       overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
@@ -200,7 +211,44 @@ export const EditIndexPattern = withRouter(
       defaultMessage: 'Index pattern details',
     });
 
-    chrome.docTitle.change(indexPattern.title);
+    chrome.docTitle.change(indexPattern.getDisplayName());
+
+    const renderDisplayNameEditor = () => (
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+        <EuiFlexItem>
+          <EuiCompressedFormRow
+            label={i18n.translate('indexPatternManagement.editIndexPattern.displayNameLabel', {
+              defaultMessage: 'Display name',
+            })}
+            helpText={i18n.translate(
+              'indexPatternManagement.editIndexPattern.displayNameHelpText',
+              {
+                defaultMessage: 'A friendly name shown in the UI instead of the index pattern.',
+              }
+            )}
+          >
+            <EuiCompressedFieldText
+              value={displayName}
+              onChange={(e) => {
+                setDisplayName(e.target.value);
+                setIsDisplayNameDirty(true);
+              }}
+              placeholder={indexPattern.title}
+              data-test-subj="editIndexPatternDisplayNameInput"
+            />
+          </EuiCompressedFormRow>
+        </EuiFlexItem>
+        {isDisplayNameDirty && (
+          <EuiFlexItem grow={false}>
+            <EuiSmallButton fill onClick={saveDisplayName} data-test-subj="saveDisplayNameButton">
+              {i18n.translate('indexPatternManagement.editIndexPattern.saveDisplayNameButton', {
+                defaultMessage: 'Save',
+              })}
+            </EuiSmallButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
@@ -211,7 +259,7 @@ export const EditIndexPattern = withRouter(
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
           defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
-          values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+          values={{ indexPatternTitle: <strong>{indexPattern.getDisplayName()}</strong> }}
         />
       );
 
@@ -289,6 +337,8 @@ export const EditIndexPattern = withRouter(
         />
         {showTagsSection && renderBadges()}
         {renderDescription()}
+        <EuiSpacer size="s" />
+        {renderDisplayNameEditor()}
         {conflictedFields.length > 0 && (
           <>
             <EuiSpacer />
@@ -319,6 +369,8 @@ export const EditIndexPattern = withRouter(
           {showTagsSection && renderBadges()}
           <EuiSpacer size="m" />
           {renderDescription()}
+          <EuiSpacer size="s" />
+          {renderDisplayNameEditor()}
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />

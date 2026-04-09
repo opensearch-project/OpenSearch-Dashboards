@@ -140,8 +140,9 @@ export const DatasetSelector = ({
           isGroupLabel: true,
         },
       ];
-      ds.forEach(({ id, title, type, dataSource }) => {
-        const label = dataSource ? `${dataSource.title}::${title}` : title;
+      ds.forEach(({ id, title, type, dataSource, displayName }) => {
+        const displayLabel = displayName || title;
+        const label = dataSource ? `${dataSource.title}::${displayLabel}` : displayLabel;
         datasetOptions.push({
           label,
           checked: id === selectedDatasetId ? 'on' : undefined,
@@ -193,11 +194,13 @@ export const DatasetSelector = ({
       return 'Select data';
     }
 
+    const displayLabel = selectedDataset.displayName || selectedDataset.title;
+
     if (selectedDataset.dataSource) {
-      return `${selectedDataset.dataSource.title}::${selectedDataset.title}`;
+      return `${selectedDataset.dataSource.title}::${displayLabel}`;
     }
 
-    return selectedDataset.title;
+    return displayLabel;
   }, [selectedDataset]);
 
   return (
@@ -206,6 +209,7 @@ export const DatasetSelector = ({
         <EuiToolTip
           display="block"
           content={`${
+            selectedDataset?.displayName ??
             selectedDataset?.title ??
             i18n.translate('data.dataSelector.defaultTitle', {
               defaultMessage: 'Select data',
