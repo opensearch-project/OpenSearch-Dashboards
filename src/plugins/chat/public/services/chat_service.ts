@@ -16,6 +16,10 @@ import {
   WorkspacesStart,
   Event,
   EventType,
+  MessagesSnapshotEvent,
+  ToolCallStartEvent,
+  ToolCallArgsEvent,
+  ToolCallEndEvent,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
@@ -402,6 +406,7 @@ export class ChatService {
     intervalMs: number = 1000
   ): Promise<void> {
     const threadId = this.getThreadId();
+    if (!threadId) return;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
@@ -580,15 +585,103 @@ export class ChatService {
   }
 
   /**
-   * Restore the latest conversation from agentic memory
-   * Returns the messages and thread ID
-   * If thread ID is already set, skip restore (use existing thread)
-   * If no conversation can be restored, generate a new thread
+   * Preprocess a conversation's event array before replay.
+   *
+   * Finds the MESSAGES_SNAPSHOT event and checks whether the last assistant message
+   * contains tool calls that have no corresponding tool result messages (i.e. the
+   * frontend tool execution never completed). When such "unfinished" tool calls are
+   * found the method:
+   *   1. Rewrites the MESSAGES_SNAPSHOT so the last assistant message only contains
+   *      the *finished* tool calls — giving the event handler a clean baseline.
+   *   2. Appends synthetic TOOL_CALL_START → TOOL_CALL_ARGS → TOOL_CALL_END events
+   *      for every unfinished tool call so the event handler re-executes them exactly
+   *      as if they had just arrived from the agent.
+   *
+   * If there are no unfinished tool calls the original array is returned unchanged.
    */
-  public async restoreLatestConversation(): Promise<{
-    threadId: string;
-    messages: Message[];
-  } | null> {
+  private injectUnfinishedToolCallEvents(events: Event[]): Event[] {
+    const snapshotIndex = events.findIndex((e) => e.type === EventType.MESSAGES_SNAPSHOT);
+    if (snapshotIndex === -1) return events;
+
+    const snapshot = events[snapshotIndex] as MessagesSnapshotEvent;
+    const messages = snapshot.messages;
+    if (!messages || messages.length === 0) return events;
+
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage.role !== 'assistant' ||
+      !('toolCalls' in lastMessage) ||
+      !lastMessage.toolCalls
+    ) {
+      return events;
+    }
+
+    const toolResultIds = new Set(
+      messages
+        .filter((m) => m.role === 'tool' && 'toolCallId' in m)
+        .map((m) => (m as any).toolCallId as string)
+    );
+
+    const assistantActionService = AssistantActionService.getInstance();
+
+    const unfinished = lastMessage.toolCalls.filter(
+      (tc) => assistantActionService.hasAction(tc.function.name) && !toolResultIds.has(tc.id)
+    );
+
+    if (unfinished.length === 0) return events;
+
+    const unfinishedIds = new Set(unfinished.map((tc) => tc.id));
+
+    // Rewrite the snapshot: strip unfinished tool calls from the last assistant message
+    const patchedLastMessage = {
+      ...lastMessage,
+      toolCalls: lastMessage.toolCalls.filter((tc) => !unfinishedIds.has(tc.id)),
+    };
+    const patchedSnapshot: MessagesSnapshotEvent = {
+      ...snapshot,
+      messages: [...messages.slice(0, -1), patchedLastMessage],
+    };
+
+    // Build synthetic tool call events for each unfinished tool call
+    const syntheticEvents: Event[] = [];
+    for (const toolCall of unfinished) {
+      syntheticEvents.push({
+        type: EventType.TOOL_CALL_START,
+        toolCallId: toolCall.id,
+        toolCallName: toolCall.function.name,
+        parentMessageId: lastMessage.id,
+        timestamp: Date.now(),
+      } as ToolCallStartEvent);
+
+      syntheticEvents.push({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId: toolCall.id,
+        delta: toolCall.function.arguments,
+        timestamp: Date.now(),
+      } as ToolCallArgsEvent);
+
+      syntheticEvents.push({
+        type: EventType.TOOL_CALL_END,
+        toolCallId: toolCall.id,
+        timestamp: Date.now(),
+      } as ToolCallEndEvent);
+    }
+
+    // Return: events before snapshot + patched snapshot + events after snapshot + synthetic events
+    return [
+      ...events.slice(0, snapshotIndex),
+      patchedSnapshot,
+      ...events.slice(snapshotIndex + 1),
+      ...syntheticEvents,
+    ];
+  }
+
+  /**
+   * Restore the latest conversation from agentic memory.
+   * Returns the AG-UI event array (with unfinished tool calls injected) for replay,
+   * or null if no conversation exists or a thread is already active.
+   */
+  public async restoreLatestConversation(): Promise<Event[] | null> {
     // Check if thread ID is already set - if so, skip restore and use existing thread
     const currentThreadId = this.coreChatService?.getThreadId();
     if (currentThreadId) {
@@ -605,7 +698,6 @@ export class ChatService {
     if (result.conversations.length > 0) {
       // Found a latest conversation - get full details
       const latestConversationSummary = result.conversations[0];
-
       // Get the full conversation with all events
       const events = await this.conversationHistoryService.getConversation(
         latestConversationSummary.threadId
@@ -617,28 +709,22 @@ export class ChatService {
         return null;
       }
 
-      // Extract messages from MESSAGES_SNAPSHOT event
-      const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
-      if (snapshotEvent && 'messages' in snapshotEvent) {
-        // Set the thread ID in core service
-        if (this.coreChatService) {
-          this.coreChatService.setThreadId(latestConversationSummary.threadId);
-        }
-        return {
-          threadId: latestConversationSummary.threadId,
-          messages: snapshotEvent.messages,
-        };
+      // Set the thread ID in core service
+      if (this.coreChatService) {
+        this.coreChatService.setThreadId(latestConversationSummary.threadId);
       }
+
+      return this.injectUnfinishedToolCallEvents(events);
     }
 
-    // No conversation found or no snapshot event, generate a new thread
+    // No conversation found, generate a new thread
     this.newThread();
     return null;
   }
 
   /**
-   * Load a conversation from history
-   * Returns AG-UI event array for proper state restoration
+   * Load a specific conversation from history by thread ID.
+   * Returns the AG-UI event array (with unfinished tool calls injected) for replay.
    */
   public async loadConversation(threadId: string): Promise<Event[] | null> {
     const events = await this.conversationHistoryService.getConversation(threadId);
@@ -651,7 +737,7 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
-    return events;
+    return this.injectUnfinishedToolCallEvents(events);
   }
 
   /**
