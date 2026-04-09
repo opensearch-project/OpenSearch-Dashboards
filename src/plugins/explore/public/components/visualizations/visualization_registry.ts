@@ -155,6 +155,71 @@ export class VisualizationRegistry {
   }
 
   /**
+   * Reuses a saved axes mapping by preserving role→field pairs where the field
+   * still exists in the new data columns, and replacing missing fields with
+   * unused columns of the same type expected by the chart rule.
+   *
+   * Example: saved `{x: "timestamp", y: "bytes", y2: "count"}` with "bytes" gone
+   * and "memory" available → returns `{x: "timestamp", y: "memory", y2: "count"}`.
+   *
+   * Returns `undefined` if a complete mapping cannot be produced.
+   */
+  public reuseAxesMapping(
+    chartType: string,
+    savedAxesMapping: Record<string, string>,
+    allColumns: VisColumn[]
+  ): Record<string, string> | undefined {
+    const rules = this.getVisualization(chartType)?.getRules();
+    if (!rules) return undefined;
+
+    const columnTypeByName = new Map(allColumns.map((c) => [c.name, c.schema]));
+    const savedRoles = Object.keys(savedAxesMapping);
+    const savedRoleSet = new Set(savedRoles);
+
+    // Find the best rule: keys must match, and surviving fields' types must agree
+    type TypeMapping = Record<string, { type: VisFieldType }>;
+    let matched: TypeMapping | undefined;
+    for (const rule of rules) {
+      matched = rule.mappings.find((m) => {
+        const keys = Object.keys(m);
+        if (keys.length !== savedRoles.length || !keys.every((k) => savedRoleSet.has(k))) {
+          return false;
+        }
+        return savedRoles.every((role) => {
+          const fieldType = columnTypeByName.get(savedAxesMapping[role]);
+          return !fieldType || fieldType === (m as TypeMapping)[role].type;
+        });
+      }) as TypeMapping | undefined;
+      if (matched) break;
+    }
+    if (!matched) return undefined;
+
+    // Lock surviving fields first, then fill missing roles with same-type replacements
+    const result: Record<string, string> = {};
+    const used = new Set<string>();
+    const missingRoles: string[] = [];
+
+    for (const role of savedRoles) {
+      const fieldType = columnTypeByName.get(savedAxesMapping[role]);
+      if (fieldType && fieldType === matched[role].type) {
+        result[role] = savedAxesMapping[role];
+        used.add(savedAxesMapping[role]);
+      } else {
+        missingRoles.push(role);
+      }
+    }
+
+    for (const role of missingRoles) {
+      const col = allColumns.find((c) => c.schema === matched![role].type && !used.has(c.name));
+      if (!col) return undefined;
+      result[role] = col.name;
+      used.add(col.name);
+    }
+
+    return result;
+  }
+
+  /**
    * Returns the highest-priority rule with an exact column-count match, optionally
    * scoped to a specific `chartType`. Returns `null` if no exact match exists.
    */

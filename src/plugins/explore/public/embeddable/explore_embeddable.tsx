@@ -496,20 +496,14 @@ export class ExploreEmbeddable
 
           // Check if the saved axes mapping is still compatible with the current data columns.
           if (!isValidMapping(savedAxesMapping, allColumns)) {
-            const bestMatch = visualizationRegistry.findBestMatch(
-              numericalColumns,
-              categoricalColumns,
-              dateColumns,
-              selectedChartType
+            const reusedMapping = visualizationRegistry.reuseAxesMapping(
+              selectedChartType,
+              savedAxesMapping,
+              allColumns
             );
-            if (bestMatch) {
-              const autoAxesMapping = visualizationRegistry.getAxesMappingByRule(
-                bestMatch.rule,
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              );
-              effectiveAxesMapping = autoAxesMapping;
+
+            if (reusedMapping) {
+              effectiveAxesMapping = reusedMapping;
             }
           }
 
