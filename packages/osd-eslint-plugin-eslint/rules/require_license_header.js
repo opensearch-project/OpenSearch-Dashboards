@@ -71,29 +71,18 @@ module.exports = {
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
+            let parsed;
             try {
-              const parsed = babelEslint.parse(license, {
+              parsed = babelEslint.parse(license, {
                 sourceType: 'module',
+                requireConfigFile: false,
                 allowImportExportEverywhere: true,
                 allowReturnOutsideFunction: true,
                 ranges: true,
                 attachComments: true,
               });
-              assert(
-                !parsed.body.length,
-                `"licenses[${i}]" option must only include a single comment`
-              );
-              assert(
-                parsed.comments.length === 1,
-                `"licenses[${i}]" option must only include a single comment`
-              );
-
-              return {
-                source: license,
-                nodeValue: normalizeWhitespace(parsed.comments[0].value),
-              };
             } catch (parseError) {
-              // If babel parsing fails, try a simpler approach
+              // If babel parsing fails, try a simpler regex approach
               const commentMatch = license.match(/\/\*(.*?)\*\//s);
               if (commentMatch) {
                 return {
@@ -103,6 +92,20 @@ module.exports = {
               }
               throw new Error(`Failed to parse license[${i}]: ${parseError.message}`);
             }
+
+            assert(
+              !parsed.body.length,
+              `"licenses[${i}]" option must only include a single comment`
+            );
+            assert(
+              parsed.comments.length === 1,
+              `"licenses[${i}]" option must only include a single comment`
+            );
+
+            return {
+              source: license,
+              nodeValue: normalizeWhitespace(parsed.comments[0].value),
+            };
           });
         });
 
