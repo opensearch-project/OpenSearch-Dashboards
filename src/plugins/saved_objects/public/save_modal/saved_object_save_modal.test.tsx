@@ -29,7 +29,7 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

@@ -25,7 +25,6 @@ jest.mock('../../../application/utils/state_management/slices', () => ({
 
 jest.mock('./query_panel_generated_query.scss', () => ({}));
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectLastExecutedTranslatedQuery } from '../../../application/utils/state_management/selectors';

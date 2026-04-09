@@ -146,7 +146,10 @@ export class HttpServer {
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+        this.createCookieSessionStorageFactory(
+          cookieOptions as SessionStorageCookieOptions<T & Record<string, any>>,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       cspReportOnly: config.cspReportOnly,
@@ -361,7 +364,7 @@ export class HttpServer {
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
-  private async createCookieSessionStorageFactory<T>(
+  private async createCookieSessionStorageFactory<T extends Record<string, any>>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {

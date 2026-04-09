@@ -96,6 +96,7 @@ export const executePPLQuery = async (
   }
 
   // Set the query string in the data service
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   dataService.query.queryString.setQuery(request.params.body.query);
 
   // Execute the search

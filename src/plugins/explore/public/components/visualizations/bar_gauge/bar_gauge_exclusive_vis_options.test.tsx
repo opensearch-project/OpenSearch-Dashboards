@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { BarGaugeExclusiveVisOptions } from './bar_gauge_exclusive_vis_options';
 import { ExclusiveBarGaugeConfig } from './bar_gauge_vis_config';

@@ -51,6 +51,7 @@ export const WorkspacePermissionSettingPanel = ({
   const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
 
   const handlePermissionSettingsChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (newSettings) => {
       onChange?.([...newSettings]);
     },

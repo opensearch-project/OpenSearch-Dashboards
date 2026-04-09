@@ -35,6 +35,7 @@ import { cloneDeepWith } from 'lodash';
 // type of the customizer function doesn't expect that.
 function cloneBuffersCustomizer(val: unknown): any {
   if (Buffer.isBuffer(val)) {
+    // @ts-expect-error TS2769 TODO(ts-upgrade): fixme
     return Buffer.from(val);
   }
 }

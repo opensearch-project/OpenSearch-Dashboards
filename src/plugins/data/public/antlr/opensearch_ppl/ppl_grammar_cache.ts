@@ -353,6 +353,7 @@ class PPLGrammarCache {
         startRuleIndex: bundle.startRuleIndex,
         pipeStartRuleIndex: bundle.pipeStartRuleIndex,
         grammarHash: bundle.grammarHash,
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
         tokenDictionary: (bundle.tokenDictionary ?? {}) as TokenDictionary,
         ignoredTokens: bundle.ignoredTokens ?? [],
         rulesToVisit: bundle.rulesToVisit ?? [],

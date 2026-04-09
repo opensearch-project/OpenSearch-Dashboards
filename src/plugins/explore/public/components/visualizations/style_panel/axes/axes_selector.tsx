@@ -22,10 +22,7 @@ import {
   useVisualizationRegistry,
 } from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
-import {
-  convertMappingsToStrings,
-  getColumnMatchFromMapping,
-} from '../../visualization_builder_utils';
+import { convertMappingsToStrings } from '../../visualization_builder_utils';
 
 interface VisColumnOption {
   column: VisColumn;

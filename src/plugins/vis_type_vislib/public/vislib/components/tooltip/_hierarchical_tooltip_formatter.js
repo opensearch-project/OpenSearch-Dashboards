@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import _ from 'lodash';
 import numeral from '@elastic/numeral';
 import { renderToStaticMarkup } from 'react-dom/server';

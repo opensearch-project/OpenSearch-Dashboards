@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 interface SwitchOptionProps<ParamName extends string> {

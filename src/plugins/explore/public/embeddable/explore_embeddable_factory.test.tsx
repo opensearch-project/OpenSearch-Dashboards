@@ -130,7 +130,7 @@ describe('ExploreEmbeddableFactory', () => {
       references: [],
     };
 
-    const result = await factory.create(input as any);
+    await factory.create(input as any);
 
     expect(ExploreEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -177,7 +177,7 @@ describe('ExploreEmbeddableFactory', () => {
       references: [],
     };
 
-    const result = await factory.create(input as any);
+    await factory.create(input as any);
 
     expect(ExploreEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -4,7 +4,7 @@
  */
 
 import { LineChartStyle } from './line_vis_config';
-import { VisColumn, AxisColumnMappings, AxisRole } from '../types';
+import { AxisColumnMappings, AxisRole } from '../types';
 import { createLineSeries, createLineBarSeries, createFacetLineSeries } from './line_chart_utils';
 import { getSwappedAxisRole } from '../utils/utils';
 import {

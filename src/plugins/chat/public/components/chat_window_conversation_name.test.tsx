@@ -32,8 +32,12 @@ jest.mock('../../../context_provider/public', () => {
 });
 
 jest.mock('../services/chat_event_handler', () => ({
-  ChatEventHandler: jest.fn().mockImplementation(() => ({
-    handleEvent: jest.fn(),
+  ChatEventHandler: jest.fn().mockImplementation((config) => ({
+    handleEvent: jest.fn().mockImplementation(async (event) => {
+      if (event.type === 'MESSAGES_SNAPSHOT' && event.messages) {
+        config.callbacks.onTimelineUpdate(() => event.messages);
+      }
+    }),
     clearState: jest.fn(),
   })),
 }));
@@ -129,10 +133,11 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '1', role: 'user' as const, content: 'How can I find the largest index?' },
         { id: '2', role: 'assistant' as const, content: 'You can use...' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -156,10 +161,11 @@ describe('ChatWindow - Conversation Name', () => {
         },
         { id: '2', role: 'assistant' as const, content: 'The weather is...' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -184,10 +190,11 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '3', role: 'user' as const, content: 'Can you describe this image?' },
         { id: '4', role: 'assistant' as const, content: 'Sure...' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -211,10 +218,11 @@ describe('ChatWindow - Conversation Name', () => {
         },
         { id: '2', role: 'assistant' as const, content: 'I see an image...' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -232,10 +240,11 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '2', role: 'user' as const, content: 'Tell me about TypeScript' },
         { id: '3', role: 'assistant' as const, content: 'TypeScript is...' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -254,10 +263,11 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '3', role: 'user' as const, content: 'How do I debug my code?' },
         { id: '4', role: 'assistant' as const, content: 'You can use...' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -276,10 +286,11 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '1', role: 'user' as const, content: longMessage },
         { id: '2', role: 'assistant' as const, content: 'Response' },
       ];
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -302,10 +313,11 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '2', role: 'assistant' as const, content: 'Initial response' },
       ];
 
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'test-thread-id',
-        messages: initialMessages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'test-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages: initialMessages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -320,10 +332,11 @@ describe('ChatWindow - Conversation Name', () => {
       // Now test with a different conversation
       const newMessages = [{ id: '3', role: 'user' as const, content: 'New conversation started' }];
 
-      mockChatService.restoreLatestConversation.mockResolvedValue({
-        threadId: 'new-thread-id',
-        messages: newMessages,
-      });
+      mockChatService.restoreLatestConversation.mockResolvedValue([
+        { type: 'RUN_STARTED', threadId: 'new-thread-id', timestamp: Date.now() },
+        { type: 'MESSAGES_SNAPSHOT', messages: newMessages, timestamp: Date.now() },
+        { type: 'RUN_FINISHED', timestamp: Date.now() },
+      ]);
 
       // Unmount and remount to simulate loading a different conversation
       const { container: newContainer } = renderWithContext(<ChatWindow onClose={jest.fn()} />);

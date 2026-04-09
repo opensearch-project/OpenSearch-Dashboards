@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';

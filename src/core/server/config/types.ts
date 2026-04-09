@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS2345 TODO Fix me
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigPath } from '@osd/config';
 import { OpenSearchDashboardsRequest } from '../http';

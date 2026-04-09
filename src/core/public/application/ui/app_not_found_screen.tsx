@@ -29,7 +29,6 @@
  */
 
 import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export const AppNotFound = () => (

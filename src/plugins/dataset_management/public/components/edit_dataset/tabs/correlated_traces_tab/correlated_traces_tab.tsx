@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataView } from '../../../../../../data/public';
@@ -22,7 +21,6 @@ interface CorrelatedTracesTabProps {
 
 export const CorrelatedTracesTab: React.FC<CorrelatedTracesTabProps> = ({ dataset }) => {
   const { savedObjects, application } = useOpenSearchDashboards<DatasetManagmentContext>().services;
-  const history = useHistory();
   const [viewingCorrelation, setViewingCorrelation] = useState<CorrelationSavedObject | null>(null);
 
   const { correlations, loading, error } = useCorrelations(savedObjects.client, {

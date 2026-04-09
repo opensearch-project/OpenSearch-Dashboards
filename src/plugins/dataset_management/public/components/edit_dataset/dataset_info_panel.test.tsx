@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DatasetInfoPanel } from './dataset_info_panel';
 import { IntlProvider } from 'react-intl';
@@ -45,6 +44,7 @@ const createMockDataset = (overrides = {}) => ({
 describe('DatasetInfoPanel', () => {
   const renderComponent = (dataset: any, editConfiguration?: () => void) => {
     return render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <DatasetInfoPanel dataset={dataset} editConfiguration={editConfiguration} />
       </IntlProvider>

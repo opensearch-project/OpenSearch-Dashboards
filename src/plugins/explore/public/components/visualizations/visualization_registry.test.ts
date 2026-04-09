@@ -101,14 +101,6 @@ describe('VisualizationRegistry', () => {
       validValuesCount: 1,
       uniqueValuesCount: 1,
     };
-    const dateCol: VisColumn = {
-      id: 3,
-      name: 'timestamp',
-      schema: VisFieldType.Date,
-      column: 'timestamp',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
-    };
 
     it('should return exact matches when column counts match rule mappings', () => {
       const rule = makeRule(100, [

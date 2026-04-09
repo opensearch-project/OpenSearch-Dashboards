@@ -72,6 +72,7 @@ describe('Heatmap to_expression', () => {
       const result = createRegularHeatmap(mockData, mockStyles, mockAxisColumnMappings);
 
       expect(Array.isArray(result?.series)).toBe(true);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const heatmapSeries = (result?.series ?? []).filter((s: any) => s.type === 'heatmap');
       expect(heatmapSeries.length).toBeGreaterThanOrEqual(1);
     });
@@ -82,6 +83,7 @@ describe('Heatmap to_expression', () => {
         { ...mockStyles, titleOptions: { show: false, titleName: '' } },
         mockAxisColumnMappings
       );
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(noTitleResult?.title?.text).toBeUndefined();
 
       const defaultTitleResult = createRegularHeatmap(
@@ -89,6 +91,7 @@ describe('Heatmap to_expression', () => {
         { ...mockStyles, titleOptions: { show: true, titleName: '' } },
         mockAxisColumnMappings
       );
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(defaultTitleResult?.title?.text).toBe('Value by Category1 and Category2');
 
       const customTitleResult = createRegularHeatmap(
@@ -96,6 +99,7 @@ describe('Heatmap to_expression', () => {
         { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Heatmap' } },
         mockAxisColumnMappings
       );
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(customTitleResult?.title?.text).toBe('Custom Heatmap');
     });
 

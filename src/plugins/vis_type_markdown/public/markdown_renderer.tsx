@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { lazy } from 'react';
+import { lazy } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';

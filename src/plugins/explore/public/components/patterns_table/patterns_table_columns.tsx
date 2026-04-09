@@ -5,7 +5,7 @@
 
 import { EuiBasicTableColumn, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { PatternItem } from './patterns_table';
 import { isValidFiniteNumber } from './utils/utils';
 import { PatternsFlyoutRecord } from './patterns_table_flyout/patterns_table_flyout';

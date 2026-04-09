@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { stringify } from '@osd/std';

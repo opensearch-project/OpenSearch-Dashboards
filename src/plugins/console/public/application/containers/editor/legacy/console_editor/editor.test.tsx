@@ -30,7 +30,6 @@
 
 import './editor.test.mock';
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
 import { act } from 'react';

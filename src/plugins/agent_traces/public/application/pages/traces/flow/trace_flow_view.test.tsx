@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TraceFlowView } from './trace_flow_view';
 import { TraceRow } from '../hooks/tree_utils';
@@ -38,6 +37,7 @@ jest.mock('../../../../services/flow_transform', () => ({
   spansToFlow: jest.fn(() => ({ nodes: [], edges: [] })),
 }));
 
+// @ts-expect-error TS2739 TODO(ts-error): fixme
 const mockTrace: TraceRow = {
   id: 'trace-1',
   spanId: 'span-1',

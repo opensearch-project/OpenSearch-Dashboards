@@ -101,6 +101,7 @@ function createWithDataSource(id: string) {
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new DataView({
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
     savedObjectsClient,
     fieldFormats: fieldFormatsMock,

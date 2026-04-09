@@ -56,7 +56,7 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
-.kiro/
+.kiro/*
 !.kiro/prompts/
 *.sublime-*
 npm-debug.log*

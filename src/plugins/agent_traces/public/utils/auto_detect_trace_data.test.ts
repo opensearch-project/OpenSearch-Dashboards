@@ -53,6 +53,7 @@ describe('detectTraceData', () => {
 
   it('should detect trace data when otel-v1-apm-span* indices exist with required fields', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -78,6 +79,7 @@ describe('detectTraceData', () => {
 
   it('should not detect traces when required fields are missing', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         // Missing traceId field
@@ -98,6 +100,7 @@ describe('detectTraceData', () => {
 
   it('should detect log data when logs-otel-v1* indices exist with required fields', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'logs-otel-v1*') {
         return [
@@ -123,6 +126,7 @@ describe('detectTraceData', () => {
 
   it('should not detect logs when required fields are missing', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'logs-otel-v1*') {
         // Missing spanId field
@@ -143,6 +147,7 @@ describe('detectTraceData', () => {
 
   it('should detect both traces and logs when both exist', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -193,6 +198,7 @@ describe('detectTraceData', () => {
   it('should pass dataSourceId to getFieldsForWildcard when provided', async () => {
     const dataSourceId = 'test-datasource-id';
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -214,6 +220,7 @@ describe('detectTraceData', () => {
 
   it('should handle errors when checking existing index patterns', async () => {
     mockIndexPatternsService.getIds.mockRejectedValue(new Error('Failed to get IDs'));
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -246,6 +253,7 @@ describe('detectTraceData', () => {
       }
       return {} as any;
     });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -266,6 +274,7 @@ describe('detectTraceData', () => {
 
   it('should handle traces with extra fields beyond the required ones', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -289,6 +298,7 @@ describe('detectTraceData', () => {
 
   it('should handle logs with extra fields beyond the required ones', async () => {
     mockIndexPatternsService.getIds.mockResolvedValue([]);
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'logs-otel-v1*') {
         return [
@@ -321,6 +331,7 @@ describe('detectTraceData', () => {
       }
       return {} as any;
     });
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -360,6 +371,7 @@ describe('detectTraceData', () => {
       return {} as any;
     });
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -429,6 +441,7 @@ describe('detectTraceDataAcrossDataSources', () => {
       ],
     } as any);
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
       if (pattern === 'otel-v1-apm-span*') {
         return [
@@ -468,6 +481,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         if (pattern === 'otel-v1-apm-span*') {
           return [
@@ -519,6 +533,7 @@ describe('detectTraceDataAcrossDataSources', () => {
 
     // Only ds1 has traces
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         if (dataSourceId === 'ds1' && pattern === 'otel-v1-apm-span*') {
           return [
@@ -553,6 +568,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         // No traces in data sources, but traces in local cluster
         if (dataSourceId === undefined && pattern === 'otel-v1-apm-span*') {
@@ -591,6 +607,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         // Both data source and local cluster have traces
         if (pattern === 'otel-v1-apm-span*') {
@@ -631,6 +648,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         if (dataSourceId === 'ds1') {
           throw new Error('Connection failed');
@@ -661,6 +679,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     mockSavedObjectsClient.find.mockRejectedValue(new Error('Failed to fetch data sources'));
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         if (dataSourceId === undefined && pattern === 'otel-v1-apm-span*') {
           return [
@@ -695,6 +714,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         if (pattern === 'otel-v1-apm-span*') {
           return [
@@ -782,6 +802,7 @@ describe('detectTraceDataAcrossDataSources', () => {
     } as any);
 
     mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       async ({ pattern, dataSourceId }) => {
         if (pattern === 'otel-v1-apm-span*') {
           return [

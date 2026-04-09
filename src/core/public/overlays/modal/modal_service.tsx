@@ -32,7 +32,6 @@
 
 import { i18n as t } from '@osd/i18n';
 import { EuiModal, EuiConfirmModal, EuiConfirmModalProps, EuiModalProps } from '@elastic/eui';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { Subject } from 'rxjs';

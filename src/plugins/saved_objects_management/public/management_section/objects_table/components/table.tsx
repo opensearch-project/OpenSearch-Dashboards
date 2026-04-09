@@ -29,7 +29,7 @@
  */
 
 import { IBasePath, WorkspaceAttribute } from 'src/core/public';
-import React, { PureComponent, Fragment } from 'react';
+import { PureComponent, Fragment } from 'react';
 import moment from 'moment';
 import {
   EuiSearchBar,

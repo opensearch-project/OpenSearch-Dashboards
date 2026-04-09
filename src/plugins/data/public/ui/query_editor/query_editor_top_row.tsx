@@ -400,7 +400,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       });
 
     const wrapperClasses = classNames('osdQueryEditor__datePickerWrapper', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdQueryEditor__datePickerWrapper-isHidden': isQueryEditorFocused,
     });
 

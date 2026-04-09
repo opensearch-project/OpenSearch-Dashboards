@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { EuiFlexItem } from '@elastic/eui';
 import { TableGroup } from '../table_vis_response_handler';

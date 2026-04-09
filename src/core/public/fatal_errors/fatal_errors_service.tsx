@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';

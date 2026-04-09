@@ -7,13 +7,22 @@ This directory contains Claude Code skills for OpenSearch Dashboards development
 ## Available Skills
 
 ### `create_pr_description` ([create_pr_description/](create_pr_description/))
-Generate comprehensive PR descriptions by analyzing code changes and adhering to the project's pull request template.
+Generate concise, one-screen PR descriptions optimized for quick reviewer comprehension.
 
 - **Skill Definition**: [create_pr_description/SKILL.md](create_pr_description/SKILL.md)
 - **Documentation**: [create_pr_description/README.md](create_pr_description/README.md)
-- **Claude Usage**: `/create_pr_description [--pr_number 123] [--include_diff] [--auto_commit_message]`
+- **Claude Usage**: `/create_pr_description [--pr_number 123]`
 - **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/create_pr_description.md](../../.kiro/prompts/create_pr_description.md)
-- **Purpose**: Analyzes code changes, commit history, and project context to generate template-compliant, comprehensive PR descriptions
+- **Purpose**: Generates brief, engineer-style PR descriptions that fit on one screen for typical changes
+
+### `test_changes` ([test_changes/](test_changes/))
+Run Jest unit tests for files changed in the current branch.
+
+- **Skill Definition**: [test_changes/SKILL.md](test_changes/SKILL.md)
+- **Documentation**: [test_changes/README.md](test_changes/README.md)
+- **Claude Usage**: `/test_changes [--scope branch|staged|unstaged|all-local] [--base origin/main]`
+- **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/test_changes.md](../../.kiro/prompts/test_changes.md)
+- **Purpose**: Finds changed files, maps them to test files, warns about missing tests, and runs `yarn test:jest`
 
 ### `resolve_cve` ([resolve_cve/](resolve_cve/))
 Automatically identify and resolve security vulnerabilities (CVEs) in project dependencies.

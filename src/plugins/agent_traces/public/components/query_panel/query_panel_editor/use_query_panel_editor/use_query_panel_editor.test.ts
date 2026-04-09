@@ -744,6 +744,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );
@@ -786,6 +787,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );

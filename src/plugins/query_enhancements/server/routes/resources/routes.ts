@@ -56,6 +56,7 @@ export function registerResourceRoutes(router: IRouter) {
       } catch (error) {
         const errorObj = error as any;
         return response.customError({
+          // @ts-expect-error TS2869 TODO(ts-upgrade): fixme
           body: 'Unable to get resources: ' + errorObj.message ?? '',
           ...errorObj,
           statusCode: coerceStatusCode(errorObj.statusCode),

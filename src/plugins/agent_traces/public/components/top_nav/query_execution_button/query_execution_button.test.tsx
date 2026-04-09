@@ -83,6 +83,7 @@ describe('QueryExecutionButton', () => {
           interval: 'auto',
           savedSearch: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         queryEditor: {
           queryStatusMap: {},
           overallQueryStatus: {

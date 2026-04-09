@@ -149,6 +149,7 @@ export function usePPLExecuteQueryAction(
 
           // Use loadQueryActionCreator which updates the editor and executes the query
           // This follows the same pattern as Recent Queries
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
 
           // Wait for query execution to complete

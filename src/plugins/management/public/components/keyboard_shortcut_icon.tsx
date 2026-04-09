@@ -23,6 +23,7 @@ export function KeyboardShortcutIcon({ core }: KeyboardShortcutIconProps) {
     const button = (
       <EuiButtonIcon
         {...props}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         ref={ref}
         aria-label={tooltipContent}
         iconType="keyboardShortcut"

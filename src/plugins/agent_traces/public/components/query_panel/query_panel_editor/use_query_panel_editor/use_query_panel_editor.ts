@@ -264,6 +264,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
 
   const handleRun = useCallback(() => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
   }, [dispatch, services]);
 

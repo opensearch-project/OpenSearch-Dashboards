@@ -153,7 +153,6 @@ import {
   selectQueryLanguage,
   selectQueryString,
   selectIsQueryEditorDirty,
-  selectDataset,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
@@ -767,6 +766,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );
@@ -809,6 +809,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );

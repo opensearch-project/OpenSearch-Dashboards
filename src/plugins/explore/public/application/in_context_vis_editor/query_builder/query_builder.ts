@@ -37,6 +37,7 @@ import {
   handleAgentError,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
+import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -140,8 +141,10 @@ export class QueryBuilder {
 
     const urlStateStorage = this.getServices().osdUrlStateStorage;
     if (urlStateStorage) {
-      queryEditorStateFromUrl = urlStateStorage?.get<Partial<QueryEditorState>>('_e');
-      queryStateFromUrl = urlStateStorage?.get<QueryState>('_eq');
+      queryEditorStateFromUrl = urlStateStorage?.get<Partial<QueryEditorState>>(
+        QUERY_EDITOR_STATE_KEY
+      );
+      queryStateFromUrl = urlStateStorage?.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY);
     }
 
     const languageType =
@@ -164,7 +167,18 @@ export class QueryBuilder {
     );
 
     if (queryEditorStateFromUrl?.languageType) {
-      this.updateQueryEditorState(queryEditorStateFromUrl);
+      this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
+    }
+
+    // read isQueryEditorDirty from url to prevent losing state after reloading page
+    // only update when isQueryEditorDirty is true
+    if (
+      queryEditorStateFromUrl?.isQueryEditorDirty &&
+      typeof queryEditorStateFromUrl?.isQueryEditorDirty === 'boolean'
+    ) {
+      this.updateQueryEditorState({
+        isQueryEditorDirty: queryEditorStateFromUrl.isQueryEditorDirty,
+      });
     }
 
     const finalQuery = queryStateFromUrl?.query ?? options?.savedQueryState?.query ?? '';
@@ -192,12 +206,14 @@ export class QueryBuilder {
   startUrlSync() {
     const urlSync = combineLatest([
       this.queryState$,
-      this.queryEditorState$.pipe(map((s) => ({ languageType: s.languageType }))),
+      this.queryEditorState$.pipe(
+        map((s) => ({ languageType: s.languageType, isQueryEditorDirty: s.isQueryEditorDirty }))
+      ),
     ])
       .pipe(debounceTime(500))
       .subscribe(([queryState, editorState]) => {
-        this.syncToUrl('_eq', queryState);
-        this.syncToUrl('_e', editorState);
+        this.syncToUrl(QUERY_BUILDER_QUERY_STATE_KEY, queryState);
+        this.syncToUrl(QUERY_EDITOR_STATE_KEY, editorState);
       });
 
     this.subscriptions.push(urlSync);

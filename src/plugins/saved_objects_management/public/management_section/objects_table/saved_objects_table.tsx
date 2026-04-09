@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { debounce } from 'lodash';
 import { saveAs } from 'file-saver';
 import {

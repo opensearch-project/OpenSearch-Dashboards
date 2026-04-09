@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import './chat_header.scss';
 
