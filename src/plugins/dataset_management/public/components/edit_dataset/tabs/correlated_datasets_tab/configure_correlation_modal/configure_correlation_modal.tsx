@@ -34,6 +34,7 @@ import { useValidateFieldMappings } from '../../../../../hooks/use_validate_fiel
 import { validateMaxLogDatasets } from '../../../../../utils/correlation_validation';
 import { extractDatasetIdsFromEntities } from '../../../../../utils/correlation_display';
 import { LogsDatasetSelector } from './logs_dataset_selector';
+import { FieldMappingEditor } from './field_mapping_editor';
 
 interface ConfigureCorrelationModalProps {
   traceDataset: DataView;
@@ -249,20 +250,18 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
         {/* Field Mapping Editor - shown for all selected datasets */}
         {selectedLogDatasetIds.length > 0 && !validating && datasets.length > 0 && (
           <>
-            {/* eslint-disable react/jsx-no-undef */}
-            {/* @ts-expect-error TS2304 TODO(ts-error): fixme */}
             <FieldMappingEditor
               dataService={data}
               datasetIds={selectedLogDatasetIds}
               datasets={datasets}
               missingMappings={missingMappings}
+              // @ts-expect-error TODO FIX ME
               onMappingsChange={handleFieldMappingsChange}
               notifications={notifications}
               onAllDatasetsReady={setAllDatasetsReady}
               onDatasetSaved={handleDatasetSaved}
               onEditingStateChange={setIsAnyDatasetEditing}
             />
-            {/* eslint-enable react/jsx-no-undef */}
             <EuiSpacer size="m" />
           </>
         )}
