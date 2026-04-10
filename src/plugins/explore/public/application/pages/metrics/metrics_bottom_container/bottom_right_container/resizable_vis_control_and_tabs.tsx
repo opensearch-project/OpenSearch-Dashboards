@@ -126,7 +126,7 @@ export const ResizableVisControlAndTabs = () => {
                   <EuiFlexItem>
                     <EuiTitle size="xxs">
                       <p>
-                        {i18n.translate('explore.visualization.stylePanel.title', {
+                        {i18n.translate('explore.metrics.visualization.stylePanel.title', {
                           defaultMessage: 'Metric tools',
                         })}
                       </p>
