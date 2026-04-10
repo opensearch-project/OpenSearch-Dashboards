@@ -32,6 +32,16 @@ jest.mock('./visualization_empty_state', () => ({
   )),
 }));
 
+jest.mock('./echarts_render', () => ({
+  EchartsRender: jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>),
+}));
+
+jest.mock('./metric/metric_component', () => ({
+  MetricChartRender: jest.fn(() => (
+    <div data-test-subj="metricChartRender">Metric Chart Render</div>
+  )),
+}));
+
 jest.mock('../../services/services', () => ({
   getServices: jest.fn(() => ({
     data: {
@@ -239,5 +249,30 @@ describe('VisualizationRender', () => {
     );
 
     expect(container.firstChild).toBeNull();
+  });
+
+  it('passes the raw echarts spec into augmentEchartsSpec and preserves axis mappings', () => {
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+    const augmentEchartsSpec = jest.fn((spec) => ({
+      ...spec,
+      title: { text: 'augmented' },
+    }));
+
+    render(
+      <VisualizationRender
+        data$={data$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
+        augmentEchartsSpec={augmentEchartsSpec}
+      />
+    );
+
+    expect(mockRender).toHaveBeenCalledWith(
+      expect.objectContaining({
+        augmentEchartsSpec,
+      })
+    );
   });
 });

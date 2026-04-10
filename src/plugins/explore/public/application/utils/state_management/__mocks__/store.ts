@@ -24,8 +24,9 @@ export const createMockStore = (initialState?: Partial<RootState>): MockStore =>
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     },
     ui: {
-      showDatasetFields: false,
-      prompt: '',
+      activeTabId: '',
+      showHistogram: true,
+      wrapCellText: false,
     },
     results: {},
     tab: {},
@@ -68,7 +69,9 @@ export const createMockRootState = (overrides?: Partial<RootState>): RootState =
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     },
     ui: {
-      prompt: '',
+      activeTabId: '',
+      showHistogram: true,
+      wrapCellText: false,
     },
     results: {},
     tab: {},

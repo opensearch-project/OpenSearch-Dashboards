@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 
 import * as VB from '../../../../../components/visualizations/visualization_builder';
 import * as ReactUse from 'react-use';
@@ -27,6 +29,10 @@ jest.mock('../../../../../components/visualizations/style_panel_render', () => (
   StylePanelRender: () => <div data-test-subj="style-panel">Style Panel</div>,
 }));
 
+jest.mock('./metrics_alerts_panel', () => ({
+  MetricsAlertsPanel: () => <div data-test-subj="metrics-alerts-panel">Metrics Alerts Panel</div>,
+}));
+
 jest.mock('../../../../utils/hooks/use_tab_error', () => ({
   useTabError: jest.fn(),
 }));
@@ -42,13 +48,33 @@ const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFuncti
 >;
 
 describe('<ResizableVisControlAndTabs />', () => {
+  const mockApplications$ = new BehaviorSubject(
+    new Map<string, unknown>([['monitors', { id: 'monitors' }]])
+  );
+
   beforeEach(() => {
     mockUseSelector.mockClear();
-    jest.spyOn(ReactUse, 'useObservable').mockReturnValue({});
+    mockApplications$.next(
+      new Map<string, unknown>([['monitors', { id: 'monitors' }]])
+    );
+    jest
+      .spyOn(ReactUse, 'useObservable')
+      .mockImplementation((observable: any, initialValue?: unknown) => {
+        if (observable === mockApplications$) {
+          return mockApplications$.getValue();
+        }
+
+        return initialValue ?? {};
+      });
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(new VB.VisualizationBuilder({}));
     mockUseTabError.mockReturnValue(null);
     mockUseOpenSearchDashboards.mockReturnValue({
       services: {
+        core: {
+          application: {
+            applications$: mockApplications$,
+          },
+        },
         tabRegistry: {
           getTab: jest.fn().mockReturnValue({
             id: 'explore_visualization_tab',
@@ -81,7 +107,13 @@ describe('<ResizableVisControlAndTabs />', () => {
 
   test('it should NOT display StylePanel if the current active tab is visualization but no data', () => {
     mockUseSelector.mockReturnValue('explore_visualization_tab');
-    jest.spyOn(ReactUse, 'useObservable').mockReturnValue(undefined);
+    jest.spyOn(ReactUse, 'useObservable').mockImplementation((observable: any) => {
+      if (observable === mockApplications$) {
+        return mockApplications$.getValue();
+      }
+
+      return undefined;
+    });
     render(<ResizableVisControlAndTabs />);
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
     expect(screen.queryByTestId('style-panel')).not.toBeInTheDocument();
@@ -102,5 +134,25 @@ describe('<ResizableVisControlAndTabs />', () => {
     render(<ResizableVisControlAndTabs />);
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
     expect(screen.queryByTestId('style-panel')).not.toBeInTheDocument();
+  });
+
+  test('it should display Alerts panel when Alerts tab is selected', () => {
+    mockUseSelector.mockReturnValue('explore_visualization_tab');
+    render(<ResizableVisControlAndTabs />);
+
+    fireEvent.click(screen.getByText('Alerts'));
+
+    expect(screen.getByTestId('metrics-alerts-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('style-panel')).not.toBeInTheDocument();
+  });
+
+  test('it should hide Alerts tab when Alerting UI is unavailable', () => {
+    mockUseSelector.mockReturnValue('explore_visualization_tab');
+    mockApplications$.next(new Map());
+
+    render(<ResizableVisControlAndTabs />);
+
+    expect(screen.queryByText('Alerts')).not.toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 });

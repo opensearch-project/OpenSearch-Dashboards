@@ -379,9 +379,17 @@ export class VisualizationBuilder {
   renderVisualization({
     timeRange,
     onSelectTimeRange,
+    augmentEchartsSpec,
   }: {
     timeRange?: TimeRange;
     onSelectTimeRange?: (range?: TimeRange) => void;
+    augmentEchartsSpec?: import('./visualization_render').VisualizationRender extends (
+      props: infer P
+    ) => any
+      ? P extends { augmentEchartsSpec?: infer A }
+        ? A
+        : never
+      : never;
   }) {
     return React.createElement(VisualizationRender, {
       data$: this.data$,
@@ -390,6 +398,7 @@ export class VisualizationBuilder {
       timeRange,
       onSelectTimeRange,
       onStyleChange: this.updateStyles.bind(this),
+      augmentEchartsSpec,
     });
   }
 

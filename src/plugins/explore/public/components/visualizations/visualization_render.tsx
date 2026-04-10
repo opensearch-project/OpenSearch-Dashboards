@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
+import { cloneElement, isValidElement, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
@@ -16,6 +16,8 @@ import { TimeRange } from '../../../../data/public';
 import { visualizationRegistry } from './visualization_registry';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { getAxisConfigByColumnMapping } from './utils/axis';
+import { EchartsRender } from './echarts_render';
+import { MetricChartRender } from './metric/metric_component';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -24,6 +26,7 @@ interface Props {
   timeRange?: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
   onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  augmentEchartsSpec?: (spec: any, context: { timeRange: TimeRange }) => any;
 }
 
 const defaultStyleOptions: TableChartStyle = {
@@ -41,6 +44,7 @@ export const VisualizationRender = ({
   timeRange: inputTimeRange,
   onSelectTimeRange,
   onStyleChange,
+  augmentEchartsSpec,
 }: Props) => {
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
@@ -109,6 +113,7 @@ export const VisualizationRender = ({
         config={visConfig}
         timeRange={timeRange}
         onSelectTimeRange={onSelectTimeRange}
+        augmentEchartsSpec={augmentEchartsSpec}
       />
     );
   }
@@ -121,11 +126,13 @@ const ChartRender = ({
   config,
   timeRange,
   onSelectTimeRange,
+  augmentEchartsSpec,
 }: {
   data?: VisData;
   config?: RenderChartConfig;
   timeRange: TimeRange;
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  augmentEchartsSpec?: (spec: any, context: { timeRange: TimeRange }) => any;
 }) => {
   if (!data) {
     return null;
@@ -155,11 +162,28 @@ const ChartRender = ({
   const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
   const styles = { ...config.styles, standardAxes: allAxisConfig };
 
-  return rule.render({
+  const renderedChart = rule.render({
     transformedData: data.transformedData,
     styleOptions: styles,
     axisColumnMappings,
     timeRange,
     onSelectTimeRange,
+  } as any);
+
+  if (
+    !augmentEchartsSpec ||
+    !isValidElement(renderedChart) ||
+    (renderedChart.type !== EchartsRender && renderedChart.type !== MetricChartRender)
+  ) {
+    return renderedChart;
+  }
+
+  const renderedSpec = (renderedChart.props as any)?.spec;
+  if (!renderedSpec) {
+    return renderedChart;
+  }
+
+  return cloneElement(renderedChart, {
+    spec: augmentEchartsSpec(renderedSpec, { timeRange }),
   });
 };

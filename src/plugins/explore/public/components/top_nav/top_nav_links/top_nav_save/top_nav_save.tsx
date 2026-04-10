@@ -72,7 +72,9 @@ export const getSaveButtonRun = (
       saveStateProps.tabDefinition,
       { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
       saveStateProps.dataset,
-      saveStateProps.activeTabId
+      saveStateProps.activeTabId,
+      services.store.getState().ui,
+      services.store.getState().query
     );
     const result = await saveSavedExplore({
       savedExplore: savedExploreWithState,

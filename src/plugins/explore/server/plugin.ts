@@ -13,6 +13,8 @@ import {
 import { capabilitiesProvider } from './capabilities_provider';
 import { exploreSavedObjectType } from './saved_objects';
 import { exploreUiSettings } from './explore_ui_settings';
+import { registerAnomalyPreviewRoutes } from './routes/anomaly_preview';
+import { registerForecastPreviewRoutes } from './routes/forecast_preview';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
 
@@ -77,6 +79,16 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
     // core.uiSettings.register(uiSettings);
     core.uiSettings.register(exploreUiSettings);
     core.savedObjects.registerType(exploreSavedObjectType);
+
+    const router = core.http.createRouter();
+    registerAnomalyPreviewRoutes({
+      router,
+      logger: this.logger,
+    });
+    registerForecastPreviewRoutes({
+      router,
+      logger: this.logger,
+    });
 
     return {};
   }
