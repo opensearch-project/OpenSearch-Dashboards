@@ -42,6 +42,16 @@ Automatically retry failed required CI checks on GitHub PRs with smart waiting a
 - **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/retry_flaky_tests.md](../../.kiro/prompts/retry_flaky_tests.md)
 - **Purpose**: Identifies required vs optional checks, waits for completion, selectively retries failed required checks
 
+### `repo_health_agent` ([repo_health_agent/](repo_health_agent/))
+Track repo health, detect stale issues/PRs, auto-label issues, and generate weekly summary insights.
+
+- **Skill Definition**: [repo_health_agent/SKILL.md](repo_health_agent/SKILL.md)
+- **Documentation**: [repo_health_agent/README.md](repo_health_agent/README.md)
+- **Claude Usage**: `/repo_health_agent --action health|stale|label|summary`
+- **Kiro Usage**: Also available as Kiro prompt at [.kiro/prompts/repo_health_agent.md](../../.kiro/prompts/repo_health_agent.md)
+- **Purpose**: Automated repo maintenance — stale detection, issue classification, weekly insights
+- **GitHub Actions**: Runs daily (stale + labeling) and weekly (summary) via `.github/workflows/repo-health-*.yml`
+
 ## Directory Structure
 
 Each skill is organized in its own subdirectory with the following structure:
