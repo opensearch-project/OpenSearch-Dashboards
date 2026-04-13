@@ -116,8 +116,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const whereCommands: string[] = [];
 
+    const skipFilters = request.params?.body?.skipFilters;
+
     const appId = await this.application.currentAppId$.pipe(first()).toPromise();
-    if (appId && PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+    if (
+      !skipFilters &&
+      appId &&
+      PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)
+    ) {
       const filters = this.queryService.filterManager.getFilters();
       const index = request.params?.index
         ? this.indexPatterns.getByTitle(request.params.index, true)

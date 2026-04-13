@@ -83,6 +83,10 @@ export async function executeQueryForOptions(
     dataset: params.dataset,
   });
 
+  // Skip dashboard filters for variable queries — variable options should
+  // not be narrowed by the current dashboard filter state.
+  searchSource.setField('skipFilters', true);
+
   const response = await searchSource.fetch({ abortSignal: signal });
   return parseResponseToOptions(response);
 }

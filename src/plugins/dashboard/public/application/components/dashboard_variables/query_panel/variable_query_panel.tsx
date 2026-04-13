@@ -497,6 +497,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         </EuiFormRow>
       )}
       <EuiFormRow
+        fullWidth
         label={i18n.translate('dashboard.variableQueryPanel.previewTitle', {
           defaultMessage: 'Preview of values ({count})',
           values: { count: previewValues.length },

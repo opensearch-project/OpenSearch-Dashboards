@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parseResponseToOptions, filterOptionsByRegex } from './variable_query_utils';
+import {
+  parseResponseToOptions,
+  filterOptionsByRegex,
+  executeQueryForOptions,
+} from './variable_query_utils';
 
 describe('parseResponseToOptions', () => {
   it('should return empty array for undefined response', () => {
@@ -141,5 +145,81 @@ describe('filterOptionsByRegex', () => {
 
   it('should work with partial match', () => {
     expect(filterOptionsByRegex(options, 'api')).toEqual(['prod-api', 'staging-api']);
+  });
+});
+
+describe('executeQueryForOptions', () => {
+  const mockSetField = jest.fn();
+  const mockFetch = jest.fn();
+  const mockCreate = jest.fn().mockResolvedValue({
+    setField: mockSetField,
+    fetch: mockFetch,
+  });
+
+  const mockDataPlugin = {
+    search: {
+      searchSource: {
+        create: mockCreate,
+      },
+    },
+  } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCreate.mockResolvedValue({
+      setField: mockSetField,
+      fetch: mockFetch,
+    });
+    mockFetch.mockResolvedValue({ hits: { hits: [] } });
+  });
+
+  it('should return empty array for empty query', async () => {
+    const result = await executeQueryForOptions(mockDataPlugin, {
+      query: '',
+      language: 'PPL',
+    });
+    expect(result).toEqual([]);
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('should set skipFilters on the search source', async () => {
+    await executeQueryForOptions(mockDataPlugin, {
+      query: 'source=logs | dedup service | fields service',
+      language: 'PPL',
+      dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' },
+    });
+
+    expect(mockSetField).toHaveBeenCalledWith('query', {
+      query: 'source=logs | dedup service | fields service',
+      language: 'PPL',
+      dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' },
+    });
+    expect(mockSetField).toHaveBeenCalledWith('skipFilters', true);
+  });
+
+  it('should pass abort signal to fetch', async () => {
+    const controller = new AbortController();
+    await executeQueryForOptions(
+      mockDataPlugin,
+      { query: 'source=logs | fields service', language: 'PPL' },
+      controller.signal
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith({ abortSignal: controller.signal });
+  });
+
+  it('should parse response and return options', async () => {
+    mockFetch.mockResolvedValue({
+      hits: {
+        hits: [{ _source: { service: 'api' } }, { _source: { service: 'web' } }],
+      },
+    });
+
+    const result = await executeQueryForOptions(mockDataPlugin, {
+      query: 'source=logs | dedup service | fields service',
+      language: 'PPL',
+    });
+
+    expect(result).toEqual(['api', 'web']);
   });
 });
