@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import React, { Fragment, useEffect, useState, Suspense, useRef, useCallback } from 'react';
+import React, { useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
@@ -147,13 +147,12 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
           }
         >
           <ReactMarkdownLazy
-            // @ts-expect-error TS2322 TODO(ts-error): fixme
-            renderers={{
-              root: Fragment,
-              link: LinkRenderer,
+            components={{
+              a: LinkRenderer,
             }}
-            source={bannerConfig.content.trim()}
-          />
+          >
+            {bannerConfig.content.trim()}
+          </ReactMarkdownLazy>
         </Suspense>
       );
     }
