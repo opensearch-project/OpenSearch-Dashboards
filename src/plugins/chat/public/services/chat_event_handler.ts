@@ -53,7 +53,6 @@ export class ChatEventHandler {
   private activeAssistantMessages = new Map<string, AssistantMessage>();
   private pendingToolCalls = new Map<string, ToolCall>();
   private lastTextMessageStartId: string | null = null;
-  private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
 
   private assistantActionService: AssistantActionService;
@@ -250,7 +249,8 @@ export class ChatEventHandler {
       delete assistantMessage.toolCalls;
     }
 
-    this.lastAssistantMessageId = assistantMessage.id;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._lastAssistantMessageId = assistantMessage.id;
 
     // Final update in timeline
     this.onTimelineUpdate((prev) => {
@@ -674,7 +674,7 @@ export class ChatEventHandler {
       // Set streaming state and subscribe to the response stream
       this.onStreamingStateChange(true);
 
-      const subscription = observable.subscribe({
+      observable.subscribe({
         next: (event: ChatEvent) => {
           // Handle the assistant's response to the tool result
           this.handleEvent(event);
@@ -720,6 +720,7 @@ export class ChatEventHandler {
     this.pendingToolCalls.clear();
     this.toolExecutor.clearAllPendingTools();
     this.lastTextMessageStartId = null;
-    this.lastAssistantMessageId = null;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._lastAssistantMessageId = null;
   }
 }

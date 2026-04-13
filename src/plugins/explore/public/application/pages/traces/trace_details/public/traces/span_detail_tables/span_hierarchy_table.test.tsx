@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { SpanHierarchyTable } from './span_hierarchy_table';
 import { SpanTableProps } from './types';

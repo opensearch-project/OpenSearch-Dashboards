@@ -25,6 +25,7 @@ jest.mock('react-use', () => ({
 
 jest.mock('html2canvas-pro', () => {
   const fn = jest.fn();
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   fn.setCspNonce = jest.fn();
   return fn;
 });

@@ -184,15 +184,13 @@ function extractCollectorDetails(
 }
 
 export function sourceHasUsageCollector(sourceFile: ts.SourceFile) {
-  if (sourceFile.isDeclarationFile === true || (sourceFile as any).identifierCount === 0) {
+  if (sourceFile.isDeclarationFile === true) {
     return false;
   }
 
-  const identifiers = (sourceFile as any).identifiers;
-  if (
-    (!identifiers.get('makeUsageCollector') && !identifiers.get('type')) ||
-    !identifiers.get('fetch')
-  ) {
+  // Use source text search instead of internal `identifiers` map (removed in TS 6)
+  const text = sourceFile.getText();
+  if ((!text.includes('makeUsageCollector') && !text.includes('type')) || !text.includes('fetch')) {
     return false;
   }
 

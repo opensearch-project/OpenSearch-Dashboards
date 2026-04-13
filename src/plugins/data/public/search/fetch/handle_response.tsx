@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { SearchResponse } from 'elasticsearch';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { InactiveDataConnectionCallout } from './inactive_data_connection_callout';
 import { EuiCallOut, EuiButton } from '@elastic/eui';

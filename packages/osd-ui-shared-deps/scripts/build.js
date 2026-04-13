@@ -33,7 +33,7 @@ const Fs = require('fs');
 
 const { run, createFailError, CiStatsReporter } = require('@osd/dev-utils');
 // const webpack = require('webpack');
-const { rspack, Stats } = require('@rspack/core');
+const { rspack } = require('@rspack/core');
 // const Stats = require('webpack/lib/Stats');
 const del = require('del');
 
@@ -92,7 +92,7 @@ run(
       throw createFailError(
         `webpack failure in about ${took} seconds\n${stats.toString({
           colors: true,
-          ...Stats.presetToOptions('minimal'),
+          preset: 'minimal',
         })}`
       );
     };

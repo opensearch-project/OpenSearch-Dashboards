@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiPanel, EuiText, EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAssistantAction } from '../../../context_provider/public';
 import { GraphVisualization } from '../components/graph_visualization';
@@ -211,6 +210,7 @@ export function useGraphTimeseriesDataAction(enabled: boolean = true) {
               <EuiText size="xs">
                 <strong>Query:</strong>
               </EuiText>
+              {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
               <EuiCode language="promql" fontSize="xs" paddingSize="xs">
                 {args.query}
               </EuiCode>

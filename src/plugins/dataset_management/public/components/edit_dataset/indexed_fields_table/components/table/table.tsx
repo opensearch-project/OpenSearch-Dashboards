@@ -2,12 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 
 import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
 

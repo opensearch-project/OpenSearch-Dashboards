@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPanel, EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -42,7 +41,12 @@ export const RightStyleOptionsPanel = () => {
     );
   }
   return (
-    <EuiPanel paddingSize="s" style={{ height: '100%' }} borderRadius="none" hasShadow={false}>
+    <EuiPanel
+      paddingSize="s"
+      style={{ height: '100%', overflow: 'auto' }}
+      borderRadius="none"
+      hasShadow={false}
+    >
       {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
     </EuiPanel>
   );

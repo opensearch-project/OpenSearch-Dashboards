@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { CoreStart } from 'src/core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 

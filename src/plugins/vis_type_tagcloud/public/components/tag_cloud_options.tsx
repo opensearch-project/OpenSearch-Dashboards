@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { VisOptionsProps } from '../../../vis_default_editor/public';

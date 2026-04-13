@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@osd/utility-types": "1.0.0",
-    "tsd": "^0.21.0"
+    "tsd": "^0.33.0"
   },
   "@osd/pm": {
     "node": true,

@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
 import { useObservable } from 'react-use';

@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act } from 'react';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { CardContainer } from './card_container';
 
 jest.mock('./card_list', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const React = require('react');
   return {
-    CardList: jest.fn().mockReturnValue(<span id="mockCardList" />),
+    CardList: jest.fn().mockReturnValue(React.createElement('span', { id: 'mockCardList' })),
   };
 });
 

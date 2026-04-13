@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
 import { EuiPopover, EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';

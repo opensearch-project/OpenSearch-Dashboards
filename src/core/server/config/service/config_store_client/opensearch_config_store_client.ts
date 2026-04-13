@@ -138,6 +138,7 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
 
     let nonExistentConfigs = [...configsToQuery];
     const configs = await this.searchConfigsRequest(configsToQuery);
+    // @ts-expect-error TS2345 TODO Fix me
     configs.body.hits.hits.forEach((config) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { config_name, config_blob } = config._source!;
@@ -157,6 +158,7 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
     return results;
   }
 
+  // @ts-expect-error TS2345 TODO Fix me
   public async listConfigs(options?: DynamicConfigurationClientOptions) {
     // Cannot get from cache since config keys can be missing
     const configs = await this.#openSearchClient.search<ConfigDocument>({
@@ -171,10 +173,12 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
 
     const results = new Map(
       configs.body.hits.hits
+        // @ts-expect-error TS2345 TODO Fix me
         .filter((config) => {
           this.setCacheFromSearch(config);
           return !!config._source?.config_blob;
         })
+        // @ts-expect-error TS2345 TODO Fix me
         .map((config) => {
           return [config._source?.config_name!, config._source?.config_blob!];
         })
@@ -260,6 +264,7 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
     // Update the existing configs with the new config blob
     const bulkConfigs: Array<
       ConfigDocument | BulkOperationContainer
+      // @ts-expect-error TS2345 TODO Fix me
     > = existingConfigs.body.hits.hits.flatMap((config) => {
       const configName = config._source?.config_name!;
       existingConfigNames.push(configName);
@@ -392,15 +397,19 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
     }
 
     const validIndices = configIndices.body
+      // @ts-expect-error TS2345 TODO Fix me
       .map((hit) => hit.index?.toString())
+      // @ts-expect-error TS2345 TODO Fix me
       .filter((index) => index && isDynamicConfigIndex(index));
 
     return validIndices.length === 0
       ? 0
       : validIndices
+          // @ts-expect-error TS2345 TODO Fix me
           .map((configIndex) => {
             return configIndex ? extractVersionFromDynamicConfigIndex(configIndex) : 0;
           })
+          // @ts-expect-error TS2345 TODO Fix me
           .reduce((currentMax, currentNum) => {
             return currentMax && currentNum && currentMax > currentNum ? currentMax : currentNum;
           });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiText, EuiCopy, EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiIcon } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';

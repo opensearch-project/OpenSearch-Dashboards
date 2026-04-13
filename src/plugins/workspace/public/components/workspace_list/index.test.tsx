@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';

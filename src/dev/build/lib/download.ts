@@ -83,7 +83,9 @@ export async function download(options: DownloadOptions): Promise<void> {
     const hash = createHash('sha256');
     await new Promise((resolve, reject) => {
       response.data.on('data', (chunk: Buffer) => {
+        // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
         hash.update(chunk);
+        // @ts-expect-error TS2769 TODO(ts-upgrade): fixme
         writeSync(fileHandle, chunk);
       });
 

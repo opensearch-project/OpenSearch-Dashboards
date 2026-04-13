@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';

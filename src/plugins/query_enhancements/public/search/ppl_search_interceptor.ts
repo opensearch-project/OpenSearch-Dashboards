@@ -24,11 +24,14 @@ import {
   fetch,
   isPPLSearchQuery,
   QueryAggConfig,
+  queryEndsWithHead,
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
+
+export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
@@ -147,9 +150,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       );
       whereCommands.push(timeFilter);
     }
+    const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
+
+    const finalQuery =
+      query.dataset?.type === DATASET.S3 && !queryEndsWithHead(queryWithFilters)
+        ? `${queryWithFilters} | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
+        : queryWithFilters;
+
     return {
       ...query,
-      query: whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query),
+      query: finalQuery,
     };
   }
 

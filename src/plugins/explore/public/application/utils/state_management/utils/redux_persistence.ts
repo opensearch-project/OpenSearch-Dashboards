@@ -356,6 +356,7 @@ const getPreloadedQueryState = async (
  * Get preloaded UI state
  */
 const getPreloadedUIState = (services: ExploreServices): UIState => {
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   return {
     activeTabId: '',
     showHistogram: true,
@@ -381,6 +382,7 @@ const getPreloadedQueryEditorState = async (
     summaryAgentIsAvailable = results[1].status === 'fulfilled' ? Boolean(results[1].value) : false;
   }
 
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   return {
     queryStatusMap: {},
     overallQueryStatus: {

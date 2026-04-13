@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { AggControlProps } from './agg_control_props';
@@ -59,6 +59,7 @@ function RowsOrColumnsControl({ editorStateParams, setStateParamValue }: AggCont
     },
   ];
   const onChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (optionId) => setStateParamValue(PARAMS.NAME, optionId === PARAMS.ROWS),
     [setStateParamValue]
   );

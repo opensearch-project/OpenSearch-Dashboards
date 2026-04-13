@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { StateTimeLineExclusiveVisOptions } from './state_timeline_exclusive_vis_options';
 import { DisableMode } from '../types';

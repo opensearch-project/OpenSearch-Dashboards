@@ -36,7 +36,6 @@ describe('definePPLBundleRoute', () => {
       }),
     } as any;
     const logger = loggingSystemMock.create().get();
-    const client = { asScoped: jest.fn() } as any;
 
     definePPLBundleRoute(logger, router);
 
@@ -89,7 +88,6 @@ describe('definePPLBundleRoute', () => {
       }),
     } as any;
     const logger = loggingSystemMock.create().get();
-    const client = { asScoped: jest.fn() } as any;
 
     definePPLBundleRoute(logger, router);
 
@@ -135,7 +133,6 @@ describe('definePPLBundleRoute', () => {
       }),
     } as any;
     const logger = loggingSystemMock.create().get();
-    const client = { asScoped: jest.fn() } as any;
 
     definePPLBundleRoute(logger, router);
 
@@ -180,7 +177,6 @@ describe('definePPLBundleRoute', () => {
       }),
     } as any;
     const logger = loggingSystemMock.create().get();
-    const client = { asScoped: jest.fn() } as any;
 
     definePPLBundleRoute(logger, router);
 

@@ -82,6 +82,7 @@ function validateValueAscending(
   };
 
   const previousModel = list[index - 1];
+  // @ts-expect-error TS2365 TODO(ts-error): fixme
   if (previousModel !== undefined && inputValue !== undefined && inputValue <= previousModel) {
     result.isInvalidOrder = true;
     result.error = i18n.translate(

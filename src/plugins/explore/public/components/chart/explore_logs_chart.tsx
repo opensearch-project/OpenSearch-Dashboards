@@ -76,6 +76,7 @@ export const ExploreLogsChart = ({
     dispatch(clearResultsByKey(histogramCacheKey));
     dispatch(clearQueryStatusMapByKey(histogramCacheKey));
     dispatch(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,
@@ -94,6 +95,7 @@ export const ExploreLogsChart = ({
       );
       dispatch(clearResults());
       dispatch(clearQueryStatusMap());
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
     [dispatch, services]

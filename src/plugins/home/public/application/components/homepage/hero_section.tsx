@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { RenderFn } from '../../../services/section_type/section_type';
 import { LazyRender } from './lazy_render';

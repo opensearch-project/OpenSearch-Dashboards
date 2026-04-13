@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import * as React from 'react';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { NewsEmptyPrompt } from './empty_news';

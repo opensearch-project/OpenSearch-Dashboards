@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { ExploreMetricsRawTable } from '../data_table/explore_metrics_raw_table';
 
 /**

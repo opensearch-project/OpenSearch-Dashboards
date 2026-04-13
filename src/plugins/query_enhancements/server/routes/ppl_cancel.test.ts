@@ -82,7 +82,9 @@ describe('registerPPLCancelRoute', () => {
         handler = h;
       }),
     } as any;
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     logger = loggingSystemMock.create().get();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     registerPPLCancelRoute(router, logger);
   });
 

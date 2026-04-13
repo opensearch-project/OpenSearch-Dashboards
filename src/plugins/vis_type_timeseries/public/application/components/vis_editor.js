@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';

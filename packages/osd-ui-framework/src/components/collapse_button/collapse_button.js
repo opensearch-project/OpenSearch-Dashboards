@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import classNames from 'classnames';
 
 const DIRECTIONS = ['down', 'up', 'left', 'right'];

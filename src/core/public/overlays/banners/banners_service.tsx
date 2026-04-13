@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 

@@ -78,6 +78,7 @@ function setupNodeEvents(
   // Fix: Error: Webpack Compilation Error
   // Module not found: Error: Can't resolve 'path'
   webpackOptions!.plugins = webpackOptions!.plugins || [];
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   webpackOptions!.plugins.push(new (require('node-polyfill-webpack-plugin'))());
 
   /**
@@ -88,6 +89,7 @@ function setupNodeEvents(
    * This extra rule relaxes this a bit by allowing imports without file extension
    *     ex. import module from './module'
    */
+  // @ts-expect-error TODO FIX ME
   webpackOptions!.module!.rules.unshift({
     test: /\.m?js/,
     resolve: {
@@ -98,6 +100,7 @@ function setupNodeEvents(
   /**
    * Add babel-loader to handle modern JavaScript syntax like optional chaining
    */
+  // @ts-expect-error TODO FIX ME
   webpackOptions!.module!.rules.push({
     test: /\.(js|ts)$/,
     exclude: /node_modules/,

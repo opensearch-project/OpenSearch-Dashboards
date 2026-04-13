@@ -22,8 +22,40 @@ env:
   NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'packages/**'
+              - 'plugins/**'
+              - 'test/**'
+              - 'scripts/**'
+              - 'examples/**'
+              - 'common/**'
+              - 'typings/**'
+              - 'config/**'
+              - 'tasks/**'
+              - 'utilities/**'
+              - 'cypress/**'
+              - 'package.json'
+              - 'yarn.lock'
+              - 'tsconfig*.json'
+              - '.browserslistrc'
+              - '.github/workflows/build_and_test_workflow.yml'
+
   prepare-source:
     name: Prepare source and warm cache
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -104,7 +136,8 @@ jobs:
 
   prepare-windows-cache:
     name: Warm Windows yarn cache
-    needs: [prepare-source]
+    needs: [changes, prepare-source]
+    if: needs.changes.outputs.code == 'true'
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -170,7 +203,8 @@ jobs:
 
   build-test:
     name: Build and Verify on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    needs: [prepare-source, prepare-windows-cache]
+    needs: [changes, prepare-source, prepare-windows-cache]
+    if: needs.changes.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -325,7 +359,8 @@ jobs:
 
   build-plugins-artifact:
     name: Build plugin bundles
-    needs: [prepare-source]
+    needs: [changes, prepare-source]
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -390,7 +425,8 @@ jobs:
 
   integration-tests:
     name: Run integration tests on ${{ matrix.name }}
-    needs: [prepare-source, prepare-windows-cache]
+    needs: [changes, prepare-source, prepare-windows-cache]
+    if: needs.changes.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -595,7 +631,8 @@ jobs:
 
   functional-tests:
     name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    needs: [prepare-source, prepare-windows-cache, build-plugins-artifact]
+    needs: [changes, prepare-source, prepare-windows-cache, build-plugins-artifact]
+    if: needs.changes.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -769,7 +806,8 @@ jobs:
 
   plugin-functional-tests:
     name: Run plugin functional tests on ${{ matrix.name }}
-    needs: [prepare-source, prepare-windows-cache]
+    needs: [changes, prepare-source, prepare-windows-cache]
+    if: needs.changes.outputs.code == 'true'
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -913,3 +951,35 @@ jobs:
             test/*/failure_debug/
             test/*/screenshots/
           overwrite: true
+
+  merge-gate:
+    name: Merge Gate
+    if: always()
+    needs:
+      - changes
+      - build-test
+      - build-plugins-artifact
+      - integration-tests
+      - lint-and-validate
+      - functional-tests
+      - plugin-functional-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate results
+        run: |
+          results=( \
+            "${{ needs.lint-and-validate.result }}" \
+            "${{ needs.build-test.result }}" \
+            "${{ needs.integration-tests.result }}" \
+            "${{ needs.functional-tests.result }}" \
+            "${{ needs.build-plugins-artifact.result }}" \
+            "${{ needs.plugin-functional-tests.result }}" \
+          )
+          for r in "${results[@]}"; do
+            if [[ "$r" == "failure" || "$r" == "cancelled" ]]; then
+              echo "❌ A required job failed or was cancelled: $r"
+              exit 1
+            fi
+          done
+          echo "✅ All checks passed (or were correctly skipped for non-code changes)"

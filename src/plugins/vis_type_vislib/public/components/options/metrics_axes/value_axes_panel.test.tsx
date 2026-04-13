@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { ValueAxis, SeriesParam } from '../../../types';

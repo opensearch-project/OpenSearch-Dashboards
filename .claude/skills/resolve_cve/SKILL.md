@@ -94,7 +94,7 @@ After each remediation attempt:
 Create a PR-ready description in `tmp/cve-pr-description.md` by **dynamically using the current GitHub PR template**:
 
 1. **Read the current PR template**: Load `.github/pull_request_template.md` to get the latest format
-2. **Parse template structure**: Identify sections like Description, Issues Resolved, Testing, Changelog, etc.
+2. **Parse template structure**: Identify sections like Description, Issues Resolved, Testing, etc.
 3. **Fill in CVE-specific content**: Replace template placeholders with actual CVE resolution details
 4. **Auto-extract GitHub Issue Numbers**: Parse CVE issue URLs and add `closes #[number]` entries
 
@@ -103,7 +103,6 @@ Create a PR-ready description in `tmp/cve-pr-description.md` by **dynamically us
 - **Description section**: Fill with CVE summary, affected packages, resolution strategy
 - **Issues Resolved section**: Auto-populate with `closes #[issue-number]` from found CVE issues
 - **Testing section**: Add CVE-specific verification commands
-- **Changelog section**: Generate appropriate changelog entry for security fixes
 - **Checklist section**: Mark relevant items as completed based on resolution results
 
 **Dynamic Template Approach**:
@@ -116,7 +115,6 @@ cp .github/pull_request_template.md tmp/cve-pr-description.md
 # - Replace "<!-- Describe what this change achieves-->" with CVE details
 # - Replace "<!-- List any issues this PR will resolve -->" with closes #123
 # - Fill testing section with CVE verification steps
-# - Add appropriate changelog entry
 ```
 
 This ensures the skill **always respects the current PR template format**, even if it changes in the future - no manual skill updates required!
@@ -160,8 +158,6 @@ cp .github/pull_request_template.md tmp/cve-pr-description.md
    ```
 
 3. **Testing section**: Replace `<!-- Please provide detailed steps... -->` with CVE-specific validation steps
-
-4. **Changelog section**: Add appropriate security fix entry following existing format
 
 This approach ensures the skill **automatically adapts** to any future PR template changes without requiring skill updates.
 

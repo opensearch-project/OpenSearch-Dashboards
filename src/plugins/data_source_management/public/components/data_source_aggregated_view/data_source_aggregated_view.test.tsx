@@ -5,8 +5,6 @@
 
 import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
-// @ts-expect-error TS6133 TODO(ts-error): fixme
-import { i18n } from '@osd/i18n';
 import { DataSourceAggregatedView } from './data_source_aggregated_view';
 import {
   IToasts,
@@ -270,7 +268,6 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
       // Should render only active options
       const euiSwitch = component.find(EuiSwitch);
       expect(euiSwitch.exists()).toBeTruthy();
-      // @ts-expect-error TS2322 TODO(ts-error): fixme
       euiSwitch.prop('onChange')({ target: { checked: true } });
       const expectedOptions = activeDataSourceIds.length
         ? [

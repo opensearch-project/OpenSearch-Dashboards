@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import _ from 'lodash';
 
 import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';

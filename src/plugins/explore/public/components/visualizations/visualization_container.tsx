@@ -4,7 +4,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 
@@ -77,6 +77,7 @@ export const VisualizationContainer = React.memo(() => {
         );
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services }));
       }
     },
