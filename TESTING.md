@@ -184,7 +184,11 @@ If you prefer to run functional tests using Docker, you can find instructions on
 
 ### Performance tests
 
-To run performance tests:
+To run performance tests locally, first install Lighthouse CI:
+
+`yarn add --dev @lhci/cli`
+
+Then run:
 
 `yarn lhci autorun`
 
