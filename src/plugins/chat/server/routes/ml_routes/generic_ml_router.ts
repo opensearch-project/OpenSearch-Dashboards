@@ -14,6 +14,7 @@ import {
   OpenSearchClient,
 } from '../../../../../core/server';
 import { MLAgentRouter } from './ml_agent_router';
+import { MLClientError } from './ml_client_error';
 
 /**
  * Generic ML client detector with caching for performance
@@ -117,6 +118,13 @@ export class GenericMLRouter implements MLAgentRouter {
         request,
         context
       );
+
+      if (mlResponse.status && mlResponse.status >= 400) {
+        const mlClientError = new MLClientError(mlResponse.body);
+        mlClientError.statusCode = mlResponse.status;
+        mlClientError.statusText = mlResponse.statusText;
+        throw mlClientError;
+      }
 
       // Handle response based on type
       if (typeof mlResponse === 'object' && 'body' in mlResponse) {

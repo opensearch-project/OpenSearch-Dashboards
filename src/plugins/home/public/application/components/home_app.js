@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ExperienceSelectionModal } from './explore_experience';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';

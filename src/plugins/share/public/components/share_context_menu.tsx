@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';

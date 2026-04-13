@@ -5,7 +5,7 @@
 
 import './results_action_bar.scss';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { useObservable } from 'react-use';
@@ -102,7 +102,7 @@ export const DiscoverResultsActionBar = ({
               <EuiFlexGroup
                 alignItems="center"
                 direction="row"
-                gutterSize="none"
+                gutterSize="s"
                 justifyContent="flexStart"
               >
                 {isLogsTab && (
@@ -148,10 +148,7 @@ export const DiscoverResultsActionBar = ({
                   </EuiFlexItem>
                 )}
                 {shouldShowExportButton && (
-                  <EuiFlexItem
-                    grow={false}
-                    className="explore-results-action-bar__explore-download-csv-flex-item"
-                  >
+                  <EuiFlexItem grow={false}>
                     <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
                   </EuiFlexItem>
                 )}

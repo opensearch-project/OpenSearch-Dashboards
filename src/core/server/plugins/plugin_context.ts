@@ -173,6 +173,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     opensearch: {
       legacy: deps.opensearch.legacy,
+      registerClientTransport: deps.opensearch.registerClientTransport,
+      hasClientTransport: deps.opensearch.hasClientTransport,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,

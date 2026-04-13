@@ -68,6 +68,7 @@ describe('deepCloneWithBuffers()', () => {
 
     expect(Buffer.isBuffer(input)).toBe(true);
     expect(Buffer.isBuffer(output)).toBe(true);
+    // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
     expect(Buffer.compare(output, input));
     expect(output).not.toBe(input);
   });
@@ -84,6 +85,7 @@ describe('deepCloneWithBuffers()', () => {
 
     expect(Buffer.isBuffer(input.a.b.c)).toBe(true);
     expect(Buffer.isBuffer(output.a.b.c)).toBe(true);
+    // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
     expect(Buffer.compare(output.a.b.c, input.a.b.c));
     expect(output.a.b.c).not.toBe(input.a.b.c);
   });

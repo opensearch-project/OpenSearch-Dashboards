@@ -5,6 +5,7 @@
 
 import DOMPurify from 'dompurify';
 import { HeatmapSeriesOption } from 'echarts';
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import type { Encoding } from 'vega-lite/build/src/encoding';
 import { AggregationType, VisColumn, Positions, ColorSchemas, ScaleType } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';

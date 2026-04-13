@@ -16,9 +16,13 @@ import { isEmpty, isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
-import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
+import {
+  AxisTypeMapping,
+  ChartType,
+  useVisualizationRegistry,
+} from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
-import { getColumnMatchFromMapping } from '../../visualization_builder_utils';
+import { convertMappingsToStrings } from '../../visualization_builder_utils';
 
 interface VisColumnOption {
   column: VisColumn;
@@ -75,6 +79,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
   const firstSelectorInput = useRef<HTMLInputElement | undefined>(undefined);
+  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
 
   // switchAxes only support heatmap scatter and bar
   const showSwitch = chartType === 'heatmap' || chartType === 'bar' || chartType === 'scatter';
@@ -96,32 +101,24 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     }
   }, [currentMapping]);
 
-  // All axis mappings of the selected chart type
-  const allMappings = useMemo(
-    () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings,
-    [chartType, visualizationRegistry]
-  );
-
-  const columnsCount = useMemo(
-    () => [numericalColumns.length, categoricalColumns.length, dateColumns.length],
-    [numericalColumns.length, categoricalColumns.length, dateColumns.length]
-  );
-
   // Filter available chart mappings based on the data's column types
   // This ensures we only show mappings that are compatible with the current dataset structure
   const availableMappings = useMemo(() => {
-    if (!allMappings) {
-      return [];
-    }
+    const mappings: AxisTypeMapping[] = [];
+    const ruleMatch = visualizationRegistry.findRulesByColumns(
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      chartType
+    );
 
-    return allMappings.filter((mapping) => {
-      const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(mapping);
-      const [currNum, currCat, currDate] = columnsCount;
-      return ruleNum <= currNum && ruleCat <= currCat && ruleDate <= currDate;
+    ruleMatch.all.forEach((match) => {
+      match.rules.forEach((rule) => {
+        mappings.push(...rule.mappings);
+      });
     });
-  }, [columnsCount, allMappings]);
-
-  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
+    return mappings;
+  }, [categoricalColumns, chartType, dateColumns, numericalColumns, visualizationRegistry]);
 
   useEffect(() => {
     // This is an intentional design since we want to modify the mapping object from outside
@@ -154,43 +151,27 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 
   useEffect(() => {
     // Current selected axis mapping
-    const updatedAxes: AxisColumnMappings = {};
+    const normalizedAxesSelections: AxisColumnMappings = {};
     Object.entries(currentSelections).forEach(([key, value]) => {
       if (value) {
-        updatedAxes[key as AxisRole] = value;
+        normalizedAxesSelections[key as AxisRole] = value;
       }
     });
+    const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
+      chartType,
+      convertMappingsToStrings(normalizedAxesSelections),
+      [...numericalColumns, ...categoricalColumns, ...dateColumns]
+    );
 
-    // Find the mapping based on current selected axis mapping, if found, then current selection is valid
-    const found = remainingMappings.find((m) => {
-      if (Object.keys(m).length === Object.keys(updatedAxes).length) {
-        return Object.keys(m).every(
-          (key) => m[key as AxisRole]?.type === updatedAxes[key as AxisRole]?.schema
-        );
-      }
-      return false;
-    });
-
-    if (found) {
-      // Find a vis rule for the current mapping
-      const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
-        Object.fromEntries(
-          Object.entries(currentSelections)
-            .filter(([, value]) => !!value)
-            .map(([key, value]) => [key, value.name])
-        ),
-        [...numericalColumns, ...categoricalColumns, ...dateColumns]
-      );
-      // If rule can be found, update visualization with the new axes mapping
-      // Limitation: the current implementation will only call updateVisualization() when the select
-      // mapping is valid and has rule mapped, which means partial selections won't trigger visualization
-      // updates until they form a complete valid mapping configuration.
-      // From the user's perspective, this means no visual feedback is provided during the selection
-      // process until a complete valid configuration is achieved, potentially leading to confusion
-      // about whether their partial selections are having any effect.
-      if (ruleToUse) {
-        updateVisualization({ mappings: updatedAxes });
-      }
+    // If rule can be found, update visualization with the new axes mapping
+    // Limitation: the current implementation will only call updateVisualization() when the select
+    // mapping is valid and has rule mapped, which means partial selections won't trigger visualization
+    // updates until they form a complete valid mapping configuration.
+    // From the user's perspective, this means no visual feedback is provided during the selection
+    // process until a complete valid configuration is achieved, potentially leading to confusion
+    // about whether their partial selections are having any effect.
+    if (ruleToUse) {
+      updateVisualization({ mappings: normalizedAxesSelections });
     }
   }, [
     updateVisualization,
@@ -200,6 +181,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     numericalColumns,
     categoricalColumns,
     dateColumns,
+    chartType,
   ]);
 
   const findColumns = useMemo(

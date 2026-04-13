@@ -30,7 +30,7 @@
 
 // @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
-import * as React from 'react';
+
 import { Container, isErrorEmbeddable } from '../lib';
 import {
   ContactCardEmbeddable,

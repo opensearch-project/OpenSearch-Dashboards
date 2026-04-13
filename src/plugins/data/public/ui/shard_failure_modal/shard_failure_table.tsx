@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, ReactElement } from 'react';
+import { useState, ReactElement } from 'react';
 // @ts-ignore
 import { EuiInMemoryTable, EuiSmallButtonIcon } from '@elastic/eui';
 // @ts-ignore

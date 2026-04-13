@@ -37,7 +37,6 @@ import {
 
 jest.mock('../lib/url_shortener', () => ({ shortenUrl: jest.fn() }));
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ExportUrlAsType, UrlPanelContent } from './url_panel_content';

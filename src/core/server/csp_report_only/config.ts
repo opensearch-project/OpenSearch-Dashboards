@@ -4,7 +4,7 @@
  */
 
 import { TypeOf, schema } from '@osd/config-schema';
-import { CSP_TRUSTED_ENDPOINTS } from '../constants';
+import { STRICT_CSP_RULES_DEFAULT_VALUE } from '../constants';
 
 /**
  * @internal
@@ -16,25 +16,7 @@ export const config = {
   schema: schema.object({
     isEmitting: schema.boolean({ defaultValue: false }),
     rules: schema.arrayOf(schema.string(), {
-      defaultValue: [
-        `default-src 'self'`,
-        `script-src 'self'`,
-        `script-src-attr 'none'`,
-        `style-src 'self'`,
-        `style-src-elem 'self'`,
-        `style-src-attr 'self' 'unsafe-inline'`,
-        `child-src 'none'`,
-        `worker-src 'self'`,
-        `frame-src 'none'`,
-        `object-src 'none'`,
-        `manifest-src 'self'`,
-        `media-src 'none'`,
-        `font-src 'self'`,
-        `connect-src 'self' ${CSP_TRUSTED_ENDPOINTS.join(' ')}`,
-        `img-src 'self' data: ${CSP_TRUSTED_ENDPOINTS.join(' ')}`,
-        `form-action 'self'`,
-        `frame-ancestors 'self'`,
-      ],
+      defaultValue: STRICT_CSP_RULES_DEFAULT_VALUE,
     }),
     nonceDirectives: schema.arrayOf(schema.string(), {
       defaultValue: ['style-src-elem'],

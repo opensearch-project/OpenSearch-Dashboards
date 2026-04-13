@@ -4,7 +4,6 @@
  */
 
 import { EuiSpacer, EuiText, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
-import React from 'react';
 
 export const NewDatasourceDescription = () => {
   return (

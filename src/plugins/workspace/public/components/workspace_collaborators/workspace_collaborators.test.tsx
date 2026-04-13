@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { WorkspaceCollaborators } from './workspace_collaborators';

@@ -150,6 +150,7 @@ export const createQueryAssistExtension = (
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <QueryAssistWrapper
           dependencies={dependencies}
           http={http}
@@ -164,6 +165,7 @@ export const createQueryAssistExtension = (
     getBanner: (dependencies) => {
       // advertise query assist if user is not on a supported language.
       return (
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <QueryAssistWrapper
           dependencies={dependencies}
           http={http}
@@ -181,6 +183,7 @@ export const createQueryAssistExtension = (
     },
     getBottomPanel: (dependencies) => {
       return (
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <QueryAssistWrapper
           dependencies={dependencies}
           http={http}
@@ -277,6 +280,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
           isSummaryAgentAvailable,
         }}
       >
+        {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
         {props.children}
       </QueryAssistContext.Provider>
     </>

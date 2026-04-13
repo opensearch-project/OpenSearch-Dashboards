@@ -77,12 +77,22 @@ test('redirects to app using state transfer with by value mode', async () => {
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
+  embeddable.getRoot = jest.fn(() => ({
+    getTitle: () => 'containerTitle',
+    id: 'containerId',
+    getInput: () => ({ panels: {} }),
+  }));
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',
     state: {
       originatingApp: 'superCoolCurrentApp',
       embeddableId: '123',
+      containerInfo: {
+        containerName: 'containerTitle',
+        containerId: 'containerId',
+      },
       valueInput: {
         id: '123',
         viewMode: ViewMode.EDIT,
@@ -101,6 +111,12 @@ test('redirects to app using state transfer without by value mode', async () => 
     true
   );
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
+  embeddable.getRoot = jest.fn(() => ({
+    getTitle: () => 'containerTitle',
+    id: 'containerId',
+  }));
+
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',
@@ -108,6 +124,10 @@ test('redirects to app using state transfer without by value mode', async () => 
       originatingApp: 'superCoolCurrentApp',
       embeddableId: '123',
       valueInput: undefined,
+      containerInfo: {
+        containerName: 'containerTitle',
+        containerId: 'containerId',
+      },
     },
   });
 });

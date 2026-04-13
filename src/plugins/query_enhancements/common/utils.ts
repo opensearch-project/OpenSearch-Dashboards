@@ -7,6 +7,7 @@ import { Query } from 'src/plugins/data/common';
 import { from, timer } from 'rxjs';
 import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
 import { stringify } from '@osd/std';
+import { DEFAULT_DATA, getHighlightRequest } from '../../data/common';
 import {
   EnhancedFetchContext,
   QueryAggConfig,
@@ -70,11 +71,23 @@ export const throwFacetError = (response: any) => {
 
 export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
   const { http, path, signal } = context;
+  // Only request highlight for dataset types backed by OpenSearch indices
+  const datasetType = query.dataset?.type;
+  const supportsHighlight =
+    !datasetType ||
+    datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ||
+    datasetType === DEFAULT_DATA.SET_TYPES.INDEX;
+  const highlight =
+    isPPLSearchQuery(query) && supportsHighlight
+      ? getHighlightRequest(query.query, true)
+      : undefined;
   const body = stringify({
     query: { ...query, format: 'jdbc' },
     aggConfig,
     pollQueryResultsParams: context.body?.pollQueryResultsParams,
     timeRange: context.body?.timeRange,
+    ...(highlight && { highlight }),
+    ...(context.body?.queryId && { queryId: context.body.queryId }),
   });
 
   return from(
@@ -86,20 +99,38 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
         signal,
       })
       .catch(async (error) => {
-        if (error.name === 'AbortError' && context.body?.pollQueryResultsParams?.queryId) {
-          // Cancel job
-          try {
-            await http.fetch({
-              method: 'DELETE',
-              path: API.DATA_SOURCE.ASYNC_JOBS,
-              query: {
-                id: query.dataset?.dataSource?.id,
-                queryId: context.body?.pollQueryResultsParams.queryId,
-              },
-            });
-          } catch (cancelError) {
-            // eslint-disable-next-line no-console
-            console.error('Failed to cancel query:', cancelError);
+        if (error.name === 'AbortError') {
+          if (context.body?.pollQueryResultsParams?.queryId) {
+            // Cancel async job
+            try {
+              await http.fetch({
+                method: 'DELETE',
+                path: API.DATA_SOURCE.ASYNC_JOBS,
+                query: {
+                  id: query.dataset?.dataSource?.id,
+                  queryId: context.body?.pollQueryResultsParams.queryId,
+                },
+              });
+            } catch (cancelError) {
+              // eslint-disable-next-line no-console
+              console.error('Failed to cancel async query:', cancelError);
+            }
+          } else if (context.body?.queryId) {
+            // Fire-and-forget: notify backend to cancel the PPL task.
+            // No need to await — the UI should move on immediately.
+            http
+              .fetch({
+                method: 'POST',
+                path: API.PPL_CANCEL,
+                body: JSON.stringify({
+                  queryId: context.body.queryId,
+                  dataSourceId: query.dataset?.dataSource?.id,
+                }),
+              })
+              .catch((cancelError) => {
+                // eslint-disable-next-line no-console
+                console.error('Failed to cancel PPL query:', cancelError);
+              });
           }
         }
         throw error;

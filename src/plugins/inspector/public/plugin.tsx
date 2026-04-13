@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import * as React from 'react';
+
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { InspectorViewRegistry } from './view_registry';

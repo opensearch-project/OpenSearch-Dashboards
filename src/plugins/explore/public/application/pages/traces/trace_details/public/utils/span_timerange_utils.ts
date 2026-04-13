@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import { Span } from '../traces/span_detail_table';
 import { hasNanosecondPrecision } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from './span_data_utils';

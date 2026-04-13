@@ -44,7 +44,8 @@ const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> =
   if (!doc.attributes.fields) return doc;
 
   const fieldsString = doc.attributes.fields;
-  const fields = JSON.parse(fieldsString) as any[];
+  // fields may already be an array if written directly to the index by external tooling
+  const fields = (Array.isArray(fieldsString) ? fieldsString : JSON.parse(fieldsString)) as any[];
   const migratedFields = fields.map((field) => {
     if (field.subType === 'multi') {
       return {

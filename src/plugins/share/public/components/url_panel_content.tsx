@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, ReactElement } from 'react';
+import React, { Component, ReactNode } from 'react';
 
 import {
   EuiButton,
@@ -121,9 +121,7 @@ export class UrlPanelContent extends Component<Props, State> {
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
           {this.renderShortUrlSwitch()}
-
           <EuiSpacer size="m" />
-
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
               <EuiButton
@@ -434,7 +432,7 @@ export class UrlPanelContent extends Component<Props, State> {
     );
   };
 
-  private renderUrlParamExtensions = (): ReactElement | void => {
+  private renderUrlParamExtensions = (): ReactNode => {
     if (!this.props.urlParamExtensions) {
       return;
     }

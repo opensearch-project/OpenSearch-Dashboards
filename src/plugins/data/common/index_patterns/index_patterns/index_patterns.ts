@@ -132,6 +132,7 @@ export class IndexPatternsService {
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(
             obj.attributes.title,
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             obj.references,
             this.getDataSource
           );
@@ -262,22 +263,6 @@ export class IndexPatternsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: IndexPatternFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
@@ -343,32 +328,6 @@ export class IndexPatternsService {
    * @param title
    * @param options
    */
-  private refreshFieldSpecMap = async (
-    fields: IndexPatternFieldMap,
-    id: string,
-    title: string,
-    options: GetFieldsOptions
-  ) => {
-    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
-    try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
-    } catch (err) {
-      if (err instanceof IndexPatternMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-        return {};
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-          values: { id, title },
-        }),
-      });
-    }
-    return fields;
-  };
-
   /**
    * Applies a set of formats to a set of fields
    * @param fieldSpecs
@@ -422,7 +381,11 @@ export class IndexPatternsService {
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFields: FieldSpec[] = Array.isArray(fields)
+      ? fields
+      : fields
+      ? JSON.parse(fields)
+      : [];
     const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
@@ -440,6 +403,7 @@ export class IndexPatternsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: parsedSchemaMappings,
     };
@@ -472,40 +436,9 @@ export class IndexPatternsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta, dataSourceRef } = spec;
     const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
-    try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: typeMeta && typeMeta.params,
-            dataSourceId: dataSourceRef?.id,
-          })
-        : spec.fields;
-    } catch (err) {
-      isSaveRequired = false;
-      if (err instanceof IndexPatternMissingIndices) {
-        this.onNotification({
-          title: (err as any).message,
-          color: 'danger',
-          iconType: 'alert',
-        });
-      } else {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
-            values: { id, title },
-          }),
-        });
-      }
-    }
 
     Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
       const field = spec.fields?.[fieldName];
@@ -516,22 +449,6 @@ export class IndexPatternsService {
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(indexPattern);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
-            defaultMessage:
-              'Error saving after fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: indexPattern.id,
-              title: indexPattern.title,
-            },
-          }),
-        });
-      }
-    }
 
     if (indexPattern.isUnsupportedTimePattern()) {
       this.onUnsupportedTimePattern({

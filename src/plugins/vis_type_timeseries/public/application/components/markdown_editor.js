@@ -33,7 +33,7 @@
 
 import PropTypes from 'prop-types';
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';

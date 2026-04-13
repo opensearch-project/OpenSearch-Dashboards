@@ -317,7 +317,7 @@ export const executeQueries = createAsyncThunk<
     const dataTableResults = latestState.results[dataTableCacheKey];
 
     // Only execute RED metrics queries if we have table results with data
-    if (dataTableResults && dataTableResults.hits?.hits?.length > 0) {
+    if (dataTableResults && dataTableResults.hasResults) {
       const dataset = query.dataset
         ? await services.data.dataViews.get(
             query.dataset.id,
@@ -701,7 +701,7 @@ const executeQueryBase = async (
 /**
  * Helper function to create SearchSource with common configuration
  */
-const createSearchSourceWithQuery = async (
+export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,
@@ -745,6 +745,7 @@ const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());

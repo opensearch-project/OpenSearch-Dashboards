@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { FeatureCards } from './feature_cards';
 import { AppCategory, ChromeNavLink } from 'opensearch-dashboards/public';

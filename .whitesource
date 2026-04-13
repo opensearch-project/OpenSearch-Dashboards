@@ -13,9 +13,6 @@
     "minSeverityLevel": "LOW"
   },
   "remediateSettings": {
-    "addLabels": [
-      "skip-changelog"
-    ],
     "workflowRules": {
       "enabled": true
     }

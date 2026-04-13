@@ -6,6 +6,7 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
+import { useUnmount, useMount } from 'react-use';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
@@ -16,13 +17,12 @@ import { ConfirmationRequest } from '../services/confirmation_service';
 import {
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
-  EventType,
 } from '../../common/events';
 import type {
   Message,
   UserMessage,
 } from '../../common/types';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
@@ -78,6 +78,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
+  const [isSendingToolResult, setIsSendingToolResult] = useState(false);
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -103,6 +104,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     return () => subscription.unsubscribe();
   }, [confirmationService]);
 
+  // Get telemetry recorder from core services
+  const telemetryRecorder = useMemo(
+    () => services.core?.telemetry?.getPluginRecorder('chat'),
+    [services.core?.telemetry]
+  );
+
   // Create the event handler using useMemo
   const eventHandler = useMemo(
     () =>
@@ -110,14 +117,16 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         assistantActionService: service,
         chatService,
         confirmationService,
+        telemetryRecorder,
         callbacks: {
           onTimelineUpdate: setTimeline,
           onStreamingStateChange: setIsStreaming,
           onStartResponse: setStartResponse,
+          onSendToolResultStateChange: setIsSendingToolResult,
           getTimeline: () => timelineRef.current,
         },
       }),
-    [service, chatService, confirmationService]
+    [service, chatService, confirmationService, telemetryRecorder]
   );
 
   // Subscribe to tool updates from the service
@@ -152,65 +161,21 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     try {
       // Check if aborted before starting
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
-      const result = await chatService.restoreLatestConversation();
+      const events = await chatService.restoreLatestConversation();
 
       // Check if aborted after async operation
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
+      
+      eventHandler.clearState();
+      setIsLoading(false);
 
-      if (result && result.messages.length > 0) {
-        const { messages } = result;
-
-        // load message and query unfinished tool call
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage.role === 'assistant' && lastMessage.toolCalls) {
-          // restore unfinished tool call by triggering events
-          const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
-            // Check if there's no corresponding tool result message
-            const hasToolResult = messages.some(msg =>
-              msg.role === 'tool' && msg.toolCallId === toolCall.id
-            );
-            return !hasToolResult;
-          });
-
-          // Trigger tool call events for unfinished tool calls
-          for (const toolCall of unfinishedToolCalls) {
-            try {
-              // Trigger TOOL_CALL_START event
-              await eventHandler.handleEvent({
-                type: EventType.TOOL_CALL_START,
-                toolCallId: toolCall.id,
-                toolCallName: toolCall.function.name,
-                parentMessageId: lastMessage.id,
-                timestamp: Date.now(),
-              });
-
-              // Trigger TOOL_CALL_ARGS event with full arguments
-              await eventHandler.handleEvent({
-                type: EventType.TOOL_CALL_ARGS,
-                toolCallId: toolCall.id,
-                delta: toolCall.function.arguments,
-                timestamp: Date.now(),
-              });
-
-              // Trigger TOOL_CALL_END event to execute the tool
-              await eventHandler.handleEvent({
-                type: EventType.TOOL_CALL_END,
-                toolCallId: toolCall.id,
-                timestamp: Date.now(),
-              });
-
-            } catch (error: any) {
-              console.error(`Error restoring tool call for ${toolCall.function.name}:`, error);
-            }
-          }
+      if (events) {
+        for (const event of events) {
+          if (abortController.signal.aborted) return;
+          await eventHandler.handleEvent(event);
         }
-        setTimeline(messages);
       }
     } catch (error: any) {
       // Don't show error if aborted
@@ -231,9 +196,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [chatService, eventHandler]);
 
   // Restore timeline from latest conversation on component mount
-  useEffect(() => {
+  useMount(() => {
     restoreConversationTimeline();
-  }, [restoreConversationTimeline]);
+  });
 
   // Save conversation to history whenever timeline changes
   useEffect(() => {
@@ -241,6 +206,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       chatService.saveConversation(timeline);
     }
   }, [timeline, chatService, isLoading]);
+
+  // Clear thread ID so next mount can restore the latest conversation
+  useUnmount(() => {
+    services.core.chat.resetThreadId()
+  });
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
@@ -266,6 +236,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
 
       setTimeline((prev) => [...prev, timelineUserMessage]);
+      setScreenshotData(undefined);
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -290,7 +261,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           setStartResponse(false);
           setIsStreaming(false);
           currentSubscriptionRef.current = null;
-          setScreenshotData(undefined);
         },
       });
 
@@ -406,9 +376,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setCurrentRunId(null);
     setIsStreaming(false);
     setPendingConfirmation(null);
+    confirmationService.cleanAll();
     setShowHistory(false);
     setRestoreError(null);
-  }, [chatService]);
+  }, [chatService, confirmationService]);
 
   const handleStop = useCallback(() => {
     // Abort the current streaming request
@@ -504,29 +475,28 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     try {
       // Check if aborted before starting
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
 
       // Check if aborted after async operation
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
       if (events) {
-        // Process each event through the event handler for proper state restoration
-        for (const event of events) {
-          await eventHandler.handleEvent(event);
-        }
-
         // Reset UI state
+        eventHandler.clearState();
         setCurrentRunId(null);
         setIsStreaming(false);
         setPendingConfirmation(null);
+        confirmationService.cleanAll();
         setShowHistory(false);
+        setIsLoading(false);
+
+        for (const event of events) {
+          if (abortController.signal.aborted) return;
+          await eventHandler.handleEvent(event);
+        }
       }
     } catch (error: any) {
       // Don't show error if aborted
@@ -553,13 +523,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         loadingAbortControllerRef.current = null;
       }
     }
-  }, [chatService, eventHandler, toasts]);
+  }, [chatService, eventHandler, confirmationService, toasts]);
 
-  const handleRetryRestore = useCallback(() => {
-    restoreConversationTimeline();
-  }, [restoreConversationTimeline]);
-
-  // Build window instance object
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
     startNewChat: () => handleNewChat(),
     sendMessage: async ({content, messages}) => (await handleSendRef.current?.({input:content, messages}))
@@ -610,7 +575,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             <p>{restoreError}</p>
           </EuiText>
           <EuiButton
-            onClick={handleRetryRestore}
+            onClick={restoreConversationTimeline}
             iconType="refresh"
           >
             {i18n.translate('chat.window.retryButton', {
@@ -673,6 +638,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             input={input}
             isCapturing={isCapturing}
             isStreaming={isStreaming}
+            isSendingToolResult={isSendingToolResult}
+            pendingConfirmation={pendingConfirmation}
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}

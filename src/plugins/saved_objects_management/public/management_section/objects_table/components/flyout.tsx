@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
+import { Component, Fragment, ReactNode } from 'react';
 import { take, get as getField } from 'lodash';
 import {
   EuiFlyout,

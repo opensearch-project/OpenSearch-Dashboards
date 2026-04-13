@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { of } from 'rxjs';
 import { createNewVisActions } from './new_vis_actions';
 import { coreMock } from '../../../../core/public/mocks';
 import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
+import { embeddablePluginMock } from '../../../embeddable/public/mocks';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../../dashboard/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { ActionExecutionContext } from '../../../ui_actions/public';
@@ -92,6 +94,7 @@ describe('createNewVisActions', () => {
     const application = coreMock.createStart().application;
     const savedObjects = coreMock.createStart().savedObjects;
     const data = dataPluginMock.createStartContract();
+    const embeddable = embeddablePluginMock.createStartContract();
     const types = {
       all: jest.fn().mockReturnValue(mockVisTypes),
       getAliases: jest.fn().mockReturnValue([]),
@@ -105,6 +108,10 @@ describe('createNewVisActions', () => {
       return undefined;
     });
 
+    // Mock currentAppId$ to emit so that
+    // `currentAppId$.pipe(take(1)).toPromise()` resolves in execute()
+    application.currentAppId$ = of(undefined);
+
     return {
       types,
       uiActions,
@@ -113,6 +120,7 @@ describe('createNewVisActions', () => {
       application,
       savedObjects,
       data,
+      embeddable,
     };
   };
 
@@ -213,7 +221,7 @@ describe('createNewVisActions', () => {
     }
   });
 
-  test('registers action that opens modal for visualizations requiring search with showIndexSelection', () => {
+  test('registers action that opens modal for visualizations requiring search with showIndexSelection', async () => {
     const services = setupServices();
     createNewVisActions(services);
 
@@ -226,16 +234,16 @@ describe('createNewVisActions', () => {
 
     expect(withSearchActionCall).toBeDefined();
 
-    // Execute the action
+    // Execute the action and await so the async currentAppId$ resolves
     if (withSearchActionCall) {
-      withSearchActionCall[1].execute({} as ActionExecutionContext<{}>);
+      await withSearchActionCall[1].execute({} as ActionExecutionContext<{}>);
     }
 
     // Should open a modal
     expect(services.overlays.openModal).toHaveBeenCalledTimes(1);
   });
 
-  test('registers action that navigates directly for visualizations requiring search without showIndexSelection', () => {
+  test('registers action that navigates directly for visualizations requiring search without showIndexSelection', async () => {
     const services = setupServices();
     createNewVisActions(services);
 
@@ -250,13 +258,83 @@ describe('createNewVisActions', () => {
 
     // Execute the action
     if (withSearchNoSelectionActionCall) {
-      withSearchNoSelectionActionCall[1].execute({} as ActionExecutionContext<{}>);
+      await withSearchNoSelectionActionCall[1].execute({} as ActionExecutionContext<{}>);
     }
 
     // Should navigate directly without opening a modal
     expect(services.overlays.openModal).not.toHaveBeenCalled();
     expect(services.application.navigateToApp).toHaveBeenCalledWith('visualize', {
       path: '#/create?type=withSearchNoSelection',
+    });
+  });
+
+  describe('when currentAppId$ has a value', () => {
+    const setupServicesWithAppId = (appId: string) => {
+      const services = setupServices();
+      services.application.currentAppId$ = of(appId);
+      // Ensure getStateTransfer returns the same mock instance used by createNewVisActions
+      const stateTransfer = services.embeddable.getStateTransfer();
+      (services.embeddable.getStateTransfer as jest.Mock).mockReturnValue(stateTransfer);
+      return { services, stateTransfer };
+    };
+
+    test('uses stateTransfer.navigateToEditor for standard vis types', async () => {
+      const { services, stateTransfer } = setupServicesWithAppId('dashboard');
+      createNewVisActions(services);
+
+      const standardActionCall = Array.from({
+        length: services.uiActions.addTriggerAction.mock.calls.length,
+      })
+        .map((_, i) => services.uiActions.addTriggerAction.mock.calls[i])
+        .find((call) => call[1].id === 'add_vis_action_withSearchNoSelection');
+
+      expect(standardActionCall).toBeDefined();
+      await standardActionCall![1].execute({} as ActionExecutionContext<{}>);
+
+      // Should use stateTransfer with originatingApp instead of navigateToApp
+      expect(services.application.navigateToApp).not.toHaveBeenCalled();
+      expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('visualize', {
+        path: '#/create?type=withSearchNoSelection',
+        state: { originatingApp: 'dashboard' },
+      });
+    });
+
+    test('uses stateTransfer.navigateToEditor for alias vis with promotion', async () => {
+      const { services, stateTransfer } = setupServicesWithAppId('dashboard');
+      createNewVisActions(services);
+
+      const promotedActionCall = Array.from({
+        length: services.uiActions.addTriggerAction.mock.calls.length,
+      })
+        .map((_, i) => services.uiActions.addTriggerAction.mock.calls[i])
+        .find((call) => call[1].id === 'add_vis_action_aliasAppWithPromotion');
+
+      expect(promotedActionCall).toBeDefined();
+      await promotedActionCall![1].execute({} as ActionExecutionContext<{}>);
+
+      expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('promotedApp', {
+        path: '/promoted',
+        state: { originatingApp: 'dashboard' },
+      });
+    });
+
+    test('uses stateTransfer.navigateToEditor for alias vis without promotion', async () => {
+      const { services, stateTransfer } = setupServicesWithAppId('dashboard');
+      createNewVisActions(services);
+
+      const aliasActionCall = Array.from({
+        length: services.uiActions.addTriggerAction.mock.calls.length,
+      })
+        .map((_, i) => services.uiActions.addTriggerAction.mock.calls[i])
+        .find((call) => call[1].id === 'add_vis_action_aliasApp');
+
+      expect(aliasActionCall).toBeDefined();
+      await aliasActionCall![1].execute({} as ActionExecutionContext<{}>);
+
+      expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('otherApp', {
+        path: '/path',
+        state: { originatingApp: 'dashboard' },
+      });
     });
   });
 });

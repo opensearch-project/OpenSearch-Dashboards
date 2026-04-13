@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {

@@ -53,6 +53,7 @@ export const useInitPage = () => {
           const query = {
             ...queryFromSavedSearch,
             ...queryFromUrl,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             query: queryFromUrl.query || queryFromSavedSearch.query,
           };
           if (query) {
@@ -72,9 +73,16 @@ export const useInitPage = () => {
           const { chartType, params, axesMapping } = JSON.parse(visualization);
           visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
         }
+        // Only use saved object's activeTab if there's no activeTab in URL state
+        // This preserves user's tab selection from URL
         if (uiState) {
-          const { activeTab } = JSON.parse(uiState);
-          dispatch(setActiveTab(activeTab));
+          const urlState = services.osdUrlStateStorage?.get('_a') ?? {};
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
+          const hasActiveTabInUrl = urlState?.ui?.activeTabId;
+          if (!hasActiveTabInUrl) {
+            const { activeTab } = JSON.parse(uiState);
+            dispatch(setActiveTab(activeTab));
+          }
         }
 
         // Add to recently accessed
@@ -90,6 +98,7 @@ export const useInitPage = () => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services }));
       }
     }

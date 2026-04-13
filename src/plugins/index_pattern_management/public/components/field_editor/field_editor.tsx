@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
 import {
@@ -788,13 +788,17 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId } = this.state;
+    const { fieldFormatId, isSaving } = this.state;
+
+    if (isSaving) {
+      return;
+    }
+
+    this.setState({
+      isSaving: true,
+    });
 
     if (field.scripted) {
-      this.setState({
-        isSaving: true,
-      });
-
       const isValid = await isScriptValid({
         name: field.name,
         script: field.script as string,
@@ -845,13 +849,19 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         } else {
           indexPattern.fields.remove(field);
         }
+      })
+      .finally(() => {
+        this.setState({
+          isSaving: false,
+        });
       });
   };
 
   isSavingDisabled() {
-    const { spec, hasFormatError, hasScriptError } = this.state;
+    const { spec, hasFormatError, hasScriptError, isSaving } = this.state;
 
     if (
+      isSaving ||
       hasFormatError ||
       hasScriptError ||
       !spec.name ||

@@ -4,7 +4,7 @@
  */
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from 'src/plugins/data/public';

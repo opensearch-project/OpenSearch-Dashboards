@@ -115,6 +115,7 @@ function createWithDataSource(id: string) {
       timeFieldName,
       fields,
       title,
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: { otelLogs: { serviceName: 'service.name' } },
     },

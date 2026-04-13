@@ -19,17 +19,6 @@ import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
 
-jest.mock('./rule_repository', () => ({
-  ALL_VISUALIZATION_RULES: [
-    {
-      id: 'rule1',
-    },
-    {
-      id: 'rule2',
-    },
-  ],
-}));
-
 jest.mock('./style_panel/threshold/threshold_utils', () => ({
   Colors: {
     ['blues']: {

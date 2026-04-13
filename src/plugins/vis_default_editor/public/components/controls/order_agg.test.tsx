@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { OrderByParamEditor } from './order_by';
 

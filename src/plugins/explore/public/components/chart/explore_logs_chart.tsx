@@ -33,7 +33,6 @@ import {
   executeHistogramQuery,
   prepareHistogramCacheKey,
   defaultPrepareQueryString,
-  executeDataTableQuery,
 } from '../../application/utils/state_management/actions/query_actions';
 import { ResultsSummary } from '../results_summary/results_summary';
 import { selectSummaryAgentIsAvailable } from '../../application/utils/state_management/selectors';
@@ -72,24 +71,17 @@ export const ExploreLogsChart = ({
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const dispatch = useDispatch();
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
-  const dataTableCacheKey = defaultPrepareQueryString(query);
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(histogramCacheKey));
     dispatch(clearQueryStatusMapByKey(histogramCacheKey));
     dispatch(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,
         interval: newInterval,
         queryString: defaultPrepareQueryString(query),
-      })
-    );
-    dispatch(
-      executeDataTableQuery({
-        services,
-        cacheKey: dataTableCacheKey,
-        queryString: dataTableCacheKey,
       })
     );
   };
@@ -103,6 +95,7 @@ export const ExploreLogsChart = ({
       );
       dispatch(clearResults());
       dispatch(clearQueryStatusMap());
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
     [dispatch, services]

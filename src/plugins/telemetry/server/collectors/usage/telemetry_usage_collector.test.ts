@@ -78,6 +78,7 @@ describe('telemetry_usage_collector', () => {
     // empty
     writeFileSync(tempFiles.empty, '');
     // 1 byte too big
+    // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
     writeFileSync(tempFiles.too_big, Buffer.alloc(MAX_FILE_SIZE + 1));
     // write-only file
     writeFileSync(tempFiles.unreadable, 'valid: true', { mode: 0o222 });

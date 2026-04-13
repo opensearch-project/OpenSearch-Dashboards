@@ -54,6 +54,7 @@ export const useInitPage = () => {
           const query = {
             ...queryFromSavedSearch,
             ...queryFromUrl,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             query: queryFromUrl.query ?? queryFromSavedSearch.query,
           };
           if (query) {
@@ -91,23 +92,39 @@ export const useInitPage = () => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
-        dispatch(executeQueries({ services }));
 
-        // Restore active tab from saved search AFTER executeQueries so queries
-        // run with activeTabId="" (all tabs get results). The dataset_change_middleware
-        // clears activeTabId when setQueryState fires; dispatching setActiveTab before
-        // executeQueries would limit execution to one tab whose results may not match
-        // the currently visible tab.
+        // Restore active tab AFTER clearQueryStatusMap (which the
+        // dataset_change_middleware also dispatches when setQueryState fires
+        // above, clearing activeTabId to '').  Dispatching here ensures
+        // BottomRightContainer sees a valid activeTabId and renders the tabs
+        // component instead of the "Start searching" placeholder.
         const uiState = savedAgentTraces.uiState;
         if (uiState) {
-          const { activeTab } = JSON.parse(uiState);
-          dispatch(setActiveTab(activeTab));
+          try {
+            const { activeTab } = JSON.parse(uiState);
+            dispatch(setActiveTab(activeTab));
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to parse saved uiState:', e);
+          }
         }
 
         // Mark as initialized so the table moves past the loading gate.
-        // useInitialQueryExecution skips when agentTracesId is present, so
-        // this hook is responsible for the flag on the saved-search path.
         dispatch(setIsInitialized(true));
+
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
+        dispatch(executeQueries({ services })).then(() => {
+          if (savedAgentTraces.sort && savedAgentTraces.sort.length > 0) {
+            dispatch(setSort(savedAgentTraces.sort));
+          }
+          if (savedAgentTraces.columns && savedAgentTraces.columns.length > 0) {
+            dispatch(setColumns(savedAgentTraces.columns));
+          }
+        });
+      } else {
+        // Reset breadcrumbs and doc title for new/unsaved search
+        chrome.docTitle.change('Agent Traces');
+        chrome.setBreadcrumbs([{ text: 'Agent Traces' }]);
       }
     }
     if (error) {

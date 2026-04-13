@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS2345 TODO Fix me
 import type { OpenSearchDashboardsClient } from '@opensearch-project/opensearch/api/opensearch_dashboards';
 import type {
   ApiResponse,

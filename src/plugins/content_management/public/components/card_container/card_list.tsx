@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';

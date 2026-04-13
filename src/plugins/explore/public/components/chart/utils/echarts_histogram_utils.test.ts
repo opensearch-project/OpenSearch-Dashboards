@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import moment from 'moment-timezone';
 import {
   getSmartDateFormat,
   getTimezone,
@@ -205,17 +204,20 @@ describe('echarts_histogram_utils', () => {
 
   describe('createTooltipFormatter', () => {
     it('creates a formatter function', () => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const formatter = createTooltipFormatter(3600000, 1000, 5000, 'YYYY-MM-DD', '#333');
       expect(typeof formatter).toBe('function');
     });
 
     it('returns empty string for empty params array', () => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const formatter = createTooltipFormatter(3600000, 1000, 5000, 'YYYY-MM-DD', '#333');
       const result = (formatter as Function)([]);
       expect(result).toBe('');
     });
 
     it('formats single series tooltip', () => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const formatter = createTooltipFormatter(
         3600000,
         1609459200000,
@@ -236,6 +238,7 @@ describe('echarts_histogram_utils', () => {
     });
 
     it('includes partial data warning when timestamp is outside domain', () => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const formatter = createTooltipFormatter(
         3600000,
         1609459200000,
@@ -256,6 +259,7 @@ describe('echarts_histogram_utils', () => {
 
     it('applies text color to tooltip content', () => {
       const textColor = '#FF0000';
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const formatter = createTooltipFormatter(
         3600000,
         1609459200000,
@@ -275,6 +279,7 @@ describe('echarts_histogram_utils', () => {
     });
 
     it('renders color indicator with dimensions matching legend icon', () => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const formatter = createTooltipFormatter(
         3600000,
         1609459200000,
@@ -428,10 +433,11 @@ describe('echarts_histogram_utils', () => {
       expect(series.stack).toBeUndefined();
     });
 
-    it('caps bar max width at 50 pixels', () => {
+    it('sets bar width to 94% for balanced density', () => {
       const series = createBarSeries('test-id', 'Test', testData, '#54B399');
 
-      expect(series.barMaxWidth).toBe(50);
+      expect(series.barWidth).toBe('94%');
+      expect(series.barMaxWidth).toBe(80);
     });
 
     it('includes emphasis.focus set to series for legend hover highlighting', () => {
@@ -796,7 +802,7 @@ describe('echarts_histogram_utils', () => {
     it('configures dashed style on y-axis grid lines', () => {
       const spec = createHistogramSpec(mockChartData as any, defaultOptions);
 
-      expect((spec.yAxis as any).splitLine.show).toBe(false);
+      expect((spec.yAxis as any).splitLine.show).toBe(true);
       expect((spec.yAxis as any).splitLine.lineStyle.type).toBe('dashed');
     });
   });

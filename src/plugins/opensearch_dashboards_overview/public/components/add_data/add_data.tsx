@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';

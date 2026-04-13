@@ -30,7 +30,6 @@
 
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const significantTermsArgs = {
   __template: {
     field: '',
@@ -68,6 +67,7 @@ const significantTermsArgs = {
     },
   },
 };
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const simple_metric = {
   __template: { field: '' },
   field: '{field}',
@@ -76,14 +76,17 @@ const simple_metric = {
     // populated by a global rule
   },
 };
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const field_metric = {
   __template: { field: '' },
   field: '{field}',
 };
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const gap_policy = {
   __one_of: ['skip', 'insert_zeros'],
 };
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const simple_pipeline = {
   __template: {
     buckets_path: '',
@@ -538,6 +541,7 @@ const rules = {
     },
   },
 };
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const { terms, histogram, date_histogram } = rules['*'];
 
 export const aggs = (specService: SpecDefinitionsService) => {

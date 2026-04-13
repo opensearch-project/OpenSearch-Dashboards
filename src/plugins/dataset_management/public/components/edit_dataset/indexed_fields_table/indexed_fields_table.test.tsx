@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
 import { IndexPatternField, DataView } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';

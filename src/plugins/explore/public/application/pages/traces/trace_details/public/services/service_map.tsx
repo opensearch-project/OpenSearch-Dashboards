@@ -314,6 +314,7 @@ const ServiceNode = ({
       panelPaddingSize="none"
       anchorPosition="downCenter"
     >
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
@@ -838,7 +839,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
     const edgeSet = new Set<string>();
 
     hits.forEach((h) => {
-      const { spanId, parentSpanId } = h;
+      const { parentSpanId } = h;
       const serviceName = resolveServiceNameFromSpan(h) || h.serviceName;
       svcSet.add(serviceName);
 

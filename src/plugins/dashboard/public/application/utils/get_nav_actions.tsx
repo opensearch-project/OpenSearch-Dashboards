@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EUI_MODAL_CANCEL_BUTTON, EuiCompressedCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
@@ -187,6 +187,10 @@ export const getNavActions = (
                 services.application
               ),
             });
+          },
+          containerInfo: {
+            containerId: currentContainer.id,
+            containerName: currentContainer.getTitle(),
           },
         });
       }

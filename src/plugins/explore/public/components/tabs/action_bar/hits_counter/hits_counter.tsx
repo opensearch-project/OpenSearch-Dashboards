@@ -29,7 +29,7 @@
  */
 
 import './hits_counter.scss';
-import React from 'react';
+
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -83,11 +83,11 @@ export function HitsCounter({
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size="xs" color="subdued">
             {hits ? (
               <FormattedMessage
                 id="explore.discover.hitsResultTitle"
-                defaultMessage="{rowsCount} of {hits} results in {elapsedMs} ms"
+                defaultMessage="{rowsCount} / {hits} hits · {elapsedMs} ms"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">
@@ -105,7 +105,7 @@ export function HitsCounter({
             ) : (
               <FormattedMessage
                 id="explore.discover.noHitsResultTitle"
-                defaultMessage="{rowsCount} results in {elapsedMs} ms"
+                defaultMessage="{rowsCount} hits · {elapsedMs} ms"
                 values={{
                   rowsCount: (
                     <strong data-test-subj="discoverQueryRowsCount">

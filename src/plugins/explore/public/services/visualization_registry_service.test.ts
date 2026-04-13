@@ -5,30 +5,29 @@
 
 import { VisualizationRegistryService } from './visualization_registry_service';
 import { VisualizationRegistry } from '../components/visualizations/visualization_registry';
-import { VisualizationRule } from '../components/visualizations/types';
+import { VisualizationType } from '../components/visualizations/utils/use_visualization_types';
 
 describe('VisualizationRegistryService', () => {
   let service: VisualizationRegistryService;
-  let mockRegisterRule: jest.Mock;
-  let mockRegisterRules: jest.Mock;
-  let mockGetRules: jest.Mock;
+  let mockRegisterVisualization: jest.SpyInstance;
+  let mockGetVisualization: jest.SpyInstance;
+
+  const createMockVisualization = (type: string): VisualizationType<any> =>
+    (({
+      type,
+      name: `${type} chart`,
+      getRules: jest.fn().mockReturnValue([]),
+      ui: { style: { defaults: {}, render: jest.fn() } },
+    } as unknown) as VisualizationType<any>);
 
   beforeEach(() => {
-    // Create mock functions
-    mockRegisterRule = jest.fn();
-    mockRegisterRules = jest.fn();
-    mockGetRules = jest.fn().mockReturnValue([]);
+    mockRegisterVisualization = jest
+      .spyOn(VisualizationRegistry.prototype, 'registerVisualization')
+      .mockImplementation(jest.fn());
+    mockGetVisualization = jest
+      .spyOn(VisualizationRegistry.prototype, 'getVisualization')
+      .mockImplementation(jest.fn());
 
-    // Mock the VisualizationRegistry constructor and its methods
-    jest
-      .spyOn(VisualizationRegistry.prototype, 'registerRule')
-      .mockImplementation(mockRegisterRule);
-    jest
-      .spyOn(VisualizationRegistry.prototype, 'registerRules')
-      .mockImplementation(mockRegisterRules);
-    jest.spyOn(VisualizationRegistry.prototype, 'getRules').mockImplementation(mockGetRules);
-
-    // Create a new instance of the service
     service = new VisualizationRegistryService();
   });
 
@@ -37,138 +36,86 @@ describe('VisualizationRegistryService', () => {
   });
 
   describe('constructor', () => {
-    it('should create a new VisualizationRegistry instance', () => {
-      // Instead of checking if the constructor was called, we verify that
-      // the service has a registry property that is an instance of VisualizationRegistry
+    it('should create a service with a VisualizationRegistry instance', () => {
       const registry = service.getRegistry();
       expect(registry).toBeInstanceOf(VisualizationRegistry);
     });
   });
 
   describe('setup', () => {
-    it('should return an object with registerRule and registerRules methods', () => {
+    it('should return an object with registerVisualization method', () => {
       const setup = service.setup();
 
-      expect(setup).toHaveProperty('registerRule');
-      expect(setup).toHaveProperty('registerRules');
-      expect(typeof setup.registerRule).toBe('function');
-      expect(typeof setup.registerRules).toBe('function');
+      expect(setup).toHaveProperty('registerVisualization');
+      expect(typeof setup.registerVisualization).toBe('function');
     });
 
-    it('should delegate registerRule to the registry', () => {
+    it('should delegate registerVisualization to the registry', () => {
       const setup = service.setup();
-      const mockRule: VisualizationRule = {
-        id: 'test-rule',
-        name: 'Test Rule',
-        matches: jest.fn(),
-        chartTypes: [],
-      };
+      const mockVis = createMockVisualization('bar');
 
-      setup.registerRule(mockRule);
+      setup.registerVisualization(mockVis);
 
-      expect(mockRegisterRule).toHaveBeenCalledTimes(1);
-      expect(mockRegisterRule).toHaveBeenCalledWith(mockRule);
+      expect(mockRegisterVisualization).toHaveBeenCalledTimes(2);
+      expect(mockRegisterVisualization).toHaveBeenCalledWith(mockVis);
     });
 
-    it('should delegate registerRules to the registry', () => {
+    it('should delegate registerVisualization with an array to the registry', () => {
       const setup = service.setup();
-      const mockRules: VisualizationRule[] = [
-        {
-          id: 'test-rule-1',
-          name: 'Test Rule 1',
-          matches: jest.fn(),
-          chartTypes: [],
-        },
-        {
-          id: 'test-rule-2',
-          name: 'Test Rule 2',
-          matches: jest.fn(),
-          chartTypes: [],
-        },
-      ];
+      const mockVisualizations = [createMockVisualization('bar'), createMockVisualization('line')];
 
-      setup.registerRules(mockRules);
+      setup.registerVisualization(mockVisualizations);
 
-      expect(mockRegisterRules).toHaveBeenCalledTimes(1);
-      expect(mockRegisterRules).toHaveBeenCalledWith(mockRules);
+      expect(mockRegisterVisualization).toHaveBeenCalledTimes(2);
+      expect(mockRegisterVisualization).toHaveBeenCalledWith(mockVisualizations);
     });
   });
 
   describe('start', () => {
-    it('should return an object with registerRule, registerRules, and getRules methods', () => {
+    it('should return an object with registerVisualization and getVisualization methods', () => {
       const start = service.start();
 
-      expect(start).toHaveProperty('registerRule');
-      expect(start).toHaveProperty('registerRules');
-      expect(start).toHaveProperty('getRules');
-      expect(typeof start.registerRule).toBe('function');
-      expect(typeof start.registerRules).toBe('function');
-      expect(typeof start.getRules).toBe('function');
+      expect(start).toHaveProperty('registerVisualization');
+      expect(start).toHaveProperty('getVisualization');
+      expect(typeof start.registerVisualization).toBe('function');
+      expect(typeof start.getVisualization).toBe('function');
     });
 
-    it('should delegate registerRule to the registry', () => {
+    it('should delegate registerVisualization to the registry', () => {
       const start = service.start();
-      const mockRule: VisualizationRule = {
-        id: 'test-rule',
-        name: 'Test Rule',
-        matches: jest.fn(),
-        chartTypes: [],
-      };
+      const mockVis = createMockVisualization('pie');
 
-      start.registerRule(mockRule);
+      start.registerVisualization(mockVis);
 
-      expect(mockRegisterRule).toHaveBeenCalledTimes(1);
-      expect(mockRegisterRule).toHaveBeenCalledWith(mockRule);
+      expect(mockRegisterVisualization).toHaveBeenCalledTimes(2);
+      expect(mockRegisterVisualization).toHaveBeenCalledWith(mockVis);
     });
 
-    it('should delegate registerRules to the registry', () => {
+    it('should delegate getVisualization to the registry', () => {
       const start = service.start();
-      const mockRules: VisualizationRule[] = [
-        {
-          id: 'test-rule-1',
-          name: 'Test Rule 1',
-          matches: jest.fn(),
-          chartTypes: [],
-        },
-        {
-          id: 'test-rule-2',
-          name: 'Test Rule 2',
-          matches: jest.fn(),
-          chartTypes: [],
-        },
-      ];
+      const mockVis = createMockVisualization('scatter');
+      mockGetVisualization.mockReturnValueOnce(mockVis);
 
-      start.registerRules(mockRules);
+      const result = start.getVisualization('scatter');
 
-      expect(mockRegisterRules).toHaveBeenCalledTimes(1);
-      expect(mockRegisterRules).toHaveBeenCalledWith(mockRules);
+      expect(mockGetVisualization).toHaveBeenCalledTimes(1);
+      expect(mockGetVisualization).toHaveBeenCalledWith('scatter');
+      expect(result).toEqual(mockVis);
     });
 
-    it('should delegate getRules to the registry', () => {
+    it('should return undefined for unregistered visualization type', () => {
       const start = service.start();
-      const mockRules: VisualizationRule[] = [
-        {
-          id: 'test-rule-1',
-          name: 'Test Rule 1',
-          matches: jest.fn(),
-          chartTypes: [],
-        },
-      ];
+      mockGetVisualization.mockReturnValueOnce(undefined);
 
-      // Setup the mock to return specific rules
-      mockGetRules.mockReturnValueOnce(mockRules);
+      const result = start.getVisualization('nonexistent');
 
-      const result = start.getRules();
-
-      expect(mockGetRules).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockRules);
+      expect(result).toBeUndefined();
     });
   });
 
   describe('getRegistry', () => {
-    it('should return a visualization registry instance', () => {
+    it('should return a VisualizationRegistry instance', () => {
       const registry = service.getRegistry();
-
       expect(registry).toBeInstanceOf(VisualizationRegistry);
     });
   });

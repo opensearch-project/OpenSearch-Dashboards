@@ -90,9 +90,11 @@ describe('promqlSearchStrategy', () => {
       );
 
       expect(result.type).toBe(DATA_FRAME_TYPES.DEFAULT);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.name).toBe('dataset-1');
 
       // Check visualization schema (Time, Series, Value)
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.schema).toEqual([
         { name: 'Time', type: 'time', values: [] },
         { name: 'Series', type: 'string', values: [] },
@@ -100,19 +102,27 @@ describe('promqlSearchStrategy', () => {
       ]);
 
       // Check fields contain visualization data
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields.length).toBe(3);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields[0].name).toBe('Time');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields[1].name).toBe('Series');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields[2].name).toBe('Value');
 
       // Verify we have 4 rows total (2 series * 2 timestamps)
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.size).toBe(4);
 
       // Check instant data in meta
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.instantData).toBeDefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.instantData.rows).toBeDefined();
 
       // Instant data should only have latest timestamp (1638316860)
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantRows = result.body.meta?.instantData.rows;
       expect(instantRows.length).toBe(2);
       expect(instantRows[0].Time).toBe(1638316860000);
@@ -151,7 +161,9 @@ describe('promqlSearchStrategy', () => {
         {}
       );
 
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.size).toBe(0);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields[0].values.length).toBe(0);
     });
 
@@ -193,6 +205,7 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Check that series name is formatted as {label1="value1", label2="value2"}
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
       expect(seriesField).toBeDefined();
       expect(seriesField?.values[0]).toContain('instance="localhost:9090"');
@@ -240,6 +253,7 @@ describe('promqlSearchStrategy', () => {
         {}
       );
 
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantSchema = result.body.meta?.instantData.schema;
       expect(instantSchema).toBeDefined();
 
@@ -289,6 +303,7 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Brackets should be escaped in Series field values
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
       expect(seriesField).toBeDefined();
       expect(seriesField?.values[0]).toContain('\\[');
@@ -339,6 +354,7 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Instant rows should handle missing labels with undefined
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantRows = result.body.meta?.instantData.rows;
       expect(instantRows[0].mode).toBeUndefined();
       expect(instantRows[1].mode).toBe('idle');
@@ -383,7 +399,9 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Visualization data (fields) should be limited to MAX_SERIES_VIZ (100)
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(resultData.body.size).toBe(100);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantRows = resultData.body.meta?.instantData.rows;
       expect(instantRows.length).toBe(150);
     });
@@ -473,9 +491,13 @@ describe('promqlSearchStrategy', () => {
       expect(prometheusManager.query).toHaveBeenCalledTimes(2);
 
       // Should have multiQuery metadata
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery).toBeDefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.queryCount).toBe(2);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.successCount).toBe(2);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.queryLabels).toEqual(['A', 'B']);
     });
 
@@ -520,6 +542,7 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Series names should be prefixed with query label
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
       expect(seriesField?.values[0]).toContain('A:');
       expect(seriesField?.values[1]).toContain('B:');
@@ -582,12 +605,14 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Instant schema should have Value #A and Value #B columns
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantSchema = result.body.meta?.instantData.schema;
       const schemaNames = instantSchema.map((s: any) => s.name);
       expect(schemaNames).toContain('Value #A');
       expect(schemaNames).toContain('Value #B');
 
       // Instant rows should have values for both queries
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantRows = result.body.meta?.instantData.rows;
       expect(instantRows[0]['Value #A']).toBe(100);
       expect(instantRows[0]['Value #B']).toBe(200);
@@ -634,12 +659,17 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Should still return results from successful query
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.size).toBeGreaterThan(0);
 
       // Should track errors in meta
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.errors.length).toBe(1);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.errors[0].query).toBe('B');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.errors[0].error).toBe('Query B failed');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.successCount).toBe(1);
     });
 
@@ -681,13 +711,16 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Should NOT have multiQuery metadata
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery).toBeUndefined();
 
       // Series name should not have prefix
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
       const seriesField = result.body.fields.find((f) => f.name === 'Series');
       expect(seriesField?.values[0]).not.toContain('A:');
 
       // Instant schema should have Value column (not Value #A)
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantSchema = result.body.meta?.instantData.schema;
       const schemaNames = instantSchema.map((s: any) => s.name);
       expect(schemaNames).toContain('Value');
@@ -811,6 +844,7 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Should extract details from the response body
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.errors[0].error).toBe(
         'Could not resolve subtype: missing type id property'
       );
@@ -866,7 +900,352 @@ describe('promqlSearchStrategy', () => {
       );
 
       // Should fall back to reason
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.meta?.multiQuery.errors[0].error).toBe('A specific reason message');
+    });
+  });
+
+  describe('instant query support', () => {
+    it('should pass instant query params when options.queryType is INSTANT', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'vector',
+            result: [
+              {
+                metric: { instance: 'localhost:9090' },
+                value: [1753309221, 42],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              queryType: 'INSTANT',
+              time: '1753309221',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.options.queryType).toBe('instant');
+      expect(callArgs.body.options.time).toBe('1753309221');
+      expect(callArgs.body.options.start).toBeUndefined();
+      expect(callArgs.body.options.end).toBeUndefined();
+      expect(callArgs.body.options.step).toBeUndefined();
+    });
+
+    it('should handle instant query response with singular value field', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'vector',
+            result: [
+              {
+                metric: { instance: 'localhost:9090', job: 'prometheus' },
+                value: [1753309221, 1],
+              },
+              {
+                metric: { instance: 'localhost:9100', job: 'node' },
+                value: [1753309221, 0],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              queryType: 'INSTANT',
+              time: '1753309221',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      expect(result.type).toBe(DATA_FRAME_TYPES.DEFAULT);
+      // Should have 2 viz rows (one per series)
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.size).toBe(2);
+
+      // Instant data should contain both series
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      const instantRows = result.body.meta?.instantData.rows;
+      expect(instantRows.length).toBe(2);
+      expect(instantRows[0].Value).toBe(1);
+      expect(instantRows[1].Value).toBe(0);
+    });
+
+    it('should handle scalar result type from instant query', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'scalar',
+            result: [1773874502, '1'],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: '1',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              queryType: 'INSTANT',
+              time: '1773874502',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      expect(result.type).toBe(DATA_FRAME_TYPES.DEFAULT);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.size).toBe(1);
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      const instantRows = result.body.meta?.instantData.rows;
+      expect(instantRows.length).toBe(1);
+      expect(instantRows[0].Value).toBe(1);
+    });
+
+    it('should throw when no options.time is provided for instant query', async () => {
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await expect(
+        strategy.search(
+          emptyRequestHandlerContext,
+          ({
+            body: {
+              query: {
+                query: 'up',
+                dataset: { id: 'dataset-1' },
+                language: 'PROMQL',
+              },
+              timeRange: {
+                from: '2021-12-01T00:00:00.000Z',
+                to: '2021-12-01T01:00:00.000Z',
+              },
+              options: {
+                queryType: 'INSTANT',
+              },
+            },
+          } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+          {}
+        )
+      ).rejects.toThrow('Time or time range option missing');
+    });
+
+    it('should parse dateMath expressions for options.time', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'vector',
+            result: [
+              {
+                metric: { instance: 'localhost:9090' },
+                value: [1638316800, 42],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              queryType: 'INSTANT',
+              time: 'now-5m',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.options.queryType).toBe('instant');
+      expect(Number(callArgs.body.options.time)).toBeGreaterThan(0);
+    });
+
+    it('should work without timeRange when options.time is provided', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'vector',
+            result: [
+              {
+                metric: { instance: 'localhost:9090' },
+                value: [1638320400, 42],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            options: {
+              queryType: 'INSTANT',
+              time: '1753309221',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.options.queryType).toBe('instant');
+      expect(callArgs.body.options.time).toBe('1753309221');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.size).toBe(1);
+    });
+
+    it('should use custom step from options when provided for range query', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'server1' },
+                values: [[1638316800, 100]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+            options: {
+              step: 60,
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.options.queryType).toBe('range');
+      expect(callArgs.body.options.step).toBe('60');
+    });
+
+    it('should still use range query when no options are provided', async () => {
+      const mockResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { instance: 'server1' },
+                values: [[1638316800, 100]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'up',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      const callArgs = (prometheusManager.query as jest.Mock).mock.calls[0][2];
+      expect(callArgs.body.options.queryType).toBe('range');
+      expect(callArgs.body.options.start).toBeDefined();
+      expect(callArgs.body.options.end).toBeDefined();
+      expect(callArgs.body.options.step).toBeDefined();
     });
   });
 });

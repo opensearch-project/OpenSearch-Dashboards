@@ -56,7 +56,19 @@ jest.mock('../../../../application/hooks', () => ({
 }));
 
 jest.mock('../../../../application/context');
-jest.mock('../../../../../../data/public');
+jest.mock('../../../../../../data/public', () => {
+  const actual = jest.createMockFromModule<any>('../../../../../../data/public');
+  return {
+    ...actual,
+    attachPPLValidationContext: jest.fn(() => jest.fn()),
+    attachPPLGrammarRefresh: jest.fn(() => jest.fn()),
+    syncPPLValidationContext: jest.fn(),
+    shouldUseRuntimeGrammar: jest.fn(() => false),
+    pplGrammarCache: {
+      subscribeToGrammarUpdates: jest.fn(() => jest.fn()),
+    },
+  };
+});
 jest.mock('../../../../application/utils/state_management/actions/query_editor');
 jest.mock('../../../../application/utils/state_management/slices');
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
@@ -64,6 +76,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectPromptModeIsAvailable: jest.fn((state) => state.promptModeIsAvailable),
   selectQueryLanguage: jest.fn((state) => state.queryLanguage),
   selectQueryString: jest.fn((state) => state.queryString),
+  selectDataset: jest.fn((state) => state.dataset),
 }));
 jest.mock('../../../../application/utils/state_management/types', () => ({
   EditorMode: {
@@ -115,6 +128,9 @@ jest.mock('@osd/monaco', () => ({
       },
     },
   },
+  setPPLValidationContext: jest.fn(),
+  clearPPLValidationContext: jest.fn(),
+  revalidatePPLModel: jest.fn(),
 }));
 
 // Now import after mocking
@@ -170,6 +186,10 @@ describe('useQueryPanelEditor', () => {
       trigger: jest.fn(),
       focus: jest.fn(),
       getContentHeight: jest.fn(() => 50),
+      getDomNode: jest.fn(() => ({
+        parentElement: { clientHeight: 100 },
+        closest: jest.fn(() => ({ clientHeight: 100 })),
+      })),
       getLayoutInfo: jest.fn(() => ({ width: 800 })),
       layout: jest.fn(),
       updateOptions: jest.fn(),
@@ -255,6 +275,7 @@ describe('useQueryPanelEditor', () => {
       if (selectorString.includes('selectIsPromptEditorMode')) return false;
       if (selectorString.includes('selectQueryString')) return '';
       if (selectorString.includes('selectIsQueryEditorDirty')) return false;
+      if (selectorString.includes('selectDataset')) return undefined;
       return '';
     });
 
@@ -749,6 +770,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );
@@ -791,6 +813,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );

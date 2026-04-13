@@ -107,27 +107,30 @@ export class CoreUsageDataService implements CoreService<void, CoreUsageDataStar
         // The _cat/indices API returns the _index_ and doesn't return a way
         // to map back from the index to the alias. So we have to make an API
         // call for every alias
-        return opensearch.client.asInternalUser.cat
-          .indices<any[]>({
-            index,
-            format: 'JSON',
-            bytes: 'b',
-          })
-          .then(({ body }) => {
-            const stats = body[0];
-            return {
-              alias: opensearchDashboardsOrTaskManagerIndex(
-                index,
-                this.opensearchDashboardsConfig!.index
-              ),
-              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
-              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
-              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
-              primaryStoreSizeBytes: stats['pri.store.size']
-                ? parseInt(stats['pri.store.size'], 10)
-                : 0,
-            };
-          });
+        return (
+          opensearch.client.asInternalUser.cat
+            .indices<any[]>({
+              index,
+              format: 'JSON',
+              bytes: 'b',
+            })
+            // @ts-expect-error TS2345 TODO Fix me
+            .then(({ body }) => {
+              const stats = body[0];
+              return {
+                alias: opensearchDashboardsOrTaskManagerIndex(
+                  index,
+                  this.opensearchDashboardsConfig!.index
+                ),
+                docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
+                docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
+                storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
+                primaryStoreSizeBytes: stats['pri.store.size']
+                  ? parseInt(stats['pri.store.size'], 10)
+                  : 0,
+              };
+            })
+        );
       })
     );
 

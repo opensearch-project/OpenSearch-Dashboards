@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiDroppable } from '@elastic/eui';
 
 import { IndexPattern, IndexPatternField, OSD_FIELD_TYPES } from '../../../../../data/public';

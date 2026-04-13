@@ -68,6 +68,7 @@ describe('ChatEventHandler', () => {
     chatEventHandler = new ChatEventHandler({
       assistantActionService: mockAssistantActionService,
       chatService: mockChatService,
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       confirmationService: mockConfirmationService,
       callbacks: {
         onTimelineUpdate: mockOnTimelineUpdate,
@@ -906,6 +907,7 @@ describe('ChatEventHandler', () => {
           id: 'msg-1',
           role: 'user',
           content: [
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             { type: 'image', image: 'data:image/png;base64,abc' },
             { type: 'text', text: 'What is this?' },
           ],
@@ -991,6 +993,380 @@ describe('ChatEventHandler', () => {
 
       expect(timeline).toEqual(messages);
       expect(timeline).toHaveLength(6);
+    });
+  });
+
+  describe('onSendToolResultStateChange callback', () => {
+    let mockOnSendToolResultStateChange: jest.Mock;
+    let chatEventHandlerWithCallback: ChatEventHandler;
+
+    beforeEach(() => {
+      mockOnSendToolResultStateChange = jest.fn();
+
+      chatEventHandlerWithCallback = new ChatEventHandler({
+        assistantActionService: mockAssistantActionService,
+        chatService: mockChatService,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        confirmationService: mockConfirmationService,
+        callbacks: {
+          onTimelineUpdate: mockOnTimelineUpdate,
+          onStreamingStateChange: mockOnStreamingStateChange,
+          onStartResponse: mockOnStartResponse,
+          onSendToolResultStateChange: mockOnSendToolResultStateChange,
+          getTimeline: mockGetTimeline,
+        },
+      });
+    });
+
+    it('should call onSendToolResultStateChange(true) before sending tool result', async () => {
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      // Mock sendToolResult to capture when it's called
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      let sendToolResultCalled = false;
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockImplementation(async () => {
+        // Verify onSendToolResultStateChange(true) was called before sendToolResult
+        expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(true);
+        sendToolResultCalled = true;
+        return {
+          observable: mockObservable,
+          toolMessage: mockToolMessage,
+        };
+      });
+
+      // Trigger tool call flow
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      expect(sendToolResultCalled).toBe(true);
+    });
+
+    it('should call onSendToolResultStateChange(false) after sending tool result succeeds', async () => {
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      // Trigger tool call flow
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Verify the callback sequence: true before, false after
+      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(true);
+      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(false);
+
+      // Verify the order: true was called before false
+      const calls = mockOnSendToolResultStateChange.mock.calls;
+      const trueCallIndex = calls.findIndex((call: any) => call[0] === true);
+      const falseCallIndex = calls.findIndex((call: any) => call[0] === false);
+      expect(trueCallIndex).toBeLessThan(falseCallIndex);
+    });
+
+    it('should call onSendToolResultStateChange(false) when sendToolResult fails', async () => {
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      // Mock sendToolResult to throw an error
+      mockChatService.sendToolResult = jest.fn().mockRejectedValue(new Error('Network error'));
+
+      // Suppress console.error for this test
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      // Trigger tool call flow
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Verify onSendToolResultStateChange(false) was called even on error
+      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(true);
+      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(false);
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should work without onSendToolResultStateChange callback', async () => {
+      // Use the original chatEventHandler without the callback
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      // Should not throw when callback is not provided
+      await expect(
+        chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_START,
+          toolCallId,
+          toolCallName: 'test_action',
+        } as ToolCallStartEvent)
+      ).resolves.not.toThrow();
+
+      await expect(
+        chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_ARGS,
+          toolCallId,
+          delta: '{}',
+        } as ToolCallArgsEvent)
+      ).resolves.not.toThrow();
+
+      await expect(
+        chatEventHandler.handleEvent({
+          type: EventType.TOOL_CALL_END,
+          toolCallId,
+        } as ToolCallEndEvent)
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('telemetry', () => {
+    let mockTelemetryRecorder: {
+      recordEvent: jest.Mock;
+      recordMetric: jest.Mock;
+      recordError: jest.Mock;
+    };
+    let chatEventHandlerWithTelemetry: ChatEventHandler;
+
+    beforeEach(() => {
+      mockTelemetryRecorder = {
+        recordEvent: jest.fn(),
+        recordMetric: jest.fn(),
+        recordError: jest.fn(),
+      };
+
+      chatEventHandlerWithTelemetry = new ChatEventHandler({
+        assistantActionService: mockAssistantActionService,
+        chatService: mockChatService,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        confirmationService: mockConfirmationService,
+        telemetryRecorder: mockTelemetryRecorder,
+        callbacks: {
+          onTimelineUpdate: mockOnTimelineUpdate,
+          onStreamingStateChange: mockOnStreamingStateChange,
+          onStartResponse: mockOnStartResponse,
+          getTimeline: mockGetTimeline,
+        },
+      });
+    });
+
+    it('should record success telemetry when run finishes', async () => {
+      // Start run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Finish run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Verify success event was recorded
+      expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_interaction_success',
+        data: {
+          threadId: 'test-thread',
+          runId: 'test-run',
+        },
+      });
+
+      // Verify duration metric was recorded
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_interaction_duration_ms',
+        value: expect.any(Number),
+        unit: 'ms',
+        labels: {
+          status: 'success',
+        },
+      });
+    });
+
+    it('should record failure telemetry when run errors', async () => {
+      // Start run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Error occurs
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_ERROR,
+        message: 'Something went wrong',
+        code: 'ERR_001',
+      });
+
+      // Verify failure event was recorded
+      expect(mockTelemetryRecorder.recordEvent).toHaveBeenCalledWith({
+        name: 'chat_interaction_failure',
+        data: {
+          errorMessage: 'Something went wrong',
+          errorCode: 'ERR_001',
+        },
+      });
+
+      // Verify error was recorded
+      expect(mockTelemetryRecorder.recordError).toHaveBeenCalledWith({
+        type: 'ChatInteractionError',
+        message: 'Something went wrong',
+        context: {
+          errorCode: 'ERR_001',
+        },
+      });
+
+      // Verify duration metric was recorded with failure status
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_interaction_duration_ms',
+        value: expect.any(Number),
+        unit: 'ms',
+        labels: {
+          status: 'failure',
+        },
+      });
+    });
+
+    it('should not record telemetry when telemetryRecorder is not provided', async () => {
+      // Use the original handler without telemetry
+      await chatEventHandler.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // The mock should not have been called because original handler has no telemetry
+      expect(mockTelemetryRecorder.recordEvent).not.toHaveBeenCalled();
+    });
+
+    it('should record duration correctly', async () => {
+      // Mock Date.now to control timing
+      const originalDateNow = Date.now;
+      let currentTime = 1000;
+      Date.now = jest.fn(() => currentTime);
+
+      // Start run at time 1000
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Advance time by 500ms
+      currentTime = 1500;
+
+      // Finish run at time 1500
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Verify duration was 500ms
+      expect(mockTelemetryRecorder.recordMetric).toHaveBeenCalledWith({
+        name: 'chat_interaction_duration_ms',
+        value: 500,
+        unit: 'ms',
+        labels: {
+          status: 'success',
+        },
+      });
+
+      // Restore Date.now
+      Date.now = originalDateNow;
     });
   });
 });

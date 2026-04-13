@@ -5,7 +5,7 @@
 
 import './_histogram.scss';
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -119,7 +119,6 @@ export const DiscoverChart = ({
       direction="column"
       gutterSize="none"
       className={classNames('dscChart__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dscChart__wrapper--enhancement': isEnhancementsEnabled,
       })}
       data-test-subj="dscChartWrapper"

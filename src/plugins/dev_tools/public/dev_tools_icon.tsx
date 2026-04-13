@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -41,7 +41,9 @@ export function DevToolsIcon({
 
   useEffect(() => {
     const subscription = core.overlays.sidecar.getSidecarConfig$().subscribe((config) => {
-      setSidecarPaddingRight(config?.dockedMode === 'right' ? `${config.paddingSize}px` : '0px');
+      setSidecarPaddingRight(
+        config?.dockedMode === 'right' && !config.isHidden ? `${config.paddingSize}px` : '0px'
+      );
     });
     return () => subscription.unsubscribe();
   }, [core.overlays.sidecar]);
@@ -66,6 +68,7 @@ export function DevToolsIcon({
   deps.uiActions.addTriggerAction(devToolsTrigger.id, createOpenDevToolAction);
 
   const elementRef = useRef<HTMLDivElement | null>(null);
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const setMountPoint = useCallback((renderFn) => {
     renderFn(elementRef.current);
     return () => {};

@@ -24,6 +24,7 @@ describe('DiscoverPlugin', () => {
   it('setup successfully', () => {
     const setupMock = coreMock.createSetup();
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     expect(() =>
       pluginInstance.setup(setupMock, {
@@ -39,6 +40,7 @@ describe('DiscoverPlugin', () => {
     const startMock = coreMock.createStart();
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
     let applicationRegistration = {} as Omit<RegisterManagementAppArgs, 'basePath'>;
@@ -72,6 +74,7 @@ describe('DiscoverPlugin', () => {
       features: ['some-other-feature'], // Not observability
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     // Mock capabilities with workspaces enabled
     (startMock.application as any).capabilities = {
@@ -82,6 +85,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
 
@@ -115,6 +119,7 @@ describe('DiscoverPlugin', () => {
       features: [`${WORKSPACE_USE_CASE_PREFIX}${DEFAULT_NAV_GROUPS.observability.id}`],
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     // Mock capabilities with workspaces enabled
     (startMock.application as any).capabilities = {
@@ -124,6 +129,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
 
@@ -131,6 +137,7 @@ describe('DiscoverPlugin', () => {
     managementMock.sections.section.opensearchDashboards.registerApp = (
       app: Omit<RegisterManagementAppArgs, 'basePath'>
     ) => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mountFunction = app.mount;
       return {} as ManagementApp;
     };
@@ -157,6 +164,7 @@ describe('DiscoverPlugin', () => {
       features: ['some-other-feature'],
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     // Mock capabilities with workspaces enabled
     (startMock.application as any).capabilities = {
@@ -166,6 +174,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
 
     let appUpdater: any;
@@ -217,6 +226,7 @@ describe('DiscoverPlugin', () => {
       features: [`${WORKSPACE_USE_CASE_PREFIX}${ALL_USE_CASE_ID}`],
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     (startMock.application as any).capabilities = {
       ...startMock.application.capabilities,
@@ -225,6 +235,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
 
@@ -232,6 +243,7 @@ describe('DiscoverPlugin', () => {
     managementMock.sections.section.opensearchDashboards.registerApp = (
       app: Omit<RegisterManagementAppArgs, 'basePath'>
     ) => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mountFunction = app.mount;
       return {} as ManagementApp;
     };
@@ -255,6 +267,7 @@ describe('DiscoverPlugin', () => {
       features: ['some-other-feature'],
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     (startMock.application as any).capabilities = {
       ...startMock.application.capabilities,
@@ -263,6 +276,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
 
     let appUpdater: any;
@@ -310,6 +324,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
 
     let appUpdater: any;

@@ -6,7 +6,7 @@
 import { SavedObjectsImportError, SavedObjectsImportSuccess } from 'opensearch-dashboards/public';
 import { DuplicateResultFlyout, DuplicateResultFlyoutProps } from './duplicate_result_flyout';
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
+
 import { IntlProvider } from 'react-intl';
 
 describe('DuplicateResultFlyout', () => {
@@ -39,6 +39,7 @@ describe('DuplicateResultFlyout', () => {
 
   const DuplicateResultFlyoutComponent = (props: DuplicateResultFlyoutProps) => {
     return (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <DuplicateResultFlyout {...props} />
       </IntlProvider>

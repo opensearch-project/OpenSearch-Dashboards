@@ -36,7 +36,6 @@ import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
-import { toExpression } from '../components/visualizations/utils/to_expression';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
@@ -55,6 +54,7 @@ import { visualizationRegistry } from '../components/visualizations/visualizatio
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
 
+// TODO cleanup unused props
 export interface SearchProps {
   description?: string;
   sort?: SortOrder[];
@@ -64,14 +64,8 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   services: ExploreServices;
-  spec?: any;
-  expression?: string;
+  chartRender?: () => any;
   sharedItemTitle?: string;
-  searchContext?: {
-    query: Query | undefined;
-    filters: Filter[] | undefined;
-    timeRange: TimeRange | undefined;
-  };
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
@@ -288,6 +282,7 @@ export class ExploreEmbeddable
         embeddable: this,
         filters: [
           {
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             range: {
               '*': {
                 mode: 'absolute',
@@ -391,7 +386,7 @@ export class ExploreEmbeddable
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
-    const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
+    const vis = visualizationRegistry.getVisualization(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
@@ -414,10 +409,11 @@ export class ExploreEmbeddable
           const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
           this.searchProps.axisColumnMappings = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+            selectedChartType,
             visualization.axesMapping,
             allColumns
           );
-          if (!matchedRule || !matchedRule.toSpec) {
+          if (!matchedRule) {
             throw new Error(
               `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
             );
@@ -427,7 +423,6 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
 
           let styles = adaptLegacyData({
@@ -441,19 +436,15 @@ export class ExploreEmbeddable
           }
           this.searchProps.styleOptions = styles;
 
-          const spec = matchedRule.toSpec(
-            visualizationData.transformedData,
-            numericalColumns,
-            categoricalColumns,
-            dateColumns,
-            styles || styleOptions,
-            selectedChartType,
-            axesMapping,
-            searchContext.timeRange
-          );
-          this.searchProps.spec = spec;
-          const exp = toExpression(searchContext, spec);
-          this.searchProps.expression = exp;
+          const chartRender = () =>
+            matchedRule.render({
+              transformedData: visualizationData.transformedData,
+              styleOptions: styles || styleOptions,
+              onSelectTimeRange: this.searchProps?.onSelectTimeRange,
+              axisColumnMappings: axesMapping,
+              timeRange: searchContext.timeRange,
+            });
+          this.searchProps.chartRender = chartRender;
         }
       }
     }

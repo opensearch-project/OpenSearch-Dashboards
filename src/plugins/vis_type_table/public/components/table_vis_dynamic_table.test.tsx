@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableVisDynamicTable } from './table_vis_dynamic_table';
@@ -95,7 +94,7 @@ describe('TableVisDynamicTable', () => {
   });
 
   it('should render the component with title', () => {
-    const { getByTestId, getByText } = render(
+    const { getByText } = render(
       <TableVisDynamicTable
         title="Test Table"
         table={mockTable}
@@ -275,7 +274,7 @@ describe('TableVisDynamicTable', () => {
   });
 
   it('should handle pagination controls', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <TableVisDynamicTable
         table={mockTable}
         visConfig={mockVisConfig}

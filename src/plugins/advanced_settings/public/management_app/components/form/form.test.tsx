@@ -28,12 +28,9 @@
  * under the License.
  */
 
-import React, { act } from 'react';
-import ReactDOM from 'react-dom';
+import { act } from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
-
-import { findTestSubject } from 'test_utils/helpers';
 
 import { notificationServiceMock } from '../../../../../../core/public/mocks';
 import { SettingsChanges } from '../../types';

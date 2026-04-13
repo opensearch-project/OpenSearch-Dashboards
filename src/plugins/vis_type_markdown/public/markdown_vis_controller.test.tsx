@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { waitFor, render } from '@testing-library/react';
 import MarkdownVisComponent from './markdown_vis_controller';
 

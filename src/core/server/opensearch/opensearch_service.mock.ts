@@ -47,14 +47,22 @@ export interface MockedOpenSearchServiceSetup {
     createClient: jest.Mock<ILegacyCustomClusterClient, any>;
     client: jest.Mocked<ILegacyClusterClient>;
   };
+  registerClientTransport: jest.Mock;
+  hasClientTransport: jest.Mock<boolean>;
 }
 
-type MockedOpenSearchServiceStart = MockedOpenSearchServiceSetup & {
+export interface MockedOpenSearchServiceStart {
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
     (name: string, config?: Partial<OpenSearchClientConfig>) => CustomClusterClientMock
   >;
-};
+  legacy: {
+    config$: BehaviorSubject<OpenSearchConfig>;
+    createClient: jest.Mock<ILegacyCustomClusterClient, any>;
+    client: jest.Mocked<ILegacyClusterClient>;
+  };
+  getClientTransport: jest.Mock;
+}
 
 const createSetupContractMock = () => {
   const setupContract: MockedOpenSearchServiceSetup = {
@@ -63,6 +71,8 @@ const createSetupContractMock = () => {
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
+    registerClientTransport: jest.fn(),
+    hasClientTransport: jest.fn().mockReturnValue(false),
   };
   setupContract.legacy.createClient.mockReturnValue(legacyClientMock.createCustomClusterClient());
   setupContract.legacy.client.asScoped.mockReturnValue(
@@ -80,6 +90,7 @@ const createStartContractMock = () => {
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
     },
+    getClientTransport: jest.fn().mockReturnValue(undefined),
   };
   startContract.legacy.createClient.mockReturnValue(legacyClientMock.createCustomClusterClient());
   startContract.legacy.client.asScoped.mockReturnValue(
@@ -113,6 +124,8 @@ const createInternalSetupContractMock = () => {
     legacy: {
       ...createSetupContractMock().legacy,
     },
+    registerClientTransport: jest.fn(),
+    hasClientTransport: jest.fn().mockReturnValue(false),
   };
   setupContract.legacy.client.asScoped.mockReturnValue(
     legacyClientMock.createScopedClusterClient()
