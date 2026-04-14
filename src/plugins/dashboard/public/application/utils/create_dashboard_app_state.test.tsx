@@ -39,7 +39,7 @@ jest.mock('../../../../data/public', () => ({
 }));
 
 jest.mock('./migrate_app_state', () => ({
-  migrateAppState: jest.fn(() => 'migratedAppState'),
+  migrateAppState: jest.fn((state) => state),
 }));
 
 const { createStateContainer, syncState } = jest.requireMock(
@@ -86,9 +86,16 @@ describe('createDashboardGlobalAndAppState', () => {
       mockServices.opensearchDashboardsVersion,
       mockServices.usageCollection
     );
-    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', 'migratedAppState', {
-      replace: true,
-    });
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      {
+        ...dashboardAppStateStub,
+        linked: false,
+      },
+      {
+        replace: true,
+      }
+    );
     expect(createStateContainer).toHaveBeenCalled();
     expect(syncState).toHaveBeenCalled();
     expect(syncQueryStateWithUrl).toHaveBeenCalled();
@@ -151,7 +158,7 @@ describe('updateStateUrl', () => {
   };
 
   test('update URL to not contain panels', () => {
-    const { panels, ...statesWithoutPanels } = dashboardAppState;
+    const { panels, variables, ...statesWithoutPanelsAndVariables } = dashboardAppState;
 
     const basePath = '/base';
     const history = scopedHistoryMock.create({
@@ -165,7 +172,7 @@ describe('updateStateUrl', () => {
       replace: true,
     });
 
-    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanels, {
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanelsAndVariables, {
       replace: true,
     });
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });

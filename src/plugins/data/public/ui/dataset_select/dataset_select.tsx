@@ -87,6 +87,14 @@ export interface DatasetSelectProps {
   signalType: string | null | string[];
   showNonTimeFieldDatasets?: boolean;
   appName?: string;
+  /**
+   * When provided, the component operates in "controlled" mode:
+   * - The selected dataset is determined by this prop instead of `queryString.getQuery().dataset`
+   * - This avoids calling `queryString.setQuery()` which would trigger global searches
+   * - Useful when embedding DatasetSelect in contexts like Dashboard variable editors
+   *   where modifying the global query state is undesirable
+   */
+  controlledSelectedDataset?: DetailedDataset;
 }
 
 interface ViewDatasetsModalProps {
@@ -292,7 +300,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   supportedTypes,
   signalType,
   showNonTimeFieldDatasets = true,
+  controlledSelectedDataset,
 }) => {
+  const isControlled = controlledSelectedDataset !== undefined;
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
@@ -329,7 +339,17 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     }
   }, [signalType]);
 
+  // Controlled mode: sync selectedDataset from prop
   useEffect(() => {
+    if (isControlled) {
+      setSelectedDataset(controlledSelectedDataset);
+    }
+  }, [isControlled, controlledSelectedDataset]);
+
+  // Uncontrolled mode: sync selectedDataset from queryString
+  useEffect(() => {
+    if (isControlled) return; // Skip in controlled mode
+
     const updateSelectedDataset = async () => {
       if (!currentDataset) {
         setSelectedDataset(undefined);
@@ -389,6 +409,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     };
     updateSelectedDataset();
   }, [
+    isControlled,
     currentDataset,
     dataViews,
     datasets,

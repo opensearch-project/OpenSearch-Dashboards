@@ -32,6 +32,7 @@ import { i18n } from '@osd/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { CoreStart, ScopedHistory } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import {
   ContainerOutput,
   EmbeddableFactoryDefinition,
@@ -54,6 +55,7 @@ interface StartServices {
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
+  data?: DataPublicPluginStart;
 }
 
 export type DashboardContainerFactory = EmbeddableFactory<
