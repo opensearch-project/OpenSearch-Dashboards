@@ -173,8 +173,8 @@ export const updateStateUrl = ({
 
 const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
   if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...stateWithoutPanels } = state;
-    return stateWithoutPanels;
+    const { panels, variables, ...stateWithoutPanelsAndVariables } = state;
+    return stateWithoutPanelsAndVariables;
   }
   return state;
 };
