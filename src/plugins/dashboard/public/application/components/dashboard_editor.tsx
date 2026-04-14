@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
+import { take } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { DashboardTopNav } from '../components/dashboard_top_nav';
 import { useChromeVisibility } from '../utils/use/use_chrome_visibility';
@@ -14,14 +15,18 @@ import { useSavedDashboardInstance } from '../utils/use/use_saved_dashboard_inst
 import { DashboardServices } from '../../types';
 import { useDashboardAppAndGlobalState } from '../utils/use/use_dashboard_app_state';
 import { useEditorUpdates } from '../utils/use/use_editor_updates';
-import { HeaderVariant } from '../../../../../core/public';
+import {
+  DEFAULT_NAV_GROUPS,
+  HeaderVariant,
+  isNavGroupInFeatureConfigs,
+} from '../../../../../core/public';
 import { ViewMode } from '../../../../embeddable/public';
 import { DashboardVariables } from './dashboard_variables';
 
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { chrome, uiSettings, keyboardShortcut } = services;
+  const { chrome, uiSettings, keyboardShortcut, workspaces } = services;
   const { setHeaderVariant } = chrome;
   const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
@@ -78,6 +83,21 @@ export const DashboardEditor = () => {
   });
 
   const variableEnabled = localStorage.getItem('__DEVELOPMENT__.dashboard.variable.enabled');
+  const [isExploreWorkspace, setIsExploreWorkspace] = useState(false);
+  useEffect(() => {
+    workspaces.currentWorkspace$
+      .pipe(take(1))
+      .toPromise()
+      .then((ws) => {
+        const features = ws?.features;
+        setIsExploreWorkspace(
+          (features &&
+            (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+              isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
+            false
+        );
+      });
+  }, [workspaces.currentWorkspace$]);
 
   return (
     <div>
@@ -95,8 +115,8 @@ export const DashboardEditor = () => {
               currentContainer={currentContainer}
               dashboardIdFromUrl={dashboardIdFromUrl}
             />
-            {/* Hide the variable feature in 3.6.0 */}
-            {variableEnabled && currentContainer.variableService && (
+            {/* Variables are only available in explore-enabled workspaces (observability / analytics) */}
+            {variableEnabled && isExploreWorkspace && currentContainer.variableService && (
               <DashboardVariables
                 variableService={currentContainer.variableService}
                 interpolationService={currentContainer.variableInterpolationService}
