@@ -55,7 +55,9 @@ export class DefaultDslDataSource extends DataSource<
         return {
           id: savedObject.id,
           title: savedObject.attributes.title,
-          displayName: savedObject.attributes.displayName,
+          ...(savedObject.attributes.displayName && {
+            displayName: savedObject.attributes.displayName,
+          }),
           // @ts-expect-error TS2345 TODO(ts-error): fixme
           dataSourceId: getDataSourceReference(savedObject.references)?.id,
         };

@@ -35,7 +35,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     return {
       id: pattern.id,
       title: pattern.title,
-      displayName: patternMeta?.displayName,
+      ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
       isRemoteDataset: pattern?.title?.includes(':') ?? false,

@@ -376,7 +376,7 @@ export class DatasetService {
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            displayName: indexPattern.displayName,
+            ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
           },
           parent: dataSource
             ? {
