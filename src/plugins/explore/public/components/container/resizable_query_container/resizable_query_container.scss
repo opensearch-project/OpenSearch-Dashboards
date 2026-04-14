@@ -66,7 +66,9 @@
     }
   }
 
-  &__contentPanel {
-    min-height: 0;
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .exploreResizableQueryContainer__contentPanel.euiResizablePanel__content {
+    display: flex !important;
+    flex-direction: column !important;
   }
 }
