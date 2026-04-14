@@ -170,7 +170,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   fetchIndexPatterns = async () => {
     const indexPatterns = (await this.props.indexPatterns.getCache())?.map((savedObject) => ({
       id: savedObject.id,
-      title: savedObject.attributes.displayName || savedObject.attributes.title,
+      title: savedObject.attributes.title,
+      displayTitle: savedObject.attributes.displayName || savedObject.attributes.title,
     }));
     this.setState({ indexPatterns } as any);
   };
@@ -593,9 +594,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         ),
         render: (id: string) => {
           const options = this.state.indexPatterns!.map(
-            (indexPattern) =>
+            (indexPattern: any) =>
               ({
-                text: indexPattern.title,
+                text: indexPattern.displayTitle || indexPattern.title,
                 value: indexPattern.id,
                 'data-test-subj': `indexPatternOption-${indexPattern.title}`,
               } as { text: string; value: string; 'data-test-subj'?: string })

@@ -116,7 +116,7 @@ export const EditIndexPattern = withRouter(
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
     const [displayName, setDisplayName] = useState<string>(indexPattern.displayName || '');
-    const [isDisplayNameDirty, setIsDisplayNameDirty] = useState(false);
+    const isDisplayNameDirty = displayName !== (indexPattern.displayName || '');
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
@@ -146,7 +146,6 @@ export const EditIndexPattern = withRouter(
       try {
         indexPattern.displayName = displayName || undefined;
         await data.indexPatterns.updateSavedObject(indexPattern);
-        setIsDisplayNameDirty(false);
       } catch (e) {
         indexPattern.displayName = previousDisplayName;
         notifications.toasts.addDanger(
@@ -242,7 +241,6 @@ export const EditIndexPattern = withRouter(
               value={displayName}
               onChange={(e) => {
                 setDisplayName(e.target.value);
-                setIsDisplayNameDirty(true);
               }}
               placeholder={indexPattern.title}
               data-test-subj="editIndexPatternDisplayNameInput"
