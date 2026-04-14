@@ -26,7 +26,6 @@
     inset: 0;
     display: flex;
     flex-direction: column;
-    z-index: 2;
 
     .exploreQueryPanel {
       flex: 1;
@@ -57,7 +56,7 @@
   }
 
   &__resizeHandle {
-    z-index: 0;
+    z-index: 1;
     margin-top: 0;
     margin-bottom: 0;
 
