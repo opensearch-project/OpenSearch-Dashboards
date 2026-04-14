@@ -17,7 +17,6 @@ const mockServices = (overrides: any = {}) => ({
 
 const startSyncingQueryStateWithUrl = jest.fn();
 const searchContext = {} as any;
-const indexPattern = {} as any;
 const savedAgentTraces = {} as any;
 const clearEditors = jest.fn();
 

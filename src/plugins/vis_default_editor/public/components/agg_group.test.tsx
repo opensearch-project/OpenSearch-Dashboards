@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react';
 import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';

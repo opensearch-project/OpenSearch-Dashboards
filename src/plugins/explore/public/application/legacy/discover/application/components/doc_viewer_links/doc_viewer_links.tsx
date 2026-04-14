@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiLink } from '@elastic/eui';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_types';

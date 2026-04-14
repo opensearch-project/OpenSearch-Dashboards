@@ -40,7 +40,6 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
         index: this.configurationIndexName,
         id: entityValidated,
       });
-      // @ts-expect-error TS2571 TODO(ts-error): fixme
       const value = data?.body?._source?.value;
 
       this.cache.set(entityValidated, value);

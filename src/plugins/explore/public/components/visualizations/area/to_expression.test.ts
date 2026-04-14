@@ -88,11 +88,6 @@ describe('Area Chart to_expression', () => {
     showFullTimeRange: false,
   };
 
-  const mockTimeRange = {
-    from: '2023-01-01',
-    to: '2023-01-04',
-  };
-
   describe('createSimpleAreaChart', () => {
     const axisColumnMappings: AxisColumnMappings = {
       [AxisRole.Y]: mockNumericalColumn,

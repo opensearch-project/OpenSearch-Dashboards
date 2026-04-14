@@ -62,6 +62,7 @@ describe('QueryExecutionButton', () => {
           language: 'kuery',
           dataset: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: '',
           showHistogram: true,

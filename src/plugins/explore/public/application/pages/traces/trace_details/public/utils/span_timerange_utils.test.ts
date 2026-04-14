@@ -8,6 +8,7 @@ import {
   calculateTraceTimeRange,
   parseHighPrecisionTimestamp,
 } from './span_timerange_utils';
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import { Span } from '../traces/span_detail_table';
 import { hasNanosecondPrecision } from '../traces/ppl_resolve_helpers';
 

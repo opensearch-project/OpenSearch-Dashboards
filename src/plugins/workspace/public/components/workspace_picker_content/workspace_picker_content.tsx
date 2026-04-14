@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import moment from 'moment';
 import {

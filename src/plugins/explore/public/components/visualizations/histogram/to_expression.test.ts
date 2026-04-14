@@ -4,7 +4,7 @@
  */
 
 import { createNumericalHistogramChart, createSingleHistogramChart } from './to_expression';
-import { VisColumn, VisFieldType, AxisRole, AggregationType } from '../types';
+import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultHistogramChartStyles } from './histogram_vis_config';
 
 describe('Histogram to_expression', () => {

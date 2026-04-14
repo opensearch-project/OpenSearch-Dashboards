@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
@@ -69,6 +68,7 @@ jest.mock('../components/visualizations/utils/use_visualization_types', () => ({
 // Mock the visualization container utils
 jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
+  isValidMapping: jest.fn().mockReturnValue(true),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
   }),

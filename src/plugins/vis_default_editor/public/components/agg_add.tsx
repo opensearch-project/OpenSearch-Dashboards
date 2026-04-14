@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,

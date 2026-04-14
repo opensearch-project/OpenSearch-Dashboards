@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';

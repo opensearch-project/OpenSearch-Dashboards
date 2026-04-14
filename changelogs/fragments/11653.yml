@@ -1,2 +1,0 @@
-fix:
-- Remove legacy write-on-read behavior from DataViewsService and IndexPatternsService ([#11653](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11653))

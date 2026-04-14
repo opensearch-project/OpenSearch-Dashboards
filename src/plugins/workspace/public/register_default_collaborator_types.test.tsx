@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { coreMock } from '../../../core/public/mocks';
 import * as opensearchDashboardsReactExports from '../../../plugins/opensearch_dashboards_react/public';
 import {

@@ -101,14 +101,6 @@ describe('VisualizationRegistry', () => {
       validValuesCount: 1,
       uniqueValuesCount: 1,
     };
-    const dateCol: VisColumn = {
-      id: 3,
-      name: 'timestamp',
-      schema: VisFieldType.Date,
-      column: 'timestamp',
-      validValuesCount: 1,
-      uniqueValuesCount: 1,
-    };
 
     it('should return exact matches when column counts match rule mappings', () => {
       const rule = makeRule(100, [
@@ -386,6 +378,215 @@ describe('VisualizationRegistry', () => {
   describe('getVisualization', () => {
     it('should return undefined for unregistered type', () => {
       expect(registry.getVisualization('nonexistent')).toBeUndefined();
+    });
+  });
+
+  describe('reuseAxesMapping', () => {
+    const col = (name: string, schema: VisFieldType, id = 0): VisColumn => ({
+      id,
+      name,
+      schema,
+      column: name,
+      validValuesCount: 10,
+      uniqueValuesCount: 5,
+    });
+
+    it('should return the saved mapping when all fields still exist and types match', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const allColumns = [
+        col('timestamp', VisFieldType.Date),
+        col('bytes', VisFieldType.Numerical),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes' },
+        allColumns
+      );
+      expect(result).toEqual({ [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes' });
+    });
+
+    it('should replace a missing field with an unused column of the same type', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // "bytes" is gone, "memory" is available
+      const allColumns = [
+        col('timestamp', VisFieldType.Date),
+        col('memory', VisFieldType.Numerical),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes' },
+        allColumns
+      );
+      expect(result).toEqual({ [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'memory' });
+    });
+
+    it('should return undefined when no replacement column is available', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // "bytes" is gone and no other Numerical column exists
+      const allColumns = [col('timestamp', VisFieldType.Date)];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes' },
+        allColumns
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for an unregistered chart type', () => {
+      const result = registry.reuseAxesMapping('unknown', { [AxisRole.Y]: 'value' }, [
+        col('value', VisFieldType.Numerical),
+      ]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no rule matches the saved role keys', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // Saved mapping has roles that don't match any rule
+      const allColumns = [
+        col('timestamp', VisFieldType.Date),
+        col('bytes', VisFieldType.Numerical),
+      ];
+      const result = registry.reuseAxesMapping('line', { a: 'timestamp', b: 'bytes' }, allColumns);
+      expect(result).toBeUndefined();
+    });
+
+    it('should use surviving field types to disambiguate rules with same key structure', () => {
+      const ruleCategoricalColor = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+          [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+        },
+      ]);
+      const ruleNumericalColor = makeRule(80, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+          [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(
+        makeVisType('line', 'Line', [ruleCategoricalColor, ruleNumericalColor])
+      );
+
+      // COLOR field "status" is Categorical → should match ruleCategoricalColor
+      // Y field "bytes" is gone → replaced by "memory"
+      const allColumns = [
+        col('timestamp', VisFieldType.Date),
+        col('memory', VisFieldType.Numerical),
+        col('status', VisFieldType.Categorical),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes', [AxisRole.COLOR]: 'status' },
+        allColumns
+      );
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: 'memory',
+        [AxisRole.COLOR]: 'status',
+      });
+    });
+
+    it('should not let a replacement steal a surviving fields column', () => {
+      // Regression: if y's field is gone, it should not claim color's surviving field
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+          [AxisRole.COLOR]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // "bytes" (Y) is gone; "count" (COLOR) survives; "memory" is available
+      const allColumns = [
+        col('timestamp', VisFieldType.Date),
+        col('count', VisFieldType.Numerical),
+        col('memory', VisFieldType.Numerical),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes', [AxisRole.COLOR]: 'count' },
+        allColumns
+      );
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: 'memory',
+        [AxisRole.COLOR]: 'count',
+      });
+    });
+
+    it('should return undefined when a surviving field has a type mismatch with the rule', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // "bytes" still exists but is now Categorical instead of Numerical
+      const allColumns = [
+        col('timestamp', VisFieldType.Date),
+        col('bytes', VisFieldType.Categorical),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'bytes' },
+        allColumns
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle all fields missing and find replacements', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      // Both saved fields are gone, but matching types are available
+      const allColumns = [
+        col('new_date', VisFieldType.Date),
+        col('new_num', VisFieldType.Numerical),
+      ];
+      const result = registry.reuseAxesMapping(
+        'line',
+        { [AxisRole.X]: 'old_date', [AxisRole.Y]: 'old_num' },
+        allColumns
+      );
+      expect(result).toEqual({ [AxisRole.X]: 'new_date', [AxisRole.Y]: 'new_num' });
     });
   });
 });

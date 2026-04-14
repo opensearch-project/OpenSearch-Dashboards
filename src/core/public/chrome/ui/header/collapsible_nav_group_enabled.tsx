@@ -179,7 +179,6 @@ export function CollapsibleNavGroupEnabled({
   };
 
   const rendeLeftNav = (props?: Partial<EuiFlyoutProps>) => (
-    // @ts-expect-error EuiFlyout ref type mismatch with React 18 - safe to ignore as we don't use ref
     <EuiFlyout
       data-test-subj="collapsibleNav"
       id={id}

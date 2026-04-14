@@ -252,7 +252,7 @@ describe('SearchSource', () => {
         index: { title: 'my-index' },
         body: {},
       };
-      const result = await searchSource.createDataFrame(searchRequest as any);
+      await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBe('my-index');
     });
@@ -272,7 +272,7 @@ describe('SearchSource', () => {
         index: 'my-index-string',
         body: {},
       };
-      const result = await searchSource.createDataFrame(searchRequest as any);
+      await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBe('my-index-string');
     });
@@ -292,7 +292,7 @@ describe('SearchSource', () => {
         index: undefined,
         body: {},
       };
-      const result = await searchSource.createDataFrame(searchRequest as any);
+      await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBeUndefined();
     });
@@ -312,7 +312,7 @@ describe('SearchSource', () => {
         index: null,
         body: {},
       };
-      const result = await searchSource.createDataFrame(searchRequest as any);
+      await searchSource.createDataFrame(searchRequest as any);
       expect(mockDf.set).toHaveBeenCalled();
       expect(storedDataFrame?.name).toBeNull();
     });

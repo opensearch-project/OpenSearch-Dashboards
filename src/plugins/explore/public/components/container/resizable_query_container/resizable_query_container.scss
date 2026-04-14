@@ -1,0 +1,74 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreResizableQueryContainer {
+  flex: 1;
+  min-height: 0;
+  gap: $ouiSizeXS;
+
+  &__queryPanel {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    >.euiResizablePanel__content {
+      overflow: hidden;
+      position: relative;
+    }
+  }
+
+  &__queryPanelInner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+
+    .exploreQueryPanel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .exploreQueryPanel__editorsWrapper {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exploreQueryPanelEditor {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+
+      .react-monaco-editor-container {
+        flex: 1;
+        min-height: 0;
+      }
+    }
+  }
+
+  &__resizeHandle {
+    z-index: 1;
+    margin-top: 0;
+    margin-bottom: 0;
+
+    &::before,
+    &::after {
+      width: $ouiSize * 2;
+    }
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .exploreResizableQueryContainer__contentPanel.euiResizablePanel__content {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+}

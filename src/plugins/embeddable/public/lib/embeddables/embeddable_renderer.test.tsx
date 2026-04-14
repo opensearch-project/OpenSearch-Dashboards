@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { waitForElementToBeRemoved } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 import {

@@ -6,7 +6,7 @@
 import './explore_data_table.scss';
 
 import { i18n } from '@osd/i18n';
-import React, { useCallback, useMemo, useRef, memo } from 'react';
+import { useCallback, useMemo, useRef, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { ExploreFlavor, SAMPLE_SIZE_SETTING } from '../../../common';

@@ -29,12 +29,14 @@ describe('createGauge', () => {
     expect(spec).toHaveProperty('dataset');
     expect(spec).toHaveProperty('series');
     expect(spec).toHaveProperty('polar');
+    // @ts-expect-error TS18048 TODO(ts-upgrade): fixme
     expect(Array.isArray(spec.series)).toBe(true);
   });
 
   it('produces gauge-type series', () => {
     const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
+    // @ts-expect-error TS18048 TODO(ts-upgrade): fixme
     const gaugeSeries = spec.series.filter((s: any) => s.type === 'gauge');
     expect(gaugeSeries.length).toBeGreaterThanOrEqual(1);
   });

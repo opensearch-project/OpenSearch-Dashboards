@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { assign, get } from 'lodash';
 
 import { TimeseriesSeries as timeseries } from './vis_types/timeseries/series';

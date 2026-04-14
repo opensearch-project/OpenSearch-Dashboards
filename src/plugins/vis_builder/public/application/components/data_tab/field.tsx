@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { EuiDraggable, EuiPopover } from '@elastic/eui';
 
 import { IndexPatternField } from '../../../../../data/public';
@@ -46,6 +46,7 @@ import './field.scss';
 
 export interface FieldProps {
   field: IndexPatternField;
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   getDetails: (field) => FieldDetails;
   id: number;
 }

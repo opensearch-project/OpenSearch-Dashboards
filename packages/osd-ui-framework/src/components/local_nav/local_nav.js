@@ -30,7 +30,6 @@
 
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import React from 'react';
 
 export function KuiLocalNav({ className, children, ...rest }) {
   const classes = classnames('kuiLocalNav', className);

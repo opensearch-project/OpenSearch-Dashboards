@@ -34,7 +34,7 @@ import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
 import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';

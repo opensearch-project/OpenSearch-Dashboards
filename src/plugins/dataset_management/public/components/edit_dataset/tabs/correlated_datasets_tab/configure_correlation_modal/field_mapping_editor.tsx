@@ -8,10 +8,8 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiAccordion,
-  EuiText,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiHealth,
   EuiIcon,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -172,6 +170,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
             // Get dataset title from saved object
             let datasetTitle = dataView.title;
             try {
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
               const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
                 'index-pattern',
                 dataView.id
@@ -547,6 +546,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                 iconType="save"
                 onClick={() => handleSaveDataset(row.datasetId)}
                 aria-label="Save"
+                // @ts-expect-error TS2322 TODO(ts-error): fixme
                 isLoading={savingDatasetId === row.datasetId}
                 disabled={savingDatasetId === row.datasetId}
                 data-test-subj={`saveDataset-${row.datasetId}`}

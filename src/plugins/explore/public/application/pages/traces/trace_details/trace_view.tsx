@@ -465,6 +465,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [forceVisualizationResize, isEmbedded]);
 
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
   const traceDetailsLink = buildTraceDetailsUrl(spanId, traceId, dataset);
 
   const renderTraceDetailsContent = () => {

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 

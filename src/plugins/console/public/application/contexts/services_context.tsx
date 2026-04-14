@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { HttpSetup, IUiSettingsClient, NotificationsSetup } from 'opensearch-dashboards/public';
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';

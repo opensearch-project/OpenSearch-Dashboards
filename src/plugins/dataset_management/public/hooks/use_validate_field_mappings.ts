@@ -55,6 +55,7 @@ export function useValidateFieldMappings(
             // IMPORTANT: Fetch saved object directly to ensure we get schemaMappings
             // dataViews.get() may return cached version without complete attributes
             try {
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
               const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
                 'index-pattern',
                 datasetId

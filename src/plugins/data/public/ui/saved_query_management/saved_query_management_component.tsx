@@ -132,6 +132,7 @@ export function SavedQueryManagementComponent({
   }, [handleClosePopover, onInitiateSaveAsNew]);
 
   const handleSelect = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (savedQueryToSelect) => {
       handleClosePopover();
       onLoad(savedQueryToSelect);

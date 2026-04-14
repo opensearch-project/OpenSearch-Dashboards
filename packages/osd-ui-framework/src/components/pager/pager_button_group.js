@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 
 import { KuiButton, KuiButtonIcon, KuiButtonGroup } from '../button';
 

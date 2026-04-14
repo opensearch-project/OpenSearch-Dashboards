@@ -10,7 +10,7 @@ import {
   EuiNotificationBadge,
   EuiTitle,
 } from '@elastic/eui';
-import React from 'react';
+
 import { useState } from 'react';
 import './draggable_accordion.scss';
 

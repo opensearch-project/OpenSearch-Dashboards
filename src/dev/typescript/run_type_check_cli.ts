@@ -31,6 +31,7 @@
 import { ToolingLog } from '@osd/dev-utils';
 import chalk from 'chalk';
 import dedent from 'dedent';
+// @ts-expect-error TS1192 TODO(ts-upgrade): fixme
 import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
@@ -44,6 +45,7 @@ export async function runTypeCheckCli() {
     default: {
       project: undefined,
     },
+    // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
     unknown(name) {
       extraFlags.push(name);
       return false;

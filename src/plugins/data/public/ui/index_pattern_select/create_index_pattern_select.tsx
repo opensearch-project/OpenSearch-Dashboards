@@ -29,7 +29,6 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
 
 import { SavedObjectsClientContract } from 'src/core/public';
 import { IndexPatternSelect, IndexPatternSelectProps } from './';

@@ -78,6 +78,7 @@ describe('PromQLToolHandlers', () => {
         { __name__: 'metric1', job: 'prometheus' },
       ]);
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = await handlers.executeTool('search_prometheus_metadata', { query: 'test' });
 
       expect(result).toHaveProperty('metrics');

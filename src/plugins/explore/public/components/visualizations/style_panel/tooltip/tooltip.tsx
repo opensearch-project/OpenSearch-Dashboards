@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiSwitch } from '@elastic/eui';
 import { TooltipOptions } from '../../types';
 import { StyleAccordion } from '../style_accordion';

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientCommon, Dataset, DataSource, DataStructureCustomMeta } from '../..';
+import { SavedObjectsClientCommon, Dataset, DataSource } from '../..';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { IDataView, DataViewSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';

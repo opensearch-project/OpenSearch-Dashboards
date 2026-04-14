@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ScaleType, BarSeries } from '@elastic/charts';
 import { getBarStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';

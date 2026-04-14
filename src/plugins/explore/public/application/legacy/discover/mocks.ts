@@ -49,6 +49,7 @@ export type Setup = jest.Mocked<ExplorePluginSetup>;
 export type Start = jest.Mocked<ExplorePluginStart>;
 
 const createSetupContract = (): Setup => {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   const setupContract: Setup = {
     visualizationRegistry: (jest.fn() as unknown) as VisualizationRegistry,
     docViews: {
@@ -62,6 +63,7 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   const startContract: Start = {
     savedExploreLoader: {} as any,
     savedSearchLoader: {} as any,
@@ -74,6 +76,7 @@ const createStartContract = (): Start => {
 };
 
 const createExploreServicesMock = (): ExploreServices =>
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   buildServices(
     coreMock.createStart(),
     {

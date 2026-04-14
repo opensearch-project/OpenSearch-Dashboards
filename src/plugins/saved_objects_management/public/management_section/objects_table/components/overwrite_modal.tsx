@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, Fragment, ReactNode } from 'react';
+import { useState, Fragment, ReactNode } from 'react';
 import { EuiConfirmModal, EuiText, EuiSuperSelect, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';

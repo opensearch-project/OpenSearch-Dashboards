@@ -46,6 +46,7 @@ const mockParseQuery = sharedUtils.parseQuery as jest.Mock;
 describe('promql code_completion', () => {
   describe('getSuggestions', () => {
     const mockDataSourceMeta = { prometheusUrl: 'http://localhost:9090' };
+    // @ts-expect-error TS2352 TODO(ts-error): fixme
     const mockIndexPattern = {
       id: 'test-datasource-id',
       title: 'test-index',
@@ -170,7 +171,9 @@ describe('promql code_completion', () => {
 
       const functionSuggestion = result.find((s) => s.text === 'rate');
       expect(functionSuggestion).toBeDefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(functionSuggestion?.detail).toBeDefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(typeof functionSuggestion?.detail).toBe('string');
     });
 
@@ -190,6 +193,7 @@ describe('promql code_completion', () => {
       const functionSuggestion = result.find((s) => s.text === 'rate');
       expect(functionSuggestion).toBeDefined();
       expect(functionSuggestion?.insertText).toBe('rate($0)');
+      // @ts-expect-error TS2551 TODO(ts-error): fixme
       expect(functionSuggestion?.insertTextRules).toBe(
         monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
       );

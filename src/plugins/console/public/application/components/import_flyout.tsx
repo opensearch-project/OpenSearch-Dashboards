@@ -23,7 +23,7 @@ import {
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { Fragment, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { ImportMode, ImportModeControl } from './import_mode_control';
 import { useServicesContext } from '../contexts';
 import { TextObject } from '../../../common/text_object';

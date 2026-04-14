@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { ChatLayoutMode } from './chat_header_button';
 import './chat_container.scss';
 

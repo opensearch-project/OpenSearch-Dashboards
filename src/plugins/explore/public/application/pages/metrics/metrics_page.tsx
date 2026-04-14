@@ -20,6 +20,7 @@ import { NewExperienceBanner } from '../../../components/experience_banners/new_
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { BottomRightContainer } from './metrics_bottom_container/bottom_right_container';
+import { ResizableQueryContainer } from '../../../components/container/resizable_query_container';
 
 /**
  * Main application component for the Explore plugin
@@ -44,14 +45,12 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <div className="dscCanvas__queryPanel">
-              <QueryPanel />
-            </div>
-
-            {/* Main content area with resizable panels under QueryPanel */}
-            <EuiPageBody className="explore-layout__canvas">
-              <BottomRightContainer />
-            </EuiPageBody>
+            <ResizableQueryContainer queryPanel={<QueryPanel />}>
+              {/* Main content area with resizable panels under QueryPanel */}
+              <EuiPageBody className="explore-layout__canvas">
+                <BottomRightContainer />
+              </EuiPageBody>
+            </ResizableQueryContainer>
           </EuiPageBody>
         </EuiPage>
       </div>

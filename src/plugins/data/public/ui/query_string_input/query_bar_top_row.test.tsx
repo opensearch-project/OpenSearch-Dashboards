@@ -30,7 +30,6 @@
 
 import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';

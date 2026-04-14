@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { IntlProvider } from 'react-intl';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -52,6 +52,7 @@ describe('DefaultDiscoverTable', () => {
   ) => {
     const rows = rowsOverride ?? mockRows;
     return (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <DataTable
           columns={mockColumns}
@@ -117,6 +118,7 @@ describe('DefaultDiscoverTable', () => {
   it('should not display the sample size callout when rows are fewer than sample size', () => {
     const fewRows = mockRows.slice(0, 5);
     render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <DataTable
           columns={mockColumns}

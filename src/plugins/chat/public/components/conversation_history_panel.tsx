@@ -39,7 +39,7 @@ export const ConversationHistoryPanel: React.FC<ConversationHistoryPanelProps> =
 
   const [conversations, setConversations] = useState<SavedConversation[]>([]);
   const [popoverOpenForId, setPopoverOpenForId] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
+  const [_page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -398,7 +398,9 @@ describe('Trace Query Actions - Test Suite', () => {
 
         // Redux Toolkit wraps errors in rejected actions instead of throwing
         expect(result.type).toBe('query/executeTraceAggregationQueries/rejected');
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         expect(result.error).toBeDefined();
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         expect(result.error.message).toBe('Request count query failed');
       });
 

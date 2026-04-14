@@ -1,0 +1,93 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// --- shared mixins (from explore/query_panel/shared.scss) ---
+@mixin variableQueryPanelVerticalSeparator {
+  &__verticalSeparator {
+    width: 1px;
+    height: $ouiSize;
+    background: $euiColorLightShade;
+    margin: $ouiSizeXS $ouiSizeXXS;
+  }
+}
+
+// --- query_panel.scss ---
+
+.variableQueryPanel.variableQueryPanel {
+  padding-bottom: $ouiSizeXXS;
+}
+
+// --- query_panel_widgets.scss ---
+
+.variableQueryPanelWidgets {
+  @include variableQueryPanelVerticalSeparator;
+
+  display: flex;
+  justify-content: space-between;
+
+  &__left {
+    display: flex;
+    padding: $ouiSizeXXS 0;
+    flex-wrap: wrap;
+  }
+
+  &__right {
+    align-items: center;
+    display: flex;
+    gap: $ouiSizeXS;
+    justify-content: end;
+    flex-wrap: wrap;
+  }
+}
+
+// --- language_toggle.scss ---
+
+.variableLanguageToggle {
+  isolation: isolate;
+
+  &__button {
+    background: $ouiColorEmptyShade;
+    border: 1px solid $ouiBorderColor;
+    box-shadow: none;
+    margin-right: $ouiSizeXS;
+    min-width: 56px;
+    padding-left: $ouiSizeM;
+    padding-right: $ouiSizeM;
+    position: relative;
+    text-transform: none;
+  }
+}
+
+// --- dataset_select wrapper ---
+
+.variableDatasetSelectWrapper {
+  display: contents;
+}
+
+// --- query_panel_editor.scss ---
+
+.variableQueryPanelEditor {
+  border: 1px solid $ouiBorderColor;
+  border-radius: $ouiBorderRadius;
+  cursor: text;
+  padding: $ouiSizeS $ouiSizeXS;
+  position: relative;
+
+  &--focused {
+    border-bottom-width: 2px;
+    border-bottom-color: $ouiColorPrimary;
+    margin-bottom: -1px;
+  }
+
+  &__placeholder {
+    position: absolute;
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $ouiFontSizeXS;
+    color: $ouiColorDisabledText;
+    pointer-events: none;
+  }
+}
