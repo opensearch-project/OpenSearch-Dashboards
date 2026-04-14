@@ -21,11 +21,11 @@ describe('transformToMultiSeriesWithSize', () => {
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
       expect(result.categories).toEqual(['A', 'B']);
-      expect(result.seriesData['A']).toEqual([
+      expect(result.seriesData.A).toEqual([
         [1, 10, 5],
         [3, 30, 10],
       ]);
-      expect(result.seriesData['B']).toEqual([[2, 20, 15]]);
+      expect(result.seriesData.B).toEqual([[2, 20, 15]]);
       expect(result.sizeRange).toEqual({ min: 5, max: 15 });
     });
   });
@@ -39,7 +39,7 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.seriesData['A']).toEqual([
+      expect(result.seriesData.A).toEqual([
         [1, 10, 0],
         [2, 20, 5],
       ]);
@@ -54,7 +54,7 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.seriesData['A']).toEqual([
+      expect(result.seriesData.A).toEqual([
         [1, 10, -3],
         [2, 20, 7],
       ]);
@@ -69,8 +69,8 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.seriesData['A']).toEqual([[1, 10, 0]]);
-      expect(result.seriesData['B']).toEqual([[2, 20, 0]]);
+      expect(result.seriesData.A).toEqual([[1, 10, 0]]);
+      expect(result.seriesData.B).toEqual([[2, 20, 0]]);
       expect(result.sizeRange).toEqual({ min: 0, max: 0 });
     });
   });
@@ -84,7 +84,7 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.seriesData['A']).toEqual([[2, 20, 5]]);
+      expect(result.seriesData.A).toEqual([[2, 20, 5]]);
       expect(result.sizeRange).toEqual({ min: 5, max: 5 });
     });
 
@@ -96,7 +96,7 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.seriesData['A']).toEqual([[2, 20, 8]]);
+      expect(result.seriesData.A).toEqual([[2, 20, 8]]);
       expect(result.sizeRange).toEqual({ min: 8, max: 8 });
     });
   });
@@ -111,8 +111,8 @@ describe('transformToMultiSeriesWithSize', () => {
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
       expect(result.sizeRange).toEqual({ min: 0, max: 0 });
-      expect(result.seriesData['A']).toEqual([]);
-      expect(result.seriesData['B']).toEqual([]);
+      expect(result.seriesData.A).toEqual([]);
+      expect(result.seriesData.B).toEqual([]);
     });
 
     it('returns sizeRange { min: 0, max: 0 } when all sizes are non-numeric strings', () => {
@@ -124,7 +124,7 @@ describe('transformToMultiSeriesWithSize', () => {
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
       expect(result.sizeRange).toEqual({ min: 0, max: 0 });
-      expect(result.seriesData['A']).toEqual([]);
+      expect(result.seriesData.A).toEqual([]);
     });
   });
 
@@ -159,7 +159,7 @@ describe('transformToMultiSeriesWithSize', () => {
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
       expect(result.categories).toEqual(['undefined']);
-      expect(result.seriesData['undefined']).toEqual([
+      expect(result.seriesData.undefined).toEqual([
         [1, 10, 5],
         [2, 20, 10],
       ]);
@@ -175,8 +175,8 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.seriesData['A']).toEqual([[1, 10, 0]]);
-      expect(result.seriesData['B']).toEqual([[4, 40, -2]]);
+      expect(result.seriesData.A).toEqual([[1, 10, 0]]);
+      expect(result.seriesData.B).toEqual([[4, 40, -2]]);
       expect(result.sizeRange).toEqual({ min: -2, max: 0 });
     });
 
@@ -186,7 +186,7 @@ describe('transformToMultiSeriesWithSize', () => {
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
       expect(result.categories).toEqual(['X']);
-      expect(result.seriesData['X']).toEqual([[5, 50, 0]]);
+      expect(result.seriesData.X).toEqual([[5, 50, 0]]);
       expect(result.sizeRange).toEqual({ min: 0, max: 0 });
     });
   });
