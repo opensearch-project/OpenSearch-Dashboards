@@ -490,6 +490,96 @@ describe('MetricsAlertsPanel', () => {
     );
   });
 
+  test('uses the default data source when local cluster is visible and the metric has no data source id', async () => {
+    mockUseOpenSearchDashboards.mockReturnValue({
+      services: {
+        http: {
+          post: mockHttpPost,
+          get: mockHttpGet,
+          delete: mockHttpDelete,
+        },
+        notifications: {
+          toasts: {
+            addSuccess: mockAddSuccess,
+            addDanger: mockAddDanger,
+            addWarning: mockAddWarning,
+          },
+        },
+        core: {
+          application: {
+            applications$: mockApplications$,
+            getUrlForApp: mockGetUrlForApp.mockImplementation(
+              (appId: string, options?: { path?: string }) =>
+                `/app/${appId}${options?.path ? options.path : ''}`
+            ),
+            navigateToUrl: mockNavigateToUrl,
+          },
+        },
+        store: {
+          getState: () => mockStoreState,
+          dispatch: mockStoreDispatch.mockImplementation((action: any) => action),
+        },
+        dataSourceEnabled: true,
+        hideLocalCluster: false,
+        uiSettings: {},
+        dataSourceManagement: {
+          getDefaultDataSourceId: mockGetDefaultDataSourceId.mockResolvedValue('ds-default'),
+        },
+      },
+    } as any);
+    mockUseQueryPanelActionDependencies.mockReturnValue({
+      query: {
+        language: 'PROMQL',
+        query: 'rate(go_gc_heap_allocs_bytes_total{instance="localhost:9090"}[5m])',
+        dataset: {
+          id: 'local',
+          type: 'PROMETHEUS',
+          dataSource: {},
+        },
+      },
+      queryInEditor: 'rate(go_gc_heap_allocs_bytes_total{instance="localhost:9090"}[5m])',
+      resultStatus: {
+        status: QueryExecutionStatus.READY,
+      },
+    } as any);
+    mockHttpPost
+      .mockResolvedValueOnce({
+        ok: true,
+        detectorId: 'det-visible-default',
+        detectorName: 'metrics-go_gc_heap_allocs_bytes_total-abcd',
+        detectionInterval: { period: { interval: 5, unit: 'Minutes' } },
+      })
+      .mockResolvedValueOnce({ ok: true })
+      .mockResolvedValueOnce({
+        ok: true,
+        resp: { _id: 'mon-visible-default' },
+      });
+
+    render(<MetricsAlertsPanel />);
+
+    await waitFor(() => expect(mockGetDefaultDataSourceId).toHaveBeenCalled());
+    fireEvent.click(screen.getByTestId('metricsCreateAlertMonitorButton'));
+
+    await waitFor(() => expect(mockHttpPost).toHaveBeenCalledTimes(3));
+
+    expect(mockHttpPost).toHaveBeenNthCalledWith(
+      1,
+      '/api/anomaly_detectors/detectors/_create_from_prometheus_query/ds-default',
+      expect.anything()
+    );
+    expect(mockHttpPost).toHaveBeenNthCalledWith(
+      2,
+      '/api/anomaly_detectors/detectors/det-visible-default/start/ds-default'
+    );
+    expect(mockHttpPost).toHaveBeenNthCalledWith(
+      3,
+      '/api/alerting/monitors',
+      expect.objectContaining({
+        query: { dataSourceId: 'ds-default' },
+      })
+    );
+  });
+
   test('creates a high-cardinality detector for multi-series Prometheus queries by default', async () => {
     mockHttpPost
       .mockResolvedValueOnce({

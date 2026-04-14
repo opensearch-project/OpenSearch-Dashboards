@@ -15,9 +15,31 @@ import { VisFieldType } from './types';
 import { VisData } from './visualization_builder.types';
 
 const mockHttpPost = jest.fn();
+const mockGetDefaultDataSourceId = jest.fn();
 const mockApplications$ = new BehaviorSubject<ReadonlyMap<string, unknown>>(
   new Map([['anomaly-detection-dashboards', { id: 'anomaly-detection-dashboards' }]])
 );
+const mockServices = {
+  core: {
+    application: {
+      applications$: mockApplications$,
+    },
+    workspaces: {
+      currentWorkspaceId$: {
+        getValue: jest.fn(() => undefined),
+      },
+    },
+  },
+  http: {
+    post: mockHttpPost,
+  },
+  uiSettings: {},
+  dataSourceEnabled: false,
+  hideLocalCluster: false,
+  dataSourceManagement: {
+    getDefaultDataSourceId: mockGetDefaultDataSourceId,
+  },
+};
 
 // Mock react-redux before importing any components
 jest.mock('react-redux', () => ({
@@ -50,16 +72,7 @@ jest.mock('../query_panel/utils/use_search_context', () => ({
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
   useOpenSearchDashboards: () => ({
-    services: {
-      core: {
-        application: {
-          applications$: mockApplications$,
-        },
-      },
-      http: {
-        post: mockHttpPost,
-      },
-    },
+    services: mockServices,
   }),
 }));
 
@@ -205,6 +218,10 @@ describe('VisualizationContainer', () => {
       ok: true,
       response: {},
     });
+    mockGetDefaultDataSourceId.mockReset();
+    mockGetDefaultDataSourceId.mockResolvedValue('');
+    mockServices.dataSourceEnabled = false;
+    mockServices.hideLocalCluster = false;
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(mockVisualizationBuilder as any);
     (useSelector as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -369,6 +386,145 @@ describe('VisualizationContainer', () => {
       '{instance="prometheus-a:9090",job="leaf-prometheus"}',
       '{instance="prometheus-b:9090",job="leaf-prometheus"}',
     ]);
+  });
+
+  it('uses the local cluster for preview routes when local cluster is available', async () => {
+    setPromqlVisualizationData([
+      {
+        Time: 1700000000000,
+        Series: '{instance="prometheus-a:9090",job="leaf-prometheus"}',
+        Value: 10,
+      },
+      {
+        Time: 1700000060000,
+        Series: '{instance="prometheus-a:9090",job="leaf-prometheus"}',
+        Value: 12,
+      },
+    ]);
+    mockServices.dataSourceEnabled = true;
+
+    (useSelector as jest.Mock).mockImplementation((selector) =>
+      selector({
+        query: {
+          language: 'PROMQL',
+          query: 'rate(go_gc_heap_allocs_bytes_total{job="leaf-prometheus"}[10m])',
+          dataset: {
+            id: 'prome_multi',
+            dataSource: { id: 'ds-1' },
+          },
+        },
+      })
+    );
+
+    render(<VisualizationContainer />);
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/api/explore/anomaly_preview',
+        expect.not.objectContaining({
+          query: expect.anything(),
+        })
+      );
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/api/explore/forecast_preview',
+        expect.not.objectContaining({
+          query: expect.anything(),
+        })
+      );
+    });
+  });
+
+  it('uses the explicit OpenSearch data source id for preview routes when local cluster is hidden', async () => {
+    setPromqlVisualizationData([
+      {
+        Time: 1700000000000,
+        Series: '{instance="prometheus-a:9090",job="leaf-prometheus"}',
+        Value: 10,
+      },
+      {
+        Time: 1700000060000,
+        Series: '{instance="prometheus-a:9090",job="leaf-prometheus"}',
+        Value: 12,
+      },
+    ]);
+    mockServices.dataSourceEnabled = true;
+    mockServices.hideLocalCluster = true;
+
+    (useSelector as jest.Mock).mockImplementation((selector) =>
+      selector({
+        query: {
+          language: 'PROMQL',
+          query: 'rate(go_gc_heap_allocs_bytes_total{job="leaf-prometheus"}[10m])',
+          dataset: {
+            id: 'prome_multi',
+            dataSource: { id: 'ds-1' },
+          },
+        },
+      })
+    );
+
+    render(<VisualizationContainer />);
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/api/explore/anomaly_preview',
+        expect.objectContaining({
+          query: { dataSourceId: 'ds-1' },
+        })
+      );
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/api/explore/forecast_preview',
+        expect.objectContaining({
+          query: { dataSourceId: 'ds-1' },
+        })
+      );
+    });
+  });
+
+  it('uses the default OpenSearch data source id for preview routes when local cluster is hidden', async () => {
+    setPromqlVisualizationData([
+      {
+        Time: 1700000000000,
+        Series: '{instance="prometheus-a:9090",job="leaf-prometheus"}',
+        Value: 10,
+      },
+      {
+        Time: 1700000060000,
+        Series: '{instance="prometheus-a:9090",job="leaf-prometheus"}',
+        Value: 12,
+      },
+    ]);
+    mockServices.dataSourceEnabled = true;
+    mockServices.hideLocalCluster = true;
+    mockGetDefaultDataSourceId.mockResolvedValue('ds-default');
+
+    (useSelector as jest.Mock).mockImplementation((selector) =>
+      selector({
+        query: {
+          language: 'PROMQL',
+          query: 'rate(go_gc_heap_allocs_bytes_total{job="leaf-prometheus"}[10m])',
+          dataset: { id: 'prome_multi' },
+        },
+      })
+    );
+
+    render(<VisualizationContainer />);
+
+    await waitFor(() => {
+      expect(mockGetDefaultDataSourceId).toHaveBeenCalled();
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/api/explore/anomaly_preview',
+        expect.objectContaining({
+          query: { dataSourceId: 'ds-default' },
+        })
+      );
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/api/explore/forecast_preview',
+        expect.objectContaining({
+          query: { dataSourceId: 'ds-default' },
+        })
+      );
+    });
   });
 
   it('asks users to select series when a Prometheus query returns more than three series', async () => {

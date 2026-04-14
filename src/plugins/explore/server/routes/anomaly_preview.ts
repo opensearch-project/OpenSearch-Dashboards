@@ -119,6 +119,9 @@ export function registerAnomalyPreviewRoutes({
     {
       path: '/api/explore/anomaly_preview',
       validate: {
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
         body: schema.object({
           // input points are epoch millis timestamps
           points: schema.arrayOf(
@@ -140,7 +143,12 @@ export function registerAnomalyPreviewRoutes({
       },
     },
     async (context, request, response) => {
-      const client = context.core.opensearch.client.asCurrentUser;
+      const dataSourceId = String(
+        (request.query as { dataSourceId?: string })?.dataSourceId || ''
+      ).trim();
+      const client = dataSourceId
+        ? await context.dataSource.opensearch.getClient(dataSourceId)
+        : context.core.opensearch.client.asCurrentUser;
 
       const {
         points,

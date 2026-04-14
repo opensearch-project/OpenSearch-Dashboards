@@ -20,6 +20,7 @@ import dateMath from '@elastic/datemath';
 
 import { AxisColumnMappings } from './types';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
+import { useResolvedOpenSearchDataSourceId } from '../../application/utils/hooks/use_resolved_opensearch_data_source_id';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
 import { TimeRange } from '../../../../data/common';
@@ -237,6 +238,8 @@ export const VisualizationContainer = React.memo(() => {
   const queryLanguage = query?.language;
   const queryText = typeof query?.query === 'string' ? query.query : '';
   const dataConnectionId = typeof query?.dataset?.id === 'string' ? query.dataset.id.trim() : '';
+  const explicitDataSourceId =
+    typeof query?.dataset?.dataSource?.id === 'string' ? query.dataset.dataSource.id.trim() : '';
   const searchContext = useSearchContext();
   const dispatch = useDispatch();
 
@@ -247,6 +250,11 @@ export const VisualizationContainer = React.memo(() => {
     services.core.application.applications$,
     new Map<string, unknown>()
   ) as ReadonlyMap<string, unknown>;
+  const { dataSourceId, isResolvingDataSourceId } = useResolvedOpenSearchDataSourceId(
+    services,
+    explicitDataSourceId,
+    { onlyWhenHideLocalCluster: true }
+  );
 
   const [previewStatusMessage, setPreviewStatusMessage] = useState('');
   const [previewStatusColor, setPreviewStatusColor] = useState<'primary' | 'warning'>('warning');
@@ -260,6 +268,9 @@ export const VisualizationContainer = React.memo(() => {
     () => availableApplications?.has?.(METRICS_ANOMALY_DETECTION_APP_ID) ?? false,
     [availableApplications]
   );
+  const requiresManagedDataSource = services.dataSourceEnabled && services.hideLocalCluster;
+  const missingManagedDataSource =
+    requiresManagedDataSource && !isResolvingDataSourceId && !dataSourceId;
 
   useEffect(() => {
     if (results) {
@@ -346,6 +357,11 @@ export const VisualizationContainer = React.memo(() => {
     }
 
     if (!promqlQuery) {
+      resetPreviewState();
+      return;
+    }
+
+    if (isResolvingDataSourceId || missingManagedDataSource) {
       resetPreviewState();
       return;
     }
@@ -530,6 +546,7 @@ export const VisualizationContainer = React.memo(() => {
       queryLanguage ?? '',
       promqlQuery,
       dataConnectionId,
+      dataSourceId,
       usablePreviewInputs
         .map(
           (previewInput) =>
@@ -569,6 +586,7 @@ export const VisualizationContainer = React.memo(() => {
                   dataConnectionId,
                   seriesValue: previewInput.seriesValue,
                 }),
+                ...(dataSourceId ? { query: { dataSourceId } } : {}),
               }),
               services.http.post('/api/explore/forecast_preview', {
                 body: JSON.stringify({
@@ -580,6 +598,7 @@ export const VisualizationContainer = React.memo(() => {
                   dataConnectionId,
                   seriesValue: previewInput.seriesValue,
                 }),
+                ...(dataSourceId ? { query: { dataSourceId } } : {}),
               }),
             ]);
 
@@ -615,7 +634,6 @@ export const VisualizationContainer = React.memo(() => {
         );
 
         if (anomalyDependencyMissingForAllSeries) {
-          previewInputSignatureRef.current = '';
           clearSeriesPreviewStatesIfNeeded(setSeriesPreviewStates);
           setPreviewStatusMessage('');
           setPreviewStatusColor('warning');
@@ -770,7 +788,10 @@ export const VisualizationContainer = React.memo(() => {
     searchContext?.timeRange,
     services.http,
     dataConnectionId,
+    dataSourceId,
     isAnomalyDetectionUiAvailable,
+    isResolvingDataSourceId,
+    missingManagedDataSource,
     selectedPreviewSeriesValues,
     visData?.transformedData,
   ]);

@@ -19,11 +19,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { UiSettingScope } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../../types';
 import { RootState } from '../../../../utils/state_management/store';
+import { useResolvedOpenSearchDataSourceId } from '../../../../utils/hooks/use_resolved_opensearch_data_source_id';
 import { useQueryPanelActionDependencies } from '../../../../../components/query_panel/query_panel_widgets/query_panel_actions/use_query_panel_action_dependencies';
 import { getVisualizationBuilder } from '../../../../../components/visualizations/visualization_builder';
 import { QueryExecutionStatus } from '../../../../utils/state_management/types';
@@ -77,14 +77,10 @@ const getDependencyAwareErrorMessage = (
   const responseStatus =
     error?.response?.status || error?.statusCode || error?.body?.statusCode || error?.body?.status;
   const serializedError =
-    typeof error === 'string'
-      ? error
-      : typeof error?.body === 'string'
+    typeof error?.body === 'string'
       ? error.body
-      : error?.body
+      : error?.body && typeof error.body === 'object'
       ? JSON.stringify(error.body)
-      : error
-      ? JSON.stringify(error)
       : '';
   const normalized = `${rawMessage} ${serializedError}`.toLowerCase();
   const looksLikeMissingDependency =
@@ -329,8 +325,6 @@ export const MetricsAlertsPanel = () => {
   const [existingAssociationError, setExistingAssociationError] = useState('');
   const [isLoadingExistingAssociation, setIsLoadingExistingAssociation] = useState(false);
   const [createdMonitor, setCreatedMonitor] = useState<CreatedMonitorInfo | null>(null);
-  const [fallbackDataSourceId, setFallbackDataSourceId] = useState('');
-  const [isResolvingDataSourceId, setIsResolvingDataSourceId] = useState(false);
   const persistedAssociation = useSelector((state: RootState) => state.ui.metricsAlertAssociation);
 
   const supportsPrometheusAlerts = useMemo(() => isPrometheusQuery(actionDeps), [actionDeps]);
@@ -380,7 +374,10 @@ export const MetricsAlertsPanel = () => {
     () => String((actionDeps.query as any)?.dataset?.dataSource?.id || '').trim(),
     [actionDeps.query]
   );
-  const currentWorkspaceId = (services.core as any)?.workspaces?.currentWorkspaceId$?.getValue?.();
+  const { dataSourceId, isResolvingDataSourceId } = useResolvedOpenSearchDataSourceId(
+    services,
+    explicitDataSourceId
+  );
   const seriesInference = useMemo(() => inferPrometheusSeries(visData, chartConfig), [
     chartConfig,
     visData,
@@ -395,63 +392,6 @@ export const MetricsAlertsPanel = () => {
     [seriesInference.suggestedEntityFields]
   );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const resolveFallbackDataSourceId = async () => {
-      const shouldResolveFallback =
-        services.dataSourceEnabled &&
-        services.hideLocalCluster &&
-        !explicitDataSourceId &&
-        !!services.dataSourceManagement?.getDefaultDataSourceId;
-
-      if (!shouldResolveFallback) {
-        setFallbackDataSourceId('');
-        setIsResolvingDataSourceId(false);
-        return;
-      }
-
-      setIsResolvingDataSourceId(true);
-      try {
-        const uiSettingsScope = currentWorkspaceId
-          ? UiSettingScope.WORKSPACE
-          : UiSettingScope.GLOBAL;
-        const defaultDataSourceId = await services.dataSourceManagement!.getDefaultDataSourceId(
-          services.uiSettings,
-          uiSettingsScope
-        );
-        if (!cancelled) {
-          setFallbackDataSourceId(String(defaultDataSourceId || '').trim());
-        }
-      } catch {
-        if (!cancelled) {
-          setFallbackDataSourceId('');
-        }
-      } finally {
-        if (!cancelled) {
-          setIsResolvingDataSourceId(false);
-        }
-      }
-    };
-
-    resolveFallbackDataSourceId();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    explicitDataSourceId,
-    currentWorkspaceId,
-    services.dataSourceEnabled,
-    services.dataSourceManagement,
-    services.hideLocalCluster,
-    services.uiSettings,
-  ]);
-
-  const dataSourceId = useMemo(() => explicitDataSourceId || fallbackDataSourceId, [
-    explicitDataSourceId,
-    fallbackDataSourceId,
-  ]);
   const requiresManagedDataSource = services.dataSourceEnabled && services.hideLocalCluster;
   const missingManagedDataSource =
     requiresManagedDataSource && !isResolvingDataSourceId && !dataSourceId;

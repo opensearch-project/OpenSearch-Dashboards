@@ -301,6 +301,9 @@ export function registerForecastPreviewRoutes({
     {
       path: '/api/explore/forecast_preview',
       validate: {
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
         body: schema.object({
           points: schema.arrayOf(
             schema.object({
@@ -320,7 +323,12 @@ export function registerForecastPreviewRoutes({
       },
     },
     async (context, request, response) => {
-      const client = context.core.opensearch.client.asCurrentUser;
+      const dataSourceId = String(
+        (request.query as { dataSourceId?: string })?.dataSourceId || ''
+      ).trim();
+      const client = dataSourceId
+        ? await context.dataSource.opensearch.getClient(dataSourceId)
+        : context.core.opensearch.client.asCurrentUser;
       const {
         points,
         startTime,
