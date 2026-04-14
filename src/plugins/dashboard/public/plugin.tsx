@@ -121,13 +121,15 @@ import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
-import { AttributeService } from '.';
+import { AttributeService, Variable } from '.';
 import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
+import { getActiveVariables } from './variables/active_variables';
+import { VariablesBar } from './application/components/dashboard_variables';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -177,6 +179,8 @@ export interface DashboardStart {
     embeddableId: string;
     embeddableType: string;
   }) => void | undefined;
+  getActiveVariables: () => Variable[] | undefined;
+  VariablesBar: typeof VariablesBar;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
@@ -280,6 +284,7 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
+        data: deps.data,
       };
     };
 
@@ -646,6 +651,8 @@ export class DashboardPlugin
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
+      getActiveVariables,
+      VariablesBar,
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
