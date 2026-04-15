@@ -32,6 +32,9 @@ jest.mock('./hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest
 jest.mock('./hooks/use_visualization_builder', () => ({ useVisualizationBuilder: jest.fn() }));
 jest.mock('./query_builder/query_builder', () => ({ getQueryBuilder: jest.fn() }));
 jest.mock('../utils/hooks/use_header_variants');
+jest.mock('./hooks/use_variables', () => ({
+  useVariables: jest.fn().mockReturnValue({ variableService: undefined }),
+}));
 jest.mock('../../../../data/public', () => ({ syncQueryStateWithUrl: jest.fn() }));
 jest.mock('./component/visualization_editor_bottom_left_container', () => ({
   ResizableQueryPanelAndVisualization: () => <div data-test-subj="query-panel" />,
@@ -67,6 +70,7 @@ const mockServices = {
   osdUrlStateStorage: { set: jest.fn(), get: jest.fn() },
   data: { query: {} },
   embeddable: { getStateTransfer: jest.fn().mockReturnValue({}) },
+  dashboard: { VariablesBar: () => null, getActiveVariables: jest.fn() },
 };
 
 beforeEach(() => {
