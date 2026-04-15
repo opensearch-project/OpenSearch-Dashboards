@@ -11,19 +11,21 @@ import {
   SavedQueryManagementComponent,
   SavedQueryMeta,
   SavedQuery,
-} from '../../../../../data/public';
-import { ExploreServices } from '../../../types';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { useEditorOperations } from '../hooks/use_editor_operations';
-import { EditorMode } from '../../utils/state_management/types';
-import '../../../components/query_panel/query_panel_widgets/save_query/save_query.scss';
-import { QueryState } from '../query_builder/query_builder';
+} from '../../../../../../data/public';
+import { EditorMode } from '../../../utils/state_management/types';
+import '../../../../components/query_panel/query_panel_widgets/save_query/save_query.scss';
+import { QueryState } from '../../query_builder/query_builder';
+import { useQueryPanelContext } from './query_panel_context';
 
 export const SaveQueryButton = () => {
-  const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { queryBuilder, queryEditorState, queryState } = useQueryBuilderState();
-  const { getEditorText, setEditorText } = useEditorOperations();
+  const {
+    services,
+    queryEditorState,
+    queryState,
+    handleQueryChange,
+    handleEditorChange,
+    editorOperations: { getEditorText, setEditorText },
+  } = useQueryPanelContext();
 
   const savedQueryService = services.data.query.savedQueries;
   const timeFilter = services.data.query.timefilter.timefilter;
@@ -109,14 +111,14 @@ export const SaveQueryButton = () => {
   const handleLoadSavedQuery = useCallback(
     async (savedQuery: SavedQuery) => {
       setCurrentSavedQueryId(savedQuery.id);
-      queryBuilder.updateQueryState(savedQuery.attributes.query as QueryState);
+      handleQueryChange(savedQuery.attributes.query as QueryState);
 
       // Update editor text
       setEditorText(savedQuery.attributes.query.query as string);
 
       // Handle time filter if present
       if (savedQuery.attributes.timefilter && timeFilter) {
-        queryBuilder.updateQueryEditorState({
+        handleEditorChange({
           dateRange: {
             from: savedQuery.attributes.timefilter.from,
             to: savedQuery.attributes.timefilter.to,
@@ -129,7 +131,7 @@ export const SaveQueryButton = () => {
 
       setIsPopoverOpen(false);
     },
-    [queryBuilder, setEditorText, timeFilter]
+    [handleEditorChange, handleQueryChange, setEditorText, timeFilter]
   );
 
   const handleClearSavedQuery = useCallback(() => {

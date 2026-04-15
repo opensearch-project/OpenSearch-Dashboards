@@ -89,6 +89,7 @@ import {
   registerDisabledPPLExecuteQueryAction,
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
+import { QueryPanel } from './application/in_context_vis_editor/component/query_panel';
 
 export class ExplorePlugin
   implements
@@ -731,6 +732,9 @@ export class ExplorePlugin
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
       slotRegistry: this.slotRegistryService.start(),
+      components: {
+        QueryPanel,
+      },
     };
   }
 

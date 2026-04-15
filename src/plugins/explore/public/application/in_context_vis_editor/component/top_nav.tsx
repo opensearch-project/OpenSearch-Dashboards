@@ -27,7 +27,6 @@ export interface TopNavProps {
 export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryBuilder, datasetView, queryEditorState } = useQueryBuilderState();
-  const { getEditorText } = useEditorOperations();
 
   const {
     navigation: {
@@ -72,11 +71,11 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       }
       // update current query text
       if (queryEditorState.editorMode !== EditorMode.Prompt) {
-        queryBuilder.updateQueryState({ query: getEditorText() });
+        queryBuilder.updateQueryState({ query: queryBuilder.getEditorRef()?.getValue() || '' });
       }
       await queryBuilder.onQueryExecutionSubmit();
     },
-    [queryBuilder, queryEditorState.editorMode, getEditorText]
+    [queryBuilder, queryEditorState.editorMode]
   );
 
   const handleQueryCancel = useCallback(() => {

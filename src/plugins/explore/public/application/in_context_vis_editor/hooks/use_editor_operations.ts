@@ -5,91 +5,75 @@
 
 import { useCallback } from 'react';
 import type { monaco } from '@osd/monaco';
-import { EditorMode } from '../../utils/state_management/types';
-import { useQueryBuilderState } from './use_query_builder_state';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
-export const useEditorOperations = () => {
-  const { queryBuilder } = useQueryBuilderState();
-  const getEditorRef = useCallback((): IStandaloneCodeEditor | null => {
-    return queryBuilder.getEditorRef();
-  }, [queryBuilder]);
+interface EditorAccessors {
+  getEditor: () => IStandaloneCodeEditor | null;
+  setEditor: (editor: IStandaloneCodeEditor | null) => void;
+}
 
-  // Set editor ref
+export const useEditorOperations = ({ getEditor, setEditor }: EditorAccessors) => {
+  const getEditorRef = useCallback(() => getEditor(), [getEditor]);
+
   const setEditorRef = useCallback(
     (editor: IStandaloneCodeEditor | null) => {
-      queryBuilder.setEditorRef(editor);
+      setEditor(editor);
     },
-    [queryBuilder]
+    [setEditor]
   );
 
-  // Focus editor
   const focusEditor = useCallback(
     (selectAll?: boolean) => {
       setTimeout(() => {
-        const editor = getEditorRef();
+        const editor = getEditor();
         const model = editor?.getModel();
         editor?.focus();
 
         if (selectAll && model) {
           editor?.setSelection(model.getFullModelRange());
         } else if (model) {
-          // Position cursor at the end
           const lastLine = model.getLineCount();
           const lastColumn = model.getLineMaxColumn(lastLine);
           editor?.setPosition({ lineNumber: lastLine, column: lastColumn });
         }
       });
     },
-    [getEditorRef]
+    [getEditor]
   );
 
-  // Get editor text
   const getEditorText = useCallback((): string => {
-    return getEditorRef()?.getValue() || '';
-  }, [getEditorRef]);
+    return getEditor()?.getValue() || '';
+  }, [getEditor]);
 
-  // Set editor text
   const setEditorText = useCallback(
     (text: string | ((prevText: string) => string)) => {
-      const editor = getEditorRef();
+      const editor = getEditor();
       const currentValue = editor?.getValue() || '';
       const newValue = typeof text === 'function' ? text(currentValue) : text;
       editor?.setValue(newValue);
     },
-    [getEditorRef]
+    [getEditor]
   );
 
-  // Switch editor mode (for language toggle)
-  const switchEditorMode = useCallback(
-    (mode: EditorMode) => {
-      const editor = getEditorRef();
-      queryBuilder.updateQueryEditorState({ editorMode: mode });
-      const range = editor?.getModel()?.getFullModelRange();
-      if (range) {
-        setTimeout(() => editor?.setSelection(range), 300);
-      }
-    },
-    [queryBuilder, getEditorRef]
-  );
-
-  const resetEditorMode = useCallback(() => {
-    queryBuilder.updateQueryEditorState({ editorMode: EditorMode.Query });
-  }, [queryBuilder]);
+  const switchEditorMode = useCallback(() => {
+    const range = getEditor()?.getModel()?.getFullModelRange();
+    if (range) {
+      setTimeout(() => getEditor()?.setSelection(range), 300);
+    }
+  }, [getEditor]);
 
   const clearEditor = useCallback(() => {
     setEditorText('');
-    resetEditorMode();
-  }, [resetEditorMode, setEditorText]);
+  }, [setEditorText]);
 
   return {
-    getEditorRef,
-    setEditorRef,
     focusEditor,
     getEditorText,
     setEditorText,
-    switchEditorMode,
     clearEditor,
+    getEditorRef,
+    setEditorRef,
+    switchEditorMode,
   };
 };
