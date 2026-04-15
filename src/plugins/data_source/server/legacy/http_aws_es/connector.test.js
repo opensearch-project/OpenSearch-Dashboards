@@ -8,6 +8,8 @@ const expect = require('chai').expect;
 const Host = require('elasticsearch/src/lib/host');
 const sinon = require('sinon');
 const { defaultProvider } = require('@aws-sdk/credential-provider-node');
+const { Readable } = require('stream');
+const zlib = require('zlib');
 
 const Connector = require('./connector');
 
@@ -286,5 +288,57 @@ describe('createRequest', () => {
 
     expect(request.path).to.equal('/test');
     expect(request.query).to.deep.equal({ foo: 'bar', baz: 'qux' });
+  });
+});
+
+describe('streamToString', () => {
+  it('should return plain text for non-gzip response', async () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const testData = '{"message": "Hello World"}';
+    const stream = Readable.from([Buffer.from(testData)]);
+
+    const result = await connector.streamToString(stream, {});
+    expect(result).to.equal(testData);
+  });
+
+  it('should decompress gzip response when content-encoding is gzip', async () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const testData = '{"message": "Hello World"}';
+    const gzippedData = zlib.gzipSync(Buffer.from(testData));
+    const stream = Readable.from([gzippedData]);
+
+    const result = await connector.streamToString(stream, { 'content-encoding': 'gzip' });
+    expect(result).to.equal(testData);
+  });
+
+  it('should decompress deflate response when content-encoding is deflate', async () => {
+    const host = new Host();
+    const connector = new Connector(host, {
+      awsConfig: {
+        region: 'us-east-1',
+        credentials: defaultProvider(),
+      },
+    });
+
+    const testData = '{"message": "Hello World"}';
+    const deflatedData = zlib.deflateSync(Buffer.from(testData));
+    const stream = Readable.from([deflatedData]);
+
+    const result = await connector.streamToString(stream, { 'content-encoding': 'deflate' });
+    expect(result).to.equal(testData);
   });
 });

@@ -30,7 +30,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 
 import {
@@ -141,7 +141,8 @@ const FooApp = ({ history, context }: { history: History; context: AppMountConte
 );
 
 export const renderApp = (context: AppMountContext, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<FooApp history={history} context={context} />, element);
+  const root = createRoot(element);
+  root.render(<FooApp history={history} context={context} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

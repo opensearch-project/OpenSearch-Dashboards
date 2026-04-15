@@ -3,8 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationRegistry } from '../components/visualizations/visualization_registry';
-import { VisualizationRule } from '../components/visualizations/types';
+import {
+  visualizationRegistry,
+  VisualizationRegistry,
+} from '../components/visualizations/visualization_registry';
+import { VisualizationType } from '../components/visualizations/utils/use_visualization_types';
+import { createAreaConfig } from '../components/visualizations/area/area_vis_config';
+import { createBarConfig } from '../components/visualizations/bar/bar_vis_config';
+import { createBarGaugeConfig } from '../components/visualizations/bar_gauge/bar_gauge_vis_config';
+import { createGaugeConfig } from '../components/visualizations/gauge/gauge_vis_config';
+import { createHeatmapConfig } from '../components/visualizations/heatmap/heatmap_vis_config';
+import { createHistogramConfig } from '../components/visualizations/histogram/histogram_vis_config';
+import { createLineConfig } from '../components/visualizations/line/line_vis_config';
+import { createMetricConfig } from '../components/visualizations/metric/metric_vis_config';
+import { createPieConfig } from '../components/visualizations/pie/pie_vis_config';
+import { createStateTimelineConfig } from '../components/visualizations/state_timeline/state_timeline_config';
+import { createScatterConfig } from '../components/visualizations/scatter/scatter_vis_config';
+import { createTableConfig } from '../components/visualizations/table/table_vis_config';
 
 /**
  * Service interface for the visualization registry
@@ -12,65 +27,62 @@ import { VisualizationRule } from '../components/visualizations/types';
  */
 export interface VisualizationRegistryServiceSetup {
   /**
-   * Register a new visualization rule
-   * @param rule The visualization rule to register
+   * Register a new visualization
    */
-  registerRule: (rule: VisualizationRule) => void;
-
-  /**
-   * Register multiple visualization rules
-   * @param rules The visualization rules to register
-   */
-  registerRules: (rules: VisualizationRule[]) => void;
+  registerVisualization: (
+    visualization: VisualizationType<any> | Array<VisualizationType<any>>
+  ) => void;
 }
 
 export interface VisualizationRegistryServiceStart {
   /**
-   * Register a new visualization rule
-   * @param rule The visualization rule to register
+   * Register a new visualization
    */
-  registerRule: (rule: VisualizationRule) => void;
+  registerVisualization: (visualization: VisualizationType<any>) => void;
 
   /**
-   * Register multiple visualization rules
-   * @param rules The visualization rules to register
+   * Get a visualization by type
    */
-  registerRules: (rules: VisualizationRule[]) => void;
-
-  /**
-   * Get all registered visualization rules
-   */
-  getRules: () => VisualizationRule[];
+  getVisualization: (chartType: string) => VisualizationType<any> | undefined;
 }
 
 export class VisualizationRegistryService {
   private readonly registry: VisualizationRegistry;
 
   constructor() {
-    this.registry = new VisualizationRegistry();
+    // TODO: refactor this to not rely on this visualizationRegistry singleton
+    this.registry = visualizationRegistry;
+    this.registry.registerVisualization([
+      createAreaConfig(),
+      createBarConfig(),
+      createBarGaugeConfig(),
+      createGaugeConfig(),
+      createHeatmapConfig(),
+      createHistogramConfig(),
+      createLineConfig(),
+      createMetricConfig(),
+      createPieConfig(),
+      createScatterConfig(),
+      createStateTimelineConfig(),
+      createTableConfig(),
+    ]);
   }
 
   public setup(): VisualizationRegistryServiceSetup {
     return {
-      registerRule: (rule: VisualizationRule) => {
-        this.registry.registerRule(rule);
-      },
-      registerRules: (rules: VisualizationRule[]) => {
-        this.registry.registerRules(rules);
+      registerVisualization: (visualization) => {
+        this.registry.registerVisualization(visualization);
       },
     };
   }
 
   public start(): VisualizationRegistryServiceStart {
     return {
-      registerRule: (rule: VisualizationRule) => {
-        this.registry.registerRule(rule);
+      registerVisualization: (visualization) => {
+        this.registry.registerVisualization(visualization);
       },
-      registerRules: (rules: VisualizationRule[]) => {
-        this.registry.registerRules(rules);
-      },
-      getRules: () => {
-        return this.registry.getRules();
+      getVisualization: (chartType) => {
+        return this.registry.getVisualization(chartType);
       },
     };
   }

@@ -48,7 +48,7 @@ export const generateRecentQueriesTestConfiguration = (dataset, datasetType, lan
     dataset,
     datasetType: customDatasetType,
     language,
-    alternativeDataset: '.opensearch-sap-log-types-config',
+    alternativeDataset: '.kibana',
     defaultQuery: defaultQuery,
     testName: `dataset: ${datasetType} and language: ${language.name}`,
   };

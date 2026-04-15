@@ -22,32 +22,33 @@ export function mergeThresholdsWithBase(
 ): { textColor: string; mergedThresholds: Threshold[] } {
   const defaultColor = baseColor ?? getColors().statusGreen;
 
+  let textColor = targetValue === undefined || minBase > targetValue ? DEFAULT_GREY : defaultColor;
+
   // Handle empty thresholds
   if (!validThresholds || validThresholds.length === 0) {
     return {
-      textColor: !targetValue || targetValue < minBase ? DEFAULT_GREY : defaultColor,
+      textColor,
       mergedThresholds: [{ value: minBase, color: defaultColor }],
     };
   }
 
   let lastBelowIndex = -1;
-  let textColor: string | undefined;
 
   for (let i = 0; i < validThresholds.length; i++) {
     const { value, color } = validThresholds[i];
 
     if (value <= minBase) lastBelowIndex = i;
-    if (targetValue !== undefined && targetValue >= value) textColor = color;
+    if (targetValue !== undefined && targetValue >= value) textColor = color; // text color doesn't consider min/max control
   }
-
-  // Default to baseColor if no textColor was found
-  textColor ??= defaultColor;
 
   // If found a threshold below minBase, update thresholds
   if (lastBelowIndex !== -1) {
     const updated = validThresholds.slice(lastBelowIndex);
     updated[0] = { ...updated[0], value: minBase };
-    return { textColor, mergedThresholds: updated.filter((t) => t.value <= maxBase) };
+    return {
+      textColor,
+      mergedThresholds: updated.filter((t) => t.value <= maxBase),
+    };
   }
 
   // Otherwise, insert a new base threshold at the beginning
@@ -65,9 +66,13 @@ export function mergeThresholdsWithBase(
  * @param targetValue The value that will be displayed in gauge
  * @returns threshold
  */
-export function locateThreshold(thresholds: Threshold[], targetValue: number): Threshold | null {
+export function locateThreshold(
+  thresholds: Threshold[],
+  targetValue: number | undefined
+): Threshold | null {
   // Return null if target value is below the minimum range
-  if (thresholds.length < 1 || targetValue < thresholds[0].value) return null;
+  if (targetValue === undefined || thresholds.length < 1 || targetValue < thresholds[0].value)
+    return null;
 
   // Iterate through ranges to find where target value belongs
   for (let i = 0; i < thresholds.length - 1; i++) {

@@ -22,6 +22,7 @@ import {
   setPromptToQueryIsLoading,
 } from '../../../../slices';
 import { runQueryActionCreator } from '../../run_query';
+import { generatePromQLWithAgUi } from '../../../../../query_assist';
 
 export const callAgentActionCreator = createAsyncThunk<
   void,
@@ -58,10 +59,24 @@ export const callAgentActionCreator = createAsyncThunk<
 
   try {
     dispatch(setPromptToQueryIsLoading(true));
+
+    if (dataset.type === 'PROMETHEUS') {
+      const result = await generatePromQLWithAgUi({
+        data: services.data,
+        question: editorText,
+        dataSourceName: dataset.title,
+        dataSourceId: dataset.dataSource?.id,
+        dataSourceMeta: dataset.dataSource?.meta as Record<string, unknown>,
+      });
+      dispatch(runQueryActionCreator(services, result.query));
+      dispatch(setLastExecutedTranslatedQuery(result.query));
+      dispatch(setLastExecutedPrompt(editorText));
+      return;
+    }
+
     const params: QueryAssistParameters = {
       question: editorText,
       index: dataset.title,
-      // TODO: when we introduce more query languages, this should be no longer be hardcoded to PPL
       language: 'PPL',
       dataSourceId: dataset.dataSource?.id,
       currentTime: moment().format('YYYY-MM-DD HH:mm:ss'),

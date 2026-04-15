@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { AssistantActionContext } from '../contexts/assistant_action_context';
 import { AssistantActionService, ToolDefinition } from '../services/assistant_action_service';
 
@@ -62,6 +62,7 @@ export function GlobalAssistantProvider({
     getToolDefinitions: service.getToolDefinitions,
     updateToolCallState: service.updateToolCallState,
     getActionRenderer: service.getActionRenderer,
+    shouldUseCustomRenderer: service.shouldUseCustomRenderer,
   };
 
   return (

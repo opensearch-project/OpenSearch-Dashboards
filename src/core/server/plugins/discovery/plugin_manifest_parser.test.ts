@@ -138,33 +138,74 @@ test('return error when plugin version is missing', async () => {
   });
 });
 
-test('return error when plugin expected OpenSearch Dashboards version has different major version', async () => {
+test('log warning when plugin expected OpenSearch Dashboards version has different major version', async () => {
   mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' }))
+    Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2', server: true }))
   );
 
-  await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "6.4.2", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
-    type: PluginDiscoveryErrorType.IncompatibleVersion,
-    path: pluginManifestPath,
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  const manifest = await parseManifest(pluginPath, packageInfo, logger);
+
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Plugin \\"someId\\" is version \\"6.4.2\\", but used OpenSearch Dashboards version is \\"7.0.0-alpha1\\".",
+      ],
+    ]
+  `);
+
+  expect(manifest).toEqual({
+    id: 'someId',
+    configPath: 'some_id',
+    version: '6.4.2',
+    opensearchDashboardsVersion: '6.4.2',
+    optionalPlugins: [],
+    requiredPlugins: [],
+    requiredEnginePlugins: {},
+    requiredBundles: [],
+    server: true,
+    ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
-test('return error when plugin expected OpenSearch Dashboards version cannot be interpreted as semver', async () => {
+test('log warning when plugin expected OpenSearch Dashboards version cannot be interpreted as semver', async () => {
   mockReadFilePromise.mockResolvedValue(
     Buffer.from(
       JSON.stringify({
         id: 'someId',
         version: '1.0.0',
         opensearchDashboardsVersion: 'non-sem-ver',
+        server: true,
       })
     )
   );
 
-  await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "non-sem-ver", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
-    type: PluginDiscoveryErrorType.IncompatibleVersion,
-    path: pluginManifestPath,
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  const manifest = await parseManifest(pluginPath, packageInfo, logger);
+
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Plugin \\"someId\\" is version \\"non-sem-ver\\", but used OpenSearch Dashboards version is \\"7.0.0-alpha1\\".",
+      ],
+    ]
+  `);
+
+  expect(manifest).toEqual({
+    id: 'someId',
+    configPath: 'some_id',
+    version: '1.0.0',
+    opensearchDashboardsVersion: 'non-sem-ver',
+    optionalPlugins: [],
+    requiredPlugins: [],
+    requiredEnginePlugins: {},
+    requiredBundles: [],
+    server: true,
+    ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
@@ -192,26 +233,67 @@ test('return error when plugin config path is an array that contains non-string 
   });
 });
 
-test('return error when plugin expected OpenSearch Dashboards version has different major version (8.x vs 7.x)', async () => {
+test('log warning when plugin expected OpenSearch Dashboards version has different major version (8.x vs 7.x)', async () => {
   mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '8.0.0' }))
+    Buffer.from(JSON.stringify({ id: 'someId', version: '8.0.0', server: true }))
   );
 
-  await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    message: `Plugin "someId" is only compatible with OpenSearch Dashboards version "8.0.0", but used OpenSearch Dashboards version is "7.0.0-alpha1". (incompatible-version, ${pluginManifestPath})`,
-    type: PluginDiscoveryErrorType.IncompatibleVersion,
-    path: pluginManifestPath,
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  const manifest = await parseManifest(pluginPath, packageInfo, logger);
+
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Plugin \\"someId\\" is version \\"8.0.0\\", but used OpenSearch Dashboards version is \\"7.0.0-alpha1\\".",
+      ],
+    ]
+  `);
+
+  expect(manifest).toEqual({
+    id: 'someId',
+    configPath: 'some_id',
+    version: '8.0.0',
+    opensearchDashboardsVersion: '8.0.0',
+    optionalPlugins: [],
+    requiredPlugins: [],
+    requiredEnginePlugins: {},
+    requiredBundles: [],
+    server: true,
+    ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
-test('return error when plugin has lower major version', async () => {
+test('log warning when plugin has lower major version', async () => {
   mockReadFilePromise.mockResolvedValue(
-    Buffer.from(JSON.stringify({ id: 'someId', version: '6.9.9' }))
+    Buffer.from(JSON.stringify({ id: 'someId', version: '6.9.9', server: true }))
   );
 
-  await expect(parseManifest(pluginPath, packageInfo, logger)).rejects.toMatchObject({
-    type: PluginDiscoveryErrorType.IncompatibleVersion,
-    path: pluginManifestPath,
+  expect(loggingSystemMock.collect(logger).warn).toHaveLength(0);
+  const manifest = await parseManifest(pluginPath, packageInfo, logger);
+
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "Plugin \\"someId\\" is version \\"6.9.9\\", but used OpenSearch Dashboards version is \\"7.0.0-alpha1\\".",
+      ],
+    ]
+  `);
+
+  expect(manifest).toEqual({
+    id: 'someId',
+    configPath: 'some_id',
+    version: '6.9.9',
+    opensearchDashboardsVersion: '6.9.9',
+    optionalPlugins: [],
+    requiredPlugins: [],
+    requiredEnginePlugins: {},
+    requiredBundles: [],
+    server: true,
+    ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 

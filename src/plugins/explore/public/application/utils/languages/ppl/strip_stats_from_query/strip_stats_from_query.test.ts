@@ -98,4 +98,43 @@ describe('stripStatsFromQuery', () => {
       language: 'PPL',
     });
   });
+
+  it('should remove stats pipe in multi-line query where stats is on a separate line', () => {
+    const queryWithStats: Query = {
+      query: 'source=logs\n| where level="error"\n| stats count by host',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithStats);
+    expect(result).toEqual({
+      ...queryWithStats,
+      query: 'source=logs\n| where level="error"',
+    });
+  });
+
+  it('should remove stats and all subsequent pipes in multi-line query', () => {
+    const queryWithStats: Query = {
+      query: 'source=logs\n| where level="error"\n| stats count by host\n| sort -count',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithStats);
+    expect(result).toEqual({
+      ...queryWithStats,
+      query: 'source=logs\n| where level="error"',
+    });
+  });
+
+  it('should remove stats on last line when preceded by multi-line pipes', () => {
+    const queryWithStats: Query = {
+      query: 'source=logs\n| where level="error"\n| eval x=1\n| stats count by x',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'PPL',
+    };
+    const result = stripStatsFromQuery(queryWithStats);
+    expect(result).toEqual({
+      ...queryWithStats,
+      query: 'source=logs\n| where level="error"\n| eval x=1',
+    });
+  });
 });

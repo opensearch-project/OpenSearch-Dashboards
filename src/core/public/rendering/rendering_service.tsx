@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { InternalChromeStart } from '../chrome';
@@ -58,7 +57,8 @@ export class RenderingService {
     const appUi = application.getComponent();
     const bannerUi = overlays.banners.getComponent();
 
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <I18nProvider>
         <div className="content" data-test-subj="opensearchDashboardsChrome">
           {chromeUi}
@@ -75,8 +75,7 @@ export class RenderingService {
             </div>
           </AppWrapper>
         </div>
-      </I18nProvider>,
-      targetDomElement
+      </I18nProvider>
     );
   }
 }

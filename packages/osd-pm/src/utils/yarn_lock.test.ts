@@ -4,6 +4,7 @@
  */
 
 import { resolve } from 'path';
+import { standardize } from '@osd/cross-platform';
 import { OpenSearchDashboards } from './opensearch_dashboards';
 import { readYarnLock } from './yarn_lock';
 
@@ -22,9 +23,11 @@ describe('#readYarnLock', () => {
           accumulator[
             key +
               '@file:' +
-              resolve(
-                devProject.getAbsolute(),
-                allDependencies[key].substring(linkedDepmarkerLength)
+              standardize(
+                resolve(
+                  devProject.getAbsolute(),
+                  allDependencies[key].substring(linkedDepmarkerLength)
+                )
               )
           ] = expect.any(Object);
         }

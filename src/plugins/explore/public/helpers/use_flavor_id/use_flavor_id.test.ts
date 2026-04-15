@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import { useFlavorId } from './use_flavor_id';
 import { ExploreFlavor } from '../../../common';
@@ -45,7 +45,10 @@ describe('useFlavorId', () => {
   it('should extract flavor ID from explore app ID', () => {
     const { result } = renderHook(() => useFlavorId());
 
-    currentAppIdSubject.next('explore/logs');
+    // Use act() to flush React state updates from the Observable subscription
+    act(() => {
+      currentAppIdSubject.next('explore/logs');
+    });
 
     expect(result.current).toBe(ExploreFlavor.Logs);
   });
@@ -53,17 +56,25 @@ describe('useFlavorId', () => {
   it('should handle multiple app ID changes', () => {
     const { result } = renderHook(() => useFlavorId());
 
-    currentAppIdSubject.next('explore/logs');
+    // Use act() to flush React state updates from the Observable subscription
+    act(() => {
+      currentAppIdSubject.next('explore/logs');
+    });
     expect(result.current).toBe(ExploreFlavor.Logs);
 
-    currentAppIdSubject.next('explore/metrics');
+    act(() => {
+      currentAppIdSubject.next('explore/metrics');
+    });
     expect(result.current).toBe(ExploreFlavor.Metrics);
   });
 
   it('should handle invalid app IDs', () => {
     const { result } = renderHook(() => useFlavorId());
 
-    currentAppIdSubject.next('invalid-app-id');
+    // Use act() to flush React state updates from the Observable subscription
+    act(() => {
+      currentAppIdSubject.next('invalid-app-id');
+    });
     expect(result.current).toBeNull();
   });
 

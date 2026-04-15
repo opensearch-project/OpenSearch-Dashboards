@@ -1,2 +1,0 @@
-fix:
-- Bugfixes for agent logging and max iteration use-cases ([#10710](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10710))

@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SignatureV4 } from '@aws-sdk/signature-v4';
-import { HttpRequest } from '@aws-sdk/protocol-http';
+import { SignatureV4 } from '@smithy/signature-v4';
+import { HttpRequest } from '@smithy/protocol-http';
 import { Sha256 } from '@aws-crypto/sha256-js';
-import { AbortController } from '@aws-sdk/abort-controller';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
+import { createGunzip, createInflate } from 'zlib';
 
 const HttpConnector = require('elasticsearch/src/lib/connectors/http');
 
@@ -52,7 +52,7 @@ class HttpAmazonESConnector extends HttpConnector {
       const { response } = await this.httpClient.handle(request, {
         abortSignal: controller.signal,
       });
-      const body = await this.streamToString(response.body);
+      const body = await this.streamToString(response.body, response.headers);
 
       this.log.trace(params.method, reqParams, params.body, body, response.statusCode);
       cb(null, body, response.statusCode, response.headers);
@@ -64,12 +64,21 @@ class HttpAmazonESConnector extends HttpConnector {
   }
 
   // Helper method to convert readable stream to string
-  streamToString(stream) {
+  streamToString(stream, headers = {}) {
     return new Promise((resolve, reject) => {
+      const contentEncoding = headers['content-encoding'] || headers['Content-Encoding'];
+
+      let targetStream = stream;
+      if (contentEncoding === 'gzip') {
+        targetStream = stream.pipe(createGunzip());
+      } else if (contentEncoding === 'deflate') {
+        targetStream = stream.pipe(createInflate());
+      }
+
       const chunks = [];
-      stream.on('data', (chunk) => chunks.push(chunk));
-      stream.on('error', reject);
-      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+      targetStream.on('data', (chunk) => chunks.push(chunk));
+      targetStream.on('error', reject);
+      targetStream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     });
   }
 

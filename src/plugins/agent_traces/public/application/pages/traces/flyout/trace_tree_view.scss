@@ -1,0 +1,159 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+
+.agentTracesFlyout {
+  &__treeContainer {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: $ouiSizeS;
+  }
+
+  &__treeNode {
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  &__treeRow {
+    padding: $ouiSizeXS $ouiSizeS $ouiSizeXS $ouiSizeXS;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    position: relative;
+
+    &:hover {
+      background-color: var(--agent-traces-row-hover-bg, $ouiColorLightestShade);
+    }
+
+    &--selected {
+      background-color: var(--agent-traces-row-selected-bg);
+    }
+  }
+
+  &__treeRowLabel {
+    gap: $ouiSizeXS;
+    min-width: 0;
+  }
+
+  &__treeRowLabelText {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    font-size: $ouiFontSizeXS;
+    line-height: 1.2;
+  }
+
+  &__treeRowLabelName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__treeRowErrorIcon {
+    flex-shrink: 0;
+    margin-left: $ouiSizeXS;
+  }
+
+  &__treeRowLatency {
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: 72px;
+    text-align: right;
+  }
+
+  &__treeChildren {
+    position: relative;
+    margin-left: $ouiSizeS;
+    padding-left: $ouiSize;
+  }
+
+  &__guideLine {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: $ouiSize;
+    z-index: 1;
+  }
+
+  &__treeChildren > &__treeNode {
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: -2px;
+      left: -$ouiSize;
+      width: 1px;
+      background-color: $ouiColorLightShade;
+      transition: background-color 150ms ease;
+      pointer-events: none;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -$ouiSize;
+      width: $ouiSize;
+      height: 15px;
+      border-left: 1px solid $ouiColorLightShade;
+      border-bottom: 1px solid $ouiColorLightShade;
+      border-bottom-left-radius: 6px;
+      background: none;
+      transition: border-color 150ms ease;
+      pointer-events: none;
+    }
+
+    &:last-child::before {
+      display: none;
+    }
+  }
+
+  &__guideLine:hover {
+    & ~ .agentTracesFlyout__treeNode::before {
+      background-color: $ouiColorPrimary;
+    }
+
+    & ~ .agentTracesFlyout__treeNode::after {
+      border-color: $ouiColorPrimary;
+    }
+  }
+
+  &__treeRowTokens {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__tokenBadge {
+    border-radius: 999px !important;
+  }
+
+  &__treeRowLabelWrap {
+    min-width: 0;
+  }
+
+  &__treeRowExpand {
+    width: $ouiSize;
+    margin-left: $ouiSizeS;
+
+    .euiIcon {
+      cursor: pointer;
+    }
+  }
+
+  &__treeWrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* stylelint-enable @osd/stylelint/no_modifying_global_selectors */

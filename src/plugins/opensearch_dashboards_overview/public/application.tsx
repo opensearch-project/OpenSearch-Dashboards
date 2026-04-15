@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { OpenSearchDashboardsContextProvider } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { NewsfeedApiEndpoint } from '../../../../src/plugins/newsfeed/public';
@@ -52,7 +51,8 @@ export const renderApp = (
     .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
   const features = home.featureCatalogue.get();
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={{ ...core, ...deps }}>
         <OpenSearchDashboardsOverviewApp
@@ -66,9 +66,8 @@ export const renderApp = (
           logos={core.chrome.logos}
         />
       </OpenSearchDashboardsContextProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

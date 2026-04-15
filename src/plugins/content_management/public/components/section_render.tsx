@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 import { EuiButtonIcon, EuiSpacer, EuiTitle } from '@elastic/eui';

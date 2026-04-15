@@ -6,7 +6,6 @@
 import { i18n } from '@osd/i18n';
 import {
   ColorSchemas,
-  ScaleType,
   Positions,
   AggregationType,
   PointShape,
@@ -77,29 +76,6 @@ export const getColorSchemas = () => [
       defaultMessage: 'Yellow to Orange',
     }),
     value: ColorSchemas.YELLOWORANGE,
-  },
-];
-
-export const getScaleType = () => [
-  {
-    text: i18n.translate('explore.vis.scaleType.linear', {
-      defaultMessage: 'Linear',
-    }),
-    value: ScaleType.LINEAR,
-  },
-
-  {
-    text: i18n.translate('explore.vis.scaleType.log', {
-      defaultMessage: 'Log',
-    }),
-    value: ScaleType.LOG,
-  },
-
-  {
-    text: i18n.translate('explore.vis.scaleType.sqrt', {
-      defaultMessage: 'Square root',
-    }),
-    value: ScaleType.SQRT,
   },
 ];
 

@@ -4,10 +4,10 @@
  */
 
 import {
+  clearResults,
   setLegacyState,
   setQueryEditorState,
   setQueryState,
-  setResultsState,
   setTabState,
   setUiState,
 } from '../../slices';
@@ -15,7 +15,6 @@ import { getPreloadedState } from '../../utils/redux_persistence';
 import { ExploreServices } from '../../../../../types';
 import { executeQueries } from '../query_actions';
 import { AppDispatch } from '../../store';
-import { detectAndSetOptimalTab } from '../detect_optimal_tab';
 import { useClearEditors } from '../../../../hooks';
 
 /**
@@ -30,11 +29,10 @@ export const resetExploreStateActionCreator = (
 
   clearEditors();
   dispatch(setUiState(state.ui));
-  dispatch(setResultsState(state.results));
+  dispatch(clearResults());
   dispatch(setTabState(state.tab));
   dispatch(setLegacyState(state.legacy));
   dispatch(setQueryState(state.query));
   dispatch(setQueryEditorState(state.queryEditor));
   await dispatch(executeQueries({ services }));
-  dispatch(detectAndSetOptimalTab({ services }));
 };

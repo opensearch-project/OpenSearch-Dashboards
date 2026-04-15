@@ -7,18 +7,6 @@ import { createGauge } from './to_expression';
 import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultGaugeChartStyles } from './gauge_vis_config';
 
-jest.mock('./gauge_chart_utils', () => ({
-  mergeThresholdsWithBase: jest.fn(() => [{ value: 0, color: '#00BD6B' }]),
-  locateThreshold: jest.fn(() => ({ value: 0, color: '#00BD6B' })),
-  generateRanges: jest.fn(() => [{ min: 0, max: 100, color: '#00BD6B' }]),
-  generateArcExpression: jest.fn(() => ({ mark: { type: 'arc' } })),
-  getMaxAndMinBase: jest.fn(() => ({ minBase: 10, maxBase: 200 })),
-}));
-
-jest.mock('../utils/calculation', () => ({
-  calculateValue: jest.fn(() => 50),
-}));
-
 describe('createGauge', () => {
   const mockNumericalColumn: VisColumn = {
     id: 1,
@@ -35,92 +23,27 @@ describe('createGauge', () => {
     [AxisRole.Value]: mockNumericalColumn,
   };
 
-  it('creates basic gauge spec', () => {
-    const spec = createGauge(
-      mockData,
-      [mockNumericalColumn],
-      [],
-      [],
-      defaultGaugeChartStyles,
-      mockAxisColumnMappings
-    );
+  it('creates an ECharts gauge spec with series and dataset', () => {
+    const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
-    expect(spec.$schema).toBe('https://vega.github.io/schema/vega-lite/v5.json');
-    expect(spec.autosize).toEqual({ type: 'fit', contains: 'padding' });
-    expect(spec.params).toBeDefined();
-    expect(spec.layer).toBeDefined();
+    expect(spec).toHaveProperty('dataset');
+    expect(spec).toHaveProperty('series');
+    expect(spec).toHaveProperty('polar');
+    // @ts-expect-error TS18048 TODO(ts-upgrade): fixme
+    expect(Array.isArray(spec.series)).toBe(true);
   });
 
-  it('uses custom min and max values', () => {
-    const customStyles = {
-      ...defaultGaugeChartStyles,
-      min: 10,
-      max: 200,
-    };
+  it('produces gauge-type series', () => {
+    const spec = createGauge(mockData, defaultGaugeChartStyles, mockAxisColumnMappings);
 
-    const spec = createGauge(
-      mockData,
-      [mockNumericalColumn],
-      [],
-      [],
-      customStyles,
-      mockAxisColumnMappings
-    );
-
-    expect(spec.params.find((p) => p.name === 'minValue')?.value).toBe(10);
-    expect(spec.params.find((p) => p.name === 'maxValue')?.value).toBe(200);
+    // @ts-expect-error TS18048 TODO(ts-upgrade): fixme
+    const gaugeSeries = spec.series.filter((s: any) => s.type === 'gauge');
+    expect(gaugeSeries.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('includes title when showTitle is true', () => {
-    const customStyles = {
-      ...defaultGaugeChartStyles,
-      showTitle: true,
-      title: 'Custom Gauge Title',
-    };
-
-    const spec = createGauge(
-      mockData,
-      [mockNumericalColumn],
-      [],
-      [],
-      customStyles,
-      mockAxisColumnMappings
+  it('throws when no value column is provided', () => {
+    expect(() => createGauge(mockData, defaultGaugeChartStyles, {})).toThrow(
+      'Missing value for metric chart'
     );
-
-    const titleLayer = spec.layer.find(
-      (l: any) => l.encoding?.text?.value === 'Custom Gauge Title'
-    );
-    expect(titleLayer).toBeDefined();
-  });
-
-  it('excludes title when showTitle is false', () => {
-    const customStyles = {
-      ...defaultGaugeChartStyles,
-      showTitle: false,
-      title: 'myTitle',
-    };
-
-    const spec = createGauge(
-      mockData,
-      [mockNumericalColumn],
-      [],
-      [],
-      customStyles,
-      mockAxisColumnMappings
-    );
-
-    const titleLayer = spec.layer.find(
-      (l: any) =>
-        l.encoding?.text &&
-        typeof l.encoding.text.value === 'string' &&
-        l.encoding.text.value === 'myTitle'
-    );
-    expect(titleLayer).toBeUndefined();
-  });
-
-  it('uses fallback values when no axis mappings provided', () => {
-    const spec = createGauge(mockData, [mockNumericalColumn], [], [], defaultGaugeChartStyles);
-
-    expect(spec.params.find((p) => p.name === 'mainValue')?.value).toBe(50);
   });
 });

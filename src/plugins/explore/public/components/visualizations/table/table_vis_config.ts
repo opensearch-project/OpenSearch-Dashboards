@@ -37,7 +37,7 @@ export interface TableChartStyleOptions {
 export type TableChartStyle = Required<TableChartStyleOptions>;
 
 export const defaultTableChartStyles: TableChartStyle = {
-  pageSize: 10,
+  pageSize: 50,
   globalAlignment: 'left',
   showColumnFilter: false,
   showFooter: false,
@@ -51,13 +51,14 @@ export const defaultTableChartStyles: TableChartStyle = {
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
-  name: 'table',
+  name: 'Table',
+  icon: 'visTable',
   type: 'table',
+  getRules: () => [],
   ui: {
     style: {
       defaults: defaultTableChartStyles,
       render: (props) => React.createElement(TableVisStyleControls, props),
     },
-    availableMappings: [],
   },
 });

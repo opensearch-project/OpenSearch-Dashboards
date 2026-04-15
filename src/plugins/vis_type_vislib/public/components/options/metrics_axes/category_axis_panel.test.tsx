@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
 import { Axis } from '../../../types';

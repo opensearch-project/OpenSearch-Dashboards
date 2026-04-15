@@ -3,18 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
 import { VisualizationRender } from './visualization_render';
 import { VisData } from './visualization_builder.types';
 import { VisFieldType, Positions, RenderChartConfig } from './types';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
 import { defaultTableChartStyles } from './table/table_vis_config';
+import { defaultMetricChartStyles } from './metric/metric_vis_config';
 
-// Mock the dependencies
+const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>);
+const mockFindRuleByAxesMapping = jest.fn();
+
+jest.mock('./visualization_registry', () => ({
+  visualizationRegistry: {
+    findRuleByAxesMapping: (...args: any[]) => mockFindRuleByAxesMapping(...args),
+  },
+}));
+
 jest.mock('./table/table_vis', () => ({
   TableVis: jest.fn(() => <div data-test-subj="tableVisualization">Table Visualization</div>),
 }));
@@ -25,11 +32,6 @@ jest.mock('./visualization_empty_state', () => ({
   )),
 }));
 
-jest.mock('./utils/to_expression', () => ({
-  toExpression: jest.fn(() => 'mocked-expression'),
-}));
-
-// Mock getServices
 jest.mock('../../services/services', () => ({
   getServices: jest.fn(() => ({
     data: {
@@ -48,7 +50,6 @@ jest.mock('../../services/services', () => ({
 }));
 
 describe('VisualizationRender', () => {
-  // Sample data for testing
   const mockVisData: VisData = {
     transformedData: [
       { field1: 'value1', count: 10 },
@@ -98,20 +99,10 @@ describe('VisualizationRender', () => {
     },
   };
 
-  const mockExpressionRenderer = jest.fn(({ expression, searchContext }) => (
-    <div data-test-subj="expressionRenderer">Expression Renderer: {expression}</div>
-  ));
-
-  const mockSearchContext: ExecutionContextSearch = {
-    timeRange: { from: 'now-15m', to: 'now' },
-    query: {
-      query: 'source=test',
-      language: 'PPL',
-    },
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRender.mockReturnValue(<div data-test-subj="echartsRender">Echarts Render</div>);
+    mockFindRuleByAxesMapping.mockReturnValue({ render: mockRender });
   });
 
   it('returns null when no visualization data is provided', () => {
@@ -126,7 +117,7 @@ describe('VisualizationRender', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders table visualization when type is table', () => {
+  it('renders table visualization when config type is table', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
@@ -138,39 +129,16 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
   });
 
-  it('renders expression renderer when there is a selection mapping and ExpressionRenderer is provided', () => {
+  it('renders EchartsRender when there is a selection mapping', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
 
     render(
-      <VisualizationRender
-        data$={data$}
-        config$={visConfig$}
-        showRawTable$={showRawTable$}
-        searchContext={mockSearchContext}
-        ExpressionRenderer={mockExpressionRenderer}
-      />
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
     );
 
-    expect(screen.getByTestId('expressionRenderer')).toBeInTheDocument();
-  });
-
-  it('returns null when there is a selection mapping but no ExpressionRenderer', () => {
-    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
-    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
-    const showRawTable$ = new BehaviorSubject<boolean>(false);
-
-    const { container } = render(
-      <VisualizationRender
-        data$={data$}
-        config$={visConfig$}
-        showRawTable$={showRawTable$}
-        searchContext={mockSearchContext}
-      />
-    );
-
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByTestId('echartsRender')).toBeInTheDocument();
   });
 
   it('renders empty state when there is no selection mapping', () => {
@@ -188,7 +156,7 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('visualizationEmptyState')).toBeInTheDocument();
   });
 
-  it('parses timeRange `from` and `to` with correct roundUp options', () => {
+  it('parses timeRange from and to with correct roundUp options', () => {
     const parseSpy = jest.spyOn(dateMath, 'parse');
 
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
@@ -200,12 +168,76 @@ describe('VisualizationRender', () => {
         data$={data$}
         config$={visConfig$}
         showRawTable$={showRawTable$}
-        searchContext={mockSearchContext}
-        ExpressionRenderer={mockExpressionRenderer}
+        timeRange={{ from: 'now-15m', to: 'now' }}
       />
     );
 
     expect(parseSpy).toHaveBeenCalledWith('now-15m');
     expect(parseSpy).toHaveBeenCalledWith('now', { roundUp: true });
+  });
+
+  it('renders raw table when showRawTable is true', () => {
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(true);
+
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
+  });
+
+  it('returns null when data has no columns', () => {
+    const emptyColumnsData: VisData = {
+      transformedData: [{ field1: 'value1' }],
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(emptyColumnsData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    const { container } = render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders MetricChartRender when config type is metric', () => {
+    mockRender.mockReturnValue(<div data-test-subj="metricChartRender">Metric Chart Render</div>);
+
+    const metricConfig: RenderChartConfig = {
+      type: 'metric',
+      styles: { ...defaultMetricChartStyles },
+      axesMapping: { value: 'count' },
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(metricConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(screen.getByTestId('metricChartRender')).toBeInTheDocument();
+  });
+
+  it('returns null when no matching rule is found', () => {
+    mockFindRuleByAxesMapping.mockReturnValue(null);
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    const { container } = render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    expect(container.firstChild).toBeNull();
   });
 });

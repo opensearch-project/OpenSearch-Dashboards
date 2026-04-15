@@ -270,7 +270,7 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATIONS.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
@@ -379,6 +379,7 @@ You could pass one or multiple flags. If you don't pass any flag, `yarn build-pl
 Currently, the supported flags for this script are:
 
 - `darwin` (builds Darwin x64)
+- `darwin-arm` (builds Darwin ARM64)
 - `linux` (builds Linux x64) **Note:** This build relies on the `dart-sass-embeddable` module, which uses `glibc`. Some Linux distributions (such as Alpine Linux) use `musl` instead of `glibc` and are not compatible with this build. If you are using a musl-based distro, consider building on a glibc-based environment (for example, using a Docker image based on Debian or CentOS) to avoid compatibility issues.
 - `linux-arm` (builds Linux ARM64).
 - `windows` (builds Windows x64)
@@ -437,7 +438,7 @@ remove it, don't simply comment it out.
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
-can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
+can run `yarn run lint:es --fix && yarn run lint:style --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
 Whenever possible we are trying to use Prettier and linting over written developer guide rules.
@@ -1071,10 +1072,6 @@ Name action functions in the form of a strong verb and passed properties in the 
 <sort-button onClick={action.sort}/>
 <pagerButton onPageNext={action.turnToNextPage} />
 ```
-
-#### Storybook
-
-OpenSearch Dashboards supports creating [Storybook](https://storybook.js.org/) for React components. New UI components should have a corresponding storybook component. See [osd-storybook](/packages/osd-storybook) for details.
 
 ### API endpoints
 

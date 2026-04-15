@@ -11,6 +11,7 @@ import { ResultsSummary } from './results_summary';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { EditorMode } from '../../application/utils/state_management/types';
 import { ResultStatus } from '../../../../data/public';
+import { resultsCache, clearResultsCache } from '../../application/utils/state_management/slices';
 
 jest.mock('./use_metrics', () => ({
   useMetrics: () => ({
@@ -107,13 +108,21 @@ const TestResultsSummary = () => {
   );
 };
 
+const defaultHits = [{ _source: { test: 'data' } }];
+const defaultCacheKey1 = 'test query';
+
 describe('ResultsSummary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
   });
 
+  afterEach(() => {
+    clearResultsCache();
+  });
+
   it('renders loading state when fetching summary', async () => {
+    resultsCache.set(defaultCacheKey1, { hits: { hits: defaultHits } } as any);
     mockServices.http.post.mockImplementation(() => new Promise(() => {})); // Never resolves to simulate loading
     renderWithProviders(<TestResultsSummary />);
     await waitFor(() => {
@@ -122,6 +131,7 @@ describe('ResultsSummary', () => {
   });
 
   it('renders summary content when available', async () => {
+    resultsCache.set(defaultCacheKey1, { hits: { hits: defaultHits } } as any);
     mockServices.http.post.mockResolvedValue('Test summary content');
     renderWithProviders(<TestResultsSummary />);
     await waitFor(() => {
@@ -130,6 +140,7 @@ describe('ResultsSummary', () => {
   });
 
   it('handles error when fetching summary fails', async () => {
+    resultsCache.set(defaultCacheKey1, { hits: { hits: defaultHits } } as any);
     mockServices.http.post.mockRejectedValue(new Error('Failed to fetch'));
     renderWithProviders(<TestResultsSummary />);
     await waitFor(() => {
@@ -160,6 +171,7 @@ describe('ResultsSummary', () => {
 
   it('uses query-specific results when available', async () => {
     const querySpecificData = [{ _source: { specific: 'data' } }];
+    resultsCache.set('test query', { hits: { hits: querySpecificData } } as any);
     const storeOverrides = {
       results: {
         'test query': {
@@ -183,6 +195,9 @@ describe('ResultsSummary', () => {
 
   it('falls back to defaultPreparePplQuery results when original query results not found', async () => {
     const fallbackData = [{ _source: { fallback: 'data' } }];
+    resultsCache.set('source=test_dataset nonexistent_query', {
+      hits: { hits: fallbackData },
+    } as any);
     const storeOverrides = {
       query: {
         query: 'nonexistent_query',

@@ -25,8 +25,12 @@ export function buildServices(
   tabRegistry: TabRegistryService,
   visualizationRegistry: VisualizationRegistryService,
   queryPanelActionsRegistry: QueryPanelActionsRegistryService,
-  isDatasetManagementEnabled: boolean,
-  slotRegistry: SlotRegistryService
+  isDatasetManagementEnabled: boolean = false,
+  slotRegistry?: SlotRegistryService,
+  dataImporterConfig?: ExploreServices['dataImporterConfig'],
+  dataSourceEnabled: boolean = false,
+  hideLocalCluster: boolean = false,
+  dataSourceManagement?: ExploreServices['dataSourceManagement']
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -102,5 +106,9 @@ export function buildServices(
     // Add supportedTypes from config
     supportedTypes,
     isDatasetManagementEnabled,
+    dataImporterConfig,
+    dataSourceEnabled,
+    hideLocalCluster,
+    dataSourceManagement,
   };
 }

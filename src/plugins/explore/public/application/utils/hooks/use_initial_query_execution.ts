@@ -9,8 +9,6 @@ import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults, clearQueryStatusMap, setIsInitialized } from '../state_management/slices';
-import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
-import { selectActiveTabId } from '../state_management/selectors';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useDatasetContext } from '../../context';
 
@@ -22,13 +20,21 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   const dispatch = useDispatch();
   const { isInitialized } = useSelector((state: RootState) => state.meta);
   const queryState = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector(selectActiveTabId);
   const exploreId = useCurrentExploreId();
   const { dataset: datasetFromContext, isLoading: datasetLoading } = useDatasetContext();
 
   const shouldSearchOnPageLoad = useMemo(() => {
+    if (queryState.dataset && services?.data?.query?.queryString) {
+      const datasetService = services.data.query.queryString.getDatasetService();
+      const typeConfig = datasetService.getType(queryState.dataset.type);
+      const datasetSearchOnLoad = typeConfig?.meta?.searchOnLoad;
+      if (datasetSearchOnLoad !== undefined) {
+        return datasetSearchOnLoad;
+      }
+    }
+
     return services?.uiSettings?.get('discover:searchOnPageLoad', true) ?? true;
-  }, [services?.uiSettings]);
+  }, [services?.uiSettings, services?.data?.query?.queryString, queryState.dataset]);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -49,10 +55,8 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         await dispatch(executeQueries({ services }));
-        if (!activeTabId) {
-          dispatch(detectAndSetOptimalTab({ services }));
-        }
         dispatch(setIsInitialized(true));
       }
     };
@@ -61,7 +65,6 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   }, [
     isInitialized,
     queryState,
-    activeTabId,
     shouldSearchOnPageLoad,
     dispatch,
     services,

@@ -59,6 +59,8 @@ export const convertResult = ({
     },
   };
 
+  const highlightData = data?.meta?.highlights;
+
   if (data && data.fields && data.fields.length > 0) {
     for (let index = 0; index < data.size; index++) {
       const hit: { [key: string]: any } = {};
@@ -122,10 +124,25 @@ export const convertResult = ({
       hits.push({
         _index: data.name,
         _source: hit,
+        ...(highlightData?.[index] && { highlight: highlightData[index] }),
       });
     }
   }
   searchResponse.hits.hits = hits;
+
+  // Handle instant data for Prometheus queries - transform to hits format
+  if (data.meta?.instantData) {
+    const instantData = data.meta.instantData;
+    const instantHits = instantData.rows.map((row: Record<string, unknown>) => ({
+      _index: data.name,
+      _source: row,
+    }));
+    (searchResponse as any).instantHits = {
+      hits: instantHits,
+      total: instantHits.length,
+    };
+    (searchResponse as any).instantFieldSchema = instantData.schema;
+  }
 
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
@@ -351,6 +368,7 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     id: id ?? DATA_FRAME_TYPES.DEFAULT,
     title: dataFrame.name,
     timeFieldName: getTimeField(dataFrame, dataFrame.meta?.queryConfig)?.name,
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSourceRef: {
       id: dataFrame.meta?.queryConfig?.dataSourceId,
       name: dataFrame.meta?.queryConfig?.dataSourceName,

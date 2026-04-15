@@ -14,12 +14,14 @@ interface DeleteFilterConfirmationModalProps {
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
   onDeleteFilter: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  isSaving: boolean;
 }
 
 export const DeleteFilterConfirmationModal = ({
   filterToDeleteValue,
   onCancelConfirmationModal,
   onDeleteFilter,
+  isSaving,
 }: DeleteFilterConfirmationModalProps) => {
   return (
     <EuiConfirmModal
@@ -47,6 +49,7 @@ export const DeleteFilterConfirmationModal = ({
           defaultMessage="Delete"
         />
       }
+      confirmButtonDisabled={isSaving}
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
     />
   );
@@ -56,4 +59,5 @@ DeleteFilterConfirmationModal.propTypes = {
   filterToDeleteValue: PropTypes.string.isRequired,
   onCancelConfirmationModal: PropTypes.func.isRequired,
   onDeleteFilter: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool.isRequired,
 };

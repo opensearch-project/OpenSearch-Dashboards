@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { PLUGIN_ID } from '../../../common';
@@ -17,7 +16,7 @@ import { useDatasetContext } from '../../application/context';
 import { ExecutionContextSearch } from '../../../../expressions/common';
 import {
   selectTabState,
-  selectUIState,
+  selectActiveTabId,
   selectQueryStatus,
   selectIsQueryRunning,
   selectShouldShowCancelButton,
@@ -60,17 +59,15 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       ui: { TopNavMenu },
     },
     data,
-    uiSettings,
-    scopedHistory,
   } = services;
 
-  const uiState = useNewStateSelector(selectUIState);
+  const activeTabId = useNewStateSelector(selectActiveTabId);
   const tabState = useNewStateSelector(selectTabState);
   const queryStatus = useNewStateSelector(selectQueryStatus);
   const isQueryRunning = useNewStateSelector(selectIsQueryRunning);
   const shouldShowCancelButton = useNewStateSelector(selectShouldShowCancelButton);
 
-  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+  const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const [searchContext, setSearchContext] = useState<ExecutionContextSearch>({
     query: queryString.getQuery(),
@@ -95,17 +92,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     };
   }, [data.query.state$]);
 
-  // Create osdUrlStateStorage from storage
-  const osdUrlStateStorage = useMemo(() => {
-    return createOsdUrlStateStorage({
-      useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: scopedHistory,
-    });
-  }, [uiSettings, scopedHistory]);
-
+  // Use the shared osdUrlStateStorage instance from services to avoid
+  // multiple instances competing to update the same URL, which causes
+  // lost updates (e.g., _q and _a being overwritten when _g is synced).
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
-    osdUrlStateStorage
+    services.osdUrlStateStorage!
   );
 
   const dispatch = useDispatch();
@@ -120,7 +112,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         tabState,
         flavorId,
         tabDefinition,
-        activeTabId: uiState.activeTabId,
+        activeTabId,
       },
       clearEditors,
       savedExplore
@@ -135,7 +127,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     flavorId,
     tabDefinition,
     clearEditors,
-    uiState.activeTabId,
+    activeTabId,
   ]);
 
   useEffect(() => {
@@ -166,6 +158,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       }
 
       const editorText = editorRef.current?.getValue() || '';
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
     },
     [dispatch, services, editorRef]
@@ -203,7 +196,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
           tabState,
           flavorId,
           tabDefinition,
-          activeTabId: uiState.activeTabId,
+          activeTabId,
         },
         savedExplore
       );
@@ -217,7 +210,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     tabState,
     flavorId,
     tabDefinition,
-    uiState.activeTabId,
+    activeTabId,
     savedExplore,
   ]);
 
@@ -284,6 +277,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
       showSaveQuery={false}
       useDefaultBehaviors={false}
+      disableTimeRangeTool={true}
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}

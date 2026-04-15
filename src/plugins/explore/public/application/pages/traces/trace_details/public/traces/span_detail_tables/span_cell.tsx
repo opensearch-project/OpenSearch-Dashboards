@@ -6,7 +6,7 @@
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import './span_detail_table.scss';
 import { nanoToMilliSec, round } from '../../utils/helper_functions';
 import { extractSpanDuration } from '../../utils/span_data_utils';

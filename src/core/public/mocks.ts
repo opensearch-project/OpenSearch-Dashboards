@@ -49,6 +49,8 @@ import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { workspacesServiceMock } from './workspace/workspaces_service.mock';
 import { keyboardShortcutServiceMock } from './keyboard_shortcut/keyboard_shortcut_service.mock';
+import { coreChatServiceMock } from './chat/chat_service.mock';
+import { coreTelemetryServiceMock } from './telemetry/telemetry_service.mock';
 
 export { applicationServiceMock } from './application/application_service.mock';
 export { scopedHistoryMock } from './application/scoped_history.mock';
@@ -64,6 +66,8 @@ export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { workspacesServiceMock } from './workspace/workspaces_service.mock';
 export { keyboardShortcutServiceMock } from './keyboard_shortcut/keyboard_shortcut_service.mock';
+export { coreChatServiceMock } from './chat/chat_service.mock';
+export { coreTelemetryServiceMock } from './telemetry/telemetry_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
@@ -92,6 +96,8 @@ function createCoreSetupMock({
     },
     workspaces: workspacesServiceMock.createSetupContract(),
     keyboardShortcut: keyboardShortcutServiceMock.createSetup(),
+    chat: coreChatServiceMock.createSetupContract(),
+    telemetry: coreTelemetryServiceMock.createSetupContract(),
   };
 
   return mock;
@@ -115,6 +121,8 @@ function createCoreStartMock({ basePath = '' } = {}) {
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
     keyboardShortcut: keyboardShortcutServiceMock.createStart(),
+    chat: coreChatServiceMock.createStartContract(),
+    telemetry: coreTelemetryServiceMock.createStartContract(),
   };
 
   return mock;

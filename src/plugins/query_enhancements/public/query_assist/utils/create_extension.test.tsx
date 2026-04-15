@@ -5,7 +5,7 @@
 
 import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
-import React from 'react';
+
 import { BehaviorSubject, of } from 'rxjs';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../../data/public';
@@ -43,7 +43,9 @@ const mockQueryWithIndexPattern = {
   },
 };
 
+// @ts-expect-error TS2345 TODO(ts-error): fixme
 queryStringMock.getQuery.mockReturnValue(mockQueryWithIndexPattern);
+// @ts-expect-error TS2345 TODO(ts-error): fixme
 queryStringMock.getUpdates$.mockReturnValue(of(mockQueryWithIndexPattern));
 
 jest.mock('../components', () => ({
@@ -58,6 +60,7 @@ describe('CreateExtension', () => {
     onSelectLanguage: jest.fn(),
     isCollapsed: false,
     setIsCollapsed: jest.fn(),
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     query: mockQueryWithIndexPattern,
     fetchStatus: ResultStatus.NO_RESULTS,
   };
@@ -85,11 +88,20 @@ describe('CreateExtension', () => {
   });
 
   const config: ConfigSchema['queryAssist'] = {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
     summary: { enabled: false, branding: { label: '' } },
   };
 
-  it('should be enabled if at least one language is configured and AI features enabled', async () => {
+  it('should be enabled if current language matches configured language and AI features enabled', async () => {
+    const mockQueryWithPPL = {
+      ...mockQueryWithIndexPattern,
+      language: 'PPL',
+    };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    queryStringMock.getQuery.mockReturnValue(mockQueryWithPPL);
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    queryStringMock.getUpdates$.mockReturnValue(of(mockQueryWithPPL));
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const extension = createQueryAssistExtension(
       coreSetupMock,
@@ -266,6 +278,7 @@ describe('CreateExtension', () => {
   it('should render the summary panel if it is enabled', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const modifiedConfig: ConfigSchema['queryAssist'] = {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
       summary: { enabled: true, branding: { label: '' } },
     };

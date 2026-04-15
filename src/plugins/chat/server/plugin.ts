@@ -12,6 +12,8 @@ import {
   Plugin,
   Logger,
   OpenSearchDashboardsRequest,
+  Capabilities,
+  HttpAuth,
 } from '../../../core/server';
 
 import { ChatPluginSetup, ChatPluginStart } from './types';
@@ -26,6 +28,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<ChatConfigType>;
   private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
+  private httpAuth?: HttpAuth;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -37,13 +40,24 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     const config = await this.config$.pipe(first()).toPromise();
     const router = core.http.createRouter();
     const getCapabilitiesResolver = () => this.capabilitiesResolver;
+    const getHttpAuth = () => this.httpAuth;
+
+    // Register capability to indicate observability agent availability
+    core.capabilities.registerProvider(() => ({
+      chat: {
+        observabilityAgentEnabled: !!config.observabilityAgentId,
+      },
+    }));
 
     defineRoutes(
       router,
       this.logger,
       config.agUiUrl,
       getCapabilitiesResolver,
-      config.mlCommonsAgentId
+      config.mlCommonsAgentId,
+      config.observabilityAgentId,
+      config.forwardCredentials,
+      getHttpAuth
     );
 
     return {};
@@ -54,6 +68,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     this.capabilitiesResolver = (request: OpenSearchDashboardsRequest) =>
       core.capabilities.resolveCapabilities(request);
+    this.httpAuth = core.http.auth;
 
     return {};
   }

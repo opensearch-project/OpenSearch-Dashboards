@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useKeyboardShortcut } from './use_keyboard_shortcut';
 import { ShortcutDefinition } from './types';
 import { KeyboardShortcutService } from './keyboard_shortcut_service';
@@ -182,12 +182,12 @@ describe('useKeyboardShortcut', () => {
         throw new Error('Registration failed');
       });
 
+      // In React 18, errors from useEffect properly bubble up through renderHook
       expect(() => {
         renderHook(() => useKeyboardShortcut(mockShortcut, mockKeyboardShortcutService));
-      }).not.toThrow();
+      }).toThrow('Registration failed');
 
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledWith(mockShortcut);
-      expect(mockKeyboardShortcutService.register).toThrow('Registration failed');
     });
 
     it('should handle unregistration errors gracefully', () => {

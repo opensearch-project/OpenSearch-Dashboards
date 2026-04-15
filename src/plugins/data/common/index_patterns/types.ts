@@ -108,6 +108,9 @@ export interface SavedObjectsClientCommonFindArgs {
 export interface SavedObjectsClientCommon {
   find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
   get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  bulkGet: <T = unknown>(
+    objects: Array<{ id: string; type: string }>
+  ) => Promise<{ savedObjects: Array<SavedObject<T>> }>;
   update: <T = unknown>(
     type: string,
     id: string,

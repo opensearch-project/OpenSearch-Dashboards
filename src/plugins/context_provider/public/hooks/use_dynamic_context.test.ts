@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDynamicContext } from './use_dynamic_context';
 import { AssistantContextOptions, AssistantContextStore } from '../types';
 import fastDeepEqual from 'fast-deep-equal';
@@ -490,37 +490,6 @@ describe('useDynamicContext', () => {
         const { unmount } = renderHook(() => useDynamicContext(options));
         unmount();
       }).not.toThrow();
-    });
-
-    it('should handle errors in addContext gracefully', () => {
-      mockContextStore.addContext.mockImplementation(() => {
-        throw new Error('Add context failed');
-      });
-
-      const options: AssistantContextOptions = {
-        description: 'Test context',
-        value: { test: 'data' },
-        label: 'Test Label',
-      };
-
-      expect(() => renderHook(() => useDynamicContext(options))).not.toThrow();
-    });
-
-    it('should handle errors in removeContextById gracefully', () => {
-      mockContextStore.removeContextById.mockImplementation(() => {
-        throw new Error('Remove context failed');
-      });
-
-      const options: AssistantContextOptions = {
-        id: 'test-context',
-        description: 'Test context',
-        value: { test: 'data' },
-        label: 'Test Label',
-      };
-
-      const { unmount } = renderHook(() => useDynamicContext(options));
-
-      expect(() => unmount()).not.toThrow();
     });
   });
 

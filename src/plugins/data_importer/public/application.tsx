@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../core/public';
 import { DataImporterPluginStartDependencies } from './types';
 import { DataImporterPluginApp } from './components/data_importer_app';
@@ -18,7 +17,8 @@ export const renderApp = (
   { dataSource, dataSourceManagement }: DataImporterPluginSetupDeps,
   config: PublicConfigSchema
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <DataImporterPluginApp
       basename={appBasePath}
       notifications={notifications}
@@ -29,9 +29,8 @@ export const renderApp = (
       dataSourceEnabled={!!dataSource}
       hideLocalCluster={dataSource?.hideLocalCluster || false}
       dataSourceManagement={dataSourceManagement}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

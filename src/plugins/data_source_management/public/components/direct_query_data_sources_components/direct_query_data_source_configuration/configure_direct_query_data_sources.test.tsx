@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_sources';
 import { NotificationsStart } from '../../../../../../core/public';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { createMemoryHistory } from 'history';
 
 const mockSetBreadcrumbs = jest.fn();
@@ -19,14 +18,24 @@ const mockHttp = {
   get: jest.fn().mockResolvedValue({ data: { role1: {}, role2: {} } }),
   post: jest.fn().mockResolvedValue({}),
 };
+const mockSavedObjects = {
+  client: {},
+};
+const mockNavigation = {};
+const mockApplication = {};
+
+const mockServices = {
+  chrome: {},
+  setBreadcrumbs: mockSetBreadcrumbs,
+  notifications: { toasts: mockToasts },
+  http: mockHttp,
+  savedObjects: mockSavedObjects,
+  navigation: mockNavigation,
+  application: mockApplication,
+};
 
 const mockUseOpenSearchDashboards = jest.fn(() => ({
-  services: {
-    chrome: {},
-    setBreadcrumbs: mockSetBreadcrumbs,
-    notifications: { toasts: mockToasts },
-    http: mockHttp,
-  },
+  services: mockServices,
 }));
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
@@ -37,11 +46,6 @@ const mockUseParams = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
-}));
-
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../utils'),
-  getDataSources: jest.fn().mockResolvedValue([]),
 }));
 
 const mockContext = {

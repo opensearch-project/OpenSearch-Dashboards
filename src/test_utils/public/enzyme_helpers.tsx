@@ -40,6 +40,12 @@ import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
 import { IntlProvider } from 'react-intl';
 
+// Cast IntlProvider to accept children prop for React 18 compatibility
+// The old @types/react-intl doesn't include children in the props
+const TypedIntlProvider = IntlProvider as React.ComponentType<
+  React.ComponentProps<typeof IntlProvider> & { children?: React.ReactNode }
+>;
+
 // Use fake component to extract `intl` property to use in tests.
 const { intl } = (mount(
   <I18nProvider>
@@ -79,7 +85,7 @@ export function nodeWithIntlProp<T>(
  *  @return The wrapped IntlProvider instance
  */
 export function wrapWithIntl<T>(node: ReactElement<T>) {
-  return <IntlProvider locale="en">{node}</IntlProvider>;
+  return <TypedIntlProvider locale="en">{node}</TypedIntlProvider>;
 }
 
 /**
@@ -99,10 +105,10 @@ export function shallowWithIntl<T>(
     context?: any;
     childContextTypes?: ValidationMap<any>;
   } = {}
-) {
+): ReactWrapper<any, any> {
   const options = getOptions(context, childContextTypes, props);
 
-  return shallow(nodeWithIntlProp(node), options);
+  return (shallow(nodeWithIntlProp(node), options) as unknown) as ReactWrapper<any, any>;
 }
 
 /**
@@ -122,10 +128,10 @@ export function mountWithIntl<T>(
     context?: any;
     childContextTypes?: ValidationMap<any>;
   } = {}
-) {
+): ReactWrapper<any, any> {
   const options = getOptions(context, childContextTypes, props);
 
-  return mount(nodeWithIntlProp(node), options);
+  return (mount(nodeWithIntlProp(node), options) as unknown) as ReactWrapper<any, any>;
 }
 
 /**
@@ -153,14 +159,15 @@ export function renderWithIntl<T>(
 
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 
-export function shallowWithI18nProvider<T>(child: ReactElement<T>) {
+export function shallowWithI18nProvider<T>(child: ReactElement<T>): ReturnType<typeof shallow> {
   const wrapped = shallow(<I18nProvider>{child}</I18nProvider>);
   const name = typeof child.type === 'string' ? child.type : child.type.name;
   return wrapped.find(name).dive();
 }
 
-export function mountWithI18nProvider<T>(child: ReactElement<T>) {
+export function mountWithI18nProvider<T>(child: ReactElement<T>): ReturnType<typeof mount> {
   const wrapped = mount(<I18nProvider>{child}</I18nProvider>);
   const name = typeof child.type === 'string' ? child.type : child.type.name;
-  return wrapped.find(name);
+  // Type assertion needed due to enzyme's bundled @types/react conflicting with React 18 types
+  return wrapped.find(name) as ReturnType<typeof mount>;
 }

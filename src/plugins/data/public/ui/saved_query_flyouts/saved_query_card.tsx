@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { monaco } from '@osd/monaco';
 import { i18n } from '@osd/i18n';

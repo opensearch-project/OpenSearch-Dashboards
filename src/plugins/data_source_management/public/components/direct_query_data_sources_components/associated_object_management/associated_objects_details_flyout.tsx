@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';

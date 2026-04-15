@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 

@@ -14,6 +14,7 @@ export interface FacetProps {
   endpoint: string;
   useJobs?: boolean;
   shimResponse?: boolean;
+  requestCompression?: boolean;
 }
 
 export class Facet {
@@ -22,13 +23,26 @@ export class Facet {
   private endpoint: string;
   private useJobs: boolean;
   private shimResponse: boolean;
+  private requestCompression: boolean;
 
-  constructor({ client, logger, endpoint, useJobs = false, shimResponse = false }: FacetProps) {
+  constructor({
+    client,
+    logger,
+    endpoint,
+    useJobs = false,
+    shimResponse = false,
+    requestCompression = false,
+  }: FacetProps) {
     this.defaultClient = client;
     this.logger = logger;
     this.endpoint = endpoint;
     this.useJobs = useJobs;
     this.shimResponse = shimResponse;
+    this.requestCompression = requestCompression;
+  }
+
+  private getCompressionHeaders(): Record<string, string> {
+    return this.requestCompression ? { 'accept-encoding': 'gzip, deflate' } : {};
   }
 
   protected fetch = async (
@@ -40,17 +54,23 @@ export class Facet {
       const query: Query = request.body.query;
       const dataSource = query.dataset?.dataSource;
       const meta = dataSource?.meta;
-      const { format, lang } = request.body;
+      const { format, lang, fetchSize, queryId } = request.body;
+      const compressionHeaders = this.getCompressionHeaders();
+      const { highlight } = request.body;
       const params = {
         body: {
           query: query.query,
+          ...(fetchSize && { fetch_size: fetchSize }),
           ...(meta?.name && { datasource: meta.name }),
           ...(meta?.sessionId && {
             sessionId: meta.sessionId,
           }),
           ...(lang && { lang }),
+          ...(highlight && { highlight }),
+          ...(queryId && { queryId }),
         },
         ...(format !== 'jdbc' && { format }),
+        ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
       };
       const clientId = dataSource?.id;
       const client = clientId
@@ -77,7 +97,11 @@ export class Facet {
   ): Promise<FacetResponse> => {
     try {
       const query: Query = request.body.query;
-      const params = request.params;
+      const compressionHeaders = this.getCompressionHeaders();
+      const params = {
+        ...request.params,
+        ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
+      };
       const clientId = query.dataset?.dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI

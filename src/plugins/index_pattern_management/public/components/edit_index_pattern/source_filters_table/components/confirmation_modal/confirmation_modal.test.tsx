@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DeleteFilterConfirmationModal } from './confirmation_modal';
@@ -40,6 +39,7 @@ describe('Header', () => {
         filterToDeleteValue={'test'}
         onCancelConfirmationModal={() => {}}
         onDeleteFilter={() => {}}
+        isSaving={false}
       />
     );
 

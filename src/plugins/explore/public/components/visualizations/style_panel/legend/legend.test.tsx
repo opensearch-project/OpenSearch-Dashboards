@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LegendOptionsPanel } from './legend';
 import { Positions } from '../../types';
@@ -51,11 +50,9 @@ describe('LegendOptionsPanel', () => {
 
     const legendModeSwitch = screen.getByTestId('legendModeSwitch');
     const legendPositionSelect = screen.getByTestId('legendPositionSelect');
-    const legendTitleInput = screen.getByTestId('legendTitleInput');
 
     expect(legendModeSwitch).toBeInTheDocument();
     expect(legendPositionSelect).toBeInTheDocument();
-    expect(legendTitleInput).toBeInTheDocument();
   });
 
   it('renders second legend title input when hasSizeLegend is true', () => {
@@ -67,12 +64,9 @@ describe('LegendOptionsPanel', () => {
       />
     );
 
-    const legendTitleInput = screen.getByTestId('legendTitleInput');
     const legendTitleForSizeInput = screen.getByTestId('legendTitleForSizeInput');
 
-    expect(legendTitleInput).toBeInTheDocument();
     expect(legendTitleForSizeInput).toBeInTheDocument();
-    expect(legendTitleInput).toHaveAttribute('placeholder', 'Color legend name');
     expect(legendTitleForSizeInput).toHaveAttribute('placeholder', 'Size legend name');
   });
 
@@ -99,19 +93,6 @@ describe('LegendOptionsPanel', () => {
     fireEvent.change(legendPositionSelect, { target: { value: Positions.RIGHT } });
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
       position: Positions.RIGHT,
-    });
-  });
-
-  it('updates legend title correctly', () => {
-    render(
-      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
-    );
-
-    const legendTitleInput = screen.getByTestId('legendTitleInput');
-
-    fireEvent.change(legendTitleInput, { target: { value: 'New Legend Title' } });
-    expect(mockOnLegendChange).toHaveBeenLastCalledWith({
-      title: 'New Legend Title',
     });
   });
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { EuiDraggable, EuiPopover } from '@elastic/eui';
 
 import { IndexPatternField } from '../../../../../data/public';
@@ -36,6 +36,7 @@ import {
   FieldButton,
   FieldButtonProps,
   FieldIcon,
+  wrapOnDot,
 } from '../../../../../opensearch_dashboards_react/public';
 
 import { COUNT_FIELD, useDrag } from '../../utils/drag_drop';
@@ -102,18 +103,13 @@ export const DraggableFieldButton = ({
     value: dragValue ?? name,
   });
 
-  function wrapOnDot(str: string) {
-    // u200B is a non-width white-space character, which allows
-    // the browser to efficiently word-wrap right after the dot
-    // without us having to draw a lot of extra DOM elements, etc
-    return str.replace(/\./g, '.\u200B');
-  }
-
   const defaultIcon = <FieldIcon type={type} scripted={scripted} size="l" />;
+
+  const wrappedDisplayName = useMemo(() => wrapOnDot(displayName), [displayName]);
 
   const defaultFieldName = (
     <span data-test-subj={`field-${name}`} title={name} className="vbFieldButton__name">
-      {wrapOnDot(displayName)}
+      {wrappedDisplayName}
     </span>
   );
 

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { ExpressionsExampleStartDependencies } from './types';
 import { ExpressionsExampleApp } from './components/app';
@@ -16,7 +16,8 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   const services = { expressions, notifications };
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <ExpressionsExampleApp
         basename={appBasePath}
@@ -24,9 +25,8 @@ export const renderApp = (
         http={http}
         navigation={navigation}
       />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

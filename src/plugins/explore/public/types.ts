@@ -39,6 +39,9 @@ import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressio
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { ContextProviderStart } from '../../context_provider/public';
 import { DatasetManagementSetup } from '../../dataset_management/public';
+import { DataImporterPluginSetup } from '../../data_importer/public';
+import { DataSourcePluginSetup } from '../../data_source/public';
+import { DataSourceManagementPluginSetup } from '../../data_source_management/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
@@ -55,7 +58,6 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
-import { ChatPluginStart } from '../../chat/public';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -105,6 +107,9 @@ export interface ExploreSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   dashboard: DashboardSetup;
   datasetManagement?: DatasetManagementSetup;
+  dataImporter?: DataImporterPluginSetup;
+  dataSource?: DataSourcePluginSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 /**
@@ -124,7 +129,6 @@ export interface ExploreStartDependencies {
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
   contextProvider?: ContextProviderStart;
-  chat?: ChatPluginStart;
 }
 
 // ============================================================================
@@ -185,7 +189,7 @@ export interface ExploreServices {
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
   queryPanelActionsRegistry: QueryPanelActionsRegistryService;
-  slotRegistry: SlotRegistryService;
+  slotRegistry?: SlotRegistryService;
   expressions: ExpressionsStart;
   contextProvider?: ContextProviderStart;
 
@@ -194,4 +198,8 @@ export interface ExploreServices {
 
   supportedTypes?: string[];
   isDatasetManagementEnabled: boolean;
+  dataImporterConfig?: DataImporterPluginSetup['config'];
+  dataSourceEnabled: boolean;
+  hideLocalCluster: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }

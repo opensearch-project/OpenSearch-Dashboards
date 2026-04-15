@@ -462,17 +462,58 @@ export class ReactGraphNodes {
         }
         return true;
       })
-      .map((msg) => ({
+      .map((msg) => {
         // Convert 'tool' role to 'user' role for Bedrock compatibility
         // Bedrock only accepts 'user' and 'assistant' roles
-        role: msg.role === 'tool' ? 'user' : msg.role || 'user',
-        // If content is already an array (proper format), use it directly
-        // This preserves toolUse and toolResult blocks
-        // Filter out empty text blocks to prevent ValidationException
-        content: Array.isArray(msg.content)
-          ? msg.content.filter((block: any) => !block.text || block.text.trim() !== '')
-          : [{ text: msg.content || '' }].filter((block: any) => block.text.trim() !== ''),
-      }));
+        const role = msg.role === 'tool' ? 'user' : msg.role || 'user';
+
+        // Process content array to handle binary/image content
+        let content: any[];
+        if (Array.isArray(msg.content)) {
+          content = msg.content
+            .map((block: any) => {
+              // Handle binary content (images)
+              if (block.type === 'binary' && block.data) {
+                // Convert binary content to Bedrock image format
+                // The AWS SDK expects image data as Uint8Array (bytes), not base64 string
+                // Extract format from mimeType (e.g., 'image/jpeg' -> 'jpeg')
+                const format = block.mimeType?.includes('/')
+                  ? block.mimeType.split('/')[1]
+                  : block.mimeType || 'jpeg';
+
+                // Convert base64 string to Uint8Array for AWS SDK
+                const imageBytes = Buffer.from(block.data, 'base64');
+
+                return {
+                  image: {
+                    format,
+                    source: {
+                      bytes: imageBytes,
+                    },
+                  },
+                };
+              }
+              // Handle text content blocks - extract just the text field for Bedrock
+              if (block.type === 'text' && block.text) {
+                return { text: block.text };
+              }
+              // Keep other content blocks as-is (toolUse, toolResult)
+              return block;
+            })
+            .filter((block: any) => {
+              // Filter out empty text blocks to prevent ValidationException
+              if (block.text !== undefined) {
+                return block.text.trim() !== '';
+              }
+              return true;
+            });
+        } else {
+          // Handle string content
+          content = [{ text: msg.content || '' }].filter((block: any) => block.text.trim() !== '');
+        }
+
+        return { role, content };
+      });
 
     // Debug logging to catch toolUse/toolResult mismatch
     let toolUseCount = 0;

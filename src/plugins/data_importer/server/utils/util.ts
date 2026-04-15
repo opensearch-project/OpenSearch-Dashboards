@@ -8,6 +8,9 @@ import moment from 'moment';
 import { FileProcessorService } from '../processors/file_processor_service';
 import { OpenSearchClient, RequestHandlerContext } from '../../../../core/server';
 
+export const ALPHANUMERIC_REGEX_STRING = /^[a-z][a-z0-9_-]*$/i;
+export const LOOKUP_FIELD = '__lookup';
+
 export const decideClient = async (
   dataSourceEnabled: boolean,
   context: RequestHandlerContext,

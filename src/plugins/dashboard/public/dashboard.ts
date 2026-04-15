@@ -10,6 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../../data/public';
 import { SavedDashboardPanel } from './types';
+import { Variable } from './variables/types';
 
 // TODO: This class can be revisited and clean up more
 export interface SerializedDashboard {
@@ -30,6 +31,7 @@ export interface SerializedDashboard {
   query: Query;
   filters: Filter[];
   title?: string;
+  variables?: Variable[];
 }
 
 export interface DashboardParams {
@@ -52,6 +54,7 @@ export class Dashboard<TDashboardParams = DashboardParams> {
   public query: Query;
   public filters: Filter[];
   public title?: string;
+  public variables?: Variable[];
   public isDirty = false;
 
   constructor(dashboardState: SerializedDashboard = {} as any) {
@@ -99,6 +102,9 @@ export class Dashboard<TDashboardParams = DashboardParams> {
     }
     if (state.filters) {
       this.filters = state.filters;
+    }
+    if (state.variables) {
+      this.variables = cloneDeep(state.variables);
     }
   }
 

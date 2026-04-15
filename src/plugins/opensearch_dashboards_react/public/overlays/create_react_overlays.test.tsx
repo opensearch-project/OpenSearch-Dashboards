@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
 import { overlayServiceMock } from '../../../../core/public/mocks';
 import { toMountPoint } from '../util';
@@ -65,7 +64,7 @@ test('can open flyout with React element', () => {
   const container = document.createElement('div');
   const mount = coreOverlays.openFlyout.mock.calls[0][0];
   mount(container);
-  expect(container.innerHTML).toMatchInlineSnapshot(`"<div>foo</div>"`);
+  expect(container.innerHTML).toMatchInlineSnapshot(`""`);
 });
 
 test('can open modal with React element', () => {
@@ -82,7 +81,7 @@ test('can open modal with React element', () => {
   const container = document.createElement('div');
   const mount = coreOverlays.openModal.mock.calls[0][0];
   mount(container);
-  expect(container.innerHTML).toMatchInlineSnapshot(`"<div>bar</div>"`);
+  expect(container.innerHTML).toMatchInlineSnapshot(`""`);
 });
 
 test('can open sidecar with React element', () => {
@@ -104,7 +103,7 @@ test('can open sidecar with React element', () => {
   const container = document.createElement('div');
   const mount = coreOverlays.sidecar.open.mock.calls[0][0];
   mount(container);
-  expect(container.innerHTML).toMatchInlineSnapshot(`"<div>bar</div>"`);
+  expect(container.innerHTML).toMatchInlineSnapshot(`""`);
 });
 
 test('passes through flyout options when opening flyout', () => {

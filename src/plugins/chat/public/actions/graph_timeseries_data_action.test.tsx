@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useAssistantAction } from '../../../context_provider/public';
 import { useGraphTimeseriesDataAction } from './graph_timeseries_data_action';
@@ -59,7 +58,40 @@ describe('useGraphTimeseriesDataAction', () => {
         }),
         handler: expect.any(Function),
         render: expect.any(Function),
+        enabled: true, // Default value when no parameter is passed
       });
+    });
+
+    it('should register action as enabled when explicitly set to true', () => {
+      const TestComponent = () => {
+        useGraphTimeseriesDataAction(true);
+        return <div>Test</div>;
+      };
+
+      render(<TestComponent />);
+
+      expect(mockUseAssistantAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'graph_timeseries_data',
+          enabled: true,
+        })
+      );
+    });
+
+    it('should register action as disabled when explicitly set to false', () => {
+      const TestComponent = () => {
+        useGraphTimeseriesDataAction(false);
+        return <div>Test</div>;
+      };
+
+      render(<TestComponent />);
+
+      expect(mockUseAssistantAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'graph_timeseries_data',
+          enabled: false,
+        })
+      );
     });
   });
 

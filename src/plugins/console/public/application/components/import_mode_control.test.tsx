@@ -4,7 +4,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { ShallowWrapper, shallow } from 'enzyme';
 import { nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ImportModeControl } from './import_mode_control';
@@ -19,6 +19,7 @@ describe('ImportModeControl Component', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     act(() => {
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       component = shallowWithIntl(
         <ImportModeControl
           initialValues={{ overwrite: false }}

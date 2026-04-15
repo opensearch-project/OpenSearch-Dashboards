@@ -40,6 +40,7 @@ export const AppWrapper: React.FunctionComponent<{
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
   useUpdatedHeader?: boolean;
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
+  children?: React.ReactNode;
 }> = ({ chromeVisible$, sidecarConfig$, useUpdatedHeader, globalBanner$, children }) => {
   const visible = useObservable(chromeVisible$);
   const sidecarConfig = useObservable(sidecarConfig$, undefined);
@@ -69,6 +70,7 @@ export const AppWrapper: React.FunctionComponent<{
 
 export const AppContainer: React.FunctionComponent<{
   classes$: Observable<string[]>;
+  children?: React.ReactNode;
 }> = ({ classes$, children }) => {
   const classes = useObservable(classes$);
   return <div className={classNames('application', classes)}>{children}</div>;

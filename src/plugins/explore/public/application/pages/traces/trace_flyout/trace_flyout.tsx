@@ -22,7 +22,12 @@ export const TraceFlyout: React.FC = () => {
 
   return (
     <EuiFlyout data-test-subj="traceFlyout" onClose={closeTraceFlyout} ownFocus={false}>
-      <TraceDetails isFlyout={true} defaultDataset={dataset} />
+      <TraceDetails
+        isFlyout={true}
+        defaultDataset={dataset}
+        defaultTraceId={flyoutData.traceId}
+        defaultSpanId={flyoutData.spanId}
+      />
     </EuiFlyout>
   );
 };

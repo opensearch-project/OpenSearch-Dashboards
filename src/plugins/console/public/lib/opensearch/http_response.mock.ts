@@ -10,6 +10,7 @@ export const createMockResponse = (
   statusText: string,
   headers: Array<[string, string]>
 ): Response => {
+  // @ts-expect-error TS2741 TODO(ts-upgrade): fixme
   return {
     headers: new Headers(headers),
     ok: true,

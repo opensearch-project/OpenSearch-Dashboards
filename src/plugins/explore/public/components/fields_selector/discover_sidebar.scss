@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-$paddingLeft: $euiSizeS;
+$paddingLeft: $ouiSizeXXS;
 $hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
 
 .explore_fieldSelector_list {
-  gap: $euiSizeS;
+  gap: $ouiSizeXXS;
 
   .exploreSideBar_searchContainer {
     .toggleFieldFilterButton {
@@ -85,7 +85,7 @@ $hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
 /* extra indentation for faceted field */
 .exploreSideBar__facetValue {
   // match fieldGroup condense indent(icon size + text margin)
-  padding-left: $paddingLeft + $euiSizeM + $euiSizeS;
+  padding-left: $paddingLeft + $euiSizeM + $ouiSizeXXS;
   border-radius: $euiSizeXS;
 
   &:focus,

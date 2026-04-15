@@ -1,2 +1,0 @@
-fix:
-- Remove index from field key to fix column focus issue ([#10582](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10582))

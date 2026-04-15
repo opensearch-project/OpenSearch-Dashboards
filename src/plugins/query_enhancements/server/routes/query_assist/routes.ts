@@ -32,6 +32,18 @@ export function registerQueryAssistRoutes(router: IRouter) {
           : context.core.opensearch.client.asCurrentUser;
       const configuredLanguages: string[] = [];
       try {
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
+        const capabilitiesResolver = context.query_assist.getCapabilitiesResolver?.();
+        if (capabilitiesResolver) {
+          const capabilities = await capabilitiesResolver(request);
+          // PromQL generation relies on the generic observability agent.
+          // Prompt and tools will come from frontend through ag-ui protocol
+          if (capabilities?.chat?.observabilityAgentEnabled) {
+            configuredLanguages.push('PROMQL');
+          }
+        }
+
+        // Check other languages via ML Commons agent config
         await Promise.allSettled(
           // @ts-expect-error TS7006 TODO(ts-error): fixme
           config.queryAssist.supportedLanguages.map((languageConfig) =>

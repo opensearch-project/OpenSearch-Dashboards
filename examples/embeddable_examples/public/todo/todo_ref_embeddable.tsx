@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
+// @ts-expect-error TS2307 TODO(ts-upgrade): fixme
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
@@ -88,7 +88,7 @@ function getHasMatch(search?: string, savedAttributes?: TodoSavedObjectAttribute
 export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
   public readonly type = TODO_REF_EMBEDDABLE;
   private subscription: Subscription;
-  private node?: HTMLElement;
+  private root: Root | null = null;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectId?: string;
 
@@ -132,11 +132,12 @@ export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
-    this.node = node;
-    ReactDOM.render(<TodoRefEmbeddableComponent embeddable={this} />, node);
+    this.root = createRoot(node);
+    this.root.render(<TodoRefEmbeddableComponent embeddable={this} />);
   }
 
   /**
@@ -158,8 +159,9 @@ export class TodoRefEmbeddable extends Embeddable<TodoRefInput, TodoRefOutput> {
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
   }
 }

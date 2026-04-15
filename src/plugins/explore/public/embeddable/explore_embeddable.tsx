@@ -4,9 +4,10 @@
  */
 
 import { isEqual } from 'lodash';
+import moment from 'moment';
 import { merge, Subscription } from 'rxjs';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
@@ -20,6 +21,11 @@ import {
   IFieldType,
 } from '../../../data/public';
 import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
+import {
+  DashboardContainer,
+  IVariableInterpolationService,
+  createNoOpVariableInterpolationService,
+} from '../../../dashboard/public';
 import { ExploreInput, ExploreOutput } from './types';
 import {
   getRequestInspectorStats,
@@ -34,8 +40,7 @@ import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
-import { VisColumn } from '../components/visualizations/types';
-import { toExpression } from '../components/visualizations/utils/to_expression';
+import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
@@ -45,11 +50,17 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
-import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
+import {
+  adaptLegacyData,
+  convertStringsToMappings,
+  isValidMapping,
+} from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
-import { getQueryWithSource } from '../application/utils/languages';
+import { prepareQueryForLanguage } from '../application/utils/languages';
+import { mergeStyles } from '../components/visualizations/utils/utils';
 
+// TODO cleanup unused props
 export interface SearchProps {
   description?: string;
   sort?: SortOrder[];
@@ -59,16 +70,12 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   services: ExploreServices;
-  expression?: string;
+  chartRender?: () => any;
   sharedItemTitle?: string;
-  searchContext?: {
-    query: Query | undefined;
-    filters: Filter[] | undefined;
-    timeRange: TimeRange | undefined;
-  };
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -80,6 +87,7 @@ export interface SearchProps {
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   onExpressionEvent?: (e: ExpressionRendererEvent) => void;
+  onSelectTimeRange?: (range: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -117,6 +125,13 @@ export class ExploreEmbeddable
     timeRange: undefined as TimeRange | undefined,
   };
   private node?: HTMLElement;
+  private root?: Root;
+
+  // Variable interpolation support
+  private interpolationService: IVariableInterpolationService = createNoOpVariableInterpolationService();
+  private variableSubscription?: Subscription;
+  public originalQuery?: string;
+  private lastInterpolatedQuery?: string;
 
   constructor(
     {
@@ -151,6 +166,10 @@ export class ExploreEmbeddable
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
     };
+
+    // Initialize variable support BEFORE search props so the interpolation
+    // service is available for the initial query setup.
+    this.initializeVariableSubscription(parent);
     this.initializeSearchProps();
 
     this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -168,10 +187,66 @@ export class ExploreEmbeddable
       });
   }
 
+  /**
+   * Initialize variable interpolation service and subscription
+   * Variables are managed by the parent DashboardContainer
+   */
+  private initializeVariableSubscription(parent?: Container) {
+    // Default to no-op interpolation service
+    this.interpolationService = createNoOpVariableInterpolationService();
+
+    if (parent && 'variableInterpolationService' in parent) {
+      const dashboardContainer = (parent as unknown) as DashboardContainer;
+      this.interpolationService = dashboardContainer.variableInterpolationService;
+
+      if ('variableService' in dashboardContainer) {
+        this.variableSubscription = dashboardContainer.variableService
+          .getVariables$()
+          .subscribe((variables) => {
+            const hasLoading = variables.some((v) => 'loading' in v && v?.loading);
+            if (hasLoading) return;
+
+            this.handleVariablesChange();
+          });
+      }
+    }
+  }
+
+  /**
+   * Handle variable changes - interpolate query and refetch
+   */
+  private handleVariablesChange() {
+    if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
+      return;
+    }
+
+    const { searchSource } = this.savedExplore;
+    const currentQuery = searchSource.getField('query');
+    const interpolatedQuery = this.interpolationService.interpolate(
+      this.originalQuery,
+      currentQuery?.language
+    );
+
+    if (interpolatedQuery === this.lastInterpolatedQuery) {
+      return;
+    }
+    this.lastInterpolatedQuery = interpolatedQuery;
+
+    if (currentQuery) {
+      searchSource.setField('query', {
+        ...currentQuery,
+        query: interpolatedQuery,
+      });
+    }
+
+    if (this.searchProps) {
+      this.updateHandler(this.searchProps, true);
+    }
+  }
+
   private initializeSearchProps() {
     const { searchSource } = this.savedExplore;
     const indexPattern = searchSource.getField('index');
-    if (!indexPattern) return;
     const searchProps: SearchProps = {
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
@@ -198,9 +273,21 @@ export class ExploreEmbeddable
       if (activeTab === 'logs') {
         query.query = defaultPrepareQueryString(query);
       } else {
-        query.query = getQueryWithSource(query).query;
+        query.query = prepareQueryForLanguage(query).query;
       }
     }
+
+    // If the query contains variable placeholders, apply initial interpolation
+    // using whatever current values are available (from saved state).
+    const queryHasVariables =
+      query?.query && this.interpolationService.hasVariables(String(query.query));
+    if (queryHasVariables && query) {
+      // Store the original (pre-interpolation) query for later use
+      this.originalQuery = String(query.query);
+      query.query = this.interpolationService.interpolate(this.originalQuery, query.language);
+      this.lastInterpolatedQuery = String(query.query);
+    }
+
     searchSource.setFields({
       index: indexPattern,
       query,
@@ -254,7 +341,7 @@ export class ExploreEmbeddable
         field,
         value,
         operator,
-        indexPattern.id!
+        indexPattern?.id!
       );
       filters = filters.map((filter) => ({
         ...filter,
@@ -273,6 +360,25 @@ export class ExploreEmbeddable
           ...e.data,
         });
       }
+    };
+
+    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+      await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+        embeddable: this,
+        filters: [
+          {
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
+            range: {
+              '*': {
+                mode: 'absolute',
+                gte: moment(range.from),
+                lte: moment(range.to),
+              },
+            },
+          },
+        ],
+        timeFieldName: '*',
+      });
     };
 
     this.updateHandler(searchProps);
@@ -365,6 +471,7 @@ export class ExploreEmbeddable
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
+    const vis = visualizationRegistry.getVisualization(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
@@ -384,12 +491,30 @@ export class ExploreEmbeddable
             rows: visualizationData.transformedData ?? [],
           };
         } else {
-          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          const savedAxesMapping = visualization.axesMapping ?? {};
+          let effectiveAxesMapping = savedAxesMapping;
+
+          // Check if the saved axes mapping is still compatible with the current data columns.
+          if (!isValidMapping(savedAxesMapping, allColumns)) {
+            const reusedMapping = visualizationRegistry.reuseAxesMapping(
+              selectedChartType,
+              savedAxesMapping,
+              allColumns
+            );
+
+            if (reusedMapping) {
+              effectiveAxesMapping = reusedMapping;
+            }
+          }
+
+          const axesMapping = convertStringsToMappings(effectiveAxesMapping, allColumns);
+          this.searchProps.axisColumnMappings = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
-            visualization.axesMapping,
+            selectedChartType,
+            effectiveAxesMapping,
             allColumns
           );
-          if (!matchedRule || !matchedRule.toSpec) {
+          if (!matchedRule) {
             throw new Error(
               `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
             );
@@ -399,19 +524,28 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
-          const spec = matchedRule.toSpec(
-            visualizationData.transformedData,
-            numericalColumns,
-            categoricalColumns,
-            dateColumns,
-            styleOptions,
-            selectedChartType,
-            axesMapping
-          );
-          const exp = toExpression(searchContext, spec);
-          this.searchProps.expression = exp;
+
+          let styles = adaptLegacyData({
+            type: selectedChartType,
+            styles: styleOptions,
+            axesMapping: effectiveAxesMapping,
+          })?.styles;
+
+          if (vis) {
+            styles = mergeStyles(vis.ui.style.defaults, styles);
+          }
+          this.searchProps.styleOptions = styles;
+
+          const chartRender = () =>
+            matchedRule.render({
+              transformedData: visualizationData.transformedData,
+              styleOptions: styles || styleOptions,
+              onSelectTimeRange: this.searchProps?.onSelectTimeRange,
+              axisColumnMappings: axesMapping,
+              timeRange: searchContext.timeRange,
+            });
+          this.searchProps.chartRender = chartRender;
         }
       }
     }
@@ -424,9 +558,9 @@ export class ExploreEmbeddable
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) return;
+    if (!this.searchProps || !this.root) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
   }
 
   public destroy() {
@@ -439,14 +573,19 @@ export class ExploreEmbeddable
       this.autoRefreshFetchSubscription.unsubscribe();
     }
 
+    // Cleanup variable subscription
+    if (this.variableSubscription) {
+      this.variableSubscription.unsubscribe();
+    }
+
     if (this.abortController) {
       this.abortController.abort();
     }
     if (this.searchProps) {
       delete this.searchProps;
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 
@@ -462,10 +601,12 @@ export class ExploreEmbeddable
     if (!this.searchProps) {
       throw new Error('Search scope not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
+    this.node.style.height = '100%';
+    this.root = createRoot(node);
   }
 
   public getInspectorAdapters() {

@@ -3,15 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ChartStylesMapping,
-  ChartStyles,
-  ChartType,
-} from '../visualizations/utils/use_visualization_types';
+import { ChartStyles } from '../visualizations/utils/use_visualization_types';
 import { ChartConfig } from './visualization_builder.types';
-
-type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
-export type AxisSupportedStyles = ChartStylesMapping[AxisSupportedChartTypes];
 
 export enum Positions {
   RIGHT = 'right',
@@ -25,40 +18,8 @@ export interface ChartMetadata {
   icon: string;
 }
 
-export interface ChartTypeMapping extends ChartMetadata {
-  priority: number; // Higher number means higher priority for rule matching
-}
-
 export type AxisColumnMappings = Partial<Record<AxisRole, VisColumn>>;
 
-export interface VisualizationRule {
-  id: string; // Unique rule identifier
-  name: string;
-  description?: string;
-  /**
-   * This function checks if the rule can be matched for the given data,
-   * If `NOT_MATCH`, the charts defined by this rule cannot be created with the data
-   * If `EXACT_MATCH`, the charts defined by this rule can be created automatically with the data
-   * If `OVER_MATCH`, the charts defined by this rule can be created but requires to select less fields
-   */
-  matches: (
-    numericalColumns: VisColumn[],
-    categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[]
-  ) => 'NOT_MATCH' | 'EXACT_MATCH' | 'COMPATIBLE_MATCH';
-  chartTypes: ChartTypeMapping[]; // Each rule can map to multiple chart types with priorities
-  // TODO: refactor to access an object of options instead of a list of arguments
-  toSpec?: (
-    transformedData: Array<Record<string, any>>,
-    numericalColumns: VisColumn[],
-    categoricalColumns: VisColumn[],
-    dateColumns: VisColumn[],
-    styleOptions: ChartStylesMapping[ChartType],
-    chartType?: ChartType,
-    axisColumnMappings?: AxisColumnMappings,
-    timeRange?: { from: string; to: string }
-  ) => any;
-}
 export interface VisColumn {
   id: number;
   name: string;
@@ -155,11 +116,6 @@ export interface ValueAxis {
   grid: Grid;
 }
 
-export interface FieldSetting {
-  default: VisColumn;
-  options?: VisColumn[];
-}
-
 export enum AxisRole {
   X = 'x',
   Y = 'y',
@@ -178,13 +134,8 @@ export interface Grid {
 }
 
 export interface StandardAxes {
-  id: string;
-  name?: string;
-  field?: FieldSetting;
-  type?: 'value' | 'category';
   position: Positions;
   show: boolean;
-  style: Record<string, any>;
   labels: AxisLabels;
   title: AxisTitle;
   axisRole: AxisRole;
@@ -278,8 +229,6 @@ export interface ThresholdOptions {
   thresholdStyle?: ThresholdMode;
 }
 
-export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
-
 export type PercentageColor = 'standard' | 'inverted';
 
 export enum FilterOperator {
@@ -296,11 +245,16 @@ export enum FilterOperator {
 export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
 
 export type CellAlignment = 'auto' | 'left' | 'center' | 'right';
+
+export interface UnitDisplay {
+  label: string | number;
+  segments?: Array<{ type: 'unit' | 'value'; value: number | string }>;
+}
 export interface UnitItem {
   id: string;
   name: string;
   symbol?: string;
-  display?: (value: number, symbol?: string) => any;
+  display?: (value: number, symbol?: string) => UnitDisplay;
   fontScale?: number;
 }
 
@@ -339,4 +293,10 @@ export interface DisconnectValuesOption {
 export interface ConnectNullValuesOption {
   connectMode: DisableMode;
   threshold: string;
+}
+
+export interface RendererSpecConfig {
+  spec?: echarts.EChartsOption;
+  name?: string;
+  data: Array<Record<string, any>>;
 }

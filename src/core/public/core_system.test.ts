@@ -57,6 +57,9 @@ import {
   MockCoreApp,
   WorkspacesServiceConstructor,
   MockWorkspacesService,
+  TelemetryServiceConstructor,
+  MockTelemetryService,
+  MockSetupSessionExpiredInterceptor,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -69,7 +72,6 @@ jest.mock('@osd/monaco', () => ({
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
-  browserSupportsCsp: true,
   injectedMetadata: {
     uiPlugins: [],
     csp: {
@@ -106,6 +108,7 @@ describe('constructor', () => {
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
     expect(WorkspacesServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(TelemetryServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -118,15 +121,6 @@ describe('constructor', () => {
     expect(InjectedMetadataServiceConstructor).toHaveBeenCalledTimes(1);
     expect(InjectedMetadataServiceConstructor).toHaveBeenCalledWith({
       injectedMetadata,
-    });
-  });
-
-  it('passes browserSupportsCsp to ChromeService', () => {
-    createCoreSystem();
-
-    expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(ChromeServiceConstructor).toHaveBeenCalledWith({
-      browserSupportsCsp: expect.any(Boolean),
     });
   });
 
@@ -246,9 +240,23 @@ describe('#setup()', () => {
     expect(MockWorkspacesService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls telemetry#setup()', async () => {
+    await setupCore();
+    expect(MockTelemetryService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls coreApp#setup()', async () => {
     await setupCore();
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls setupSessionExpiredInterceptor with http and notifications', async () => {
+    await setupCore();
+    expect(MockSetupSessionExpiredInterceptor).toHaveBeenCalledTimes(1);
+    expect(MockSetupSessionExpiredInterceptor).toHaveBeenCalledWith(
+      MockHttpService.setup.mock.results[0].value,
+      MockNotificationsService.setup.mock.results[0].value
+    );
   });
 });
 
@@ -338,6 +346,11 @@ describe('#start()', () => {
     expect(MockWorkspacesService.start).toHaveBeenCalledTimes(1);
   });
 
+  it('calls telemetry#start()', async () => {
+    await startCore();
+    expect(MockTelemetryService.start).toHaveBeenCalledTimes(1);
+  });
+
   it('calls coreApp#start()', async () => {
     await startCore();
     expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
@@ -398,6 +411,14 @@ describe('#stop()', () => {
     expect(MockWorkspacesService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockWorkspacesService.stop).toHaveBeenCalled();
+  });
+
+  it('calls telemetry.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockTelemetryService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockTelemetryService.stop).toHaveBeenCalled();
   });
 
   it('calls coreApp.stop()', () => {

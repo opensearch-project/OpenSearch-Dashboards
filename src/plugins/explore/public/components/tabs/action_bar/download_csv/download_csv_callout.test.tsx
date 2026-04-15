@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { render, screen } from '@testing-library/react';
 import { DiscoverDownloadCsvCallout } from './download_csv_callout';
@@ -11,6 +10,7 @@ import { MAX_DOWNLOAD_CSV_COUNT } from './constants';
 
 const TestHarness = () => {
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <DiscoverDownloadCsvCallout />
     </IntlProvider>

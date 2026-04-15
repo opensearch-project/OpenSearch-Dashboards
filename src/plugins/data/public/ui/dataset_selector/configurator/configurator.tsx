@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../../common';
 import { getIndexPatterns, getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
@@ -177,14 +177,14 @@ export const Configurator = ({
         <EuiModalHeaderTitle>
           <h1>
             <FormattedMessage
-              id="data.explorer.datasetSelector.advancedSelector.configurator.title"
+              id="data.explorer.datasetSelector.advancedSelector.configurator.data.title"
               defaultMessage="Step 2: Configure data"
             />
           </h1>
           <EuiText>
             <p>
               <FormattedMessage
-                id="data.explorer.datasetSelector.advancedSelector.configurator.description"
+                id="data.explorer.datasetSelector.advancedSelector.configurator.data.description"
                 defaultMessage="Configure selected data based on parameters available."
               />
             </p>
@@ -335,6 +335,7 @@ export const Configurator = ({
           onClick={async () => {
             let newDataset = dataset;
             if (shouldSelectIndexedView && selectedIndexedView) {
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               newDataset = await updateDatasetForIndexedView();
             }
             await queryString.getDatasetService().cacheDataset(newDataset, services);
@@ -345,7 +346,7 @@ export const Configurator = ({
           data-test-subj="advancedSelectorConfirmButton"
         >
           <FormattedMessage
-            id="data.explorer.datasetSelector.advancedSelector.confirm"
+            id="data.explorer.datasetSelector.advancedSelector.data.confirm"
             defaultMessage="Select Data"
           />
         </EuiButton>

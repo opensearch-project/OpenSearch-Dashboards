@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PatternsTableFlyout, PatternsFlyoutRecord } from './patterns_table_flyout';
@@ -15,7 +14,7 @@ jest.mock('./patterns_flyout_context', () => ({
 
 jest.mock('./patterns_flyout_update_search', () => ({
   PatternsFlyoutUpdateSearch: ({ patternString }: { patternString: string }) => (
-    <div data-testid="mock-update-search">Update Search: {patternString}</div>
+    <div data-test-subj="mock-update-search">Update Search: {patternString}</div>
   ),
 }));
 
@@ -27,7 +26,7 @@ jest.mock('./patterns_flyout_event_table', () => ({
     patternString: string;
     totalItemCount: number;
   }) => (
-    <table data-testid="mock-event-table">
+    <table data-test-subj="mock-event-table">
       <tbody>
         <tr>
           <td>Event</td>
@@ -66,8 +65,11 @@ describe('PatternsTableFlyout', () => {
     expect(screen.getByText('Pattern')).toBeInTheDocument();
     expect(screen.getByText('INFO [main] * application')).toBeInTheDocument();
 
-    expect(screen.getByText('Event count')).toBeInTheDocument();
-    expect(screen.getByText('350')).toBeInTheDocument();
+    // Event count is shown in the events panel title
+    expect(screen.getByText('Events (350)')).toBeInTheDocument();
+
+    // Update search button should be in the header
+    expect(screen.getByTestId('mock-update-search')).toBeInTheDocument();
 
     const table = container.querySelector('table');
     expect(table).toBeInTheDocument();
@@ -88,7 +90,9 @@ describe('PatternsTableFlyout', () => {
 
     // checking that other panels aren't in document
     expect(screen.queryByText('Pattern')).not.toBeInTheDocument();
-    expect(screen.queryByText('Event count')).not.toBeInTheDocument();
+
+    // Update search should not be rendered when there's no record
+    expect(screen.queryByTestId('mock-update-search')).not.toBeInTheDocument();
   });
 
   it('should handle empty sample array', () => {
@@ -110,8 +114,7 @@ describe('PatternsTableFlyout', () => {
     expect(screen.getByText('Pattern')).toBeInTheDocument();
     expect(screen.getByText('ERROR [database] * connection')).toBeInTheDocument();
 
-    expect(screen.getByText('Event count')).toBeInTheDocument();
-    expect(screen.getByText('50')).toBeInTheDocument();
+    expect(screen.getByText('Events (50)')).toBeInTheDocument();
   });
 
   it('should call closePatternsTableFlyout when close button is clicked', async () => {

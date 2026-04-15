@@ -21,7 +21,7 @@ export interface PatternsSettingsPopoverContentProps {
   fieldChange?: () => void;
 }
 
-const gatherOptions = (dataset?: DataView) => {
+export const gatherOptions = (dataset?: DataView) => {
   if (!dataset || !dataset.fields) {
     return [];
   }
@@ -79,6 +79,7 @@ export const PatternsSettingsPopoverContent = ({
     Promise.resolve().then(() => {
       // Trigger query execution to reload the patterns tab
       if (services) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services }));
       }
 

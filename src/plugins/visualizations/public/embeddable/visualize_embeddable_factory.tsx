@@ -191,9 +191,19 @@ export class VisualizeEmbeddableFactory
         parent
       );
     } else {
+      const container =
+        parent?.id && parent?.getTitle()
+          ? {
+              containerInfo: {
+                containerId: parent.id,
+                containerName: parent.getTitle() ?? '',
+              },
+            }
+          : {};
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),
         outsideVisualizeApp: true,
+        ...container,
       });
       return undefined;
     }

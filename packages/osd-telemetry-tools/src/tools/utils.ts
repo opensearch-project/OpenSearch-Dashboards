@@ -87,8 +87,36 @@ export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.Sou
   }
 
   const identifierName = node.getText();
-  const identifierDefinition: ts.Node = (source as any).locals.get(identifierName);
+  // In TS 6, sourceFile.locals may not be available as a public API.
+  // Try locals first, then fall back to searching the AST.
+  const identifierDefinition: ts.Node | undefined = (source as any).locals?.get(identifierName);
   if (!identifierDefinition) {
+    // Fallback: search top-level statements for the declaration
+    for (const statement of source.statements) {
+      if (ts.isVariableStatement(statement)) {
+        for (const decl of statement.declarationList.declarations) {
+          if (ts.isIdentifier(decl.name) && decl.name.text === identifierName) {
+            return decl;
+          }
+        }
+      }
+      if (ts.isTypeAliasDeclaration(statement) && statement.name.text === identifierName) {
+        return statement;
+      }
+      if (ts.isInterfaceDeclaration(statement) && statement.name.text === identifierName) {
+        return statement;
+      }
+      if (ts.isImportDeclaration(statement) && statement.importClause) {
+        const bindings = statement.importClause.namedBindings;
+        if (bindings && ts.isNamedImports(bindings)) {
+          for (const element of bindings.elements) {
+            if (element.name.text === identifierName) {
+              return element;
+            }
+          }
+        }
+      }
+    }
     throw new Error(`Unable to find identifier in source ${identifierName}`);
   }
   const declarations = (identifierDefinition as any).declarations as ts.Node[];
@@ -173,12 +201,24 @@ export function getResolvedModuleSourceFile(
   program: ts.Program,
   importedModuleName: string
 ) {
-  const resolvedModule = (originalSource as any).resolvedModules.get(importedModuleName);
-  const resolvedModuleSourceFile = program.getSourceFile(resolvedModule.resolvedFileName);
-  if (!resolvedModuleSourceFile) {
-    throw new Error(`Unable to find resolved module ${importedModuleName}`);
+  // Use the type checker to resolve the import module, as sourceFile.resolvedModules
+  // was removed in TS 6.
+  const checker = program.getTypeChecker();
+  for (const stmt of originalSource.statements) {
+    if (ts.isImportDeclaration(stmt) && stmt.moduleSpecifier) {
+      const specText = (stmt.moduleSpecifier as ts.StringLiteral).text;
+      if (specText === importedModuleName) {
+        const symbol = checker.getSymbolAtLocation(stmt.moduleSpecifier);
+        if (symbol) {
+          const decls = symbol.getDeclarations();
+          if (decls && decls.length > 0) {
+            return decls[0].getSourceFile();
+          }
+        }
+      }
+    }
   }
-  return resolvedModuleSourceFile;
+  throw new Error(`Unable to find resolved module ${importedModuleName}`);
 }
 
 export function getIdentifierValue(

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen, act } from '@testing-library/react';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 
 jest.mock('@osd/i18n', () => ({
@@ -118,6 +117,7 @@ describe('SaveAndAddButtonWithModal', () => {
     mockUseKeyboardShortcut.mockClear();
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(
       new VB.VisualizationBuilder({
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
         getExpressions: jest.fn(),
       })
     );
@@ -207,7 +207,7 @@ describe('SaveAndAddButtonWithModal', () => {
       });
     });
 
-    it('keyboard shortcut opens modal', () => {
+    it('keyboard shortcut opens modal', async () => {
       render(
         <Provider store={store}>
           <SaveAndAddButtonWithModal dataset={undefined} />
@@ -222,11 +222,15 @@ describe('SaveAndAddButtonWithModal', () => {
 
       const executeFunction = keyboardShortcutCall[0].execute;
 
-      // Execute the keyboard shortcut
-      executeFunction();
+      // Execute the keyboard shortcut (wrap in act for React 18)
+      await act(async () => {
+        executeFunction();
+      });
 
       // Verify modal opens
-      expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+      });
     });
   });
 });

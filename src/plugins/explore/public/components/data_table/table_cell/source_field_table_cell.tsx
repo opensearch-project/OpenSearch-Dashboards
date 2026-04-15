@@ -12,13 +12,8 @@
 import './source_field_table_cell.scss';
 
 import React, { Fragment } from 'react';
-import dompurify from 'dompurify';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
+import { getDisplayValue } from '../../../../../data/common';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -27,44 +22,46 @@ export interface SourceFieldTableCellProps {
   dataset: IndexPattern | Dataset;
   row: OpenSearchSearchHit<Record<string, unknown>>;
   isShortDots: boolean;
+  wrapCellText?: boolean;
 }
 
-export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
+const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
   colName,
   dataset,
   row,
   isShortDots,
+  wrapCellText,
 }) => {
-  const formattedRow = dataset.formatHit(row);
-  const rawKeys = Object.keys(formattedRow);
+  const formattedRow = dataset.formatHit(row, 'text');
+  const metaFields = dataset.metaFields || [];
+  const rawKeys = Object.keys(formattedRow).filter((key) => !metaFields.includes(key));
   const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
 
   return (
     <td
       key={colName}
-      className="exploreDocTableCell eui-textBreakAll eui-textBreakWord exploreDocTableCell__source"
+      className={`exploreDocTableCell${
+        wrapCellText ? '' : ' eui-textTruncate'
+      } exploreDocTableCell__source`}
       data-test-subj="docTableField"
     >
-      <div className="truncate-by-height">
-        <EuiDescriptionList type="inline" compressed className="source exploreTableSourceCell">
+      <div className="exploreDocTableCell__content">
+        <span className="source">
           {keys.map((key, index) => (
             <Fragment key={key}>
-              <EuiDescriptionListTitle
-                className="exploreDescriptionListFieldTitle"
-                data-test-subj="dscDataGridTableCellListFieldTitle"
-              >
-                {key + ':'}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription
-                dangerouslySetInnerHTML={{
-                  __html: dompurify.sanitize(formattedRow[rawKeys[index]]),
-                }}
-              />
+              <span className="source__key" data-test-subj="sourceFieldKey">
+                {key}:
+              </span>
+              <span className="source__value" data-test-subj="sourceFieldValue">
+                {getDisplayValue(rawKeys[index], formattedRow[rawKeys[index]], row.highlight)}
+              </span>
               {index !== keys.length - 1 && ' '}
             </Fragment>
           ))}
-        </EuiDescriptionList>
+        </span>
       </div>
     </td>
   );
 };
+
+export const SourceFieldTableCell = React.memo(SourceFieldTableCellComponent);

@@ -73,6 +73,7 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
     dispatch(clearResultsByKey(histogramCacheKey));
     dispatch(clearQueryStatusMapByKey(histogramCacheKey));
     dispatch(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,

@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';

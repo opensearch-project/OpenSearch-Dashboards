@@ -38,6 +38,16 @@ export interface IngestOptions {
    * Supplied when multiple data sources (MDS) is enabled
    */
   dataSourceId?: string;
+
+  /**
+   * Unique identifier to inject into documents for filtered alias support
+   */
+  lookupId?: string;
+
+  /**
+   * Field name to use for the lookup identifier (typically '__lookup')
+   */
+  lookupField?: string;
 }
 
 export interface IngestResponse {
