@@ -27,7 +27,8 @@ jest.mock('./vis_editor_loading_state', () => ({
   VisEditorLoadingState: () => <div data-test-subj="vis-loading" />,
 }));
 jest.mock('../component/query_panel/visualization_editor_query_panel', () => ({
-  QueryPanel: () => <div data-test-subj="query-panel" />,
+  __esModule: true,
+  default: () => <div data-test-subj="query-panel" />,
 }));
 jest.mock('../../../components/tabs/error_guard/error_code_block', () => ({
   ErrorCodeBlock: ({ title, text }: any) => (
