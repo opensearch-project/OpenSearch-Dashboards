@@ -52,7 +52,7 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
 
   // In prompt (AI) mode, render a simple stacked layout without the resizable
   // handle. The prompt editor is a single-line input so resizing adds no value
-  // and the resize handle can overlap the generated-query bar.
+  // resize handler required for editing ppl large queries only
   if (isPromptMode) {
     return (
       <div className="exploreResizableQueryContainer exploreResizableQueryContainer--promptMode">
