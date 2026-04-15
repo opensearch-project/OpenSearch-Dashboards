@@ -15,10 +15,9 @@ jest.mock('react-redux', () => ({
 }));
 
 // Mock the selectors module
-const mockSelectIsPromptEditorMode = jest.fn();
 jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectLastExecutedTranslatedQuery: jest.fn(),
-  selectIsPromptEditorMode: mockSelectIsPromptEditorMode,
+  selectIsPromptEditorMode: 'selectIsPromptEditorMode',
 }));
 
 // Mock ResizeObserver (still needed by EUI internals)
@@ -40,7 +39,7 @@ describe('ResizableQueryContainer', () => {
     resizeEvents.length = 0;
     // Default: not in prompt mode (PPL/resizable path)
     mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === mockSelectIsPromptEditorMode) return false;
+      if (selector === 'selectIsPromptEditorMode') return false;
       return '';
     });
     window.dispatchEvent = jest.fn((event: Event) => {
@@ -137,7 +136,7 @@ describe('ResizableQueryContainer', () => {
   describe('prompt mode', () => {
     beforeEach(() => {
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === mockSelectIsPromptEditorMode) return true;
+        if (selector === 'selectIsPromptEditorMode') return true;
         return '';
       });
     });
@@ -148,7 +147,9 @@ describe('ResizableQueryContainer', () => {
       expect(screen.getByTestId('query-panel')).toBeInTheDocument();
       expect(screen.getByTestId('content-panel')).toBeInTheDocument();
 
-      const promptContainer = document.querySelector('.exploreResizableQueryContainer--promptMode');
+      const promptContainer = document.querySelector(
+        '.exploreResizableQueryContainer--promptMode'
+      );
       expect(promptContainer).toBeInTheDocument();
 
       // No resize handle in prompt mode
