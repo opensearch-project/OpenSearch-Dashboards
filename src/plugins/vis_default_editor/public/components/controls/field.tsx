@@ -84,7 +84,9 @@ function FieldParamEditor({
         defaultMessage:
           'The index pattern {indexPatternTitle} does not contain any of the following compatible field types: {fieldTypes}',
         values: {
-          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+          indexPatternTitle:
+            agg.getIndexPattern &&
+            (agg.getIndexPattern().displayName || agg.getIndexPattern().title),
           fieldTypes: getFieldTypesString(agg),
         },
       })

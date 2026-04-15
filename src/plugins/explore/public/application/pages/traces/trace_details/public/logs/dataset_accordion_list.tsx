@@ -64,7 +64,7 @@ export const DatasetAccordionList: React.FC<DatasetAccordionListProps> = ({
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem>
-                            <EuiText size="s">{dataset.title}</EuiText>
+                            <EuiText size="s">{dataset.displayName || dataset.title}</EuiText>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
