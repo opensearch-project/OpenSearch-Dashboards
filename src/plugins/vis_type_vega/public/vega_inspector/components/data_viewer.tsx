@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiCompressedComboBox,

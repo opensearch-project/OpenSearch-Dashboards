@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { StatusMessage } from '../status_message';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';

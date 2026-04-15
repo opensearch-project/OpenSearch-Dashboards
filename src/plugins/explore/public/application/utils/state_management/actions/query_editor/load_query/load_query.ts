@@ -10,14 +10,14 @@ import { useSetEditorTextWithQuery } from '../../../../../hooks';
 import { clearLastExecutedData } from '../../../slices';
 
 /**
- * This is called when you need to load a query, it runs the loaded query
+ * This is called when you need to load a query, it runs the loaded query.
  */
 export const loadQueryActionCreator = (
   services: ExploreServices,
   setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>,
   query: string
-) => (dispatch: AppDispatch) => {
+) => async (dispatch: AppDispatch) => {
   dispatch(clearLastExecutedData());
   setEditorTextWithQuery(query);
-  dispatch(runQueryActionCreator(services, query));
+  await ((dispatch(runQueryActionCreator(services, query)) as unknown) as Promise<void>);
 };

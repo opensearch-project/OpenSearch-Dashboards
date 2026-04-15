@@ -4,6 +4,7 @@
  */
 
 import { trimEnd } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
 import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
@@ -23,11 +24,14 @@ import {
   fetch,
   isPPLSearchQuery,
   QueryAggConfig,
+  queryEndsWithHead,
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
+
+export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
@@ -54,6 +58,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
+    const isAsync = strategy === SEARCH_STRATEGY.PPL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
@@ -61,6 +66,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       body: {
         pollQueryResultsParams: request.params?.pollQueryResultsParams,
         timeRange: request.params?.body?.timeRange,
+        ...(!isAsync && { queryId: uuidv4() }),
       },
     };
 
@@ -110,8 +116,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const whereCommands: string[] = [];
 
+    const skipFilters = request.params?.body?.skipFilters;
+
     const appId = await this.application.currentAppId$.pipe(first()).toPromise();
-    if (appId && PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+    if (
+      !skipFilters &&
+      appId &&
+      PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)
+    ) {
       const filters = this.queryService.filterManager.getFilters();
       const index = request.params?.index
         ? this.indexPatterns.getByTitle(request.params.index, true)
@@ -144,9 +156,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       );
       whereCommands.push(timeFilter);
     }
+    const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
+
+    const finalQuery =
+      query.dataset?.type === DATASET.S3 && !queryEndsWithHead(queryWithFilters)
+        ? `${queryWithFilters} | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
+        : queryWithFilters;
+
     return {
       ...query,
-      query: whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query),
+      query: finalQuery,
     };
   }
 

@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { TableVisConfig, ColumnSort, AggTypes } from '../types';
 import { TableVisComponent } from './table_vis_component';
 import { FormattedColumn } from '../types';
 import { FormattedTableContext } from '../table_vis_response_handler';
 import { TableVisDynamicTable } from './table_vis_dynamic_table';
-import { TableUiState } from '../utils/get_table_ui_state';
 
 const mockFormatter = {
   convert: jest.fn((val) => val),

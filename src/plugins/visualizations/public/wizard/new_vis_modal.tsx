@@ -57,6 +57,10 @@ interface TypeSelectionProps {
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
   data: DataPublicPluginStart;
+  containerInfo?: {
+    containerId: string;
+    containerName: string;
+  };
 }
 
 interface TypeSelectionState {
@@ -191,6 +195,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         path: params,
         state: {
           originatingApp: this.props.originatingApp,
+          containerInfo: this.props.containerInfo,
         },
       });
     } else {

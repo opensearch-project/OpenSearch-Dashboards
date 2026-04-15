@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { AggParamEditorProps } from '../../agg_param_props';
 
 export const wrapWithInlineComp = <T extends unknown>(

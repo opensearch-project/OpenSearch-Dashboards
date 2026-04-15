@@ -5,7 +5,11 @@
 
 import { act } from 'react';
 import { renderHook } from '@testing-library/react';
-import { usePageContainerCapture } from './use_page_container_capture';
+import {
+  usePageContainerCapture,
+  calculateScale,
+  MAX_DIMENSION,
+} from './use_page_container_capture';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
@@ -21,6 +25,7 @@ jest.mock('react-use', () => ({
 
 jest.mock('html2canvas-pro', () => {
   const fn = jest.fn();
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   fn.setCspNonce = jest.fn();
   return fn;
 });
@@ -146,6 +151,7 @@ describe('usePageContainerCapture', () => {
       backgroundColor: '#ffffff',
       logging: false,
       useCORS: true,
+      scale: 1,
     });
   });
 
@@ -265,5 +271,76 @@ describe('usePageContainerCapture', () => {
     expect(captureResult).toBeDefined();
     expect(captureResult.base64).toBe(mockBase64);
     expect(captureResult.mimeType).toBe('image/jpeg');
+  });
+});
+
+describe('calculateScale', () => {
+  it('should return 1 when both dimensions are under MAX_DIMENSION', () => {
+    expect(calculateScale(1000, 2000)).toBe(1);
+    expect(calculateScale(7999, 7999)).toBe(1);
+    expect(calculateScale(100, 100)).toBe(1);
+  });
+
+  it('should return 1 when dimensions are exactly MAX_DIMENSION', () => {
+    expect(calculateScale(MAX_DIMENSION, MAX_DIMENSION)).toBe(1);
+    expect(calculateScale(MAX_DIMENSION, 1000)).toBe(1);
+    expect(calculateScale(1000, MAX_DIMENSION)).toBe(1);
+  });
+
+  it('should scale down when width exceeds MAX_DIMENSION', () => {
+    const scale = calculateScale(16000, 4000);
+    expect(scale).toBeLessThan(1);
+    expect(16000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+    expect(4000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+  });
+
+  it('should scale down when height exceeds MAX_DIMENSION', () => {
+    const scale = calculateScale(4000, 16000);
+    expect(scale).toBeLessThan(1);
+    expect(4000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+    expect(16000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+  });
+
+  it('should scale down when both dimensions exceed MAX_DIMENSION', () => {
+    const scale = calculateScale(10000, 12000);
+    expect(scale).toBeLessThan(1);
+    expect(10000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+    expect(12000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+  });
+
+  it('should use the smaller scale factor when both dimensions exceed MAX_DIMENSION', () => {
+    // Height is larger, so scaleY should be smaller and used
+    const scale = calculateScale(10000, 20000);
+    expect(scale).toBe(Math.floor((MAX_DIMENSION / 20000) * 1e10) / 1e10);
+  });
+
+  it('should floor to 10 decimal places to ensure dimensions stay under 8k', () => {
+    // Test with a dimension that would produce a repeating decimal
+    const scale = calculateScale(10001, 5000);
+    const scaledWidth = 10001 * scale;
+    expect(scaledWidth).toBeLessThanOrEqual(MAX_DIMENSION);
+  });
+
+  it('should handle very large dimensions', () => {
+    const scale = calculateScale(100000, 100000);
+    expect(scale).toBeLessThan(1);
+    expect(100000 * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+  });
+
+  it('should ensure resulting dimensions never exceed MAX_DIMENSION due to floating point', () => {
+    // Test edge cases where floating point could cause issues
+    const testCases = [
+      [8001, 8001],
+      [9999, 7000],
+      [12345, 8765],
+      [16384, 16384],
+      [32000, 24000],
+    ];
+
+    testCases.forEach(([width, height]) => {
+      const scale = calculateScale(width, height);
+      expect(width * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+      expect(height * scale).toBeLessThanOrEqual(MAX_DIMENSION);
+    });
   });
 });

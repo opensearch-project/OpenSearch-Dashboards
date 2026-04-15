@@ -10,6 +10,7 @@ import {
   EuiText,
   EuiIcon,
   EuiBadge,
+  EuiToolTip,
   EuiSpacer,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
@@ -23,6 +24,28 @@ import {
 } from '../../../../services/span_categorization';
 import { TreeNode } from './tree_helpers';
 import './trace_tree_view.scss';
+
+const TokenIcon: React.FC = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ verticalAlign: 'middle', marginRight: 4, flexShrink: 0 }}
+  >
+    <path
+      d="M9 11.625C11.2782 11.625 13.125 9.77817 13.125 7.5C13.125 5.22183 11.2782 3.375 9 3.375L6.5 2H9C12.0376 2 14.5 4.46243 14.5 7.5C14.5 10.5376 12.0376 13 9 13H6.5L9 11.625Z"
+      fill="currentColor"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.5 11.625C8.77817 11.625 10.625 9.77817 10.625 7.5C10.625 5.22183 8.77817 3.375 6.5 3.375C4.22183 3.375 2.375 5.22183 2.375 7.5C2.375 9.77817 4.22183 11.625 6.5 11.625ZM12 7.5C12 10.5376 9.53757 13 6.5 13C3.46243 13 1 10.5376 1 7.5C1 4.46243 3.46243 2 6.5 2C9.53757 2 12 4.46243 12 7.5Z"
+      fill="currentColor"
+    />
+  </svg>
+);
 
 export interface TraceTreeViewProps {
   traceTreeData: TreeNode[];
@@ -79,7 +102,11 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
                     const category = node.traceRow ? getSpanCategory(node.traceRow) : 'OTHER';
                     const meta = getCategoryMeta(category);
                     return (
-                      <EuiBadge className="agentTraces__categoryBadge" color={meta.color}>
+                      <EuiBadge
+                        className="agentTraces__categoryBadge"
+                        color={meta.bgColor}
+                        style={{ color: meta.textColor }}
+                      >
                         {meta.label}
                       </EuiBadge>
                     );
@@ -89,12 +116,17 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
                 <span className="agentTracesFlyout__treeRowLabelText" title={node.label}>
                   <span className="agentTracesFlyout__treeRowLabelName">{node.label}</span>
                   {node.traceRow?.status === 'error' && (
-                    <EuiIcon
-                      type="alert"
-                      color="danger"
-                      size="m"
-                      className="agentTracesFlyout__treeRowErrorIcon"
-                    />
+                    <EuiToolTip
+                      content={`Span error: ${node.traceRow?.statusMessage || 'Unknown error'}`}
+                      position="top"
+                    >
+                      <EuiIcon
+                        type="alert"
+                        color="danger"
+                        size="m"
+                        className="agentTracesFlyout__treeRowErrorIcon"
+                      />
+                    </EuiToolTip>
                   )}
                 </span>
               </EuiFlexGroup>
@@ -102,14 +134,36 @@ export const TraceTreeView: React.FC<TraceTreeViewProps> = ({
 
             <EuiFlexItem grow={false} className="agentTracesFlyout__treeRowTokens">
               {node.tokens && node.tokens !== '—' && Number(node.tokens) > 0 ? (
-                <EuiBadge
-                  className="agentTracesFlyout__tokenBadge"
-                  color="hollow"
-                  iconType="kqlSelector"
-                  iconSide="left"
+                <EuiToolTip
+                  content={
+                    <div>
+                      <div>
+                        Tokens:{' '}
+                        {typeof node.tokens === 'number'
+                          ? node.tokens.toLocaleString()
+                          : node.tokens}
+                      </div>
+                      <hr
+                        style={{
+                          margin: '4px 0',
+                          border: 'none',
+                          borderTop: '1px solid rgba(255,255,255,0.3)',
+                        }}
+                      />
+                      <div>Input tokens: {node.traceRow?.inputTokens ?? '—'}</div>
+                      <div>Output tokens: {node.traceRow?.outputTokens ?? '—'}</div>
+                    </div>
+                  }
+                  position="top"
                 >
-                  {node.tokens}
-                </EuiBadge>
+                  <EuiBadge
+                    color="hollow"
+                    iconType={() => <TokenIcon />}
+                    className="agentTracesFlyout__tokenBadge"
+                  >
+                    {typeof node.tokens === 'number' ? node.tokens.toLocaleString() : node.tokens}
+                  </EuiBadge>
+                </EuiToolTip>
               ) : null}
             </EuiFlexItem>
 

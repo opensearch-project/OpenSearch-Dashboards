@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState, createContext, useContext, useCallback } from 'react';
+import { useState, createContext, useContext, useCallback } from 'react';
 
 import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
 

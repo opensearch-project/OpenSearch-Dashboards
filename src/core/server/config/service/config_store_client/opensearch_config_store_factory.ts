@@ -20,6 +20,7 @@ export class OpenSearchDynamicConfigStoreFactory implements IDynamicConfigStoreC
   /**
    * TODO Once the OpenSearch client is implemented, finish implementing factory method
    */
+  // @ts-expect-error TS2345 TODO Fix me
   public create() {
     return new OpenSearchConfigStoreClient(this.#opensearchClient);
   }

@@ -4,11 +4,12 @@
  */
 
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DataViewField } from '../../../../data/public';
 import { DiscoverField } from './discover_field';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { FieldDetails } from './types';
+import { AGENT_TRACES_DEFAULT_COLUMNS } from '../../../common';
 
 interface FieldGroupProps extends DiscoverSidebarProps {
   category: 'query' | 'discovered' | 'selected';
@@ -74,6 +75,11 @@ export const FieldList = ({
                 getDetails={getDetailsByField}
                 useShortDots={shortDotsEnabled}
                 showSummary
+                nonRemovable={
+                  category === 'selected' &&
+                  (AGENT_TRACES_DEFAULT_COLUMNS.includes(field.name) ||
+                    field.name === selectedDataSet.timeFieldName)
+                }
               />
             </EuiPanel>
           );

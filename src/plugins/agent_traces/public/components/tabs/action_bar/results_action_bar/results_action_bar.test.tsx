@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './results_action_bar';
 import { render, screen } from '@testing-library/react';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
@@ -18,6 +17,10 @@ const store = mockStore(initialState);
 
 jest.mock('../download_csv', () => ({
   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
+}));
+
+jest.mock('../../../../components/add_to_dashboard', () => ({
+  SaveAndAddButtonWithModal: () => <div data-test-subj="agentTracesAddToDashboardButton" />,
 }));
 
 const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
@@ -108,7 +111,7 @@ describe('ResultsActionBar', () => {
 
   test('should show export button for visualization tab', () => {
     const patternsStore = mockStore({
-      ui: { activeTabId: 'agent_traces_visualization_tab' },
+      ui: { activeTabId: 'visualization' },
       tab: { patterns: { patternsField: 'message' } },
     });
     render(

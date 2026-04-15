@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { UseField, Props as UseFieldProps } from './use_field';
 import { FieldHook } from '../types';
 

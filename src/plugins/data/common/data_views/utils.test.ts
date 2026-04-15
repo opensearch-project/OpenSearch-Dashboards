@@ -50,6 +50,7 @@ describe('test getDataViewTitle', () => {
   };
   const dataViewMockTitle = 'dataViewMockTitle';
   const referencesMock: DataViewSavedObjectReference[] = [
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     { type: 'data-source', id: 'dataSourceId' },
   ];
 

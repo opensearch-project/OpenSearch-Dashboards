@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TraceFlowView } from './trace_flow_view';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { categorizeSpanTree } from '../../../../services/span_categorization';
 import { spansToFlow } from '../../../../services/flow_transform';
 
@@ -38,6 +37,7 @@ jest.mock('../../../../services/flow_transform', () => ({
   spansToFlow: jest.fn(() => ({ nodes: [], edges: [] })),
 }));
 
+// @ts-expect-error TS2739 TODO(ts-error): fixme
 const mockTrace: TraceRow = {
   id: 'trace-1',
   spanId: 'span-1',
@@ -110,7 +110,11 @@ describe('TraceFlowView', () => {
 
     render(<TraceFlowView {...defaultProps} />);
 
-    expect(capturedMapProps.layoutOptions).toEqual({ direction: 'TB' });
+    expect(capturedMapProps.layoutOptions).toEqual({
+      direction: 'TB',
+      rankSeparation: 80,
+      nodeSeparation: 40,
+    });
     expect(capturedMapProps.legend).toBe(false);
     expect(capturedMapProps.showMinimap).toBe(true);
     expect(capturedMapProps.topN).toBe(Infinity);

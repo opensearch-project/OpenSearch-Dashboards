@@ -9,8 +9,6 @@ import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults, clearQueryStatusMap, setIsInitialized } from '../state_management/slices';
-import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
-import { selectActiveTabId } from '../state_management/selectors';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useDatasetContext } from '../../context';
 
@@ -22,7 +20,6 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   const dispatch = useDispatch();
   const { isInitialized } = useSelector((state: RootState) => state.meta);
   const queryState = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector(selectActiveTabId);
   const exploreId = useCurrentExploreId();
   const { dataset: datasetFromContext, isLoading: datasetLoading } = useDatasetContext();
 
@@ -58,10 +55,8 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         await dispatch(executeQueries({ services }));
-        if (!activeTabId) {
-          dispatch(detectAndSetOptimalTab({ services }));
-        }
         dispatch(setIsInitialized(true));
       }
     };
@@ -70,7 +65,6 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   }, [
     isInitialized,
     queryState,
-    activeTabId,
     shouldSearchOnPageLoad,
     dispatch,
     services,

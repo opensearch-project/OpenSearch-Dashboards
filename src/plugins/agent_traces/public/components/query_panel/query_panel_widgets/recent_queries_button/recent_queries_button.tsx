@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useDispatch } from 'react-redux';
@@ -54,6 +54,7 @@ export const RecentQueriesButton = () => {
         isQuickSelection: true,
       });
     }
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, updatedQuery));
   };
 

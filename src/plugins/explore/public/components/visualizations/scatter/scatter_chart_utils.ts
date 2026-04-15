@@ -80,7 +80,7 @@ export const transformToMultiSeriesWithSize = (
     const y = row[yFieldIndex];
     const category = String(row[colorFieldIndex] || 'undefined');
     const size = Number(row[sizeFieldIndex]);
-    if (isNaN(size) || size <= 0) return;
+    if (isNaN(size)) return;
     // Track size range
     minSize = Math.min(minSize, size);
     maxSize = Math.max(maxSize, size);
@@ -88,6 +88,12 @@ export const transformToMultiSeriesWithSize = (
     // Add point to corresponding category
     seriesData[category].push([x, y, size]);
   });
+
+  // Handle case where no valid data points were found
+  if (minSize === Infinity || maxSize === -Infinity) {
+    minSize = 0;
+    maxSize = 0;
+  }
 
   return {
     categories,
@@ -272,7 +278,7 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   colorField: string;
   sizeField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings } = state;
+  const { transformedData = [] } = state;
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
@@ -304,10 +310,6 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     sizeField
   );
 
-  const sizeAxisMapping = Object.values(axisColumnMappings).find(
-    (mapping) => mapping.column === sizeField
-  );
-  const sizeAxisName = sizeAxisMapping?.name || sizeField;
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
   // Create multiple scatter series, one for each color category
@@ -360,6 +362,7 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     }
   };
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   newState.visualMap = {
     show: styles.addLegend === true,
     type: 'continuous',

@@ -27,7 +27,7 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
 
   private readonly http: HttpSetup;
 
-  constructor(http: HttpSetup) {
+  constructor(http: HttpSetup, private dataSourceIdProvider: () => Promise<string | undefined>) {
     this.http = http;
   }
 
@@ -50,6 +50,7 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
   ): Promise<PaginatedConversations> {
     try {
       const { page, pageSize } = params;
+      const dataSourceId = await this.dataSourceIdProvider();
 
       const response = await this.http.post<{
         hits: {
@@ -65,6 +66,7 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
           }>;
         };
       }>('/api/chat/memory/sessions/search', {
+        query: dataSourceId ? { dataSourceId } : undefined,
         body: JSON.stringify({
           query: {
             match_all: {},
@@ -120,19 +122,23 @@ export class AgenticMemoryProvider implements ConversationMemoryProvider {
       // Use AgUiAgent to handle SSE streaming consistently
       const agent = new AgUiAgent();
       const collectedEvents: Event[] = [];
+      const dataSourceId = await this.dataSourceIdProvider();
 
       // Collect all events from the agent run
       await new Promise<void>((resolve, reject) => {
         agent
-          .runAgent({
-            threadId,
-            runId: `restore-${Date.now()}`,
-            messages: [],
-            tools: [],
-            context: [],
-            state: {},
-            forwardedProps: {},
-          })
+          .runAgent(
+            {
+              threadId,
+              runId: `restore-${Date.now()}`,
+              messages: [],
+              tools: [],
+              context: [],
+              state: {},
+              forwardedProps: {},
+            },
+            dataSourceId
+          )
           .subscribe({
             next: (event) => {
               // Collect all events as they arrive

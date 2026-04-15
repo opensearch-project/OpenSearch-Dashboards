@@ -18,11 +18,12 @@ export interface PPLQueryDeps {
   pplService: TracePPLService | undefined;
   datasetParam: Dataset | null;
   baseQueryString: string | null;
+  sourceOnlyQueryString: string | null;
 }
 
 /**
  * Shared hook that provides the common PPL query dependencies
- * used by use_agent_traces, use_agent_spans, and use_trace_metrics.
+ * used by use_trace_metrics.
  */
 export const usePPLQueryDeps = (): PPLQueryDeps => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
@@ -60,7 +61,15 @@ export const usePPLQueryDeps = (): PPLQueryDeps => {
     }
   }, [query]);
 
-  return { services, pplService, datasetParam, baseQueryString };
+  const sourceOnlyQueryString = useMemo(() => {
+    try {
+      return defaultPrepareQueryString({ ...query, query: '' });
+    } catch {
+      return null;
+    }
+  }, [query]);
+
+  return { services, pplService, datasetParam, baseQueryString, sourceOnlyQueryString };
 };
 
 /**

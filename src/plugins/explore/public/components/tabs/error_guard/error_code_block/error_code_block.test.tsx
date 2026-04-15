@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ErrorCodeBlock, ErrorCodeBlockProps } from './error_code_block';
 

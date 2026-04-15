@@ -6,10 +6,11 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import { CelestialMap, AgentCardNode } from '@osd/apm-topology';
 import type { NodeProps } from '@xyflow/react';
 
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { categorizeSpanTree, CategorizedSpan } from '../../../../services/span_categorization';
 import { spansToFlow } from '../../../../services/flow_transform';
 import './trace_flow_view.scss';
@@ -185,7 +186,7 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
         <CelestialMap
           map={mapData}
           nodeTypes={NODE_TYPES}
-          layoutOptions={{ direction: 'TB' }}
+          layoutOptions={{ direction: 'TB', rankSeparation: 80, nodeSeparation: 40 }}
           legend={false}
           breadcrumbs={[]}
           showMinimap

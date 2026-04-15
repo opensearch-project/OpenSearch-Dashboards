@@ -8,340 +8,155 @@ import {
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
 } from './to_expression';
-import {
-  DisableMode,
-  AxisRole,
-  VEGASCHEMA,
-  VisFieldType,
-  VisColumn,
-  AxisColumnMappings,
-} from '../types';
+import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
 import { defaultStateTimeLineChartStyles } from './state_timeline_config';
 
-jest.mock('../utils/utils', () => ({
-  getSwappedAxisRole: jest.fn(() => ({
-    xAxis: { column: 'timestamp', name: 'Time' },
-    xAxisStyle: { title: { text: 'Time' } },
-    yAxis: { column: 'category', name: 'Category' },
-    yAxisStyle: { title: { text: 'Category' } },
-  })),
-  applyAxisStyling: jest.fn(),
-  getChartRender: jest.fn(),
-}));
+describe('State Timeline to_expression', () => {
+  const mockData = [
+    { timestamp: '2023-01-01', group: 'A', color: 'red', numValue: 10 },
+    { timestamp: '2023-01-02', group: 'A', color: 'blue', numValue: 20 },
+    { timestamp: '2023-01-03', group: 'B', color: 'red', numValue: 30 },
+  ];
 
-jest.mock('./state_timeline_utils', () => ({
-  mergeDataCore: jest.fn(() => () => [
-    {
-      timestamp: '2023-01-01',
-      category: 'A',
-      mergedLabel: 'mergedLabel',
-      start: '2023-01-01',
-      end: '2023-01-02',
-    },
-  ]),
-  convertThresholdsToValueMappings: jest.fn(),
-}));
-
-const mockData = [
-  { timestamp: '2023-01-01', c1: 'A', v1: 20 },
-  { timestamp: '2023-01-03', c1: 'A', v1: 50 },
-  { timestamp: '2023-01-03', c1: 'C', v1: 20 },
-];
-
-const mockNumericalColumns: VisColumn[] = [
-  {
+  const mockTimeColumn: VisColumn = {
     id: 1,
-    name: 'value 1',
-    schema: VisFieldType.Numerical,
-    column: 'v1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-  },
-];
-
-const mockCateColumns: VisColumn[] = [
-  {
-    id: 1,
-    name: 'cate 1',
-    schema: VisFieldType.Categorical,
-    column: 'c1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-  },
-  {
-    id: 2,
-    name: 'cate 2',
-    schema: VisFieldType.Categorical,
-    column: 'c2',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-  },
-];
-
-const mockTimeColumns: VisColumn[] = [
-  {
-    id: 1,
-    name: 'date 1',
+    name: 'Time',
     schema: VisFieldType.Date,
-    column: 'd1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
-  },
-];
+    column: 'timestamp',
+    validValuesCount: 3,
+    uniqueValuesCount: 3,
+  };
 
-const mockStyleOptions = {
-  ...defaultStateTimeLineChartStyles,
-  valueMappingOptions: { valueMappings: [{ type: 'value', value: 'red' }] },
-};
+  const mockCateColumn1: VisColumn = {
+    id: 2,
+    name: 'Group',
+    schema: VisFieldType.Categorical,
+    column: 'group',
+    validValuesCount: 3,
+    uniqueValuesCount: 2,
+  };
 
-describe('to_expression', () => {
+  const mockCateColumn2: VisColumn = {
+    id: 3,
+    name: 'Color',
+    schema: VisFieldType.Categorical,
+    column: 'color',
+    validValuesCount: 3,
+    uniqueValuesCount: 2,
+  };
+
+  const mockNumColumn: VisColumn = {
+    id: 4,
+    name: 'NumValue',
+    schema: VisFieldType.Numerical,
+    column: 'numValue',
+    validValuesCount: 3,
+    uniqueValuesCount: 3,
+  };
+
+  const mockStyles = {
+    ...defaultStateTimeLineChartStyles,
+    titleOptions: { show: true, titleName: '' },
+  };
+
   describe('createNumericalStateTimeline', () => {
-    it('should create a state timeline chart with one date one cate and one metric', () => {
-      const rangeMappings = [{ type: 'range', range: { min: 0 } }];
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.COLOR]: mockNumericalColumns[0],
-        [AxisRole.Y]: mockCateColumns[0],
-        [AxisRole.X]: mockTimeColumns[0],
-      };
+    const mockAxisMappings: AxisColumnMappings = {
+      [AxisRole.X]: mockTimeColumn,
+      [AxisRole.Y]: mockCateColumn1,
+      [AxisRole.COLOR]: mockNumColumn,
+    };
 
-      const result = createNumericalStateTimeline(
+    it('returns an ECharts spec with dataset and series', () => {
+      const result = createNumericalStateTimeline(mockData, mockStyles, mockAxisMappings);
+
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('xAxis');
+      expect(result).toHaveProperty('yAxis');
+      expect(result.title.text).toBe('NumValue by Group and Time');
+    });
+
+    it('handles title display options', () => {
+      const noTitle = createNumericalStateTimeline(
         mockData,
-        mockNumericalColumns,
-        mockCateColumns,
-        mockTimeColumns,
-        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
-        mockAxisColumnMappings
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
+      expect(noTitle.title.text).toBeUndefined();
 
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', [
-        {
-          timestamp: '2023-01-01',
-          mergedLabel: 'mergedLabel',
-          start: '2023-01-01',
-          end: '2023-01-02',
-          category: 'A',
-        },
-      ]);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the mark layer
-      const markLayer = result.layer[0];
-      expect(markLayer).toHaveProperty('mark.type', 'rect');
-      expect(markLayer).toHaveProperty('mark.tooltip', true);
-
-      // Verify encoding
-      expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
-
-      expect(markLayer).toHaveProperty('encoding.y.field', 'category');
-      expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'mergedLabel');
-    });
-
-    it('should fallback to categorical state timeline when no range mappings are provided', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.COLOR]: mockNumericalColumns[0],
-        [AxisRole.Y]: mockCateColumns[0],
-        [AxisRole.X]: mockTimeColumns[0],
-      };
-
-      const result = createNumericalStateTimeline(
+      const customTitle = createNumericalStateTimeline(
         mockData,
-        mockNumericalColumns,
-        mockCateColumns,
-        mockTimeColumns,
-        { ...mockStyleOptions, valueMappingOptions: {} },
-        mockAxisColumnMappings
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Timeline' } },
+        mockAxisMappings
       );
-
-      // Verify the basic structure
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', [
-        {
-          timestamp: '2023-01-01',
-          mergedLabel: 'mergedLabel',
-          start: '2023-01-01',
-          end: '2023-01-02',
-          category: 'A',
-        },
-      ]);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the mark layer
-      const markLayer = result.layer[0];
-      expect(markLayer).toHaveProperty('mark.type', 'rect');
-      expect(markLayer).toHaveProperty('mark.tooltip', true);
-
-      // Verify encoding
-      expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
-
-      expect(markLayer).toHaveProperty('encoding.y.field', 'category');
-      expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'v1');
+      expect(customTitle.title.text).toBe('Custom Timeline');
     });
 
-    it('includes text layer when showValues is true', () => {
-      const styleWithText = {
-        ...mockStyleOptions,
-        exclusive: { ...mockStyleOptions.exclusive, showValues: true },
-      };
-
-      const result = createNumericalStateTimeline(mockData, [], [], [], styleWithText);
-      expect(result.layer).toHaveLength(2);
-    });
-    it('should display Ranges when customized legend title is not set', () => {
-      const rangeMappings = [{ type: 'range', range: { min: 0 } }];
-      const styleWithLegend = {
-        ...mockStyleOptions,
-        valueMappingOptions: { valueMappings: rangeMappings },
-      };
-      const result = createNumericalStateTimeline(mockData, [], [], [], styleWithLegend);
-      expect(result.layer[0].encoding.color.legend.title).toBe('Ranges');
-    });
-
-    it('should display customized legend title', () => {
-      const styleWithLegend = {
-        ...mockStyleOptions,
-        legendTitle: 'default',
-      };
-      const result = createNumericalStateTimeline(mockData, [], [], [], styleWithLegend);
-      expect(result.layer[0].encoding.color.legend.title).toBe('default');
+    it('throws when required fields are missing', () => {
+      expect(() => createNumericalStateTimeline(mockData, mockStyles, {})).toThrow(
+        'Missing field config for state-timeline chart'
+      );
     });
   });
 
   describe('createCategoricalStateTimeline', () => {
-    it('creates vega spec with correct structure', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.COLOR]: mockCateColumns[1],
-        [AxisRole.Y]: mockCateColumns[0],
-        [AxisRole.X]: mockTimeColumns[0],
-      };
-      const result = createCategoricalStateTimeline(
+    const mockAxisMappings: AxisColumnMappings = {
+      [AxisRole.X]: mockTimeColumn,
+      [AxisRole.Y]: mockCateColumn1,
+      [AxisRole.COLOR]: mockCateColumn2,
+    };
+
+    it('returns an ECharts spec with dataset and series', () => {
+      const result = createCategoricalStateTimeline(mockData, mockStyles, mockAxisMappings);
+
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Color by Group and Time');
+    });
+
+    it('handles title display options', () => {
+      const noTitle = createCategoricalStateTimeline(
         mockData,
-        mockNumericalColumns,
-        mockCateColumns,
-        mockTimeColumns,
-        mockStyleOptions,
-        mockAxisColumnMappings
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
-
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', [
-        {
-          timestamp: '2023-01-01',
-          mergedLabel: 'mergedLabel',
-          start: '2023-01-01',
-          end: '2023-01-02',
-          category: 'A',
-        },
-      ]);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the mark layer
-      const markLayer = result.layer[0];
-      expect(markLayer).toHaveProperty('mark.type', 'rect');
-      expect(markLayer).toHaveProperty('mark.tooltip', true);
-
-      // Verify encoding
-      expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
-
-      expect(markLayer).toHaveProperty('encoding.y.field', 'category');
-      expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
+      expect(noTitle.title.text).toBeUndefined();
     });
 
-    it('includes title when titleOptions show is true', () => {
-      const styleWithTitle = {
-        ...mockStyleOptions,
-        titleOptions: { show: true, titleName: 'Test Title' },
-      };
-
-      const result = createCategoricalStateTimeline(mockData, [], [], [], styleWithTitle);
-      expect(result.title).toBe('Test Title');
-    });
-    it('should display customized legend title', () => {
-      const styleWithLegend = {
-        ...mockStyleOptions,
-        legendTitle: 'default',
-      };
-      const result = createCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
-      expect(result.layer[0].encoding.color.legend.title).toBe('default');
+    it('throws when required fields are missing', () => {
+      expect(() => createCategoricalStateTimeline(mockData, mockStyles, {})).toThrow(
+        'Missing field config for state-timeline chart'
+      );
     });
   });
 
   describe('createSingleCategoricalStateTimeline', () => {
-    it('creates vega spec with correct structure', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: mockCateColumns[0],
-        [AxisRole.X]: mockTimeColumns[0],
-      };
-      const result = createSingleCategoricalStateTimeline(
+    const mockAxisMappings: AxisColumnMappings = {
+      [AxisRole.X]: mockTimeColumn,
+      [AxisRole.COLOR]: mockCateColumn2,
+    };
+
+    it('returns an ECharts spec with dataset and series', () => {
+      const result = createSingleCategoricalStateTimeline(mockData, mockStyles, mockAxisMappings);
+
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Color  by Time');
+    });
+
+    it('handles title display options', () => {
+      const noTitle = createSingleCategoricalStateTimeline(
         mockData,
-        mockNumericalColumns,
-        mockCateColumns,
-        mockTimeColumns,
-        mockStyleOptions,
-        mockAxisColumnMappings
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
-
-      expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', [
-        {
-          timestamp: '2023-01-01',
-          mergedLabel: 'mergedLabel',
-          start: '2023-01-01',
-          end: '2023-01-02',
-          category: 'A',
-        },
-      ]);
-      expect(result).toHaveProperty('layer');
-      expect(Array.isArray(result.layer)).toBe(true);
-
-      // Verify the mark layer
-      const markLayer = result.layer[0];
-      expect(markLayer).toHaveProperty('mark.type', 'rect');
-      expect(markLayer).toHaveProperty('mark.tooltip', true);
-
-      // Verify encoding
-      expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
-      expect(markLayer).toHaveProperty('encoding.y.field', 'fakeYAxis');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
+      expect(noTitle.title.text).toBeUndefined();
     });
 
-    it('handles disconnect threshold correctly', () => {
-      const styleWithThreshold = {
-        ...mockStyleOptions,
-        exclusive: {
-          ...mockStyleOptions.exclusive,
-          disconnectValues: { disableMode: DisableMode.Threshold, threshold: '2h' },
-        },
-      };
-
-      const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithThreshold);
-      expect(result).toHaveProperty('data.values');
-    });
-    it('should display customized legend title', () => {
-      const styleWithLegend = {
-        ...mockStyleOptions,
-        legendTitle: 'default',
-      };
-      const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
-      expect(result.layer[0].encoding.color.legend.title).toBe('default');
+    it('throws when required fields are missing', () => {
+      expect(() => createSingleCategoricalStateTimeline(mockData, mockStyles, {})).toThrow(
+        'Missing field config for single state-timeline chart'
+      );
     });
   });
 });

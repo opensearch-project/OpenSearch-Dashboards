@@ -14,6 +14,7 @@ jest.mock('./ag_ui_agent');
 describe('AgenticMemoryProvider', () => {
   let provider: AgenticMemoryProvider;
   let mockHttp: jest.Mocked<HttpSetup>;
+  let mockDataSourceIdProvider: jest.Mock<Promise<string | undefined>>;
 
   beforeEach(() => {
     // Create mock HTTP setup
@@ -27,7 +28,10 @@ describe('AgenticMemoryProvider', () => {
       options: jest.fn(),
     } as any;
 
-    provider = new AgenticMemoryProvider(mockHttp);
+    // Create mock data source ID provider
+    mockDataSourceIdProvider = jest.fn().mockResolvedValue(undefined);
+
+    provider = new AgenticMemoryProvider(mockHttp, mockDataSourceIdProvider);
   });
 
   afterEach(() => {
@@ -93,6 +97,7 @@ describe('AgenticMemoryProvider', () => {
       const result = await provider.getConversations({ page: 2, pageSize: 20 });
 
       expect(mockHttp.post).toHaveBeenCalledWith('/api/chat/memory/sessions/search', {
+        query: undefined,
         body: JSON.stringify({
           query: {
             match_all: {},
@@ -108,6 +113,37 @@ describe('AgenticMemoryProvider', () => {
       expect(result.conversations[1].name).toBe('Untitled Conversation'); // empty summary
       expect(result.hasMore).toBe(true); // 60 < 100
       expect(result.total).toBe(100);
+    });
+
+    it('should include dataSourceId in query when provider returns a value', async () => {
+      const testDataSourceId = 'test-data-source-123';
+      mockDataSourceIdProvider.mockResolvedValue(testDataSourceId);
+
+      const mockResponse = {
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _id: 'conv-1',
+              _source: {
+                summary: 'Test',
+                created_time: 1640000000000,
+                last_updated_time: 1640001000000,
+                memory_container_id: 'container-1',
+              },
+            },
+          ],
+        },
+      };
+      mockHttp.post.mockResolvedValue(mockResponse);
+
+      await provider.getConversations({ page: 0, pageSize: 10 });
+
+      expect(mockDataSourceIdProvider).toHaveBeenCalled();
+      expect(mockHttp.post).toHaveBeenCalledWith('/api/chat/memory/sessions/search', {
+        query: { dataSourceId: testDataSourceId },
+        body: expect.any(String),
+      });
     });
 
     it('should return empty result on error', async () => {
@@ -158,15 +194,18 @@ describe('AgenticMemoryProvider', () => {
       const result = await provider.getConversation('thread-123');
 
       expect(AgUiAgent).toHaveBeenCalledWith();
-      expect(mockRunAgent).toHaveBeenCalledWith({
-        threadId: 'thread-123',
-        runId: expect.stringMatching(/^restore-\d+$/),
-        messages: [],
-        tools: [],
-        context: [],
-        state: {},
-        forwardedProps: {},
-      });
+      expect(mockRunAgent).toHaveBeenCalledWith(
+        {
+          threadId: 'thread-123',
+          runId: expect.stringMatching(/^restore-\d+$/),
+          messages: [],
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      );
 
       expect(result).toHaveLength(3);
       expect(result![0].type).toBe('RUN_STARTED');
@@ -197,6 +236,25 @@ describe('AgenticMemoryProvider', () => {
       expect(result).toBeNull();
 
       consoleErrorSpy.mockRestore();
+    });
+
+    it('should pass dataSourceId to AgUiAgent when provider returns a value', async () => {
+      const testDataSourceId = 'test-data-source-456';
+      mockDataSourceIdProvider.mockResolvedValue(testDataSourceId);
+
+      const mockEvents = [{ type: 'RUN_STARTED', threadId: 'thread-123' }];
+      const mockRunAgent = jest.fn().mockReturnValue(of(...mockEvents));
+      (AgUiAgent as jest.Mock).mockImplementation(() => ({
+        runAgent: mockRunAgent,
+      }));
+
+      await provider.getConversation('thread-123');
+
+      expect(mockDataSourceIdProvider).toHaveBeenCalled();
+      expect(mockRunAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ threadId: 'thread-123' }),
+        testDataSourceId
+      );
     });
   });
 

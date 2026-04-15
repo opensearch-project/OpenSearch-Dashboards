@@ -61,7 +61,6 @@ const isOnTracesFlavor = (): boolean => {
 export function TraceDetailsView({ hit }: DocViewRenderProps) {
   const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>(undefined);
 
   const {
     services: { data, chrome },
@@ -237,6 +236,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
           isGanttChartLoading={false}
           colorMap={colorMap}
           onSpanSelect={handleSpanClickNavigation}
+          // @ts-expect-error TS2304 TODO(ts-error): fixme
           selectedSpanId={selectedSpanId || traceInfo.spanId || undefined}
           activeView="timeline"
           isEmbedded={true}

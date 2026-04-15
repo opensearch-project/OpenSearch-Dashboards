@@ -3,9 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-// @ts-expect-error TS6133 TODO(ts-error): fixme
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { UpdateAwsCredentialModal } from './update_aws_credential_modal';
 import { SigV4ServiceName } from '../../../../../../data_source/common/data_sources';

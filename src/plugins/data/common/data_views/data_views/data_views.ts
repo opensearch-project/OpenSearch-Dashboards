@@ -8,7 +8,7 @@ import { DataSourceAttributes } from 'src/plugins/data_source/common/data_source
 import { SavedObjectsClientCommon, Dataset, DEFAULT_DATA, UI_SETTINGS, SavedObject } from '../..';
 import { DataView } from './data_view';
 import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
-import { IndexPatternsService } from '../../index_patterns';
+import { IndexPattern, IndexPatternsService } from '../../index_patterns';
 import {
   DataViewOnNotification,
   DataViewOnError,
@@ -139,14 +139,17 @@ export class DataViewsService {
     const uncachedIds: string[] = [];
 
     for (const id of ids) {
-      // Check cache first
+      // Check cache first, but only accept proper DataView instances (with toDataset).
+      // A plain IndexPattern cached by IndexPatternsService lacks toDataset and
+      // initializeDataSourceRef(), causing dataSource.title to fall back to the raw
+      // saved-object reference name "dataSource" instead of the real data source title.
       const cached = await this.patterns.get(id, true);
-      if (cached) {
+      if (cached && (cached as any).toDataset) {
         cachedDataViews.set(id, cached as DataView);
         continue;
       }
 
-      // Not cached - needs to be fetched
+      // Not cached (or cached as a plain IndexPattern) - needs to be fetched as a DataView
       uncachedIds.push(id);
     }
 
@@ -160,118 +163,71 @@ export class DataViewsService {
       uncachedIds.map((id) => ({ id, type: savedObjectType }))
     );
 
-    // Process each saved object and create DataViews in parallel
+    // Process each saved object and create DataViews in parallel.
+    // Errors on individual objects are caught so one bad entry doesn't break the entire list.
     const newDataViewPromises = response.savedObjects.map(
-      async (savedObject: SavedObject<DataViewAttributes>) => {
-        if (!savedObject.version) {
-          throw new SavedObjectNotFound(
-            savedObjectType,
-            savedObject.id,
-            'management/opensearch-dashboards/indexPatterns'
-          );
-        }
-
-        const spec = this.savedObjectToSpec(savedObject);
-        const { title, type, typeMeta, dataSourceRef } = spec;
-        const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
-          ? JSON.parse(savedObject.attributes.fieldFormatMap)
-          : {};
-
-        const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-        let isSaveRequired = isFieldRefreshRequired;
+      async (
+        savedObject: SavedObject<DataViewAttributes>
+      ): Promise<{ id: string; dataView: DataView } | undefined> => {
         try {
-          spec.fields = isFieldRefreshRequired
-            ? await this.refreshFieldSpecMap(
-                spec.fields || {},
-                savedObject.id,
-                spec.title as string,
-                {
-                  pattern: title,
-                  metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-                  type,
-                  params: typeMeta && typeMeta.params,
-                  dataSourceId: dataSourceRef?.id,
-                }
-              )
-            : spec.fields;
-        } catch (err) {
-          isSaveRequired = false;
-          if (err instanceof DataViewMissingIndices) {
-            this.onNotification({
-              title: (err as any).message,
-              color: 'danger',
-              iconType: 'alert',
-            });
-          } else {
-            this.onError(err, {
-              title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-                defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-                values: { id: savedObject.id, title },
-              }),
-            });
+          if (!savedObject.version) {
+            return undefined;
           }
-        }
 
-        Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
-          const field = spec.fields?.[fieldName];
-          if (field) {
-            field.format = value;
-          }
-        });
+          const spec = this.savedObjectToSpec(savedObject);
+          const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
+            ? JSON.parse(savedObject.attributes.fieldFormatMap)
+            : {};
 
-        const dataView = await this.create(spec, true);
-        this.patterns.saveToCache(savedObject.id, dataView);
-
-        if (isSaveRequired) {
-          try {
-            this.updateSavedObject(dataView);
-          } catch (err) {
-            this.onError(err, {
-              title: i18n.translate('data.dataViews.fetchFieldSaveErrorTitle', {
-                defaultMessage:
-                  'Error saving after fetching fields for data view {title} (ID: {id})',
-                values: {
-                  id: dataView.id,
-                  title: dataView.title,
-                },
-              }),
-            });
-          }
-        }
-
-        if (dataView.isUnsupportedTimePattern()) {
-          this.onUnsupportedTimePattern({
-            id: dataView.id as string,
-            title: dataView.title,
-            index: dataView.getIndex(),
+          Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
+            const field = spec.fields?.[fieldName];
+            if (field) {
+              field.format = value;
+            }
           });
-        }
 
-        dataView.resetOriginalSavedObjectBody();
-        return { id: savedObject.id, dataView };
+          const dataView = await this.create(spec, true);
+          this.patterns.saveToCache(savedObject.id, dataView);
+
+          if (dataView.isUnsupportedTimePattern()) {
+            this.onUnsupportedTimePattern({
+              id: dataView.id as string,
+              title: dataView.title,
+              index: dataView.getIndex(),
+            });
+          }
+
+          dataView.resetOriginalSavedObjectBody();
+          return { id: savedObject.id, dataView };
+        } catch (e) {
+          // Skip this DataView — log but don't let it prevent other DataViews from loading
+          this.onError(e, {
+            title: `Failed to load data view "${savedObject.id}"`,
+          });
+          return undefined;
+        }
       }
     );
 
     // Wait for all DataViews to be created
     const newDataViewResults = await Promise.all(newDataViewPromises);
 
-    // Build a map of newly created DataViews
+    // Build a map of newly created DataViews, skipping not-found entries
     const newDataViewsMap: Map<string, DataView> = new Map();
-    newDataViewResults.forEach(({ id, dataView }: { id: string; dataView: DataView }) => {
-      newDataViewsMap.set(id, dataView);
+    newDataViewResults.forEach((result: { id: string; dataView: DataView } | undefined) => {
+      if (result) {
+        newDataViewsMap.set(result.id, result.dataView);
+      }
     });
 
-    // Return DataViews in the same order as input IDs
-    // Throw error if any DataView is missing (shouldn't happen in normal flow)
-    return ids.map((id) => {
+    // Return DataViews in the same order as input IDs, filtering out not-found ones
+    return ids.reduce<DataView[]>((acc, id) => {
       const dataView = cachedDataViews.get(id) || newDataViewsMap.get(id);
-      if (!dataView) {
-        throw new Error(
-          `DataView with id "${id}" was not found in cache or fetch results. This may indicate a failed fetch operation.`
-        );
+      if (dataView) {
+        acc.push(dataView);
       }
-      return dataView;
-    });
+      return acc;
+    }, []);
   };
 
   /**
@@ -385,22 +341,6 @@ export class DataViewsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: DataViewFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
@@ -458,39 +398,6 @@ export class DataViewsService {
   };
 
   /**
-   * Refreshes a field list from a spec before an data view instance is created
-   * @param fields
-   * @param id
-   * @param title
-   * @param options
-   */
-  private refreshFieldSpecMap = async (
-    fields: DataViewFieldMap,
-    id: string,
-    title: string,
-    options: DataViewGetFieldsOptions
-  ) => {
-    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
-    try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
-    } catch (err) {
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
-        return {};
-      }
-
-      this.onError(err, {
-        title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id, title },
-        }),
-      });
-    }
-    return fields;
-  };
-
-  /**
    * Applies a set of formats to a set of fields
    * @param fieldSpecs
    * @param fieldFormatMap
@@ -545,7 +452,11 @@ export class DataViewsService {
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
-    const parsedFields: DataViewFieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFields: DataViewFieldSpec[] = Array.isArray(fields)
+      ? fields
+      : fields
+      ? JSON.parse(fields)
+      : [];
     const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
@@ -563,6 +474,7 @@ export class DataViewsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: parsedSchemaMappings,
     };
@@ -575,15 +487,17 @@ export class DataViewsService {
    * @param onlyCheckCache - If true, only check cache and return undefined if not found
    */
   get = async (id: string, onlyCheckCache: boolean = false): Promise<DataView> => {
-    // Check cache first
+    // Check cache, but only accept proper DataView instances (with toDataset).
+    // A plain IndexPattern cached by IndexPatternsService lacks toDataset and
+    // initializeDataSourceRef(), causing dataSource.title to show "dataSource".
     const cache = await this.patterns.get(id, true);
 
-    if (cache) {
+    if (cache && (cache as any).toDataset) {
       return cache as DataView;
     }
 
     if (onlyCheckCache) {
-      return cache as DataView;
+      return undefined as any;
     }
 
     const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(savedObjectType, id);
@@ -597,40 +511,9 @@ export class DataViewsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta, dataSourceRef } = spec;
     const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
-    try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: typeMeta && typeMeta.params,
-            dataSourceId: dataSourceRef?.id,
-          })
-        : spec.fields;
-    } catch (err) {
-      isSaveRequired = false;
-      if (err instanceof DataViewMissingIndices) {
-        this.onNotification({
-          title: (err as any).message,
-          color: 'danger',
-          iconType: 'alert',
-        });
-      } else {
-        this.onError(err, {
-          title: i18n.translate('data.dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id, title },
-          }),
-        });
-      }
-    }
 
     Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
       const field = spec.fields?.[fieldName];
@@ -641,21 +524,6 @@ export class DataViewsService {
 
     const dataView = await this.create(spec, true);
     this.patterns.saveToCache(id, dataView);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(dataView);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.dataViews.fetchFieldSaveErrorTitle', {
-            defaultMessage: 'Error saving after fetching fields for data view {title} (ID: {id})',
-            values: {
-              id: dataView.id,
-              title: dataView.title,
-            },
-          }),
-        });
-      }
-    }
 
     if (dataView.isUnsupportedTimePattern()) {
       this.onUnsupportedTimePattern({
@@ -932,9 +800,9 @@ export class DataViewsService {
    * @param dataView DataView object to convert to Dataset
    * @returns Dataset object with data source information
    */
-  async convertToDataset(dataView: DataView): Promise<Dataset> {
-    if (dataView.toDataset) {
-      return await dataView.toDataset();
+  async convertToDataset(dataView: DataView | IndexPattern): Promise<Dataset> {
+    if ('toDataset' in dataView) {
+      return await (dataView as DataView).toDataset();
     }
 
     return {
@@ -949,6 +817,7 @@ export class DataViewsService {
           id: dataView.dataSourceRef.id,
           title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
           type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+          version: dataView.dataSourceRef.version || '',
         },
       }),
     };

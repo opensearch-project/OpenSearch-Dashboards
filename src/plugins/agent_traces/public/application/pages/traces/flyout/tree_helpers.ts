@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 import { parseLatencyMs, parseTimestampMs } from '../trace_details/utils/span_timerange_utils';
 import {
   getSpanCategory,
@@ -69,19 +69,6 @@ export const countSpans = (nodes: TreeNode[]): number => {
     }
   });
   return count;
-};
-
-export const sumTokens = (nodes: TreeNode[]): number => {
-  let total = 0;
-  nodes.forEach((node) => {
-    if (typeof node.tokens === 'number') {
-      total += node.tokens;
-    }
-    if (node.children) {
-      total += sumTokens(node.children);
-    }
-  });
-  return total;
 };
 
 export const extractTimestamps = (node: TreeNode): { startMs: number; endMs: number } => {

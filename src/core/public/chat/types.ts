@@ -116,7 +116,7 @@ export type Role = 'developer' | 'system' | 'assistant' | 'user' | 'tool';
 export interface ChatWindowState {
   isWindowOpen: boolean;
   windowMode: 'sidecar' | 'fullscreen';
-  paddingSize: number;
+  paddingSize?: number;
 }
 
 /**
@@ -131,9 +131,10 @@ export interface ChatServiceInterface {
   /**
    * Thread management - managed by core
    */
-  getThreadId$(): Observable<string>;
-  getThreadId(): string;
+  getThreadId$(): Observable<string | undefined>;
+  getThreadId(): string | undefined;
   setThreadId(threadId: string): void;
+  resetThreadId(): void;
   newThread(): void;
 
   /**
@@ -177,10 +178,6 @@ export interface ChatImplementationFunctions {
     messages: Message[],
     options?: { clearConversation?: boolean }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
-
-  // Window operations
-  openWindow: () => Promise<void>;
-  closeWindow: () => Promise<void>;
 }
 
 /**

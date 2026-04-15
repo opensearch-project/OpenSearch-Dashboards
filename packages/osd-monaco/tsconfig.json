@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "bundler",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./target/tsconfig.tsbuildinfo",
     "outDir": "./target",
     "declaration": true,
     "sourceMap": true,

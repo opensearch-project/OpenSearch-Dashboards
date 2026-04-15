@@ -23,7 +23,7 @@ describe('createStateTimelineConfig', () => {
     const config = createStateTimelineConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'state_timeline');
+    expect(config).toHaveProperty('name', 'State timeline');
     expect(config).toHaveProperty('type', 'state_timeline');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { UI_SETTINGS } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -13,6 +13,7 @@ import {
   moveColumn,
   setColumns,
 } from '../../application/utils/state_management/slices';
+import { AGENT_TRACES_DEFAULT_COLUMNS } from '../../../common';
 import { selectColumns } from '../../application/utils/state_management/selectors';
 import { DiscoverSidebar } from '.';
 import { AgentTracesServices } from '../../types';
@@ -41,7 +42,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const rawResults = useSelector((state: RootState) => {
     const activeTab = services.tabRegistry.getTab(activeTabId);
     const prepareQuery = activeTab?.prepareQuery || defaultPrepareQueryString;
-    const key = prepareQuery(state.query);
+    const key = prepareQuery(state.query, state.legacy.sort);
     return key ? state.results[key] : null;
   });
   const { dataset } = useDatasetContext();
@@ -94,6 +95,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
         dispatch(addColumn({ column: fieldName }));
       }}
       onRemoveField={(fieldName) => {
+        if (AGENT_TRACES_DEFAULT_COLUMNS.includes(fieldName)) return;
         dispatch(removeColumn(fieldName));
       }}
       onReorderFields={(source, destination) => {

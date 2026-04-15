@@ -270,7 +270,7 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATIONS.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
@@ -438,7 +438,7 @@ remove it, don't simply comment it out.
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
-can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
+can run `yarn run lint:es --fix && yarn run lint:style --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
 Whenever possible we are trying to use Prettier and linting over written developer guide rules.

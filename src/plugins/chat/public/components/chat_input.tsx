@@ -3,18 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { EuiButtonIcon, EuiTextColor, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { ContextPills } from './context_pills';
 import { SlashCommandMenu } from './slash_command_menu';
 import { ChatContextPopover } from './chat_context_popover';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../core/public';
+import { ConfirmationRequest } from '../services/confirmation_service';
 
 import './chat_input.scss';
 
@@ -23,6 +24,8 @@ interface ChatInputProps {
   input: string;
   isCapturing: boolean;
   isStreaming: boolean;
+  isSendingToolResult?: boolean;
+  pendingConfirmation?: ConfirmationRequest | null;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
@@ -36,6 +39,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   input,
   isCapturing,
   isStreaming,
+  isSendingToolResult = false,
+  pendingConfirmation,
   onInputChange,
   onSend,
   onStop,
@@ -103,7 +108,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chatInput__fieldWrapper">
           <EuiTextArea
             inputRef={inputRef}
-            placeholder="How can I help you today?"
+            placeholder={
+              pendingConfirmation
+                ? i18n.translate('chat.input.waitingForConfirmation', {
+                    defaultMessage: 'Waiting for confirmation...',
+                  })
+                : i18n.translate('chat.input.placeholder', {
+                    defaultMessage: 'How can I help you today?',
+                  })
+            }
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -111,6 +124,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             fullWidth
             resize="none"
             rows={2}
+            disabled={isSendingToolResult || !!pendingConfirmation}
           />
           {ghostText && (
             <div className="chatInput__ghostText" aria-hidden="true">
@@ -131,7 +145,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <EuiButtonIcon
           iconType={isStreaming ? 'stop' : 'sortUp'}
           onClick={isStreaming ? onStop : onSend}
-          isDisabled={(!isStreaming && input.trim().length === 0) || isCapturing}
+          isDisabled={
+            (!isStreaming && input.trim().length === 0) || isCapturing || isSendingToolResult
+          }
           aria-label={isStreaming ? 'Stop generating' : 'Send message'}
           size="m"
           color={isStreaming ? 'danger' : 'primary'}

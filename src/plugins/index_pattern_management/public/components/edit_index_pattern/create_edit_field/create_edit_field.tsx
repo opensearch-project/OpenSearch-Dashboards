@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
@@ -76,7 +75,7 @@ export const CreateEditField = withRouter(
         {
           defaultMessage:
             "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
-          values: { indexPatternTitle: indexPattern.title, fieldName },
+          values: { indexPatternTitle: indexPattern.getDisplayName(), fieldName },
         }
       );
       notifications.toasts.addWarning(message);
@@ -85,7 +84,7 @@ export const CreateEditField = withRouter(
 
     const docFieldName = spec?.name || newFieldPlaceholder;
 
-    chrome.docTitle.change([docFieldName, indexPattern.title]);
+    chrome.docTitle.change([docFieldName, indexPattern.getDisplayName()]);
 
     const redirectAway = () => {
       history.push(

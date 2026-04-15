@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { TracesTab } from './pages/traces/traces_tab';
 import { SpansTab } from './pages/traces/spans_tab';
+import { VisTab } from './pages/traces/vis_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { AgentTracesServices } from '../types';
 import {
@@ -13,8 +14,11 @@ import {
   AGENT_TRACES_DEFAULT_LANGUAGE,
   AGENT_TRACES_TRACES_TAB_ID,
   AGENT_TRACES_SPANS_TAB_ID,
+  AGENT_TRACES_VISUALIZATION_TAB_ID,
 } from '../../common';
 import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
+import { buildPplSortClause, splitPplWhereAndTail } from './pages/traces/table_shared';
+import { prepareQueryForLanguage } from './utils/languages';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -31,12 +35,11 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     order: 10,
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
 
-    // Traces tab handles its own PPL queries via useAgentTraces (server-side pagination),
-    // but we still provide prepareQuery so the standard pipeline fetches a sample of hits.
-    // The sidebar's field details popover (top 5 values) relies on these hits.
-    prepareQuery: (query) => {
+    prepareQuery: (query, sort) => {
       const baseQuery = defaultPrepareQueryString(query);
-      return `${baseQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) | head 500`;
+      const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQuery);
+      const sortClause = sort?.length ? ` ${buildPplSortClause(sort[0][0], sort[0][1])}` : '';
+      return `${whereQuery} | where parentSpanId = "" AND isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands}${sortClause}`;
     },
 
     component: TracesTab,
@@ -54,14 +57,33 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
 
     // Filter to all gen_ai spans (not just root spans)
-    prepareQuery: (query) => {
+    prepareQuery: (query, sort) => {
       const baseQuery = defaultPrepareQueryString(query);
-      return `${baseQuery} | where isnotnull(\`attributes.gen_ai.operation.name\`) | head 500`;
+      const { whereQuery, tailCommands } = splitPplWhereAndTail(baseQuery);
+      const sortClause = sort?.length ? ` ${buildPplSortClause(sort[0][0], sort[0][1])}` : '';
+      return `${whereQuery} | where isnotnull(\`attributes.gen_ai.operation.name\`) ${tailCommands}${sortClause}`;
     },
 
     component: SpansTab,
   };
   tabRegistry.registerTab(spansTabDefinition);
+
+  // Register Visualization Tab
+  tabRegistry.registerTab({
+    id: AGENT_TRACES_VISUALIZATION_TAB_ID,
+    label: i18n.translate('agentTraces.visualizationTab.label', {
+      defaultMessage: 'Visualization',
+    }),
+    flavor: [AgentTracesFlavor.Traces],
+    order: 30,
+    supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
+
+    prepareQuery: (query) => {
+      return prepareQueryForLanguage(query).query;
+    },
+
+    component: VisTab,
+  });
 };
 
 /**

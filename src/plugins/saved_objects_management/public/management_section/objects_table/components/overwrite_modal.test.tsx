@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithI18nProvider, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { OverwriteModalProps, OverwriteModal } from './overwrite_modal';
 // @ts-expect-error TS2306 TODO(ts-error): fixme

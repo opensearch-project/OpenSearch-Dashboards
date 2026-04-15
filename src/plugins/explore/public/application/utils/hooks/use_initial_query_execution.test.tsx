@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import React from 'react';
+
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useInitialQueryExecution } from './use_initial_query_execution';
@@ -19,7 +19,6 @@ import {
 import { metaReducer } from '../state_management/slices/meta/meta_slice';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices';
-import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 import { MockStore } from '../state_management/__mocks__';
 import * as CurrentExploreIdHook from './use_current_explore_id';
 import * as DatasetContextHook from '../../context';
@@ -34,10 +33,6 @@ jest.mock('../state_management/actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'EXECUTE_QUERIES' }),
 }));
 
-jest.mock('../state_management/actions/detect_optimal_tab', () => ({
-  detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'DETECT_AND_SET_OPTIMAL_TAB' }),
-}));
-
 jest.mock('../state_management/slices', () => ({
   ...jest.requireActual('../state_management/slices'),
   clearResults: jest.fn().mockReturnValue({ type: 'CLEAR_RESULTS' }),
@@ -46,9 +41,6 @@ jest.mock('../state_management/slices', () => ({
 
 const mockExecuteQueries = executeQueries as jest.MockedFunction<typeof executeQueries>;
 const mockClearResults = clearResults as jest.MockedFunction<typeof clearResults>;
-const mockDetectAndSetOptimalTab = detectAndSetOptimalTab as jest.MockedFunction<
-  typeof detectAndSetOptimalTab
->;
 
 // Mock store state type
 interface MockRootState {
@@ -205,7 +197,6 @@ describe('useInitialQueryExecution', () => {
 
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
-      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       expect(result.current.isInitialized).toBe(false); // Still false until Redux state updates
     });
 
@@ -277,7 +268,6 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query (business logic decision)
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
-      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -355,9 +345,6 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: servicesWithoutTimefilter });
-      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({
-        services: servicesWithoutTimefilter,
-      });
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -472,7 +459,6 @@ describe('useInitialQueryExecution', () => {
 
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
-      expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -501,7 +487,6 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
-      expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({

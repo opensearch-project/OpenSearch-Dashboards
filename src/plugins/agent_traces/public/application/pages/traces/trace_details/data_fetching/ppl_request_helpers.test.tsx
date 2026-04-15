@@ -56,6 +56,7 @@ describe('ppl_request_helpers', () => {
           type: 'OpenSearch',
         },
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = buildPPLDataset(datasetWithDataSource);
       expect(result).toEqual({
         id: 'test-dataset-id',
@@ -80,10 +81,13 @@ describe('ppl_request_helpers', () => {
           index: 'test-index',
           body: {
             query: {
-              query: 'source = test-index',
-              language: 'PPL',
-              format: 'jdbc',
-              dataset: buildPPLDataset(dataset),
+              queries: [
+                {
+                  query: 'source = test-index',
+                  language: 'PPL',
+                  dataset: buildPPLDataset(dataset),
+                },
+              ],
             },
           },
         },
@@ -93,7 +97,7 @@ describe('ppl_request_helpers', () => {
     it('integrates dataset correctly', () => {
       const dataset = createMockDataset();
       const result = buildPPLQueryRequest(dataset, 'source = test-index');
-      expect(result.params.body.query.dataset).toEqual(buildPPLDataset(dataset));
+      expect(result.params.body.query.queries[0].dataset).toEqual(buildPPLDataset(dataset));
     });
 
     it('includes aggConfig when provided (external data source)', () => {
@@ -119,8 +123,9 @@ describe('ppl_request_helpers', () => {
           type: 'OpenSearch',
         },
       };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = buildPPLQueryRequest(datasetWithDataSource, 'source = test-index');
-      expect(result.params.body.query.dataset.dataSource).toEqual({
+      expect(result.params.body.query.queries[0].dataset.dataSource).toEqual({
         id: 'external-datasource-id',
         title: 'external',
         type: 'OpenSearch',
@@ -151,9 +156,6 @@ describe('ppl_request_helpers', () => {
 
     it('executes query successfully', async () => {
       await executePPLQuery(mockDataService, mockRequest);
-      expect(mockDataService.query.queryString.setQuery).toHaveBeenCalledWith(
-        mockRequest.params.body.query
-      );
       expect(mockDataService.search.search).toHaveBeenCalledWith(mockRequest, {});
     });
 

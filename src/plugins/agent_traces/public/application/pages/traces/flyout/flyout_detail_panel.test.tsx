@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FlyoutDetailPanel, formatJsonOrString } from './flyout_detail_panel';
 import { TreeNode } from './tree_helpers';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 describe('formatJsonOrString', () => {
   it('returns "(no data)" for empty or dash values', () => {
@@ -41,7 +40,10 @@ describe('FlyoutDetailPanel', () => {
     startTime: '01/01/2025, 12:00:00 AM',
     endTime: '01/01/2025, 12:00:01 AM',
     latency: '150ms',
+    durationNanos: 150000000,
     totalTokens: 200,
+    inputTokens: 100,
+    outputTokens: 100,
     totalCost: '—',
   };
 
@@ -73,9 +75,9 @@ describe('FlyoutDetailPanel', () => {
       />
     );
 
-    expect(screen.getByText('OPERATION')).toBeInTheDocument();
+    expect(screen.getByText(/Operation:/)).toBeInTheDocument();
     expect(screen.getByText('chat')).toBeInTheDocument();
-    expect(screen.getByText('DURATION')).toBeInTheDocument();
+    expect(screen.getByText(/Duration:/)).toBeInTheDocument();
     expect(screen.getByText('150ms')).toBeInTheDocument();
   });
 
@@ -92,7 +94,7 @@ describe('FlyoutDetailPanel', () => {
     expect(dashes.length).toBeGreaterThan(0);
   });
 
-  it('renders status as OK for success', () => {
+  it('renders span ID in a badge', () => {
     render(
       <FlyoutDetailPanel
         selectedNode={mockTreeNode}
@@ -101,21 +103,7 @@ describe('FlyoutDetailPanel', () => {
       />
     );
 
-    expect(screen.getByText('OK')).toBeInTheDocument();
-  });
-
-  it('renders status as ERROR for error trace rows', () => {
-    const errorRow: TraceRow = { ...mockTraceRow, status: 'error' };
-    const errorNode: TreeNode = { ...mockTreeNode, traceRow: errorRow };
-
-    render(
-      <FlyoutDetailPanel
-        selectedNode={errorNode}
-        selectedTraceRow={errorRow}
-        onSelectNode={jest.fn()}
-      />
-    );
-
-    expect(screen.getByText('ERROR')).toBeInTheDocument();
+    expect(screen.getByText(/Span ID:/)).toBeInTheDocument();
+    expect(screen.getByText('span-1-full-id-abcdef')).toBeInTheDocument();
   });
 });

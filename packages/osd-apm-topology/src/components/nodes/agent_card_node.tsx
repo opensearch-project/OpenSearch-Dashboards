@@ -56,13 +56,6 @@ export const AgentCardNode = ({ data }: NodeProps<AgentCardCustomNode>) => {
             label={kindConfig.label}
             color={kindConfig.color}
             textColor={kindConfig.textColor}
-            icon={
-              <img
-                src={kindConfig.icon}
-                alt=""
-                className="osd:w-3 osd:h-3 celAgentCard__kind-icon"
-              />
-            }
           />
           {data.status && (
             <StatusIndicator status={data.status} label={data.statusLabel} icon={data.statusIcon} />

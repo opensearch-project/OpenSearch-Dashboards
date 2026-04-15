@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 
 import prometheusLogo from '../../assets/prometheus_logo.svg';

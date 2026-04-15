@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { act } from 'react';
 
 import { registerTestBed, TestBed } from '../shared_imports';

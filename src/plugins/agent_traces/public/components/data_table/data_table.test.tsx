@@ -4,9 +4,9 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { IntlProvider } from 'react-intl';
-import { act, render, waitFor, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataTable } from './data_table';
 import { DocViewsRegistry, OpenSearchSearchHit } from '../../types/doc_views_types';
@@ -14,6 +14,20 @@ import { indexPatternMock } from '../../__mock__/index_pattern_mock';
 import { mockColumns, mockRows } from './data_table.mocks';
 import { DocViewTable } from '../doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from '../doc_viewer/json_code_block/json_code_block';
+
+// Mock IntersectionObserver for lazy loading tests
+let intersectionCallback: IntersectionObserverCallback;
+const mockObserve = jest.fn();
+const mockDisconnect = jest.fn();
+
+beforeEach(() => {
+  mockObserve.mockClear();
+  mockDisconnect.mockClear();
+  (window as any).IntersectionObserver = jest.fn((cb: IntersectionObserverCallback) => {
+    intersectionCallback = cb;
+    return { observe: mockObserve, disconnect: mockDisconnect, unobserve: jest.fn() };
+  });
+});
 
 describe('DefaultDiscoverTable', () => {
   const docViewsRegistry = new DocViewsRegistry();
@@ -38,6 +52,7 @@ describe('DefaultDiscoverTable', () => {
   ) => {
     const rows = rowsOverride ?? mockRows;
     return (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <DataTable
           columns={mockColumns}
@@ -55,87 +70,81 @@ describe('DefaultDiscoverTable', () => {
     );
   };
 
-  let intersectionObserverCallback: (entries: IntersectionObserverEntry[]) => void = (_) => {};
-  const mockIntersectionObserver = jest.fn();
-
-  beforeEach(() => {
-    mockIntersectionObserver.mockImplementation((...args) => {
-      intersectionObserverCallback = args[0];
-      return {
-        observe: () => null,
-        unobserve: () => null,
-        disconnect: () => null,
-      };
-    });
-    window.IntersectionObserver = mockIntersectionObserver;
-  });
-
-  it('should render the correct number of rows initially', () => {
+  it('should render only the first batch of rows initially (lazy loading)', () => {
     const { container } = render(getDataTable());
 
     const tableRows = container.querySelectorAll('tbody tr');
-    expect(tableRows.length).toBe(10);
+    // mockRows has 138 entries, lazy load batch size is 50
+    expect(tableRows.length).toBe(50);
+    // Should show progress bar since there are more rows to load
+    expect(screen.getByTestId('discoverRenderedRowsProgress')).toBeInTheDocument();
   });
 
-  it('should load more rows when scrolling to the bottom', async () => {
+  it('should render more rows when IntersectionObserver fires', () => {
     const { container } = render(getDataTable());
 
-    const sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
-    const mockScrollEntry = { isIntersecting: true, target: sentinel };
+    expect(container.querySelectorAll('tbody tr').length).toBe(50);
+
+    // Simulate the sentinel becoming visible
     act(() => {
-      intersectionObserverCallback([mockScrollEntry] as IntersectionObserverEntry[]);
-    });
-
-    await waitFor(() => {
-      const tableRows = container.querySelectorAll('tbody tr');
-      expect(tableRows.length).toBe(20);
-    });
-  });
-
-  it('should display the sample size callout when all rows are rendered', async () => {
-    const { container } = render(getDataTable());
-
-    let sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
-
-    // Simulate scrolling to the bottom until all rows are rendered
-    while (sentinel) {
-      const mockScrollEntry = { isIntersecting: true, target: sentinel };
-      act(() => {
-        intersectionObserverCallback([mockScrollEntry] as IntersectionObserverEntry[]);
-      });
-      sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
-    }
-
-    await waitFor(() => {
-      const callout = screen.getByTestId('discoverDocTableFooter');
-      expect(callout).toBeInTheDocument();
-    });
-  });
-
-  it('Should restart rendering when new data is available', async () => {
-    const truncHits = mockRows.slice(0, 35);
-    const { container, rerender } = render(getDataTable(truncHits));
-
-    let sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
-
-    // Keep scrolling until all the current rows are exhausted
-    while (sentinel) {
-      const mockScrollEntry = { isIntersecting: true, target: sentinel };
-      act(() => {
-        intersectionObserverCallback([mockScrollEntry] as IntersectionObserverEntry[]);
-      });
-      sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
-    }
-
-    // Make the other rows available
-    rerender(getDataTable(mockRows));
-
-    await waitFor(() => {
-      const progressSentinel = container.querySelector(
-        'div[data-test-subj="discoverRenderedRowsProgress"]'
+      intersectionCallback(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
       );
-      expect(progressSentinel).toBeInTheDocument();
     });
+
+    expect(container.querySelectorAll('tbody tr').length).toBe(100);
+
+    // Fire again to load the remaining rows
+    act(() => {
+      intersectionCallback(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+
+    expect(container.querySelectorAll('tbody tr').length).toBe(mockRows.length);
+    // Progress bar should be gone since all rows are rendered
+    expect(screen.queryByTestId('discoverRenderedRowsProgress')).not.toBeInTheDocument();
+  });
+
+  it('should display the sample size callout when rows equal sample size', () => {
+    render(getDataTable());
+
+    const callout = screen.getByTestId('discoverDocTableFooter');
+    expect(callout).toBeInTheDocument();
+  });
+
+  it('should not display the sample size callout when rows are fewer than sample size', () => {
+    const fewRows = mockRows.slice(0, 5);
+    render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
+      <IntlProvider locale="en">
+        <DataTable
+          columns={mockColumns}
+          rows={fewRows}
+          dataset={indexPatternMock}
+          sampleSize={500}
+          isShortDots={false}
+          docViewsRegistry={docViewsRegistry}
+          showPagination={false}
+          onRemoveColumn={jest.fn()}
+          onAddColumn={jest.fn()}
+          onFilter={jest.fn()}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId('discoverDocTableFooter')).not.toBeInTheDocument();
+  });
+
+  it('should handle empty rows gracefully', () => {
+    const { container } = render(getDataTable([]));
+
+    const table = container.querySelector('table');
+    expect(table).toBeInTheDocument();
+    const tableRows = container.querySelectorAll('tbody tr');
+    expect(tableRows.length).toBe(0);
   });
 
   it('should pagination', async () => {
@@ -158,56 +167,7 @@ describe('DefaultDiscoverTable', () => {
     expect(screen.queryByTestId('osdPaginationLimitsHitMessage')).not.toBeInTheDocument();
   });
 
-  describe('Column Width Algorithm', () => {
-    // Mock DOM methods needed for width calculation
-    beforeEach(() => {
-      // Mock getBoundingClientRect for container width
-      Element.prototype.getBoundingClientRect = jest.fn(() => ({
-        width: 1000,
-        height: 600,
-        top: 0,
-        left: 0,
-        bottom: 600,
-        right: 1000,
-        x: 0,
-        y: 0,
-        toJSON: jest.fn(),
-      }));
-
-      // Mock offsetWidth for measuring element
-      Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-        configurable: true,
-        value() {
-          // Simulate different text widths based on content length
-          const text = this.textContent || '';
-          return Math.max(text.length * 8, 50); // 8px per character, minimum 50px
-        },
-      });
-
-      // Mock getComputedStyle
-      window.getComputedStyle = jest.fn(() => ({
-        fontSize: '12px',
-        fontFamily: 'Arial',
-        fontWeight: 'normal',
-        padding: '4px',
-      })) as any;
-
-      // Mock requestAnimationFrame to prevent infinite loops
-      let rafId = 0;
-      global.requestAnimationFrame = jest.fn((cb) => {
-        // Don't immediately call the callback - just return an ID
-        // Tests will manually trigger callbacks when needed
-        return ++rafId;
-      });
-
-      // Mock cancelAnimationFrame
-      global.cancelAnimationFrame = jest.fn();
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
+  describe('Table Structure', () => {
     it('should render table with proper structure', () => {
       const { container } = render(getDataTable());
 
@@ -216,36 +176,11 @@ describe('DefaultDiscoverTable', () => {
       expect(table).toHaveClass('agentTraces-table');
     });
 
-    it('should render header cells for column width calculation', () => {
+    it('should render header cells', () => {
       const { container } = render(getDataTable());
 
       const headerCells = container.querySelectorAll('thead th:not(:first-child)');
       expect(headerCells.length).toBeGreaterThan(0);
-    });
-
-    it('should handle empty table gracefully', () => {
-      const { container } = render(getDataTable([]));
-
-      // Should not crash with empty data
-      const table = container.querySelector('table');
-      expect(table).toBeInTheDocument();
-    });
-
-    it('should not cause infinite loops with requestAnimationFrame', () => {
-      // This test ensures our mocking doesn't cause stack overflow
-      expect(() => {
-        render(getDataTable());
-      }).not.toThrow();
-
-      // Verify requestAnimationFrame was called (column width calculation)
-      expect(global.requestAnimationFrame).toHaveBeenCalled();
-    });
-
-    it('should have measuring element CSS class available', () => {
-      // Test that our CSS class exists (would be used by the algorithm)
-      const testDiv = document.createElement('div');
-      testDiv.className = 'column-width-measuring-element';
-      expect(testDiv.className).toBe('column-width-measuring-element');
     });
   });
 

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
@@ -67,14 +65,10 @@ jest.mock('../components/visualizations/utils/use_visualization_types', () => ({
   }),
 }));
 
-// Mock the toExpression function
-jest.mock('../components/visualizations/utils/to_expression', () => ({
-  toExpression: jest.fn().mockReturnValue('test expression'),
-}));
-
 // Mock the visualization container utils
 jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
+  isValidMapping: jest.fn().mockReturnValue(true),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
   }),
@@ -602,11 +596,9 @@ describe('ExploreEmbeddable', () => {
 
   test('should be able to adapt deprecated styles', async () => {
     jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce({
-      id: 'test-rule',
-      name: 'Test Rule',
-      matches: jest.fn(),
-      chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
-      toSpec: jest.fn(),
+      priority: 100,
+      mappings: [],
+      render: jest.fn(),
     });
 
     const adaptLegacyDataSpy = jest.spyOn(

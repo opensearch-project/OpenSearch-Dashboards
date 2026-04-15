@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { Switch, Router, Route, Redirect } from 'react-router-dom';
 import { History } from 'history';
 import { getServices } from '../../../opensearch_dashboards_services';

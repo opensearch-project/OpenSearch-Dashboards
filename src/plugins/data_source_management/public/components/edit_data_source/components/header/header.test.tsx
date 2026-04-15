@@ -39,6 +39,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -94,6 +95,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -125,6 +127,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -184,6 +187,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -220,6 +224,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,

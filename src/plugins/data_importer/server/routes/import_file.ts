@@ -119,7 +119,9 @@ export function importFileRoute(
 
         // Add __lookup field to mapping if using import identifier
         if (request.query.importIdentifier) {
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           mappingObj.properties = mappingObj.properties || {};
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           mappingObj.properties[LOOKUP_FIELD] = {
             type: 'keyword',
           };
@@ -171,6 +173,7 @@ export function importFileRoute(
             });
           } catch (aliasError) {
             // Log error but don't fail the import
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             context.dataImporter?.logger.error(
               `Failed to create alias ${request.query.importIdentifier}: ${aliasError}`
             );

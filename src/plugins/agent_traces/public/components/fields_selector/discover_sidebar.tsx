@@ -6,7 +6,7 @@
 import { EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { DataView, DataViewField, UI_SETTINGS } from '../../../../data/public';
 import { getServices } from '../../application/legacy/discover/opensearch_dashboards_services';
@@ -20,7 +20,7 @@ import { DiscoverFieldHeader } from './discover_field_header';
 import { FieldList } from './field_list';
 import { FacetList } from './facet_list';
 import { useFlavorId } from '../../helpers/use_flavor_id';
-import { AgentTracesFlavor } from '../../../common';
+import { AgentTracesFlavor, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
 
 export interface DiscoverSidebarProps {
   /**
@@ -98,14 +98,20 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
 
   const { facetedFields, selectedFields, queryFields, discoveredFields } = useMemo(() => {
     const showFacetedFields = flavorId === AgentTracesFlavor.Traces;
+    const services = getServices();
+    const hideTimeCol = services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
+    // Include the time field in columns so it appears in "Selected fields"
+    const timeField = selectedDataSet?.timeFieldName;
+    const effectiveColumns =
+      !hideTimeCol && timeField && !columns.includes(timeField) ? [timeField, ...columns] : columns;
     return groupFields(
       fields as DataViewField[],
-      columns,
+      effectiveColumns,
       fieldCounts,
       fieldFilterState,
       showFacetedFields
     );
-  }, [flavorId, fields, columns, fieldCounts, fieldFilterState]);
+  }, [flavorId, fields, columns, fieldCounts, fieldFilterState, selectedDataSet]);
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];

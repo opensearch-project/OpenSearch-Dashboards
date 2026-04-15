@@ -4,7 +4,7 @@
  */
 
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { TraceRow } from '../application/pages/traces/hooks/use_agent_traces';
+import { TraceRow } from '../application/pages/traces/hooks/tree_utils';
 
 export type SpanCategory = 'AGENT' | 'LLM' | 'TOOL' | 'EMBEDDINGS' | 'RETRIEVAL' | 'OTHER';
 
@@ -18,6 +18,7 @@ export interface CategorizedSpan extends TraceRow {
 interface CategoryMeta {
   color: string;
   bgColor: string;
+  textColor: string;
   label: string;
 }
 
@@ -30,10 +31,11 @@ function getCategoryColor(category: SpanCategory): string {
     case 'EMBEDDINGS':
       return euiThemeVars.euiColorVis1;
     case 'TOOL':
-      return euiThemeVars.euiColorVis0;
+      return euiThemeVars.euiColorVis8;
     case 'RETRIEVAL':
-      return euiThemeVars.euiColorSecondary;
+      return euiThemeVars.euiColorVis4;
     case 'OTHER':
+    default:
       return euiThemeVars.euiColorMediumShade;
   }
 }
@@ -49,7 +51,12 @@ const CATEGORY_LABEL: Record<SpanCategory, string> = {
 
 export function getCategoryMeta(category: SpanCategory): CategoryMeta {
   const color = getCategoryColor(category);
-  return { color, bgColor: color, label: CATEGORY_LABEL[category] };
+  return {
+    color,
+    bgColor: hexToRgba(color, 0.12),
+    textColor: color,
+    label: CATEGORY_LABEL[category],
+  };
 }
 
 export function hexToRgba(hex: string, alpha: number): string {
@@ -73,6 +80,20 @@ const OPERATION_CATEGORY: Record<string, SpanCategory> = {
   invoke_agent: 'AGENT',
   create_agent: 'AGENT',
 };
+
+/** Reverse mapping: category → list of operation names that belong to it. */
+const CATEGORY_OPERATIONS: Record<SpanCategory, string[]> = (() => {
+  const map: Record<string, string[]> = {};
+  for (const [op, cat] of Object.entries(OPERATION_CATEGORY)) {
+    (map[cat] ??= []).push(op);
+  }
+  return map as Record<SpanCategory, string[]>;
+})();
+
+/** Get all operation names that map to a given category. */
+export function getOperationNamesForCategory(category: SpanCategory): string[] {
+  return CATEGORY_OPERATIONS[category] || [];
+}
 
 /**
  * Determine span category from the gen_ai.operation.name attribute.

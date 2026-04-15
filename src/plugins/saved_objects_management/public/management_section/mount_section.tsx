@@ -99,6 +99,7 @@ export const mountManagementSection = async ({
 
   const capabilities = coreStart.application.capabilities;
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.opensearchDashboards?.objects ?? false;
 
@@ -113,6 +114,7 @@ export const mountManagementSection = async ({
     <Router history={history}>
       <Switch>
         <Route path={'/:service/:id'} exact={true}>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <RedirectToHomeIfUnauthorized>
             <Suspense fallback={<EuiLoadingSpinner />}>
               <SavedObjectsEditionPage
@@ -128,6 +130,7 @@ export const mountManagementSection = async ({
           </RedirectToHomeIfUnauthorized>
         </Route>
         <Route path={'/'} exact={false}>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <RedirectToHomeIfUnauthorized>
             <Suspense fallback={<EuiLoadingSpinner />}>
               <SavedObjectsTablePage

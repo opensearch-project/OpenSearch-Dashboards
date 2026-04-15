@@ -4,12 +4,13 @@
  */
 
 import classNames from 'classnames';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { FieldMapping, DocViewFilterFn } from '../../../../types/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
+import { DocViewTableRowBtnCopy } from './table_row_btn_copy';
 import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from './field_name/field_name';
@@ -45,8 +46,12 @@ export function DocViewTableRow({
   value,
   valueRaw,
 }: Props) {
+  const handleCopy = () => {
+    const textToCopy = typeof valueRaw === 'string' ? valueRaw : JSON.stringify(valueRaw);
+    navigator.clipboard.writeText(textToCopy);
+  };
+
   const valueClassName = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     agentTracesDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });
@@ -63,6 +68,7 @@ export function DocViewTableRow({
             disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter(fieldMapping, valueRaw, '-')}
           />
+          <DocViewTableRowBtnCopy onClick={handleCopy} />
           {typeof onToggleColumn === 'function' && (
             <DocViewTableRowBtnToggleColumn active={isColumnActive} onClick={onToggleColumn} />
           )}

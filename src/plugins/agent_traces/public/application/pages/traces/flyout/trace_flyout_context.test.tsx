@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { TraceFlyoutProvider, useTraceFlyout } from './trace_flyout_context';
-import { TraceRow } from '../hooks/use_agent_traces';
+import { TraceRow } from '../hooks/tree_utils';
 
 jest.mock('./trace_details_flyout', () => ({
   TraceDetailsFlyout: ({ trace, onClose }: any) => (
@@ -18,6 +17,7 @@ jest.mock('./trace_details_flyout', () => ({
   ),
 }));
 
+// @ts-expect-error TS2739 TODO(ts-error): fixme
 const mockTrace: TraceRow = {
   id: 'trace-1',
   spanId: 'span-1',

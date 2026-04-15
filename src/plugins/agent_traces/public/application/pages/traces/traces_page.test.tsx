@@ -5,7 +5,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -54,7 +54,7 @@ jest.mock('../../../components/container/bottom_container', () => ({
         <div data-test-subj="tab-agent_traces_traces_tab">
           <div data-test-subj="agentTraces-data-table">Data Table</div>
         </div>
-        <div data-test-subj="tab-agent_traces_visualization_tab">
+        <div data-test-subj="tab-visualization">
           <div data-test-subj="visualization-container">Visualization Container</div>
         </div>
       </div>
@@ -154,6 +154,7 @@ describe('TracesPage', () => {
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -181,6 +182,7 @@ describe('TracesPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage />
       </TestHarness>
@@ -195,6 +197,7 @@ describe('TracesPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
@@ -207,6 +210,7 @@ describe('TracesPage', () => {
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <TracesPage />
       </TestHarness>

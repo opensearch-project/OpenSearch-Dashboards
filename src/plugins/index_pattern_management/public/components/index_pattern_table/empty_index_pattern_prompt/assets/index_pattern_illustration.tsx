@@ -29,7 +29,6 @@
  */
 
 import './index_pattern_illustration.scss';
-import React from 'react';
 
 const IndexPatternIllustration = () => (
   <svg

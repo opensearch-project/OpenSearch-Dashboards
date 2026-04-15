@@ -13,7 +13,6 @@ import {
 } from './bar_gauge_utils';
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { getColors } from '../theme/default_colors';
 
 describe('bar_gauge_utils', () => {
   describe('getBarOrientation', () => {

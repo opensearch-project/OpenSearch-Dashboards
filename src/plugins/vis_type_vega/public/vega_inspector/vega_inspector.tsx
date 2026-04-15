@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { VegaAdapter } from './vega_adapter';

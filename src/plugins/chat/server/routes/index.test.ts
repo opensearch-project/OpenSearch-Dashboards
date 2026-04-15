@@ -6,9 +6,10 @@
 import supertest from 'supertest';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
-import { defineRoutes } from './index';
+import { defineRoutes, generateOboToken, getValidOboToken } from './index';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
+import { RequestHandlerContext, Logger } from '../../../../core/server';
 
 // Mock native fetch
 global.fetch = jest.fn();
@@ -22,13 +23,22 @@ describe('Chat Proxy Routes', () => {
   const testSetup = async (
     agUiUrl?: string,
     getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
-    mlCommonsAgentId?: string
+    mlCommonsAgentId?: string,
+    forwardCredentials?: boolean
   ) => {
     const { server: testServer, httpSetup } = await setupServer();
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
-    defineRoutes(router, mockLogger, agUiUrl, getCapabilitiesResolver, mlCommonsAgentId);
+    defineRoutes(
+      router,
+      mockLogger,
+      agUiUrl,
+      getCapabilitiesResolver,
+      mlCommonsAgentId,
+      undefined,
+      forwardCredentials
+    );
 
     // Mock dynamicConfigService required by server.start()
     const dynamicConfigService = {
@@ -432,6 +442,99 @@ describe('Chat Proxy Routes', () => {
       });
     });
 
+    describe('OBO token credential forwarding', () => {
+      it('should not forward any auth header when forwardCredentials is false (default)', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .set('Authorization', 'Bearer raw-user-token')
+          .send(validRequest)
+          .expect(200);
+
+        const fetchHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(fetchHeaders).not.toHaveProperty('Authorization');
+      });
+
+      it('should gracefully degrade when forwardCredentials is true but OBO is unavailable', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          true // forwardCredentials
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // The OBO call will fail in the test env (no real OpenSearch client),
+        // so we verify that the error is logged and the request still proceeds
+        const warnCalls = mockLogger.warn.mock.calls.map((c: any) => c[0]);
+        const errorCalls = mockLogger.error.mock.calls.map((c: any) => c[0]);
+        const oboLogFound =
+          warnCalls.some((msg: string) => msg.includes('OBO token')) ||
+          errorCalls.some((msg: string) => msg.includes('OBO token'));
+        expect(oboLogFound).toBe(true);
+
+        // Request still went through to AG-UI without auth header
+        const fetchHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Record<
+          string,
+          string
+        >;
+        expect(fetchHeaders).not.toHaveProperty('Authorization');
+      });
+
+      it('should not attempt OBO token generation when forwardCredentials is false', async () => {
+        const mockReader = {
+          read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+        };
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: { getReader: () => mockReader },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined,
+          undefined,
+          false // forwardCredentials explicitly false
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // No OBO-related log messages should appear
+        expect(mockLogger.warn).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
+        expect(mockLogger.error).not.toHaveBeenCalledWith(expect.stringContaining('OBO token'));
+      });
+    });
+
     describe('System Prompt Injection', () => {
       const mockSuccessfulAgUiResponse = () => {
         mockFetch.mockResolvedValue({
@@ -739,5 +842,221 @@ describe('Chat Proxy Routes', () => {
         dataSourceId: 'ds-123',
       });
     });
+  });
+});
+
+describe('generateOboToken', () => {
+  let mockLogger: Logger;
+  let mockContext: RequestHandlerContext;
+  let mockTransportRequest: jest.Mock;
+
+  beforeEach(() => {
+    mockLogger = ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as unknown) as Logger;
+
+    mockTransportRequest = jest.fn();
+
+    mockContext = ({
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              transport: {
+                request: mockTransportRequest,
+              },
+            },
+          },
+        },
+      },
+    } as unknown) as RequestHandlerContext;
+  });
+
+  it('should return OBO token and duration on successful generation', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'obo-jwt-token-123', durationSeconds: 300 },
+    });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toEqual({ token: 'obo-jwt-token-123', durationSeconds: 300 });
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generated for credential forwarding to AG-UI endpoint')
+    );
+    expect(mockTransportRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_plugins/_security/api/obo/token',
+      body: { description: 'OBO token for AG-UI credential forwarding' },
+    });
+  });
+
+  it('should default durationSeconds to 300 when not present in response', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'obo-jwt-token-123' },
+    });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toEqual({ token: 'obo-jwt-token-123', durationSeconds: 300 });
+  });
+
+  it('should return undefined and warn when response has no authenticationToken', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { unexpected: 'response' },
+    });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'OBO token response did not contain authenticationToken'
+    );
+  });
+
+  it('should return undefined and warn on 404 (security plugin not installed)', async () => {
+    mockTransportRequest.mockRejectedValue({ statusCode: 404, message: 'Not Found' });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generation unavailable (HTTP 404)')
+    );
+  });
+
+  it('should return undefined and warn on 400 (OBO not configured)', async () => {
+    mockTransportRequest.mockRejectedValue({ statusCode: 400, message: 'Bad Request' });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generation unavailable (HTTP 400)')
+    );
+  });
+
+  it('should return undefined and log error on unexpected errors', async () => {
+    mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toBeUndefined();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to generate OBO token: Connection refused')
+    );
+  });
+
+  it('should handle error with meta.statusCode for 404', async () => {
+    mockTransportRequest.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    const result = await generateOboToken(mockContext, mockLogger, 'http://agui:3000');
+
+    expect(result).toBeUndefined();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('OBO token generation unavailable (HTTP 404)')
+    );
+  });
+});
+
+describe('getValidOboToken', () => {
+  let mockLogger: Logger;
+  let mockContext: RequestHandlerContext;
+  let mockTransportRequest: jest.Mock;
+
+  beforeEach(() => {
+    mockLogger = ({
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      debug: jest.fn(),
+    } as unknown) as Logger;
+
+    mockTransportRequest = jest.fn();
+
+    mockContext = ({
+      core: {
+        opensearch: {
+          client: {
+            asCurrentUser: {
+              transport: {
+                request: mockTransportRequest,
+              },
+            },
+          },
+        },
+      },
+    } as unknown) as RequestHandlerContext;
+  });
+
+  it('should mint a new token when cache is empty', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'fresh-token', durationSeconds: 300 },
+    });
+
+    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-a');
+
+    expect(token).toBe('fresh-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return cached token on subsequent calls within TTL', async () => {
+    mockTransportRequest.mockResolvedValue({
+      body: { authenticationToken: 'cached-token', durationSeconds: 300 },
+    });
+
+    // First call — mints
+    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
+    // Second call — should use cache
+    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-b');
+
+    expect(token1).toBe('cached-token');
+    expect(token2).toBe('cached-token');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(1); // Only one mint call
+    expect(mockLogger.debug).toHaveBeenCalledWith('Using cached OBO token');
+  });
+
+  it('should return undefined when token generation fails', async () => {
+    mockTransportRequest.mockRejectedValue(new Error('Connection refused'));
+
+    const token = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-c');
+
+    expect(token).toBeUndefined();
+  });
+
+  it('should use separate cache entries per user', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-user-d', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-user-e', durationSeconds: 300 },
+      });
+
+    const tokenD = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-d');
+    const tokenE = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', 'user-e');
+
+    expect(tokenD).toBe('token-user-d');
+    expect(tokenE).toBe('token-user-e');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('should skip caching when username is undefined to prevent cross-user token sharing', async () => {
+    mockTransportRequest
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-call-1', durationSeconds: 300 },
+      })
+      .mockResolvedValueOnce({
+        body: { authenticationToken: 'token-call-2', durationSeconds: 300 },
+      });
+
+    // Both calls without username should mint fresh tokens (no caching)
+    const token1 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
+    const token2 = await getValidOboToken(mockContext, mockLogger, 'http://agui:3000', undefined);
+
+    expect(token1).toBe('token-call-1');
+    expect(token2).toBe('token-call-2');
+    expect(mockTransportRequest).toHaveBeenCalledTimes(2); // No caching — minted twice
   });
 });

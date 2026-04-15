@@ -13,6 +13,9 @@ import {
   setSavedSearch,
   setQueryState,
   setActiveTab,
+  setIsInitialized,
+  setSort,
+  setColumns,
   clearResults,
   clearQueryStatusMap,
   clearLastExecutedData,
@@ -51,7 +54,8 @@ export const useInitPage = () => {
           const query = {
             ...queryFromSavedSearch,
             ...queryFromUrl,
-            query: queryFromUrl.query || queryFromSavedSearch.query,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
+            query: queryFromUrl.query ?? queryFromSavedSearch.query,
           };
           if (query) {
             dispatch(setQueryState(query));
@@ -63,13 +67,6 @@ export const useInitPage = () => {
         // TODO: remove this once legacy state is not consumed any more
         dispatch(setSavedSearch(savedAgentTraces.id));
 
-        // Init ui state
-        const uiState = savedAgentTraces.uiState;
-        if (uiState) {
-          const { activeTab } = JSON.parse(uiState);
-          dispatch(setActiveTab(activeTab));
-        }
-
         // Add to recently accessed
         chrome.recentlyAccessed.add(
           `/app/agentTraces/${savedAgentTraces.type ?? AgentTracesFlavor.Traces}#/view/${
@@ -80,12 +77,54 @@ export const useInitPage = () => {
           { type: 'agentTraces' }
         );
 
+        // Restore sort and columns from saved search so the executeQueries
+        // cache key matches what useTabResults will compute once the table
+        // component mounts and sets its own defaults.
+        if (savedAgentTraces.sort && savedAgentTraces.sort.length > 0) {
+          dispatch(setSort(savedAgentTraces.sort));
+        }
+        if (savedAgentTraces.columns && savedAgentTraces.columns.length > 0) {
+          dispatch(setColumns(savedAgentTraces.columns));
+        }
+
         dispatch(clearLastExecutedData());
         dispatch(setEditorMode(EditorMode.Query));
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
         dispatch(setUsingRegexPatterns(false));
-        dispatch(executeQueries({ services }));
+
+        // Restore active tab AFTER clearQueryStatusMap (which the
+        // dataset_change_middleware also dispatches when setQueryState fires
+        // above, clearing activeTabId to '').  Dispatching here ensures
+        // BottomRightContainer sees a valid activeTabId and renders the tabs
+        // component instead of the "Start searching" placeholder.
+        const uiState = savedAgentTraces.uiState;
+        if (uiState) {
+          try {
+            const { activeTab } = JSON.parse(uiState);
+            dispatch(setActiveTab(activeTab));
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to parse saved uiState:', e);
+          }
+        }
+
+        // Mark as initialized so the table moves past the loading gate.
+        dispatch(setIsInitialized(true));
+
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
+        dispatch(executeQueries({ services })).then(() => {
+          if (savedAgentTraces.sort && savedAgentTraces.sort.length > 0) {
+            dispatch(setSort(savedAgentTraces.sort));
+          }
+          if (savedAgentTraces.columns && savedAgentTraces.columns.length > 0) {
+            dispatch(setColumns(savedAgentTraces.columns));
+          }
+        });
+      } else {
+        // Reset breadcrumbs and doc title for new/unsaved search
+        chrome.docTitle.change('Agent Traces');
+        chrome.setBreadcrumbs([{ text: 'Agent Traces' }]);
       }
     }
     if (error) {

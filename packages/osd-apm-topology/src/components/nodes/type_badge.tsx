@@ -15,12 +15,15 @@ export interface TypeBadgeProps {
 
 /**
  * Colored pill badge with an optional icon and label.
- * Used to indicate node type (e.g., "Service", "Agent", "LLM", "Tool").
+ * Uses a pastel background derived from the color with the text in the full color.
  */
 export const TypeBadge: React.FC<TypeBadgeProps> = ({ label, color, icon, textColor }) => (
   <span
     className="osd:inline-flex osd:items-center osd:gap-1 osd:px-2 osd:py-0.5 osd:rounded-full osd:text-xs osd:font-semibold osd:leading-none"
-    style={{ backgroundColor: color, color: textColor ?? '#FFFFFF' }}
+    style={{
+      backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+      color: textColor ?? color,
+    }}
   >
     {icon && <span className="osd:flex osd:items-center osd:w-3 osd:h-3">{icon}</span>}
     {label}

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { JsonCodeBlock } from './json_code_block';
 import { IndexPattern } from '../../../../../../../../data/public';

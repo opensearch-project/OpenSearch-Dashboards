@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC, useRef, useLayoutEffect, useState } from 'react';
+import { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { MountPoint, UnmountCallback } from '../../../types';
 

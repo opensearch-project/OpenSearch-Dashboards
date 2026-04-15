@@ -4,7 +4,6 @@
  */
 
 import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
 
 interface SaveOrCancelProps {
   onSave: () => void;

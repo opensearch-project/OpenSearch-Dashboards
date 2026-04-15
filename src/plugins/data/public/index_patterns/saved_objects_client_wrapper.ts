@@ -60,6 +60,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
   }
 
   async bulkGet<T = unknown>(objects: Array<{ id: string; type: string }>) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const response = await this.savedObjectClient.bulkGet<T>(objects);
     return {
       savedObjects: response.savedObjects.map<SavedObject<T>>(simpleSavedObjectToSavedObject),

@@ -4,7 +4,7 @@
  */
 
 import './doc_viewer.scss';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { DocViewerTab } from './doc_viewer_tab/doc_viewer_tab';
 import { DocView, DocViewRenderProps, DocViewsRegistry } from '../../types/doc_views_types';

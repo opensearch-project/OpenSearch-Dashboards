@@ -9,7 +9,6 @@ on:
       - 'docs/**'
       - '.lycheeignore'
       - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
       test_branch:

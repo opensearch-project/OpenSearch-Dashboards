@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _, { get, isUndefined, assign, includes } from 'lodash';

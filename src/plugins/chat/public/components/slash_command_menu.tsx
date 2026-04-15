@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SlashCommand } from '../services/slash_commands';
 import './slash_command_menu.scss';
 

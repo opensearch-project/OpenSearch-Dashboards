@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
 import { I18nProvider } from '@osd/i18n/react';

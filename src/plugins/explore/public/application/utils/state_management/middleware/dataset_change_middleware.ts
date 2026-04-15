@@ -12,7 +12,6 @@ import { ExploreServices } from '../../../../types';
 import {
   clearResults,
   setPromptModeIsAvailable,
-  setActiveTab,
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
   setPatternsField,
@@ -22,7 +21,6 @@ import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/q
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
-import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
 
 /**
@@ -53,7 +51,6 @@ export const createDatasetChangeMiddleware = (
 
       currentDataset = dataset;
 
-      store.dispatch(setActiveTab(''));
       store.dispatch(clearResults());
       store.dispatch(clearQueryStatusMap());
       store.dispatch(clearLastExecutedData());

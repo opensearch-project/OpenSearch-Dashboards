@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { keys, EuiText } from '@elastic/eui';
 
