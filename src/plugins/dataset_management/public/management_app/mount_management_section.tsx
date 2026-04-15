@@ -2,8 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
-import ReactDOM from 'react-dom';
+
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
@@ -15,7 +15,6 @@ import { EuiPageContent } from '@elastic/eui';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
-  DatasetTableWithRouter,
   EditDatasetContainer,
   CreateEditFieldContainer,
   CreateDatasetWizardWithRouter,
@@ -106,7 +105,8 @@ export async function mountManagementSection(
     </Router>
   );
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         {params.wrapInPage ? (
@@ -122,12 +122,11 @@ export async function mountManagementSection(
           content
         )}
       </I18nProvider>
-    </OpenSearchDashboardsContextProvider>,
-    params.element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

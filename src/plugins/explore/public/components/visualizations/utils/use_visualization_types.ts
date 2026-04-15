@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
+
 import { LineChartStyle, LineChartStyleOptions } from '../line/line_vis_config';
 import { PieChartStyle, PieChartStyleOptions } from '../pie/pie_vis_config';
 import { MetricChartStyle, MetricChartStyleOptions } from '../metric/metric_vis_config';
 import { HeatmapChartStyle, HeatmapChartStyleOptions } from '../heatmap/heatmap_vis_config';
 import { ScatterChartStyle, ScatterChartStyleOptions } from '../scatter/scatter_vis_config';
 import { AreaChartStyle, AreaChartStyleOptions } from '../area/area_vis_config';
-import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
+import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -23,6 +25,7 @@ import {
 } from '../state_timeline/state_timeline_config';
 import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from '../bar_gauge/bar_gauge_vis_config';
 import { HistogramChartStyle, HistogramChartStyleOptions } from '../histogram/histogram_vis_config';
+import { TimeRange } from '../../../../../data/public';
 
 export type ChartType =
   | 'line'
@@ -75,23 +78,36 @@ export interface StyleControlsProps<T extends ChartStyles> {
   numericalColumns?: VisColumn[];
   categoricalColumns?: VisColumn[];
   dateColumns?: VisColumn[];
-  availableChartTypes?: ChartTypeMapping[];
-  selectedChartType?: string;
   axisColumnMappings: AxisColumnMappings;
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
-type ChartTypePossibleMapping = Partial<Record<AxisRole, { type: VisFieldType; index: number }>>;
+interface VisRenderProps<T extends ChartType> {
+  transformedData: Array<Record<string, any>>;
+  styleOptions: ChartStylesMapping[T];
+  axisColumnMappings: AxisColumnMappings;
+  timeRange?: { from: string; to: string };
+  onSelectTimeRange?: (timeRange: TimeRange) => void;
+}
+
+export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType }>>;
+
+export interface VisRule<T extends ChartType> {
+  priority: number;
+  mappings: AxisTypeMapping[];
+  render: (props: VisRenderProps<T>) => React.ReactNode;
+}
 
 export interface VisualizationType<T extends ChartType> {
   readonly name: string;
   readonly type: T;
+  readonly icon?: string;
+  readonly getRules: () => Array<VisRule<T>>;
   readonly ui: {
     style: {
       defaults: ChartStylesMapping[T];
       render: (props: StyleControlsProps<ChartStylesMapping[T]>) => JSX.Element;
     };
-    availableMappings: ChartTypePossibleMapping[];
   };
 }
 

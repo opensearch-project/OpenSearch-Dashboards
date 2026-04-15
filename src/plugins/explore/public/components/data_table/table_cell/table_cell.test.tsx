@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
@@ -134,29 +133,42 @@ describe('TableCell', () => {
 
     const cell = screen.getByTestId('docTableField');
     expect(cell).toHaveClass('exploreDocTableCell', 'eui-textNoWrap');
-    expect(cell).not.toHaveClass('eui-textBreakAll', 'eui-textBreakWord');
+    expect(cell).not.toHaveClass('eui-textTruncate');
   });
 
   it('renders as regular field cell when isTimeField is false', () => {
     render(<TableCell {...defaultProps} isTimeField={false} />);
 
     const cell = screen.getByTestId('docTableField');
-    expect(cell).toHaveClass('exploreDocTableCell', 'eui-textBreakAll', 'eui-textBreakWord');
+    expect(cell).toHaveClass('exploreDocTableCell', 'eui-textTruncate');
     expect(cell).not.toHaveClass('eui-textNoWrap');
   });
 
-  it('renders truncate wrapper for non-time fields', () => {
-    render(<TableCell {...defaultProps} isTimeField={false} />);
+  it('omits eui-textTruncate when wrapCellText is true', () => {
+    render(<TableCell {...defaultProps} isTimeField={false} wrapCellText={true} />);
 
-    const truncateWrapper = document.querySelector('.truncate-by-height');
-    expect(truncateWrapper).toBeInTheDocument();
+    const cell = screen.getByTestId('docTableField');
+    expect(cell).toHaveClass('exploreDocTableCell');
+    expect(cell).not.toHaveClass('eui-textTruncate');
+    expect(cell).not.toHaveClass('eui-textNoWrap');
   });
 
-  it('does not render truncate wrapper for time fields', () => {
-    render(<TableCell {...defaultProps} isTimeField={true} />);
+  it('keeps eui-textNoWrap on time field even when wrapCellText is true', () => {
+    render(<TableCell {...defaultProps} isTimeField={true} wrapCellText={true} />);
 
-    const truncateWrapper = document.querySelector('.truncate-by-height');
-    expect(truncateWrapper).not.toBeInTheDocument();
+    const cell = screen.getByTestId('docTableField');
+    expect(cell).toHaveClass('exploreDocTableCell', 'eui-textNoWrap');
+    expect(cell).not.toHaveClass('eui-textTruncate');
+  });
+
+  it('renders content wrapper for all fields', () => {
+    render(<TableCell {...defaultProps} isTimeField={false} />);
+    expect(document.querySelector('.exploreDocTableCell__content')).toBeInTheDocument();
+  });
+
+  it('renders content wrapper for time fields', () => {
+    render(<TableCell {...defaultProps} isTimeField={true} />);
+    expect(document.querySelector('.exploreDocTableCell__content')).toBeInTheDocument();
   });
 
   it('renders filter section with correct test subjects', () => {

@@ -1,4 +1,5 @@
 .tableVis {
+  height: 100%;
   /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
   .tableVis__dataGrid .euiDataGridRowCell__expandButton {
     &::before {

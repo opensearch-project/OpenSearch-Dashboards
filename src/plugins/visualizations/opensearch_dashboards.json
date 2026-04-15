@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "expressions", "uiActions", "embeddable", "inspector", "dashboard"],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "contextProvider"],
   "requiredBundles": [
     "opensearchDashboardsUtils",
     "discover",

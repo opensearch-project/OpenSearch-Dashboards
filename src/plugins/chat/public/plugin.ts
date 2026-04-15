@@ -9,12 +9,28 @@ import { EuiText } from '@elastic/eui';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
-import { ChatService, ChatWindowState } from './services/chat_service';
-import { ChatHeaderButton, ChatLayoutMode } from './components/chat_header_button';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  ChatWindowState,
+} from '../../../core/public';
+import {
+  ChatPluginSetup,
+  ChatPluginStart,
+  AppPluginStartDependencies,
+  ChatLayoutMode,
+} from './types';
+import { ChatService } from './services/chat_service';
+import { ChatHeaderButton } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
+import { isChatEnabled } from '../common/chat_capabilities';
+import { CommandRegistryService } from './services/command_registry_service';
+import { ConfirmationService } from './services/confirmation_service';
+import { AgenticMemoryProvider } from './services/agentic_memory_provider';
+import { ChatMountService } from './services/chat_mount_service';
 
 const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
   const state = test as ChatWindowState | null;
@@ -22,8 +38,9 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
     typeof state === 'object' &&
     !!state &&
     typeof state.isWindowOpen === 'boolean' &&
-    [ChatLayoutMode.SIDECAR, ChatLayoutMode.FULLSCREEN].includes(state.windowMode) &&
-    typeof state.paddingSize === 'number'
+    (ChatLayoutMode.SIDECAR === state.windowMode ||
+      state.windowMode === ChatLayoutMode.FULLSCREEN) &&
+    (typeof state.paddingSize === 'number' || typeof state.paddingSize === 'undefined')
   );
 };
 
@@ -34,17 +51,25 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
   private suggestedActionsService = new SuggestedActionsService();
+  private commandRegistryService = new CommandRegistryService();
+  private confirmationService = new ConfirmationService();
+  private chatMountService?: ChatMountService;
   private paddingSizeSubscription?: Subscription;
-  private unsubscribeWindowStateChange?: () => void;
+  private windowStateChangeSubscription?: Subscription;
+  private coreSetup?: CoreSetup;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  private setupChatbotWindowState({ overlays }: Pick<CoreStart, 'overlays'>) {
+  private setupChatbotWindowState({
+    overlays,
+    chat,
+    chrome,
+  }: Pick<CoreStart, 'overlays' | 'chat' | 'chrome'>) {
     if (!this.chatService) {
       throw new Error('Chat service not initialized.');
     }
     const WINDOW_STATE_KEY = 'chat.windowState';
-    let storeState;
+    let storeState: unknown;
     try {
       const stateString = window.localStorage.getItem(WINDOW_STATE_KEY);
       if (stateString) {
@@ -54,7 +79,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     } catch {}
 
     if (isValidChatWindowState(storeState)) {
-      this.chatService.setWindowState(storeState);
+      chat.setWindowState(storeState);
     }
 
     this.paddingSizeSubscription = overlays.sidecar
@@ -65,36 +90,90 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         distinctUntilChanged()
       )
       .subscribe((paddingSize) => {
-        this.chatService?.setWindowState({ paddingSize });
+        chat?.setWindowState({ paddingSize });
       });
 
-    this.unsubscribeWindowStateChange = this.chatService.onWindowStateChange((newWindowState) => {
+    this.windowStateChangeSubscription = chat.getWindowState$().subscribe((newWindowState) => {
       window.localStorage.setItem(WINDOW_STATE_KEY, JSON.stringify(newWindowState));
     });
   }
 
-  public setup(): ChatPluginSetup {
+  public setup(core: CoreSetup): ChatPluginSetup {
+    // Store core setup reference for later use
+    this.coreSetup = core;
+    const suggestedActionsSetup = this.suggestedActionsService.setup();
+    const commandRegistrySetup = this.commandRegistryService.setup();
+
+    // Register suggested actions service with core chat service
+    if (this.coreSetup?.chat?.setSuggestedActionsService) {
+      this.coreSetup.chat.setSuggestedActionsService(suggestedActionsSetup);
+    }
+
     return {
-      suggestedActionsService: this.suggestedActionsService.setup(),
+      suggestedActionsService: suggestedActionsSetup,
+      commandRegistry: commandRegistrySetup,
     };
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
-    // Get configuration
-    const config = this.initializerContext.config.get<{ enabled: boolean; agUiUrl?: string }>();
+    // Get plugin configuration (same as original implementation)
+    const chatConfig = this.initializerContext.config.get<{
+      enabled: boolean;
+      agUiUrl?: string;
+      mlCommonsAgentId?: string;
+    }>();
+    const contextProviderConfig = deps.contextProvider ? { enabled: true } : { enabled: false };
 
-    // Check if chat plugin is enabled
-    if (!config.enabled) {
+    // Check enablement using the unified logic
+    const isEnabled = isChatEnabled(
+      chatConfig,
+      contextProviderConfig,
+      core.application.capabilities
+    );
+
+    // Always initialize chat service - core service handles enablement
+    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+
+    if (!isEnabled) {
       return {
         chatService: undefined,
       };
     }
 
-    // Initialize chat service (it will use the server proxy)
-    this.chatService = new ChatService();
+    // Register implementation functions with core chat service
+    if (this.coreSetup?.chat?.setImplementation) {
+      this.coreSetup.chat.setImplementation({
+        // Only business logic operations
+        sendMessage: this.chatService.sendMessage.bind(this.chatService),
+        sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
+      });
+    }
 
-    // Store reference to chat service for use in subscription
-    const chatService = this.chatService;
+    // Set up agentic memory provider only if ML Commons agent ID is configured
+    if (this.coreSetup?.chat?.setMemoryProvider && chatConfig.mlCommonsAgentId) {
+      try {
+        const agenticMemoryProvider = new AgenticMemoryProvider(
+          core.http,
+          () => this.chatService?.getCurrentDataSourceId() ?? Promise.resolve(undefined)
+        );
+        this.coreSetup.chat.setMemoryProvider(agenticMemoryProvider);
+      } catch (error) {
+        // If agentic memory provider setup fails, fall back to default LocalStorageMemoryProvider
+        // eslint-disable-next-line no-console
+        console.warn('Failed to set up agentic memory provider, using default:', error);
+      }
+    }
+
+    this.chatMountService = new ChatMountService();
+
+    this.chatMountService.start({
+      core,
+      chatService: this.chatService!,
+      contextProvider: deps.contextProvider,
+      charts: deps.charts,
+      suggestedActionsService: this.suggestedActionsService!,
+      confirmationService: this.confirmationService,
+    });
 
     // Register chat button in header with conditional visibility
     core.chrome.navControls.registerPrimaryHeaderRight({
@@ -106,10 +185,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         const mountPoint = toMountPoint(
           React.createElement(ChatHeaderButton, {
             core,
-            chatService,
-            contextProvider: deps.contextProvider,
-            charts: deps.charts,
-            suggestedActionsService: this.suggestedActionsService!,
           })
         );
         unmountComponent = mountPoint(element);
@@ -142,7 +217,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         ),
       ],
       action: async ({ content }: { content: string }) => {
-        await chatService.sendMessageWithWindow(content, [], { clearConversation: true });
+        await this.chatService!.sendMessageWithWindow(content, [], { clearConversation: true });
       },
     });
 
@@ -154,7 +229,10 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   }
 
   public stop() {
+    this.chatMountService?.stop();
     this.paddingSizeSubscription?.unsubscribe();
-    this.unsubscribeWindowStateChange?.();
+    this.windowStateChangeSubscription?.unsubscribe();
+    this.chatService?.destroy();
+    this.confirmationService.cleanAll();
   }
 }

@@ -1,2 +1,0 @@
-fix:
-- Added support for loading state in the header ([#10753](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10753))

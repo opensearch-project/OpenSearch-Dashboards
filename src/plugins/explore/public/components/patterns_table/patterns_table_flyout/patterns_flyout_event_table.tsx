@@ -5,8 +5,10 @@
 
 import { CriteriaWithPagination, EuiBasicTable, EuiCallOut } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import { useSelector } from 'react-redux';
+import { UI_SETTINGS } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import {
   selectDataset,
@@ -16,7 +18,7 @@ import {
 } from '../../../application/utils/state_management/selectors';
 import { ExploreServices } from '../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
-import { getQueryWithSource } from '../../../application/utils/languages';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
 import { createSearchPatternQueryWithSlice } from '../utils/utils';
 
 interface PatternsFlyoutEventTableProps {
@@ -25,13 +27,13 @@ interface PatternsFlyoutEventTableProps {
 }
 
 interface EventTableItem {
-  timestamp: string;
+  timestamp?: string;
   event: string;
 }
 
 const EVENT_TABLE_PAGE_SIZE = 10;
 
-export const PatternsFlyoutEventTable = ({
+const PatternsFlyoutEventTableComponent = ({
   patternString,
   totalItemCount,
 }: PatternsFlyoutEventTableProps) => {
@@ -40,18 +42,16 @@ export const PatternsFlyoutEventTable = ({
   const patternsField = useSelector(selectPatternsField);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const dateFormat = services.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
   const timeFieldName = dataset?.timeFieldName;
 
-  const [fetchError, setFetchError] = useState<unknown | null>(null);
-
-  if (!dataset || !patternsField || !timeFieldName)
-    throw new Error('Dataset, patterns field, or time field is not appearing for event table');
-
+  const [fetchError, setFetchError] = useState<unknown>(null);
   const [fetchedItems, setFetchedItems] = useState<EventTableItem[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [tableLoading, setTableLoading] = useState(false);
 
   const eventResults = async (page: number) => {
+    if (!dataset || !patternsField) return;
     /**
      * Below logic queries similar to how its done in query_actions
      */
@@ -66,7 +66,7 @@ export const PatternsFlyoutEventTable = ({
       const filters = services.data.query.filterManager.getFilters();
       const size = services.uiSettings.get(SAMPLE_SIZE_SETTING);
 
-      const querySource = getQueryWithSource(query);
+      const querySource = prepareQueryForLanguage(query);
 
       const modifiedQuerySource = {
         ...querySource,
@@ -94,10 +94,15 @@ export const PatternsFlyoutEventTable = ({
       const rows = results.hits.hits;
 
       const items: EventTableItem[] = rows.map((row) => {
-        return {
-          timestamp: row._source[timeFieldName],
+        const item: EventTableItem = {
           event: row._source[patternsField],
         };
+
+        if (timeFieldName) {
+          item.timestamp = row._source[timeFieldName];
+        }
+
+        return item;
       });
 
       setFetchedItems(items);
@@ -114,35 +119,46 @@ export const PatternsFlyoutEventTable = ({
   }, []);
 
   const eventTableColumns = useMemo(() => {
-    return [
-      {
+    const columns = [];
+
+    if (timeFieldName) {
+      columns.push({
         field: 'timestamp',
         name: i18n.translate('explore.patterns.flyout.timeColumnName', {
           defaultMessage: 'Time ({timeFieldName})',
           values: { timeFieldName },
         }),
         sortable: false,
-      },
-      {
-        field: 'event',
-        name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
-          defaultMessage: 'Event ({patternsField})',
-          values: { patternsField },
-        }),
-        sortable: false,
-      },
-    ];
-  }, [timeFieldName, patternsField]);
+        width: '220px',
+        render: (val: string) => moment(val).format(dateFormat),
+      });
+    }
+
+    columns.push({
+      field: 'event',
+      name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
+        defaultMessage: 'Event ({patternsField})',
+        values: { patternsField },
+      }),
+      sortable: false,
+    });
+
+    return columns;
+  }, [timeFieldName, patternsField, dateFormat]);
+
+  if (!dataset || !patternsField)
+    return <EuiCallOut title="Missing dataset or patterns field" color="danger" iconType="alert" />;
 
   return fetchError ? (
     <EuiCallOut title="Error fetching events" color="danger" iconType="alert">
-      {fetchError.toString()}
+      {String(fetchError)}
     </EuiCallOut>
   ) : (
     <EuiBasicTable
       aria-label={i18n.translate('explore.patterns.flyout.eventTable', {
         defaultMessage: 'Pattern event table',
       })}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       items={fetchedItems}
       columns={eventTableColumns}
       tableLayout="auto"
@@ -152,6 +168,7 @@ export const PatternsFlyoutEventTable = ({
         totalItemCount,
         hidePerPageOptions: true,
       }}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       onChange={({ page: { index } }: CriteriaWithPagination<EventTableItem>) => {
         setTableLoading(true);
         setPageIndex(index);
@@ -161,3 +178,5 @@ export const PatternsFlyoutEventTable = ({
     />
   );
 };
+
+export const PatternsFlyoutEventTable = React.memo(PatternsFlyoutEventTableComponent);

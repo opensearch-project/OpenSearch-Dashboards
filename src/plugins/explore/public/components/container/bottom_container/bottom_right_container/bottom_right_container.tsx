@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { selectQueryStatusMapByKey } from '../../../../application/utils/state_management/selectors';
@@ -24,6 +24,7 @@ import { useDatasetContext } from '../../../../application/context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
+import { TraceAutoDetectCallout } from '../../../trace_auto_detect_callout';
 
 export const BottomRightContainer = () => {
   const dispatch = useDispatch();
@@ -33,6 +34,7 @@ export const BottomRightContainer = () => {
 
   const onRefresh = () => {
     if (services) {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     }
   };
@@ -46,6 +48,19 @@ export const BottomRightContainer = () => {
   });
 
   if (dataset == null) {
+    // Show auto-detect callout only for traces flavor
+    if (flavorId === ExploreFlavor.Traces) {
+      return (
+        <CanvasPanel>
+          <>
+            <EuiSpacer size="xxl" />
+            <TraceAutoDetectCallout />
+          </>
+        </CanvasPanel>
+      );
+    }
+
+    // Show default empty state for other flavors
     return (
       <CanvasPanel>
         <>
@@ -92,12 +107,10 @@ export const BottomRightContainer = () => {
     status === QueryExecutionStatus.ERROR
   ) {
     return (
-      <>
-        {flavorId !== ExploreFlavor.Traces && <DiscoverChartContainer />}
-        <CanvasPanel>
-          <ResizableVisControlAndTabs />
-        </CanvasPanel>
-      </>
+      <CanvasPanel>
+        <DiscoverChartContainer />
+        <ResizableVisControlAndTabs />
+      </CanvasPanel>
     );
   }
 

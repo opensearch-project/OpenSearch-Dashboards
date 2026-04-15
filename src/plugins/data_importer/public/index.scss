@@ -1,1 +1,35 @@
-/* stylelint-disable no-empty-source */
+.data_importer_content {
+
+  /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+  .euiFlexGroup {
+
+    /* stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors */
+    .euiTitle {
+      font-size: $euiFontSizeS;
+    }
+  }
+}
+
+.dataImporterEmbedded {
+  &__flexGroup {
+    height: 100%;
+    align-items: flex-start;
+  }
+
+  &__leftPanel {
+    min-width: 300px;
+    max-width: 400px;
+    flex-shrink: 0;
+  }
+
+  &__rightPanel {
+    min-width: 0;
+    flex: 1;
+    overflow: auto;
+  }
+
+  &__previewContainer {
+    height: 100%;
+    min-width: 0;
+  }
+}

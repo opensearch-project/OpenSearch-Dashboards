@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 import { IndexPattern, IAggType, AggGroupNames } from 'src/plugins/data/public';
 

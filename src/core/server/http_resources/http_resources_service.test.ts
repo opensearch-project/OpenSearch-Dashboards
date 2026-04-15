@@ -85,6 +85,7 @@ describe('HttpResources service', () => {
             context.core.uiSettings.client,
             {
               includeUserSettings: true,
+              nonce: expect.any(String),
             }
           );
         });
@@ -134,6 +135,7 @@ describe('HttpResources service', () => {
             context.core.uiSettings.client,
             {
               includeUserSettings: false,
+              nonce: expect.any(String),
             }
           );
         });

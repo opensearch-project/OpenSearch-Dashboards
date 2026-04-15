@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { DatasetMetadataFields } from './dataset_metadata_fields';
 
 const renderWithIntl = (component: React.ReactElement) => {
+  // @ts-expect-error TS2769 TODO(ts-error): fixme
   return render(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 
@@ -33,6 +34,7 @@ describe('DatasetMetadataFields', () => {
 
     expect(screen.getByText('Dataset name')).toBeInTheDocument();
     expect(screen.getByText('Dataset description')).toBeInTheDocument();
+    expect(screen.getAllByText('optional')).toHaveLength(2);
     expect(screen.getByTestId('datasetNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('datasetDescriptionInput')).toBeInTheDocument();
   });

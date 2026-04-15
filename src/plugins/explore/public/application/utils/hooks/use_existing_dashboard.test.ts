@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useExistingDashboard } from './use_existing_dashboard';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DashboardInterface } from '../../../components/visualizations/add_to_dashboard_button';
@@ -14,12 +14,14 @@ const mockSavedObjectsClient = ({
 } as unknown) as SavedObjectsClientContract;
 
 const mockDashboards: DashboardInterface[] = [
+  // @ts-expect-error TS2352 TODO(ts-error): fixme
   {
     id: 'dashboard-1',
     attributes: { title: 'Dashboard 1' },
     type: 'dashboard',
     references: [],
   } as DashboardInterface,
+  // @ts-expect-error TS2352 TODO(ts-error): fixme
   {
     id: 'dashboard-2',
     attributes: { title: 'Dashboard 2' },
@@ -38,9 +40,7 @@ describe('useExistingDashboard', () => {
       savedObjects: mockDashboards,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useExistingDashboard(mockSavedObjectsClient)
-    );
+    const { result } = renderHook(() => useExistingDashboard(mockSavedObjectsClient));
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.dashboardsToShow).toEqual([]);
@@ -51,14 +51,14 @@ describe('useExistingDashboard', () => {
 
     expect(result.current.isLoading).toBe(true);
 
-    await waitForNextUpdate();
-
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-      type: 'dashboard',
+    await waitFor(() => {
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'dashboard',
+      });
+      expect(result.current.dashboardsToShow).toEqual(mockDashboards);
+      expect(result.current.selectedDashboard).toBe(null);
+      expect(result.current.isLoading).toBe(false);
     });
-    expect(result.current.dashboardsToShow).toEqual(mockDashboards);
-    expect(result.current.selectedDashboard).toBe(null);
-    expect(result.current.isLoading).toBe(false);
   });
 
   it('should not load dashboards on mount by default', () => {
@@ -74,9 +74,7 @@ describe('useExistingDashboard', () => {
       savedObjects: [mockDashboards[0]],
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useExistingDashboard(mockSavedObjectsClient)
-    );
+    const { result } = renderHook(() => useExistingDashboard(mockSavedObjectsClient));
 
     act(() => {
       result.current.searchDashboards('Dashboard 1');
@@ -84,16 +82,16 @@ describe('useExistingDashboard', () => {
 
     expect(result.current.isSearching).toBe(true);
 
-    await waitForNextUpdate();
-
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
-      type: 'dashboard',
-      search: '*Dashboard 1*',
-      searchFields: ['title'],
-      perPage: 100,
+    await waitFor(() => {
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'dashboard',
+        search: '*Dashboard 1*',
+        searchFields: ['title'],
+        perPage: 100,
+      });
+      expect(result.current.dashboardsToShow).toEqual([mockDashboards[0]]);
+      expect(result.current.isSearching).toBe(false);
     });
-    expect(result.current.dashboardsToShow).toEqual([mockDashboards[0]]);
-    expect(result.current.isSearching).toBe(false);
   });
 
   it('should clear search when empty search term is provided', async () => {
@@ -141,46 +139,42 @@ describe('useExistingDashboard', () => {
       .mockResolvedValueOnce({ savedObjects: mockDashboards }) // for loadAllDashboards
       .mockResolvedValueOnce({ savedObjects: [mockDashboards[0]] }); // for searchDashboards
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useExistingDashboard(mockSavedObjectsClient)
-    );
+    const { result } = renderHook(() => useExistingDashboard(mockSavedObjectsClient));
 
     // Load dashboards first
     act(() => {
       result.current.loadAllDashboards();
     });
 
-    await waitForNextUpdate();
-
-    // Initially shows all dashboards
-    expect(result.current.dashboardsToShow).toEqual(mockDashboards);
+    await waitFor(() => {
+      // Initially shows all dashboards
+      expect(result.current.dashboardsToShow).toEqual(mockDashboards);
+    });
 
     // After search, shows search results
     act(() => {
       result.current.searchDashboards('Dashboard 1');
     });
 
-    await waitForNextUpdate();
-
-    expect(result.current.dashboardsToShow).toEqual([mockDashboards[0]]);
+    await waitFor(() => {
+      expect(result.current.dashboardsToShow).toEqual([mockDashboards[0]]);
+    });
   });
 
   it('should handle errors gracefully', async () => {
     (mockSavedObjectsClient.find as jest.Mock).mockRejectedValue(new Error('API Error'));
 
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useExistingDashboard(mockSavedObjectsClient)
-    );
+    const { result } = renderHook(() => useExistingDashboard(mockSavedObjectsClient));
 
     act(() => {
       result.current.loadAllDashboards();
     });
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect(result.current.dashboardsToShow).toEqual([]);
-    expect(result.current.selectedDashboard).toBe(null);
-    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.dashboardsToShow).toEqual([]);
+      expect(result.current.selectedDashboard).toBe(null);
+      expect(result.current.isLoading).toBe(false);
+    });
   });
 });

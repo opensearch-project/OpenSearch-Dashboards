@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 

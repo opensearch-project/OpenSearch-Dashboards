@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { useDebouncedNumber } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -144,22 +144,17 @@ export const LineExclusiveVisOptions = ({
         />
       </EuiFormRow>
 
-      <EuiSpacer size="s" />
-
       {shouldShowTimeMarker && (
-        <EuiFormRow
+        <EuiSwitch
+          compressed
           label={i18n.translate('explore.stylePanel.basic.showTimeMarker', {
             defaultMessage: 'Show current time marker',
           })}
-        >
-          <EuiSwitch
-            compressed
-            label=""
-            checked={addTimeMarker}
-            onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
-          />
-        </EuiFormRow>
+          checked={addTimeMarker}
+          onChange={(e) => onAddTimeMarkerChange(e.target.checked)}
+        />
       )}
+      <EuiSpacer size="s" />
     </StyleAccordion>
   );
 };

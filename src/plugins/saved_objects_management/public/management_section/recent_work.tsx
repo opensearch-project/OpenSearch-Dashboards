@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import moment from 'moment';
 import {
   EuiFlexItem,
@@ -241,7 +241,9 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                 ...recentAccessItem.meta,
                 workspaceName: findWorkspace?.name,
                 updatedAt: moment(obj?.updated_at).valueOf(),
-                link: workspaceEnabled ? href : link,
+                link: workspaceEnabled
+                  ? href
+                  : basePath.prepend(link, { withoutClientBasePath: true }),
                 label: label || obj.meta.title,
               };
             })

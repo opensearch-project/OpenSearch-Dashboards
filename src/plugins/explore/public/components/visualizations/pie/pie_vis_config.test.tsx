@@ -19,7 +19,7 @@ describe('createPieConfig', () => {
     const config = createPieConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'pie');
+    expect(config).toHaveProperty('name', 'Pie');
     expect(config).toHaveProperty('type', 'pie');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');

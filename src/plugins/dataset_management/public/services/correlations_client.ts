@@ -14,7 +14,7 @@ import {
   FindCorrelationsOptions,
   CreateCorrelationData,
   UpdateCorrelationData,
-  CORRELATION_TYPES,
+  CORRELATION_TYPE_PREFIXES,
   CORRELATION_VERSION,
 } from '../types/correlations';
 import { extractDatasetIdsFromEntities } from '../utils/correlation_display';
@@ -62,7 +62,14 @@ export class CorrelationsClient {
    * Create a new correlation
    */
   async create(data: CreateCorrelationData): Promise<CorrelationSavedObject> {
-    const { traceDatasetId, logDatasetIds, correlationType, version } = data;
+    const {
+      traceDatasetId,
+      traceDatasetTitle,
+      logDatasetIds,
+      correlationType,
+      version,
+      title,
+    } = data;
 
     // Build references array
     const references: SavedObjectReference[] = [
@@ -78,9 +85,17 @@ export class CorrelationsClient {
       })),
     ];
 
+    // Use trace dataset title in correlationType for unique identification
+    const finalCorrelationType =
+      correlationType || `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}${traceDatasetTitle}`;
+
+    // Generate title for search: use provided title or generate from trace dataset
+    const finalTitle = title || `trace-to-logs_${traceDatasetTitle}`;
+
     // Build attributes
     const attributes: CorrelationAttributes = {
-      correlationType: correlationType || CORRELATION_TYPES.TRACES_LOGS,
+      title: finalTitle,
+      correlationType: finalCorrelationType,
       version: version || CORRELATION_VERSION,
       entities: [
         { tracesDataset: { id: 'references[0].id' } },

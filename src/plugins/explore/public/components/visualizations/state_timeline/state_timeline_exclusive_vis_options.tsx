@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup } from '@elastic/eui';
-import React from 'react';
+
 import { StateTimeLineChartStyle } from './state_timeline_config';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -76,7 +76,7 @@ export const StateTimeLineExclusiveVisOptions = ({
         <EuiSwitch
           compressed
           label={i18n.translate('explore.vis.statetimeline.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
+            defaultMessage: 'Use threshold color',
           })}
           data-test-subj="useThresholdColorButton"
           checked={useThresholdColor ?? false}

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { StateManagementExampleApp } from './components/app';
@@ -19,7 +19,8 @@ export const renderApp = (
   { navigation }: StateManagementExampleAppDeps,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <PluginStoreProvider>
       <StateManagementExampleApp
         basename={appBasePath}
@@ -27,9 +28,8 @@ export const renderApp = (
         http={http}
         navigation={navigation}
       />
-    </PluginStoreProvider>,
-    element
+    </PluginStoreProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

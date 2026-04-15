@@ -22,7 +22,7 @@ import {
 import { QueryService, QueryStart } from '../query_service';
 import { TimefilterContract } from '../timefilter';
 import { ISearchInterceptor } from '../../search';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useSyncQueryStateWithUrl } from './use_sync_state_with_url';
 import * as SyncQueryStateWithUrl from './sync_state_with_url';
 
@@ -85,6 +85,7 @@ describe('use_sync_query_state_with_url', () => {
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
+      // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
       defaultSearchInterceptor: mockSearchInterceptor,
       application: setupMock.application,
       notifications: setupMock.notifications,

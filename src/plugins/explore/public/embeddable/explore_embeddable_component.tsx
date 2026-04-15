@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults } from '../../../visualizations/public';
@@ -24,9 +24,6 @@ interface ExploreEmbeddableProps {
 
 export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddableProps) => {
   const services = getServices();
-  const {
-    expressions: { ReactExpressionRenderer },
-  } = services;
 
   // Get docViewsRegistry for DataTable
   const docViewsRegistry = useMemo(() => getDocViewsRegistry(), []);
@@ -117,16 +114,11 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       );
     }
 
-    return (
-      <ReactExpressionRenderer
-        expression={searchProps.expression ?? ''}
-        searchContext={searchProps.searchContext}
-        key={JSON.stringify(searchProps.searchContext) + searchProps.expression}
-        onEvent={(e) => {
-          searchProps.onExpressionEvent?.(e);
-        }}
-      />
-    );
+    if (searchProps.chartRender) {
+      return searchProps.chartRender();
+    }
+
+    return null;
   };
 
   return (
@@ -135,7 +127,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       direction="column"
       responsive={false}
       data-test-subj="embeddedSavedExplore"
-      className="eui-xScrollWithShadows eui-yScrollWithShadows"
+      style={{ overflowX: 'auto' }}
     >
       <EuiFlexItem style={{ minHeight: 0 }} data-test-subj="osdExploreContainer">
         {getEmbeddableContent()}

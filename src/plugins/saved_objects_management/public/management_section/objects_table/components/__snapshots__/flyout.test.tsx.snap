@@ -227,10 +227,12 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "indexPatterns": Array [
             Object {
+              "displayTitle": undefined,
               "id": "1",
               "title": undefined,
             },
             Object {
+              "displayTitle": undefined,
               "id": "2",
               "title": undefined,
             },

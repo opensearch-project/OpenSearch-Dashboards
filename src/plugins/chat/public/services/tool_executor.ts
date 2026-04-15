@@ -4,13 +4,16 @@
  */
 
 import { AssistantActionService } from '../../../context_provider/public';
+import { ConfirmationService } from './confirmation_service';
 
 export interface ToolResult {
-  success: boolean;
+  success?: boolean;
   data?: any;
   error?: string;
   source?: 'registered_action' | 'agent_tool';
   waitingForAgentResponse?: boolean;
+  userRejected?: boolean;
+  cancelled?: boolean;
 }
 
 interface PendingToolCall {
@@ -24,23 +27,73 @@ interface PendingToolCall {
  */
 export class ToolExecutor {
   private pendingAgentTools = new Map<string, PendingToolCall>();
+  private confirmationService: ConfirmationService;
 
-  constructor(private assistantActionService: AssistantActionService) {}
+  constructor(
+    private assistantActionService: AssistantActionService,
+    confirmationService: ConfirmationService
+  ) {
+    this.confirmationService = confirmationService;
+  }
 
   /**
    * Execute a tool by name and arguments
    * First checks registered actions, then agent-only tools
+   * Supports user confirmation for tools that require it
    */
-  async executeTool(toolName: string, toolArgs: any): Promise<ToolResult> {
+  async executeTool(
+    toolName: string,
+    toolArgs: any,
+    toolCallId: string,
+    datasourceId?: string
+  ): Promise<ToolResult> {
     try {
+      // Check if this tool requires confirmation
+      const requiresConfirmation = this.assistantActionService.isUserConfirmRequired(toolName);
+
+      if (requiresConfirmation && this.confirmationService && toolCallId) {
+        // Request user confirmation
+        const response = await this.confirmationService.requestConfirmation(
+          toolName,
+          toolCallId,
+          toolArgs
+        );
+
+        // Check if confirmation was cancelled (e.g., due to cleanup)
+        if (response.cancelled) {
+          return {
+            success: false,
+            cancelled: true,
+          };
+        }
+
+        if (!response.approved) {
+          return {
+            success: false,
+            error: 'User rejected the tool execution',
+            userRejected: true,
+            data: {
+              message: 'The user chose not to proceed with this action.',
+              toolName,
+              args: toolArgs,
+            },
+          };
+        }
+
+        toolArgs = { ...toolArgs, confirmed: true };
+      }
+
+      // Include datasourceId in toolArgs if provided
+      const enrichedToolArgs = datasourceId ? { ...toolArgs, datasourceId } : toolArgs;
+
       // First, check if this is a registered assistant action
-      const registeredAction = await this.tryExecuteRegisteredAction(toolName, toolArgs);
-      if (registeredAction.handled) {
+      const registeredAction = await this.tryExecuteRegisteredAction(toolName, enrichedToolArgs);
+      if (registeredAction.handled && registeredAction.result) {
         return registeredAction.result;
       }
 
       // Otherwise, handle as agent-only tool
-      return await this.executeAgentTool(toolName, toolArgs);
+      return await this.executeAgentTool(toolName, enrichedToolArgs);
     } catch (error: any) {
       return {
         success: false,

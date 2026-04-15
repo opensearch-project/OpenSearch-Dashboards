@@ -87,12 +87,12 @@ export const extractSpanDuration = (span: any): number => {
   if (!span) return 0;
 
   return (
-    span._source?.durationNano ||
     span._source?.durationInNanos ||
+    span._source?.durationNano ||
     span._source?.duration ||
     span._source?.['duration.nanos'] ||
-    span.durationNano ||
     span.durationInNanos ||
+    span.durationNano ||
     span.duration ||
     span['duration.nanos'] ||
     0

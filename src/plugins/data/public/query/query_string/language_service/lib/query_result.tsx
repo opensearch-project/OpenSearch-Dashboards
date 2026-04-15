@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import './_recent_query.scss';
 import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import {

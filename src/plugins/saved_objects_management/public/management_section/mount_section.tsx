@@ -29,7 +29,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -99,6 +99,7 @@ export const mountManagementSection = async ({
 
   const capabilities = coreStart.application.capabilities;
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.opensearchDashboards?.objects ?? false;
 
@@ -113,6 +114,7 @@ export const mountManagementSection = async ({
     <Router history={history}>
       <Switch>
         <Route path={'/:service/:id'} exact={true}>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <RedirectToHomeIfUnauthorized>
             <Suspense fallback={<EuiLoadingSpinner />}>
               <SavedObjectsEditionPage
@@ -128,6 +130,7 @@ export const mountManagementSection = async ({
           </RedirectToHomeIfUnauthorized>
         </Route>
         <Route path={'/'} exact={false}>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <RedirectToHomeIfUnauthorized>
             <Suspense fallback={<EuiLoadingSpinner />}>
               <SavedObjectsTablePage
@@ -159,7 +162,8 @@ export const mountManagementSection = async ({
       }
     : {};
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       {mountParams.wrapInPage ? (
         <EuiPageContent
@@ -173,11 +177,10 @@ export const mountManagementSection = async ({
       ) : (
         content
       )}
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

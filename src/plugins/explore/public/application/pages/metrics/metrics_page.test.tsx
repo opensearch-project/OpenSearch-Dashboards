@@ -5,7 +5,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -37,21 +37,9 @@ jest.mock('../../../components/query_panel', () => ({
   QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
 }));
 
-jest.mock('../../../components/container/bottom_container', () => ({
-  BottomContainer: () => (
-    <div data-test-subj="bottom-container">
-      <div data-test-subj="discover-panel">Discover Panel</div>
-      <div data-test-subj="discover-chart-container">Chart Container</div>
-      <div data-test-subj="explore-tabs">
-        <div data-test-subj="tab-explore_logs_tab">
-          <div data-test-subj="explore-data-table">Data Table</div>
-        </div>
-        <div data-test-subj="tab-explore_visualization_tab">
-          <div data-test-subj="visualization-container">Visualization Container</div>
-        </div>
-      </div>
-      <div data-test-subj="dscBottomLeftCanvas">Bottom Left Canvas</div>
-    </div>
+jest.mock('./metrics_bottom_container/bottom_right_container', () => ({
+  BottomRightContainer: () => (
+    <div data-test-subj="bottom-right-container">Bottom Right Container</div>
   ),
 }));
 
@@ -84,6 +72,10 @@ jest.mock('../../utils/hooks/use_timefilter_subscription', () => ({
 
 jest.mock('../../utils/hooks/use_header_variants', () => ({
   useHeaderVariants: jest.fn(),
+}));
+
+jest.mock('../../utils/hooks/use_initialize_metrics_dataset', () => ({
+  useInitializeMetricsDataset: jest.fn(),
 }));
 
 jest.mock('../../context', () => ({
@@ -150,10 +142,12 @@ describe('MetricsPage', () => {
         query: queryReducer,
         queryEditor: queryEditorReducer,
       },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       preloadedState,
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -178,13 +172,14 @@ describe('MetricsPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>
     );
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
@@ -193,18 +188,20 @@ describe('MetricsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
     );
 
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
   });
 
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>

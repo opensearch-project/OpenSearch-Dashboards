@@ -8,6 +8,7 @@ import LRUCache from 'lru-cache';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   CachedDataStructure,
+  DATA_STRUCTURE_META_TYPES,
   Dataset,
   DataStorage,
   DataStructure,
@@ -110,6 +111,7 @@ export class DatasetService {
           : await type?.fetchFields(dataset, services);
         const spec = {
           id: dataset.id,
+          type: dataset.type,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
@@ -124,6 +126,7 @@ export class DatasetService {
                 version: dataset.dataSource.version,
               }
             : undefined,
+          dataSourceMeta: dataset.dataSource ? dataset.dataSource.meta : undefined,
         } as IndexPatternSpec;
 
         if (defaultCache) {
@@ -191,6 +194,7 @@ export class DatasetService {
         const spec = {
           // Generate ID with data source prefix if data source exists, otherwise allow UUID generation
           id: dataset.dataSource?.id ? `${dataset.dataSource.id}::${uuidv4()}` : undefined,
+          type: dataset.type,
           displayName: dataset.displayName,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
@@ -370,6 +374,10 @@ export class DatasetService {
           id: indexPattern.id,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
+          },
           parent: dataSource
             ? {
                 id: dataSource.id,

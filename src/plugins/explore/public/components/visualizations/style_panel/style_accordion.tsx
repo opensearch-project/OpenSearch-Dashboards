@@ -12,6 +12,7 @@ export interface StyleAccordionProps {
   id: string;
   accordionLabel: React.ReactNode;
   initialIsOpen: boolean;
+  children?: React.ReactNode;
 }
 
 export const StyleAccordion: React.FC<StyleAccordionProps> = ({
@@ -38,7 +39,7 @@ export const StyleAccordion: React.FC<StyleAccordionProps> = ({
         initialIsOpen={initialIsOpen}
       >
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="s" hasBorder={false} color="subdued">
+        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
           {children}
         </EuiPanel>
       </EuiAccordion>

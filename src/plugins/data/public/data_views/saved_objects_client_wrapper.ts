@@ -19,6 +19,7 @@ const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject)
     ...omit(simpleSavedObject, '_version'),
   } as any);
 
+// @ts-expect-error TS2420 TODO(ts-error): fixme
 export class SavedObjectsClientPublicToCommon implements DataViewSavedObjectsClientCommon {
   private savedObjectClient: SOClient;
   constructor(savedObjectClient: SOClient) {

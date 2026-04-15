@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Route, Switch } from 'react-router-dom';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Store } from 'redux';
@@ -19,7 +18,8 @@ export const renderApp = (
   services: VisBuilderServices,
   store: Store
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
@@ -32,9 +32,8 @@ export const renderApp = (
           </services.i18n.Context>
         </ReduxProvider>
       </OpenSearchDashboardsContextProvider>
-    </Router>,
-    element
+    </Router>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { contentManagementPluginMocks } from '../../../content_management/public';
 import { setupUserSettingsPage, UserSettingsApp } from './user_settings';
 import { I18nProvider } from '@osd/i18n/react';

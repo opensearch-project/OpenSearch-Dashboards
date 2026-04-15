@@ -58,6 +58,11 @@ expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>
 expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
+const processProcOutput = (all: string | undefined) => {
+  const regexp = /\n\s*\(node:\d+\)\s*\[DEP0180\] DeprecationWarning: fs.Stats constructor is deprecated.\n\s*\(Use `node --trace-deprecation ...` to show where the warning was created\)/;
+  return all?.replace(regexp, '');
+};
+
 beforeEach(async () => {
   await del([PLUGIN_DIR, TMP_DIR]);
   Fs.mkdirSync(TMP_DIR);
@@ -96,7 +101,7 @@ it('builds a generated plugin into a viable archive', async () => {
     }
   );
 
-  expect(buildProc.all).toMatchInlineSnapshot(`
+  expect(processProcOutput(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @osd/optimizer
      │ info initialized, 0 bundles cached
@@ -123,9 +128,9 @@ it('builds a generated plugin into a viable archive', async () => {
       "opensearch-dashboards/fooTestPlugin/server/plugin.js",
       "opensearch-dashboards/fooTestPlugin/server/routes/index.js",
       "opensearch-dashboards/fooTestPlugin/server/types.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.0.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.0.js.br",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.0.js.gz",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
@@ -184,7 +189,7 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
     }
   );
 
-  expect(buildProc.all).toMatchInlineSnapshot(`
+  expect(processProcOutput(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @osd/optimizer
      │ info initialized, 0 bundles cached
@@ -211,9 +216,9 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
       "opensearch-dashboards/fooTestPlugin/server/plugin.js",
       "opensearch-dashboards/fooTestPlugin/server/routes/index.js",
       "opensearch-dashboards/fooTestPlugin/server/types.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.0.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.0.js.br",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.0.js.gz",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",

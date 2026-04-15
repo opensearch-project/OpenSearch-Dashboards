@@ -12,13 +12,13 @@ import {
 
 describe('correlation_display', () => {
   describe('getCorrelationTypeDisplay', () => {
-    it('should return display name for APM-Correlation', () => {
-      const display = getCorrelationTypeDisplay('APM-Correlation');
+    it('should return display name for trace-to-logs prefix', () => {
+      const display = getCorrelationTypeDisplay('trace-to-logs-my-trace-dataset');
       expect(display).toBe('Trace-to-logs');
     });
 
-    it('should return display name for Trace-to-logs', () => {
-      const display = getCorrelationTypeDisplay('Trace-to-logs');
+    it('should return display name for another trace-to-logs prefix', () => {
+      const display = getCorrelationTypeDisplay('trace-to-logs-otel-v1-apm-span*');
       expect(display).toBe('Trace-to-logs');
     });
 

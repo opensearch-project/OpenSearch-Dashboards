@@ -4,271 +4,145 @@
  */
 
 import { ScatterChartStyle } from './scatter_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
-import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
-
-const DEFAULT_POINTER_SIZE = 80;
-const DEFAULT_STROKE_OPACITY = 0.65;
-
-const hoverParams = [
-  {
-    name: 'hover',
-    select: { type: 'point', on: 'mouseover' },
-  },
-];
-
-const hoverStateEncoding = {
-  opacity: {
-    value: DEFAULT_STROKE_OPACITY,
-    condition: { param: 'hover', value: 1, empty: false },
-  },
-  stroke: {
-    value: null,
-    condition: { param: 'hover', value: 'white', empty: false },
-  },
-  strokeWidth: {
-    value: 0,
-    condition: { param: 'hover', value: 2, empty: false },
-  },
-};
+import { AxisColumnMappings, AxisRole } from '../types';
+import { getSwappedAxisRole } from '../utils/utils';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+} from '../utils/echarts_spec';
+import {
+  createScatterSeries,
+  createCategoryScatterSeries,
+  createSizeScatterSeries,
+} from './scatter_chart_utils';
+import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styles);
+  const xField = axisConfig.xAxis?.column;
+  const yField = axisConfig.yAxis?.column;
 
-  const markLayer = {
-    params: hoverParams,
-    mark: {
-      type: 'point',
-      tooltip: styles?.tooltipOptions?.mode !== 'hidden',
-      shape: styles?.exclusive?.pointShape,
-      angle: styles?.exclusive?.angle,
-      filled: styles?.exclusive?.filled,
-      size: DEFAULT_POINTER_SIZE,
-      strokeOpacity: DEFAULT_STROKE_OPACITY,
-    },
-    encoding: {
-      x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
-      },
-      y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
-      },
-      ...hoverStateEncoding,
-      color: styles?.useThresholdColor ? colorEncodingLayer : [],
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
-        tooltip: [
-          {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
-          },
-          {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
-          },
-        ],
-      }),
-    },
-  };
+  if (!xField || !yField) throw Error('Missing axis config for scatter chart');
 
-  // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
 
-  const baseSpec = {
-    $schema: VEGASCHEMA,
-    data: { values: transformedData },
-    layer: [markLayer, thresholdLayer].filter(Boolean),
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
-      : undefined,
-  };
-  return baseSpec;
+  const result = pipe(
+    transform(convertTo2DArray(allColumns)),
+    createBaseConfig({ title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name}` }),
+    buildAxisConfigs,
+    buildVisMap({
+      seriesFields: (headers) => (headers ?? []).filter((h) => h === yField),
+    }),
+    createScatterSeries({
+      styles,
+      xField,
+      yField,
+    }),
+    assembleSpec
+  )({
+    data: transformedData,
+    styles,
+    axisConfig,
+    axisColumnMappings: axisColumnMappings ?? {},
+  });
+
+  return result.spec;
 };
 
 export const createTwoMetricOneCateScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const colorColumn = axisColumnMappings?.color;
-  const categoryFields = axisColumnMappings?.color?.column!;
-  const categoryNames = axisColumnMappings?.color?.name!;
-  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
-  const markLayer = {
-    params: hoverParams,
-    mark: {
-      type: 'point',
-      tooltip: styles.tooltipOptions?.mode !== 'hidden',
-      shape: styles.exclusive?.pointShape,
-      angle: styles.exclusive?.angle,
-      filled: styles.exclusive?.filled,
-      size: DEFAULT_POINTER_SIZE,
-      strokeOpacity: DEFAULT_STROKE_OPACITY,
-    },
-    encoding: {
-      x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
-      },
-      y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
-      },
-      color: {
-        field: categoryFields,
-        type: getSchemaByAxis(colorColumn),
-        legend: styles?.addLegend
-          ? {
-              title: styles?.legendTitle,
-              orient: styles?.legendPosition,
-              symbolLimit: 10,
-            }
-          : null,
-      },
-      ...hoverStateEncoding,
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
-        tooltip: [
-          {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
-          },
-          {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
-          },
-          { field: categoryFields, type: 'nominal', title: categoryNames },
-        ],
+  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const xField = axisConfig.xAxis?.column;
+  const yField = axisConfig.yAxis?.column;
+  const colorField = axisColumnMappings?.[AxisRole.COLOR]?.column;
+
+  if (!xField || !yField || !colorField)
+    throw Error('Missing axis config for colored scatter chart');
+
+  const result = pipe(
+    transform(
+      pivot({
+        groupBy: xField,
+        pivot: colorField,
+        field: yField,
       }),
-    },
-  };
+      convertTo2DArray()
+    ),
+    createBaseConfig({
+      title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
+        axisColumnMappings?.[AxisRole.COLOR]?.name
+      }`,
+    }),
+    buildAxisConfigs,
+    createCategoryScatterSeries({
+      styles,
+      xField,
+      yField,
+      colorField,
+    }),
+    assembleSpec
+  )({
+    data: transformedData,
+    styles,
+    axisConfig,
+    axisColumnMappings: axisColumnMappings ?? {},
+  });
 
-  // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
-
-  const baseSpec = {
-    $schema: VEGASCHEMA,
-    autosize: { type: 'fit', contains: 'padding' },
-    data: { values: transformedData },
-    layer: [markLayer, thresholdLayer].filter(Boolean),
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name} by ${categoryNames}`
-      : undefined,
-  };
-  return baseSpec;
+  return result.spec;
 };
 
 export const createThreeMetricOneCateScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const colorColumn = axisColumnMappings?.color;
-  const categoryFields = axisColumnMappings?.color?.column!;
-  const categoryNames = axisColumnMappings?.color?.name!;
-  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const numericalSize = axisColumnMappings?.size;
-  const markLayer = {
-    params: hoverParams,
-    mark: {
-      type: 'point',
-      tooltip: styles.tooltipOptions?.mode !== 'hidden',
-      shape: styles.exclusive?.pointShape,
-      angle: styles.exclusive?.angle,
-      filled: styles.exclusive?.filled,
-      size: DEFAULT_POINTER_SIZE,
-      strokeOpacity: DEFAULT_STROKE_OPACITY,
-    },
-    encoding: {
-      x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
-      },
-      y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
-      },
-      color: {
-        field: categoryFields,
-        type: getSchemaByAxis(colorColumn),
-        legend: styles?.addLegend
-          ? {
-              title: styles?.legendTitle,
-              orient: styles?.legendPosition,
-              symbolLimit: 10,
-            }
-          : null,
-      },
-      size: {
-        field: numericalSize?.column,
-        type: getSchemaByAxis(numericalSize),
-        legend: styles?.addLegend
-          ? {
-              title: styles?.legendTitleForSize,
-              orient: styles?.legendPosition,
-              symbolLimit: 10,
-            }
-          : null,
-      },
-      ...hoverStateEncoding,
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
-        tooltip: [
-          {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
-          },
-          {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
-          },
-          { field: categoryFields, type: 'nominal', title: categoryNames },
-          { field: numericalSize?.column, type: 'quantitative', title: numericalSize?.name },
-        ],
-      }),
-    },
-  };
+  const xField = axisConfig.xAxis?.column;
+  const yField = axisConfig.yAxis?.column;
+  const colorField = axisColumnMappings?.[AxisRole.COLOR]?.column;
+  const sizeField = axisColumnMappings?.[AxisRole.SIZE]?.column;
 
-  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  if (!xField || !yField || !colorField || !sizeField) {
+    throw Error('Missing axis config for size scatter chart');
+  }
 
-  const baseSpec = {
-    $schema: VEGASCHEMA,
-    autosize: { type: 'fit', contains: 'padding' },
-    data: { values: transformedData },
-    layer: [markLayer, thresholdLayer].filter(Boolean),
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName ||
-        `${xAxis?.name} with ${yAxis?.name} by ${categoryNames} (Size shows ${numericalSize?.name})`
-      : undefined,
-  };
-  return baseSpec;
+  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+  const result = pipe(
+    transform(convertTo2DArray(allColumns)),
+    createBaseConfig({
+      title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
+        axisColumnMappings?.[AxisRole.COLOR]?.name
+      } (Size: ${axisColumnMappings?.[AxisRole.SIZE]?.name})`,
+    }),
+    buildAxisConfigs,
+    createSizeScatterSeries({
+      styles,
+      xField,
+      yField,
+      colorField,
+      sizeField,
+    }),
+    assembleSpec
+  )({
+    data: transformedData,
+    styles,
+    axisConfig,
+    axisColumnMappings: axisColumnMappings ?? {},
+  });
+
+  return result.spec;
 };

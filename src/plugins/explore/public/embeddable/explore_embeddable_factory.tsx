@@ -14,12 +14,17 @@ import {
   Container,
   ErrorEmbeddable,
 } from '../../../embeddable/public';
-import { TimeRange } from '../../../data/public';
+import {
+  TimeRange,
+  injectSearchSourceReferences,
+  parseSearchSourceJSON,
+} from '../../../data/public';
 import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { VisualizationRegistryService } from '../services/visualization_registry_service';
-import { ExploreFlavor } from '../../common';
+import { ExploreFlavor, VISUALIZATION_EDITOR_APP_ID } from '../../common';
+import { SavedExplore } from '../saved_explore';
 
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -68,7 +73,7 @@ export class ExploreEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('explore.embeddable.displayName', {
-      defaultMessage: 'visualization in discover',
+      defaultMessage: 'visualization',
     });
   }
 
@@ -90,18 +95,25 @@ export class ExploreEmbeddableFactory
       const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
       const flavor = savedObject.type ?? ExploreFlavor.Logs;
-      const editUrl = services.addBasePath(`/app/explore/${flavor}/${url}`);
+      const editUrl = savedObject.type
+        ? services.addBasePath(`/app/explore/${flavor}/${url}`)
+        : services.addBasePath(`/app/${VISUALIZATION_EDITOR_APP_ID}#/edit/${savedObjectId}`);
+
+      // for in-context created visualization
+      const editPath = !savedObject.type ? `#/edit/${savedObjectId}` : url;
+
+      const editApp = !savedObject.type ? VISUALIZATION_EDITOR_APP_ID : `explore/${flavor}`;
 
       return new ExploreEmbeddableClass(
         {
           savedExplore: savedObject,
           editUrl,
-          editPath: url,
+          editPath,
           filterManager,
           editable: services.capabilities.discover?.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],
           services,
-          editApp: `explore/${flavor}`,
+          editApp,
         },
         input,
         executeTriggerActions,
@@ -113,7 +125,61 @@ export class ExploreEmbeddableFactory
     }
   };
 
-  public async create(input: ExploreInput) {
-    return new ErrorEmbeddable('Saved explores can only be created from a saved object', input);
+  /**
+   * Creates a by-value explore embeddable from input without a stored saved object.
+   */
+  public async create(
+    input: ExploreInput,
+    parent?: Container
+  ): Promise<ExploreEmbeddable | ErrorEmbeddable> {
+    if (!input.attributes) {
+      return new ErrorEmbeddable(
+        'Attributes are required. Use createFromSavedObject to create from a saved object id',
+        input,
+        parent
+      );
+    }
+
+    const services = getServices();
+    const filterManager = services.filterManager;
+    const attributes = input.attributes;
+    const references = input.references || [];
+
+    try {
+      let searchSourceValues = parseSearchSourceJSON(
+        attributes.kibanaSavedObjectMeta!.searchSourceJSON
+      );
+      searchSourceValues = injectSearchSourceReferences(searchSourceValues, references);
+      const searchSource = await services.data.search.searchSource.create(searchSourceValues);
+      const indexPattern = searchSource.getField('index');
+
+      const savedExplore = {
+        id: input.id,
+        ...input.attributes,
+        searchSource,
+      } as SavedExplore;
+
+      const { executeTriggerActions } = await this.getStartServices();
+      const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
+      const flavor = savedExplore.type;
+
+      return new ExploreEmbeddableClass(
+        {
+          savedExplore,
+          editUrl: '', // by-value embeddables cannot be edited
+          editPath: '',
+          filterManager,
+          editable: false,
+          indexPatterns: indexPattern ? [indexPattern] : [],
+          services,
+          editApp: `explore/${flavor}`,
+        },
+        input,
+        executeTriggerActions,
+        parent
+      );
+    } catch (e) {
+      return new ErrorEmbeddable(e, input, parent);
+    }
   }
 }

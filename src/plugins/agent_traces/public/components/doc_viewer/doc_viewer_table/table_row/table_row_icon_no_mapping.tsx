@@ -1,0 +1,37 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+
+export function DocViewTableRowIconNoMapping() {
+  const ariaLabel = i18n.translate(
+    'agentTraces.docViews.table.noCachedMappingForThisFieldAriaLabel',
+    {
+      defaultMessage: 'Warning',
+    }
+  );
+  const tooltipContent = i18n.translate(
+    'agentTraces.docViews.table.noCachedMappingForThisFieldTooltip',
+    {
+      defaultMessage:
+        'No cached mapping for this field. Refresh field list from the Management > Index Patterns page',
+    }
+  );
+  return (
+    <EuiIconTip
+      aria-label={ariaLabel}
+      color="warning"
+      content={tooltipContent}
+      iconProps={{
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
+        className: 'agentTracesDocViewer__warning',
+        'data-test-subj': 'noMappingWarning',
+      }}
+      size="s"
+      type="alert"
+    />
+  );
+}

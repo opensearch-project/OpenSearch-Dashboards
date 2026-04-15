@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -15,7 +15,7 @@ export interface SourceFiltersTableProps {
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
-  saveDataset: DataPublicPluginStart['datasets']['updateSavedObject'];
+  saveDataset: DataPublicPluginStart['dataViews']['updateSavedObject'];
   useUpdatedUX: boolean;
 }
 
@@ -155,7 +155,11 @@ export class SourceFiltersTable extends Component<
     return (
       <>
         <Header />
-        <AddFilter useUpdatedUX={this.props.useUpdatedUX} onAddFilter={this.onAddFilter} />
+        <AddFilter
+          useUpdatedUX={this.props.useUpdatedUX}
+          onAddFilter={this.onAddFilter}
+          isSaving={isSaving}
+        />
         <EuiSpacer size="l" />
         <Table
           isSaving={isSaving}
@@ -171,6 +175,7 @@ export class SourceFiltersTable extends Component<
             filterToDeleteValue={filterToDelete.value}
             onCancelConfirmationModal={this.hideDeleteConfirmationModal}
             onDeleteFilter={this.deleteFilter}
+            isSaving={isSaving}
           />
         )}
       </>

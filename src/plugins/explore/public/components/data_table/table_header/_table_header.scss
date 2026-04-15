@@ -3,11 +3,28 @@
 
   // nested for specificity
   .exploreDocTableHeaderField {
-    padding: $euiSizeS;
+    padding: $ouiSizeXXS;
 
+    // Outer wrapper: flex container for header text + action buttons
+    > span {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+
+      // EuiToolTip wrapper: size to content, but shrink when needed
+      > span:first-child {
+        flex: 0 1 auto; // don't grow, can shrink, size to content
+        min-width: 0;
+        overflow: hidden;
+      }
+    }
+
+    // Header text: truncate with ellipsis
     .header-text {
-      display: inline-block;
-      vertical-align: top;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }

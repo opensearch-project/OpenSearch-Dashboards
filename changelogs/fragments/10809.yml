@@ -1,2 +1,0 @@
-fix:
-- Discover vis Y-Axis not display caused by crosshair axis setting ([#10809](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10809))

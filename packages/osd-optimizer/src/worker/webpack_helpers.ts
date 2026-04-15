@@ -28,38 +28,45 @@
  * under the License.
  */
 
-import webpack from 'webpack';
-// @ts-ignore
-import Stats from 'webpack/lib/Stats';
+import { Stats } from '@rspack/core';
 
-export function isFailureStats(stats: webpack.Stats) {
-  if (stats.hasErrors()) {
-    return true;
+export function isFailureStats(stats: Stats) {
+  const { warnings, errors } = stats.toJson({ all: false, warnings: true, errors: true });
+
+  // Log warnings if present
+  if (warnings && warnings.length > 0) {
+    // eslint-disable-next-line no-console
+    console.warn(`[Webpack] ${warnings.length} warning(s) found:`);
+    warnings.forEach((warning, index) => {
+      // eslint-disable-next-line no-console
+      console.warn(`  Warning ${index + 1}: ${warning.message || warning}`);
+    });
   }
 
-  const { warnings } = stats.toJson({ all: false, warnings: true });
+  // Log errors if present
+  if (errors && errors.length > 0) {
+    // eslint-disable-next-line no-console
+    console.error(`[Webpack] ${errors.length} error(s) found:`);
+    errors.forEach((error, index) => {
+      // eslint-disable-next-line no-console
+      console.error(`  Error ${index + 1}: ${error.message || error}`);
+    });
+  }
 
-  // 1 - when typescript doesn't do a full type check, as we have the ts-loader
-  // configured here, it does not have enough information to determine
-  // whether an imported name is a type or not, so when the name is then
-  // exported, typescript has no choice but to emit the export. Fortunately,
-  // the extraneous export should not be harmful, so we just suppress these warnings
-  // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-  const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
-
-  return filteredWarnings.length > 0;
+  return stats.hasErrors();
 }
 
-const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join(''));
+export const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join(''));
 
-export function failedStatsToErrorMessage(stats: webpack.Stats) {
+export function failedStatsToErrorMessage(stats: Stats) {
   const details = stats.toString({
-    ...Stats.presetToOptions('minimal'),
+    preset: 'minimal',
     colors: true,
-    warningsFilter: STATS_WARNINGS_FILTER,
     errors: true,
     errorDetails: true,
     moduleTrace: true,
+    warnings: false,
+    timings: true,
   });
 
   return `Optimizations failure.\n${details.split('\n').join('\n    ')}`;
@@ -130,8 +137,12 @@ export interface WebpackIgnoredModule {
   readableIdentifierStr: string;
 }
 
+// TODO: refactor the types here
 export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
-  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ');
+  return (
+    (module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ')) ||
+    (module?.constructor?.name === 'Module' && module?.identifier?.().startsWith('ignored'))
+  );
 }
 
 /** module replacing imports for webpack externals */
@@ -146,6 +157,10 @@ export interface WebpackExternalModule {
 
 export function isExternalModule(module: any): module is WebpackExternalModule {
   return module?.constructor?.name === 'ExternalModule';
+}
+
+export function isContextModule(module: any): module is WebpackExternalModule {
+  return module?.constructor?.name === 'ContextModule';
 }
 
 /** module replacing imports for webpack externals */

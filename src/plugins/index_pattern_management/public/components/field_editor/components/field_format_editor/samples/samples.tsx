@@ -30,7 +30,7 @@
 
 import './samples.scss';
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 
 import { EuiBasicTable, EuiCompressedFormRow } from '@elastic/eui';
 
@@ -92,6 +92,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
           className="osdFieldFormatEditor__samples"
           compressed={true}
           items={samples}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           columns={columns}
         />
       </EuiCompressedFormRow>

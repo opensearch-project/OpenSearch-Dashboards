@@ -6,17 +6,9 @@
 import React from 'react';
 import { createLineConfig } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import {
-  CategoryAxis,
-  GridOptions,
-  ThresholdMode,
-  ValueAxis,
-  Positions,
-  TooltipOptions,
-} from '../types';
+import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 
-// Mock the React.createElement function
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
   createElement: jest.fn(),
@@ -31,8 +23,7 @@ describe('line_vis_config', () => {
     it('should create a line visualization type configuration', () => {
       const config = createLineConfig();
 
-      // Verify the basic structure
-      expect(config).toHaveProperty('name', 'line');
+      expect(config).toHaveProperty('name', 'Line');
       expect(config).toHaveProperty('type', 'line');
       expect(config).toHaveProperty('ui.style.defaults');
       expect(config).toHaveProperty('ui.style.render');
@@ -42,67 +33,22 @@ describe('line_vis_config', () => {
       const config = createLineConfig();
       const defaults = config.ui.style.defaults;
 
-      // Verify basic controls
       expect(defaults.addLegend).toBe(true);
       expect(defaults.legendPosition).toBe(Positions.BOTTOM);
       expect(defaults.addTimeMarker).toBe(false);
 
-      // Verify line style
-      expect(defaults.lineStyle).toBe('both');
+      expect(defaults.lineStyle).toBe('line');
       expect(defaults.lineMode).toBe('straight');
       expect(defaults.lineWidth).toBe(2);
 
-      // Verify tooltip options
       expect(defaults.tooltipOptions).toEqual({
         mode: 'all',
       });
 
-      // Verify threshold settings
       expect(defaults.thresholdOptions).toMatchObject({
         baseColor: '#00BD6B',
         thresholds: [],
         thresholdStyle: ThresholdMode.Off,
-      });
-
-      // Verify axes
-      expect(defaults.categoryAxes).toHaveLength(1);
-      expect(defaults.categoryAxes[0]).toEqual({
-        id: 'CategoryAxis-1',
-        type: 'category',
-        position: Positions.BOTTOM,
-        show: true,
-        labels: {
-          show: true,
-          filter: true,
-          rotate: 0,
-          truncate: 100,
-        },
-        grid: {
-          showLines: true,
-        },
-        title: {
-          text: '',
-        },
-      });
-      expect(defaults.valueAxes).toHaveLength(1);
-      expect(defaults.valueAxes[0]).toEqual({
-        id: 'ValueAxis-1',
-        name: 'LeftAxis-1',
-        type: 'value',
-        position: Positions.LEFT,
-        show: true,
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        grid: {
-          showLines: true,
-        },
-        title: {
-          text: '',
-        },
       });
 
       expect(defaults.titleOptions).toMatchObject({
@@ -111,19 +57,19 @@ describe('line_vis_config', () => {
       });
     });
 
-    it('should have available mappings configured', () => {
+    it('should have getRules configured', () => {
       const config = createLineConfig();
 
-      expect(config.ui.availableMappings).toHaveLength(9);
-      expect(config.ui.availableMappings[0]).toHaveProperty('x');
-      expect(config.ui.availableMappings[0]).toHaveProperty('y');
+      expect(typeof config.getRules).toBe('function');
+      const rules = config.getRules();
+      expect(Array.isArray(rules)).toBe(true);
+      expect(rules.length).toBeGreaterThan(0);
     });
 
     it('should render the LineVisStyleControls component with the provided props', () => {
       const config = createLineConfig();
       const renderFunction = config.ui.style.render;
 
-      // Mock props
       const mockProps = {
         styleOptions: {
           addLegend: true,
@@ -139,12 +85,12 @@ describe('line_vis_config', () => {
           lineWidth: 1,
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,
-          categoryAxes: [] as CategoryAxis[],
-          valueAxes: [] as ValueAxis[],
+          standardAxes: [],
           titleOptions: {
             show: true,
             titleName: '',
           },
+          showFullTimeRange: false,
         },
         onStyleChange: jest.fn(),
         numericalColumns: [],
@@ -154,10 +100,8 @@ describe('line_vis_config', () => {
         updateVisualization: jest.fn(),
       };
 
-      // Call the render function
       renderFunction(mockProps);
 
-      // Verify that React.createElement was called with the correct arguments
       expect(React.createElement).toHaveBeenCalledWith(LineVisStyleControls, mockProps);
     });
   });

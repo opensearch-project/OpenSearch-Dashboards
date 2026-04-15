@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { StatusMessage } from '../status_message';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';

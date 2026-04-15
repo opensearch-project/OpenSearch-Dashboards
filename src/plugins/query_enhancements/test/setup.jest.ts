@@ -10,6 +10,7 @@ import '@testing-library/jest-dom';
 configure({ testIdAttribute: 'data-test-subj' });
 
 // https://github.com/inrupt/solid-client-authn-js/issues/1676#issuecomment-917016646
+// @ts-expect-error TS2322 TODO(ts-upgrade): fixme
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 

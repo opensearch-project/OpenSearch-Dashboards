@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import { FC } from 'react';
 import {
   EuiFormRow,
   EuiButtonGroup,
   EuiSelect,
   EuiSwitch,
   EuiSplitPanel,
-  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -31,8 +30,20 @@ interface AllAxesOptionsProps {
   initialIsOpen?: boolean;
 }
 
-export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
-  standardAxes,
+const xAxisLabel = i18n.translate('explore.vis.standardAxes.xAxis', {
+  defaultMessage: 'X-Axis',
+});
+
+const yAxisLabel = i18n.translate('explore.vis.standardAxes.yAxis', {
+  defaultMessage: 'Y-Axis',
+});
+
+const y2AxisLabel = i18n.translate('explore.vis.standardAxes.y2Axis', {
+  defaultMessage: 'Y-Axis(2nd)',
+});
+
+export const AllAxesOptions: FC<AllAxesOptionsProps> = ({
+  standardAxes = [],
   onStandardAxesChange,
   axisColumnMappings,
   disableGrid = false,
@@ -51,8 +62,19 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     onStandardAxesChange(updatedAxes);
   };
 
+  const getAxisLabel = (role: AxisRole) => {
+    switch (role) {
+      case AxisRole.X:
+        return switchAxes ? yAxisLabel : xAxisLabel;
+      case AxisRole.Y:
+        return switchAxes ? xAxisLabel : yAxisLabel;
+      case AxisRole.Y_SECOND:
+        return y2AxisLabel;
+    }
+  };
+
   const getPositionsForAxis = (axis: StandardAxes) => {
-    const isY = axis.axisRole === AxisRole.Y;
+    const isY = axis.axisRole === AxisRole.Y || axis.axisRole === AxisRole.Y_SECOND;
     const flipped = !!switchAxes;
 
     // if switch axes, only switch label
@@ -109,26 +131,18 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       data-test-subj="standardAxesPanel"
     >
       {standardAxes.map((axis, index) => {
-        const isYAxis = axis.axisRole === AxisRole.Y;
-
         return (
-          <EuiSplitPanel.Inner paddingSize="s" key={axis.id} color="subdued">
-            <EuiText size="s" style={{ fontWeight: 600 }}>
-              {(switchAxes ? !isYAxis : isYAxis)
-                ? i18n.translate('explore.vis.standardAxes.yAxis', {
-                    defaultMessage: 'Y-Axis',
-                  })
-                : i18n.translate('explore.vis.standardAxes.xAxis', {
-                    defaultMessage: 'X-Axis',
-                  })}
-            </EuiText>
-            <EuiSpacer size="m" />
+          <EuiSplitPanel.Inner paddingSize="s" key={axis.axisRole}>
+            {index !== 0 && <EuiSpacer size="m" />}
             <div>
               <EuiFormRow>
                 <EuiSwitch
                   compressed
                   label={i18n.translate('explore.vis.standardAxes.showAxis', {
-                    defaultMessage: 'Show axis',
+                    defaultMessage: 'Show {name}',
+                    values: {
+                      name: getAxisLabel(axis.axisRole),
+                    },
                   })}
                   data-test-subj="showAxisSwitch"
                   checked={axis.show}
@@ -183,7 +197,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                           })}
                           checked={showFullTimeRange ?? false}
                           onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
-                          data-testid="showFullTimeRangeSwitch"
+                          data-test-subj="showFullTimeRangeSwitch"
                         />
                       </EuiFormRow>
                     )}
@@ -280,6 +294,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                 </>
               )}
             </div>
+            {index < standardAxes.length - 1 && <EuiSpacer size="m" />}
           </EuiSplitPanel.Inner>
         );
       })}

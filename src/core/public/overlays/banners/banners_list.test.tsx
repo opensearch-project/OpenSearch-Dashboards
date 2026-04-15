@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mount } from 'enzyme';
 
 import { BannersList } from './banners_list';

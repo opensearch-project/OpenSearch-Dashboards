@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
@@ -75,13 +75,17 @@ class MarkdownPanelConfigUi extends Component {
     const lessSrc = `#markdown-${model.id} {
   ${value}
 }`;
-    lessC.render(lessSrc, { compress: true, javascriptEnabled: false }, (e, output) => {
-      const parts = { markdown_less: value };
-      if (output) {
-        parts.markdown_css = output.css;
+    lessC.render(
+      lessSrc,
+      { compress: true, javascriptEnabled: false, disablePluginRule: true },
+      (e, output) => {
+        const parts = { markdown_less: value };
+        if (output) {
+          parts.markdown_css = output.css;
+        }
+        this.props.onChange(parts);
       }
-      this.props.onChange(parts);
-    });
+    );
   }
 
   render() {

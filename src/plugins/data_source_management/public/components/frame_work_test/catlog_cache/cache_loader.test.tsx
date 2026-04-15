@@ -24,7 +24,7 @@ import {
   useLoadAccelerationsToCache,
 } from '../../../../framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 
 interface LooseObject {

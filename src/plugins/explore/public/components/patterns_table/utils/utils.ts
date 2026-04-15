@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { IFieldType, Query } from 'src/plugins/data/common';
 import {
   CALCITE_DELIM_CONTENT,
@@ -10,15 +12,15 @@ import {
   COUNT_FIELD,
   DELIM_END,
   DELIM_START,
-  MARK_END,
-  MARK_START,
   PATTERNS_FIELD,
   SAMPLE_FIELD,
 } from './constants';
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
-import { getQueryWithSource } from '../../../application/utils/languages';
+import { resultsCache } from '../../../application/utils/state_management/slices';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
+import { escapePPLValue } from '../../../application/pages/traces/trace_details/server/ppl_request_helpers';
 
 // Small functions returning the two pattern queries
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
@@ -34,7 +36,9 @@ export const regexUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = '${patternString}'`;
+  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field = ${escapePPLValue(
+    patternString
+  )}`;
 };
 
 export const brainUpdateSearchPatternQuery = (
@@ -42,7 +46,29 @@ export const brainUpdateSearchPatternQuery = (
   patternsField: string,
   patternString: string
 ) => {
-  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field = '${patternString}'`;
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field = ${escapePPLValue(
+    patternString
+  )}`;
+};
+
+export const regexExcludeSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` | where patterns_field != ${escapePPLValue(
+    patternString
+  )}`;
+};
+
+export const brainExcludeSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | where patterns_field != ${escapePPLValue(
+    patternString
+  )}`;
 };
 
 export const createSearchPatternQuery = (
@@ -51,10 +77,22 @@ export const createSearchPatternQuery = (
   usingRegexPatterns: boolean,
   patternString: string
 ) => {
-  const preparedQuery = getQueryWithSource(query);
+  const queryString = typeof query.query === 'string' ? query.query : '';
   return usingRegexPatterns
-    ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
-    : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
+    ? regexUpdateSearchPatternQuery(queryString, patternsField, patternString)
+    : brainUpdateSearchPatternQuery(queryString, patternsField, patternString);
+};
+
+export const createExcludeSearchPatternQuery = (
+  query: Query,
+  patternsField: string,
+  usingRegexPatterns: boolean,
+  patternString: string
+) => {
+  const queryString = typeof query.query === 'string' ? query.query : '';
+  return usingRegexPatterns
+    ? regexExcludeSearchPatternQuery(queryString, patternsField, patternString)
+    : brainExcludeSearchPatternQuery(queryString, patternsField, patternString);
 };
 
 export const createSearchPatternQueryWithSlice = (
@@ -62,21 +100,29 @@ export const createSearchPatternQueryWithSlice = (
   patternsField: string,
   usingRegexPatterns: boolean,
   patternString: string,
-  timeField: string,
+  timeField: string | undefined,
   pageSize: number,
   pageOffset: number
 ) => {
   // TODO: switch this logic back to adding onto the createSearchPatternQuery
   // when we don't need a patterns clause to lock in the pattern type
 
-  const preparedQuery = getQueryWithSource(query);
+  const preparedQuery = prepareQueryForLanguage(query);
+  const sortClause = timeField ? ` | sort - ${timeField}` : '';
+
   return usingRegexPatterns
     ? `${regexUpdateSearchPatternQuery(
         preparedQuery.query,
         patternsField,
         patternString
-      )} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`
-    : `${preparedQuery.query} | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field, ${timeField}, ${patternsField} | where patterns_field = '${patternString}' | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
+      )}${sortClause} | head ${pageSize} from ${pageOffset}`
+    : `${
+        preparedQuery.query
+      } | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field${
+        timeField ? `, ${timeField}` : ''
+      }, ${patternsField} | where patterns_field = ${escapePPLValue(
+        patternString
+      )}${sortClause} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table
@@ -84,27 +130,33 @@ export const isValidFiniteNumber = (val: number) => {
   return !isNaN(val) && isFinite(val);
 };
 
+const getHighlightColor = (isDarkMode: boolean): string =>
+  isDarkMode ? euiThemeVars.ouiColorVis0 : euiThemeVars.ouiColorVis13;
+
 /**
  * Highlights dynamic elements in a log string based on a pattern string.
  *
  * This function takes a log string and a pattern string containing delimiters (e.g., <*>) that mark
  * where dynamic content appears. It identifies the dynamic parts of the log by comparing it with the pattern,
- * and wraps those dynamic elements with <mark> tags for visual highlighting in the UI.
+ * and wraps those dynamic elements with highlighted React span elements for visual highlighting in the UI.
  *
  * The strategy uses a two-pointer approach that traverses both the log and pattern strings simultaneously.
  * It identifies static text in the pattern, locates that same text in the log using a sliding window, and
  * marks everything in between as dynamic content. The algorithm handles both standard delimiters (<*>)
  * and specialized delimiters (e.g., <*IP*>, <*DATETIME*>) to accommodate different types of dynamic content.
  */
-export const highlightLogUsingPattern = (log: string, pattern: string) => {
-  // continue those last few steps until we reach the end.
-
+export const highlightLogUsingPattern = (
+  log: string,
+  pattern: string,
+  isDarkMode: boolean
+): React.ReactNode => {
   // two pointers for the sample log string and the pattern string
   let currSampleLogPos = 0;
   let currPatternPos = 0;
 
-  // an accumulator: string that we're building w/ <mark>
-  let markedPattern = '';
+  const highlightColor = getHighlightColor(isDarkMode);
+  const segments: React.ReactNode[] = [];
+  let keyIdx = 0;
 
   try {
     while (currPatternPos < pattern.length) {
@@ -163,8 +215,18 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
       // move samplePos up past preDelimWindow
       currSampleLogPos += preDelimWindow.length;
 
-      if (dynamicElement.length !== 0) markedPattern += MARK_START + dynamicElement + MARK_END;
-      markedPattern += preDelimWindow;
+      if (dynamicElement.length !== 0) {
+        segments.push(
+          React.createElement(
+            'span',
+            { key: keyIdx++, style: { color: highlightColor } },
+            dynamicElement
+          )
+        );
+      }
+      if (preDelimWindow) {
+        segments.push(preDelimWindow);
+      }
     }
 
     // check to see if our currSampleLogPos is at the length of the log.length
@@ -172,10 +234,16 @@ export const highlightLogUsingPattern = (log: string, pattern: string) => {
     // otherwise, there must be another delimiter at the end of the log.
     // simply mark the last section.
     if (currSampleLogPos !== log.length) {
-      markedPattern += MARK_START + log.slice(currSampleLogPos) + MARK_END;
+      segments.push(
+        React.createElement(
+          'span',
+          { key: keyIdx++, style: { color: highlightColor } },
+          log.slice(currSampleLogPos)
+        )
+      );
     }
 
-    return markedPattern;
+    return React.createElement(React.Fragment, null, ...segments);
   } catch {
     return log;
   }
@@ -200,7 +268,6 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
 
   // Get the log tab's results from the state
   const query = state.query;
-  const results = state.results;
 
   // Get the logs tab to find its cache key
   const logsTab = services.tabRegistry.getTab('logs');
@@ -208,7 +275,7 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
 
   // Get the cache key for logs tab results
   const logsCacheKey = defaultPrepareQueryString(query);
-  const logResults = results[logsCacheKey];
+  const logResults = resultsCache.get(logsCacheKey);
 
   // Get fields
   const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {

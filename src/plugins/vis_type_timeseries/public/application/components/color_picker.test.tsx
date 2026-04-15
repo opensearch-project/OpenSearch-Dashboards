@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { mount } from 'enzyme';
 import { ReactWrapper } from 'enzyme';

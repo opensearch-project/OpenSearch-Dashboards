@@ -7,8 +7,7 @@ import { SavedObjectsClientContract, SavedObjectReference } from '../../../../co
 import { CorrelationsClient } from './correlations_client';
 import {
   CorrelationSavedObject,
-  CorrelationAttributes,
-  CORRELATION_TYPES,
+  CORRELATION_TYPE_PREFIXES,
   CORRELATION_VERSION,
 } from '../types/correlations';
 
@@ -53,6 +52,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       const result = await client.find();
@@ -81,6 +81,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       const result = await client.find({ datasetId: 'trace-dataset-123' });
@@ -99,6 +100,7 @@ describe('CorrelationsClient', () => {
 
     it('should support pagination options', async () => {
       const mockResponse = { savedObjects: [] };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       await client.find({ page: 2, perPage: 50 });
@@ -111,6 +113,7 @@ describe('CorrelationsClient', () => {
     });
 
     it('should handle empty results', async () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
 
       const result = await client.find();
@@ -138,6 +141,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.get.mockResolvedValue(mockCorrelation);
 
       const result = await client.get('correlation-1');
@@ -157,14 +161,17 @@ describe('CorrelationsClient', () => {
     it('should create a new correlation with correct structure', async () => {
       const createData = {
         traceDatasetId: 'trace-123',
+        traceDatasetTitle: 'my-trace-dataset',
         logDatasetIds: ['logs-456', 'logs-789'],
       };
+
+      const expectedCorrelationType = `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}my-trace-dataset`;
 
       const mockResponse: CorrelationSavedObject = {
         id: 'new-correlation',
         type: 'correlations',
         attributes: {
-          correlationType: CORRELATION_TYPES.TRACES_LOGS,
+          correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
@@ -179,6 +186,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       const result = await client.create(createData);
@@ -186,7 +194,8 @@ describe('CorrelationsClient', () => {
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'correlations',
         {
-          correlationType: CORRELATION_TYPES.TRACES_LOGS,
+          title: 'trace-to-logs_my-trace-dataset',
+          correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
@@ -208,14 +217,17 @@ describe('CorrelationsClient', () => {
     it('should create correlation with single log dataset', async () => {
       const createData = {
         traceDatasetId: 'trace-123',
+        traceDatasetTitle: 'my-trace-dataset',
         logDatasetIds: ['logs-456'],
       };
+
+      const expectedCorrelationType = `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}my-trace-dataset`;
 
       const mockResponse: CorrelationSavedObject = {
         id: 'new-correlation',
         type: 'correlations',
         attributes: {
-          correlationType: CORRELATION_TYPES.TRACES_LOGS,
+          correlationType: expectedCorrelationType,
           version: CORRELATION_VERSION,
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
@@ -228,6 +240,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       const result = await client.create(createData);
@@ -239,6 +252,7 @@ describe('CorrelationsClient', () => {
     it('should allow custom correlationType and version', async () => {
       const createData = {
         traceDatasetId: 'trace-123',
+        traceDatasetTitle: 'my-trace-dataset',
         logDatasetIds: ['logs-456'],
         correlationType: 'Custom-Type',
         version: '2.0.0',
@@ -261,6 +275,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       await client.create(createData);
@@ -295,6 +310,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.get.mockResolvedValue(existingCorrelation);
 
       const updatedCorrelation: CorrelationSavedObject = {
@@ -314,6 +330,7 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.update.mockResolvedValue(updatedCorrelation);
 
       const result = await client.update({
@@ -358,7 +375,9 @@ describe('CorrelationsClient', () => {
         ],
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.get.mockResolvedValue(existingCorrelation);
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.update.mockResolvedValue({
         ...existingCorrelation,
         references: [],
@@ -396,6 +415,7 @@ describe('CorrelationsClient', () => {
   describe('getCorrelationsForDataset', () => {
     it('should call find with datasetId', async () => {
       const mockResponse = { savedObjects: [] };
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       await client.getCorrelationsForDataset('dataset-123');
@@ -421,6 +441,7 @@ describe('CorrelationsClient', () => {
         ] as any,
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       const count = await client.countForDataset('dataset-123');
@@ -432,6 +453,7 @@ describe('CorrelationsClient', () => {
     });
 
     it('should return 0 when no correlations found', async () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
 
       const count = await client.countForDataset('dataset-123');
@@ -446,6 +468,7 @@ describe('CorrelationsClient', () => {
         savedObjects: [{ id: 'correlation-1' }] as any,
       };
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
       const result = await client.isTraceDatasetCorrelated('trace-123');
@@ -454,6 +477,7 @@ describe('CorrelationsClient', () => {
     });
 
     it('should return false when trace dataset has no correlations', async () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
 
       const result = await client.isTraceDatasetCorrelated('trace-123');
@@ -499,6 +523,7 @@ describe('CorrelationsClient', () => {
         },
       ];
 
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: mockCorrelations });
 
       const result = await client.getCorrelationByTraceDataset('trace-123');
@@ -508,6 +533,7 @@ describe('CorrelationsClient', () => {
     });
 
     it('should return null when no correlation found', async () => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
 
       const result = await client.getCorrelationByTraceDataset('nonexistent');
@@ -535,6 +561,7 @@ describe('CorrelationsClient', () => {
         },
       ];
 
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: mockCorrelations });
 
       const result = await client.getCorrelationByTraceDataset('trace-123');

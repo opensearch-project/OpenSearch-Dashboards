@@ -28,12 +28,8 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
-
-const markdownRenderers = {
-  root: Fragment,
-};
 
 export interface MarkdownSimpleProps {
   children: string;
@@ -41,7 +37,9 @@ export interface MarkdownSimpleProps {
 
 // Render markdown string into JSX inside of a Fragment.
 export const MarkdownSimple = ({ children }: MarkdownSimpleProps) => (
-  <ReactMarkdown renderers={markdownRenderers}>{children}</ReactMarkdown>
+  <Fragment>
+    <ReactMarkdown>{children}</ReactMarkdown>
+  </Fragment>
 );
 
 // Needed for React.lazy

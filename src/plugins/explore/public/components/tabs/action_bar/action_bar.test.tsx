@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ActionBar } from './action_bar';
 
@@ -85,6 +84,19 @@ jest.mock('../../../application/utils/hooks/use_histogram_results', () => ({
       },
     },
   }),
+}));
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: () => ({ language: 'PPL', query: 'source=logs', dataset: { id: 'test' } }),
+}));
+
+jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: () => 'source=logs',
+}));
+
+jest.mock('../../../application/utils/state_management/actions/utils', () => ({
+  queryEndsWithHead: () => false,
 }));
 
 describe('ActionBar', () => {

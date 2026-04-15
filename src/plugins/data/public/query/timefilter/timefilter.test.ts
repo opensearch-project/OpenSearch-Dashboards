@@ -28,8 +28,6 @@
  * under the License.
  */
 
-jest.useFakeTimers();
-
 jest.mock('./lib/parse_querystring', () => ({
   parseQueryString: () => {
     return {
@@ -142,9 +140,14 @@ describe('setRefreshInterval', () => {
   let autoRefreshSub: Subscription;
 
   beforeEach(() => {
+    // IMPORTANT: Stop any auto-refresh from previous test/retry BEFORE enabling fake timers
+    // This ensures clean state when timefilter persists across Jest retries
+    timefilter.setRefreshInterval({ pause: true, value: 0 });
+    jest.useFakeTimers();
     update = sinon.spy();
     fetch = sinon.spy();
     autoRefreshFetch = sinon.spy();
+    // Reset to default state with pause: false, value: 0 (no auto-refresh since value is 0)
     timefilter.setRefreshInterval({
       pause: false,
       value: 0,
@@ -155,9 +158,13 @@ describe('setRefreshInterval', () => {
   });
 
   afterEach(() => {
+    // Stop any auto-refresh that might be running FIRST
+    timefilter.setRefreshInterval({ pause: true, value: 0 });
     refreshSub.unsubscribe();
     fetchSub.unsubscribe();
     autoRefreshSub.unsubscribe();
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test('should update refresh interval', () => {

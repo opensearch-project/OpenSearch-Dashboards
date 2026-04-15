@@ -4,25 +4,25 @@
  */
 
 import {
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedSelect,
+  EuiCompressedTextArea,
+  EuiForm,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiCompressedFormRow,
-  EuiCompressedFieldText,
-  EuiCompressedTextArea,
-  EuiCompressedSelect,
-  EuiForm,
 } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import React, { useState } from 'react';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { ApplicationStart } from 'opensearch-dashboards/public';
-import { FormattedMessage } from '@osd/i18n/react';
-import { AuthMethod, OPENSEARCH_DOCUMENTATION_URL } from '../../../constants';
-import { QueryPermissionsConfiguration } from '../query_permissions';
 import { Role } from '../../../../types';
+import { AuthMethod, OPENSEARCH_DOCUMENTATION_URL } from '../../../constants';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
 import { NameRow } from '../name_row';
+import { QueryPermissionsConfiguration } from '../query_permissions';
 
 interface ConfigurePrometheusDatasourceProps {
   useNewUX: boolean;
@@ -88,6 +88,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
   const [details, setDetails] = useState(currentDetails);
   const [store, setStore] = useState(currentStore);
   const authOptions = [
+    { value: 'noauth', text: 'No authentication' },
     { value: 'basicauth', text: 'Basic authentication' },
     { value: 'awssigv4', text: 'AWS Signature Version 4' },
   ];

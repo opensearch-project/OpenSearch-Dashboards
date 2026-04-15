@@ -13,7 +13,7 @@ import React from 'react';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
 import { ScopedHistory } from 'opensearch-dashboards/public';
 import * as utils from '../utils';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
@@ -57,6 +57,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -91,6 +92,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,

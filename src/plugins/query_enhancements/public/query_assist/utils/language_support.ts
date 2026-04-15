@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PPL_SUPPORT_DATASET_TYPES } from './constant';
+import { PPL_SUPPORT_DATASET_TYPES, PROMQL_SUPPORT_DATASET_TYPES } from './constant';
 
 export const isPPLSupportedType = (type?: string) => {
   if (!type) {
@@ -11,4 +11,12 @@ export const isPPLSupportedType = (type?: string) => {
   }
 
   return PPL_SUPPORT_DATASET_TYPES.includes(type);
+};
+
+export const isPromQLSupportedType = (type?: string) => {
+  if (!type) {
+    return false;
+  }
+
+  return PROMQL_SUPPORT_DATASET_TYPES.includes(type);
 };

@@ -28,4 +28,5 @@
  * under the License.
  */
 
+export declare const workerUrl: string;
 export declare const workerModule: { id: string; src: string };

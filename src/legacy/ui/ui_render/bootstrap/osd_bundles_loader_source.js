@@ -39,14 +39,13 @@ function osdBundlesLoader() {
     return Object.prototype.hasOwnProperty.call(modules, prop);
   }
 
-  function define(key, bundleRequire, bundleModuleKey) {
+  function define(key, bundleRequire) {
     if (has(key)) {
       throw new Error('__osdBundles__ already has a module defined for "' + key + '"');
     }
 
     modules[key] = {
       bundleRequire,
-      bundleModuleKey,
     };
   }
 
@@ -55,7 +54,7 @@ function osdBundlesLoader() {
       throw new Error('__osdBundles__ does not have a module defined for "' + key + '"');
     }
 
-    return modules[key].bundleRequire(modules[key].bundleModuleKey);
+    return modules[key].bundleRequire();
   }
 
   return { has: has, define: define, get: get };

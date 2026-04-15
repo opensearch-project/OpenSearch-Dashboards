@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import sinon from 'sinon';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 

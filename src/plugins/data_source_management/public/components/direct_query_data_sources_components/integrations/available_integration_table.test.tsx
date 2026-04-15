@@ -4,12 +4,10 @@
  */
 
 import { configure, mount } from 'enzyme';
-// @ts-expect-error TS7016 TODO(ts-error): fixme
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
 import { waitFor } from '@testing-library/react';
 import { AvailableIntegrationsTable } from './available_integration_table';
 import { availableTableViewData } from '../../../mocks';
-import React from 'react';
 
 describe('Available Integration Table View Test', () => {
   configure({ adapter: new Adapter() });

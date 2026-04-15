@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';

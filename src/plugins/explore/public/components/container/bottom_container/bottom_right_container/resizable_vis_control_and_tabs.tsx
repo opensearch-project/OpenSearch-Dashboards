@@ -5,7 +5,7 @@
 
 import './resizable_vis_control_and_tabs.scss';
 
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -49,7 +49,7 @@ export const ResizableVisControlAndTabs = () => {
   }
 
   return (
-    <EuiResizableContainer style={{ height: '100%' }}>
+    <EuiResizableContainer className="tabsPanelContainer">
       {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
         collapseFn.current = (id, direction: PanelDirection = 'left') =>
           togglePanel?.(id, { direction });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -28,6 +27,7 @@ jest.mock('../../services/usage_collector', () => ({
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   executeHistogramQuery: jest.fn(() => ({ type: 'mock/executeHistogramQuery' })),
+  executeDataTableQuery: jest.fn(() => ({ type: 'mock/executeDataTableQuery' })),
   defaultPrepareQueryString: jest.fn((query) => `${query.language}:${query.query}`),
   prepareHistogramCacheKey: jest.fn((query) => `histogram:${query.language}:${query.query}`),
 }));
@@ -119,6 +119,7 @@ describe('DiscoverChart', () => {
         isDirty: false,
         lineCount: undefined,
       },
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       ui: {
         activeTabId: 'logs',
         showHistogram: true,
@@ -148,6 +149,7 @@ describe('DiscoverChart', () => {
         summaryAgentIsAvailable: false,
         queryExecutionButtonStatus: 'REFRESH',
         isQueryEditorDirty: false,
+        hasUserInitiatedQuery: false,
       },
       results: {},
       tab: {

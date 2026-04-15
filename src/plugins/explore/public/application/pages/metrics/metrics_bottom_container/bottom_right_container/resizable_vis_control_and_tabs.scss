@@ -1,0 +1,34 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.visStylePanelOuter {
+  padding-left: $ouiSizeS;
+}
+
+.visStylePanelInner {
+  padding-left: $ouiSizeXS;
+  border-left: $euiBorderThin;
+  min-height: 100%;
+}
+
+.visStylePanelTitle {
+  padding-bottom: $euiSizeXS;
+  padding-top: $ouiSizeXS;
+  padding-left: $ouiSizeXS;
+  border-bottom: $euiBorderThin;
+}
+
+.visStylePanelBody {
+  margin-top: $euiSizeM;
+}
+
+.tabsPanel {
+  display: flex;
+}
+
+.tabsPanelContainer {
+  min-height: 0;
+  flex-grow: 1;
+}

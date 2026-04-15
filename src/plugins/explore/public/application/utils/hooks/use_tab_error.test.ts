@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux';
 import { useTabError } from './use_tab_error';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';

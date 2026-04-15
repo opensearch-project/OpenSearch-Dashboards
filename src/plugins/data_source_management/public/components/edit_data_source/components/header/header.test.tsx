@@ -9,7 +9,7 @@ import { Header } from './header';
 import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { mockManagementPlugin } from '../../../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 const headerTitleIdentifier = '[data-test-subj="editDataSourceTitle"]';
 const deleteIconIdentifier = '[data-test-subj="editDatasourceDeleteIcon"]';
@@ -39,6 +39,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -94,6 +95,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -125,6 +127,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -184,6 +187,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -220,6 +224,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
 import { QueryPanelEditor } from './query_panel_editor';
@@ -29,7 +28,7 @@ const QueryPanel = () => {
   usePPLExecuteQueryAction(setEditorTextWithQuery);
 
   return (
-    <EuiPanel paddingSize="s">
+    <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <QueryPanelWidgets />
       <div className="exploreQueryPanel__editorsWrapper">
         <QueryPanelEditor />

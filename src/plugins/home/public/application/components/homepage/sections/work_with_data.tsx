@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,

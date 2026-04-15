@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { ComponentType, ReactWrapper } from 'enzyme';
+import { ComponentType } from 'react';
+import { ReactWrapper } from 'enzyme';
 
 import { findTestSubject, reactRouterMock } from '../helpers';
 import {

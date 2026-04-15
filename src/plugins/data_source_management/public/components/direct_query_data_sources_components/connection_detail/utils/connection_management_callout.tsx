@@ -4,7 +4,6 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import React from 'react';
 
 export const ConnectionManagementCallout = () => {
   return (

@@ -1,5 +1,0 @@
-feat:
-- Added dataset with accordion ([#10703](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10703))
-- Made logs row expandable ([#10703](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10703))
-- Display 10 logs ([#10703](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10703))
-- Added testing for the componenets ([#10703](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10703))

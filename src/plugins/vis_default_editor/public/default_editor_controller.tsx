@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import React, { Suspense, lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { Suspense, lazy } from 'react';
+import { createRoot, Root } from 'react-dom/client';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
@@ -39,6 +39,8 @@ import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/pub
 const DefaultEditor = lazy(() => import('./default_editor'));
 
 class DefaultEditorController {
+  private root: Root | null = null;
+
   constructor(
     private el: HTMLElement,
     private vis: Vis,
@@ -47,7 +49,11 @@ class DefaultEditorController {
   ) {}
 
   render(props: EditorRenderProps) {
-    render(
+    if (!this.root) {
+      this.root = createRoot(this.el);
+    }
+
+    this.root.render(
       <EuiErrorBoundary>
         <Suspense
           fallback={
@@ -70,13 +76,15 @@ class DefaultEditorController {
             {...props}
           />
         </Suspense>
-      </EuiErrorBoundary>,
-      this.el
+      </EuiErrorBoundary>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
   }
 }
 

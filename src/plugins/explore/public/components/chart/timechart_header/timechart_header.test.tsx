@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
@@ -157,6 +156,16 @@ describe('timechart header', function () {
     // @ts-ignore
     const labels = dropdown.find('option').map((option) => option.text());
     expect(labels).toEqual(['Auto', 'Millisecond', 'Second']);
+  });
+
+  it('should hide interval selector when hideIntervalSelector is true', () => {
+    const updatedProps = {
+      ...props,
+      hideIntervalSelector: true,
+    };
+    component = mountWithIntl(<TimechartHeader {...updatedProps} />);
+    const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
+    expect(intervalSelect.length).toBe(0);
   });
 
   it('should change the interval', function () {

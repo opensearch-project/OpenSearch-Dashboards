@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import { PatternsFlyoutRecord } from './patterns_table_flyout';
 import { isValidFiniteNumber } from '../utils/utils';
 
@@ -22,7 +22,7 @@ export const PatternsFlyoutProvider: React.FC<{ children: ReactNode }> = ({ chil
     undefined
   );
 
-  const openPatternsTableFlyout = (record?: PatternsFlyoutRecord) => {
+  const openPatternsTableFlyout = useCallback((record?: PatternsFlyoutRecord) => {
     // check the record to make sure that the flyout can be properly opening with the right data
     if (
       typeof record?.count !== 'number' ||
@@ -37,23 +37,24 @@ export const PatternsFlyoutProvider: React.FC<{ children: ReactNode }> = ({ chil
 
     // finally, open the flyout
     setIsFlyoutOpen(true);
-  };
+  }, []);
 
-  const closePatternsTableFlyout = () => {
+  const closePatternsTableFlyout = useCallback(() => {
     setIsFlyoutOpen(false);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      isFlyoutOpen,
+      patternsFlyoutData,
+      openPatternsTableFlyout,
+      closePatternsTableFlyout,
+    }),
+    [isFlyoutOpen, patternsFlyoutData, openPatternsTableFlyout, closePatternsTableFlyout]
+  );
 
   return (
-    <PatternsFlyoutContext.Provider
-      value={{
-        isFlyoutOpen,
-        patternsFlyoutData,
-        openPatternsTableFlyout,
-        closePatternsTableFlyout,
-      }}
-    >
-      {children}
-    </PatternsFlyoutContext.Provider>
+    <PatternsFlyoutContext.Provider value={contextValue}>{children}</PatternsFlyoutContext.Provider>
   );
 };
 

@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useCallback, useMemo, useState } from 'react';
+import { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, of } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -197,7 +197,7 @@ export function Header({
   const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
 
   const setIsNavOpen = useCallback(
-    (value) => {
+    (value: boolean) => {
       /**
        * When use updated header, we will regard the lock state as source of truth
        */

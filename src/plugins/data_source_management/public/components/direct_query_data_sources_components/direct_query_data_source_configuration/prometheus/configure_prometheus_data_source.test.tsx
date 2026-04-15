@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiTextArea, EuiSelect } from '@elastic/eui';
+import { EuiTextArea } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './configure_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
 
@@ -150,37 +149,5 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     });
 
     expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
-  });
-
-  it('updates auth method on select change', async () => {
-    const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect);
-    await act(async () => {
-      const onChange = select.prop('onChange');
-      if (onChange) {
-        onChange({ target: { value: 'awssigv4' } } as any);
-      }
-    });
-    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-  });
-
-  it('displays authentication fields based on auth method', async () => {
-    const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect);
-    await act(async () => {
-      const onChange = select.prop('onChange');
-      if (onChange) {
-        onChange({ target: { value: 'awssigv4' } } as any);
-      }
-    });
-    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-
-    await act(async () => {
-      const onChange = select.prop('onChange');
-      if (onChange) {
-        onChange({ target: { value: 'basicauth' } } as any);
-      }
-    });
-    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
   });
 });

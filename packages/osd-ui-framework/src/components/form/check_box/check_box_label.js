@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { KuiCheckBox } from './check_box';

@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import produce from 'immer';
-import { Draft } from 'immer';
+import produce, { Draft } from 'immer';
 import {
   ColorModes,
   ColorRanges,
@@ -65,6 +64,7 @@ function MetricVizOptions() {
 
   return (
     <>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.params.settingsTitle', { defaultMessage: 'Settings' })}
         initialIsOpen
@@ -95,6 +95,7 @@ function MetricVizOptions() {
           }
         />
       </Option>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option title={i18n.translate('visBuilder.params.rangesTitle', { defaultMessage: 'Ranges' })}>
         <ColorRanges
           data-test-subj="metricColorRange"
@@ -140,6 +141,7 @@ function MetricVizOptions() {
           uiState={new PersistedState({})}
         />
       </Option>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.params.style.styleTitle', { defaultMessage: 'Style' })}
       >

@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TraceTopNavMenu } from './top_nav_buttons';
 
@@ -55,7 +54,7 @@ describe('TraceTopNavMenu', () => {
     mockElements = [];
   });
 
-  it('renders the modal when View raw data button is clicked', () => {
+  it('renders the modal when View raw data button is clicked', async () => {
     const mockSetMenuMountPoint = jest.fn();
     const mockElement = document.createElement('div');
     document.body.appendChild(mockElement);
@@ -65,7 +64,9 @@ describe('TraceTopNavMenu', () => {
 
     // Get the mount function and call it to render the header content
     const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-    mountFunction(mockElement);
+    await act(async () => {
+      mountFunction(mockElement);
+    });
 
     // Find and click the View raw data button
     const viewRawDataBtn = mockElement.querySelector('[data-test-subj="viewRawDataBtn"]');
@@ -80,7 +81,7 @@ describe('TraceTopNavMenu', () => {
     expect(screen.getByText(/test.*data/)).toBeInTheDocument();
   });
 
-  it('closes the raw data modal when Close button is clicked', () => {
+  it('closes the raw data modal when Close button is clicked', async () => {
     const mockSetMenuMountPoint = jest.fn();
     const mockElement = document.createElement('div');
     document.body.appendChild(mockElement);
@@ -89,7 +90,9 @@ describe('TraceTopNavMenu', () => {
     render(<TraceTopNavMenu {...defaultProps} setMenuMountPoint={mockSetMenuMountPoint} />);
 
     const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-    mountFunction(mockElement);
+    await act(async () => {
+      mountFunction(mockElement);
+    });
 
     // Open the modal
     const viewRawDataBtn = mockElement.querySelector('[data-test-subj="viewRawDataBtn"]');
@@ -103,7 +106,7 @@ describe('TraceTopNavMenu', () => {
     expect(screen.queryByText('Raw data')).not.toBeInTheDocument();
   });
 
-  it('handles empty payload data gracefully', () => {
+  it('handles empty payload data gracefully', async () => {
     const propsWithEmptyData = {
       ...defaultProps,
       payloadData: [],
@@ -117,7 +120,9 @@ describe('TraceTopNavMenu', () => {
     render(<TraceTopNavMenu {...propsWithEmptyData} setMenuMountPoint={mockSetMenuMountPoint} />);
 
     const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-    mountFunction(mockElement);
+    await act(async () => {
+      mountFunction(mockElement);
+    });
 
     // Click the View raw data button
     const viewRawDataBtn = mockElement.querySelector('[data-test-subj="viewRawDataBtn"]');
@@ -178,7 +183,7 @@ describe('TraceTopNavMenu', () => {
   });
 
   describe('Trace ID Badge', () => {
-    it('displays trace ID badge with correct format when traceId is provided', () => {
+    it('displays trace ID badge with correct format when traceId is provided', async () => {
       const mockSetMenuMountPoint = jest.fn();
       const mockElement = document.createElement('div');
       document.body.appendChild(mockElement);
@@ -187,7 +192,9 @@ describe('TraceTopNavMenu', () => {
       render(<TraceTopNavMenu {...defaultProps} setMenuMountPoint={mockSetMenuMountPoint} />);
 
       const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-      mountFunction(mockElement);
+      await act(async () => {
+        mountFunction(mockElement);
+      });
 
       // Check if the trace ID badge is rendered with correct format
       expect(mockElement.textContent).toContain('Trace ID: test-trace-id');
@@ -202,7 +209,9 @@ describe('TraceTopNavMenu', () => {
       render(<TraceTopNavMenu {...defaultProps} setMenuMountPoint={mockSetMenuMountPoint} />);
 
       const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-      mountFunction(mockElement);
+      await act(async () => {
+        mountFunction(mockElement);
+      });
 
       // Find and click the badge
       const badge = mockElement.querySelector('[style*="cursor: pointer"]');
@@ -216,7 +225,7 @@ describe('TraceTopNavMenu', () => {
       });
     });
 
-    it('does not display trace ID badge when traceId is not provided', () => {
+    it('does not display trace ID badge when traceId is not provided', async () => {
       const mockSetMenuMountPoint = jest.fn();
       const mockElement = document.createElement('div');
       document.body.appendChild(mockElement);
@@ -234,7 +243,9 @@ describe('TraceTopNavMenu', () => {
       );
 
       const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-      mountFunction(mockElement);
+      await act(async () => {
+        mountFunction(mockElement);
+      });
 
       // Should not contain trace ID text
       expect(mockElement.textContent).not.toContain('Trace ID:');
@@ -251,7 +262,9 @@ describe('TraceTopNavMenu', () => {
       render(<TraceTopNavMenu {...defaultProps} setMenuMountPoint={mockSetMenuMountPoint} />);
 
       const mountFunction = mockSetMenuMountPoint.mock.calls[0][0];
-      mountFunction(mockElement);
+      await act(async () => {
+        mountFunction(mockElement);
+      });
 
       const mockWriteText = jest.fn().mockRejectedValue(new Error('Clipboard error'));
       Object.assign(navigator, {

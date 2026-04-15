@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiPageBody,
@@ -92,10 +92,12 @@ export const DataSourceMultiSelectableExample = ({
           fullWidth: false,
           savedObjects: savedObjects.client,
           notifications,
+          // @ts-expect-error TODO FIX ME
           onSelectedDataSources: (ds) => setSelectedDataSources(ds),
         }}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjects, notifications, setActionMenu]);
 
   return (
@@ -122,6 +124,7 @@ export const DataSourceMultiSelectableExample = ({
             </p>
             <p>
               <EuiTextColor color="accent">
+                {/* @ts-expect-error TODO FIX ME */}
                 Selected: {selectedDataSources.map((ds) => ds.label).join(', ')}
               </EuiTextColor>
             </p>

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@osd/i18n';
@@ -82,7 +81,7 @@ export class RenderingService {
       render: async (
         request,
         uiSettings,
-        { includeUserSettings = true, vars }: IRenderOptions = {}
+        { includeUserSettings = true, vars, nonce }: IRenderOptions
       ) => {
         const env = {
           mode: this.coreContext.env.mode,
@@ -118,6 +117,7 @@ export class RenderingService {
           startupScriptUrl: `${basePath}/startup.js`,
           i18n: i18n.translate,
           locale,
+          nonce,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,

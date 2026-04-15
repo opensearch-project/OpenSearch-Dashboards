@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
@@ -97,32 +97,6 @@ export const LegendOptionsPanel = ({
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
-          <EuiFormRow
-            label={
-              hasSizeLegend
-                ? i18n.translate('explore.stylePanel.legend.colorTitle', {
-                    defaultMessage: 'Color legend title',
-                  })
-                : i18n.translate('explore.stylePanel.legend.title', {
-                    defaultMessage: 'Legend title',
-                  })
-            }
-          >
-            <DebouncedFieldText
-              value={legendOptions.title || ''}
-              onChange={(value: string) => onLegendOptionsChange({ title: value })}
-              data-test-subj="legendTitleInput"
-              placeholder={
-                hasSizeLegend
-                  ? i18n.translate('explore.stylePanel.legend.colorTitle.placeholder', {
-                      defaultMessage: 'Color legend name',
-                    })
-                  : i18n.translate('explore.stylePanel.legend.title.placeholder', {
-                      defaultMessage: 'Legend name',
-                    })
-              }
-            />
-          </EuiFormRow>
           {hasSizeLegend && (
             <EuiFormRow
               label={i18n.translate('explore.stylePanel.legend.titleForSize', {

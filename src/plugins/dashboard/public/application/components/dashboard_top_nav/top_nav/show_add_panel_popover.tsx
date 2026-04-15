@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { useRef } from 'react';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { useAsync } from 'react-use';
@@ -12,16 +12,22 @@ import { EuiButton, EuiWrappingPopover, EuiSpacer, EuiContextMenu } from '@elast
 import { buildContextMenuForActions, UiActionsStart } from '../../../../../../ui_actions/public';
 import { dashboardAddPanelTrigger, DASHBOARD_ADD_PANEL_TRIGGER } from '../../../../ui_triggers';
 
+interface ContainerInfo {
+  containerName?: string;
+  containerId?: string;
+}
+
 let isMount = false;
+let root: Root | null = null;
 
 const container = document.createElement('div');
 
 const unmount = () => {
-  ReactDOM.unmountComponentAtNode(container);
+  if (root) {
+    root.unmount();
+    root = null;
+  }
   isMount = false;
-};
-const triggerContext = {
-  trigger: dashboardAddPanelTrigger,
 };
 
 const PanelPopover = ({
@@ -29,12 +35,18 @@ const PanelPopover = ({
   button,
   onAddExistingPanelFlyout,
   uiActions,
+  containerInfo,
 }: {
   onClose: () => void;
   button: HTMLElement;
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
+  containerInfo?: ContainerInfo;
 }) => {
+  const triggerContext = {
+    trigger: dashboardAddPanelTrigger,
+    containerInfo,
+  };
   const actionsRef = useRef(uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER));
 
   const panels = useAsync(() => {
@@ -81,10 +93,12 @@ export function showAddPanelPopover({
   anchorElement,
   onAddExistingPanelFlyout,
   uiActions,
+  containerInfo,
 }: {
   anchorElement: HTMLElement;
   onAddExistingPanelFlyout: () => void;
   uiActions: UiActionsStart;
+  containerInfo?: ContainerInfo;
 }) {
   if (isMount) {
     unmount();
@@ -94,13 +108,14 @@ export function showAddPanelPopover({
   isMount = true;
 
   document.body.appendChild(container);
-  ReactDOM.render(
+  root = createRoot(container);
+  root.render(
     <PanelPopover
       onAddExistingPanelFlyout={onAddExistingPanelFlyout}
       button={anchorElement}
       onClose={unmount}
       uiActions={uiActions}
-    />,
-    container
+      containerInfo={containerInfo}
+    />
   );
 }

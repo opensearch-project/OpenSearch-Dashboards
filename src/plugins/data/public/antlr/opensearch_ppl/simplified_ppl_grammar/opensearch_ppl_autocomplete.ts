@@ -13,7 +13,6 @@ import {
 import {
   AutocompleteData,
   AutocompleteResultBase,
-  CursorPosition,
   OpenSearchPplAutocompleteResult,
   ProcessVisitedRulesResult,
   SourceOrTableSuggestion,
@@ -433,9 +432,7 @@ export function enrichAutocompleteResult(
   baseResult: AutocompleteResultBase,
   rules: c3.CandidatesCollection['rules'],
   tokenStream: TokenStream,
-  cursorTokenIndex: number,
-  cursor: CursorPosition,
-  query: string
+  cursorTokenIndex: number
 ): OpenSearchPplAutocompleteResult {
   const {
     shouldSuggestColumns,

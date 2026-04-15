@@ -42,7 +42,7 @@ import vfs from 'vinyl-fs';
 import File from 'vinyl';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
-import tar, { ExtractOptions } from 'tar';
+import * as tar from 'tar';
 import { ToolingLog } from '@osd/dev-utils';
 import { standardize } from '@osd/cross-platform';
 
@@ -266,6 +266,7 @@ export async function getFileHash(path: string, algo: string) {
   const readStream = fs.createReadStream(path);
   await new Promise((res, rej) => {
     readStream
+      // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
       .on('data', (chunk) => hash.update(chunk))
       .on('error', rej)
       .on('end', res);
@@ -274,11 +275,7 @@ export async function getFileHash(path: string, algo: string) {
   return hash.digest('hex');
 }
 
-export async function untar(
-  source: string,
-  destination: string,
-  extractOptions: ExtractOptions = {}
-) {
+export async function untar(source: string, destination: string, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
@@ -287,6 +284,7 @@ export async function untar(
   await pipelineAsync(
     fs.createReadStream(source),
     createGunzip(),
+    // @ts-expect-error TS2769 TODO(ts-upgrade): fixme
     tar.extract({
       ...extractOptions,
       cwd: destination,

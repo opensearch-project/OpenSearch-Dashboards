@@ -114,7 +114,11 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         break;
       case 'PROMETHEUS':
         const prometheusProperties =
-          authMethod === 'basicauth'
+          authMethod === 'noauth'
+            ? {
+                'prometheus.uri': storeURI,
+              }
+            : authMethod === 'basicauth'
             ? {
                 'prometheus.uri': storeURI,
                 'prometheus.auth.type': authMethod,

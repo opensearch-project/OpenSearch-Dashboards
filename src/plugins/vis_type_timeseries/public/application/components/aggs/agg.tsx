@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { HTMLAttributes } from 'react';
+import { HTMLAttributes } from 'react';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
 // @ts-ignore
