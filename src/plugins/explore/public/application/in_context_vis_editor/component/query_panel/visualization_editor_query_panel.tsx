@@ -11,12 +11,18 @@ import { QueryPanelGeneratedQuery } from './generated_query_panel';
 import { QueryPanelProvider, useQueryPanelContext, QueryPanelProps } from './query_panel_context';
 
 const InnerQueryPanel = () => {
-  const { queryEditorState } = useQueryPanelContext();
+  const {
+    queryEditorState,
+    showDatasetSelect,
+    showLanguageToggle,
+    showSaveQueryButton,
+  } = useQueryPanelContext();
 
   const isLoading =
     queryEditorState?.queryStatus?.status === QueryExecutionStatus.LOADING ||
     queryEditorState?.promptToQueryIsLoading;
 
+  const showWidgets = showDatasetSelect || showLanguageToggle || showSaveQueryButton;
   return (
     <EuiPanel
       paddingSize="s"
@@ -24,7 +30,7 @@ const InnerQueryPanel = () => {
       className="exploreInContexQueryPanel"
       style={{ height: '100%' }}
     >
-      <QueryPanelWidgets />
+      {showWidgets && <QueryPanelWidgets />}
       <div className="exploreQueryPanel__editorsWrapper">
         <QueryPanelEditor />
         <QueryPanelGeneratedQuery />
