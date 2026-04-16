@@ -83,6 +83,7 @@ describe('Datasource Management: Create Datasource form', () => {
         />
       ),
       {
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,
@@ -298,6 +299,7 @@ describe('Datasource Management: Create Datasource form with different authType 
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -338,6 +340,7 @@ describe('Datasource Management: Create Datasource form with different authType 
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -378,6 +381,7 @@ describe('Datasource Management: Create Datasource form with different authType 
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -442,6 +446,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -496,6 +501,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -544,6 +550,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
           />
         ),
         {
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           wrappingComponent: OpenSearchDashboardsContextProvider,
           wrappingComponentProps: {
             services: mockedContext,
@@ -585,6 +592,7 @@ describe('Datasource Management: Create Datasource form with registered Auth Typ
         />
       ),
       {
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         wrappingComponent: OpenSearchDashboardsContextProvider,
         wrappingComponentProps: {
           services: mockedContext,

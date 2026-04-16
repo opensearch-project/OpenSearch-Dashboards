@@ -7,7 +7,7 @@ import { Query } from 'src/plugins/data/common';
 import { from, timer } from 'rxjs';
 import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
 import { stringify } from '@osd/std';
-import { getHighlightRequest } from '../../data/common';
+import { DEFAULT_DATA, getHighlightRequest } from '../../data/common';
 import {
   EnhancedFetchContext,
   QueryAggConfig,
@@ -93,7 +93,16 @@ export const throwFacetError = (response: any) => {
 
 export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
   const { http, path, signal } = context;
-  const highlight = isPPLSearchQuery(query) ? getHighlightRequest(query.query, true) : undefined;
+  // Only request highlight for dataset types backed by OpenSearch indices
+  const datasetType = query.dataset?.type;
+  const supportsHighlight =
+    !datasetType ||
+    datasetType === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ||
+    datasetType === DEFAULT_DATA.SET_TYPES.INDEX;
+  const highlight =
+    isPPLSearchQuery(query) && supportsHighlight
+      ? getHighlightRequest(query.query, true)
+      : undefined;
   const body = stringify({
     query: { ...query, format: 'jdbc' },
     aggConfig,

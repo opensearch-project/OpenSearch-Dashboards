@@ -166,10 +166,12 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
     return;
   }
 
+  // @ts-expect-error TS2345 TODO Fix me
   const templateNames = templates.map((t) => t.name);
 
   log.info(`Removing index templates: ${templateNames}`);
 
+  // @ts-expect-error TS2345 TODO Fix me
   return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
 }
 
@@ -230,12 +232,12 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
+    // @ts-expect-error TS2345 TODO Fix me
     log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
       client,
       dest.indexName,
-      // @ts-expect-error @opensearch-project/opensearch _source is optional
       await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
     );
   }

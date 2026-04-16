@@ -9,7 +9,7 @@ import {
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
 } from 'opensearch-dashboards/public';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 interface Props {
   link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };

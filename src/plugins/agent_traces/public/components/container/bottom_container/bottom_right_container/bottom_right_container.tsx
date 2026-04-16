@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { selectQueryStatusMapByKey } from '../../../../application/utils/state_management/selectors';
@@ -21,7 +21,6 @@ import {
 } from '../../../../application/utils/state_management/actions/query_actions';
 import { useDatasetContext } from '../../../../application/context';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
-import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import './bottom_right_container.scss';
 
 // Memoized content component to prevent re-renders of chart + tabs when status hasn't changed
@@ -36,11 +35,10 @@ export const BottomRightContainer = () => {
   const dispatch = useDispatch();
   const { dataset } = useDatasetContext();
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
-  const flavorId = useFlavorId();
-  const [selectedTab, setSelectedTab] = useState<'traces' | 'spans'>('traces');
 
   const onRefresh = () => {
     if (services) {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     }
   };

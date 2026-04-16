@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, {
+import {
   Fragment,
   FunctionComponent,
   useLayoutEffect,

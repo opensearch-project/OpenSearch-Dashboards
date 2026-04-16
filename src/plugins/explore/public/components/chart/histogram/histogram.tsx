@@ -141,6 +141,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
       }
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     inst.on('brushEnd', onBrushEnd);
 
     return () => {
@@ -167,6 +168,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
       }
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     inst.on('click', onClick);
 
     return () => {

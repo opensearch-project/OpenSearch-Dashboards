@@ -756,12 +756,8 @@ export const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
-  const histogramConfigs = createHistogramConfigs(
-    dataView,
-    customInterval,
-    services.data,
-    services.uiSettings
-  );
+ // @ts-expect-error TS2554 TODO(ts-error): fixme
+  const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());
   }

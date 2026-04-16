@@ -4,7 +4,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+
 import { MetricsRawTable } from './metrics_raw_table';
 import { IPrometheusSearchResult } from '../../application/utils/state_management/slices';
 
@@ -14,7 +14,9 @@ describe('MetricsRawTable', () => {
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       total: { value: 0, relation: 'eq' },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       max_score: null,
       hits: [],
     },

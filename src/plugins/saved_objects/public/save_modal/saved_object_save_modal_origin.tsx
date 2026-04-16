@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCompressedFormRow, EuiCompressedSwitch } from '@elastic/eui';
 

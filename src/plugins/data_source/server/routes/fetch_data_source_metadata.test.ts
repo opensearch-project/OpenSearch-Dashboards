@@ -183,6 +183,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
     registerFetchDataSourceMetaDataRoute(
       router,
       dataSourceServiceSetupMock,
+      // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
       cryptographyMock,
       authRegistryPromiseMock,
       customApiSchemaRegistryPromise
@@ -211,6 +212,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
     expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalledWith(
       expect.objectContaining({
         savedObjects: handlerContext.savedObjects.client,
+        // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
         cryptography: cryptographyMock,
         dataSourceId: 'testId',
         testClientDataSourceAttr: dataSourceAttr,

@@ -4,7 +4,6 @@
  */
 
 import './dataset_illustration.scss';
-import React from 'react';
 
 const DatasetIllustration = () => (
   <svg

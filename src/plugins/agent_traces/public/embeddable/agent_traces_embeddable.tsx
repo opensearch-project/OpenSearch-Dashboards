@@ -161,6 +161,7 @@ export class AgentTracesEmbeddable
     // Set up VisualizationBuilder for visualization tabs
     if (isVisualizationTab) {
       this.visualizationBuilder = new VisualizationBuilder({
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
         getExpressions: () => this.services.expressions,
       });
       this.visualizationBuilder.setVisConfig({

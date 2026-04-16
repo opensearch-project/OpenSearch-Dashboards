@@ -22,8 +22,8 @@
   &__placeholder {
     position: absolute;
     left: 45px; // hard-code to match where the text is in editor
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    padding-top: $ouiSizeM;
     font-size: $ouiFontSizeXS;
     color: $ouiColorDisabledText;
   }

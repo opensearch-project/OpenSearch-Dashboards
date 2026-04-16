@@ -24,6 +24,7 @@ describe('ensureDefaultDataView', () => {
     };
 
     onRedirectNoDataView = jest.fn();
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     savedObjectsClient = {
       find: jest.fn(),
       get: jest.fn(),

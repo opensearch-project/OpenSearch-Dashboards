@@ -147,7 +147,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new BundleDepsCheckPlugin(bundle, bundleRefs),
       new NodePolyfillPlugin({ additionalAliases: ['process'] }),
       new rspack.DefinePlugin({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'process.env.IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE': JSON.stringify(
           worker.dist ? 'true' : 'false'
         ),

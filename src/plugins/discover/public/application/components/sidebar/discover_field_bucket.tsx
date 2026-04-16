@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import {
   EuiText,
   EuiSmallButtonIcon,

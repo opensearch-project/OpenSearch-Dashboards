@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { CanvasPanel } from '../../../../../components/panel/canvas_panel';
@@ -30,6 +30,7 @@ export const BottomRightContainer = () => {
   const onRefresh = () => {
     if (services) {
       const editorText = editorRef.current?.getValue() || '';
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
     }
   };

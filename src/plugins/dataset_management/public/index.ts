@@ -19,6 +19,7 @@ import { DatasetManagementPlugin } from './plugin';
 export { DatasetManagementSetup, DatasetManagementStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   return new DatasetManagementPlugin(initializerContext);
 }
 

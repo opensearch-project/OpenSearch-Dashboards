@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 
 import { EuiCompressedFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
 

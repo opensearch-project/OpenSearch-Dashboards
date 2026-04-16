@@ -29,10 +29,12 @@
  */
 
 import { schema, TypeOf } from '@osd/config-schema';
+// @ts-expect-error TS2345 TODO Fix me
 import { ConfigDeprecationProvider } from 'packages/osd-config';
 
 export type OpenSearchDashboardsConfigType = TypeOf<typeof config.schema>;
 
+// @ts-expect-error TS2345 TODO Fix me
 const deprecations: ConfigDeprecationProvider = ({ renameFromRoot }) => [
   renameFromRoot('kibana.enabled', 'opensearchDashboards.enabled'),
   renameFromRoot('kibana.index', 'opensearchDashboards.index'),

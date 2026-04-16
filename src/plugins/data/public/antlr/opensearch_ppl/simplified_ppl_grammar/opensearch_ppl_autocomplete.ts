@@ -13,7 +13,6 @@ import {
 import {
   AutocompleteData,
   AutocompleteResultBase,
-  CursorPosition,
   OpenSearchPplAutocompleteResult,
   ProcessVisitedRulesResult,
   SourceOrTableSuggestion,

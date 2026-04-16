@@ -5,7 +5,7 @@
  */
 
 import { useObservable } from 'react-use';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {

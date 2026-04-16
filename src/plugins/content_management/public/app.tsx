@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { PageRender } from './components/page_render';
 import { Page } from './services';

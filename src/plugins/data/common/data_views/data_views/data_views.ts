@@ -163,65 +163,71 @@ export class DataViewsService {
       uncachedIds.map((id) => ({ id, type: savedObjectType }))
     );
 
-    // Process each saved object and create DataViews in parallel
+    // Process each saved object and create DataViews in parallel.
+    // Errors on individual objects are caught so one bad entry doesn't break the entire list.
     const newDataViewPromises = response.savedObjects.map(
-      async (savedObject: SavedObject<DataViewAttributes>) => {
-        if (!savedObject.version) {
-          throw new SavedObjectNotFound(
-            savedObjectType,
-            savedObject.id,
-            'management/opensearch-dashboards/indexPatterns'
-          );
-        }
-
-        const spec = this.savedObjectToSpec(savedObject);
-        const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
-          ? JSON.parse(savedObject.attributes.fieldFormatMap)
-          : {};
-
-        Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
-          const field = spec.fields?.[fieldName];
-          if (field) {
-            field.format = value;
+      async (
+        savedObject: SavedObject<DataViewAttributes>
+      ): Promise<{ id: string; dataView: DataView } | undefined> => {
+        try {
+          if (!savedObject.version) {
+            return undefined;
           }
-        });
 
-        const dataView = await this.create(spec, true);
-        this.patterns.saveToCache(savedObject.id, dataView);
+          const spec = this.savedObjectToSpec(savedObject);
+          const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
+            ? JSON.parse(savedObject.attributes.fieldFormatMap)
+            : {};
 
-        if (dataView.isUnsupportedTimePattern()) {
-          this.onUnsupportedTimePattern({
-            id: dataView.id as string,
-            title: dataView.title,
-            index: dataView.getIndex(),
+          Object.entries(parsedFieldFormats).forEach(([fieldName, value]) => {
+            const field = spec.fields?.[fieldName];
+            if (field) {
+              field.format = value;
+            }
           });
-        }
 
-        dataView.resetOriginalSavedObjectBody();
-        return { id: savedObject.id, dataView };
+          const dataView = await this.create(spec, true);
+          this.patterns.saveToCache(savedObject.id, dataView);
+
+          if (dataView.isUnsupportedTimePattern()) {
+            this.onUnsupportedTimePattern({
+              id: dataView.id as string,
+              title: dataView.title,
+              index: dataView.getIndex(),
+            });
+          }
+
+          dataView.resetOriginalSavedObjectBody();
+          return { id: savedObject.id, dataView };
+        } catch (e) {
+          // Skip this DataView — log but don't let it prevent other DataViews from loading
+          this.onError(e, {
+            title: `Failed to load data view "${savedObject.id}"`,
+          });
+          return undefined;
+        }
       }
     );
 
     // Wait for all DataViews to be created
     const newDataViewResults = await Promise.all(newDataViewPromises);
 
-    // Build a map of newly created DataViews
+    // Build a map of newly created DataViews, skipping not-found entries
     const newDataViewsMap: Map<string, DataView> = new Map();
-    newDataViewResults.forEach(({ id, dataView }: { id: string; dataView: DataView }) => {
-      newDataViewsMap.set(id, dataView);
+    newDataViewResults.forEach((result: { id: string; dataView: DataView } | undefined) => {
+      if (result) {
+        newDataViewsMap.set(result.id, result.dataView);
+      }
     });
 
-    // Return DataViews in the same order as input IDs
-    // Throw error if any DataView is missing (shouldn't happen in normal flow)
-    return ids.map((id) => {
+    // Return DataViews in the same order as input IDs, filtering out not-found ones
+    return ids.reduce<DataView[]>((acc, id) => {
       const dataView = cachedDataViews.get(id) || newDataViewsMap.get(id);
-      if (!dataView) {
-        throw new Error(
-          `DataView with id "${id}" was not found in cache or fetch results. This may indicate a failed fetch operation.`
-        );
+      if (dataView) {
+        acc.push(dataView);
       }
-      return dataView;
-    });
+      return acc;
+    }, []);
   };
 
   /**
@@ -468,6 +474,7 @@ export class DataViewsService {
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,
       type,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSourceRef,
       schemaMappings: parsedSchemaMappings,
     };

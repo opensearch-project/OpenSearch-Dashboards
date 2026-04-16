@@ -4,7 +4,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { GlobalSearchPageItem } from './page_item';
 import { ChromeNavGroupServiceStartContract } from '../../nav_group';
 import { InternalApplicationStart } from '../../../../../core/public/application';

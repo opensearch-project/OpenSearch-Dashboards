@@ -18,6 +18,7 @@ import {
 import { ISearchResult } from '../../../application/utils/state_management/slices';
 import { ExploreServices } from '../../../types';
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
+import { IVariableInterpolationService } from '../../../../../dashboard/public';
 
 import { Dataset, DEFAULT_DATA, DataView, Query } from '../../../../../data/common';
 import {
@@ -126,6 +127,8 @@ export class QueryBuilder {
   private editorRef: monaco.editor.IStandaloneCodeEditor | null = null;
   private subscriptions = Array<Subscription>();
   private getServices: () => ExploreServices;
+  private interpolationService?: IVariableInterpolationService;
+  public lastExecutedInterpolatedQuery?: string;
 
   constructor(getServices: () => ExploreServices) {
     this.getServices = getServices;
@@ -548,7 +551,13 @@ export class QueryBuilder {
     }
     const currentQuery = this.queryState$.value;
     // prepare querystring for execution, add clause when query is '' for PPL
-    const queryString = this.prepareQueryStringToCacheKey(currentQuery);
+    let queryString = this.prepareQueryStringToCacheKey(currentQuery);
+
+    if (this.interpolationService && this.interpolationService.hasVariables(queryString)) {
+      queryString = this.interpolationService.interpolate(queryString, currentQuery.language);
+    }
+
+    this.lastExecutedInterpolatedQuery = queryString;
 
     await queryExecution({
       services: this.getServices(),
@@ -562,6 +571,10 @@ export class QueryBuilder {
   private prepareQueryStringToCacheKey(query: Query) {
     const preparedQuery = prepareQueryForLanguage(query);
     return preparedQuery.query;
+  }
+
+  setInterpolationService(service: IVariableInterpolationService) {
+    this.interpolationService = service;
   }
 
   setEditorRef(editor: monaco.editor.IStandaloneCodeEditor | null) {

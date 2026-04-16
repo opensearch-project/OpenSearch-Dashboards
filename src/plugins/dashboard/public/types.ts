@@ -56,6 +56,7 @@ import { EmbeddableStart, ViewMode } from '../../embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SavedDashboardPanel730ToLatest } from '../common';
 import { UiActionsStart } from '../../ui_actions/public';
+import { Variable } from './variables/types';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -129,6 +130,7 @@ export interface DashboardAppState {
   viewMode: ViewMode;
   expandedPanelId?: string;
   savedQuery?: string;
+  variables?: Variable[];
 }
 
 export type DashboardAppStateDefaults = DashboardAppState & {

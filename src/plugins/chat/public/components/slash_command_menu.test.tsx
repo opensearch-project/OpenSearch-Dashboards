@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SlashCommandMenu } from './slash_command_menu';
 import { SlashCommand } from '../services/slash_commands';

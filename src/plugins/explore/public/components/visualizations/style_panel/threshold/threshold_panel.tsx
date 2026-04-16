@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { ThresholdCustomValues } from './threshold_custom_values';

@@ -8,7 +8,8 @@
     "declarationMap": true
   },
   "include": [
-    "public/**/*"
+    "public/**/*",
+    "../../typings/**/*"
   ],
   "exclude": [
     "target"

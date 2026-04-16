@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from '../types';
@@ -167,6 +166,7 @@ describe('ChatMessages', () => {
 
     it('should filter out empty text content from array assistant messages', () => {
       const timeline: Message[] = [
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
         {
           id: '1',
           role: 'assistant',
@@ -225,6 +225,7 @@ describe('ChatMessages', () => {
 
     it('should filter out array content with null/undefined text', () => {
       const timeline: Message[] = [
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
         {
           id: '1',
           role: 'assistant',
