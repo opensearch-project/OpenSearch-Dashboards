@@ -13,6 +13,7 @@ import {
   setSavedSearch,
   setQueryState,
   setActiveTab,
+  setMetricsAlertAssociation,
   clearResults,
   clearQueryStatusMap,
   clearLastExecutedData,
@@ -76,13 +77,18 @@ export const useInitPage = () => {
         // Only use saved object's activeTab if there's no activeTab in URL state
         // This preserves user's tab selection from URL
         if (uiState) {
+          const { activeTab, metricsAlertAssociation } = JSON.parse(uiState);
           const urlState = services.osdUrlStateStorage?.get('_a') ?? {};
           // @ts-expect-error TS2339 TODO(ts-error): fixme
           const hasActiveTabInUrl = urlState?.ui?.activeTabId;
-          if (!hasActiveTabInUrl) {
-            const { activeTab } = JSON.parse(uiState);
+
+          if (activeTab && !hasActiveTabInUrl) {
             dispatch(setActiveTab(activeTab));
           }
+
+          dispatch(setMetricsAlertAssociation(metricsAlertAssociation));
+        } else {
+          dispatch(setMetricsAlertAssociation(undefined));
         }
 
         // Add to recently accessed

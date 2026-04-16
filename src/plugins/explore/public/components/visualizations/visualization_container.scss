@@ -1,9 +1,11 @@
 .exploreVisContainer {
   display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: auto;
   scrollbar-width: thin;
   flex-grow: 1;
+  min-width: 0;
   border-radius: $euiSizeXS;
 }
 
@@ -11,6 +13,13 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+.exploreVisPreviewBanner {
+  width: 100%;
+  flex: 0 0 auto;
 }
 
 .exploreVisPanel__inner {

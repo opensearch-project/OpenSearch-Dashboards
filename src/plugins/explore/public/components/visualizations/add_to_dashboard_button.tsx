@@ -105,7 +105,10 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
         axesMapping: chartConfig?.axesMapping,
         styleOptions: chartConfig?.styles,
       },
-      dataset
+      dataset,
+      activeTabId,
+      services.store.getState().ui,
+      services.store.getState().query
     );
 
     const saveOptions = {

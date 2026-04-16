@@ -7,12 +7,17 @@ import { i18n } from '@osd/i18n';
 import { DataView as Dataset, IndexPattern } from 'src/plugins/data/common';
 import { InvalidJSONProperty } from '../../../opensearch_dashboards_utils/public';
 import { LegacyState } from '../application/utils/state_management/slices';
+import {
+  MetricsAlertAssociationState,
+  UIState,
+} from '../application/utils/state_management/slices/ui/ui_slice';
 import { SavedExplore, SavedExploreAttributes } from '../types/saved_explore_types';
 import { TabDefinition } from '../services/tab_registry/tab_registry_service';
 import {
   ChartType,
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
+import { QueryState } from '../application/utils/state_management/slices/query/query_slice';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -26,13 +31,44 @@ interface VisState {
   axesMapping?: Record<string, string>;
 }
 
+const normalizePromqlText = (value?: string) => String(value || '').trim();
+
+const getPersistableMetricsAlertAssociation = (
+  uiState?: UIState,
+  queryState?: QueryState
+): MetricsAlertAssociationState | undefined => {
+  const association = uiState?.metricsAlertAssociation;
+  if (!association) {
+    return undefined;
+  }
+
+  const currentQuery = normalizePromqlText(queryState?.query as string | undefined);
+  const currentDataConnectionId = String(queryState?.dataset?.id || '').trim();
+  const currentDataSourceId = String(queryState?.dataset?.dataSource?.id || '').trim();
+
+  if (
+    normalizePromqlText(association.promqlQuery) !== currentQuery ||
+    String(association.dataConnectionId || '').trim() !== currentDataConnectionId
+  ) {
+    return undefined;
+  }
+
+  if (association.dataSourceId && association.dataSourceId !== currentDataSourceId) {
+    return undefined;
+  }
+
+  return association;
+};
+
 export const saveStateToSavedObject = (
   obj: SavedExplore,
   flavorId: string,
   tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
-  activeTabId?: string
+  activeTabId?: string,
+  uiState?: UIState,
+  queryState?: QueryState
 ): SavedExplore => {
   // Serialize the state into the saved object
   obj.type = flavorId;
@@ -47,6 +83,7 @@ export const saveStateToSavedObject = (
 
   obj.uiState = JSON.stringify({
     activeTab: activeTabId || tabDefinition?.id || 'logs',
+    metricsAlertAssociation: getPersistableMetricsAlertAssociation(uiState, queryState),
   });
   obj.searchSourceFields = { index: dataset };
 

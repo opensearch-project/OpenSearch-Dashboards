@@ -4,11 +4,26 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { PrometheusDetectorMode } from '../../../metrics_feature_constants';
+
+export interface MetricsAlertAssociationState {
+  detectorId: string;
+  detectorName: string;
+  monitorId: string;
+  monitorName: string;
+  promqlQuery: string;
+  dataConnectionId: string;
+  dataSourceId?: string;
+  detectorMode?: PrometheusDetectorMode;
+  selectedSeriesId?: string;
+  selectedEntityField?: string;
+}
 
 export interface UIState {
   activeTabId: string;
   showHistogram: boolean;
   wrapCellText: boolean;
+  metricsAlertAssociation?: MetricsAlertAssociationState;
 }
 
 const initialState: UIState = {
@@ -33,9 +48,21 @@ const uiSlice = createSlice({
     setWrapCellText: (state, action: PayloadAction<boolean>) => {
       state.wrapCellText = action.payload;
     },
+    setMetricsAlertAssociation: (
+      state,
+      action: PayloadAction<MetricsAlertAssociationState | undefined>
+    ) => {
+      state.metricsAlertAssociation = action.payload;
+    },
   },
 });
 
-export const { setActiveTab, setUiState, setShowHistogram, setWrapCellText } = uiSlice.actions;
+export const {
+  setActiveTab,
+  setUiState,
+  setShowHistogram,
+  setWrapCellText,
+  setMetricsAlertAssociation,
+} = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();
