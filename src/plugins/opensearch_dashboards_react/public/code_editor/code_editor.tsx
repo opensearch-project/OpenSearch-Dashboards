@@ -153,6 +153,19 @@ export class CodeEditor extends React.Component<Props, {}> {
     );
   };
 
+  _ensureFontsLoaded = () => {
+    // Fix for Monaco Editor cursor misalignment when using custom fonts
+    // Based on: https://github.com/microsoft/monaco-editor/issues/4644
+    document.fonts.ready
+      .then(() => {
+        monaco.editor.remeasureFonts();
+      })
+      .catch(() => {
+        // Silently handle any font loading errors
+        // This ensures the editor still works even if font loading fails
+      });
+  };
+
   _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
     if (__monaco !== monaco) {
       throw new Error('react-monaco-editor is using a different version of monaco');
@@ -165,6 +178,9 @@ export class CodeEditor extends React.Component<Props, {}> {
     // was already encountered in a previous mount cycle.
     this._ensureProvidersRegistered(this.props.languageId);
     this._setLanguageConfiguration(this.props.languageId, true);
+
+    // Fix cursor misalignment issue by remeasuring fonts after they're loaded
+    this._ensureFontsLoaded();
 
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
