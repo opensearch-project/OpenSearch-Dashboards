@@ -5,6 +5,10 @@
 
 import { RootState } from './store';
 import { ResultStatus as DataPluginResultStatus } from '../../../../../data/public';
+import {
+  OpenSearchErrorResponse,
+  OpenSearchErrorContext,
+} from '../../../../../../common/error_types';
 
 export type QueryExecutionStatus = DataPluginResultStatus;
 export const QueryExecutionStatus = DataPluginResultStatus;
@@ -21,9 +25,9 @@ export interface QueryResultStatus {
     };
     originalErrorMessage: string;
     // Rich error context from OpenSearch (PPL field errors, etc.)
-    errorBody?: any;
+    errorBody?: OpenSearchErrorResponse;
     errorContext?: {
-      context?: any;
+      context?: OpenSearchErrorContext;
       code?: string;
       type?: string;
       location?: string[];

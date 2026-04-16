@@ -16,6 +16,7 @@ import {
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
+import { OpenSearchErrorResponse } from '../../../../../../common/error_types';
 import { ExploreServices } from '../../../../types';
 import {
   DataPublicPluginStart,
@@ -653,9 +654,9 @@ const executeQueryBase = async (
       return;
     }
 
-    let parsedError;
+    let parsedError: OpenSearchErrorResponse | undefined;
     try {
-      parsedError = JSON.parse(error.body.message);
+      parsedError = JSON.parse(error.body.message) as OpenSearchErrorResponse;
     } catch (parseError) {
       parsedError = {
         error: {
@@ -663,6 +664,7 @@ const executeQueryBase = async (
           details: error.body?.error || 'An error occurred',
           type: error.name,
         },
+        status: error.body?.statusCode || 500,
       };
     }
 
@@ -756,7 +758,7 @@ export const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
- // @ts-expect-error TS2554 TODO(ts-error): fixme
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());

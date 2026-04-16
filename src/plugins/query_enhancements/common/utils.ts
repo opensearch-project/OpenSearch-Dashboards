@@ -15,6 +15,7 @@ import {
   QueryStatusOptions,
 } from './types';
 import { API } from './constants';
+import { OpenSearchErrorResponse, OpenSearchErrorContext, OpenSearchError } from './error_types';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -46,28 +47,53 @@ export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
 };
 
-export const throwFacetError = (response: any) => {
+export interface EnhancedError extends Error {
+  status: number;
+  errorBody?: OpenSearchErrorResponse;
+  errorContext?: {
+    context?: OpenSearchErrorContext;
+    code?: string;
+    type?: string;
+    location?: string[];
+  };
+}
+
+export const throwFacetError = (response: any): never => {
   // Preserve the full error body for rich error context
-  const errorBody = response.data.body ?? response.data;
+  const errorBody: unknown = response.data.body ?? response.data;
 
   // Extract error details if they exist (OpenSearch enhanced error format)
   let errorMessage: string;
-  let errorContext: any;
+  let errorContext:
+    | {
+        context?: OpenSearchErrorContext;
+        code?: string;
+        type?: string;
+        location?: string[];
+      }
+    | undefined;
+  let typedErrorBody: OpenSearchErrorResponse | undefined;
 
   if (typeof errorBody === 'object' && errorBody !== null) {
     if (errorBody instanceof Error) {
       errorMessage = errorBody.message;
-    } else if (errorBody.error) {
+    } else if ('error' in errorBody && typeof errorBody.error === 'object' && errorBody.error) {
       // OpenSearch enhanced error format with error.details, error.context, etc.
-      const errObj = errorBody.error;
-      errorMessage = errObj.details ?? errObj.message ?? JSON.stringify(errObj);
+      const errObj = errorBody.error as Partial<OpenSearchError>;
+      errorMessage = errObj.details ?? errObj.reason ?? JSON.stringify(errObj);
+
+      // Build typed error response
+      if ('status' in errorBody && typeof errorBody.status === 'number') {
+        typedErrorBody = errorBody as OpenSearchErrorResponse;
+      }
+
       errorContext = {
         ...(errObj.context && { context: errObj.context }),
         ...(errObj.code && { code: errObj.code }),
         ...(errObj.type && { type: errObj.type }),
         ...(errObj.location && { location: errObj.location }),
       };
-    } else if (errorBody.message) {
+    } else if ('message' in errorBody && typeof errorBody.message === 'string') {
       errorMessage = errorBody.message;
     } else {
       errorMessage = JSON.stringify(errorBody);
@@ -76,16 +102,18 @@ export const throwFacetError = (response: any) => {
     errorMessage = String(errorBody);
   }
 
-  const error = new Error(errorMessage);
+  const error = new Error(errorMessage) as EnhancedError;
   error.name = response.data.status ?? response.status ?? response.data.statusCode;
-  (error as any).status = error.name;
+  error.status = error.name;
 
   // Attach full error body for consumers that need rich context
-  (error as any).errorBody = errorBody;
+  if (typedErrorBody) {
+    error.errorBody = typedErrorBody;
+  }
 
   // Attach structured context if available
   if (errorContext && Object.keys(errorContext).length > 0) {
-    (error as any).errorContext = errorContext;
+    error.errorContext = errorContext;
   }
 
   throw error;
