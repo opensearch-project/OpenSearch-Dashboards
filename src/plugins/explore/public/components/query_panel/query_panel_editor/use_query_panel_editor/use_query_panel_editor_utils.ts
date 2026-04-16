@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { monaco } from '@osd/monaco';
+import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 
@@ -19,6 +19,11 @@ import { getSpacebarAction } from './spacebar_action';
 import { getEscapeAction } from './escape_action';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { getAutocompleteContext } from '../../../../application/utils/multi_query_utils';
+import {
+  attachPPLValidationContext,
+  attachPPLGrammarRefresh,
+  pplGrammarCache,
+} from '../../../../../../data/public';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
@@ -77,6 +82,8 @@ export const editorMount = (
     isPromptModeRef: React.MutableRefObject<boolean>;
     editorTextRef: React.MutableRefObject<string>;
     queryLanguageRef: React.MutableRefObject<string>;
+    detachValidationContextRef: React.MutableRefObject<(() => void) | undefined>;
+    detachGrammarRefreshRef: React.MutableRefObject<(() => void) | undefined>;
   },
   actions: {
     setEditorRef: (editor: IStandaloneCodeEditor) => void;
@@ -88,9 +95,32 @@ export const editorMount = (
       language: string
     ) => void;
     clearDecorations: (editor: monaco.editor.IStandaloneCodeEditor | null) => void;
-  }
+  },
+  getValidationContext: () => PPLValidationContext
 ) => {
   actions.setEditorRef(editor);
+
+  // Attach PPL runtime validation context
+  refs.detachValidationContextRef.current?.();
+  refs.detachGrammarRefreshRef.current?.();
+  refs.detachValidationContextRef.current = attachPPLValidationContext(
+    editor,
+    getValidationContext
+  );
+
+  refs.detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+    editor,
+    getValidationContext,
+    (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
+    revalidatePPLModel
+  );
+
+  // Revalidate immediately so any initial content that was validated before
+  // the context was attached gets re-checked with the runtime grammar.
+  const model = editor.getModel();
+  if (model) {
+    void revalidatePPLModel(model);
+  }
 
   const focusDisposable = editor.onDidFocusEditorText(() => {
     actions.setEditorIsFocused(true);
