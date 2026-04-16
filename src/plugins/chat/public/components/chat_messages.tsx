@@ -64,6 +64,7 @@ interface ChatMessagesProps {
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
   startResponse?: boolean;
+  threadId?: string;
 }
 
 /**
@@ -234,6 +235,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onRejectConfirmation,
   onFillInput,
   startResponse,
+  threadId,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -422,12 +424,16 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                         content: content.text,
                         id: `${assistantMsg.id}-${contentIndex}`,
                       }}
+                      timeline={timeline}
+                      threadId={threadId}
                     />
                   ));
               }
 
               if (assistantMsg.content.trim()) {
-                return <MessageRow message={assistantMsg} />;
+                return (
+                  <MessageRow message={assistantMsg} timeline={timeline} threadId={threadId} />
+                );
               }
 
               return null;
