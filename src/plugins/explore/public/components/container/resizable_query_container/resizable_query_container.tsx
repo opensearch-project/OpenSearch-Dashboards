@@ -55,10 +55,10 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
   // resize handler required for editing ppl large queries only
   if (isPromptMode) {
     return (
-      <>
+      <div className="exploreResizableQueryContainer exploreResizableQueryContainer--promptMode">
         {queryPanel}
         {children}
-      </>
+      </div>
     );
   }
 

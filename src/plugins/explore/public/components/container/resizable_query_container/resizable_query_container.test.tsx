@@ -147,6 +147,9 @@ describe('ResizableQueryContainer', () => {
       expect(screen.getByTestId('query-panel')).toBeInTheDocument();
       expect(screen.getByTestId('content-panel')).toBeInTheDocument();
 
+      const promptContainer = document.querySelector('.exploreResizableQueryContainer--promptMode');
+      expect(promptContainer).toBeInTheDocument();
+
       // No resize handle in prompt mode
       const handle = document.querySelector('.exploreResizableQueryContainer__resizeHandle');
       expect(handle).not.toBeInTheDocument();
@@ -154,9 +157,6 @@ describe('ResizableQueryContainer', () => {
 
     it('does not render the resizable container or inner wrapper', () => {
       renderComponent();
-
-      const container = document.querySelector('.exploreResizableQueryContainer');
-      expect(container).not.toBeInTheDocument();
 
       const inner = document.querySelector('.exploreResizableQueryContainer__queryPanelInner');
       expect(inner).not.toBeInTheDocument();
