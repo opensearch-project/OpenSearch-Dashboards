@@ -13,7 +13,6 @@ import {
   EditorMode,
   QueryExecutionStatus,
 } from '../../../application/utils/state_management/types';
-import { useEditorOperations } from '../hooks/use_editor_operations';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ExploreServices } from '../../../types';
 import { SavedExplore } from '../../../saved_explore';

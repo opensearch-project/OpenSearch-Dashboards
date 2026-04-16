@@ -100,6 +100,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         editor?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
 
+      if (!editorText) {
+        getEditorRef()?.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      }
+
       return () => {
         onDidFocusDisposable?.dispose();
       };

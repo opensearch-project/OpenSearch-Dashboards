@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
+import { monaco } from '@osd/monaco';
 import {
   EuiFlexGroup,
   EuiResizableContainer,
@@ -96,36 +97,74 @@ export const ResizableQueryPanelAndVisualization = () => {
     return <VisualizationContainer />;
   };
 
-  const queryPanelProps: QueryPanelProps = {
-    services: {
-      keyboardShortcut: services.keyboardShortcut,
-      data: services.data,
-      notifications: services.notifications,
-      appName: services.appName,
-      capabilities: services.capabilities,
-    },
+  const getEditor = useCallback(() => queryBuilder.getEditorRef(), [queryBuilder]);
+  const setEditor = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor | null) => queryBuilder.setEditorRef(editor),
+    [queryBuilder]
+  );
 
-    queryState,
-    queryEditorState,
-
-    onQuerySubmit: () => queryBuilder.onQueryExecutionSubmit(),
-    handleQueryChange: (updates: Partial<QueryState>) => queryBuilder.updateQueryState(updates),
-    handleEditorChange: (updates: Partial<QueryEditorState>) =>
-      queryBuilder.updateQueryEditorState(updates),
-    handleLanguageTypeChange: (languageType: SupportLanguageType | undefined) =>
+  const onQuerySubmit = useCallback(() => queryBuilder.onQueryExecutionSubmit(), [queryBuilder]);
+  const handleQueryChange = useCallback(
+    (updates: Partial<QueryState>) => queryBuilder.updateQueryState(updates),
+    [queryBuilder]
+  );
+  const handleEditorChange = useCallback(
+    (updates: Partial<QueryEditorState>) => queryBuilder.updateQueryEditorState(updates),
+    [queryBuilder]
+  );
+  const handleLanguageTypeChange = useCallback(
+    (languageType: SupportLanguageType | undefined) =>
       queryBuilder.updateQueryEditorState({ languageType }),
+    [queryBuilder]
+  );
 
-    showLanguageToggle: true,
-    showDatasetSelect: true,
-    showSaveQueryButton: true,
+  const queryPanelProps: QueryPanelProps = useMemo(
+    () => ({
+      services: {
+        keyboardShortcut: services.keyboardShortcut,
+        data: services.data,
+        notifications: services.notifications,
+        appName: services.appName,
+        capabilities: services.capabilities,
+      },
 
-    // refer to editor inside QueryBuilder
-    getEditor: () => queryBuilder.getEditorRef(),
-    setEditor: (editor) => queryBuilder.setEditorRef(editor),
+      queryState,
+      queryEditorState,
 
-    // dataset supported types
-    supportedTypes: services.supportedTypes,
-  };
+      onQuerySubmit,
+      handleQueryChange,
+      handleEditorChange,
+      handleLanguageTypeChange,
+
+      showLanguageToggle: true,
+      showDatasetSelect: true,
+      showSaveQueryButton: true,
+
+      // refer to editor inside QueryBuilder
+      getEditor,
+      setEditor,
+
+      // dataset supported types
+      supportedTypes: services.supportedTypes,
+    }),
+    [
+      services.keyboardShortcut,
+      services.data,
+      services.notifications,
+      services.appName,
+      services.capabilities,
+      services.supportedTypes,
+      queryState,
+      queryEditorState,
+      onQuerySubmit,
+      handleQueryChange,
+      handleEditorChange,
+      handleLanguageTypeChange,
+      getEditor,
+      setEditor,
+    ]
+  );
+
   return (
     <EuiResizableContainer direction="vertical">
       {(EuiResizablePanel, EuiResizableButton) => {
