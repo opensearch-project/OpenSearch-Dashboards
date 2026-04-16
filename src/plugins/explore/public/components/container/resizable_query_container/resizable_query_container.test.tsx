@@ -141,22 +141,22 @@ describe('ResizableQueryContainer', () => {
       });
     });
 
-    it('renders a simple stacked layout without the resizable handle', () => {
+    it('renders query panel and content without the resizable handle', () => {
       renderComponent();
 
       expect(screen.getByTestId('query-panel')).toBeInTheDocument();
       expect(screen.getByTestId('content-panel')).toBeInTheDocument();
-
-      const promptContainer = document.querySelector('.exploreResizableQueryContainer--promptMode');
-      expect(promptContainer).toBeInTheDocument();
 
       // No resize handle in prompt mode
       const handle = document.querySelector('.exploreResizableQueryContainer__resizeHandle');
       expect(handle).not.toBeInTheDocument();
     });
 
-    it('does not render the resizable panel inner wrapper', () => {
+    it('does not render the resizable container or inner wrapper', () => {
       renderComponent();
+
+      const container = document.querySelector('.exploreResizableQueryContainer');
+      expect(container).not.toBeInTheDocument();
 
       const inner = document.querySelector('.exploreResizableQueryContainer__queryPanelInner');
       expect(inner).not.toBeInTheDocument();
