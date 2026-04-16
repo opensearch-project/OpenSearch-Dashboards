@@ -80,7 +80,7 @@ export class AGUIAuditLogger extends BaseLogger {
       ag_ui_event: {
         type: event.type,
         timestamp: event.timestamp,
-        timestamp_human: this.toHumanTimestamp(event.timestamp),
+        timestamp_human: this.toHumanTimestamp(event.timestamp ?? 0),
         ...this.sanitizeEvent(event),
       },
     };
