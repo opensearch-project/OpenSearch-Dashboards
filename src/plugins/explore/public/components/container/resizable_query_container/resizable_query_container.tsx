@@ -4,9 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { EuiResizableContainer } from '@elastic/eui';
-import { selectIsPromptEditorMode } from '../../../application/utils/state_management/selectors';
 import './resizable_query_container.scss';
 
 // Approximate pixel height needed for the query panel to show one line:
@@ -33,7 +31,6 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
   queryPanel,
   children,
 }) => {
-  const isPromptMode = useSelector(selectIsPromptEditorMode);
   const rafRef = useRef<number>(0);
   const initialSize = useMemo(() => getInitialQueryPanelSize(), []);
 
@@ -49,18 +46,6 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
     const timer = setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  // In prompt (AI) mode, render a simple stacked layout without the resizable
-  // handle. The prompt editor is a single-line input so resizing adds no value
-  // resize handler required for editing ppl large queries only
-  if (isPromptMode) {
-    return (
-      <div>
-        {queryPanel}
-        {children}
-      </div>
-    );
-  }
 
   return (
     <EuiResizableContainer
