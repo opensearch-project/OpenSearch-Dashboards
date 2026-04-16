@@ -61,7 +61,7 @@ export function generatePDFReport(data: ChatExportData, options: ChatExportOptio
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1b20; line-height: 1.6; }
-  .report { max-width: 800px; margin: 0 auto; background: #fff; min-height: 100vh; }
+  .report { max-width: 800px; margin: 0 auto; background: #fff; }
   .report-header { background: linear-gradient(135deg, #0a1628 0%, #162447 100%); color: #fff; padding: 40px 48px 32px; }
   .report-header .badge { display: inline-block; background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px; }
   .report-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
@@ -98,11 +98,16 @@ export function generatePDFReport(data: ChatExportData, options: ChatExportOptio
   .report-footer .powered { font-size: 11px; color: #adb5bd; text-align: center; }
   .empty-section { font-size: 13px; color: #868e96; font-style: italic; }
   @media print {
-    body { background: #fff; }
-    .report { max-width: none; box-shadow: none; }
-    .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { margin: 10mm; }
+    body { background: #fff; margin: 0; padding: 0; }
+    .report { max-width: none; margin: 0; box-shadow: none; }
+    .report-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 16px 24px 12px; }
+    .report-header h1 { font-size: 18px; }
+    .report-body { padding: 16px 24px 24px; }
+    .section { margin-bottom: 16px; }
     .trace-step { break-inside: avoid; }
     .section { break-inside: avoid; }
+    .report-footer { padding: 12px 24px; }
   }
 </style>
 </head>

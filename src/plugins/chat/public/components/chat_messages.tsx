@@ -408,6 +408,17 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
 
+            // Only show share button on the last assistant message before the next user message
+            // (or end of timeline). This prevents showing share on intermediate tool-call responses.
+            const isLastAssistantInTurn = (() => {
+              for (let j = index + 1; j < messageRows.length; j++) {
+                const next = messageRows[j];
+                if (next.role === 'user') return true;
+                if (next.role === 'assistant' && (next as AssistantMessage).content) return false;
+              }
+              return true; // Last message in timeline
+            })();
+
             const renderAssistantContent = () => {
               if (!assistantMsg.content) {
                 return null;
@@ -424,15 +435,19 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                         content: content.text,
                         id: `${assistantMsg.id}-${contentIndex}`,
                       }}
-                      timeline={timeline}
-                      threadId={threadId}
+                      timeline={isLastAssistantInTurn ? timeline : undefined}
+                      threadId={isLastAssistantInTurn ? threadId : undefined}
                     />
                   ));
               }
 
               if (assistantMsg.content.trim()) {
                 return (
-                  <MessageRow message={assistantMsg} timeline={timeline} threadId={threadId} />
+                  <MessageRow
+                    message={assistantMsg}
+                    timeline={isLastAssistantInTurn ? timeline : undefined}
+                    threadId={isLastAssistantInTurn ? threadId : undefined}
+                  />
                 );
               }
 
