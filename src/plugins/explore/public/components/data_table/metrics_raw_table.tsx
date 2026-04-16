@@ -230,7 +230,7 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center" className="dscResultCount">
+          <EuiFlexGroup justifyContent="flexStart" alignItems="center" className="dscResultCount" data-test-subj="metricsRawResultCount">
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <FormattedMessage
@@ -254,7 +254,7 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <div className="metricsRawTable">
+      <div className="metricsRawTable" data-test-subj="metricsRawTable">
         <div className="metricsRawTable__tableContainer">
           <EuiBasicTable
             items={paginatedData}

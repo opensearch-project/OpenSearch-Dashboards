@@ -97,6 +97,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           defaultMessage: 'Metric card: {name}',
           values: { name },
         })}
+        data-test-subj={`metricsExploreCard-${name}`}
       >
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
           <EuiFlexItem grow={false} onClick={(e: React.MouseEvent) => e.stopPropagation()}>

@@ -147,7 +147,7 @@ const prometheusDatasetTestSuite = () => {
 
   (!prometheusConfig.url ? describe.skip : describe)(
     'Prometheus Dataset',
-    { defaultCommandTimeout: 600000 },
+    { defaultCommandTimeout: 60000 },
     () => {
       before(() => {
         setupPrometheusConnection(prometheusConfig.name, prometheusConfig.url);
@@ -168,6 +168,9 @@ const prometheusDatasetTestSuite = () => {
       describe('Prometheus Connection and Query', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
+          cy.getElementByTestId('metricsPageTab-query').should('be.visible');
+          cy.wait(1000);
+          cy.getElementByTestId('metricsPageTab-query').click();
         });
 
         it('should have Prometheus dataset pre-selected and verify PromQL language', function () {
@@ -207,58 +210,52 @@ const prometheusDatasetTestSuite = () => {
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Table').click();
+          cy.getElementByTestId('exploreTab-metrics').click();
           cy.get('[role="grid"]').should('be.visible');
           cy.get('[role="columnheader"]').should('have.length.at.least', 1);
           cy.get('[role="gridcell"]').should('have.length.at.least', 1);
         });
 
-        it('should validate Raw tab displays metrics in table format', function () {
+        it('should validate raw table displays metrics in visualization tab', function () {
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Raw').click();
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
 
-          cy.get('table').should('be.visible');
-
-          cy.get('body').should('contain.text', 'prometheus_build_info');
-          cy.get('body').should('contain.text', 'prometheus');
-
-          cy.get('body').should('contain.text', 'result series');
+          cy.getElementByTestId('metricsRawTable').should('be.visible');
+          cy.getElementByTestId('metricsRawTable').find('table').should('be.visible');
+          cy.getElementByTestId('metricsRawResultCount').should('be.visible');
         });
 
         it('should validate Visualization tab displays chart with controls', function () {
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Visualization').click();
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
 
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('dscResultCount').should('be.visible');
 
           cy.getElementByTestId('dscDownloadCsvButton').should('be.visible');
           cy.getElementByTestId('addToDashboardButton').should('be.visible');
 
-          cy.get('body').should('contain.text', 'Visualization type');
+          cy.getElementByTestId('dscResultsActionBar').should('be.visible');
         });
 
         it('should switch between tabs and maintain data', function () {
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Table').click();
+          cy.getElementByTestId('exploreTab-metrics').click();
           cy.get('[role="grid"]').should('be.visible');
-          cy.get('body').should('contain.text', 'prometheus_build_info');
+          cy.get('[role="gridcell"]').should('have.length.at.least', 1);
 
-          cy.get('[role="tab"]').contains('Raw').click();
-          cy.get('table').should('be.visible');
-          cy.get('body').should('contain.text', 'prometheus_build_info');
-
-          cy.get('[role="tab"]').contains('Visualization').click();
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
           cy.getElementByTestId('dscDownloadCsvButton').should('be.visible');
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('dscResultCount').should('be.visible');
+          cy.getElementByTestId('metricsRawTable').find('table').should('be.visible');
 
-          cy.get('[role="tab"]').contains('Table').click();
-          cy.get('body').should('contain.text', 'prometheus_build_info');
+          cy.getElementByTestId('exploreTab-metrics').click();
+          cy.get('[role="grid"]').should('be.visible');
         });
 
         it('should add visualization to a new dashboard', function () {
@@ -268,9 +265,9 @@ const prometheusDatasetTestSuite = () => {
           typeInQueryEditor('prometheus_build_info');
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Visualization').click();
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
 
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('dscResultCount').should('be.visible');
           cy.getElementByTestId('dscDownloadCsvButton').should('be.visible');
 
           cy.getElementByTestId('addToDashboardButton').should('be.visible').click();
@@ -334,8 +331,8 @@ const prometheusDatasetTestSuite = () => {
           executeQuery();
 
           // Navigate to visualization tab
-          cy.get('#explore_visualization_tab').click();
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
+          cy.getElementByTestId('dscResultCount').should('be.visible');
 
           cy.getElementByTestId('discoverSaveButton').should('be.visible').click();
           cy.getElementByTestId('savedObjectTitle').should('be.visible').type(searchName);
@@ -359,7 +356,7 @@ const prometheusDatasetTestSuite = () => {
           cy.getElementByTestId('exploreQueryPanelEditor')
             .find('.view-lines')
             .should('contain.text', 'prometheus_build_info');
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('dscResultCount').should('be.visible');
         });
 
         it('should open a saved prometheus search from explore/logs and redirect to metrics page', function () {
@@ -369,8 +366,8 @@ const prometheusDatasetTestSuite = () => {
           executeQuery();
 
           // Navigate to visualization tab
-          cy.get('#explore_visualization_tab').click();
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
+          cy.getElementByTestId('dscResultCount').should('be.visible');
 
           cy.getElementByTestId('discoverSaveButton').should('be.visible').click();
           cy.getElementByTestId('savedObjectTitle').should('be.visible').type(searchName);
@@ -396,13 +393,96 @@ const prometheusDatasetTestSuite = () => {
           cy.getElementByTestId('exploreQueryPanelEditor')
             .find('.view-lines')
             .should('contain.text', 'prometheus_build_info');
-          // cy.get('body').should('contain.text', 'results in');
+          cy.getElementByTestId('dscResultCount').should('be.visible');
+        });
+      });
+
+      describe('Metrics Explore Tab', () => {
+        beforeEach(() => {
+          cy.visit(`/w/${workspaceId}/app/explore/metrics`);
+          cy.getElementByTestId('metricsPageTab-explore').should('be.visible');
+          cy.wait(1000);
+          cy.getElementByTestId('metricsPageTab-explore').click();
+          cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
+        });
+
+        it('should display Explore tab with metric browser', function () {
+          cy.getElementByTestId('metricsPageTab-explore').should(
+            'have.attr',
+            'aria-selected',
+            'true'
+          );
+          cy.getElementByTestId('metricsExploreSearchInput').should('exist');
+          cy.getElementByTestId('metricsExploreCard-ALERTS').should('exist');
+          cy.getElementByTestId('metricsExploreLoadMoreButton').should('be.visible');
+        });
+
+        it('should search metrics and navigate to detail view', function () {
+          cy.getElementByTestId('metricsExploreSearchInput').type('prometheus_build');
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info', {
+            timeout: 10000,
+          }).should('exist');
+
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info')
+            .contains('button', 'prometheus_build_info')
+            .click();
+
+          cy.getElementByTestId('metricsExploreDetailTitle').should(
+            'contain.text',
+            'prometheus_build_info'
+          );
+          cy.getElementByTestId('metricsExploreBackButton').should('be.visible');
+          cy.getElementByTestId('metricsExploreExecuteButton').should('be.visible');
+          cy.getElementByTestId('metricsExploreBreakdownSection').should('exist');
+        });
+
+        it('should navigate back from detail to browser', function () {
+          cy.getElementByTestId('metricsExploreCard-ALERTS').contains('button', 'ALERTS').click();
+          cy.getElementByTestId('metricsExploreDetailTitle').should('contain.text', 'ALERTS');
+
+          cy.getElementByTestId('metricsExploreBackButton').click();
+          cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
+          cy.getElementByTestId('metricsExploreCard-ALERTS').should('exist');
+        });
+
+        it('should execute metric from detail view and switch to Query tab', function () {
+          cy.getElementByTestId('metricsExploreCard-ALERTS').contains('button', 'ALERTS').click();
+          cy.getElementByTestId('metricsExploreDetailTitle').should('contain.text', 'ALERTS');
+
+          cy.getElementByTestId('metricsExploreExecuteButton').click();
+
+          cy.getElementByTestId('metricsPageTab-query').should(
+            'have.attr',
+            'aria-selected',
+            'true'
+          );
+          cy.getElementByTestId('exploreQueryPanelEditor')
+            .find('.view-lines')
+            .should('contain.text', 'ALERTS');
+        });
+
+        it('should persist detail view state in URL on reload', function () {
+          cy.getElementByTestId('metricsExploreCard-ALERTS').contains('button', 'ALERTS').click();
+          cy.getElementByTestId('metricsExploreDetailTitle').should('contain.text', 'ALERTS');
+          cy.url().should('include', 'level:detail');
+
+          cy.url().then((url) => {
+            cy.visit(url);
+            cy.getElementByTestId('metricsExploreDetailTitle', { timeout: 30000 }).should(
+              'contain.text',
+              'ALERTS'
+            );
+            cy.getElementByTestId('metricsExploreBackButton').should('be.visible');
+          });
         });
       });
 
       describe('Multi-Query Functionality', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
+          cy.getElementByTestId('metricsPageTab-query').should('be.visible');
+          cy.wait(1000);
+          cy.getElementByTestId('metricsPageTab-query').click();
         });
 
         it('should display Value #A and Value #B columns in Table view for multi-query', function () {
@@ -411,7 +491,7 @@ const prometheusDatasetTestSuite = () => {
           });
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Table').click();
+          cy.getElementByTestId('exploreTab-metrics').click();
           cy.get('[role="grid"]').should('be.visible');
           cy.get('[role="columnheader"]').should('contain.text', 'Value #A');
           cy.get('[role="columnheader"]').should('contain.text', 'Value #B');
@@ -419,21 +499,23 @@ const prometheusDatasetTestSuite = () => {
           cy.get('[role="gridcell"]').should('have.length.at.least', 1);
         });
 
-        it('should display Value #A and Value #B columns in Raw view for multi-query', function () {
+        it('should display Value #A and Value #B columns in raw table for multi-query', function () {
           typeInQueryEditor('prometheus_build_info; prometheus_build_info', {
             parseSpecialCharSequences: false,
           });
           executeQuery();
 
-          cy.get('[role="tab"]').contains('Raw').click();
-          cy.get('table').should('be.visible');
-          cy.get('table').within(() => {
-            cy.contains('Value #A').should('be.visible');
-            cy.contains('Value #B').should('be.visible');
-          });
+          cy.getElementByTestId('exploreTab-explore_visualization_tab').click();
+          cy.getElementByTestId('metricsRawTable').should('be.visible');
+          cy.getElementByTestId('metricsRawTable').find('table').should('be.visible');
+          cy.getElementByTestId('metricsRawTable')
+            .find('table')
+            .within(() => {
+              cy.contains('Value #A').should('be.visible');
+              cy.contains('Value #B').should('be.visible');
+            });
 
-          cy.get('body').should('contain.text', 'prometheus_build_info');
-          cy.get('body').should('contain.text', 'result series');
+          cy.getElementByTestId('metricsRawResultCount').should('be.visible');
         });
       });
     }
