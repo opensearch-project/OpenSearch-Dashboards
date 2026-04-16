@@ -329,20 +329,21 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         }
 
         if (!workspaceIds.length) {
-          return { authorized: false, unauthorizedWorkspaces: workspaceIds };
+          return { authorized: false };
         }
 
         const unauthorizedWorkspaces: string[] = [];
 
         for (const workspaceId of workspaceIds) {
           const result = await (this.client as IWorkspaceClientImpl).get({ request }, workspaceId);
-          this.logger.info(`Workspace object fetched successfully: ${workspaceId}`);
 
           if (!result.success) {
             this.logger.warn(`Workspace authorization: workspace ${workspaceId} not found`);
             unauthorizedWorkspaces.push(workspaceId);
             continue;
           }
+
+          this.logger.info(`Workspace object fetched: ${JSON.stringify(result)}`);
 
           const permissions = (result.result as any).permissions as
             | Record<string, { users?: string[]; groups?: string[] }>
