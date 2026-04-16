@@ -50,15 +50,14 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
     return () => clearTimeout(timer);
   }, []);
 
-  // In prompt (AI) mode, render a simple stacked layout without the resizable
-  // handle. The prompt editor is a single-line input so resizing adds no value
-  // resize handler required for editing ppl large queries only
+  // In prompt (AI) mode, render without the resizable handle.
+  // This mirrors the original layout before the resizable container was introduced.
   if (isPromptMode) {
     return (
-      <div className="exploreResizableQueryContainer exploreResizableQueryContainer--promptMode">
-        {queryPanel}
+      <>
+        <div className="dscCanvas__queryPanel">{queryPanel}</div>
         {children}
-      </div>
+      </>
     );
   }
 

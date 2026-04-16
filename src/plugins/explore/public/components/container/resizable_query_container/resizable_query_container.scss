@@ -8,12 +8,6 @@
   min-height: 0;
   gap: $ouiSizeXS;
 
-  // Simple stacked layout used in prompt (AI) mode — no resize handle needed.
-  &--promptMode {
-    display: flex;
-    flex-direction: column;
-  }
-
   &__queryPanel {
     overflow: visible;
     display: flex;
@@ -62,7 +56,6 @@
   }
 
   &__resizeHandle {
-    z-index: 1;
     margin-top: 0;
     margin-bottom: 0;
 

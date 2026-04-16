@@ -2,6 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { ResizableQueryContainer, getInitialQueryPanelSize } from './resizable_query_container';
 
@@ -147,8 +149,9 @@ describe('ResizableQueryContainer', () => {
       expect(screen.getByTestId('query-panel')).toBeInTheDocument();
       expect(screen.getByTestId('content-panel')).toBeInTheDocument();
 
-      const promptContainer = document.querySelector('.exploreResizableQueryContainer--promptMode');
-      expect(promptContainer).toBeInTheDocument();
+      // Query panel wrapped in dscCanvas__queryPanel like the original pre-resizable layout
+      const queryWrapper = document.querySelector('.dscCanvas__queryPanel');
+      expect(queryWrapper).toBeInTheDocument();
 
       // No resize handle in prompt mode
       const handle = document.querySelector('.exploreResizableQueryContainer__resizeHandle');
@@ -157,6 +160,9 @@ describe('ResizableQueryContainer', () => {
 
     it('does not render the resizable container or inner wrapper', () => {
       renderComponent();
+
+      const resizable = document.querySelector('.exploreResizableQueryContainer');
+      expect(resizable).not.toBeInTheDocument();
 
       const inner = document.querySelector('.exploreResizableQueryContainer__queryPanelInner');
       expect(inner).not.toBeInTheDocument();
