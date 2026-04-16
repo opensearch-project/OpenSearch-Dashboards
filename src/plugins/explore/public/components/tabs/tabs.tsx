@@ -30,7 +30,7 @@ import { DiscoverUninitialized } from '../../application/legacy/discover/applica
 import { DiscoverNoResults } from '../../application/legacy/discover/application/components/no_results/no_results';
 import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 import { useDatasetContext } from '../../application/context';
-import { useMetricsPageMode } from '../../application/pages/metrics/metrics_page_tabs';
+import { useMetricsPageMode } from '../../application/pages/metrics/metrics_page_mode_context';
 
 export const EXPLORE_ACTION_BAR_SLOT_ID = 'explore-action-bar-slot';
 

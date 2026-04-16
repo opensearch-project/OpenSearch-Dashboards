@@ -4,7 +4,7 @@
  */
 
 import './metrics_page_tabs.scss';
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import { EuiTabs, EuiTab, EuiPageBody } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { MetricsExploreTab } from './explore';
@@ -14,10 +14,9 @@ import { BottomRightContainer } from './metrics_bottom_container/bottom_right_co
 import { DatasetSelectWidget } from '../../../components/query_panel/query_panel_widgets/dataset_select';
 import { RootState } from '../../utils/state_management/store';
 import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
+import { MetricsPageMode, MetricsPageModeContext } from './metrics_page_mode_context';
 
-type MetricsPageMode = 'explore' | 'query';
-const MetricsPageModeContext = createContext<MetricsPageMode>('explore');
-export const useMetricsPageMode = () => useContext(MetricsPageModeContext);
+export { useMetricsPageMode } from './metrics_page_mode_context';
 
 const PAGE_TABS: Array<{ id: MetricsPageMode; label: string }> = [
   { id: 'explore', label: 'Explore' },
