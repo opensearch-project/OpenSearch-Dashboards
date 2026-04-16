@@ -8,6 +8,17 @@
   min-height: 0;
   gap: $ouiSizeXS;
 
+  // In prompt (AI) mode, hide the resize handle and lower its z-index
+  // so it cannot overlap the generated-query bar.
+  &--promptMode {
+    .exploreResizableQueryContainer__resizeHandle {
+      visibility: hidden;
+      z-index: 0;
+      height: 0;
+      margin: 0;
+    }
+  }
+
   &__queryPanel {
     overflow: visible;
     display: flex;

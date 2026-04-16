@@ -143,29 +143,22 @@ describe('ResizableQueryContainer', () => {
       });
     });
 
-    it('renders query panel and content without the resizable handle', () => {
+    it('adds the prompt mode class to the container', () => {
+      renderComponent();
+
+      const container = document.querySelector('.exploreResizableQueryContainer--promptMode');
+      expect(container).toBeInTheDocument();
+    });
+
+    it('still renders query panel, content, and resize handle in the DOM', () => {
       renderComponent();
 
       expect(screen.getByTestId('query-panel')).toBeInTheDocument();
       expect(screen.getByTestId('content-panel')).toBeInTheDocument();
 
-      // Query panel wrapped in dscCanvas__queryPanel like the original pre-resizable layout
-      const queryWrapper = document.querySelector('.dscCanvas__queryPanel');
-      expect(queryWrapper).toBeInTheDocument();
-
-      // No resize handle in prompt mode
+      // Resize handle is still in the DOM (just hidden via CSS)
       const handle = document.querySelector('.exploreResizableQueryContainer__resizeHandle');
-      expect(handle).not.toBeInTheDocument();
-    });
-
-    it('does not render the resizable container or inner wrapper', () => {
-      renderComponent();
-
-      const resizable = document.querySelector('.exploreResizableQueryContainer');
-      expect(resizable).not.toBeInTheDocument();
-
-      const inner = document.querySelector('.exploreResizableQueryContainer__queryPanelInner');
-      expect(inner).not.toBeInTheDocument();
+      expect(handle).toBeInTheDocument();
     });
   });
 });

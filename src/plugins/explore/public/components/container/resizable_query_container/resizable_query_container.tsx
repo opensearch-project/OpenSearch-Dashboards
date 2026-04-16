@@ -50,21 +50,12 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
     return () => clearTimeout(timer);
   }, []);
 
-  // In prompt (AI) mode, render without the resizable handle.
-  // This mirrors the original layout before the resizable container was introduced.
-  if (isPromptMode) {
-    return (
-      <>
-        <div className="dscCanvas__queryPanel">{queryPanel}</div>
-        {children}
-      </>
-    );
-  }
-
   return (
     <EuiResizableContainer
       direction="vertical"
-      className="exploreResizableQueryContainer"
+      className={`exploreResizableQueryContainer${
+        isPromptMode ? ' exploreResizableQueryContainer--promptMode' : ''
+      }`}
       onPanelWidthChange={handlePanelWidthChange}
     >
       {(EuiResizablePanel, EuiResizableButton) => (
