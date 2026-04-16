@@ -513,6 +513,184 @@ describe('Workspace server plugin', () => {
     expect(startMock.savedObjects.createSerializer).toBeCalledTimes(1);
   });
 
+  describe('#authorizeWorkspace', () => {
+    let workspacePlugin: WorkspacePlugin;
+    let setupMock: ReturnType<typeof coreMock.createSetup>;
+    let startMock: ReturnType<typeof coreMock.createStart>;
+    let workspaceStart: any;
+    let clientGetSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      setupMock = coreMock.createSetup();
+      startMock = coreMock.createStart();
+      const initializerContextConfigMock = coreMock.createPluginInitializerContext({
+        enabled: true,
+        permission: { enabled: true },
+      });
+      workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
+      clientGetSpy = jest.spyOn(workspaceSetup.client, 'get');
+      workspaceStart = workspacePlugin.start(startMock);
+    });
+
+    it('should return unauthorized for empty workspaceIds', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, [], 'user1');
+      expect(result.authorized).toBe(false);
+    });
+
+    it('should return authorized when principal has matching permission', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          name: 'test-workspace',
+          permissions: {
+            read: { users: ['user1'] },
+          },
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1', ['read']);
+      expect(result.authorized).toBe(true);
+      expect(result.unauthorizedWorkspaces).toBeUndefined();
+    });
+
+    it('should return unauthorized when principal lacks permission', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          name: 'test-workspace',
+          permissions: {
+            read: { users: ['other-user'] },
+          },
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1', ['read']);
+      expect(result.authorized).toBe(false);
+      expect(result.unauthorizedWorkspaces).toEqual(['ws-1']);
+    });
+
+    it('should return authorized when wildcard * is in users', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          name: 'test-workspace',
+          permissions: {
+            read: { users: ['*'] },
+          },
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'any-user', ['read']);
+      expect(result.authorized).toBe(true);
+    });
+
+    it('should return authorized if any one of the permission modes matches (OR logic)', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          name: 'test-workspace',
+          permissions: {
+            library_write: { users: ['user1'] },
+          },
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(
+        request, ['ws-1'], 'user1', ['library_write', 'library_read']
+      );
+      expect(result.authorized).toBe(true);
+    });
+
+    it('should return unauthorized when workspace is not found', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: false,
+        error: 'workspace not found',
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-missing'], 'user1');
+      expect(result.authorized).toBe(false);
+      expect(result.unauthorizedWorkspaces).toEqual(['ws-missing']);
+    });
+
+    it('should return unauthorized when workspace has no permissions', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          name: 'test-workspace',
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1', ['read']);
+      expect(result.authorized).toBe(false);
+      expect(result.unauthorizedWorkspaces).toEqual(['ws-1']);
+    });
+
+    it('should check multiple workspaces and return unauthorized ones', async () => {
+      clientGetSpy
+        .mockResolvedValueOnce({
+          success: true,
+          result: { id: 'ws-1', permissions: { read: { users: ['user1'] } } },
+        })
+        .mockResolvedValueOnce({
+          success: true,
+          result: { id: 'ws-2', permissions: { read: { users: ['other-user'] } } },
+        });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(
+        request, ['ws-1', 'ws-2'], 'user1', ['read']
+      );
+      expect(result.authorized).toBe(false);
+      expect(result.unauthorizedWorkspaces).toEqual(['ws-2']);
+    });
+
+    it('should default to read permission mode', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          permissions: {
+            read: { users: ['user1'] },
+          },
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1');
+      expect(result.authorized).toBe(true);
+    });
+
+    it('should skip ACL check and return authorized when principal is dashboard admin', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(request, { isDashboardAdmin: true });
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'admin-user', [
+        'read',
+      ]);
+      expect(result.authorized).toBe(true);
+      expect(clientGetSpy).not.toHaveBeenCalled();
+    });
+
+    it('should perform ACL check when principal is not dashboard admin', async () => {
+      clientGetSpy.mockResolvedValue({
+        success: true,
+        result: {
+          id: 'ws-1',
+          permissions: { read: { users: ['user1'] } },
+        },
+      });
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(request, { isDashboardAdmin: false });
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1', ['read']);
+      expect(result.authorized).toBe(true);
+      expect(clientGetSpy).toHaveBeenCalled();
+    });
+  });
+
   it('#stop', () => {
     const initializerContextConfigMock = coreMock.createPluginInitializerContext();
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);

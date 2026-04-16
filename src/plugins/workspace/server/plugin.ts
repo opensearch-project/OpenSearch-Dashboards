@@ -314,6 +314,64 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     return {
       client: this.client as IWorkspaceClientImpl,
+      authorizeWorkspace: async (
+        request: any,
+        workspaceIds: string | any[],
+        principal: string,
+        permissionModes = ['read']
+      ) => {
+        const { isDashboardAdmin } = getWorkspaceState(request);
+        if (isDashboardAdmin) {
+          this.logger.info(
+            `Workspace authorization skipped: principal=${principal} is dashboard admin`
+          );
+          return { authorized: true };
+        }
+
+        if (!workspaceIds.length) {
+          return { authorized: false, unauthorizedWorkspaces: workspaceIds };
+        }
+
+        const unauthorizedWorkspaces: string[] = [];
+
+        for (const workspaceId of workspaceIds) {
+          const result = await (this.client as IWorkspaceClientImpl).get({ request }, workspaceId);
+          this.logger.info(`Workspace object fetched successfully: ${workspaceId}`);
+
+          if (!result.success) {
+            this.logger.warn(`Workspace authorization: workspace ${workspaceId} not found`);
+            unauthorizedWorkspaces.push(workspaceId);
+            continue;
+          }
+
+          const permissions = (result.result as any).permissions as
+            | Record<string, { users?: string[]; groups?: string[] }>
+            | undefined;
+          const hasAccess = permissions
+            ? permissionModes.some(
+                (mode) =>
+                  permissions[mode]?.users?.includes(principal) ||
+                  permissions[mode]?.users?.includes('*')
+              )
+            : false;
+
+          this.logger.info(
+            `Workspace authorization: workspace=${workspaceId}, principal=${principal}, modes=${permissionModes.join(
+              ','
+            )}, authorized=${hasAccess}`
+          );
+
+          if (!hasAccess) {
+            unauthorizedWorkspaces.push(workspaceId);
+          }
+        }
+
+        const authorized = unauthorizedWorkspaces.length === 0;
+        return {
+          authorized,
+          ...(unauthorizedWorkspaces.length > 0 ? { unauthorizedWorkspaces } : {}),
+        };
+      },
     };
   }
 
