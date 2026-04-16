@@ -2,32 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
+import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { ResizableQueryContainer, getInitialQueryPanelSize } from './resizable_query_container';
 
 // Mock the scss import
 jest.mock('./resizable_query_container.scss', () => ({}));
-
-// Mock react-redux
-const mockUseSelector = jest.fn();
-jest.mock('react-redux', () => ({
-  useSelector: (selector: any) => mockUseSelector(selector),
-}));
-
-// Mock the selectors module
-jest.mock('../../../application/utils/state_management/selectors', () => ({
-  selectLastExecutedTranslatedQuery: jest.fn(),
-  selectIsPromptEditorMode: 'selectIsPromptEditorMode',
-}));
-
-// Mock ResizeObserver (still needed by EUI internals)
-const mockObserve = jest.fn();
-const mockDisconnect = jest.fn();
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: mockObserve,
-  unobserve: jest.fn(),
-  disconnect: mockDisconnect,
-}));
 
 // Track resize events
 const resizeEvents: Event[] = [];
@@ -37,11 +18,6 @@ describe('ResizableQueryContainer', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     resizeEvents.length = 0;
-    // Default: not in prompt mode (PPL/resizable path)
-    mockUseSelector.mockImplementation((selector: any) => {
-      if (selector === 'selectIsPromptEditorMode') return false;
-      return '';
-    });
     window.dispatchEvent = jest.fn((event: Event) => {
       resizeEvents.push(event);
       return originalDispatchEvent.call(window, event);
@@ -131,35 +107,5 @@ describe('ResizableQueryContainer', () => {
 
     const postTimerResizes = resizeEvents.filter((e) => e.type === 'resize').length;
     expect(postTimerResizes).toBeGreaterThan(preTimerResizes);
-  });
-
-  describe('prompt mode', () => {
-    beforeEach(() => {
-      mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === 'selectIsPromptEditorMode') return true;
-        return '';
-      });
-    });
-
-    it('renders query panel and content without the resizable handle', () => {
-      renderComponent();
-
-      expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-      expect(screen.getByTestId('content-panel')).toBeInTheDocument();
-
-      const promptContainer = document.querySelector('.exploreResizableQueryContainer--promptMode');
-      expect(promptContainer).toBeInTheDocument();
-
-      // No resize handle in prompt mode
-      const handle = document.querySelector('.exploreResizableQueryContainer__resizeHandle');
-      expect(handle).not.toBeInTheDocument();
-    });
-
-    it('does not render the resizable container or inner wrapper', () => {
-      renderComponent();
-
-      const inner = document.querySelector('.exploreResizableQueryContainer__queryPanelInner');
-      expect(inner).not.toBeInTheDocument();
-    });
   });
 });
