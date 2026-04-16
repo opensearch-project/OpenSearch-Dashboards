@@ -16,9 +16,10 @@ import {
   EuiFormRow,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { LabelFilter } from './types';
-import { PrometheusClient } from './prometheus_client';
-import { useExploration } from './exploration_context';
+import { i18n } from '@osd/i18n';
+import { LabelFilter } from '../types';
+import { PrometheusClient } from '../services/prometheus_client';
+import { useExploration } from '../contexts/exploration_context';
 
 const OPERATORS: Array<{
   value: LabelFilter['operator'];
@@ -32,7 +33,9 @@ const OPERATORS: Array<{
       <>
         <strong>=</strong>
         <br />
-        <small>Equals</small>
+        <small>
+          {i18n.translate('explore.metricsExplore.operatorEquals', { defaultMessage: 'Equals' })}
+        </small>
       </>
     ),
   },
@@ -43,7 +46,11 @@ const OPERATORS: Array<{
       <>
         <strong>!=</strong>
         <br />
-        <small>Not equal</small>
+        <small>
+          {i18n.translate('explore.metricsExplore.operatorNotEqual', {
+            defaultMessage: 'Not equal',
+          })}
+        </small>
       </>
     ),
   },
@@ -54,7 +61,11 @@ const OPERATORS: Array<{
       <>
         <strong>=~</strong>
         <br />
-        <small>Matches regex</small>
+        <small>
+          {i18n.translate('explore.metricsExplore.operatorMatchesRegex', {
+            defaultMessage: 'Matches regex',
+          })}
+        </small>
       </>
     ),
   },
@@ -65,7 +76,11 @@ const OPERATORS: Array<{
       <>
         <strong>!~</strong>
         <br />
-        <small>Does not match regex</small>
+        <small>
+          {i18n.translate('explore.metricsExplore.operatorNotMatchRegex', {
+            defaultMessage: 'Does not match regex',
+          })}
+        </small>
       </>
     ),
   },
@@ -98,10 +113,12 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
       button={
         <EuiSmallButtonEmpty
           onClick={() => setIsOpen((v) => !v)}
-          aria-label="Add label filter"
+          aria-label={i18n.translate('explore.metricsExplore.addLabelFilterAriaLabel', {
+            defaultMessage: 'Add label filter',
+          })}
           data-test-subj="addLabelFilter"
         >
-          Label
+          {i18n.translate('explore.metricsExplore.labelFilter', { defaultMessage: 'Label' })}
           <EuiIcon type="filter" style={{ marginLeft: 4 }} />
         </EuiSmallButtonEmpty>
       }
@@ -110,9 +127,16 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
     >
       <EuiFlexGroup gutterSize="s" direction="column" style={{ width: 260 }}>
         <EuiFlexItem>
-          <EuiFormRow label="Label" compressed>
+          <EuiFormRow
+            label={i18n.translate('explore.metricsExplore.labelName', {
+              defaultMessage: 'Label',
+            })}
+            compressed
+          >
             <EuiComboBox
-              placeholder="Select label..."
+              placeholder={i18n.translate('explore.metricsExplore.selectLabel', {
+                defaultMessage: 'Select label...',
+              })}
               singleSelection={{ asPlainText: true }}
               options={labelNames.map((n) => ({ label: n }))}
               selectedOptions={draftName ? [{ label: draftName }] : []}
@@ -135,7 +159,12 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
         </EuiFlexItem>
         {draftName && (
           <EuiFlexItem>
-            <EuiFormRow label="Operator" compressed>
+            <EuiFormRow
+              label={i18n.translate('explore.metricsExplore.operator', {
+                defaultMessage: 'Operator',
+              })}
+              compressed
+            >
               <EuiSuperSelect
                 options={OPERATORS}
                 valueOfSelected={draftOp}
@@ -147,7 +176,12 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
         )}
         {draftName && (
           <EuiFlexItem>
-            <EuiFormRow label="Value" compressed>
+            <EuiFormRow
+              label={i18n.translate('explore.metricsExplore.value', {
+                defaultMessage: 'Value',
+              })}
+              compressed
+            >
               <EuiComboBox
                 placeholder={`${draftName}${draftOp}...`}
                 singleSelection={{ asPlainText: true }}

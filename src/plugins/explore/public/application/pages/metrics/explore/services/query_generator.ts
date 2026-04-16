@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MetricType, LabelFilter, inferMetricType } from './types';
+import { MetricType, LabelFilter, inferMetricType } from '../types';
 
 export class MetricQueryGenerator {
   constructor(private scrapeInterval: string = '15s', private stepInterval: string = '15s') {}

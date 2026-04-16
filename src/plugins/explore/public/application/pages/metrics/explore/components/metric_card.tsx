@@ -15,9 +15,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
-import { MetricMetadata, MetricType, TYPE_COLORS, inferMetricType } from './types';
+import { i18n } from '@osd/i18n';
+import { MetricMetadata, MetricType, TYPE_COLORS, inferMetricType } from '../types';
 import { SparklineChart, SERIES_COLORS } from './sparkline';
-import { useExploration } from './exploration_context';
+import { useExploration } from '../contexts/exploration_context';
 
 interface MetricCardProps {
   name: string;
@@ -92,7 +93,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           display: 'flex',
           flexDirection: 'column',
         }}
-        aria-label={`Metric card: ${name}`}
+        aria-label={i18n.translate('explore.metricsExplore.metricCard', {
+          defaultMessage: 'Metric card: {name}',
+          values: { name },
+        })}
       >
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
           <EuiFlexItem grow={false} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
@@ -100,7 +104,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
               id={`select-${name}`}
               checked={isSelected}
               onChange={onToggleSelect}
-              aria-label={`Select ${name}`}
+              aria-label={i18n.translate('explore.metricsExplore.selectMetric', {
+                defaultMessage: 'Select {name}',
+                values: { name },
+              })}
             />
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 0, overflow: 'hidden' }}>

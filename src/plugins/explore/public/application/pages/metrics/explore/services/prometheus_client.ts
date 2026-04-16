@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExploreServices } from '../../../../types';
-import { MetricMetadata, MetricType, CACHE_TTL_DATA, CACHE_TTL_METADATA } from './types';
+import { ExploreServices } from '../../../../../types';
+import { MetricMetadata, MetricType, CACHE_TTL_DATA, CACHE_TTL_METADATA } from '../types';
 import { LRUCache } from './lru_cache';
 
 export class PrometheusClient {
@@ -17,10 +17,6 @@ export class PrometheusClient {
 
   abort(): void {
     this.aborted = true;
-    this.abortActiveControllers();
-  }
-
-  cancelPendingQueries(): void {
     this.abortActiveControllers();
   }
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CACHE_MAX_ENTRIES } from './types';
+import { CACHE_MAX_ENTRIES } from '../types';
 
 interface CacheEntry<T> {
   value: T;

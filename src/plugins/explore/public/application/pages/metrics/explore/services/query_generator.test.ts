@@ -4,7 +4,7 @@
  */
 
 import { MetricQueryGenerator } from './query_generator';
-import { MetricType } from './types';
+import { MetricType } from '../types';
 
 describe('MetricQueryGenerator', () => {
   const gen = new MetricQueryGenerator('15s', '15s');

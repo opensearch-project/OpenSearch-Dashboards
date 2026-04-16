@@ -22,12 +22,16 @@ import {
 } from '../../../utils/state_management/slices/ui/ui_slice';
 import { RootState } from '../../../utils/state_management/store';
 import type { AppDispatch } from '../../../utils/state_management/store';
-import { CursorContext, createCursorBus } from './cursor_context';
-import { ExplorationContext, defaultState, explorationReducer } from './exploration_context';
-import { MetricBrowser } from './metric_browser';
-import { MetricDetail } from './metric_detail';
-import { PrometheusClient } from './prometheus_client';
-import { MetricQueryGenerator } from './query_generator';
+import { CursorContext, createCursorBus } from './hooks/cursor_context';
+import {
+  ExplorationContext,
+  defaultState,
+  explorationReducer,
+} from './contexts/exploration_context';
+import { MetricBrowser } from './components/metric_browser';
+import { MetricDetail } from './components/metric_detail';
+import { PrometheusClient } from './services/prometheus_client';
+import { MetricQueryGenerator } from './services/query_generator';
 import { ExplorationLevel, ExplorationState } from './types';
 
 export const MetricsExploreTab = () => {
@@ -140,17 +144,7 @@ export const MetricsExploreTab = () => {
     return () => sub.unsubscribe();
   }, [services.data?.query?.timefilter?.timefilter, client]);
 
-  // Cancel pending queries when navigation level changes
-  const prevLevelRef = useRef(state.level);
-  useEffect(() => {
-    if (prevLevelRef.current !== state.level) {
-      prevLevelRef.current = state.level;
-      // Note: useConcurrentQueries handles its own cleanup on unmount,
-      // so we no longer call client.cancelPendingQueries() here.
-      // That was aborting the NEW level's queries that started before this effect ran.
-    }
-  }, [state.level, client]);
-
+  // Abort pending queries on unmount
   useEffect(() => {
     return () => client.abort();
   }, [client]);

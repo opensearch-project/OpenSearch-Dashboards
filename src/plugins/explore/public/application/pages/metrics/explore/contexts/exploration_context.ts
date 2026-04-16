@@ -10,9 +10,9 @@ import {
   LabelFilter,
   GroupingStrategy,
   LayoutMode,
-} from './types';
-import { PrometheusClient } from './prometheus_client';
-import { MetricQueryGenerator } from './query_generator';
+} from '../types';
+import { PrometheusClient } from '../services/prometheus_client';
+import { MetricQueryGenerator } from '../services/query_generator';
 
 export const defaultState: ExplorationState = {
   level: ExplorationLevel.BROWSER,
@@ -24,7 +24,7 @@ export const defaultState: ExplorationState = {
   layout: LayoutMode.GRID,
 };
 
-export type Action =
+type Action =
   | { type: 'SET_SEARCH'; search: string }
   | { type: 'SELECT_METRIC'; metric: string }
   | { type: 'SELECT_LABEL'; label: string }
@@ -75,7 +75,7 @@ export function explorationReducer(state: ExplorationState, action: Action): Exp
   }
 }
 
-export interface ExplorationContextValue {
+interface ExplorationContextValue {
   state: ExplorationState;
   dispatch: React.Dispatch<Action>;
   client: PrometheusClient;

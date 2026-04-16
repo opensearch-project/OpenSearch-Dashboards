@@ -9,3 +9,9 @@
   overflow: hidden;
   padding: $euiSizeS;
 }
+
+.metricsExploreDetail__queryDivider {
+  border-left: $euiBorderThin;
+  padding-left: $euiSizeS;
+  margin-left: $euiSizeXS;
+}

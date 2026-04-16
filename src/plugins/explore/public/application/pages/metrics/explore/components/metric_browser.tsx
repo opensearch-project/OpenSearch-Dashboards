@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import {
   MetricMetadata,
   MetricType,
@@ -23,12 +24,12 @@ import {
   SEARCH_DEBOUNCE_MS,
   LayoutMode,
   breakdownGridStyle,
-} from './types';
-import { useExploration } from './exploration_context';
+} from '../types';
+import { useExploration } from '../contexts/exploration_context';
 import { MetricCard } from './metric_card';
 import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
-import { useConcurrentQueries } from './use_concurrent_queries';
+import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
 
 const PAGE_SIZE = 20;
 
@@ -53,12 +54,14 @@ function useSparklines(
     [client, queryGen, filters]
   );
 
-  const { results, onVisibilityChange, enqueueAll } = useConcurrentQueries<Array<[number, string]>>(
-    fetchFn,
-    [client, filters, refreshCounter, metadata]
-  );
+  const { results, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(fetchFn, [
+    client,
+    filters,
+    refreshCounter,
+    metadata,
+  ]);
 
-  return { sparklines: results as SparklineMap, onVisibilityChange, enqueueNames: enqueueAll };
+  return { sparklines: results as SparklineMap, onVisibilityChange };
 }
 
 export const MetricBrowser: React.FC = () => {
@@ -198,11 +201,26 @@ export const MetricBrowser: React.FC = () => {
     return (
       <EuiEmptyPrompt
         iconType="metricsApp"
-        title={<h2>Explore Your Metrics</h2>}
+        title={
+          <h2>
+            {i18n.translate('explore.metricsExplore.emptyTitle', {
+              defaultMessage: 'Explore Your Metrics',
+            })}
+          </h2>
+        }
         body={
           <EuiText>
-            <p>Browse, search, and drill into Prometheus metrics without writing PromQL.</p>
-            <p>No metrics found. Ensure a Prometheus data source is configured.</p>
+            <p>
+              {i18n.translate('explore.metricsExplore.emptyBody', {
+                defaultMessage:
+                  'Browse, search, and drill into Prometheus metrics without writing PromQL.',
+              })}
+            </p>
+            <p>
+              {i18n.translate('explore.metricsExplore.noMetricsFound', {
+                defaultMessage: 'No metrics found. Ensure a Prometheus data source is configured.',
+              })}
+            </p>
           </EuiText>
         }
       />
@@ -246,14 +264,18 @@ export const MetricBrowser: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldSearch
-            placeholder="Search metrics..."
+            placeholder={i18n.translate('explore.metricsExplore.searchPlaceholder', {
+              defaultMessage: 'Search metrics...',
+            })}
             value={state.search}
             onChange={(e) => dispatch({ type: 'SET_SEARCH', search: e.target.value })}
             isClearable
             fullWidth
             compressed
             isLoading={isSearching || (!!state.search && state.search !== debouncedSearch)}
-            aria-label="Search metrics"
+            aria-label={i18n.translate('explore.metricsExplore.searchAriaLabel', {
+              defaultMessage: 'Search metrics',
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -290,12 +312,17 @@ export const MetricBrowser: React.FC = () => {
                 iconType="play"
                 size="s"
               >
-                Execute ({selected.size})
+                {i18n.translate('explore.metricsExplore.executeSelected', {
+                  defaultMessage: 'Execute ({count})',
+                  values: { count: selected.size },
+                })}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={() => setSelected(new Set())} size="s">
-                Clear
+                {i18n.translate('explore.metricsExplore.clearSelection', {
+                  defaultMessage: 'Clear',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </>
@@ -339,7 +366,10 @@ export const MetricBrowser: React.FC = () => {
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButton onClick={() => setDisplayCount((c) => c + PAGE_SIZE)} iconType="arrowDown">
-                Load more ({displayCount} of {totalMetrics.toLocaleString()})
+                {i18n.translate('explore.metricsExplore.loadMore', {
+                  defaultMessage: 'Load more ({displayed} of {total})',
+                  values: { displayed: displayCount, total: totalMetrics.toLocaleString() },
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

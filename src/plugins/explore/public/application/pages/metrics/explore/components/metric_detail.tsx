@@ -19,13 +19,14 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
-import { LabelInfo, MetricType, inferMetricType, LayoutMode, breakdownGridStyle } from './types';
-import { useExploration } from './exploration_context';
+import { i18n } from '@osd/i18n';
+import { LabelInfo, MetricType, inferMetricType, LayoutMode, breakdownGridStyle } from '../types';
+import { useExploration } from '../contexts/exploration_context';
 import { SparklineChart } from './sparkline';
 import { LabelFilterBar } from './label_filter_bar';
 import { LabelFilterBadges } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
-import { useConcurrentQueries } from './use_concurrent_queries';
+import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
 
 interface BreakdownSeries {
   labelValue: string;
@@ -121,7 +122,7 @@ const BreakdownPanel: React.FC<{
                 />
               ) : (
                 <EuiText size="xs" color="subdued">
-                  No data
+                  {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
                 </EuiText>
               )}
             </div>
@@ -154,7 +155,7 @@ const BreakdownPanel: React.FC<{
             />
           ) : (
             <EuiText size="xs" color="subdued">
-              No data
+              {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
             </EuiText>
           )}
         </div>
@@ -287,7 +288,9 @@ export const MetricDetail: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="arrowLeft"
-            aria-label="Back to all metrics"
+            aria-label={i18n.translate('explore.metricsExplore.backToMetrics', {
+              defaultMessage: 'Back to all metrics',
+            })}
             onClick={() => dispatch({ type: 'GO_BACK' })}
           />
         </EuiFlexItem>
@@ -317,7 +320,7 @@ export const MetricDetail: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="play" onClick={() => executePromQL(promql)} size="s" fill>
-            Execute
+            {i18n.translate('explore.metricsExplore.execute', { defaultMessage: 'Execute' })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -334,12 +337,11 @@ export const MetricDetail: React.FC = () => {
             onClear={() => {}}
           />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          style={{ borderLeft: '1px solid #D3DAE6', paddingLeft: 8, marginLeft: 4 }}
-        >
+        <EuiFlexItem grow={false} className="metricsExploreDetail__queryDivider">
           <EuiText size="xs">
-            <strong>Query</strong>
+            <strong>
+              {i18n.translate('explore.metricsExplore.queryLabel', { defaultMessage: 'Query' })}
+            </strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
@@ -362,7 +364,7 @@ export const MetricDetail: React.FC = () => {
           />
         ) : (
           <EuiText size="s" color="subdued">
-            No data
+            {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
           </EuiText>
         )}
       </EuiPanel>
@@ -373,12 +375,18 @@ export const MetricDetail: React.FC = () => {
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <strong>Breakdown</strong>
+                <strong>
+                  {i18n.translate('explore.metricsExplore.breakdownLabel', {
+                    defaultMessage: 'Breakdown',
+                  })}
+                </strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ minWidth: 180 }}>
               <EuiComboBox
-                placeholder="All"
+                placeholder={i18n.translate('explore.metricsExplore.allLabels', {
+                  defaultMessage: 'All',
+                })}
                 singleSelection={{ asPlainText: true }}
                 options={labelOptions}
                 selectedOptions={selectedLabel}

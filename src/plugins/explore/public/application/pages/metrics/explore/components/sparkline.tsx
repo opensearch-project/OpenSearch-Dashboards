@@ -6,7 +6,9 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiText } from '@elastic/eui';
-import { useSharedCursor } from './cursor_context';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
+import { useSharedCursor } from '../hooks/cursor_context';
 
 interface SeriesData {
   name: string;
@@ -88,7 +90,7 @@ export const SERIES_COLORS = [
 export const SparklineChart: React.FC<ChartProps> = ({
   values,
   height,
-  stroke = '#006BB4',
+  stroke = euiThemeVars.euiColorPrimary,
   label = 'value',
   series: multiSeries,
   yMin: propYMin,
@@ -233,7 +235,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
         }}
       >
         <EuiText size="xs" color="subdued">
-          No data
+          {i18n.translate('explore.metricsExplore.noData', { defaultMessage: 'No data' })}
         </EuiText>
       </div>
     );
@@ -495,14 +497,3 @@ export const SparklineChart: React.FC<ChartProps> = ({
     </div>
   );
 };
-
-// Keep backward compat for any other callers
-export function renderSvgLine(
-  values: Array<[number, string]>,
-  w: number,
-  h: number,
-  stroke = '#006BB4',
-  isDark = false
-): JSX.Element {
-  return <SparklineChart values={values} height={h} stroke={stroke} isDarkMode={isDark} />;
-}

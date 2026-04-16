@@ -6,9 +6,10 @@
 import '../explore_page.scss';
 import './metrics_page.scss';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
+import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
@@ -20,6 +21,7 @@ import { NewExperienceBanner } from '../../../components/experience_banners/new_
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { MetricsPageTabs } from './metrics_page_tabs';
+import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
 
 /**
  * Main application component for the Explore plugin
@@ -29,7 +31,15 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { savedExplore } = useInitPage();
+  const dispatch = useDispatch();
   useInitializeMetricsDataset({ services, savedExplore });
+
+  // Switch to query tab when loading a saved search
+  useEffect(() => {
+    if (savedExplore?.id) {
+      dispatch(setMetricsPageMode('query'));
+    }
+  }, [savedExplore?.id, dispatch]);
 
   useInitialQueryExecution(services);
   useUrlStateSync(services);

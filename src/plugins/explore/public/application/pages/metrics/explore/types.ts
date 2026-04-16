@@ -59,8 +59,6 @@ export interface LabelInfo {
 export const CACHE_TTL_DATA = 60_000;
 export const CACHE_TTL_METADATA = 300_000;
 export const CACHE_MAX_ENTRIES = 500;
-export const METRIC_LIMIT = 5000;
-export const LABEL_BREAKDOWN_LIMIT = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
 
 export function inferMetricType(name: string, type: MetricType): MetricType {

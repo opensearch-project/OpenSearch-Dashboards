@@ -4,7 +4,7 @@
  */
 
 import { explorationReducer, defaultState } from './exploration_context';
-import { ExplorationLevel, GroupingStrategy, LayoutMode } from './types';
+import { ExplorationLevel, GroupingStrategy, LayoutMode } from '../types';
 
 describe('explorationReducer', () => {
   it('SET_SEARCH updates search', () => {
