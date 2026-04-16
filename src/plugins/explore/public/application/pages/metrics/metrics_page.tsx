@@ -4,13 +4,13 @@
  */
 
 import '../explore_page.scss';
+import './metrics_page.scss';
 
 import React from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
-import { QueryPanel } from '../../../components/query_panel';
 import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_execution';
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
@@ -19,8 +19,7 @@ import { useInitializeMetricsDataset } from '../../utils/hooks/use_initialize_me
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
-import { BottomRightContainer } from './metrics_bottom_container/bottom_right_container';
-import { ResizableQueryContainer } from '../../../components/container/resizable_query_container';
+import { MetricsPageTabs } from './metrics_page_tabs';
 
 /**
  * Main application component for the Explore plugin
@@ -39,18 +38,13 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
 
   return (
     <EuiErrorBoundary>
-      <div className="mainPage">
+      <div className="mainPage metricsPage">
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <ResizableQueryContainer queryPanel={<QueryPanel />}>
-              {/* Main content area with resizable panels under QueryPanel */}
-              <EuiPageBody className="explore-layout__canvas">
-                <BottomRightContainer />
-              </EuiPageBody>
-            </ResizableQueryContainer>
+            <MetricsPageTabs />
           </EuiPageBody>
         </EuiPage>
       </div>

@@ -21,9 +21,9 @@ export const createPersistenceMiddleware = (services: ExploreServices): Middlewa
     const shouldPersist =
       action.type && persistTriggeringActions.some((prefix) => action.type.startsWith(prefix));
 
-    if (shouldPersist) {
+    if (shouldPersist && !action.meta?.skipPersist) {
       const state = store.getState() as RootState;
-      persistReduxState(state, services);
+      persistReduxState(state, services, { replace: !action.meta?.pushHistory });
     }
 
     return result;

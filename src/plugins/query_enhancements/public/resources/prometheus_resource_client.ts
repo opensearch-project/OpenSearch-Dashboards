@@ -65,13 +65,18 @@ export class PrometheusResourceClient extends BaseResourceClient {
     dataConnectionId: string,
     meta?: Record<string, unknown>,
     label?: string,
-    timeRange?: TimeRange
+    timeRange?: TimeRange,
+    match?: string
   ) {
+    const content = this.toContent(meta, timeRange) || {};
+    if (match) {
+      content['match[]'] = match;
+    }
     return this.get<string[]>(
       dataConnectionId,
       RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES,
       label,
-      this.toContent(meta, timeRange)
+      Object.keys(content).length > 0 ? content : undefined
     );
   }
 
