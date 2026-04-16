@@ -51,12 +51,12 @@ export async function collectChatExportData(
  * Export as PDF: generates HTML report and opens browser print dialog.
  * User saves as PDF from the native print dialog.
  */
-export function exportAsPdf(data: ChatExportData, options: ChatExportOptions): void {
+export function exportAsPdf(
+  data: ChatExportData,
+  options: ChatExportOptions,
+  printWindow: Window
+): void {
   const htmlContent = generatePDFReport(data, options);
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    throw new Error('Failed to open print window. Please allow popups for this site.');
-  }
   printWindow.document.write(htmlContent);
   printWindow.document.close();
   printWindow.onload = () => {
@@ -123,8 +123,11 @@ export function extractTraces(timeline: Message[], targetIndex: number): ChatTra
     return extractTracesFromTurn(timeline, targetIndex);
   }
 
+  // Scope tool result search to the same Q&A turn
+  const turnMessages = getTurnMessages(timeline, targetIndex);
+
   return toolCalls.map((toolCall) => {
-    const toolResult = timeline.find(
+    const toolResult = turnMessages.find(
       (msg) => msg.role === 'tool' && (msg as ToolMessage).toolCallId === toolCall.id
     ) as ToolMessage | undefined;
 
@@ -138,13 +141,11 @@ export function extractTraces(timeline: Message[], targetIndex: number): ChatTra
 }
 
 /**
- * Extract traces from all assistant messages and tool results
- * in the same Q&A turn (between the preceding user message and the next user message).
+ * Get the slice of the timeline that belongs to the same Q&A turn as the target message.
+ * A turn starts after the preceding user message and ends before the next user message.
  */
-export function extractTracesFromTurn(timeline: Message[], targetIndex: number): ChatTraceStep[] {
-  const traces: ChatTraceStep[] = [];
-
-  let turnStart = targetIndex;
+export function getTurnMessages(timeline: Message[], targetIndex: number): Message[] {
+  let turnStart = 0;
   for (let i = targetIndex - 1; i >= 0; i--) {
     if (timeline[i].role === 'user') {
       turnStart = i + 1;
@@ -160,12 +161,22 @@ export function extractTracesFromTurn(timeline: Message[], targetIndex: number):
     }
   }
 
-  for (let i = turnStart; i < turnEnd; i++) {
-    const msg = timeline[i];
+  return timeline.slice(turnStart, turnEnd);
+}
+
+/**
+ * Extract traces from all assistant messages and tool results
+ * in the same Q&A turn (between the preceding user message and the next user message).
+ */
+export function extractTracesFromTurn(timeline: Message[], targetIndex: number): ChatTraceStep[] {
+  const turnMessages = getTurnMessages(timeline, targetIndex);
+  const traces: ChatTraceStep[] = [];
+
+  for (const msg of turnMessages) {
     if (msg.role === 'assistant') {
       const assistantMsg = msg as AssistantMessage;
       for (const toolCall of assistantMsg.toolCalls || []) {
-        const toolResult = timeline.find(
+        const toolResult = turnMessages.find(
           (m) => m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
         ) as ToolMessage | undefined;
 
@@ -187,26 +198,10 @@ export function extractTracesFromTurn(timeline: Message[], targetIndex: number):
  * Used to scope visualization capture to the correct turn.
  */
 export function getToolCallIdsFromTurn(timeline: Message[], targetIndex: number): string[] {
+  const turnMessages = getTurnMessages(timeline, targetIndex);
   const ids: string[] = [];
 
-  let turnStart = 0;
-  for (let i = targetIndex - 1; i >= 0; i--) {
-    if (timeline[i].role === 'user') {
-      turnStart = i + 1;
-      break;
-    }
-  }
-
-  let turnEnd = timeline.length;
-  for (let i = targetIndex + 1; i < timeline.length; i++) {
-    if (timeline[i].role === 'user') {
-      turnEnd = i;
-      break;
-    }
-  }
-
-  for (let i = turnStart; i < turnEnd; i++) {
-    const msg = timeline[i];
+  for (const msg of turnMessages) {
     if (msg.role === 'assistant') {
       const assistantMsg = msg as AssistantMessage;
       for (const toolCall of assistantMsg.toolCalls || []) {

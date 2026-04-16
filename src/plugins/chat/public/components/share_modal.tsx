@@ -63,6 +63,26 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);
+
+    // Open the print window synchronously (before any async work) to avoid popup blockers.
+    // Browsers block window.open calls that aren't in the same call stack as a user gesture.
+    let printWindow: Window | null = null;
+    if (format === 'pdf') {
+      printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toasts?.addDanger({
+          title: i18n.translate('chat.shareModal.popupBlocked', {
+            defaultMessage: 'Popup blocked',
+          }),
+          text: i18n.translate('chat.shareModal.popupBlockedText', {
+            defaultMessage: 'Please allow popups for this site to export as PDF.',
+          }),
+        });
+        setIsExporting(false);
+        return;
+      }
+    }
+
     try {
       const options = {
         includeAISummary,
@@ -75,12 +95,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       const data = await collectChatExportData(timeline, targetMessage, threadId, options);
 
       if (format === 'pdf') {
-        exportAsPdf(data, options);
+        exportAsPdf(data, options, printWindow!);
       } else {
         exportAsMarkdown(data, options);
       }
       onClose();
     } catch (error) {
+      // Close the print window if it was opened but export failed
+      printWindow?.close();
       toasts?.addDanger({
         title: i18n.translate('chat.shareModal.exportError', {
           defaultMessage: 'Failed to export report',

@@ -41,6 +41,13 @@ jest.mock('../../../opensearch_dashboards_react/public', () => ({
 }));
 
 describe('ShareModal', () => {
+  const mockPrintWindow = {
+    document: { write: jest.fn(), close: jest.fn() },
+    print: jest.fn(),
+    close: jest.fn(),
+    onload: null as any,
+  };
+
   const mockTimeline: Message[] = [
     { id: 'u1', role: 'user', content: 'What caused the crash?' } as UserMessage,
     {
@@ -67,6 +74,7 @@ describe('ShareModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(window, 'open').mockReturnValue(mockPrintWindow as any);
   });
 
   it('should render the modal with title and description', () => {
