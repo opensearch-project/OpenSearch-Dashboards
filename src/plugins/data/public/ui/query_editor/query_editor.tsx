@@ -201,6 +201,11 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         persistedLogRef.current.add(currentQuery.query);
       }
 
+      // Add query to queryString history for Recent Queries feature
+      if (currentQuery.query?.trim()) {
+        queryString.addToQueryHistory(currentQuery, dateRange);
+      }
+
       props.onSubmit(
         {
           ...currentQuery,
@@ -561,7 +566,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         </>
       )}
       <RecentQueriesTable
-        isVisible={isRecentQueryVisible && useQueryEditor}
+        isVisible={isRecentQueryVisible}
         queryString={queryString}
         onClickRecentQuery={onClickRecentQuery}
       />

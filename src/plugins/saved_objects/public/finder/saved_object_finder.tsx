@@ -182,7 +182,10 @@ class SavedObjectFinderUi extends React.Component<
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
-      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
+      .reduce((allFields, currentFields) => allFields.concat(currentFields), [
+        'title',
+        'displayName',
+      ]);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
@@ -206,8 +209,9 @@ class SavedObjectFinderUi extends React.Component<
       resp.savedObjects.map(async (obj) => {
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
+          const displayTitle = (obj.attributes as any).displayName || obj.attributes.title!;
           result.attributes.title = await getIndexPatternTitle(
-            obj.attributes.title!,
+            displayTitle,
             // @ts-expect-error TS2345 TODO(ts-error): fixme
             obj.references,
             getDataSource

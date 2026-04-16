@@ -119,11 +119,11 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 
-  test('savedObjectCache pre-fetches only title', async () => {
+  test('savedObjectCache pre-fetches title and displayName', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       perPage: 10000,
     });
   });

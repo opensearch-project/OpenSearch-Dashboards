@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
@@ -152,7 +153,14 @@ export function IndexHeader({
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText size="s">
-          <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
+          <h1 data-test-subj="indexPatternTitle">
+            {indexPattern.displayName || indexPattern.title}
+          </h1>
+          {indexPattern.displayName && (
+            <EuiText size="xs" color="subdued" data-test-subj="indexPatternTitleSubtext">
+              {indexPattern.title}
+            </EuiText>
+          )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
