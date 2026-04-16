@@ -147,9 +147,7 @@ describe('ResizableQueryContainer', () => {
       expect(screen.getByTestId('query-panel')).toBeInTheDocument();
       expect(screen.getByTestId('content-panel')).toBeInTheDocument();
 
-      const promptContainer = document.querySelector(
-        '.exploreResizableQueryContainer--promptMode'
-      );
+      const promptContainer = document.querySelector('.exploreResizableQueryContainer--promptMode');
       expect(promptContainer).toBeInTheDocument();
 
       // No resize handle in prompt mode
