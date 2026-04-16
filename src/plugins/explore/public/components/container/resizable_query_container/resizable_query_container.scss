@@ -8,30 +8,6 @@
   min-height: 0;
   gap: $ouiSizeXS;
 
-  // Simple stacked layout used in prompt (AI) mode where the resizable handle
-  // is not needed.
-  &--promptMode {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__promptQueryPanel {
-    flex: 0 0 auto;
-  }
-
-  &__promptContentPanel {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__queryPanel {
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
     >.euiResizablePanel__content {
       overflow: visible !important;
