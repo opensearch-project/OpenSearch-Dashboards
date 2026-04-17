@@ -4,7 +4,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { EuiResizableContainer } from '@elastic/eui';
+import { selectIsPromptEditorMode } from '../../../application/utils/state_management/selectors';
 import './resizable_query_container.scss';
 
 // Approximate pixel height needed for the query panel to show one line:
@@ -31,6 +33,7 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
   queryPanel,
   children,
 }) => {
+  const isPromptMode = useSelector(selectIsPromptEditorMode);
   const rafRef = useRef<number>(0);
   const initialSize = useMemo(() => getInitialQueryPanelSize(), []);
 
@@ -50,7 +53,9 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
   return (
     <EuiResizableContainer
       direction="vertical"
-      className="exploreResizableQueryContainer"
+      className={`exploreResizableQueryContainer${
+        isPromptMode ? ' exploreResizableQueryContainer--promptMode' : ''
+      }`}
       onPanelWidthChange={handlePanelWidthChange}
     >
       {(EuiResizablePanel, EuiResizableButton) => (
