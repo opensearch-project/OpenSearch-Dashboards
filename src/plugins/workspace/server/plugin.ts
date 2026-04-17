@@ -26,6 +26,7 @@ import {
   initializeClientCallAuditor,
   updateWorkspaceState,
 } from 'opensearch-dashboards/server/utils';
+import { ACL, Permissions } from 'opensearch-dashboards/server';
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -57,7 +58,6 @@ import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
 import { DataSourcePluginSetup } from '../../data_source/server';
 import { ConfigSchema } from '../config';
-import { WorkspaceAttributeWithPermission } from '../../../../core/types';
 
 export interface WorkspacePluginDependencies {
   dataSource: DataSourcePluginSetup;
@@ -319,13 +319,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       authorizeWorkspace: async (
         request: OpenSearchDashboardsRequest,
         workspaceIds: string[],
-        principal: string,
         permissionModes: string[] = ['read']
       ) => {
+        const principals = this.permissionControl!.getPrincipalsFromRequest(request);
+
         const { isDashboardAdmin } = getWorkspaceState(request);
         if (isDashboardAdmin) {
           this.logger.debug(
-            `Workspace authorization skipped: principal=${principal} is dashboard admin`
+            `Workspace authorization skipped: caller is dashboard admin`
           );
           return { authorized: true as const };
         }
@@ -345,13 +346,9 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
             continue;
           }
 
-          const { permissions } = result.result as WorkspaceAttributeWithPermission;
+          const { permissions } = result.result as { permissions?: Permissions };
           const hasAccess = permissions
-            ? permissionModes.some(
-                (mode) =>
-                  permissions[mode]?.users?.includes(principal) ||
-                  permissions[mode]?.users?.includes('*')
-              )
+            ? new ACL(permissions).hasPermission(permissionModes, principals)
             : false;
 
           this.logger.debug(

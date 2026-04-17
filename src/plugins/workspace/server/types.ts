@@ -177,16 +177,14 @@ export interface WorkspacePluginStart {
    * Check if the given principal has access to the specified workspaces.
    * Fetches workspace details and checks permissions against the principal.
    *
-   * @param request - the incoming request (used to scope the saved objects client)
+   * @param request - the incoming request (used to scope the saved objects client and extract principals)
    * @param workspaceIds - workspace IDs to check
-   * @param principal - the calling principal (e.g. IAM ARN)
    * @param permissionModes - permission modes to check (defaults to ['read'])
    * @returns WorkspaceAuthResult with authorized flag and any unauthorized workspace IDs
    */
   authorizeWorkspace: (
     request: OpenSearchDashboardsRequest,
     workspaceIds: string[],
-    principal: string,
     permissionModes?: string[]
   ) => Promise<WorkspaceAuthResult>;
 }
