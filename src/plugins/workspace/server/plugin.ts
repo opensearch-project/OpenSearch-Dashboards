@@ -13,6 +13,7 @@ import {
   Logger,
   CoreStart,
   SharedGlobalConfig,
+  OpenSearchDashboardsRequest,
 } from 'opensearch-dashboards/server';
 import {
   cleanWorkspaceId,
@@ -56,6 +57,7 @@ import { uiSettings } from './ui_settings';
 import { RepositoryWrapper } from './saved_objects/repository_wrapper';
 import { DataSourcePluginSetup } from '../../data_source/server';
 import { ConfigSchema } from '../config';
+import { WorkspaceAttributeWithPermission } from '../../../../core/types';
 
 export interface WorkspacePluginDependencies {
   dataSource: DataSourcePluginSetup;
@@ -315,21 +317,21 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     return {
       client: this.client as IWorkspaceClientImpl,
       authorizeWorkspace: async (
-        request: any,
-        workspaceIds: string | any[],
+        request: OpenSearchDashboardsRequest,
+        workspaceIds: string[],
         principal: string,
-        permissionModes = ['read']
+        permissionModes: string[] = ['read']
       ) => {
         const { isDashboardAdmin } = getWorkspaceState(request);
         if (isDashboardAdmin) {
-          this.logger.info(
+          this.logger.debug(
             `Workspace authorization skipped: principal=${principal} is dashboard admin`
           );
-          return { authorized: true };
+          return { authorized: true as const };
         }
 
         if (!workspaceIds.length) {
-          return { authorized: false };
+          return { authorized: false as const, unauthorizedWorkspaces: [] as string[] };
         }
 
         const unauthorizedWorkspaces: string[] = [];
@@ -343,11 +345,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
             continue;
           }
 
-          this.logger.info(`Workspace object fetched: ${JSON.stringify(result)}`);
-
-          const permissions = (result.result as any).permissions as
-            | Record<string, { users?: string[]; groups?: string[] }>
-            | undefined;
+          const { permissions } = result.result as WorkspaceAttributeWithPermission;
           const hasAccess = permissions
             ? permissionModes.some(
                 (mode) =>
@@ -356,8 +354,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
               )
             : false;
 
-          this.logger.info(
-            `Workspace authorization: workspace=${workspaceId}, principal=${principal}, modes=${permissionModes.join(
+          this.logger.debug(
+            `Workspace authorization: workspace=${workspaceId}, modes=${permissionModes.join(
               ','
             )}, authorized=${hasAccess}`
           );
@@ -367,11 +365,9 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           }
         }
 
-        const authorized = unauthorizedWorkspaces.length === 0;
-        return {
-          authorized,
-          ...(unauthorizedWorkspaces.length > 0 ? { unauthorizedWorkspaces } : {}),
-        };
+        return unauthorizedWorkspaces.length === 0
+          ? { authorized: true as const }
+          : { authorized: false as const, unauthorizedWorkspaces };
       },
     };
   }

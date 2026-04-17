@@ -585,7 +585,9 @@ describe('Workspace server plugin', () => {
         },
       });
       const request = httpServerMock.createOpenSearchDashboardsRequest();
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'any-user', ['read']);
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'any-user', [
+        'read',
+      ]);
       expect(result.authorized).toBe(true);
     });
 
@@ -601,9 +603,10 @@ describe('Workspace server plugin', () => {
         },
       });
       const request = httpServerMock.createOpenSearchDashboardsRequest();
-      const result = await workspaceStart.authorizeWorkspace(
-        request, ['ws-1'], 'user1', ['library_write', 'library_read']
-      );
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1', [
+        'library_write',
+        'library_read',
+      ]);
       expect(result.authorized).toBe(true);
     });
 
@@ -643,9 +646,9 @@ describe('Workspace server plugin', () => {
           result: { id: 'ws-2', permissions: { read: { users: ['other-user'] } } },
         });
       const request = httpServerMock.createOpenSearchDashboardsRequest();
-      const result = await workspaceStart.authorizeWorkspace(
-        request, ['ws-1', 'ws-2'], 'user1', ['read']
-      );
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1', 'ws-2'], 'user1', [
+        'read',
+      ]);
       expect(result.authorized).toBe(false);
       expect(result.unauthorizedWorkspaces).toEqual(['ws-2']);
     });
