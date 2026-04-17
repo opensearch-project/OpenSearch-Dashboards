@@ -94,7 +94,11 @@ export const MetricsExploreTab = () => {
   const prevSavedRef = useRef(savedTabState);
   useEffect(() => {
     const target = savedTabState ?? defaultState;
-    if (!isEqual(target, prevStateRef.current) && savedTabState !== prevSavedRef.current) {
+    // Compare only the persisted fields (MetricsExploreTabState shape) to avoid
+    // false mismatches from extra local-only fields like `layout`.
+    const { level, search, metric, label, filters, grouping } = prevStateRef.current;
+    const prevPersisted = { level, search, metric, label, filters, grouping };
+    if (!isEqual(target, prevPersisted) && savedTabState !== prevSavedRef.current) {
       restoringRef.current = true;
       dispatch({ type: 'RESTORE', state: target });
     }
