@@ -434,7 +434,7 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
 
   private findMatrixSelector(ctx: ParserRuleContext | null): MatrixSelectorContext | null {
     if (!ctx) return null;
-    if (ctx.constructor?.name === 'MatrixSelectorContext') return ctx as MatrixSelectorContext;
+    if (ctx instanceof MatrixSelectorContext) return ctx;
     if (ctx.children) {
       for (const child of ctx.children) {
         const found = this.findMatrixSelector(child as ParserRuleContext);

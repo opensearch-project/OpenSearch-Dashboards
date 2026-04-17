@@ -321,7 +321,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
           parsed.map((s, si) => {
             const linePoints = s.nums
               .map((v, i) => {
-                const x = pad.left + (i / (s.nums.length - 1)) * plotW;
+                const x = pad.left + (i / (s.nums.length > 1 ? s.nums.length - 1 : 1)) * plotW;
                 const y = pad.top + plotH - ((v - min) / range) * plotH;
                 return `${x},${y}`;
               })

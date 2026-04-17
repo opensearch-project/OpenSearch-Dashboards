@@ -58,7 +58,7 @@ export function createPromQLSuggestionProvider(
             range,
             detail: s.detail,
             sortText: s.sortText,
-            documentation: s.documentation ? { value: s.documentation, isTrusted: true } : '',
+            documentation: s.documentation ? { value: s.documentation } : '',
             command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
           })),
           incomplete: false,

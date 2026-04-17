@@ -195,6 +195,8 @@ export class PrometheusClient {
     cacheKey: string,
     signal?: AbortSignal
   ): Promise<QueryRangeSeries[]> {
+    if (signal?.aborted) return [];
+
     const dataView = await this.resolveDataView();
     if (!dataView) return [];
 

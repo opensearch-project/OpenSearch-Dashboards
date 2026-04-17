@@ -40,7 +40,6 @@ export {
   PromQLParser,
   ExpressionContext,
   VectorOperationContext,
-  VectorContext,
   ParensContext,
   InstantSelectorContext,
   LabelMatcherContext,
