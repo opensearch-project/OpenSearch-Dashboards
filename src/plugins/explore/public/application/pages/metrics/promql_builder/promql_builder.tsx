@@ -5,7 +5,7 @@
 
 import './promql_builder.scss';
 
-import React, { useEffect, useMemo, useReducer, useRef } from 'react';
+import React, { useEffect, useMemo, useReducer } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiComboBox,
@@ -54,17 +54,13 @@ export const PromQLBuilder: React.FC<PromQLBuilderProps> = ({
     loadLabelValues,
   } = useMetricData(client, state.metric);
 
-  const prevQueryRef = useRef('');
+  const query = useMemo(() => buildPromQL(state), [state]);
 
   useEffect(() => {
-    const query = buildPromQL(state);
-    if (query !== prevQueryRef.current) {
-      prevQueryRef.current = query;
-      onQueryChange(query);
-    }
-  }, [state, onQueryChange]);
+    onQueryChange(query);
+  }, [query, onQueryChange]);
 
-  const reversedOps = useMemo(() => [...state.operations].reverse(), [state.operations]);
+  const reversedOps = [...state.operations].reverse();
 
   const metricRow = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
@@ -149,7 +145,6 @@ export const PromQLBuilder: React.FC<PromQLBuilderProps> = ({
       <LabelBadges
         metric={state.metric}
         labelCardinality={labelCardinality}
-        labelFilters={state.labelFilters}
         client={client}
         dispatch={dispatch}
       />
@@ -183,7 +178,7 @@ export const PromQLBuilder: React.FC<PromQLBuilderProps> = ({
 
       <EuiSpacer size="s" />
       <EuiCode language="promql" transparentBackground className="pqbQueryPreview">
-        {buildPromQL(state) ||
+        {query ||
           i18n.translate('explore.promqlBuilder.queryPreviewPlaceholder', {
             defaultMessage: 'Select a metric to start.',
           })}

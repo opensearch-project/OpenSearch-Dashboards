@@ -5,6 +5,7 @@
 
 import { monaco } from '@osd/monaco';
 import { DEFAULT_DATA } from '../../../../../../data/common';
+import { MonacoCompatibleQuerySuggestion } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 
 export function createPromQLSuggestionProvider(
@@ -19,9 +20,10 @@ export function createPromQLSuggestionProvider(
       if (token.isCancellationRequested) return { suggestions: [], incomplete: false };
       try {
         const currentDataset = queryService.queryString.getQuery().dataset;
+        if (!currentDataset?.id) return { suggestions: [], incomplete: false };
         const currentDataView = await dataViews.get(
-          currentDataset?.id!,
-          currentDataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+          currentDataset.id,
+          currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
         );
         const text = model.getValue();
         const offset = model.getOffsetAt(position);
@@ -32,8 +34,9 @@ export function createPromQLSuggestionProvider(
           language: 'PROMQL',
           baseLanguage: 'PROMQL',
           indexPattern: currentDataView,
-          datasetType: currentDataset?.type,
+          datasetType: currentDataset.type,
           position,
+          // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
           services: services as any,
         });
         const wordUntil = model.getWordUntilPosition(position);
@@ -43,8 +46,11 @@ export function createPromQLSuggestionProvider(
           position.lineNumber,
           wordUntil.endColumn
         );
+        const monacoSuggestions = (suggestions || []).filter(
+          (s): s is MonacoCompatibleQuerySuggestion => 'detail' in s
+        );
         return {
-          suggestions: (suggestions?.filter((s: any) => 'detail' in s) || []).map((s: any) => ({
+          suggestions: monacoSuggestions.map((s) => ({
             label: s.text,
             kind: s.type as monaco.languages.CompletionItemKind,
             insertText: s.insertText ?? s.text,

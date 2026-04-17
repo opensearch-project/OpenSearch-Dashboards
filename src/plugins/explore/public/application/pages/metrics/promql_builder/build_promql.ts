@@ -11,6 +11,7 @@ import {
   RANGE_FUNCTIONS,
 } from './promql_parser';
 import { AGGREGATION_IDS } from './operation_categories';
+import { escapeLabelValue } from '../explore/services/query_generator';
 
 const BINARY_OP_SYMBOLS: Record<string, string> = {
   add: '+',
@@ -31,6 +32,7 @@ export type BuilderAction =
   | { type: 'SET_METRIC'; metric: string }
   | { type: 'SET_LABEL_FILTER'; index: number; filter: Partial<LabelFilter> }
   | { type: 'ADD_LABEL_FILTER' }
+  | { type: 'ADD_LABEL_FILTER_WITH_VALUE'; filter: LabelFilter }
   | { type: 'REMOVE_LABEL_FILTER'; index: number }
   | { type: 'ADD_OPERATION'; operation: Operation }
   | { type: 'REMOVE_OPERATION'; index: number }
@@ -55,6 +57,8 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
     }
     case 'ADD_LABEL_FILTER':
       return { ...state, labelFilters: [...state.labelFilters, emptyFilter()] };
+    case 'ADD_LABEL_FILTER_WITH_VALUE':
+      return { ...state, labelFilters: [...state.labelFilters, action.filter] };
     case 'REMOVE_LABEL_FILTER':
       return { ...state, labelFilters: state.labelFilters.filter((_, i) => i !== action.index) };
     case 'ADD_OPERATION':
@@ -104,7 +108,7 @@ export function buildPromQL(state: BuilderState): string {
 
   const matchers = state.labelFilters
     .filter((f) => f.label && f.value)
-    .map((f) => `${f.label}${f.op}"${f.value}"`);
+    .map((f) => `${f.label}${f.op}"${escapeLabelValue(f.value)}"`);
 
   let selector = state.metric;
   if (matchers.length > 0) {

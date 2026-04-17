@@ -18,9 +18,16 @@ export function useMetricData(client: PrometheusClient, metric: string) {
 
   const metricSearchTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const metricNamesLoadedRef = useRef(false);
+  const loadedLabelsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(metricSearchTimerRef.current);
+    };
+  }, []);
 
   const onMetricFocus = useCallback(() => {
-    if (metricNamesLoadedRef.current || metricOptions.length > 0) return;
+    if (metricNamesLoadedRef.current) return;
     metricNamesLoadedRef.current = true;
     setMetricSearchLoading(true);
     client
@@ -28,7 +35,7 @@ export function useMetricData(client: PrometheusClient, metric: string) {
       .then((names) => setMetricOptions(names.slice(0, 100).map((n) => ({ label: n }))))
       .catch(() => {})
       .finally(() => setMetricSearchLoading(false));
-  }, [client, metricOptions.length]);
+  }, [client]);
 
   const onMetricSearchChange = useCallback(
     (searchValue: string) => {
@@ -55,8 +62,9 @@ export function useMetricData(client: PrometheusClient, metric: string) {
     [client]
   );
 
-  // Fetch label names and derive cardinality from a single getSeries call
   useEffect(() => {
+    loadedLabelsRef.current = new Set();
+    setLabelValueOptions({});
     if (!metric) {
       setLabelOptions([]);
       setLabelCardinality({});
@@ -90,7 +98,8 @@ export function useMetricData(client: PrometheusClient, metric: string) {
 
   const loadLabelValues = useCallback(
     (labelName: string) => {
-      if (!labelName || labelValueOptions[labelName]) return;
+      if (!labelName || loadedLabelsRef.current.has(labelName)) return;
+      loadedLabelsRef.current.add(labelName);
       client
         .getLabelValues(labelName, metric)
         .then((values) => {
@@ -99,9 +108,11 @@ export function useMetricData(client: PrometheusClient, metric: string) {
             [labelName]: values.map((v) => ({ label: v })),
           }));
         })
-        .catch(() => {});
+        .catch(() => {
+          loadedLabelsRef.current.delete(labelName);
+        });
     },
-    [client, metric, labelValueOptions]
+    [client, metric]
   );
 
   return {

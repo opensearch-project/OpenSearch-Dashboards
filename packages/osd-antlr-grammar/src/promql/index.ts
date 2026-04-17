@@ -38,11 +38,19 @@
 export { PromQLLexer } from './.generated/PromQLLexer';
 export {
   PromQLParser,
+  ExpressionContext,
+  VectorOperationContext,
+  VectorContext,
+  ParensContext,
   InstantSelectorContext,
   LabelMatcherContext,
   AggregationContext,
   LabelNameListContext,
   MetricNameContext,
   ParameterListContext,
+  ParameterContext,
+  FunctionContext,
+  MatrixSelectorContext,
+  OffsetContext,
 } from './.generated/PromQLParser';
 export { PromQLParserVisitor } from './.generated/PromQLParserVisitor';

@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiButton,
   EuiButtonGroup,
   EuiButtonIcon,
+  EuiDraggable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -27,6 +28,12 @@ import { QueryRow, RowMode, modeButtons } from './row_state';
 
 import '../../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
 
+type DraggableChildFn = Exclude<
+  React.ComponentProps<typeof EuiDraggable>['children'],
+  React.ReactElement
+>;
+type DragHandleProps = Parameters<DraggableChildFn>[0]['dragHandleProps'];
+
 export interface QueryRowProps {
   row: QueryRow;
   label: string;
@@ -37,7 +44,7 @@ export interface QueryRowProps {
   onRemove: (rowId: string) => void;
   canRemove: boolean;
   isDragging: boolean;
-  dragHandleProps: any;
+  dragHandleProps: DragHandleProps;
 }
 
 export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
@@ -55,16 +62,21 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
   }) => {
     const [showCodeConfirm, setShowCodeConfirm] = useState(false);
 
+    const parsed = useMemo(() => (row.query ? parsePromQL(row.query) : null), [row.query]);
+
     const handleBuilderQueryChange = useCallback(
       (query: string) => {
         const result = parsePromQL(query);
-        onBuilderChange(row.id, query, result.canBuild ? result.state : row.builderState!);
+        if (result.canBuild) {
+          onBuilderChange(row.id, query, result.state);
+        } else if (row.builderState) {
+          onBuilderChange(row.id, query, row.builderState);
+        }
       },
       [row.id, row.builderState, onBuilderChange]
     );
 
-    const canSwitchToBuilder =
-      row.mode === 'builder' || !row.query || parsePromQL(row.query).canBuild;
+    const canSwitchToBuilder = row.mode === 'builder' || !parsed || parsed.canBuild;
     const modeToggleTooltip =
       row.mode === 'code' && !canSwitchToBuilder
         ? i18n.translate('explore.promqlBuilder.cannotSwitchToBuilder', {
@@ -80,18 +92,13 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
     const handleModeChange = useCallback(
       (id: string) => {
         const newMode = id as RowMode;
-        if (
-          row.mode === 'builder' &&
-          newMode === 'code' &&
-          row.query &&
-          !parsePromQL(row.query).canBuild
-        ) {
+        if (row.mode === 'builder' && newMode === 'code' && parsed && !parsed.canBuild) {
           setShowCodeConfirm(true);
         } else {
           onModeChange(row.id, newMode);
         }
       },
-      [row.id, row.mode, row.query, onModeChange]
+      [row.id, row.mode, parsed, onModeChange]
     );
 
     return (

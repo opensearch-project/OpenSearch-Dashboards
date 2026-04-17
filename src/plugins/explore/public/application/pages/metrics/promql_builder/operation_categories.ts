@@ -15,6 +15,7 @@ export interface OperationDef {
 
 interface OperationCategory {
   name: string;
+  pillLabel: () => string;
   items: OperationDef[];
 }
 
@@ -45,6 +46,8 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     name: i18n.translate('explore.promqlBuilder.category.addFunction', {
       defaultMessage: 'Add function',
     }),
+    pillLabel: () =>
+      i18n.translate('explore.promqlBuilder.pillLabel.function', { defaultMessage: 'Function' }),
     items: [
       {
         id: 'abs',
@@ -545,6 +548,10 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     name: i18n.translate('explore.promqlBuilder.category.addAggregation', {
       defaultMessage: 'Add aggregation',
     }),
+    pillLabel: () =>
+      i18n.translate('explore.promqlBuilder.pillLabel.aggregation', {
+        defaultMessage: 'Aggregation',
+      }),
     items: [
       { id: 'sum', name: 'sum', params: [], description: 'Calculate sum over dimensions.' },
       { id: 'avg', name: 'avg', params: [], description: 'Calculate the average over dimensions.' },
@@ -608,6 +615,10 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     name: i18n.translate('explore.promqlBuilder.category.addBinaryOperation', {
       defaultMessage: 'Add binary operation',
     }),
+    pillLabel: () =>
+      i18n.translate('explore.promqlBuilder.pillLabel.binaryOperation', {
+        defaultMessage: 'Binary operation',
+      }),
     items: [
       {
         id: 'add',
@@ -705,6 +716,8 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     name: i18n.translate('explore.promqlBuilder.category.replaceWithLiteral', {
       defaultMessage: 'Replace with literal',
     }),
+    pillLabel: () =>
+      i18n.translate('explore.promqlBuilder.pillLabel.literal', { defaultMessage: 'Literal' }),
     items: [
       {
         id: 'literal',
@@ -716,5 +729,3 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     ],
   },
 ];
-
-// Lookup utilities are in operation_lookup.ts

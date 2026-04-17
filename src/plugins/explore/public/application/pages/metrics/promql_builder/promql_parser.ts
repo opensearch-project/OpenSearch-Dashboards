@@ -3,14 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CharStream, CommonTokenStream } from 'antlr4ng';
+import { CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
 import {
   PromQLLexer,
   PromQLParser,
   PromQLParserVisitor,
+  ExpressionContext,
+  VectorOperationContext,
+  ParensContext,
   InstantSelectorContext,
   LabelMatcherContext,
   AggregationContext,
+  FunctionContext,
+  MatrixSelectorContext,
+  OffsetContext,
+  ParameterContext,
 } from '@osd/antlr-grammar';
 import { OP_DEF_MAP } from './operation_lookup';
 
@@ -179,23 +186,21 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
 
   defaultResult = () => {};
 
-  visitExpression = (ctx: any) => {
+  visitExpression = (ctx: ExpressionContext) => {
     this.visitChildren(ctx);
   };
 
-  visitVectorOperation = (ctx: any) => {
-    // Identify which binary op (if any) is present
+  visitVectorOperation = (ctx: VectorOperationContext) => {
     const opCtx = ctx.compareOp?.() || ctx.addOp?.() || ctx.multOp?.() || ctx.powOp?.();
     if (opCtx) {
-      // Binary op: allow only if RHS is a scalar literal
-      const rhs = ctx.vectorOperation?.(1);
-      const scalar = this.extractScalarLiteral(rhs);
+      const rhs = ctx.vectorOperation(1);
+      const scalar = rhs ? this.extractScalarLiteral(rhs) : undefined;
       if (scalar !== undefined) {
         const opToken = opCtx.start?.type;
         const opId = opToken !== undefined ? BINARY_OP_ID_MAP[opToken] : undefined;
-        if (opId) {
-          // Visit LHS to extract metric/operations, then append the binary op
-          this.visit(ctx.vectorOperation(0));
+        const lhs = ctx.vectorOperation(0);
+        if (opId && lhs) {
+          this.visit(lhs);
           this.operations.push({
             id: opId,
             name: OP_DEF_MAP[opId]?.name || opId,
@@ -211,12 +216,10 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
       this.canBuild = false;
       return;
     }
-    // Subquery
     if (ctx.subqueryOp?.()) {
       this.canBuild = false;
       return;
     }
-    // Unary negation / @ modifier — not representable in builder
     if (ctx.unaryOp?.() || ctx.AT?.()) {
       this.canBuild = false;
       return;
@@ -229,8 +232,8 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
    * represent as a binary-op param, return its text; otherwise return undefined.
    * Accepts: NUMBER literals, bare metric names (identifiers), and STRING literals.
    */
-  private extractScalarLiteral(ctx: any): string | undefined {
-    const vector = ctx?.vector?.();
+  private extractScalarLiteral(ctx: VectorOperationContext): string | undefined {
+    const vector = ctx.vector?.();
     if (!vector) return undefined;
     const literal = vector.literal?.();
     if (literal) {
@@ -248,10 +251,9 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
       }
       return undefined;
     }
-    // Bare identifier (metric name with no labels/braces)
     const sel = vector.instantSelector?.();
     if (sel && sel.metricName?.() && !sel.LEFT_BRACE?.()) {
-      return sel.metricName().getText();
+      return sel.metricName()!.getText();
     }
     return undefined;
   }
@@ -282,7 +284,6 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     const opToken = opCtx?.start?.type;
     const op = (opToken !== undefined && OP_MAP[opToken]) || '=';
     let value = ctx.labelValue()?.getText() || '';
-    // Strip surrounding quotes
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
       (value.startsWith("'") && value.endsWith("'"))
@@ -292,18 +293,16 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     this.labelFilters.push({ label, op, value });
   };
 
-  visitFunction = (ctx: any) => {
+  visitFunction = (ctx: FunctionContext) => {
     if (!this.canBuild) return;
 
     const fnName = ctx.functionNames()?.getText()?.toLowerCase() || '';
-    const params = ctx.parameter() || [];
+    const params: ParameterContext[] = ctx.parameter() || [];
 
     if (RANGE_FUNCTIONS.has(fnName)) {
-      // For range functions, extract the range duration and any literal params
       let rangeDuration = '';
       const literalParams: string[] = [];
 
-      // Visit children to extract the inner selector, and collect literal params
       this.insideRangeFunction = true;
       for (const param of params) {
         const literal = param.literal?.();
@@ -315,7 +314,6 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
       }
       this.insideRangeFunction = false;
 
-      // Try to find the matrix selector's duration from the tree
       const matrixCtx = this.findMatrixSelector(ctx);
       if (matrixCtx) {
         const timeRange = matrixCtx.timeRange();
@@ -324,11 +322,8 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
         }
       }
 
-      // Param layout must match operation_categories paramNames order:
-      // quantile_over_time: [Quantile, Range] — literal before range
-      // holt_winters: [Range, Smoothing, Trend] — range before literals
-      // predict_linear: [Range, Seconds] — range before literals
-      // others: [Range]
+      // Param layout matches operation_categories paramNames order:
+      // quantile_over_time: [Quantile, Range]; holt_winters / predict_linear: [Range, ...]
       const opParams =
         fnName === 'quantile_over_time'
           ? [...literalParams, rangeDuration]
@@ -336,15 +331,12 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
 
       this.operations.push({ id: fnName, name: fnName, params: opParams });
     } else {
-      // For functions like histogram_quantile(0.95, expr), abs(expr), etc.
       const fnParams: string[] = [];
 
       for (const param of params) {
-        // If param is a literal (number/string), capture it
         const literal = param.literal?.();
         if (literal) {
           let text = literal.getText();
-          // Strip surrounding quotes from string literals
           if (
             (text.startsWith('"') && text.endsWith('"')) ||
             (text.startsWith("'") && text.endsWith("'"))
@@ -353,12 +345,10 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
           }
           fnParams.push(text);
         } else {
-          // It's a sub-expression — visit it to extract selector/ops
           this.visit(param);
         }
       }
 
-      // Ensure functions always have their expected number of params
       const EXPECTED_PARAMS: Record<string, string[]> = {
         label_replace: ['', '', '', ''],
         clamp: ['1', '100'],
@@ -380,7 +370,6 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     const opName = ctx.aggregationOperators()?.getText()?.toLowerCase() || '';
     const params: string[] = [];
 
-    // Extract numeric params (e.g., topk(5, ...) → ['5'])
     const paramList = ctx.parameterList();
     if (paramList) {
       for (const param of paramList.parameter()) {
@@ -395,13 +384,11 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
           }
           params.push(text);
         } else {
-          // Sub-expression — visit to extract inner selector
           this.visit(param);
         }
       }
     }
 
-    // Extract by/without clause
     let grouping: OperationGrouping | undefined;
     const byCtx = ctx.by();
     const withoutCtx = ctx.without();
@@ -410,27 +397,25 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
         byCtx
           .labelNameList()
           ?.labelName()
-          ?.map((ln: any) => ln.getText()) || [];
+          ?.map((ln) => ln.getText()) || [];
       grouping = { mode: 'by', labels };
     } else if (withoutCtx) {
       const labels =
         withoutCtx
           .labelNameList()
           ?.labelName()
-          ?.map((ln: any) => ln.getText()) || [];
+          ?.map((ln) => ln.getText()) || [];
       grouping = { mode: 'without', labels };
     }
 
     this.operations.push({ id: opName, name: opName, params, grouping });
   };
 
-  visitMatrixSelector = (ctx: any) => {
-    // Visit the inner instant selector
+  visitMatrixSelector = (ctx: MatrixSelectorContext) => {
     const instantCtx = ctx.instantSelector();
     if (instantCtx) {
       this.visitInstantSelector(instantCtx);
     }
-    // Extract range for standalone matrix selectors (no wrapping range function)
     if (!this.insideRangeFunction) {
       const timeRange = ctx.timeRange();
       if (timeRange) {
@@ -439,22 +424,20 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     }
   };
 
-  visitOffset = (ctx: any) => {
-    // offset is too complex for builder currently
+  visitOffset = (_ctx: OffsetContext) => {
     this.canBuild = false;
   };
 
-  visitParens = (ctx: any) => {
-    // Parenthesized expression — just visit the inner expression
+  visitParens = (ctx: ParensContext) => {
     this.visitChildren(ctx);
   };
 
-  private findMatrixSelector(ctx: any): any {
+  private findMatrixSelector(ctx: ParserRuleContext | null): MatrixSelectorContext | null {
     if (!ctx) return null;
-    if (ctx.constructor?.name === 'MatrixSelectorContext') return ctx;
+    if (ctx.constructor?.name === 'MatrixSelectorContext') return ctx as MatrixSelectorContext;
     if (ctx.children) {
       for (const child of ctx.children) {
-        const found = this.findMatrixSelector(child);
+        const found = this.findMatrixSelector(child as ParserRuleContext);
         if (found) return found;
       }
     }

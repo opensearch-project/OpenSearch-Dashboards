@@ -18,12 +18,10 @@ import {
 } from '@elastic/eui';
 import { PrometheusClient } from '../explore/services/prometheus_client';
 import { BuilderAction } from './build_promql';
-import { LabelFilter } from './promql_parser';
 
 interface LabelBadgesProps {
   metric: string;
   labelCardinality: Record<string, number>;
-  labelFilters: LabelFilter[];
   client: PrometheusClient;
   dispatch: React.Dispatch<BuilderAction>;
 }
@@ -52,7 +50,6 @@ const MAX_VISIBLE = 3;
 export const LabelBadges: React.FC<LabelBadgesProps> = ({
   metric,
   labelCardinality,
-  labelFilters,
   client,
   dispatch,
 }) => {
@@ -135,15 +132,10 @@ export const LabelBadges: React.FC<LabelBadgesProps> = ({
                         values: { label, value: v },
                       })}
                       onClick={() => {
-                        dispatch({ type: 'ADD_LABEL_FILTER' });
-                        const filterIdx = labelFilters.length;
-                        setTimeout(() => {
-                          dispatch({
-                            type: 'SET_LABEL_FILTER',
-                            index: filterIdx,
-                            filter: { label, value: v },
-                          });
-                        }, 0);
+                        dispatch({
+                          type: 'ADD_LABEL_FILTER_WITH_VALUE',
+                          filter: { label, op: '=', value: v },
+                        });
                         setLabelPopover(null);
                       }}
                     />

@@ -4,13 +4,13 @@
  */
 
 const measureCanvas = (() => {
-  let canvas: HTMLCanvasElement | null = null;
+  let ctx: CanvasRenderingContext2D | null = null;
   return (
     text: string,
     font = '14px Rubik, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif'
   ): number => {
-    if (!canvas) canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
+    if (!ctx) ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return text.length * 8;
     ctx.font = font;
     return Math.ceil(ctx.measureText(text).width);
   };

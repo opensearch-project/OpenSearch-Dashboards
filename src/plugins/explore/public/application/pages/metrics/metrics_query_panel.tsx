@@ -171,21 +171,13 @@ export const MetricsQueryPanel: React.FC = () => {
     [syncEditorText]
   );
 
-  const suggestionProviderRef = useRef<monaco.languages.CompletionItemProvider | null>(null);
-  const suggestionProvider = useMemo(() => {
-    const provider = createPromQLSuggestionProvider(services);
-    suggestionProviderRef.current = provider;
-    return provider;
-  }, [services]);
-
   useEffect(() => {
-    if (!suggestionProviderRef.current) return;
     const disposable = monaco.languages.registerCompletionItemProvider(
       'PROMQL',
-      suggestionProviderRef.current
+      createPromQLSuggestionProvider(services)
     );
     return () => disposable.dispose();
-  }, [suggestionProvider]);
+  }, [services]);
 
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
