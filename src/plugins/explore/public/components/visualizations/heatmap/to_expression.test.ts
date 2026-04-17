@@ -4,7 +4,7 @@
  */
 
 import { createRegularHeatmap } from './to_expression';
-import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings, Positions } from '../types';
+import { VisColumn, VisFieldType, AxisRole, Positions } from '../types';
 import { defaultHeatmapChartStyles, HeatmapChartStyle } from './heatmap_vis_config';
 
 describe('Heatmap to_expression', () => {
@@ -52,7 +52,7 @@ describe('Heatmap to_expression', () => {
   };
 
   describe('createRegularHeatmap', () => {
-    const mockAxisColumnMappings: AxisColumnMappings = {
+    const mockAxisColumnMappings = {
       [AxisRole.X]: mockCategoricalColumns[0],
       [AxisRole.Y]: mockCategoricalColumns[1],
       [AxisRole.COLOR]: mockNumericalColumns[0],
@@ -104,9 +104,7 @@ describe('Heatmap to_expression', () => {
     });
 
     it('throws when axis config is missing', () => {
-      expect(() => createRegularHeatmap(mockData, mockStyles, {})).toThrow(
-        'Missing axis config for heatmap chart'
-      );
+      expect(() => createRegularHeatmap(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 });

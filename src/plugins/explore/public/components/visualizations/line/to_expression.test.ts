@@ -11,14 +11,7 @@ import {
   createCategoryLineChart,
   createCategoryMultiLineChart,
 } from './to_expression';
-import {
-  VisColumn,
-  VisFieldType,
-  ThresholdMode,
-  Positions,
-  AxisRole,
-  AxisColumnMappings,
-} from '../types';
+import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
 import { defaultLineChartStyles } from './line_vis_config';
 
 describe('Line Chart to_expression', () => {
@@ -87,8 +80,8 @@ describe('Line Chart to_expression', () => {
   };
 
   describe('createSimpleLineChart', () => {
-    const mockAxisMappings: AxisColumnMappings = {
-      [AxisRole.Y]: mockNumericColumn,
+    const mockAxisMappings = {
+      [AxisRole.Y]: [mockNumericColumn],
       [AxisRole.X]: mockDateColumn,
     };
 
@@ -127,10 +120,10 @@ describe('Line Chart to_expression', () => {
   });
 
   describe('createLineBarChart', () => {
-    const mockAxisMappings: AxisColumnMappings = {
-      [AxisRole.Y]: mockNumericColumn,
+    const mockAxisMappings = {
+      [AxisRole.Y]: [mockNumericColumn],
       [AxisRole.X]: mockDateColumn,
-      [AxisRole.Y_SECOND]: mockNumericColumn2,
+      [AxisRole.Y_SECOND]: [mockNumericColumn2],
     };
 
     it('returns an ECharts spec with dataset and series', () => {
@@ -152,12 +145,12 @@ describe('Line Chart to_expression', () => {
     });
 
     it('throws when axis config is missing', () => {
-      expect(() => createLineBarChart(mockData, mockStyles, {})).toThrow();
+      expect(() => createLineBarChart(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 
   describe('createMultiLineChart', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.Y]: mockNumericColumn,
       [AxisRole.X]: mockDateColumn,
       [AxisRole.COLOR]: mockCategoricalColumn,
@@ -190,7 +183,7 @@ describe('Line Chart to_expression', () => {
   });
 
   describe('createFacetedMultiLineChart', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.Y]: mockNumericColumn,
       [AxisRole.X]: mockDateColumn,
       [AxisRole.COLOR]: mockCategoricalColumn,
@@ -216,8 +209,8 @@ describe('Line Chart to_expression', () => {
   });
 
   describe('createCategoryLineChart', () => {
-    const mockAxisMappings: AxisColumnMappings = {
-      [AxisRole.Y]: mockNumericColumn,
+    const mockAxisMappings = {
+      [AxisRole.Y]: [mockNumericColumn],
       [AxisRole.X]: mockCategoricalColumn,
     };
 
@@ -241,7 +234,7 @@ describe('Line Chart to_expression', () => {
   });
 
   describe('createCategoryMultiLineChart', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.Y]: mockNumericColumn,
       [AxisRole.X]: mockCategoricalColumn,
       [AxisRole.COLOR]: mockCategoricalColumn2,

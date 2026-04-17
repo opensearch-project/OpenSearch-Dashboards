@@ -50,8 +50,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           dateColumns={dateColumns}
           currentMapping={axisColumnMappings}
           updateVisualization={updateVisualization}
-          onSwitchAxes={(v: boolean) => updateStyleOption('switchAxes', v)}
-          switchAxes={styleOptions.switchAxes}
           chartType="scatter"
         />
       </EuiFlexItem>
@@ -77,7 +75,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
-              switchAxes={styleOptions.switchAxes}
               axisColumnMappings={axisColumnMappings}
               standardAxes={styleOptions.standardAxes}
               onStandardAxesChange={(standardAxes) =>

@@ -9,7 +9,7 @@ import { RootState } from '../state_management/store';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { defaultPrepareQueryString } from '../state_management/actions/query_actions';
-import { selectPatternsField } from '../state_management/selectors';
+import { selectActiveTabId, selectPatternsField } from '../state_management/selectors';
 import { selectQueryStatusMapByKey } from '../state_management/selectors/query_editor/query_editor';
 import { resultsCache } from '../state_management/slices';
 
@@ -19,7 +19,7 @@ import { resultsCache } from '../state_management/slices';
 export const useTabResults = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const query = useSelector((state: RootState) => state.query);
-  const activeTabId = useSelector((state: RootState) => state.ui.activeTabId);
+  const activeTabId = useSelector(selectActiveTabId);
   const patternsField = useSelector(selectPatternsField); // for use in updating dependency array of cacheKey
 
   const cacheKey = useMemo(() => {
