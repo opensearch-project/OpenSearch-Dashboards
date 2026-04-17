@@ -16,9 +16,7 @@ const mockStore = configureMockStore([]);
 const store = mockStore({
   tab: {
     visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
+      styleOptions: {},
     },
   },
 });

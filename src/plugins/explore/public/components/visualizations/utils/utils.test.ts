@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis, mergeStyles } from './utils';
+import { applyAxisStyling, getAxisConfig, getSchemaByAxis, mergeStyles } from './utils';
 import { AxisRole, Positions, VisFieldType, StandardAxes } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -118,44 +118,11 @@ describe('applyAxisStyling', () => {
   });
 });
 
-describe('getSwappedAxisRole', () => {
+describe('getAxisConfig', () => {
   it('returns undefined when axes are missing', () => {
-    const { xAxis, yAxis } = getSwappedAxisRole({}, {});
+    const { xAxis, yAxis } = getAxisConfig({}, {});
     expect(xAxis).toBeUndefined();
     expect(yAxis).toBeUndefined();
-  });
-
-  it('returns swapped roles if switchAxes is true', () => {
-    const { xAxis, yAxis } = getSwappedAxisRole(
-      {
-        standardAxes: [
-          { axisRole: AxisRole.X, position: Positions.BOTTOM } as StandardAxes,
-          { axisRole: AxisRole.Y, position: Positions.LEFT } as StandardAxes,
-        ],
-        switchAxes: true,
-      },
-      {
-        x: {
-          id: 1,
-          name: 'X Value',
-          schema: VisFieldType.Categorical,
-          column: 'x',
-          validValuesCount: 6,
-          uniqueValuesCount: 6,
-        },
-        y: {
-          id: 2,
-          name: 'Y Value',
-          schema: VisFieldType.Numerical,
-          column: 'y',
-          validValuesCount: 6,
-          uniqueValuesCount: 6,
-        },
-      }
-    );
-
-    expect(xAxis?.schema).toBe(VisFieldType.Numerical);
-    expect(yAxis?.schema).toBe(VisFieldType.Categorical);
   });
 });
 

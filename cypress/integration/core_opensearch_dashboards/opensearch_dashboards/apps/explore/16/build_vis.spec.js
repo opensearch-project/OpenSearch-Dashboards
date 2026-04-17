@@ -27,10 +27,12 @@ export const runBuildVisTests = () => {
 
     const selectFieldFromComboBox = (labelText, index, fieldName) => {
       cy.get('.euiFormLabel').contains(labelText).should('be.visible');
-      cy.get('#axesSelector').within(() => {
-        cy.get('[data-test-subj="comboBoxInput"]').eq(index).click();
-      });
-      cy.get('div[role="listBox"]').contains(fieldName).click();
+      cy.get('.euiFormLabel')
+        .contains(labelText)
+        .closest('.euiFormRow')
+        .find('[data-test-subj="axisSelectorButton"]')
+        .click();
+      cy.get('li[role="option"]').contains(fieldName).trigger('click');
       cy.wait(500);
     };
 
