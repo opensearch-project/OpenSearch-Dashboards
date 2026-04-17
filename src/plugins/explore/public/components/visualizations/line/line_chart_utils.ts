@@ -332,15 +332,15 @@ export const createLineSeries = <T extends BaseChartStyle>({
 
   if (usedTimeMarker) {
     {
-      // manully extend xAxis range
-      const newxAxisConfig = { ...xAxisConfig };
-      newxAxisConfig.max = new Date();
-      newState.xAxisConfig = newxAxisConfig;
+      // manually extend xAxis range
+      const newXAxisConfig = { ...xAxisConfig };
+      newXAxisConfig.max = new Date();
+      newState.xAxisConfig = newXAxisConfig;
     }
   }
 
   const series = seriesFields?.map((item: string) => {
-    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     return {
       name,
@@ -370,13 +370,14 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
   categoryField,
 }: {
   styles: LineChartStyle;
-  valueField: VisColumn;
-  value2Field: VisColumn;
+  valueField: string[];
+  value2Field: string[];
   categoryField: string;
 }): PipelineFn<T> => (state) => {
-  const { xAxisConfig, yAxisConfig: _yAxisConfig } = state;
+  const { xAxisConfig, axisColumnMappings } = state;
   const newState = { ...state };
 
+  // TODO: move this to buildAxisConfigs function
   if (styles.addTimeMarker) {
     {
       // manully extend xAxis range
@@ -387,32 +388,38 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
   }
 
   const series = [
-    {
-      type: 'line',
-      name: valueField?.name,
-      ...generateLineStyles(styles),
-      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
-      yAxisIndex: 0,
-      encode: {
-        x: categoryField,
-        y: valueField.column,
-      },
-      emphasis: {
-        focus: 'self',
-      },
-    },
-    {
-      type: 'bar',
-      name: value2Field?.name,
-      yAxisIndex: 1,
-      encode: {
-        x: categoryField,
-        y: value2Field.column,
-      },
-      emphasis: {
-        focus: 'self',
-      },
-    },
+    ...valueField.map((field) => {
+      const name = getSeriesDisplayName(field, Object.values(axisColumnMappings).flat());
+      return {
+        type: 'line',
+        name,
+        ...generateLineStyles(styles),
+        ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+        yAxisIndex: 0,
+        encode: {
+          x: categoryField,
+          y: field,
+        },
+        emphasis: {
+          focus: 'self',
+        },
+      };
+    }),
+    ...value2Field.map((field) => {
+      const name = getSeriesDisplayName(field, Object.values(axisColumnMappings).flat());
+      return {
+        type: 'bar',
+        name,
+        yAxisIndex: 1,
+        encode: {
+          x: categoryField,
+          y: field,
+        },
+        emphasis: {
+          focus: 'self',
+        },
+      };
+    }),
   ];
 
   newState.series = series as LineSeriesOption[];

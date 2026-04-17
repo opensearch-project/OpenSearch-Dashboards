@@ -74,28 +74,28 @@ describe('visualization_container_utils', () => {
   describe('convertMappingsToStrings', () => {
     it('converts axis mappings to string format', () => {
       const mappings = {
-        [AxisRole.X]: mockColumns[1],
-        [AxisRole.Y]: mockColumns[0],
+        [AxisRole.X]: [mockColumns[1]],
+        [AxisRole.Y]: [mockColumns[0]],
       };
 
       const result = convertMappingsToStrings(mappings);
 
       expect(result).toEqual({
-        [AxisRole.X]: 'category',
-        [AxisRole.Y]: 'count',
+        [AxisRole.X]: ['category'],
+        [AxisRole.Y]: ['count'],
       });
     });
 
     it('handles undefined columns', () => {
       const mappings = {
-        [AxisRole.X]: mockColumns[0],
+        [AxisRole.X]: [mockColumns[0]],
         [AxisRole.Y]: undefined,
       };
 
       const result = convertMappingsToStrings(mappings);
 
       expect(result).toEqual({
-        [AxisRole.X]: 'count',
+        [AxisRole.X]: ['count'],
         [AxisRole.Y]: undefined,
       });
     });
@@ -111,8 +111,8 @@ describe('visualization_container_utils', () => {
       const result = convertStringsToMappings(stringMappings, mockColumns);
 
       expect(result).toEqual({
-        [AxisRole.X]: mockColumns[1],
-        [AxisRole.Y]: mockColumns[0],
+        [AxisRole.X]: [mockColumns[1]],
+        [AxisRole.Y]: [mockColumns[0]],
       });
     });
 
@@ -124,7 +124,7 @@ describe('visualization_container_utils', () => {
       const result = convertStringsToMappings(stringMappings, mockColumns);
 
       expect(result).toEqual({
-        [AxisRole.X]: undefined,
+        [AxisRole.X]: [],
       });
     });
   });

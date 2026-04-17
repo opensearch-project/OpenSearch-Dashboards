@@ -4,8 +4,8 @@
  */
 
 import { AreaChartStyle } from './area_vis_config';
-import { AxisColumnMappings, AxisRole, TimeUnit, AggregationType } from '../types';
-import { getSwappedAxisRole } from '../utils/utils';
+import { AxisRole, VisColumn, TimeUnit, AggregationType } from '../types';
+import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
 import {
   pipe,
   createBaseConfig,
@@ -14,13 +14,7 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import {
-  createAreaSeries,
-  createFacetAreaSeries,
-  createCategoryAreaSeries,
-  createStackAreaSeries,
-  replaceNullWithZero,
-} from './area_chart_utils';
+import { createAreaSeries, createFacetAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
   convertTo2DArray,
   transform,
@@ -36,27 +30,29 @@ import {
 export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
   timeRange?: { from: string; to: string }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getAxisConfig(styles);
 
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
+  const timeField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
+  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
-  if (!valueField || !timeField) throw Error('Missing axis config for area chart');
-
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
-    transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-    createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
+    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
+    createBaseConfig({
+      title: `${valueFieldNames.join(', ')} Over Time`,
+      legend: { show: false },
+    }),
     buildAxisConfigs,
     applyTimeRange,
     createAreaSeries({
       styles,
       categoryField: timeField,
-      seriesFields: [valueField],
+      seriesFields: valueField,
     }),
     assembleSpec
   )({
@@ -76,18 +72,19 @@ export const createSimpleAreaChart = (
 export const createMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
+  },
   timeRange?: { from: string; to: string }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-  const colorField = colorColumn?.column;
+  const axisConfig = getAxisConfig(styles);
 
-  if (!timeField || !valueField || !colorField) {
-    throw Error('Missing axis config or color field for multi area chart');
-  }
+  const timeField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].column;
+  const colorField = axisColumnMappings[AxisRole.COLOR].column;
+
   const result = pipe(
     transform(
       sortByTime(timeField),
@@ -102,7 +99,9 @@ export const createMultiAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisConfig.yAxis?.name} Over Time by ${axisColumnMappings?.[AxisRole.COLOR]?.name}`,
+      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
+        axisColumnMappings[AxisRole.COLOR].name
+      }`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -110,7 +109,12 @@ export const createMultiAreaChart = (
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
-    createStackAreaSeries(styles),
+    createAreaSeries({
+      styles,
+      categoryField: timeField,
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      stack: true,
+    }),
     assembleSpec
   )({
     data: transformedData,
@@ -129,19 +133,20 @@ export const createMultiAreaChart = (
 export const createFacetedMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
+    [AxisRole.FACET]: VisColumn;
+  },
   timeRange?: { from: string; to: string }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-  const colorField = colorColumn?.column;
+  const axisConfig = getAxisConfig(styles);
 
-  const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
-  if (!timeField || !valueField || !colorField || !facetColumn) {
-    throw Error('Missing axis config for facet area chart');
-  }
+  const timeField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].column;
+  const colorField = axisColumnMappings[AxisRole.COLOR].column;
+  const facetColumn = axisColumnMappings[AxisRole.FACET].column;
 
   const result = pipe(
     facetTransform(
@@ -158,9 +163,9 @@ export const createFacetedMultiAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisConfig.yAxis?.name} Over Time by ${
-        axisColumnMappings?.[AxisRole.COLOR]?.name
-      } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
+        axisColumnMappings[AxisRole.COLOR].name
+      } (Faceted by ${axisColumnMappings[AxisRole.FACET].name})`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -188,16 +193,15 @@ export const createFacetedMultiAreaChart = (
 export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getAxisConfig(styles);
 
-  const categoryField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
+  const categoryField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
+  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
-  if (!valueField || !categoryField) throw Error('Missing axis config for area chart');
-
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
     transform(
@@ -209,14 +213,14 @@ export const createCategoryAreaChart = (
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
-      title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
+      title: `${valueFieldNames.join(', ')} by ${axisColumnMappings[AxisRole.X].name}`,
       legend: { show: false },
     }),
     buildAxisConfigs,
-    createCategoryAreaSeries({
+    createAreaSeries({
       styles,
       categoryField,
-      valueField,
+      seriesFields: valueField,
     }),
     assembleSpec
   )({
@@ -232,20 +236,17 @@ export const createCategoryAreaChart = (
 export const createStackedAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings
-): any => {
-  // Extract field mappings directly from axisColumnMappings
-  const xAxis = axisColumnMappings?.[AxisRole.X];
-  const yAxis = axisColumnMappings?.[AxisRole.Y];
-  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
-  const colorField = colorMapping?.column;
-
-  if (!xAxis || !yAxis || !colorField) {
-    throw Error('Missing axis config or color field for stacked area chart');
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
   }
+): any => {
+  const axisConfig = getAxisConfig(styles);
 
-  const categoryField = xAxis.column;
-  const valueField = yAxis.column;
+  const categoryField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].column;
+  const colorField = axisColumnMappings[AxisRole.COLOR].column;
 
   const result = pipe(
     transform(
@@ -259,19 +260,26 @@ export const createStackedAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+      title: `${axisColumnMappings[AxisRole.Y].name} by ${
+        axisColumnMappings[AxisRole.X].name
+      } and ${axisColumnMappings[AxisRole.COLOR].name}`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
     buildVisMap({
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
     }),
-    createStackAreaSeries(styles),
+    createAreaSeries({
+      styles,
+      categoryField,
+      seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      stack: true,
+    }),
     assembleSpec
   )({
     data: transformedData,
     styles,
-    axisConfig: { xAxis, yAxis },
+    axisConfig,
     axisColumnMappings: axisColumnMappings ?? {},
   });
 

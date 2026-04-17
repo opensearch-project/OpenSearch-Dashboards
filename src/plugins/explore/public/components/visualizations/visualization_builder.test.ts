@@ -272,7 +272,7 @@ describe('VisualizationBuilder', () => {
         }
       );
       // For line, the axes are x/y
-      expect(axesMapping).toEqual({ x: 'name-categorical-0', y: 'name-numerical-0' });
+      expect(axesMapping).toEqual({ x: 'name-categorical-0', y: ['name-numerical-0'] });
     });
   });
 

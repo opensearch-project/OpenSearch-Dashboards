@@ -44,7 +44,6 @@ export interface ScatterChartStyleOptions {
   standardAxes?: StandardAxes[];
 
   exclusive?: ExclusiveScatterConfig;
-  switchAxes?: boolean;
 
   titleOptions?: TitleOptions;
 
@@ -81,7 +80,6 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
     thresholdStyle: ThresholdMode.Off,
   },
   standardAxes: [],
-  switchAxes: false,
   titleOptions: {
     show: false,
     titleName: '',
@@ -103,11 +101,13 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           },
         ],
         render(props) {
-          const spec = createTwoMetricScatter(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          if (!x || !y) throw Error('Missing axis config for scatter chart');
+          const spec = createTwoMetricScatter(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
           return <EchartsRender spec={spec} />;
         },
       },
@@ -121,11 +121,15 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           },
         ],
         render(props) {
-          const spec = createTwoMetricOneCateScatter(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for scatter chart');
+          const spec = createTwoMetricOneCateScatter(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} />;
         },
       },
@@ -140,11 +144,17 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           },
         ],
         render(props) {
-          const spec = createThreeMetricOneCateScatter(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          const size = props.axisColumnMappings.size?.[0];
+          if (!x || !y || !color || !size) throw Error('Missing axis config for scatter chart');
+          const spec = createThreeMetricOneCateScatter(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+            [AxisRole.SIZE]: size,
+          });
           return <EchartsRender spec={spec} />;
         },
       },

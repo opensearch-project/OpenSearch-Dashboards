@@ -5,42 +5,12 @@
 
 import { BarSeriesOption } from 'echarts';
 import { graphic } from 'echarts';
-import { AxisColumnMappings, Threshold, VisFieldType, AxisRole, VisColumn } from '../types';
+import { Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { DEFAULT_GREY, getColors } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn, EChartsSpecState, getAxisType } from '../utils/echarts_spec';
 import { getUnitById } from '../style_panel/unit/collection';
-
-export const getBarOrientation = (
-  styles: BarGaugeChartStyle,
-  axisColumnMappings?: AxisColumnMappings
-) => {
-  const xAxis = axisColumnMappings?.x;
-  const yAxis = axisColumnMappings?.y;
-  const isHorizontal = styles?.exclusive.orientation === 'horizontal';
-  const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
-
-  const axisStyle = {
-    axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0, labelOverlap: 'greedy' },
-  };
-  const nullStyle = { axis: null };
-
-  if (isHorizontal) {
-    return {
-      xAxis: yAxis,
-      xAxisStyle: isXNumerical ? axisStyle : nullStyle,
-      yAxis: xAxis,
-      yAxisStyle: isXNumerical ? nullStyle : axisStyle,
-    };
-  }
-
-  return {
-    xAxis,
-    xAxisStyle: isXNumerical ? nullStyle : axisStyle,
-    yAxis,
-    yAxisStyle: isXNumerical ? axisStyle : nullStyle,
-  };
-};
+import { BarGaugeAxisMapping } from './types';
 
 export const thresholdsToGradient = (thresholds: Threshold[]) => {
   return thresholds.map((threshold: Threshold, index) => {
@@ -51,22 +21,8 @@ export const thresholdsToGradient = (thresholds: Threshold[]) => {
   });
 };
 
-export const symbolOpposite = (orientationMode: string, symbol: string) => {
-  if (orientationMode === 'horizontal') {
-    return symbol === 'x' ? 'y' : 'x';
-  }
-  return symbol;
-};
-
-export const getGradientConfig = (
-  orientationMode: string,
-  displayMode: string,
-  isXaxisNumerical: boolean
-) => {
-  if (
-    (!isXaxisNumerical && orientationMode === 'horizontal') ||
-    (isXaxisNumerical && orientationMode !== 'horizontal')
-  ) {
+export const getGradientConfig = (displayMode: string, isXAxisNumerical: boolean) => {
+  if (!isXAxisNumerical) {
     if (displayMode === 'gradient')
       return {
         x1: 0,
@@ -94,7 +50,7 @@ export const normalizeData = (data: number, start: number, end: number) => {
 export const generateParams = (
   thresholds: Threshold[],
   styleOptions: BarGaugeChartStyle,
-  isXaxisNumerical: boolean
+  isXAxisNumerical: boolean
 ) => {
   const result: any[] = [];
 
@@ -134,11 +90,7 @@ export const generateParams = (
       name: `gradient${i}`,
       value: {
         gradient: 'linear',
-        ...getGradientConfig(
-          styleOptions.exclusive.orientation,
-          styleOptions.exclusive.displayMode,
-          isXaxisNumerical
-        ),
+        ...getGradientConfig(styleOptions.exclusive.displayMode, isXAxisNumerical),
         stops,
       },
     });
@@ -223,12 +175,14 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   styles,
   categoryField,
   valueField,
+  axisColumnMappings,
 }: {
   styles: BarGaugeChartStyle;
   categoryField: string;
   valueField: string;
+  axisColumnMappings: BarGaugeAxisMapping;
 }): PipelineFn<T> => (state: EChartsSpecState<T>) => {
-  const { transformedData, axisColumnMappings } = state;
+  const { transformedData } = state;
   const newState = { ...state };
 
   // null is already identified as invalid numbers at the aggregate stage.
@@ -553,11 +507,13 @@ export const createBarGaugeAxesConfig = ({
 }: {
   styles: BarGaugeChartStyle;
   categories: string[];
-  axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
+  axisColumnMappings: BarGaugeAxisMapping;
   minBase: number;
   maxBase: number;
 }) => {
-  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getAxesStyleConfig(styles, axisColumnMappings);
+  const xAxis = axisColumnMappings.x;
+  const yAxis = axisColumnMappings.y;
+  const { xAxisStyle, yAxisStyle } = getAxesStyleConfig(axisColumnMappings);
 
   const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
 
@@ -580,14 +536,9 @@ export const createBarGaugeAxesConfig = ({
   return { xAxisConfig, yAxisConfig };
 };
 
-const getAxesStyleConfig = (
-  styles: BarGaugeChartStyle,
-  axisColumnMappings?: AxisColumnMappings
-) => {
-  const xAxis = axisColumnMappings?.x;
-  const yAxis = axisColumnMappings?.y;
-  const isHorizontal = styles?.exclusive.orientation === 'horizontal';
-  const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
+const getAxesStyleConfig = (axisColumnMappings: BarGaugeAxisMapping) => {
+  const xAxis = axisColumnMappings.x;
+  const isXNumerical = xAxis.schema === VisFieldType.Numerical;
 
   const axisStyle = {
     axisLine: { show: false },
@@ -596,19 +547,8 @@ const getAxesStyleConfig = (
   };
   const nullStyle = { show: false };
 
-  if (isHorizontal) {
-    return {
-      xAxis: yAxis,
-      xAxisStyle: isXNumerical ? axisStyle : nullStyle,
-      yAxis: xAxis,
-      yAxisStyle: isXNumerical ? nullStyle : axisStyle,
-    };
-  }
-
   return {
-    xAxis,
     xAxisStyle: isXNumerical ? nullStyle : axisStyle,
-    yAxis,
     yAxisStyle: isXNumerical ? axisStyle : nullStyle,
   };
 };

@@ -8,7 +8,8 @@ import * as echarts from 'echarts';
 import { debounce } from 'lodash';
 
 import { MetricChartStyle } from './metric_vis_config';
-import { AxisColumnMappings, AxisRole, RendererSpecConfig } from '../types';
+import { AxisRole, RendererSpecConfig } from '../types';
+import { MetricAxisMapping } from './to_expression';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getUnitById } from '../style_panel/unit/collection';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
@@ -33,13 +34,13 @@ interface MetricChartProps {
   name: string;
   data?: Array<Record<string, any>>;
   styles: MetricChartStyle;
-  axisColumnMappings?: AxisColumnMappings;
+  axisColumnMappings: MetricAxisMapping;
   spec?: echarts.EChartsOption;
 }
 
 interface MetricChartRenderProps {
   styles: MetricChartStyle;
-  axisColumnMappings?: AxisColumnMappings;
+  axisColumnMappings: MetricAxisMapping;
   spec?: RendererSpecConfig | RendererSpecConfig[];
 }
 
@@ -343,8 +344,8 @@ export const MetricChart: React.FC<MetricChartProps> = ({
   spec,
   name,
 }) => {
-  const valueColumn = axisColumnMappings?.[AxisRole.Value];
-  const numericField = valueColumn?.column ?? '';
+  const valueColumn = axisColumnMappings[AxisRole.Value];
+  const numericField = valueColumn.column;
 
   // State for container dimensions
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });

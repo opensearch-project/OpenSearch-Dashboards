@@ -380,7 +380,7 @@ export class BaseAGUIAdapter {
         }
       }
     } catch (error) {
-      this.logger.debug('Error detecting PPL query', { error: error.message });
+      this.logger.debug('Error detecting PPL query', { error: (error as Error).message });
     }
 
     return null;
