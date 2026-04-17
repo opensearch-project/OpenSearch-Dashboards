@@ -171,6 +171,7 @@ export const MetricDetail: React.FC = () => {
     dispatch,
     client,
     queryGen,
+    stepSec,
     executePromQL,
     refreshCounter,
     onTimeRangeChange,
@@ -186,7 +187,7 @@ export const MetricDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedLabel, setSelectedLabel] = useState<Array<{ label: string }>>([]);
 
-  const promql = queryGen.forMetric(state.metric, metadata.type, state.filters);
+  const promql = queryGen.forMetric(state.metric, metadata.type, stepSec, state.filters);
   const selectedLabelName = selectedLabel[0]?.label || '';
 
   useEffect(() => {
@@ -199,7 +200,7 @@ export const MetricDetail: React.FC = () => {
         const meta = metaMap[state.metric];
         if (meta && !cancelled) setMetadata({ type: meta.type, help: meta.help, unit: meta.unit });
         const type = inferMetricType(state.metric, meta?.type || MetricType.UNKNOWN);
-        const query = queryGen.forMetric(state.metric, type, state.filters);
+        const query = queryGen.forMetric(state.metric, type, stepSec, state.filters);
         const result = await client.queryRange(query);
         if (!cancelled) setChartData(result?.[0]?.values || []);
         const labelNames = await client.getLabelsForMetric(state.metric);
@@ -216,7 +217,7 @@ export const MetricDetail: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [state.metric, state.filters, client, queryGen, refreshCounter]);
+  }, [state.metric, state.filters, client, queryGen, stepSec, refreshCounter]);
 
   // Clear selection when data source changes
   const filterKey = `${state.metric}|${JSON.stringify(state.filters)}|${refreshCounter}`;
@@ -232,7 +233,13 @@ export const MetricDetail: React.FC = () => {
   const metricType = inferMetricType(state.metric, metadata.type);
   const breakdownFetch = useCallback(
     (labelName: string, signal: AbortSignal) => {
-      const query = queryGen.forBreakdown(state.metric, metricType, labelName, state.filters);
+      const query = queryGen.forBreakdown(
+        state.metric,
+        metricType,
+        labelName,
+        stepSec,
+        state.filters
+      );
       return client.queryRange(query, signal).then((result) => {
         const series: BreakdownSeries[] = (result || []).map((r: any) => ({
           labelValue: r.metric?.[labelName] ?? '',
@@ -241,7 +248,7 @@ export const MetricDetail: React.FC = () => {
         return { label: labelName, cardinality: series.length, series } as LabelBreakdownData;
       });
     },
-    [client, queryGen, state.metric, metricType, state.filters]
+    [client, queryGen, state.metric, metricType, stepSec, state.filters]
   );
 
   const { results: breakdowns, onVisibilityChange } = useConcurrentQueries<LabelBreakdownData>(

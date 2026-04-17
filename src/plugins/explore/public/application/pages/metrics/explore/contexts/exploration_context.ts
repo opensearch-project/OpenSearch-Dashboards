@@ -80,6 +80,7 @@ interface ExplorationContextValue {
   dispatch: React.Dispatch<Action>;
   client: PrometheusClient;
   queryGen: MetricQueryGenerator;
+  stepSec: number;
   executePromQL: (promql: string) => void;
   refreshCounter: number;
   onTimeRangeChange?: (from: string, to: string) => void;

@@ -31,7 +31,7 @@ import {
 import { MetricBrowser } from './components/metric_browser';
 import { MetricDetail } from './components/metric_detail';
 import { PrometheusClient } from './services/prometheus_client';
-import { MetricQueryGenerator } from './services/query_generator';
+import { MetricQueryGenerator, calculateStep } from './services/query_generator';
 import { ExplorationLevel, ExplorationState } from './types';
 
 export const MetricsExploreTab = () => {
@@ -60,6 +60,18 @@ export const MetricsExploreTab = () => {
   const client = useMemo(() => {
     return new PrometheusClient(services, dataConnectionId);
   }, [services, dataConnectionId]);
+
+  // Chart step (seconds) derived from the active time range. Used to size the
+  // PromQL rate window so zoomed-out views stay gap-free. Recomputed whenever
+  // refreshCounter bumps (time range change, manual refresh).
+  const stepSec = useMemo(() => {
+    const timefilter = services.data?.query?.timefilter?.timefilter;
+    if (!timefilter) return 60;
+    const bounds = timefilter.getBounds();
+    if (!bounds?.min || !bounds?.max) return 60;
+    return calculateStep(bounds.max.valueOf() - bounds.min.valueOf());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.data?.query?.timefilter?.timefilter, refreshCounter]);
 
   // Sync local state → Redux (for URL persistence)
   const prevStateRef = useRef(state);
@@ -195,6 +207,7 @@ export const MetricsExploreTab = () => {
         dispatch,
         client,
         queryGen: queryGenRef.current,
+        stepSec,
         executePromQL,
         refreshCounter,
         onTimeRangeChange: handleTimeRangeChange,

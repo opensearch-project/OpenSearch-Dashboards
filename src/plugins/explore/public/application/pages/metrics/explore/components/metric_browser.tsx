@@ -39,6 +39,7 @@ function useSparklines(
   metadata: Record<string, MetricMetadata>,
   client: ReturnType<typeof useExploration>['client'],
   queryGen: ReturnType<typeof useExploration>['queryGen'],
+  stepSec: number,
   filters: ReturnType<typeof useExploration>['state']['filters'],
   refreshCounter: number
 ) {
@@ -48,10 +49,10 @@ function useSparklines(
   const fetchFn = useCallback(
     (name: string, signal: AbortSignal) => {
       const type = metadataRef.current[name]?.type || MetricType.UNKNOWN;
-      const promql = queryGen.forSparkline(name, type, filters);
+      const promql = queryGen.forSparkline(name, type, stepSec, filters);
       return client.queryRange(promql, signal).then((r) => r?.[0]?.values ?? []);
     },
-    [client, queryGen, filters]
+    [client, queryGen, stepSec, filters]
   );
 
   const { results, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(fetchFn, [
@@ -59,13 +60,22 @@ function useSparklines(
     filters,
     refreshCounter,
     metadata,
+    stepSec,
   ]);
 
   return { sparklines: results as SparklineMap, onVisibilityChange };
 }
 
 export const MetricBrowser: React.FC = () => {
-  const { state, dispatch, client, queryGen, executePromQL, refreshCounter } = useExploration();
+  const {
+    state,
+    dispatch,
+    client,
+    queryGen,
+    stepSec,
+    executePromQL,
+    refreshCounter,
+  } = useExploration();
   const [allMetrics, setAllMetrics] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<Record<string, MetricMetadata>>({});
   const [loading, setLoading] = useState(true);
@@ -169,6 +179,7 @@ export const MetricBrowser: React.FC = () => {
     metadata,
     client,
     queryGen,
+    stepSec,
     state.filters,
     refreshCounter
   );
@@ -305,7 +316,7 @@ export const MetricBrowser: React.FC = () => {
                 onClick={() => {
                   const queries = Array.from(selected).map((selName) => {
                     const type = metadata[selName]?.type || MetricType.GAUGE;
-                    return queryGen.forMetric(selName, type, state.filters);
+                    return queryGen.forMetric(selName, type, stepSec, state.filters);
                   });
                   const multiQuery = queries.map((q) => `${q};`).join('\n');
                   executePromQL(multiQuery);

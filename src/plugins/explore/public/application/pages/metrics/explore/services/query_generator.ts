@@ -10,43 +10,77 @@ export function escapeLabelValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-export class MetricQueryGenerator {
-  constructor(private scrapeInterval: string = '15s', private stepInterval: string = '15s') {}
+// Assumed Prometheus scrape interval when building rate windows. 60s covers
+// typical deployments (15s–60s scrapes) without requiring per-datasource config.
+const ASSUMED_SCRAPE_SEC = 60;
 
-  // Match Grafana's $__rate_interval: max(4 * scrapeInterval, step + scrapeInterval)
-  public get rateInterval(): string {
-    const scrape = this.parseToSeconds(this.scrapeInterval);
-    const step = this.parseToSeconds(this.stepInterval);
-    const rateSeconds = Math.max(scrape * 4, step + scrape);
-    if (rateSeconds >= 60 && rateSeconds % 60 === 0) {
-      return `${rateSeconds / 60}m`;
-    }
-    return `${rateSeconds}s`;
+// Default number of datapoints per chart; step = duration / resolution.
+const DEFAULT_RESOLUTION = 1440;
+const MIN_STEP_INTERVAL = 15;
+
+function roundInterval(intervalMs: number): number {
+  if (intervalMs <= 1) return 1;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(intervalMs)));
+  const normalized = intervalMs / magnitude;
+  let nice: number;
+  if (normalized <= 1) nice = 1;
+  else if (normalized <= 2) nice = 2;
+  else if (normalized <= 5) nice = 5;
+  else nice = 10;
+  return Math.round(nice * magnitude);
+}
+
+// Mirrors the server-side calculateStep in query_enhancements/server/search/prom_utils.ts
+// so client-rendered rate windows align with server-selected step intervals.
+export function calculateStep(durationMs: number): number {
+  const rawIntervalMs = durationMs / DEFAULT_RESOLUTION;
+  const stepSec = roundInterval(rawIntervalMs) / 1000;
+  return Math.max(stepSec, MIN_STEP_INTERVAL);
+}
+
+export class MetricQueryGenerator {
+  public rateInterval(stepSec: number): string {
+    const rateSec = Math.max(ASSUMED_SCRAPE_SEC * 4, stepSec + ASSUMED_SCRAPE_SEC);
+    if (rateSec >= 60 && rateSec % 60 === 0) return `${rateSec / 60}m`;
+    return `${rateSec}s`;
   }
 
-  forMetric(name: string, type: MetricType, filters: LabelFilter[] = []): string {
+  forMetric(name: string, type: MetricType, stepSec: number, filters: LabelFilter[] = []): string {
     const selector = this.buildSelector(name, filters);
+    const rate = this.rateInterval(stepSec);
     switch (inferMetricType(name, type)) {
       case MetricType.COUNTER:
-        return `sum(rate(${selector}[${this.rateInterval}]))`;
+        return `sum(rate(${selector}[${rate}]))`;
       case MetricType.HISTOGRAM:
-        return `histogram_quantile(0.95, sum(rate(${selector}[${this.rateInterval}])) by (le))`;
+        return `histogram_quantile(0.95, sum(rate(${selector}[${rate}])) by (le))`;
       default:
         return `avg(${selector})`;
     }
   }
 
-  forSparkline(name: string, type: MetricType, filters: LabelFilter[] = []): string {
-    return this.forMetric(name, type, filters);
+  forSparkline(
+    name: string,
+    type: MetricType,
+    stepSec: number,
+    filters: LabelFilter[] = []
+  ): string {
+    return this.forMetric(name, type, stepSec, filters);
   }
 
-  forBreakdown(name: string, type: MetricType, label: string, filters: LabelFilter[] = []): string {
+  forBreakdown(
+    name: string,
+    type: MetricType,
+    label: string,
+    stepSec: number,
+    filters: LabelFilter[] = []
+  ): string {
     const selector = this.buildSelector(name, filters);
+    const rate = this.rateInterval(stepSec);
     switch (inferMetricType(name, type)) {
       case MetricType.COUNTER:
-        return `sum by (${label}) (rate(${selector}[${this.rateInterval}]))`;
+        return `sum by (${label}) (rate(${selector}[${rate}]))`;
       case MetricType.HISTOGRAM:
-        return `histogram_quantile(0.95, sum by (${label}, le) (rate(${selector}[${this.rateInterval}])))`;
+        return `histogram_quantile(0.95, sum by (${label}, le) (rate(${selector}[${rate}])))`;
       default:
         return `avg by (${label}) (${selector})`;
     }
@@ -58,13 +92,5 @@ export class MetricQueryGenerator {
       .map((f) => `${f.name}${f.operator}"${escapeLabelValue(f.value)}"`)
       .join(',');
     return labelMatchers ? `${name}{${labelMatchers}}` : name;
-  }
-
-  private parseToSeconds(interval: string): number {
-    const match = interval.match(/^(\d+)([smhd])$/);
-    if (!match) return 60;
-    const [, num, unit] = match;
-    const multipliers: Record<string, number> = { s: 1, m: 60, h: 3600, d: 86400 };
-    return parseInt(num, 10) * (multipliers[unit] || 60);
   }
 }
