@@ -366,7 +366,11 @@ export const MetricBrowser: React.FC = () => {
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setDisplayCount((c) => c + PAGE_SIZE)} iconType="arrowDown" data-test-subj="metricsExploreLoadMoreButton">
+              <EuiButton
+                onClick={() => setDisplayCount((c) => c + PAGE_SIZE)}
+                iconType="arrowDown"
+                data-test-subj="metricsExploreLoadMoreButton"
+              >
                 {i18n.translate('explore.metricsExplore.loadMore', {
                   defaultMessage: 'Load more ({displayed} of {total})',
                   values: { displayed: displayCount, total: totalMetrics.toLocaleString() },

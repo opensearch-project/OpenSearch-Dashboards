@@ -299,7 +299,9 @@ export const MetricDetail: React.FC = () => {
           <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <h2 style={{ whiteSpace: 'nowrap' }} data-test-subj="metricsExploreDetailTitle">{state.metric}</h2>
+                <h2 style={{ whiteSpace: 'nowrap' }} data-test-subj="metricsExploreDetailTitle">
+                  {state.metric}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -320,7 +322,13 @@ export const MetricDetail: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="play" onClick={() => executePromQL(promql)} size="s" fill data-test-subj="metricsExploreExecuteButton">
+          <EuiButton
+            iconType="play"
+            onClick={() => executePromQL(promql)}
+            size="s"
+            fill
+            data-test-subj="metricsExploreExecuteButton"
+          >
             {i18n.translate('explore.metricsExplore.execute', { defaultMessage: 'Execute' })}
           </EuiButton>
         </EuiFlexItem>
@@ -373,7 +381,11 @@ export const MetricDetail: React.FC = () => {
       {labels.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="metricsExploreBreakdownSection">
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            data-test-subj="metricsExploreBreakdownSection"
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
                 <strong>

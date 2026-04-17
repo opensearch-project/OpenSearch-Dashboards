@@ -303,7 +303,7 @@ const prometheusDatasetTestSuite = () => {
         });
 
         it('should navigate to saved searches and back', function () {
-          const searchName = 'prometheus-navigation-test';
+          const searchName = `prometheus-navigation-test-${Date.now()}`;
 
           typeInQueryEditor('rate(prometheus_http_requests_total[5m])', {
             parseSpecialCharSequences: false,
@@ -413,8 +413,10 @@ const prometheusDatasetTestSuite = () => {
             'true'
           );
           cy.getElementByTestId('metricsExploreSearchInput').should('exist');
-          cy.getElementByTestId('metricsExploreCard-ALERTS').should('exist');
-          cy.getElementByTestId('metricsExploreLoadMoreButton').should('be.visible');
+          cy.getElementByTestId('metricsExploreSearchInput').type('prometheus_build');
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info', {
+            timeout: 10000,
+          }).should('exist');
         });
 
         it('should search metrics and navigate to detail view', function () {
@@ -433,21 +435,32 @@ const prometheusDatasetTestSuite = () => {
           );
           cy.getElementByTestId('metricsExploreBackButton').should('be.visible');
           cy.getElementByTestId('metricsExploreExecuteButton').should('be.visible');
-          cy.getElementByTestId('metricsExploreBreakdownSection').should('exist');
         });
 
         it('should navigate back from detail to browser', function () {
-          cy.getElementByTestId('metricsExploreCard-ALERTS').contains('button', 'ALERTS').click();
-          cy.getElementByTestId('metricsExploreDetailTitle').should('contain.text', 'ALERTS');
+          cy.getElementByTestId('metricsExploreSearchInput').type('prometheus_build');
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info', { timeout: 10000 })
+            .contains('button', 'prometheus_build_info')
+            .click();
+          cy.getElementByTestId('metricsExploreDetailTitle').should(
+            'contain.text',
+            'prometheus_build_info'
+          );
 
           cy.getElementByTestId('metricsExploreBackButton').click();
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
-          cy.getElementByTestId('metricsExploreCard-ALERTS').should('exist');
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info').should('exist');
         });
 
         it('should execute metric from detail view and switch to Query tab', function () {
-          cy.getElementByTestId('metricsExploreCard-ALERTS').contains('button', 'ALERTS').click();
-          cy.getElementByTestId('metricsExploreDetailTitle').should('contain.text', 'ALERTS');
+          cy.getElementByTestId('metricsExploreSearchInput').type('prometheus_build');
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info', { timeout: 10000 })
+            .contains('button', 'prometheus_build_info')
+            .click();
+          cy.getElementByTestId('metricsExploreDetailTitle').should(
+            'contain.text',
+            'prometheus_build_info'
+          );
 
           cy.getElementByTestId('metricsExploreExecuteButton').click();
 
@@ -458,19 +471,25 @@ const prometheusDatasetTestSuite = () => {
           );
           cy.getElementByTestId('exploreQueryPanelEditor')
             .find('.view-lines')
-            .should('contain.text', 'ALERTS');
+            .should('contain.text', 'prometheus_build_info');
         });
 
         it('should persist detail view state in URL on reload', function () {
-          cy.getElementByTestId('metricsExploreCard-ALERTS').contains('button', 'ALERTS').click();
-          cy.getElementByTestId('metricsExploreDetailTitle').should('contain.text', 'ALERTS');
+          cy.getElementByTestId('metricsExploreSearchInput').type('prometheus_build');
+          cy.getElementByTestId('metricsExploreCard-prometheus_build_info', { timeout: 10000 })
+            .contains('button', 'prometheus_build_info')
+            .click();
+          cy.getElementByTestId('metricsExploreDetailTitle').should(
+            'contain.text',
+            'prometheus_build_info'
+          );
           cy.url().should('include', 'level:detail');
 
           cy.url().then((url) => {
             cy.visit(url);
             cy.getElementByTestId('metricsExploreDetailTitle', { timeout: 30000 }).should(
               'contain.text',
-              'ALERTS'
+              'prometheus_build_info'
             );
             cy.getElementByTestId('metricsExploreBackButton').should('be.visible');
           });

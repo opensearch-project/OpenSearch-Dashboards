@@ -230,7 +230,12 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center" className="dscResultCount" data-test-subj="metricsRawResultCount">
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            className="dscResultCount"
+            data-test-subj="metricsRawResultCount"
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <FormattedMessage
