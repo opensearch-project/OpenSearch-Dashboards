@@ -68,6 +68,47 @@ describe('useConcurrentQueries', () => {
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
+  it('batches concurrent completions into a single render', async () => {
+    const resolvers: Array<(v: string) => void> = [];
+    const fetchFn = jest.fn().mockImplementation(
+      () =>
+        new Promise<string>((r) => {
+          resolvers.push(r);
+        })
+    );
+    let renderCount = 0;
+    const { result } = renderHook(() => {
+      renderCount++;
+      return useConcurrentQueries(fetchFn, [1]);
+    });
+    const initialRenders = renderCount;
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+      result.current.onVisibilityChange('b', true);
+      result.current.onVisibilityChange('c', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+
+    // Resolve all three fetches in the same synchronous block. With batching,
+    // this should cause exactly one additional render, not three.
+    const beforeResolve = renderCount;
+    await act(async () => {
+      resolvers[0]('val-a');
+      resolvers[1]('val-b');
+      resolvers[2]('val-c');
+    });
+
+    expect(result.current.results.get('a')).toBe('val-a');
+    expect(result.current.results.get('b')).toBe('val-b');
+    expect(result.current.results.get('c')).toBe('val-c');
+    expect(renderCount - beforeResolve).toBe(1);
+    expect(initialRenders).toBeGreaterThan(0);
+  });
+
   it('resets on dependency change', async () => {
     const fetchFn = jest.fn().mockResolvedValue('data');
     const { result, rerender } = renderHook(

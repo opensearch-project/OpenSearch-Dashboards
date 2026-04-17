@@ -28,9 +28,30 @@ export function useConcurrentQueries<T>(
     fetched: new Set<string>(),
     viewport: new Set<string>(),
     pinned: new Set<string>(),
+    // Results that completed since the last render, buffered so a burst of
+    // concurrent fetches finishing in the same tick produces a single render.
+    buffered: new Map<string, T>(),
+    flushScheduled: false,
   });
 
   const drainRef = useRef<() => void>(() => {});
+
+  const scheduleFlush = useCallback(() => {
+    const s = stateRef.current;
+    if (s.flushScheduled) return;
+    s.flushScheduled = true;
+    Promise.resolve().then(() => {
+      s.flushScheduled = false;
+      if (s.buffered.size === 0) return;
+      const batch = s.buffered;
+      s.buffered = new Map();
+      setResults((prev) => {
+        const next = new Map(prev);
+        for (const [k, v] of batch) next.set(k, v);
+        return next;
+      });
+    });
+  }, []);
 
   const drain = useCallback(() => {
     const s = stateRef.current;
@@ -50,7 +71,8 @@ export function useConcurrentQueries<T>(
         fetchFn(key, controller.signal)
           .then((value) => {
             s.fetched.add(key);
-            setResults((prev) => new Map(prev).set(key, value));
+            s.buffered.set(key, value);
+            scheduleFlush();
           })
           .catch(() => {})
           .finally(() => {
@@ -60,7 +82,7 @@ export function useConcurrentQueries<T>(
       }, DEBOUNCE_MS);
       s.pending.set(key, timer);
     }
-  }, [fetchFn, concurrency]);
+  }, [fetchFn, concurrency, scheduleFlush]);
 
   drainRef.current = drain;
 
@@ -74,6 +96,7 @@ export function useConcurrentQueries<T>(
     s.inflight.clear();
     for (const [, timer] of s.pending) clearTimeout(timer);
     s.pending.clear();
+    s.buffered.clear();
     setResults(new Map());
     // Re-queue everything still in viewport
     s.queue = Array.from(s.viewport);
@@ -125,6 +148,7 @@ export function useConcurrentQueries<T>(
         ctrl.abort();
         s.inflight.delete(key);
       }
+      s.buffered.delete(key);
       s.queue = s.queue.filter((n) => n !== key);
     }
   }, []);

@@ -194,6 +194,9 @@ export class PrometheusClient {
     }
   }
 
+  // Groups hits back into series. Relies on the server (promql_search_strategy)
+  // emitting a structured `Labels` object per row, so we never parse labels out
+  // of the formatted `Series` string.
   private transformHitsToSeries(hits: any[]): any[] {
     const seriesMap = new Map<
       string,
@@ -205,7 +208,11 @@ export class PrometheusClient {
       const time = Number(src.Time) / 1000;
       const value = String(src.Value ?? '');
       if (!seriesMap.has(seriesName)) {
-        seriesMap.set(seriesName, { labels: this.parseSeriesLabels(seriesName), values: [] });
+        const labels = (src.Labels && typeof src.Labels === 'object' ? src.Labels : {}) as Record<
+          string,
+          string
+        >;
+        seriesMap.set(seriesName, { labels, values: [] });
       }
       seriesMap.get(seriesName)!.values.push([time, value]);
     }
@@ -213,16 +220,5 @@ export class PrometheusClient {
       metric: { __name__: name, ...labels },
       values,
     }));
-  }
-
-  private parseSeriesLabels(series: string): Record<string, string> {
-    const braceStart = series.indexOf('{');
-    if (braceStart === -1) return {};
-    const braceContent = series.slice(braceStart + 1, series.lastIndexOf('}'));
-    const labels: Record<string, string> = {};
-    for (const match of braceContent.matchAll(/(\w+)="([^"]*)"/g)) {
-      labels[match[1]] = match[2];
-    }
-    return labels;
   }
 }
