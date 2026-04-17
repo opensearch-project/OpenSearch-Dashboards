@@ -22,7 +22,7 @@ import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { LabelInfo, MetricType, inferMetricType, LayoutMode, breakdownGridStyle } from '../types';
 import { useExploration } from '../contexts/exploration_context';
-import { SparklineChart } from './sparkline';
+import { SparklineChart, SERIES_COLORS } from './sparkline';
 import { LabelFilterBar } from './label_filter_bar';
 import { LabelFilterBadges } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
@@ -105,7 +105,7 @@ const BreakdownPanel: React.FC<{
           ...breakdownGridStyle(layout),
         }}
       >
-        {data.series.map((s) => (
+        {data.series.map((s, i) => (
           <EuiPanel key={`${data.label}-${s.labelValue}`} paddingSize="s" hasBorder>
             <EuiTitle size="xxs">
               <h3>{s.labelValue}</h3>
@@ -116,6 +116,7 @@ const BreakdownPanel: React.FC<{
                   values={s.values}
                   height={160}
                   label="sum(rate)"
+                  stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
                   isDarkMode={darkMode}
                   onTimeRangeChange={onTimeRangeChange}
                   {...breakdownYRange}
