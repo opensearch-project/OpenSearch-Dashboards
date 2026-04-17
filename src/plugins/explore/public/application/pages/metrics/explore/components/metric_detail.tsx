@@ -219,11 +219,13 @@ export const MetricDetail: React.FC = () => {
 
   // Clear selection when data source changes
   const filterKey = `${state.metric}|${JSON.stringify(state.filters)}|${refreshCounter}`;
-  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
-  if (filterKey !== prevFilterKey) {
-    setPrevFilterKey(filterKey);
-    setSelectedLabel([]);
-  }
+  const prevFilterKeyRef = useRef(filterKey);
+  useEffect(() => {
+    if (filterKey !== prevFilterKeyRef.current) {
+      prevFilterKeyRef.current = filterKey;
+      setSelectedLabel([]);
+    }
+  }, [filterKey]);
 
   // Concurrent breakdown fetching via shared hook
   const metricType = inferMetricType(state.metric, metadata.type);
@@ -339,11 +341,12 @@ export const MetricDetail: React.FC = () => {
         <EuiFlexItem grow={false}>
           <LabelFilterBar
             metric={state.metric}
-            filters={[]}
+            filters={state.filters}
             client={client}
             onAdd={(filter) => dispatch({ type: 'ADD_FILTER', filter })}
-            onRemove={() => {}}
-            onClear={() => {}}
+            onRemove={(index) => dispatch({ type: 'REMOVE_FILTER', index })}
+            onToggle={(index) => dispatch({ type: 'TOGGLE_FILTER', index })}
+            onClear={() => dispatch({ type: 'CLEAR_FILTERS' })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="metricsExploreDetail__queryDivider">

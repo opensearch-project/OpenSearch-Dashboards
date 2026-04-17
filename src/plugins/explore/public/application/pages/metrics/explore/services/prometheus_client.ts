@@ -6,6 +6,7 @@
 import { ExploreServices } from '../../../../../types';
 import { MetricMetadata, MetricType, CACHE_TTL_DATA, CACHE_TTL_METADATA } from '../types';
 import { LRUCache } from './lru_cache';
+import { escapeLabelValue } from './query_generator';
 
 export class PrometheusClient {
   private metadataCache = new LRUCache<any>(CACHE_TTL_METADATA);
@@ -103,9 +104,11 @@ export class PrometheusClient {
     const cached = this.dataCache.get(key);
     if (cached) return cached;
 
-    // Use series API with regex match for server-side filtering
-    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const match = `{__name__=~".*${escaped}.*"}`;
+    // Use series API with regex match for server-side filtering.
+    // Escape regex metacharacters first, then escape for PromQL string syntax
+    // (backslash + double-quote) so the final selector is always well-formed.
+    const regexEscaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = `{__name__=~".*${escapeLabelValue(regexEscaped)}.*"}`;
     const series = await this.getSeries(match);
     const nameSet = new Set<string>();
     for (const s of series) {
@@ -122,7 +125,7 @@ export class PrometheusClient {
     const cached = this.dataCache.get(key);
     if (cached) return cached;
     const rc = this.getResourceClient();
-    const match = metric ? `{__name__="${metric}"}` : undefined;
+    const match = metric ? `{__name__="${escapeLabelValue(metric)}"}` : undefined;
     const data = await rc.getLabelValues(this.dataConnectionId, undefined, label, undefined, match);
     this.dataCache.set(key, data);
     return data;
@@ -130,7 +133,8 @@ export class PrometheusClient {
 
   async queryRange(promql: string, signal?: AbortSignal): Promise<any> {
     if (this.aborted) return [];
-    const key = `qr:${this.dataConnectionId}:${promql}`;
+    const timeRange = this.services.data.query.timefilter.timefilter.getTime();
+    const key = `qr:${this.dataConnectionId}:${timeRange.from}:${timeRange.to}:${promql}`;
     const cached = this.dataCache.get(key);
     if (cached) return cached;
     return this.executeQueryRange(promql, key, signal);
@@ -174,9 +178,15 @@ export class PrometheusClient {
     try {
       const rawResults = await searchSource.fetch({ abortSignal: controller.signal });
       const result = this.transformHitsToSeries(rawResults?.hits?.hits || []);
-      this.dataCache.set(cacheKey, result);
+      if (!this.aborted && !controller.signal.aborted) {
+        this.dataCache.set(cacheKey, result);
+      }
       return result;
-    } catch {
+    } catch (err) {
+      if (!controller.signal.aborted) {
+        // eslint-disable-next-line no-console
+        console.error('PrometheusClient.executeQueryRange failed', err);
+      }
       return [];
     } finally {
       clearTimeout(timeoutId);

@@ -31,8 +31,9 @@ export class LRUCache<T> {
   }
 
   set(key: string, value: T): void {
+    const isNewKey = !this.cache.has(key);
     this.cache.delete(key);
-    if (this.cache.size >= this.maxEntries) {
+    if (isNewKey && this.cache.size >= this.maxEntries) {
       const firstKey = this.cache.keys().next().value;
       if (firstKey !== undefined) this.cache.delete(firstKey);
     }

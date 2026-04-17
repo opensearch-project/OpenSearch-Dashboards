@@ -5,6 +5,11 @@
 
 import { MetricType, LabelFilter, inferMetricType } from '../types';
 
+// Escape backslash and double-quote for PromQL label values.
+export function escapeLabelValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 export class MetricQueryGenerator {
   constructor(private scrapeInterval: string = '15s', private stepInterval: string = '15s') {}
 
@@ -13,7 +18,10 @@ export class MetricQueryGenerator {
     const scrape = this.parseToSeconds(this.scrapeInterval);
     const step = this.parseToSeconds(this.stepInterval);
     const rateSeconds = Math.max(scrape * 4, step + scrape);
-    return rateSeconds >= 60 ? `${rateSeconds / 60}m` : `${rateSeconds}s`;
+    if (rateSeconds >= 60 && rateSeconds % 60 === 0) {
+      return `${rateSeconds / 60}m`;
+    }
+    return `${rateSeconds}s`;
   }
 
   forMetric(name: string, type: MetricType, filters: LabelFilter[] = []): string {
@@ -47,7 +55,7 @@ export class MetricQueryGenerator {
   private buildSelector(name: string, filters: LabelFilter[]): string {
     const labelMatchers = filters
       .filter((f) => f.enabled !== false)
-      .map((f) => `${f.name}${f.operator}"${f.value}"`)
+      .map((f) => `${f.name}${f.operator}"${escapeLabelValue(f.value)}"`)
       .join(',');
     return labelMatchers ? `${name}{${labelMatchers}}` : name;
   }
