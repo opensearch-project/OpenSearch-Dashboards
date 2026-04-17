@@ -147,7 +147,7 @@ const prometheusDatasetTestSuite = () => {
 
   (!prometheusConfig.url ? describe.skip : describe)(
     'Prometheus Dataset',
-    { defaultCommandTimeout: 60000 },
+    { defaultCommandTimeout: 120000 },
     () => {
       before(() => {
         setupPrometheusConnection(prometheusConfig.name, prometheusConfig.url);

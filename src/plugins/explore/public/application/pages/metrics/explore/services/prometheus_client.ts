@@ -125,8 +125,8 @@ export class PrometheusClient {
     const cached = this.dataCache.get(key);
     if (cached) return cached;
     const rc = this.getResourceClient();
-    const match = metric ? `{__name__="${escapeLabelValue(metric)}"}` : undefined;
-    const data = await rc.getLabelValues(this.dataConnectionId, undefined, label, undefined, match);
+    const meta = metric ? { 'match[]': `{__name__="${escapeLabelValue(metric)}"}` } : undefined;
+    const data = await rc.getLabelValues(this.dataConnectionId, meta, label);
     this.dataCache.set(key, data);
     return data;
   }
