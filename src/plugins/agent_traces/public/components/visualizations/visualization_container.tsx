@@ -22,10 +22,6 @@ import {
 } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
-export interface UpdateVisualizationProps {
-  mappings: Record<string, string>;
-}
-
 export const VisualizationContainer = React.memo(() => {
   const { services } = useOpenSearchDashboards<AgentTracesServices>();
   const { results } = useTabResults();

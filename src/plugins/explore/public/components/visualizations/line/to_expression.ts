@@ -38,8 +38,6 @@ export const createSimpleLineChart = (
   const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
   const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
-  if (!valueField || !timeField) throw Error('Missing axis config for line chart');
-
   const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
