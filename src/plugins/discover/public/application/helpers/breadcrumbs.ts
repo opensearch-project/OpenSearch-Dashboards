@@ -65,8 +65,9 @@ export function getRootBreadcrumbs(services?: DiscoverViewServices): EuiBreadcru
             if (store && scopedHistory) {
               const savedId = sessionStorage.getItem(LAST_INDEX_PATTERN_KEY);
               // Core does not currently expose analytics.reportEvent; this is a no-op until that API exists.
-              const analytics = (core as { analytics?: { reportEvent?: (name: string, payload?: object) => void } })
-                .analytics;
+              const analytics = (core as {
+                analytics?: { reportEvent?: (name: string, payload?: object) => void };
+              }).analytics;
               analytics?.reportEvent?.('discover_breadcrumb_navigation', {
                 from_saved_search: !!store.getState().discover?.savedSearch,
                 restored_index_pattern: !!savedId,

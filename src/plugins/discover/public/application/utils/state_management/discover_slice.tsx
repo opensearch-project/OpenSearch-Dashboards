@@ -100,7 +100,7 @@ export const getPreloadedState = async ({
         },
       };
 
-     savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
+      savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
     }
   } else if (config.get(DEFAULT_COLUMNS_SETTING)) {
     preloadedState.state.columns = config.get(DEFAULT_COLUMNS_SETTING);
