@@ -5,12 +5,11 @@
 
 import './metrics_page_tabs.scss';
 import React from 'react';
-import { EuiTabs, EuiTab, EuiPageBody, EuiIcon } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useSelector, useDispatch } from 'react-redux';
 import { MetricsExploreTab } from './explore';
-import { QueryPanel } from '../../../components/query_panel';
-import { ResizableQueryContainer } from '../../../components/container/resizable_query_container';
+import { MetricsQueryPanel } from './metrics_query_panel';
 import { BottomRightContainer } from './metrics_bottom_container/bottom_right_container';
 import { DatasetSelectWidget } from '../../../components/query_panel/query_panel_widgets/dataset_select';
 import { RootState } from '../../utils/state_management/store';
@@ -58,11 +57,11 @@ export const MetricsPageTabs: React.FC = () => {
           <MetricsExploreTab />
         </div>
       ) : (
-        <ResizableQueryContainer queryPanel={<QueryPanel />}>
-          <EuiPageBody className="explore-layout__canvas">
-            <BottomRightContainer />
-          </EuiPageBody>
-        </ResizableQueryContainer>
+        <>
+          <MetricsQueryPanel />
+          <EuiHorizontalRule margin="none" />
+          <BottomRightContainer />
+        </>
       )}
     </MetricsPageModeContext.Provider>
   );

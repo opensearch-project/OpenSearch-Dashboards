@@ -1,0 +1,188 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.pqbPill {
+  &__body {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    > .euiButtonIcon.euiButtonIcon,
+    > .euiToolTipAnchor > .euiButtonIcon.euiButtonIcon {
+      min-width: $euiFormControlCompressedHeight;
+      width: $euiFormControlCompressedHeight;
+      height: $euiFormControlCompressedHeight;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.pqbParamInput {
+  height: $euiFormControlCompressedHeight;
+  font-size: $euiFontSizeXS;
+  font-weight: 400;
+  border: none;
+  background: transparent;
+  padding: 0 $euiSizeS;
+  outline: none;
+  color: $euiCodeBlockNumberColor; // match label-name highlight group
+
+  &::placeholder {
+    color: $euiColorMediumShade;
+  }
+}
+
+.pqbGroupingButton {
+  background: $euiFormInputGroupLabelBackground;
+  border: none;
+  padding: 0 $euiSizeS;
+  font-size: $euiFontSizeXS;
+  cursor: pointer;
+  white-space: nowrap;
+  height: 100%;
+}
+
+.pqbGroupingPanel {
+  min-width: 200px;
+  max-width: 280px;
+}
+
+.pqbGroupingSearch {
+  width: 100%;
+  font-size: $euiFontSizeXS;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeXS $euiSizeS;
+  margin-bottom: $euiSizeS;
+}
+
+.pqbCheckboxLabel {
+  padding: 2px 0;
+  cursor: pointer;
+  font-size: $euiFontSizeXS;
+  display: block;
+
+  input {
+    margin-right: $euiSizeS;
+  }
+}
+
+.pqbCheckboxList {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.pqbLabelFilterRow {
+  display: flex;
+  align-items: center;
+}
+
+// Outlined group with a floating label on the top border
+.pqbGroup {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid $euiBorderColor;
+  border-radius: $euiSizeM;
+  padding: 0 2px;
+  background: $euiColorEmptyShade;
+  margin-top: 2px;
+
+  &__label {
+    position: absolute;
+    top: -0.6em;
+    left: $euiSizeS;
+    z-index: 1;
+    padding: 0 $euiSizeXS;
+    font-size: $euiFontSizeXS;
+    font-weight: 500;
+    color: $euiColorDarkShade;
+    background: inherit;
+    line-height: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  // Remove all inner borders/shadows — the group border is the only outline
+  .euiFormControlLayout,
+  .euiFormControlLayout__childrenWrapper,
+  .euiComboBox-isOpen .euiFormControlLayout,
+  .euiComboBox__inputWrap {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .euiSuperSelectControl {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  // Clip the last button's hover shade to match the rounded right edge
+  > .pqbPill__body > .euiButtonIcon:last-child,
+  > .pqbPill__body > .euiToolTipAnchor:last-child .euiButtonIcon,
+  > .euiButtonIcon:last-child {
+    border-radius: 0 calc(#{$euiSizeM} - 2px) calc(#{$euiSizeM} - 2px) 0;
+  }
+}
+
+.pqbSep {
+  width: 1px;
+  align-self: stretch;
+  background: $euiBorderColor;
+  flex-shrink: 0;
+}
+
+// Align combobox text color with code editor / query preview highlighting.
+.pqbCombo--labelName .euiComboBoxPill--plainText {
+  color: $euiCodeBlockNumberColor;
+}
+
+.pqbCombo--labelValue .euiComboBoxPill--plainText {
+  color: $euiCodeBlockStringColor;
+}
+
+.pqbCombo--aggName .euiComboBoxPill--plainText {
+  color: $euiCodeBlockKeywordColor;
+}
+
+.pqbBuilder {
+  padding: 0 $euiSizeXS;
+}
+
+.pqbOpsMenuDescription {
+  white-space: normal;
+  max-width: 300px;
+}
+
+.pqbOpsMenuPanel {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pqbLabelPopover {
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.pqbGroupingModeSelect {
+  margin-bottom: $euiSizeXS;
+}
+
+.pqbLabelPopoverValues {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-bottom: $euiSizeS;
+}
+
+.pqbLabelValueRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}

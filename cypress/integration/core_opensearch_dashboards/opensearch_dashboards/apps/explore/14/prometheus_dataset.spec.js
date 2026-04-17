@@ -9,8 +9,20 @@ import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 
+const switchRowToCodeMode = (label = 'A') => {
+  // EuiButtonGroup renders each option as a radio input with data-test-subj=id,
+  // wrapped in a label. Click the wrapping label (scoped to this row).
+  cy.getElementByTestId(`queryRow-${label}`)
+    .find('[data-test-subj="code"]')
+    .parents('label')
+    .first()
+    .click({ force: true });
+};
+
 const typeInQueryEditor = (query, options = {}) => {
-  const { parseSpecialCharSequences = true } = options;
+  const { parseSpecialCharSequences = true, label = 'A' } = options;
+
+  switchRowToCodeMode(label);
 
   cy.getElementByTestId('exploreQueryPanelEditor')
     .find('.react-monaco-editor-container')
@@ -182,10 +194,12 @@ const prometheusDatasetTestSuite = () => {
           cy.getElementByTestId('queryPanelFooterLanguageToggle')
             .should('be.visible')
             .should('contain.text', 'PromQL');
-          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
+          cy.getElementByTestId('queryRow-A').should('be.visible');
         });
 
         it('should validate autocomplete suggestions for PromQL metrics', function () {
+          switchRowToCodeMode('A');
+
           cy.getElementByTestId('exploreQueryPanelEditor')
             .find('.react-monaco-editor-container')
             .should('be.visible')
@@ -354,8 +368,8 @@ const prometheusDatasetTestSuite = () => {
             .contains(searchName)
             .click();
 
-          cy.getElementByTestId('exploreQueryPanelEditor')
-            .find('.view-lines')
+          cy.getElementByTestId('queryRow-A')
+            .find('[data-test-subj="promqlBuilderMetricSelect"]')
             .should('contain.text', 'prometheus_build_info');
           cy.getElementByTestId('dscResultCount').should('be.visible');
         });
@@ -391,8 +405,8 @@ const prometheusDatasetTestSuite = () => {
             .click();
 
           cy.url().should('include', '/app/explore/metrics');
-          cy.getElementByTestId('exploreQueryPanelEditor')
-            .find('.view-lines')
+          cy.getElementByTestId('queryRow-A')
+            .find('[data-test-subj="promqlBuilderMetricSelect"]')
             .should('contain.text', 'prometheus_build_info');
           cy.getElementByTestId('dscResultCount').should('be.visible');
         });
@@ -470,8 +484,8 @@ const prometheusDatasetTestSuite = () => {
             'aria-selected',
             'true'
           );
-          cy.getElementByTestId('exploreQueryPanelEditor')
-            .find('.view-lines')
+          cy.getElementByTestId('queryRow-A')
+            .find('[data-test-subj="promqlBuilderMetricSelect"]')
             .should('contain.text', 'prometheus_build_info');
         });
 

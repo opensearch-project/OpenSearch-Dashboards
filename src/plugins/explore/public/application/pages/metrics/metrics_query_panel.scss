@@ -1,0 +1,36 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.mqpQueryRow {
+  padding: $euiSizeS 0 $euiSizeXS;
+  border-bottom: $euiBorderThin;
+
+  &--dragging {
+    background: $euiColorLightestShade;
+  }
+
+  &[data-test-subj="queryRow-A"] {
+    border-top: 1px solid transparent;
+  }
+
+  &--builder[data-test-subj="queryRow-A"] {
+    border-top: $euiBorderThin;
+  }
+}
+
+.mqpRowLabel {
+  font-weight: $euiFontWeightSemiBold;
+  min-width: $euiSizeM;
+  text-align: center;
+  line-height: $euiSizeXL;
+}
+
+.mqpDragHandle {
+  cursor: grab;
+}
+
+.mqpAddQueryRow {
+  padding: $euiSizeXS 0;
+}
