@@ -549,6 +549,7 @@ export class ExplorePlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'discoverApp' as const,
         ...(isObservability ? {} : { title: 'Explorer' }),
       },
       {
@@ -556,18 +557,21 @@ export class ExplorePlugin
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'logsApp' as const,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'apmTrace' as const,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'stats' as const,
       },
     ];
 

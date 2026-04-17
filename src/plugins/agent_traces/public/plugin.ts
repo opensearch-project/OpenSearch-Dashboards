@@ -280,6 +280,7 @@ export class AgentTracesPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'uptimeApp' as const,
       },
     ];
 

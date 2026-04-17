@@ -466,6 +466,7 @@ export class DashboardPlugin
         id: app.id,
         order: 400,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
@@ -473,6 +474,7 @@ export class DashboardPlugin
         id: app.id,
         order: 400,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
@@ -480,6 +482,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
@@ -487,6 +490,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -494,6 +498,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
 

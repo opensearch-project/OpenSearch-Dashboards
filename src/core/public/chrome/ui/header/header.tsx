@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import { createRef, useCallback, useMemo, useState } from 'react';
+import { createRef, useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, of } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -131,6 +131,7 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
+  enableIconSideNav?: boolean;
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
   keyboardShortcut?: KeyboardShortcutStart;
   globalSearchCommands$: Observable<GlobalSearchCommand[]>;
@@ -159,6 +160,7 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
+  enableIconSideNav: enableIconSideNavSetting,
   keyboardShortcut,
   ...observables
 }: HeaderProps) {
@@ -166,9 +168,19 @@ export function Header({
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
   const [isNavOpenState, setIsNavOpenState] = useState(false);
+  const [isTempExpanded, setIsTempExpanded] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
   const globalBanner = useObservable(observables.globalBanner$ || of(undefined), undefined);
+  const currentAppId = useObservable(application.currentAppId$, '');
+
+  // Enable icon side nav only when the UI setting is on AND user is in the Observability workspace
+  const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
+  const enableIconSideNav =
+    !!enableIconSideNavSetting &&
+    !!useUpdatedHeader &&
+    navGroupEnabled &&
+    currentNavGroup?.id === 'observability';
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);
@@ -194,21 +206,38 @@ export function Header({
     return getSidecarLeftNavStyle(sidecarConfig);
   }, [sidecarConfig]);
 
-  const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+  const isNavOpen = enableIconSideNav
+    ? isLocked || isTempExpanded
+    : useUpdatedHeader
+    ? isLocked
+    : isNavOpenState;
 
   const setIsNavOpen = useCallback(
     (value: boolean) => {
-      /**
-       * When use updated header, we will regard the lock state as source of truth
-       */
-      if (useUpdatedHeader) {
+      if (enableIconSideNav) {
+        // In icon side nav mode, toggle opens/closes the temp expansion
+        if (isLocked) {
+          // If locked, unlock to collapse
+          if (!value) onIsLockedUpdate(false);
+        } else {
+          setIsTempExpanded(value);
+        }
+      } else if (useUpdatedHeader) {
         onIsLockedUpdate(value);
       } else {
         setIsNavOpenState(value);
       }
     },
-    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
+    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader, enableIconSideNav, isLocked]
   );
+
+  // Auto-collapse nav when navigating to a new app (only in icon side nav mode)
+  useEffect(() => {
+    if (enableIconSideNav && !isLocked && isTempExpanded) {
+      setIsTempExpanded(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAppId]);
 
   const handleToggleNavOpen = useCallback(() => {
     setIsNavOpen(!isNavOpen);
@@ -297,6 +326,9 @@ export function Header({
   );
 
   const renderNavToggle = () => {
+    // When icon side nav is active, the sidebar has its own hamburger — hide the header's toggle.
+    if (enableIconSideNav) return null;
+
     const renderNavToggleWithExtraProps = (
       props: EuiHeaderSectionItemButtonProps & { isSmallScreen?: boolean }
     ) => {
@@ -716,6 +748,11 @@ export function Header({
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
             globalSearchCommands$={observables.globalSearchCommands$}
+            enableIconSideNav={enableIconSideNav}
+            isLocked={isLocked}
+            onIsLockedUpdate={onIsLockedUpdate}
+            openNav={() => setIsNavOpen(true)}
+            applications$={application.applications$}
           />
         ) : (
           <CollapsibleNav

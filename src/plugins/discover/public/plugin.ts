@@ -322,6 +322,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -330,6 +331,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -338,6 +340,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -346,6 +349,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 

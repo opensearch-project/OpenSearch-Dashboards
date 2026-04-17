@@ -14,7 +14,11 @@ import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 import { UiSettingScope } from '../../../core/server';
-import { SEARCH_WORKSPACE_DISMISS_GET_STARTED, USE_NEW_HOME_PAGE } from '../common/constants';
+import {
+  ENABLE_ICON_SIDE_NAV,
+  SEARCH_WORKSPACE_DISMISS_GET_STARTED,
+  USE_NEW_HOME_PAGE,
+} from '../common/constants';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [USE_NEW_HOME_PAGE]: {
@@ -24,6 +28,18 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: false,
     description: i18n.translate('home.ui_settings.useNewHomePage.description', {
       defaultMessage: 'Try the new home page',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [ENABLE_ICON_SIDE_NAV]: {
+    name: i18n.translate('home.ui_settings.enableIconSideNav.label', {
+      defaultMessage: 'Enable icon side navigation',
+    }),
+    value: false,
+    description: i18n.translate('home.ui_settings.enableIconSideNav.description', {
+      defaultMessage:
+        'Enable the modernized side navigation with icons, collapsible categories, and animated transitions.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,

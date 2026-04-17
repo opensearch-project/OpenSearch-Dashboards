@@ -151,7 +151,9 @@ export class ChromeService {
   private readonly navGroup = new ChromeNavGroupService();
   private readonly globalSearch = new GlobalSearchService();
   private useUpdatedHeader = false;
+  private enableIconSideNav = false;
   private updatedHeaderSubscription: Subscription | undefined;
+  private iconSideNavSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   private navGroupStart?: ChromeNavGroupServiceStartContract;
   private applicationStart?: InternalApplicationStart;
@@ -266,6 +268,12 @@ export class ChromeService {
         this.useUpdatedHeader = value;
       });
 
+    this.iconSideNavSubscription = uiSettings
+      .get$('home:enableIconSideNav', false)
+      .subscribe((value) => {
+        this.enableIconSideNav = value;
+      });
+
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
@@ -326,6 +334,7 @@ export class ChromeService {
                 opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
+                keyboardShortcutService={keyboardShortcut}
               />
             </I18nProvider>
           );
@@ -424,6 +433,7 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
+          enableIconSideNav={this.enableIconSideNav}
           globalSearchCommands$={globalSearch.getAllSearchCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
           keyboardShortcut={keyboardShortcut}
@@ -504,6 +514,7 @@ export class ChromeService {
     this.navLinks.stop();
     this.navGroup.stop();
     this.updatedHeaderSubscription?.unsubscribe();
+    this.iconSideNavSubscription?.unsubscribe();
     this.stop$.next();
   }
 }

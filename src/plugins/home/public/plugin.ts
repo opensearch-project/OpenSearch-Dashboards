@@ -216,6 +216,7 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
+          euiIconType: 'home',
         },
       ]);
 
@@ -224,6 +225,7 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
+          euiIconType: 'home',
           category: {
             id: DEFAULT_NAV_GROUPS.search.id,
             label: DEFAULT_NAV_GROUPS.search.title,
@@ -264,7 +266,7 @@ export class HomePublicPlugin
     core.getStartServices().then(([coreStart]) => {
       if (!coreStart.application.capabilities.workspaces.enabled) {
         core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-          { id: IMPORT_SAMPLE_DATA_APP_ID },
+          { id: IMPORT_SAMPLE_DATA_APP_ID, euiIconType: 'importAction' },
         ]);
       }
     });

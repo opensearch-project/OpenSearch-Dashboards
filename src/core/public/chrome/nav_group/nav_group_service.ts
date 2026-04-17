@@ -4,6 +4,7 @@
  */
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   AppCategory,
   ApplicationStart,
@@ -47,6 +48,16 @@ export interface ChromeRegistrationNavLink {
    * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
+
+  /**
+   * Icon type to display next to the nav link in the side navigation.
+   */
+  euiIconType?: EuiIconType;
+
+  /**
+   * Observable that emits badge values (counts, labels) to display on the nav link.
+   */
+  badge$?: Observable<number | string | undefined>;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {

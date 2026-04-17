@@ -210,6 +210,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       });
     }
     if (core.chrome.navGroup.getNavGroupEnabled()) {
+      const hideButton = core.uiSettings.get('home:enableIconSideNav', false);
       core.chrome.navControls.registerLeftBottom({
         order: 4,
         mount: toMountPoint(
@@ -220,6 +221,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
             devTools: this.getSortedDevTools(),
             deps: this.setupDeps as DevToolsSetupDependencies,
             title: this.title,
+            hideButton,
           })
         ),
       });
