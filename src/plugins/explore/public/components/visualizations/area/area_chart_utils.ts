@@ -4,7 +4,7 @@
  */
 
 import { LineSeriesOption } from 'echarts';
-import { TimeUnit, AxisRole } from '../types';
+import { TimeUnit } from '../types';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
@@ -58,10 +58,12 @@ export const createAreaSeries = <T extends BaseChartStyle>({
   styles,
   seriesFields,
   categoryField,
+  stack,
 }: {
   styles: AreaChartStyle;
   seriesFields: string[] | ((headers?: string[]) => string[]);
   categoryField: string;
+  stack?: boolean;
 }): PipelineFn<T> => (state) => {
   const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
@@ -72,13 +74,14 @@ export const createAreaSeries = <T extends BaseChartStyle>({
 
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
   const series = seriesFields?.map((item: string, index: number) => {
-    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     return {
       name,
       type: 'line',
       showSymbol: false,
       connectNulls: true,
+      stack: stack ? 'Total' : undefined,
       areaStyle: {
         opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
@@ -144,113 +147,6 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
   });
 
   newState.series = allSeries?.flat() as LineSeriesOption[];
-
-  return newState;
-};
-
-/**
- * Create category-based area series with aggregation
- */
-export const createCategoryAreaSeries = <T extends BaseChartStyle>({
-  styles,
-  categoryField,
-  valueField,
-}: {
-  styles: AreaChartStyle;
-  categoryField: string;
-  valueField: string;
-}): PipelineFn<T> => (state) => {
-  const { transformedData, axisColumnMappings } = state;
-  const newState = { ...state };
-
-  if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-    newState.series = [];
-    return newState;
-  }
-
-  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-  const series = [
-    {
-      type: 'line',
-      showSymbol: false,
-      name: getSeriesDisplayName(valueField, Object.values(axisColumnMappings)),
-      connectNulls: true,
-      areaStyle: {
-        opacity: styles.areaOpacity || DEFAULT_OPACITY,
-      },
-      smooth: true,
-      encode: {
-        x: categoryField,
-        y: valueField,
-      },
-      emphasis: {
-        focus: 'self',
-      },
-      ...thresholdLines,
-    },
-  ];
-
-  newState.series = series as LineSeriesOption[];
-  return newState;
-};
-
-/**
- * Create stack area series configuration based on aggregatedData
- */
-export const createStackAreaSeries = <T extends BaseChartStyle>(
-  styles: AreaChartStyle
-): PipelineFn<T> => (state) => {
-  const { axisColumnMappings, transformedData: aggregatedData } = state;
-  const newState = { ...state };
-  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-
-  if (!axisColumnMappings) {
-    throw new Error('axisColumnMappings must be available for createStackAreaSeries');
-  }
-
-  if (!aggregatedData || !Array.isArray(aggregatedData) || aggregatedData.length < 2) {
-    newState.series = [];
-    return newState;
-  }
-
-  // Find the x-axis column from axisColumnMappings
-  const xAxis = axisColumnMappings[AxisRole.X];
-
-  if (!xAxis?.column) {
-    throw new Error('xAxis column must be available for createStackAreaSeries');
-  }
-
-  // Get category columns from the first row (header), excluding the x-axis column
-  const headerRow = aggregatedData[0] as string[];
-  const cateColumns = headerRow.filter((c: string) => c !== xAxis.column);
-
-  if (!cateColumns || cateColumns.length === 0) {
-    throw new Error('No category columns found for stacked area series');
-  }
-
-  // Create multi-series for each category column
-  const newseries = cateColumns.map((categoryName: string, index: number) => ({
-    name: String(categoryName),
-    type: 'line',
-    showSymbol: false,
-    stack: 'Total',
-    areaStyle: {
-      opacity: styles.areaOpacity || DEFAULT_OPACITY,
-    },
-    smooth: true,
-    connectNulls: true,
-    encode: {
-      x: xAxis.column,
-      y: categoryName,
-    },
-    emphasis: {
-      focus: 'self',
-    },
-    ...(index === 0 && thresholdLines),
-  }));
-
-  // Series created successfully
-  newState.series = newseries as LineSeriesOption[];
 
   return newState;
 };

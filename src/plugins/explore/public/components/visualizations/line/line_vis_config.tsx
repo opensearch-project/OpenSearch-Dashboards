@@ -114,14 +114,18 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
         mappings: [
           {
             [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y;
+          if (!x || !y || y.length === 0) throw Error('Missing axis config for line chart');
+
           const spec = createSimpleLineChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -132,15 +136,22 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
         mappings: [
           {
             [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+            [AxisRole.Y_SECOND]: { type: VisFieldType.Numerical, multi: true },
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y;
+          const y2 = props.axisColumnMappings.y2;
+
+          if (!x || !y || !y2 || y.length === 0 || y2.length === 0)
+            throw Error('Missing axis config for line/bar combo chart');
+
           const spec = createLineBarChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.Y_SECOND]: y2 },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -156,10 +167,15 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
+
           const spec = createMultiLineChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -175,10 +191,15 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
+
           const spec = createMultiLineChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -195,10 +216,17 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          const facet = props.axisColumnMappings.facet?.[0];
+          if (!x || !y || !color || !facet)
+            throw Error('Missing axis config for faceted multi-line chart');
+
           const spec = createFacetedMultiLineChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -215,10 +243,17 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          const facet = props.axisColumnMappings.facet?.[0];
+          if (!x || !y || !color || !facet)
+            throw Error('Missing axis config for faceted multi-line chart');
+
           const spec = createFacetedMultiLineChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -229,15 +264,19 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
         mappings: [
           {
             [AxisRole.X]: { type: VisFieldType.Categorical },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
           },
         ],
         render(props) {
-          const spec = createCategoryLineChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y;
+          if (!x || !y || y.length === 0)
+            throw Error('Missing axis config for category line chart');
+
+          const spec = createCategoryLineChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
@@ -251,11 +290,16 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           },
         ],
         render(props) {
-          const spec = createCategoryMultiLineChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
+
+          const spec = createCategoryMultiLineChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
@@ -269,11 +313,16 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           },
         ],
         render(props) {
-          const spec = createCategoryMultiLineChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
+
+          const spec = createCategoryMultiLineChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
