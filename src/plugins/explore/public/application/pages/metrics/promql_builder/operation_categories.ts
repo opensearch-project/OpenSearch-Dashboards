@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 export interface OperationDef {
   id: string;
   name: string;
@@ -11,7 +13,7 @@ export interface OperationDef {
   description: string;
 }
 
-export interface OperationCategory {
+interface OperationCategory {
   name: string;
   items: OperationDef[];
 }
@@ -40,7 +42,9 @@ export const GROUPABLE_AGGREGATION_IDS = new Set([
 
 export const OPERATION_CATEGORIES: OperationCategory[] = [
   {
-    name: 'Add function',
+    name: i18n.translate('explore.promqlBuilder.category.addFunction', {
+      defaultMessage: 'Add function',
+    }),
     items: [
       {
         id: 'abs',
@@ -538,7 +542,9 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     ],
   },
   {
-    name: 'Add aggregation',
+    name: i18n.translate('explore.promqlBuilder.category.addAggregation', {
+      defaultMessage: 'Add aggregation',
+    }),
     items: [
       { id: 'sum', name: 'sum', params: [], description: 'Calculate sum over dimensions.' },
       { id: 'avg', name: 'avg', params: [], description: 'Calculate the average over dimensions.' },
@@ -599,7 +605,9 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     ],
   },
   {
-    name: 'Add binary operation',
+    name: i18n.translate('explore.promqlBuilder.category.addBinaryOperation', {
+      defaultMessage: 'Add binary operation',
+    }),
     items: [
       {
         id: 'add',
@@ -694,7 +702,9 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
     ],
   },
   {
-    name: 'Replace with literal',
+    name: i18n.translate('explore.promqlBuilder.category.replaceWithLiteral', {
+      defaultMessage: 'Replace with literal',
+    }),
     items: [
       {
         id: 'literal',
@@ -707,29 +717,4 @@ export const OPERATION_CATEGORIES: OperationCategory[] = [
   },
 ];
 
-const OP_CATEGORY_MAP: Record<string, string> = {};
-OPERATION_CATEGORIES.forEach((cat) => {
-  cat.items.forEach((item) => {
-    OP_CATEGORY_MAP[item.id] = cat.name.replace(/^Add /, '').replace(/^Replace with /, '');
-  });
-});
-
-export function getCategoryLabel(opId: string): string {
-  const cat = OP_CATEGORY_MAP[opId];
-  if (!cat) return 'Operation';
-  return cat.charAt(0).toUpperCase() + cat.slice(1);
-}
-
-export const OP_DEF_MAP: Record<string, OperationDef> = {};
-OPERATION_CATEGORIES.forEach((cat) => {
-  cat.items.forEach((item) => {
-    OP_DEF_MAP[item.id] = item;
-  });
-});
-
-export function getOperationSiblings(opId: string): OperationDef[] {
-  for (const cat of OPERATION_CATEGORIES) {
-    if (cat.items.find((item) => item.id === opId)) return cat.items;
-  }
-  return [];
-}
+// Lookup utilities are in operation_lookup.ts

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { parsePromQL } from '../promql_builder';
 import type { BuilderState } from '../promql_builder';
 import { splitMultiQueries } from '../../../utils/multi_query_utils';
@@ -17,8 +18,14 @@ export interface QueryRow {
 }
 
 export const modeButtons = [
-  { id: 'builder', label: 'Builder' },
-  { id: 'code', label: 'Code' },
+  {
+    id: 'builder',
+    label: i18n.translate('explore.metricsQueryPanel.builderMode', { defaultMessage: 'Builder' }),
+  },
+  {
+    id: 'code',
+    label: i18n.translate('explore.metricsQueryPanel.codeMode', { defaultMessage: 'Code' }),
+  },
 ];
 
 export function initRows(queryString: string, nextId: () => string): QueryRow[] {

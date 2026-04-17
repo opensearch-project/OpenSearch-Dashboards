@@ -12,7 +12,7 @@ import {
   LabelMatcherContext,
   AggregationContext,
 } from '@osd/antlr-grammar';
-import { OP_DEF_MAP } from './operation_categories';
+import { OP_DEF_MAP } from './operation_lookup';
 
 export interface LabelFilter {
   label: string;
@@ -39,7 +39,7 @@ export interface BuilderState {
   range?: string;
 }
 
-export interface ParseResult {
+interface ParseResult {
   canBuild: boolean;
   state: BuilderState;
 }

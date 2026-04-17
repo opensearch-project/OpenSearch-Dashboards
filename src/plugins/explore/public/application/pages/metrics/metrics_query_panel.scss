@@ -12,7 +12,7 @@
   }
 
   &[data-test-subj="queryRow-A"] {
-    border-top: 1px solid transparent;
+    border-top: $euiBorderWidthThin solid transparent;
   }
 
   &--builder[data-test-subj="queryRow-A"] {

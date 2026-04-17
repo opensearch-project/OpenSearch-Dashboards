@@ -173,7 +173,10 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                   button={
                     <EuiToolTip content={modeToggleTooltip} position="top">
                       <EuiButtonGroup
-                        legend={`Query ${label} mode`}
+                        legend={i18n.translate('explore.metricsQueryPanel.queryModeLabel', {
+                          defaultMessage: 'Query {label} mode',
+                          values: { label },
+                        })}
                         options={modeButtons}
                         idSelected={row.mode}
                         onChange={handleModeChange}
@@ -182,7 +185,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                     </EuiToolTip>
                   }
                 >
-                  <div style={{ maxWidth: 280 }}>
+                  <div className="pqbCodeConfirmPopover">
                     <EuiText size="s">
                       <p>
                         {i18n.translate('explore.promqlBuilder.switchToCodeWarning', {

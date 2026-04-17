@@ -50,7 +50,7 @@ export const useAggregationGrouping = (
       options={MODE_OPTIONS}
       valueOfSelected={mode}
       onChange={(val) => setMode(val)}
-      style={{ width: 100 }}
+      className="pqbGroupingModeSelect"
     />
   );
 
@@ -69,7 +69,7 @@ export const useAggregationGrouping = (
           onLabelsChange([...selectedLabelOptions, { label: v }]);
         }
       }}
-      style={{ minWidth: 400 }}
+      className="pqbGroupingLabelsCombo"
     />
   );
 

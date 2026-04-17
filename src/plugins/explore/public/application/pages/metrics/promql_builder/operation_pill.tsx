@@ -8,12 +8,8 @@ import { i18n } from '@osd/i18n';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { Operation, RANGE_FUNCTIONS } from './promql_parser';
 import { BuilderAction } from './build_promql';
-import {
-  OperationDef,
-  GROUPABLE_AGGREGATION_IDS,
-  OP_DEF_MAP,
-  getCategoryLabel,
-} from './operation_categories';
+import { OperationDef, GROUPABLE_AGGREGATION_IDS } from './operation_categories';
+import { OP_DEF_MAP, getCategoryLabel } from './operation_lookup';
 import { useAggregationGrouping } from './aggregation_grouping';
 import { comboBoxWidth, inputWidth } from './measure_text';
 

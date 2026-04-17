@@ -172,6 +172,7 @@
 
 .pqbGroupingModeSelect {
   margin-bottom: $euiSizeXS;
+  width: 100px;
 }
 
 .pqbLabelPopoverValues {
@@ -185,4 +186,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 2px 0;
+}
+
+.pqbQueryPreview {
+  font-size: $euiFontSizeXS;
+}
+
+.pqbOperatorSelect {
+  width: 70px;
+}
+
+.pqbGroupingLabelsCombo {
+  min-width: 400px;
+}
+
+.pqbCodeConfirmPopover {
+  max-width: 280px;
 }
