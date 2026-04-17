@@ -342,12 +342,8 @@ export const MetricDetail: React.FC = () => {
         <EuiFlexItem grow={false}>
           <LabelFilterBar
             metric={state.metric}
-            filters={state.filters}
             client={client}
             onAdd={(filter) => dispatch({ type: 'ADD_FILTER', filter })}
-            onRemove={(index) => dispatch({ type: 'REMOVE_FILTER', index })}
-            onToggle={(index) => dispatch({ type: 'TOGGLE_FILTER', index })}
-            onClear={() => dispatch({ type: 'CLEAR_FILTERS' })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="metricsExploreDetail__queryDivider">

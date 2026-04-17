@@ -215,23 +215,11 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
 
 interface LabelFilterBarProps {
   metric: string;
-  filters: LabelFilter[];
   client: PrometheusClient;
   onAdd: (filter: LabelFilter) => void;
-  onRemove: (index: number) => void;
-  onToggle?: (index: number) => void;
-  onClear: () => void;
 }
 
-export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({
-  metric,
-  filters,
-  client,
-  onAdd,
-  onRemove,
-  onToggle,
-  onClear,
-}) => {
+export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({ metric, client, onAdd }) => {
   const [labelNames, setLabelNames] = useState<string[]>([]);
   const [valueOptions, setValueOptions] = useState<Record<string, EuiComboBoxOptionOption[]>>({});
   const [activeName, setActiveName] = useState('');
@@ -265,33 +253,12 @@ export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-      {filters.map((f, i) => (
-        <EuiFlexItem grow={false} key={i}>
-          <EuiBadge
-            color={f.enabled === false ? 'default' : 'hollow'}
-            iconType="cross"
-            iconSide="right"
-            iconOnClick={() => onRemove(i)}
-            iconOnClickAriaLabel={`Remove ${f.name}${f.operator}${f.value}`}
-            onClick={() => onToggle?.(i)}
-            onClickAriaLabel={`Toggle ${f.name}${f.operator}${f.value}`}
-            style={f.enabled === false ? { opacity: 0.5, textDecoration: 'line-through' } : {}}
-          >
-            {f.name}
-            {f.operator}&quot;{f.value}&quot;
-          </EuiBadge>
-        </EuiFlexItem>
-      ))}
-      <EuiFlexItem grow={false}>
-        <LabelFilterPopover
-          labelNames={labelNames}
-          loadValues={loadValues}
-          valueOptions={valueOptions[activeName] || []}
-          onAdd={onAdd}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <LabelFilterPopover
+      labelNames={labelNames}
+      loadValues={loadValues}
+      valueOptions={valueOptions[activeName] || []}
+      onAdd={onAdd}
+    />
   );
 };
 
