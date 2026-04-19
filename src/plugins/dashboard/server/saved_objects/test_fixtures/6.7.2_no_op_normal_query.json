@@ -1,0 +1,23 @@
+{
+  "description": "Dashboard 6.7.2: No-op when query is not match_all",
+  "type": "dashboard",
+  "migrationVersion": "6.7.2",
+  "input": {
+    "id": "dash-normal-query",
+    "type": "dashboard",
+    "attributes": {
+      "title": "Dashboard with normal query",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"status:200\",\"language\":\"kuery\"},\"filter\":[]}"
+      }
+    },
+    "references": []
+  },
+  "expected": {
+    "attributes_equals": {
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"status:200\",\"language\":\"kuery\"},\"filter\":[]}"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "description": "Dashboard 7.0.0: Extract searchSource index pattern into references",
+  "type": "dashboard",
+  "migrationVersion": "7.0.0",
+  "input": {
+    "id": "dash-with-index",
+    "type": "dashboard",
+    "attributes": {
+      "title": "Dashboard with index pattern",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"logstash-*\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+      },
+      "panelsJSON": "[]"
+    },
+    "references": []
+  },
+  "expected": {
+    "references_contain": [
+      { "type": "index-pattern", "id": "logstash-*" }
+    ]
+  }
+}
