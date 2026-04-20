@@ -220,6 +220,7 @@ interface LabelFilterBarProps {
 }
 
 export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({ metric, client, onAdd }) => {
+  const { refreshCounter } = useExploration();
   const [labelNames, setLabelNames] = useState<string[]>([]);
   const [valueOptions, setValueOptions] = useState<Record<string, EuiComboBoxOptionOption[]>>({});
   const [activeName, setActiveName] = useState('');
@@ -238,10 +239,11 @@ export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({ metric, client, 
           console.debug('Failed to fetch labels', e);
         }
       });
+    setValueOptions({});
     return () => {
       cancelled = true;
     };
-  }, [client, metric]);
+  }, [client, metric, refreshCounter]);
 
   const valueOptionsRef = useRef(valueOptions);
   valueOptionsRef.current = valueOptions;

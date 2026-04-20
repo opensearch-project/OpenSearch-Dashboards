@@ -97,7 +97,8 @@ export const MetricBrowser: React.FC = () => {
         }
         setLabelNames(['job', 'instance']);
       });
-  }, [client]);
+    setLabelValues({});
+  }, [client, refreshCounter]);
 
   useEffect(() => {
     timerRef.current = setTimeout(() => setDebouncedSearch(state.search), SEARCH_DEBOUNCE_MS);
@@ -122,6 +123,7 @@ export const MetricBrowser: React.FC = () => {
   }, [client, refreshCounter]);
 
   // Fetch all metadata in a single bulk call when the client changes (datasource switch)
+  // or the time range updates — Prometheus scopes metadata to start/end.
   useEffect(() => {
     let cancelled = false;
     client
@@ -138,7 +140,7 @@ export const MetricBrowser: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [client]);
+  }, [client, refreshCounter]);
 
   // Backend search when debounced search term changes
   useEffect(() => {
