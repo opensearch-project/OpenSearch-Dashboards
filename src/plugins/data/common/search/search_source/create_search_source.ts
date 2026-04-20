@@ -62,7 +62,8 @@ export const createSearchSource = (
     fields.index &&
     typeof fields.index === 'string' &&
     (!fields.query?.dataset?.type ||
-      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ||
+      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX)
   ) {
     fields.index = await indexPatterns.get(fields.index as string);
   }
