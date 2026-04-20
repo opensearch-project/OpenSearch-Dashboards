@@ -71,11 +71,13 @@ export function useMetricData(client: PrometheusClient, metric: string) {
       return;
     }
     let cancelled = false;
-    Promise.all([client.getLabelsForMetric(metric), client.getSeries(`{__name__="${metric}"}`)])
-      .then(([labels, series]) => {
+    // The series response includes every label key on each entry, so we derive
+    // both the label list and per-label cardinality from a single call rather
+    // than also hitting /labels?match[]=<metric>.
+    client
+      .getSeries(`{__name__="${metric}"}`)
+      .then((series) => {
         if (cancelled) return;
-        setLabelOptions(labels.map((l) => ({ label: l })));
-
         const valueSets: Record<string, Set<string>> = {};
         for (const s of series) {
           for (const [key, value] of Object.entries(s)) {
@@ -84,9 +86,11 @@ export function useMetricData(client: PrometheusClient, metric: string) {
             valueSets[key].add(value);
           }
         }
+        const labels = Object.keys(valueSets).sort();
+        setLabelOptions(labels.map((l) => ({ label: l })));
         const cardinality: Record<string, number> = {};
         for (const label of labels) {
-          cardinality[label] = valueSets[label]?.size ?? 0;
+          cardinality[label] = valueSets[label].size;
         }
         setLabelCardinality(cardinality);
       })
