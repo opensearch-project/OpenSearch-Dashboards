@@ -109,6 +109,54 @@ describe('useConcurrentQueries', () => {
     expect(initialRenders).toBeGreaterThan(0);
   });
 
+  it('populates errors map when fetch rejects', async () => {
+    const fetchFn = jest.fn().mockRejectedValue(new Error('boom'));
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('boom');
+    expect(result.current.results.size).toBe(0);
+  });
+
+  it('stringifies non-Error rejections', async () => {
+    const fetchFn = jest.fn().mockRejectedValue('stringly');
+    const { result } = renderHook(() => useConcurrentQueries<string>(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    expect(result.current.errors.get('a')).toBe('stringly');
+  });
+
+  it('clears errors on dependency change', async () => {
+    const fetchFn = jest.fn().mockRejectedValue(new Error('boom'));
+    const { result, rerender } = renderHook(
+      ({ dep }: { dep: number }) => useConcurrentQueries<string>(fetchFn, [dep]),
+      { initialProps: { dep: 1 } }
+    );
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.errors.get('a')).toBe('boom');
+
+    rerender({ dep: 2 });
+    expect(result.current.errors.size).toBe(0);
+  });
+
   it('resets on dependency change', async () => {
     const fetchFn = jest.fn().mockResolvedValue('data');
     const { result, rerender } = renderHook(

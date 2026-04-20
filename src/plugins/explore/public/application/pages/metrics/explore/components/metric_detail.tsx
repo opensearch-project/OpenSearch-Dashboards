@@ -17,6 +17,7 @@ import {
   EuiComboBox,
   EuiButtonGroup,
   EuiLoadingChart,
+  EuiIcon,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
@@ -39,6 +40,33 @@ interface LabelBreakdownData {
   series: BreakdownSeries[];
 }
 
+const BreakdownErrorContent: React.FC<{ error: string }> = ({ error }) => (
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="xs"
+    alignItems="center"
+    justifyContent="center"
+    responsive={false}
+    style={{ height: 160 }}
+  >
+    <EuiFlexItem grow={false}>
+      <EuiIcon type="alert" color="danger" size="m" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="danger">
+        {i18n.translate('explore.metricsExplore.breakdownError', {
+          defaultMessage: 'Query failed',
+        })}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued" style={{ maxWidth: 240, textAlign: 'center' }}>
+        {error}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 function seriesLabelForType(type: MetricType): string {
   switch (type) {
     case MetricType.COUNTER:
@@ -53,6 +81,7 @@ function seriesLabelForType(type: MetricType): string {
 const BreakdownPanel: React.FC<{
   labelName: string;
   data: LabelBreakdownData | null;
+  error?: string | null;
   selectedLabelName: string;
   breakdownYRange?: { yMin: number; yMax: number };
   layout: LayoutMode;
@@ -62,6 +91,7 @@ const BreakdownPanel: React.FC<{
 }> = ({
   labelName,
   data,
+  error,
   selectedLabelName,
   breakdownYRange,
   layout,
@@ -84,6 +114,19 @@ const BreakdownPanel: React.FC<{
       onVisibilityChange(labelName, false);
     };
   }, [labelName, onVisibilityChange]);
+
+  if (error) {
+    return (
+      <div ref={panelRef}>
+        <EuiPanel paddingSize="s" hasBorder>
+          <EuiTitle size="xxs">
+            <h3>{labelName}</h3>
+          </EuiTitle>
+          <BreakdownErrorContent error={error} />
+        </EuiPanel>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -264,10 +307,9 @@ export const MetricDetail: React.FC = () => {
     [client, queryGen, state.metric, metricType, stepSec, state.filters]
   );
 
-  const { results: breakdowns, onVisibilityChange } = useConcurrentQueries<LabelBreakdownData>(
-    breakdownFetch,
-    [client, state.filters, refreshCounter, selectedLabelName, loading]
-  );
+  const { results: breakdowns, errors: breakdownErrors, onVisibilityChange } = useConcurrentQueries<
+    LabelBreakdownData
+  >(breakdownFetch, [client, state.filters, refreshCounter, selectedLabelName, loading]);
 
   const labelOptions = useMemo(() => labels.map((l) => ({ label: l.name })), [labels]);
 
@@ -465,6 +507,7 @@ export const MetricDetail: React.FC = () => {
                 key={l.name}
                 labelName={l.name}
                 data={breakdowns.get(l.name) ?? null}
+                error={breakdownErrors.get(l.name) ?? null}
                 selectedLabelName={selectedLabelName}
                 breakdownYRange={breakdownYRange}
                 layout={state.layout}

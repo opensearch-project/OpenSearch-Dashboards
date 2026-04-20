@@ -5,7 +5,7 @@
 
 import './promql_builder.scss';
 
-import React, { useEffect, useMemo, useReducer } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiComboBox,
@@ -56,9 +56,12 @@ export const PromQLBuilder: React.FC<PromQLBuilderProps> = ({
 
   const query = useMemo(() => buildPromQL(state), [state]);
 
+  const onQueryChangeRef = useRef(onQueryChange);
+  onQueryChangeRef.current = onQueryChange;
+
   useEffect(() => {
-    onQueryChange(query);
-  }, [query, onQueryChange]);
+    onQueryChangeRef.current(query);
+  }, [query]);
 
   const reversedOps = [...state.operations].reverse();
 

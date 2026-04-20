@@ -197,6 +197,7 @@ export const MetricsQueryPanel: React.FC = () => {
               customDragHandle={true}
               spacing="none"
               hasInteractiveChildren={true}
+              isDragDisabled={rows.length <= 1}
             >
               {(provided, snapshot) => (
                 <QueryRowComponent

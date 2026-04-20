@@ -225,11 +225,8 @@ export class PrometheusClient {
       }
       return result;
     } catch (err) {
-      if (!controller.signal.aborted) {
-        // eslint-disable-next-line no-console
-        console.debug('PrometheusClient.executeQueryRange failed', err);
-      }
-      return [];
+      if (controller.signal.aborted) return [];
+      throw err;
     } finally {
       clearTimeout(timeoutId);
       this.activeControllers.delete(controller);

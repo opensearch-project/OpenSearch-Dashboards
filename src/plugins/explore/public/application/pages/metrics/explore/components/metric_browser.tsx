@@ -12,8 +12,6 @@ import {
   EuiSpacer,
   EuiButton,
   EuiTitle,
-  EuiEmptyPrompt,
-  EuiText,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -29,6 +27,7 @@ import { useExploration } from '../contexts/exploration_context';
 import { MetricCard } from './metric_card';
 import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
+import { MetricsEmptyState } from './metrics_empty_state';
 import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
 
 const PAGE_SIZE = 20;
@@ -55,15 +54,12 @@ function useSparklines(
     [client, queryGen, stepSec, filters]
   );
 
-  const { results, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(fetchFn, [
-    client,
-    filters,
-    refreshCounter,
-    metadata,
-    stepSec,
-  ]);
+  const { results, errors, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(
+    fetchFn,
+    [client, filters, refreshCounter, metadata, stepSec]
+  );
 
-  return { sparklines: results as SparklineMap, onVisibilityChange };
+  return { sparklines: results as SparklineMap, sparklineErrors: errors, onVisibilityChange };
 }
 
 export const MetricBrowser: React.FC = () => {
@@ -186,7 +182,7 @@ export const MetricBrowser: React.FC = () => {
     return groups;
   }, [displayedMetrics, state.grouping]);
 
-  const { sparklines, onVisibilityChange } = useSparklines(
+  const { sparklines, sparklineErrors, onVisibilityChange } = useSparklines(
     metadata,
     client,
     queryGen,
@@ -211,6 +207,21 @@ export const MetricBrowser: React.FC = () => {
     });
   }, []);
 
+  if (!client.dataConnectionId) {
+    return (
+      <MetricsEmptyState
+        iconType="database"
+        title={i18n.translate('explore.metricsExplore.noDatasourceTitle', {
+          defaultMessage: 'Select a Prometheus data source',
+        })}
+        body={i18n.translate('explore.metricsExplore.noDatasourceBody', {
+          defaultMessage:
+            'Choose a Prometheus data source from the selector above to start exploring metrics.',
+        })}
+      />
+    );
+  }
+
   if (loading) {
     return <LoadingIndicator />;
   }
@@ -221,30 +232,14 @@ export const MetricBrowser: React.FC = () => {
 
   if (!allMetrics.length) {
     return (
-      <EuiEmptyPrompt
-        iconType="metricsApp"
-        title={
-          <h2>
-            {i18n.translate('explore.metricsExplore.emptyTitle', {
-              defaultMessage: 'Explore Your Metrics',
-            })}
-          </h2>
-        }
-        body={
-          <EuiText>
-            <p>
-              {i18n.translate('explore.metricsExplore.emptyBody', {
-                defaultMessage:
-                  'Browse, search, and drill into Prometheus metrics without writing PromQL.',
-              })}
-            </p>
-            <p>
-              {i18n.translate('explore.metricsExplore.noMetricsFound', {
-                defaultMessage: 'No metrics found. Ensure a Prometheus data source is configured.',
-              })}
-            </p>
-          </EuiText>
-        }
+      <MetricsEmptyState
+        title={i18n.translate('explore.metricsExplore.emptyTitle', {
+          defaultMessage: 'No metrics found',
+        })}
+        body={i18n.translate('explore.metricsExplore.emptyBody', {
+          defaultMessage:
+            'The selected Prometheus data source returned no metrics for the current time range. Try adjusting the time range or verify the data source is scraping targets.',
+        })}
       />
     );
   }
@@ -389,6 +384,7 @@ export const MetricBrowser: React.FC = () => {
                   name={m}
                   metadata={metadata[m]}
                   sparkline={sparklines.get(m) ?? null}
+                  sparklineError={sparklineErrors.get(m) ?? null}
                   isSelected={selected.has(m)}
                   colorIndex={mi}
                   onToggleSelect={() => toggleSelection(m)}

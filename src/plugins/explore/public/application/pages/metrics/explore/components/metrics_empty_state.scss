@@ -1,0 +1,15 @@
+.metricsEmptyState__sampleTrigger {
+  cursor: pointer;
+  border-radius: $ouiBorderRadius;
+  transition: background-color 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: $ouiColorLightShade;
+  }
+
+  &:focus-visible {
+    outline: $ouiFocusRingSize solid $ouiFocusRingColor;
+    outline-offset: 2px;
+  }
+}
