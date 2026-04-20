@@ -18,7 +18,8 @@ export interface ChartMetadata {
   icon: string;
 }
 
-export type AxisColumnMappings = Partial<Record<AxisRole, VisColumn>>;
+export type AxisColumnMappings = Partial<Record<AxisRole, VisColumn[]>>;
+export type AxisFieldNameMappings = Partial<Record<string, string | string[]>>;
 
 export interface VisColumn {
   id: number;

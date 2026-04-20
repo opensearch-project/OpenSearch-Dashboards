@@ -13,7 +13,6 @@ import { createBarGaugeSpec } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
 export interface ExclusiveBarGaugeConfig {
-  orientation: 'vertical' | 'horizontal';
   displayMode: 'gradient' | 'stack' | 'basic';
   valueDisplay: 'valueColor' | 'textColor' | 'hidden';
   showUnfilledArea: boolean;
@@ -40,7 +39,6 @@ export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
     mode: 'all',
   },
   exclusive: {
-    orientation: 'vertical',
     displayMode: 'gradient',
     valueDisplay: 'valueColor',
     showUnfilledArea: true,
@@ -63,8 +61,8 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
         priority: 80,
         mappings: [
           {
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
             [AxisRole.X]: { type: VisFieldType.Categorical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
           },
           {
             [AxisRole.X]: { type: VisFieldType.Numerical },
@@ -72,11 +70,13 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
           },
         ],
         render(props) {
-          const spec = createBarGaugeSpec(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          if (!x || !y) throw Error('Missing axis config for bar gauge chart');
+          const spec = createBarGaugeSpec(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
           return <EchartsRender spec={spec} />;
         },
       },

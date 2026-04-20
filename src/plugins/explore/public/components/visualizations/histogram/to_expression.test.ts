@@ -63,9 +63,9 @@ describe('Histogram to_expression', () => {
     });
 
     it('throws when x axis is missing', () => {
-      expect(() => createSingleHistogramChart(mockData, defaultHistogramChartStyles, {})).toThrow(
-        'Missing axis config for Histogram chart'
-      );
+      expect(() =>
+        createSingleHistogramChart(mockData, defaultHistogramChartStyles, {} as any)
+      ).toThrow();
     });
   });
 
@@ -102,8 +102,8 @@ describe('Histogram to_expression', () => {
 
     it('throws when x axis is missing', () => {
       expect(() =>
-        createNumericalHistogramChart(mockData, defaultHistogramChartStyles, {})
-      ).toThrow('Missing axis config for Histogram chart');
+        createNumericalHistogramChart(mockData, defaultHistogramChartStyles, {} as any)
+      ).toThrow();
     });
   });
 });

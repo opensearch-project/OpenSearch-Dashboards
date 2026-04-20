@@ -109,14 +109,18 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
         mappings: [
           {
             [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y;
+          if (!x || !y || y.length === 0) throw Error('Missing axis config for area chart');
+
           const spec = createSimpleAreaChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -132,10 +136,15 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for multi-area chart');
+
           const spec = createMultiAreaChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -151,10 +160,15 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for multi-area chart');
+
           const spec = createMultiAreaChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -171,10 +185,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          const facet = props.axisColumnMappings.facet?.[0];
+          if (!x || !y || !color || !facet)
+            throw Error('Missing axis config for faceted multi-area chart');
+
           const spec = createFacetedMultiAreaChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -191,10 +212,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          const facet = props.axisColumnMappings.facet?.[0];
+          if (!x || !y || !color || !facet)
+            throw Error('Missing axis config for faceted multi-area chart');
+
           const spec = createFacetedMultiAreaChart(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
@@ -205,15 +233,19 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
         mappings: [
           {
             [AxisRole.X]: { type: VisFieldType.Categorical },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
           },
         ],
         render(props) {
-          const spec = createCategoryAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y;
+          if (!x || !y || y.length === 0)
+            throw Error('Missing axis config for category area chart');
+
+          const spec = createCategoryAreaChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
@@ -227,11 +259,16 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           },
         ],
         render(props) {
-          const spec = createStackedAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
+
+          const spec = createStackedAreaChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
@@ -245,11 +282,16 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           },
         ],
         render(props) {
-          const spec = createStackedAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
+
+          const spec = createStackedAreaChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },

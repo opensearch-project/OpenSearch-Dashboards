@@ -12,12 +12,7 @@ import {
   BucketOptions,
   AggregationType,
 } from '../types';
-import {
-  applyAxisStyling,
-  getSchemaByAxis,
-  adjustOppositeSymbol,
-  generateThresholdLines,
-} from '../utils/utils';
+import { applyAxisStyling, getSchemaByAxis, generateThresholdLines } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
@@ -199,6 +194,8 @@ interface Options {
   styles: BarChartStyle;
   categoryField: string;
   seriesFields: string[] | ((headers?: string[]) => string[]);
+  categoryEncode: 'x' | 'y';
+  seriesEncode: 'x' | 'y';
 }
 
 /**
@@ -207,7 +204,7 @@ interface Options {
 export const createBarSeries = <T extends BaseChartStyle>(options: Options): PipelineFn<T> => (
   state
 ) => {
-  const { styles, categoryField } = options;
+  const { styles, categoryField, categoryEncode = 'x', seriesEncode = 'y' } = options;
   let seriesFields = options.seriesFields;
 
   const { axisColumnMappings, transformedData = [] } = state;
@@ -217,13 +214,7 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
     seriesFields = seriesFields(transformedData[0]);
   }
 
-  const thresholdLines = generateThresholdLines(
-    options.styles?.thresholdOptions,
-    options.styles?.switchAxes
-  );
-
-  const encodeX = adjustOppositeSymbol(options.styles?.switchAxes, 'x');
-  const encodeY = adjustOppositeSymbol(options.styles?.switchAxes, 'y');
+  const thresholdLines = generateThresholdLines(options.styles?.thresholdOptions);
 
   let barWidth: string | undefined;
   if (styles.barSizeMode === 'manual') {
@@ -231,7 +222,7 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
   }
 
   const series = seriesFields.map((seriesField, index) => {
-    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
+    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings).flat());
     const seriesConfig = {
       type: 'bar',
       emphasis: {
@@ -239,8 +230,8 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
       },
       name,
       encode: {
-        [encodeX]: categoryField,
-        [encodeY]: seriesField,
+        [categoryEncode]: categoryField,
+        [seriesEncode]: seriesField,
       },
       barWidth,
       ...(index === 0 && thresholdLines),
@@ -265,15 +256,19 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
   styles,
   categoryField,
   seriesFields,
+  categoryEncode = 'x',
+  seriesEncode = 'y',
 }: {
   styles: BarChartStyle;
   categoryField: string;
   seriesFields: (headers?: string[]) => string[];
+  categoryEncode?: 'x' | 'y';
+  seriesEncode?: 'x' | 'y';
 }): PipelineFn<T> => (state) => {
   const { transformedData } = state;
 
   const newState = { ...state };
-  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions);
 
   // facet into one chart
   if (!Array.isArray(transformedData?.[0]?.[0])) {
@@ -281,6 +276,8 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
       styles,
       categoryField,
       seriesFields,
+      categoryEncode,
+      seriesEncode,
     })(newState);
     return simpleBar as EChartsSpecState<T>;
   }
@@ -293,8 +290,8 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
         name: String(item),
         type: 'bar',
         encode: {
-          [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
-          [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
+          [categoryEncode]: categoryField,
+          [seriesEncode]: item,
         },
         datasetIndex: index,
         gridIndex: index,

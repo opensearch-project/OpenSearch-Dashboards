@@ -140,8 +140,10 @@ const queriesTestSuite = () => {
         cy.osd.waitForLoader(true);
         cy.wait(1000);
 
-        // Logs table is displayed by default
-        cy.getElementByTestId('docTable').should('be.visible');
+        // Statistic tab is selected
+        cy.getElementByTestId('exploreTab-explore_statistics')
+          .should('be.visible')
+          .and('have.attr', 'aria-selected', 'true');
         // Navigate to visualization
         cy.get('#explore_visualization_tab').click();
         cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');

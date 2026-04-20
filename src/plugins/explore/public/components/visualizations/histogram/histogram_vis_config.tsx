@@ -101,11 +101,14 @@ export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
           },
         ],
         render(props) {
-          const spec = createNumericalHistogramChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          if (!x || !y) throw Error('Missing axis config for histogram');
+
+          const spec = createNumericalHistogramChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+          });
           return <EchartsRender spec={spec} />;
         },
       },
@@ -117,11 +120,12 @@ export const createHistogramConfig = (): VisualizationType<'histogram'> => ({
           },
         ],
         render(props) {
-          const spec = createSingleHistogramChart(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          if (!x) throw Error('Missing axis config for histogram');
+
+          const spec = createSingleHistogramChart(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+          });
           return <EchartsRender spec={spec} />;
         },
       },

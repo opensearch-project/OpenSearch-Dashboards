@@ -19,6 +19,7 @@ import {
 import { metaReducer } from '../state_management/slices/meta/meta_slice';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults } from '../state_management/slices';
+import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 import { MockStore } from '../state_management/__mocks__';
 import * as CurrentExploreIdHook from './use_current_explore_id';
 import * as DatasetContextHook from '../../context';
@@ -33,6 +34,10 @@ jest.mock('../state_management/actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'EXECUTE_QUERIES' }),
 }));
 
+jest.mock('../state_management/actions/detect_optimal_tab', () => ({
+  detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'DETECT_AND_SET_OPTIMAL_TAB' }),
+}));
+
 jest.mock('../state_management/slices', () => ({
   ...jest.requireActual('../state_management/slices'),
   clearResults: jest.fn().mockReturnValue({ type: 'CLEAR_RESULTS' }),
@@ -41,6 +46,9 @@ jest.mock('../state_management/slices', () => ({
 
 const mockExecuteQueries = executeQueries as jest.MockedFunction<typeof executeQueries>;
 const mockClearResults = clearResults as jest.MockedFunction<typeof clearResults>;
+const mockDetectAndSetOptimalTab = detectAndSetOptimalTab as jest.MockedFunction<
+  typeof detectAndSetOptimalTab
+>;
 
 // Mock store state type
 interface MockRootState {
@@ -197,18 +205,27 @@ describe('useInitialQueryExecution', () => {
 
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       expect(result.current.isInitialized).toBe(false); // Still false until Redux state updates
     });
 
-    it('should only initialize once', () => {
-      const { rerender } = renderHookWithProvider(mockServices);
+    it('should only initialize once', async () => {
+      let hookResult: any;
+
+      await act(async () => {
+        hookResult = renderHookWithProvider(mockServices);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // First render
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledTimes(1);
 
       // Re-render should not trigger again
-      rerender();
+      await act(async () => {
+        hookResult.rerender();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledTimes(1);
     });
@@ -268,6 +285,7 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query (business logic decision)
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -345,6 +363,9 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalledWith({ services: servicesWithoutTimefilter });
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalledWith({
+        services: servicesWithoutTimefilter,
+      });
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -459,6 +480,7 @@ describe('useInitialQueryExecution', () => {
 
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -487,6 +509,7 @@ describe('useInitialQueryExecution', () => {
       // But should still execute query
       expect(mockClearResults).toHaveBeenCalled();
       expect(mockExecuteQueries).toHaveBeenCalled();
+      expect(mockDetectAndSetOptimalTab).toHaveBeenCalled();
       // Verify setIsInitialized was dispatched (state update happens asynchronously)
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
