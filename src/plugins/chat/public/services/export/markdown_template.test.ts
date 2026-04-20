@@ -10,7 +10,6 @@ describe('generateMarkdownReport', () => {
   const baseOptions: ChatExportOptions = {
     includeAISummary: true,
     includeTraces: true,
-    includeVisualizations: false,
     includeMetadata: true,
     format: 'markdown',
   };
@@ -19,7 +18,6 @@ describe('generateMarkdownReport', () => {
     question: 'What caused the crash?',
     answer: 'Found **3,247** crash events.',
     traces: [{ toolName: 'LogTool', arguments: '{"index":"logs"}', result: '3247 events' }],
-    visualizations: [],
     metadata: { timestamp: '2026-04-08T16:42:00Z', threadId: 'thread-123' },
   };
 

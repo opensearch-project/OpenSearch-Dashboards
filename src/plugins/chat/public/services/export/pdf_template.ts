@@ -150,20 +150,6 @@ export function generatePDFReport(data: ChatExportData, options: ChatExportOptio
     }
 
     ${
-      options.includeVisualizations && data.visualizations.length > 0
-        ? `<div class="section">
-      <div class="section-title">Visualizations</div>
-      ${data.visualizations
-        .map(
-          (viz) =>
-            `<div class="viz-container"><img src="data:${viz.mimeType};base64,${viz.base64}" alt="Visualization" style="max-width:100%;border:1px solid #e9ecef;border-radius:8px;margin-bottom:12px;" /></div>`
-        )
-        .join('\n')}
-    </div>`
-        : ''
-    }
-
-    ${
       options.includeTraces && data.traces.length > 0
         ? `<div class="section">
       <div class="section-title">Evidence (Agent Investigation Steps)</div>

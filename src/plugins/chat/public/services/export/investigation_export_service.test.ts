@@ -9,17 +9,7 @@ import {
   findPrecedingQuestion,
   extractTraces,
   extractTracesFromTurn,
-  getToolCallIdsFromTurn,
 } from './investigation_export_service';
-
-// Mock html2canvas-pro to avoid DOM dependency in unit tests
-jest.mock('html2canvas-pro', () => {
-  const fn = jest.fn().mockResolvedValue({
-    toDataURL: jest.fn().mockReturnValue('data:image/png;base64,mockBase64'),
-  });
-  (fn as any).setCspNonce = jest.fn();
-  return { __esModule: true, default: fn };
-});
 
 describe('findPrecedingQuestion', () => {
   it('should find the preceding user message with string content', () => {
@@ -256,64 +246,10 @@ describe('extractTracesFromTurn', () => {
   });
 });
 
-describe('getToolCallIdsFromTurn', () => {
-  it('should return tool call IDs from the same Q&A turn', () => {
-    const timeline: Message[] = [
-      { id: 'u1', role: 'user', content: 'Q1' } as UserMessage,
-      {
-        id: 'a1',
-        role: 'assistant',
-        toolCalls: [
-          { id: 'tc1', type: 'function', function: { name: 'ToolA', arguments: '{}' } },
-          { id: 'tc2', type: 'function', function: { name: 'ToolB', arguments: '{}' } },
-        ],
-      } as AssistantMessage,
-      { id: 'a2', role: 'assistant', content: 'Answer' } as AssistantMessage,
-    ];
-    const ids = getToolCallIdsFromTurn(timeline, 2);
-    expect(ids).toEqual(['tc1', 'tc2']);
-  });
-
-  it('should not include tool call IDs from a different Q&A turn', () => {
-    const timeline: Message[] = [
-      { id: 'u1', role: 'user', content: 'Q1' } as UserMessage,
-      {
-        id: 'a1',
-        role: 'assistant',
-        toolCalls: [
-          { id: 'tc-old', type: 'function', function: { name: 'OldTool', arguments: '{}' } },
-        ],
-      } as AssistantMessage,
-      { id: 'u2', role: 'user', content: 'Q2' } as UserMessage,
-      {
-        id: 'a2',
-        role: 'assistant',
-        toolCalls: [
-          { id: 'tc-new', type: 'function', function: { name: 'NewTool', arguments: '{}' } },
-        ],
-      } as AssistantMessage,
-      { id: 'a3', role: 'assistant', content: 'Final' } as AssistantMessage,
-    ];
-    const ids = getToolCallIdsFromTurn(timeline, 4);
-    expect(ids).toEqual(['tc-new']);
-    expect(ids).not.toContain('tc-old');
-  });
-
-  it('should return empty array when no tool calls in turn', () => {
-    const timeline: Message[] = [
-      { id: 'u1', role: 'user', content: 'Q1' } as UserMessage,
-      { id: 'a1', role: 'assistant', content: 'Simple answer' } as AssistantMessage,
-    ];
-    const ids = getToolCallIdsFromTurn(timeline, 1);
-    expect(ids).toHaveLength(0);
-  });
-});
-
 describe('collectChatExportData', () => {
   const baseOptions = {
     includeAISummary: true,
     includeTraces: true,
-    includeVisualizations: false,
     includeMetadata: true,
     format: 'pdf' as const,
   };
@@ -347,7 +283,6 @@ describe('collectChatExportData', () => {
     expect(data.answer).toBe('Found **issues**.');
     expect(data.traces).toHaveLength(1);
     expect(data.metadata?.threadId).toBe('thread-123');
-    expect(data.visualizations).toHaveLength(0);
   });
 
   it('should skip traces when includeTraces is false', async () => {

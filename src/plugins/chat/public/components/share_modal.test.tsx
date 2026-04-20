@@ -96,7 +96,6 @@ describe('ShareModal', () => {
     expect(tracesCheckbox).toBeChecked();
     expect(metadataCheckbox).not.toBeChecked();
   });
-
   it('should render format selector with PDF selected by default', () => {
     render(<ShareModal {...defaultProps} />);
     expect(screen.getByText('PDF')).toBeInTheDocument();
@@ -126,7 +125,6 @@ describe('ShareModal', () => {
     // Uncheck all checkboxes
     fireEvent.click(screen.getByLabelText(/AI Summary/));
     fireEvent.click(screen.getByLabelText(/Evidence/));
-    fireEvent.click(screen.getByLabelText(/Visualizations/));
 
     const downloadButton = screen.getByText('Download Report');
     expect(downloadButton.closest('button')).toBeDisabled();
@@ -152,7 +150,6 @@ describe('ShareModal', () => {
         expect.objectContaining({
           includeAISummary: true,
           includeTraces: true,
-          includeVisualizations: true,
           includeMetadata: false,
           format: 'pdf',
         })

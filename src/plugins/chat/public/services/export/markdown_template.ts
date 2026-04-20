@@ -37,15 +37,6 @@ export function generateMarkdownReport(data: ChatExportData, options: ChatExport
     sections.push('');
   }
 
-  if (options.includeVisualizations && data.visualizations.length > 0) {
-    sections.push('## Visualizations');
-    sections.push('');
-    sections.push(
-      `*${data.visualizations.length} visualization(s) were captured. Visualizations are only available in the PDF export format.*`
-    );
-    sections.push('');
-  }
-
   if (options.includeTraces && data.traces.length > 0) {
     sections.push('## Evidence (Agent Investigation Steps)');
     sections.push('');

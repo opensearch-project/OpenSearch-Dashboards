@@ -76,7 +76,6 @@ describe('generatePDFReport', () => {
   const baseOptions: ChatExportOptions = {
     includeAISummary: true,
     includeTraces: true,
-    includeVisualizations: false,
     includeMetadata: true,
     format: 'pdf',
   };
@@ -85,7 +84,6 @@ describe('generatePDFReport', () => {
     question: 'What caused the crash?',
     answer: 'Found **3,247** crash events.',
     traces: [{ toolName: 'LogTool', arguments: '{"index":"logs"}', result: '3247 events' }],
-    visualizations: [],
     metadata: { timestamp: '2026-04-08T16:42:00Z', threadId: 'thread-123' },
   };
 
@@ -171,32 +169,5 @@ describe('generatePDFReport', () => {
     const result = generatePDFReport(data, baseOptions);
     expect(result).not.toContain('<script>alert');
     expect(result).toContain('&lt;script&gt;');
-  });
-
-  it('should include visualizations when enabled and present', () => {
-    const data: ChatExportData = {
-      ...baseData,
-      visualizations: [{ base64: 'mockBase64Data', mimeType: 'image/png', toolCallId: 'tc1' }],
-    };
-    const options = { ...baseOptions, includeVisualizations: true };
-    const result = generatePDFReport(data, options);
-    expect(result).toContain('Visualizations');
-    expect(result).toContain('data:image/png;base64,mockBase64Data');
-  });
-
-  it('should not include visualizations section when disabled', () => {
-    const data: ChatExportData = {
-      ...baseData,
-      visualizations: [{ base64: 'mockBase64Data', mimeType: 'image/png', toolCallId: 'tc1' }],
-    };
-    const options = { ...baseOptions, includeVisualizations: false };
-    const result = generatePDFReport(data, options);
-    expect(result).not.toContain('data:image/png;base64,mockBase64Data');
-  });
-
-  it('should not include visualizations section when array is empty', () => {
-    const options = { ...baseOptions, includeVisualizations: true };
-    const result = generatePDFReport(baseData, options);
-    expect(result).not.toContain('Visualizations');
   });
 });

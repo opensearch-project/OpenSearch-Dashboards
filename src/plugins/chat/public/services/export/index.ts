@@ -8,12 +8,5 @@ export {
   exportAsPdf,
   exportAsMarkdown,
   findPrecedingQuestion,
-  getToolCallIdsFromTurn,
-  captureVisualizations,
 } from './investigation_export_service';
-export type {
-  ChatExportOptions,
-  ChatExportData,
-  ChatTraceStep,
-  CapturedVisualization,
-} from './types';
+export type { ChatExportOptions, ChatExportData, ChatTraceStep } from './types';

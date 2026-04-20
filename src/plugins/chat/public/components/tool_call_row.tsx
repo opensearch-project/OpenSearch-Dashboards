@@ -372,7 +372,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
   if (isGraphTool) {
     if (shouldUseCustomRenderer) {
       return (
-        <div className="toolCallRow" data-tool-call-id={toolCall.id}>
+        <div className="toolCallRow">
           {renderer(
             getCustomizedRenderOptions({
               toolCall,

@@ -52,14 +52,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const toasts = services.core?.notifications?.toasts;
   const [includeAISummary, setIncludeAISummary] = useState(true);
   const [includeTraces, setIncludeTraces] = useState(true);
-  const [includeVisualizations, setIncludeVisualizations] = useState(true);
   const [includeMetadata, setIncludeMetadata] = useState(false);
   const [format, setFormat] = useState<'pdf' | 'markdown'>('pdf');
   const [note, setNote] = useState('');
   const [isExporting, setIsExporting] = useState(false);
 
-  const nothingSelected =
-    !includeAISummary && !includeTraces && !includeVisualizations && !includeMetadata;
+  const nothingSelected = !includeAISummary && !includeTraces && !includeMetadata;
 
   const handleExport = useCallback(async () => {
     setIsExporting(true);
@@ -87,7 +85,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
       const options = {
         includeAISummary,
         includeTraces,
-        includeVisualizations,
         includeMetadata,
         format,
         note: note.trim() || undefined,
@@ -115,7 +112,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   }, [
     includeAISummary,
     includeTraces,
-    includeVisualizations,
     includeMetadata,
     format,
     note,
@@ -170,15 +166,6 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           })}
           checked={includeTraces}
           onChange={(e) => setIncludeTraces(e.target.checked)}
-        />
-        <EuiSpacer size="xs" />
-        <EuiCheckbox
-          id="share-include-visualizations"
-          label={i18n.translate('chat.shareModal.visualizations', {
-            defaultMessage: 'Visualizations — Charts and graphs from tool calls',
-          })}
-          checked={includeVisualizations}
-          onChange={(e) => setIncludeVisualizations(e.target.checked)}
         />
         <EuiSpacer size="xs" />
         <EuiCheckbox

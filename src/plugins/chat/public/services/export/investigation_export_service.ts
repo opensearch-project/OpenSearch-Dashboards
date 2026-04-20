@@ -3,20 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import html2canvas from 'html2canvas-pro';
 import type {
   Message,
   AssistantMessage,
   ToolMessage,
   TextInputContent,
 } from '../../../common/types';
-import {
-  ChatExportData,
-  ChatExportOptions,
-  ChatTraceStep,
-  CapturedVisualization,
-  QuestionImage,
-} from './types';
+import { ChatExportData, ChatExportOptions, ChatTraceStep, QuestionImage } from './types';
 import { generatePDFReport } from './pdf_template';
 import { generateMarkdownReport } from './markdown_template';
 
@@ -36,18 +29,11 @@ export async function collectChatExportData(
   const targetIndex = timeline.findIndex((m) => m.id === targetMessage.id);
   const { text: question, image: questionImage } = findPrecedingQuestion(timeline, targetIndex);
 
-  let visualizations: CapturedVisualization[] = [];
-  if (options.includeVisualizations) {
-    const toolCallIds = getToolCallIdsFromTurn(timeline, targetIndex);
-    visualizations = await captureVisualizations(toolCallIds);
-  }
-
   return {
     question,
     questionImage,
     answer: targetMessage.content || '',
     traces: options.includeTraces ? extractTraces(timeline, targetIndex) : [],
-    visualizations,
     metadata: options.includeMetadata
       ? { timestamp: new Date().toISOString(), threadId }
       : undefined,
@@ -209,66 +195,4 @@ export function extractTracesFromTurn(timeline: Message[], targetIndex: number):
   }
 
   return traces;
-}
-
-/**
- * Get all tool call IDs from the same Q&A turn as the target message.
- * Used to scope visualization capture to the correct turn.
- */
-export function getToolCallIdsFromTurn(timeline: Message[], targetIndex: number): string[] {
-  const turnMessages = getTurnMessages(timeline, targetIndex);
-  const ids: string[] = [];
-
-  for (const msg of turnMessages) {
-    if (msg.role === 'assistant') {
-      const assistantMsg = msg as AssistantMessage;
-      for (const toolCall of assistantMsg.toolCalls || []) {
-        ids.push(toolCall.id);
-      }
-    }
-  }
-
-  return ids;
-}
-
-/**
- * Capture visualization DOM elements as base64 images using html2canvas-pro.
- * Only captures elements whose data-tool-call-id matches the provided IDs.
- */
-export async function captureVisualizations(
-  toolCallIds: string[]
-): Promise<CapturedVisualization[]> {
-  if (!toolCallIds.length) return [];
-
-  const nonce = document.querySelector('meta[name="csp-nonce"]')?.getAttribute('content');
-  if (nonce) {
-    html2canvas.setCspNonce(nonce);
-  }
-
-  const results: CapturedVisualization[] = [];
-
-  for (const toolCallId of toolCallIds) {
-    const element = document.querySelector(`[data-tool-call-id="${toolCallId}"]`);
-    if (!element) continue;
-
-    try {
-      const canvas = await html2canvas(element as HTMLElement, {
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-      });
-      const base64 = canvas.toDataURL('image/png').split(',')[1];
-
-      results.push({
-        base64,
-        mimeType: 'image/png',
-        toolCallId,
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn(`Failed to capture visualization for tool call ${toolCallId}:`, error);
-    }
-  }
-
-  return results;
 }
