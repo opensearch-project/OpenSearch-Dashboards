@@ -10,7 +10,13 @@ import type {
   ToolMessage,
   TextInputContent,
 } from '../../../common/types';
-import { ChatExportData, ChatExportOptions, ChatTraceStep, CapturedVisualization } from './types';
+import {
+  ChatExportData,
+  ChatExportOptions,
+  ChatTraceStep,
+  CapturedVisualization,
+  QuestionImage,
+} from './types';
 import { generatePDFReport } from './pdf_template';
 import { generateMarkdownReport } from './markdown_template';
 
@@ -28,6 +34,7 @@ export async function collectChatExportData(
   options: ChatExportOptions
 ): Promise<ChatExportData> {
   const targetIndex = timeline.findIndex((m) => m.id === targetMessage.id);
+  const { text: question, image: questionImage } = findPrecedingQuestion(timeline, targetIndex);
 
   let visualizations: CapturedVisualization[] = [];
   if (options.includeVisualizations) {
@@ -36,7 +43,8 @@ export async function collectChatExportData(
   }
 
   return {
-    question: findPrecedingQuestion(timeline, targetIndex),
+    question,
+    questionImage,
     answer: targetMessage.content || '',
     traces: options.includeTraces ? extractTraces(timeline, targetIndex) : [],
     visualizations,
@@ -91,24 +99,34 @@ export function exportAsMarkdown(data: ChatExportData, options: ChatExportOption
  * Find the user question that precedes the target assistant message.
  * Walks backward through the timeline from the target index.
  * Handles both string content and multimodal content (text + images).
+ * Returns the text question and optionally a binary image (e.g., from "Ask AI" on a visualization).
  */
-export function findPrecedingQuestion(timeline: Message[], targetIndex: number): string {
+export function findPrecedingQuestion(
+  timeline: Message[],
+  targetIndex: number
+): { text: string; image?: QuestionImage } {
   for (let i = targetIndex - 1; i >= 0; i--) {
     const msg = timeline[i];
     if (msg.role === 'user') {
       if (typeof msg.content === 'string') {
-        return msg.content;
+        return { text: msg.content };
       }
       if (Array.isArray(msg.content)) {
-        return msg.content
+        const text = msg.content
           .filter((c): c is TextInputContent => c.type === 'text')
           .map((c) => c.text)
           .join(' ');
+        const binaryContent = msg.content.find((c) => c.type === 'binary' && 'data' in c);
+        const image =
+          binaryContent && binaryContent.type === 'binary' && binaryContent.data
+            ? { base64: binaryContent.data, mimeType: binaryContent.mimeType || 'image/png' }
+            : undefined;
+        return { text, image };
       }
-      return '';
+      return { text: '' };
     }
   }
-  return '';
+  return { text: '' };
 }
 
 /**

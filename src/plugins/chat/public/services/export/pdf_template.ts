@@ -132,6 +132,11 @@ export function generatePDFReport(data: ChatExportData, options: ChatExportOptio
       <div class="question-box">
         <div class="label">Investigation Question</div>
         <div class="text">${escape(data.question)}</div>
+        ${
+          data.questionImage
+            ? `<img src="data:${data.questionImage.mimeType};base64,${data.questionImage.base64}" alt="Question context" style="max-width:100%;border-radius:6px;margin-top:12px;" />`
+            : ''
+        }
       </div>
     </div>
 

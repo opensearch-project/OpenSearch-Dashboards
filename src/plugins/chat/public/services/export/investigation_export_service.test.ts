@@ -27,7 +27,7 @@ describe('findPrecedingQuestion', () => {
       { id: 'u1', role: 'user', content: 'What caused the crash?' } as UserMessage,
       { id: 'a1', role: 'assistant', content: 'Found 3,247 crash events.' } as AssistantMessage,
     ];
-    expect(findPrecedingQuestion(timeline, 1)).toBe('What caused the crash?');
+    expect(findPrecedingQuestion(timeline, 1)).toEqual({ text: 'What caused the crash?' });
   });
 
   it('should find the preceding user message with multimodal content', () => {
@@ -42,14 +42,16 @@ describe('findPrecedingQuestion', () => {
       } as UserMessage,
       { id: 'a1', role: 'assistant', content: 'The chart shows...' } as AssistantMessage,
     ];
-    expect(findPrecedingQuestion(timeline, 1)).toBe('Analyze this chart');
+    const result = findPrecedingQuestion(timeline, 1);
+    expect(result.text).toBe('Analyze this chart');
+    expect(result.image).toEqual({ base64: 'abc', mimeType: 'image/png' });
   });
 
-  it('should return empty string when no preceding user message exists', () => {
+  it('should return empty text when no preceding user message exists', () => {
     const timeline: Message[] = [
       { id: 'a1', role: 'assistant', content: 'Hello!' } as AssistantMessage,
     ];
-    expect(findPrecedingQuestion(timeline, 0)).toBe('');
+    expect(findPrecedingQuestion(timeline, 0)).toEqual({ text: '' });
   });
 
   it('should skip non-user messages when walking backward', () => {
@@ -59,7 +61,7 @@ describe('findPrecedingQuestion', () => {
       { id: 't1', role: 'tool', content: 'tool result', toolCallId: 'tc1' } as ToolMessage,
       { id: 'a2', role: 'assistant', content: 'Second answer' } as AssistantMessage,
     ];
-    expect(findPrecedingQuestion(timeline, 3)).toBe('First question');
+    expect(findPrecedingQuestion(timeline, 3)).toEqual({ text: 'First question' });
   });
 
   it('should find the nearest user message in multi-turn conversation', () => {
@@ -69,15 +71,29 @@ describe('findPrecedingQuestion', () => {
       { id: 'u2', role: 'user', content: 'Second question' } as UserMessage,
       { id: 'a2', role: 'assistant', content: 'Second answer' } as AssistantMessage,
     ];
-    expect(findPrecedingQuestion(timeline, 3)).toBe('Second question');
+    expect(findPrecedingQuestion(timeline, 3)).toEqual({ text: 'Second question' });
   });
 
-  it('should return empty string for user message with empty array content', () => {
+  it('should return empty text for user message with empty array content', () => {
     const timeline: Message[] = [
       ({ id: 'u1', role: 'user', content: [] } as unknown) as UserMessage,
       { id: 'a1', role: 'assistant', content: 'Answer' } as AssistantMessage,
     ];
-    expect(findPrecedingQuestion(timeline, 1)).toBe('');
+    expect(findPrecedingQuestion(timeline, 1)).toEqual({ text: '' });
+  });
+
+  it('should not include image when multimodal content has no binary data', () => {
+    const timeline: Message[] = [
+      {
+        id: 'u1',
+        role: 'user',
+        content: [{ type: 'text', text: 'Just text' }],
+      } as UserMessage,
+      { id: 'a1', role: 'assistant', content: 'Answer' } as AssistantMessage,
+    ];
+    const result = findPrecedingQuestion(timeline, 1);
+    expect(result.text).toBe('Just text');
+    expect(result.image).toBeUndefined();
   });
 });
 

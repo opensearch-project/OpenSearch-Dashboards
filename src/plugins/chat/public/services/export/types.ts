@@ -25,8 +25,14 @@ export interface CapturedVisualization {
   toolCallId: string;
 }
 
+export interface QuestionImage {
+  base64: string;
+  mimeType: string;
+}
+
 export interface ChatExportData {
   question: string;
+  questionImage?: QuestionImage;
   answer: string;
   traces: ChatTraceStep[];
   visualizations: CapturedVisualization[];

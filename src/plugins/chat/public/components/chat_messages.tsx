@@ -409,15 +409,18 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
             const assistantMsg = message as AssistantMessage;
 
             // Only show share button on the last assistant message before the next user message
-            // (or end of timeline). This prevents showing share on intermediate tool-call responses.
-            const isLastAssistantInTurn = (() => {
-              for (let j = index + 1; j < messageRows.length; j++) {
-                const next = messageRows[j];
-                if (next.role === 'user') return true;
-                if (next.role === 'assistant' && (next as AssistantMessage).content) return false;
-              }
-              return true; // Last message in timeline
-            })();
+            // (or end of timeline), and not while streaming. This prevents sharing incomplete
+            // responses and showing share on intermediate tool-call responses.
+            const isShareable =
+              !isStreaming &&
+              (() => {
+                for (let j = index + 1; j < messageRows.length; j++) {
+                  const next = messageRows[j];
+                  if (next.role === 'user') return true;
+                  if (next.role === 'assistant' && (next as AssistantMessage).content) return false;
+                }
+                return true; // Last message in timeline
+              })();
 
             const renderAssistantContent = () => {
               if (!assistantMsg.content) {
@@ -435,8 +438,8 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                         content: content.text,
                         id: `${assistantMsg.id}-${contentIndex}`,
                       }}
-                      timeline={isLastAssistantInTurn ? timeline : undefined}
-                      threadId={isLastAssistantInTurn ? threadId : undefined}
+                      timeline={isShareable ? timeline : undefined}
+                      threadId={isShareable ? threadId : undefined}
                     />
                   ));
               }
@@ -445,8 +448,8 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                 return (
                   <MessageRow
                     message={assistantMsg}
-                    timeline={isLastAssistantInTurn ? timeline : undefined}
-                    threadId={isLastAssistantInTurn ? threadId : undefined}
+                    timeline={isShareable ? timeline : undefined}
+                    threadId={isShareable ? threadId : undefined}
                   />
                 );
               }
