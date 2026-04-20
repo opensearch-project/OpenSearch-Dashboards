@@ -63,7 +63,7 @@ export const createMetricChartSeries = ({
       }
     }
 
-    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     series.push({
       name: seriesDisplayName,

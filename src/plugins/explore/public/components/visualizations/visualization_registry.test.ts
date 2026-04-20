@@ -12,7 +12,7 @@ describe('VisualizationRegistry', () => {
 
   const makeRule = (
     priority: number,
-    mappings: Array<Partial<Record<string, { type: VisFieldType }>>>
+    mappings: Array<Partial<Record<string, { type: VisFieldType; multi?: boolean }>>>
   ): VisRule<any> => ({
     priority,
     mappings,
@@ -101,6 +101,14 @@ describe('VisualizationRegistry', () => {
       validValuesCount: 1,
       uniqueValuesCount: 1,
     };
+    const dateCol: VisColumn = {
+      id: 3,
+      name: 'timestamp',
+      schema: VisFieldType.Date,
+      column: 'timestamp',
+      validValuesCount: 1,
+      uniqueValuesCount: 1,
+    };
 
     it('should return exact matches when column counts match rule mappings', () => {
       const rule = makeRule(100, [
@@ -147,6 +155,67 @@ describe('VisualizationRegistry', () => {
       registry.registerVisualization(makeVisType('line', 'Line', [rule]));
 
       const result = registry.findRulesByColumns([numCol], [], []);
+      expect(result.all).toHaveLength(0);
+      expect(result.exact).toHaveLength(0);
+    });
+
+    it('should return exact match for multi axis as sole consumer of its type', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const numCol2: VisColumn = { ...numCol, id: 4, name: 'value2', column: 'value2' };
+      const result = registry.findRulesByColumns([numCol, numCol2], [], [dateCol]);
+      expect(result.exact).toHaveLength(1);
+      expect(result.exact[0].visType).toBe('line');
+    });
+
+    it('should not return exact match when multi and fixed axes share the same type', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Numerical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const numCol2: VisColumn = { ...numCol, id: 4, name: 'value2', column: 'value2' };
+      const numCol3: VisColumn = { ...numCol, id: 5, name: 'value3', column: 'value3' };
+      const result = registry.findRulesByColumns([numCol, numCol2, numCol3], [], []);
+      expect(result.all).toHaveLength(1);
+      expect(result.exact).toHaveLength(0);
+    });
+
+    it('should return compatible match for multi axis with sufficient columns', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const numCol2: VisColumn = { ...numCol, id: 4, name: 'value2', column: 'value2' };
+      // Extra categorical column means not exact, but still compatible
+      const result = registry.findRulesByColumns([numCol, numCol2], [catCol], [dateCol]);
+      expect(result.all).toHaveLength(1);
+      expect(result.exact).toHaveLength(0);
+    });
+
+    it('should not match multi axis when no columns of that type are available', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const result = registry.findRulesByColumns([], [], [dateCol]);
       expect(result.all).toHaveLength(0);
       expect(result.exact).toHaveLength(0);
     });
@@ -242,6 +311,67 @@ describe('VisualizationRegistry', () => {
       ]);
 
       const result = registry.getAxesMappingByRule(rule, [], [], []);
+      expect(result).toEqual({});
+    });
+
+    it('should assign all columns of a type to a multi axis', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+
+      const numCol1: VisColumn = {
+        id: 1,
+        name: 'revenue',
+        schema: VisFieldType.Numerical,
+        column: 'revenue',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      };
+      const numCol2: VisColumn = {
+        id: 2,
+        name: 'cost',
+        schema: VisFieldType.Numerical,
+        column: 'cost',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      };
+      const dateCol: VisColumn = {
+        id: 3,
+        name: 'timestamp',
+        schema: VisFieldType.Date,
+        column: 'timestamp',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      };
+
+      const result = registry.getAxesMappingByRule(rule, [numCol1, numCol2], [], [dateCol]);
+      expect(result).toEqual({
+        [AxisRole.X]: 'timestamp',
+        [AxisRole.Y]: ['revenue', 'cost'],
+      });
+    });
+
+    it('should return empty object when multi axis has no columns available', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+
+      const dateCol: VisColumn = {
+        id: 1,
+        name: 'timestamp',
+        schema: VisFieldType.Date,
+        column: 'timestamp',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      };
+
+      const result = registry.getAxesMappingByRule(rule, [], [], [dateCol]);
       expect(result).toEqual({});
     });
   });
@@ -372,6 +502,89 @@ describe('VisualizationRegistry', () => {
         allColumns
       );
       expect(result).toBe(rule);
+    });
+
+    it('should match a multi axis rule when multiple fields are provided', () => {
+      const numCol2: VisColumn = {
+        id: 4,
+        name: 'value2',
+        schema: VisFieldType.Numerical,
+        column: 'value2',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      };
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: ['value', 'value2'] },
+        [...allColumns, numCol2]
+      );
+      expect(result).toBe(rule);
+    });
+
+    it('should match a multi rule when single field is provided', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: 'value' },
+        allColumns
+      );
+      expect(result).toBe(rule);
+    });
+
+    it('should not match a single-field rule when multiple fields are provided', () => {
+      const numCol2: VisColumn = {
+        id: 4,
+        name: 'value2',
+        schema: VisFieldType.Numerical,
+        column: 'value2',
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      };
+      const rule = makeRule(100, [
+        {
+          [AxisRole.X]: { type: VisFieldType.Date },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'line',
+        { [AxisRole.X]: 'timestamp', [AxisRole.Y]: ['value', 'value2'] },
+        [...allColumns, numCol2]
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when multi field types are mixed', () => {
+      const rule = makeRule(100, [
+        {
+          [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+        },
+      ]);
+      registry.registerVisualization(makeVisType('line', 'Line', [rule]));
+
+      const result = registry.findRuleByAxesMapping(
+        'line',
+        { [AxisRole.Y]: ['value', 'category'] },
+        allColumns
+      );
+      expect(result).toBeUndefined();
     });
   });
 

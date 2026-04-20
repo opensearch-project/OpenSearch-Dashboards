@@ -37,4 +37,16 @@
   .euiTabs:not(.euiTabs--condensed)::before {
     height: 0;
   }
+
+  .explore-statistic-tab {
+    .exploreStatisticTable {
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+
+      > div:first-of-type {
+        overflow: auto;
+      }
+    }
+  }
 }

@@ -78,6 +78,17 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorDidMount(editor);
 
+      // Add Tab command for autocomplete acceptance
+      editor.addCommand(monaco.KeyCode.Tab, () => {
+        // Accept the selected suggestion
+        editor.trigger('keyboard', 'acceptSelectedSuggestion', {});
+
+        // Retrigger suggestions after a short delay
+        setTimeout(() => {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        }, 100);
+      });
+
       const focusDisposable = editor.onDidFocusEditorText(() => {
         if (blurTimeoutRef.current) {
           clearTimeout(blurTimeoutRef.current);
