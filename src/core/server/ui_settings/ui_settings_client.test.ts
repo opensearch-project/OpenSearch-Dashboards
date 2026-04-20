@@ -704,12 +704,55 @@ describe('ui settings', () => {
         baz: { isOverridden: true },
       });
     });
+
+    it('getUserProvided with key param should only read scopes the key belongs to', async () => {
+      const defaults = {
+        workspaceSetting: { value: 'ws-default', scope: 'workspace' },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockResolvedValue({
+        attributes: { workspaceSetting: 'ws-user-value' },
+      } as any);
+
+      const result = await uiSettings.getUserProvided(undefined, 'workspaceSetting');
+
+      expect(result).toEqual({ workspaceSetting: { userValue: 'ws-user-value' } });
+
+      // Only the workspace scope should have been read
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+    });
+
+    it('getUserProvided without key param should still read all scopes', async () => {
+      const { uiSettings, savedObjectsClient } = setup();
+
+      await uiSettings.getUserProvided();
+
+      // All 4 scopes should be read: global, workspace, user, dashboard_admin
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
+    });
   });
 
   describe('#getAll()', () => {
     it('pulls user configuration from OpenSearch', async () => {
       const opensearchDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
+      const defaults = { foo: { value: 'bar' } };
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource, defaults });
       await uiSettings.getAll();
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
@@ -970,8 +1013,9 @@ describe('ui settings', () => {
   describe('#get()', () => {
     it('pulls user configuration from OpenSearch', async () => {
       const opensearchDocSource = {};
-      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource });
-      await uiSettings.get('any');
+      const defaults = { foo: { value: 'bar' } };
+      const { uiSettings, savedObjectsClient } = setup({ opensearchDocSource, defaults });
+      await uiSettings.get('foo');
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
@@ -1100,50 +1144,96 @@ describe('ui settings', () => {
 
       await uiSettings.get('workspaceSetting');
 
-      // Verify it fetched the appropriate configs based on scope
+      // Should only fetch the workspace-scoped settings
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
       );
-
       expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, ID);
+
+      savedObjectsClient.get.mockClear();
+
+      await uiSettings.get('globalSetting');
+
+      // Should only fetch the global config, not workspace or admin
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
+      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
     });
 
     it('should return the config with higher scope priority', async () => {
       const defaults = {
-        multiSetting: { value: 'default', scope: ['global', 'workspace'] },
+        // DASHBOARD_ADMIN has highest priority, followed by workspace, then global
+        multiSetting: { value: 'default', scope: ['global', 'workspace', 'dashboard_admin'] },
       };
 
       const { uiSettings, savedObjectsClient } = setup({ defaults });
 
       savedObjectsClient.get.mockImplementation((_type, id, _options) => {
-        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+        if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
           return Promise.resolve({
-            attributes: {
-              multiSetting: 'workspace-value',
-            },
+            attributes: { multiSetting: 'admin-value' },
+          } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: { multiSetting: 'workspace-value' },
           } as any);
         } else {
           return Promise.resolve({
-            attributes: {
-              multiSetting: 'global-value',
-            },
+            attributes: { multiSetting: 'global-value' },
           } as any);
         }
       });
 
       const result = await uiSettings.get('multiSetting');
 
-      expect(result).toBe('workspace-value');
+      // DASHBOARD_ADMIN has highest priority and should win
+      expect(result).toBe('admin-value');
 
-      // Should fetch workspace config
+      // Should fetch all scopes the key belongs to
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(
         TYPE,
         `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
       );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
 
-      // Should not fetch global config since workspace has higher priority
-      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, ID);
+      savedObjectsClient.get.mockClear();
+
+      // When admin scope has no value, workspace should win
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === DASHBOARD_ADMIN_SETTINGS_ID) {
+          return Promise.resolve({ attributes: {} } as any);
+        } else if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: { multiSetting: 'workspace-value' },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: { multiSetting: 'global-value' },
+          } as any);
+        }
+      });
+
+      const resultFallback = await uiSettings.get('multiSetting');
+      expect(resultFallback).toBe('workspace-value');
+    });
+
+    it('should fall back to default when key scopes have no user-provided value', async () => {
+      const defaults = {
+        adminOnlySetting: { value: 'admin-default', scope: 'dashboard_admin' },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockResolvedValue({ attributes: {} } as any);
+
+      const result = await uiSettings.get('adminOnlySetting');
+
+      expect(result).toBe('admin-default');
     });
 
     it('should return config following scope priority', async () => {
