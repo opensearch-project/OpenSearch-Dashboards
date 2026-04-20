@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiSearchBarProps,
   EuiBasicTableColumn,
@@ -150,6 +150,7 @@ interface Props {
 type PermissionSettingWithAccessLevelAndDisplayedType = PermissionSetting & {
   accessLevel?: string;
   displayedType?: string;
+  name?: string;
 };
 
 export const WorkspaceCollaboratorTable = ({
@@ -160,8 +161,54 @@ export const WorkspaceCollaboratorTable = ({
   const [selection, setSelection] = useState<PermissionSetting[]>([]);
   const {
     overlays,
-    services: { notifications },
+    services: { notifications, http },
   } = useOpenSearchDashboards();
+  const [idToNameMap, setIdToNameMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!http) return;
+    const fetchNames = async () => {
+      // Group collaborator IDs by (source, type) from their matching WorkspaceCollaboratorType
+      const groupMap = new Map<string, { source: string; type: string; ids: string[] }>();
+      permissionSettings.forEach((setting) => {
+        if (!isWorkspacePermissionSetting(setting)) return;
+        const collaborator = convertPermissionSettingToWorkspaceCollaborator(setting);
+        // Find the collaborator type that owns this collaborator and has identitySource
+        const collaboratorType = displayedCollaboratorTypes.find(
+          (ct) => ct.identitySource && ct.getDisplayedType?.(collaborator)
+        );
+        const identitySource = collaboratorType?.identitySource;
+        if (!identitySource) return;
+        const key = `${identitySource.source}__${identitySource.type}`;
+        const id =
+          setting.type === WorkspacePermissionItemType.User ? setting.userId : setting.group;
+        if (!id) return;
+        if (!groupMap.has(key)) {
+          groupMap.set(key, { ...identitySource, ids: [] });
+        }
+        groupMap.get(key)!.ids.push(id);
+      });
+
+      const newMap: Record<string, string> = {};
+      await Promise.all(
+        Array.from(groupMap.values()).map(async ({ source, type, ids }) => {
+          try {
+            const resp = await http.post<Array<{ id: string; name: string }>>(
+              '/api/security/identity/_entries',
+              { body: JSON.stringify({ source, type, ids }) }
+            );
+            resp?.forEach(({ id, name }) => {
+              newMap[id] = name;
+            });
+          } catch {
+            // silently ignore, Name column will remain empty
+          }
+        })
+      );
+      setIdToNameMap(newMap);
+    };
+    fetchNames();
+  }, [permissionSettings, displayedCollaboratorTypes, http]);
 
   const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings
@@ -185,17 +232,19 @@ export const WorkspaceCollaboratorTable = ({
             ...basicSettings,
             // Id represents the index of the permission setting in the array, will use primaryId for displayed id
             primaryId: setting.userId,
+            name: setting.userId ? idToNameMap[setting.userId] : undefined,
           };
         } else if (setting.type === WorkspacePermissionItemType.Group) {
           return {
             ...basicSettings,
             primaryId: setting.group,
+            name: setting.group ? idToNameMap[setting.group] : undefined,
           };
         }
         return basicSettings;
       })
       .filter((item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*'));
-  }, [permissionSettings, displayedCollaboratorTypes]);
+  }, [permissionSettings, displayedCollaboratorTypes, idToNameMap]);
 
   const adminCollaboratorsNum = useMemo(() => {
     const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
@@ -428,7 +477,15 @@ export const WorkspaceCollaboratorTable = ({
       name: i18n.translate('workspace.collaborator.id.name', {
         defaultMessage: 'ID',
       }),
-      width: '30%',
+      width: '25%',
+    },
+    {
+      field: 'name',
+      name: i18n.translate('workspace.collaborator.name.name', {
+        defaultMessage: 'Name',
+      }),
+      render: (name: string) => name || <>&mdash;</>,
+      width: '25%',
     },
     {
       field: 'displayedType',
@@ -436,7 +493,7 @@ export const WorkspaceCollaboratorTable = ({
         defaultMessage: 'Type',
       }),
       render: (displayedType: string) => displayedType || <>&mdash;</>,
-      width: '30%',
+      width: '25%',
     },
     {
       field: 'accessLevel',
@@ -444,7 +501,7 @@ export const WorkspaceCollaboratorTable = ({
         defaultMessage: 'Access level',
       }),
       render: (accessLevel: string) => accessLevel || <>&mdash;</>,
-      width: '30%',
+      width: '15%',
     },
     {
       name: i18n.translate('workspace.collaborator.actions.name', {
