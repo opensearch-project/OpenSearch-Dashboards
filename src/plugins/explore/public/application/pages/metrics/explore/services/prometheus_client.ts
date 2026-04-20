@@ -190,20 +190,21 @@ export class PrometheusClient {
     const cached = this.dataCache.get(key) as string[] | undefined;
     if (cached) return cached;
 
-    // Use series API with regex match for server-side filtering.
-    // Escape regex metacharacters first, then escape for PromQL string syntax
-    // (backslash + double-quote) so the final selector is always well-formed.
+    // Use label values API (/api/v1/label/__name__/values) with match[] filter
+    // instead of series API to avoid fetching full label sets for every series.
     const regexEscaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const match = `{__name__=~".*${escapeLabelValue(regexEscaped)}.*"}`;
-    const series = await this.getSeries(match);
-    const nameSet = new Set<string>();
-    for (const s of series) {
-      if (s.__name__) nameSet.add(s.__name__);
-    }
-    const names = Array.from(nameSet).sort().slice(0, limit);
+    const rc = this.getResourceClient();
+    const names: string[] = await rc.getLabelValues(
+      this.dataConnectionId,
+      { 'match[]': match },
+      '__name__',
+      this.getTimeRange()
+    );
+    const sorted = names.sort().slice(0, limit);
 
-    this.dataCache.set(key, names);
-    return names;
+    this.dataCache.set(key, sorted);
+    return sorted;
   }
 
   async getLabelValues(label: string, metric?: string): Promise<string[]> {

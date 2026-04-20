@@ -183,10 +183,14 @@ describe('PrometheusClient resource calls propagate time range', () => {
     await client.getSeries('{__name__="up"}');
     expect(rc.getSeries).toHaveBeenLastCalledWith('conn-1', '{__name__="up"}', undefined, tr);
 
-    rc.getSeries.mockResolvedValueOnce([{ __name__: 'http_requests_total' }]);
+    rc.getLabelValues.mockResolvedValueOnce(['http_requests_total']);
     await client.searchMetricNames('http');
-    const lastCall = rc.getSeries.mock.calls[rc.getSeries.mock.calls.length - 1];
-    expect(lastCall[3]).toEqual(tr);
+    expect(rc.getLabelValues).toHaveBeenLastCalledWith(
+      'conn-1',
+      { 'match[]': '{__name__=~".*http.*"}' },
+      '__name__',
+      tr
+    );
   });
 
   it('scopes the cache by time range so a new range triggers a fresh fetch', async () => {
