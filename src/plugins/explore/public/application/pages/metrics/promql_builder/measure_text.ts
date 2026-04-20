@@ -21,7 +21,7 @@ const measureCanvas = (() => {
  * Adds padding for the combo box chrome (icon, borders, etc).
  */
 export function comboBoxWidth(text: string): number {
-  return Math.min(Math.max(measureCanvas(text) + 80, 200), 350);
+  return Math.min(Math.max(measureCanvas(text) + 80, 200), 700);
 }
 
 export function inputWidth(
