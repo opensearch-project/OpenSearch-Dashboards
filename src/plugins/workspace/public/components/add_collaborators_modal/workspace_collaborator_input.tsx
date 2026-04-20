@@ -107,7 +107,7 @@ export const WorkspaceCollaboratorInput = ({
             },
             signal: abortController.current.signal,
           });
-          setOptions(results.map((r) => ({ label: r.name, value: r.id })));
+          setOptions(results.map((r) => ({ label: `${r.name} (${r.id})`, value: r.id })));
         } catch (e) {
           if ((e as Error).name !== 'AbortError') setOptions([]);
         } finally {

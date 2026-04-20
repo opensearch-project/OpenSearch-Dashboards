@@ -88,6 +88,13 @@ export const AddCollaboratorsModal = ({
   });
   const [isAdding, setIsAdding] = useState(false);
 
+  const handleCollaboratorsChange = (newCollaborators: WorkspaceCollaboratorInner[]) => {
+    setCollaborators(newCollaborators);
+    if (Object.keys(errors).length > 0) {
+      setErrors({});
+    }
+  };
+
   const handleAddCollaborators = async () => {
     const singleStarIds = validInnerCollaborators.flatMap(({ id, collaboratorId }) =>
       collaboratorId.trim() === '*' ? id : []
@@ -197,7 +204,7 @@ export const AddCollaboratorsModal = ({
         )}
         <WorkspaceCollaboratorsPanel
           collaborators={collaborators}
-          onChange={setCollaborators}
+          onChange={handleCollaboratorsChange}
           label={inputLabel}
           description={inputDescription}
           collaboratorIdInputPlaceholder={inputPlaceholder}
