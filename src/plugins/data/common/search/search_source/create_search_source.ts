@@ -59,15 +59,23 @@ export const createSearchSource = (
 
   // hydrating index pattern
   if (fields.index && typeof fields.index === 'string') {
-    const isIndexPattern =
-      !fields.query?.dataset?.type ||
-      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+    const dataset = fields.query?.dataset;
+    const isIndexPattern = !dataset?.type || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
     try {
-      // Non-INDEX_PATTERN datasets (e.g. INDEXES) have no saved object, so fall back
-      // to a cache-only lookup populated by datasetService.cacheDataset.
-      const pattern = isIndexPattern
+      let pattern = isIndexPattern
         ? await indexPatterns.get(fields.index as string)
         : await indexPatterns.get(fields.index as string, true);
+
+      // Non-INDEX_PATTERN datasets (e.g. INDEXES, S3, Prometheus) have no backing
+      // saved object. On a cache miss, ask the public layer to prime the dataset
+      // cache via `hydrateDataset`, then try the cache-only lookup again. This
+      // centralizes hydration so Discover, Explore embeddables, and any other
+      // consumer of `searchSource.create()` all benefit.
+      if (!pattern && !isIndexPattern && dataset && searchSourceDependencies.hydrateDataset) {
+        await searchSourceDependencies.hydrateDataset(dataset);
+        pattern = await indexPatterns.get(fields.index as string, true);
+      }
+
       if (pattern) {
         fields.index = pattern;
       }
