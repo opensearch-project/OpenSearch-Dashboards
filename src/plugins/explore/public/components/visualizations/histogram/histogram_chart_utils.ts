@@ -49,7 +49,7 @@ export const createHistogramSeries = <T extends BaseChartStyle>(
 
   // Histogram series
   const series = seriesFields.map((seriesField, index) => {
-    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
+    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings).flat());
     const seriesFieldIndex = headers.indexOf(seriesField);
     return {
       type: 'custom',

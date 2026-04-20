@@ -61,7 +61,7 @@ describe('bar to_expression', () => {
     test('creates an ECharts bar chart spec with dataset and series', () => {
       const spec = createBarSpec(mockData, defaultBarChartStyles, {
         [AxisRole.X]: mockCategoricalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       });
 
       expect(spec).toHaveProperty('dataset');
@@ -75,7 +75,7 @@ describe('bar to_expression', () => {
     test('handles title display options', () => {
       const axisMappings = {
         [AxisRole.X]: mockCategoricalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       };
 
       const noTitleResult = createBarSpec(
@@ -115,7 +115,7 @@ describe('bar to_expression', () => {
 
       const spec = createBarSpec(mockData, customStyles, {
         [AxisRole.X]: mockCategoricalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       });
 
       const seriesWithMarkLine = spec.series.find((s: any) => s.markLine);
@@ -175,7 +175,7 @@ describe('bar to_expression', () => {
     test('creates a time bar chart ECharts spec', () => {
       const axisMappings = {
         [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       };
 
       const spec = createTimeBarChart(mockData, defaultBarChartStyles, axisMappings);
@@ -191,7 +191,7 @@ describe('bar to_expression', () => {
     test('handles title display options', () => {
       const axisMappings = {
         [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       };
 
       const noTitleResult = createTimeBarChart(
@@ -231,7 +231,7 @@ describe('bar to_expression', () => {
 
       const spec = createTimeBarChart(mockData, customStyles, {
         [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       });
 
       const seriesWithMarkLine = spec.series.find((s: any) => s.markLine);
@@ -242,7 +242,7 @@ describe('bar to_expression', () => {
     describe('bucketing vs skip bucketing', () => {
       const axisMappings = {
         [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.Y]: [mockNumericalColumn],
       };
 
       // Timestamps within the same second — auto-inferred interval will bucket them together
@@ -461,7 +461,7 @@ describe('bar to_expression', () => {
     test('creates a double numerical bar chart ECharts spec', () => {
       const spec = createDoubleNumericalBarChart(mockData, defaultBarChartStyles, {
         [AxisRole.X]: mockNumericalColumn,
-        [AxisRole.Y]: mockNumericalColumn2,
+        [AxisRole.Y]: [mockNumericalColumn2],
       });
 
       expect(spec).toHaveProperty('dataset');

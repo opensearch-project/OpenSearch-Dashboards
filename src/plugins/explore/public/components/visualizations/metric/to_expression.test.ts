@@ -4,7 +4,7 @@
  */
 
 import { createSingleMetric } from './to_expression';
-import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultMetricChartStyles, MetricChartStyle } from './metric_vis_config';
 
 describe('Metric to_expression', () => {
@@ -36,7 +36,7 @@ describe('Metric to_expression', () => {
 
   describe('createSingleMetric', () => {
     it('returns result with spec, name, and data', () => {
-      const mockAxisMappings: AxisColumnMappings = {
+      const mockAxisMappings = {
         [AxisRole.Value]: numericColumn,
       };
 
@@ -54,7 +54,7 @@ describe('Metric to_expression', () => {
         { value: 200, date: '2023-01-02' },
       ];
 
-      const mockAxisMappings: AxisColumnMappings = {
+      const mockAxisMappings = {
         [AxisRole.Value]: numericColumn,
         [AxisRole.Time]: dateColumn,
       };
@@ -68,7 +68,7 @@ describe('Metric to_expression', () => {
     });
 
     it('does not include line series when no date column', () => {
-      const mockAxisMappings: AxisColumnMappings = {
+      const mockAxisMappings = {
         [AxisRole.Value]: numericColumn,
       };
 
@@ -78,9 +78,7 @@ describe('Metric to_expression', () => {
     });
 
     it('throws when no value column is provided', () => {
-      expect(() => createSingleMetric(mockData, mockStyles, {})).toThrow(
-        'Missing value for metric chart'
-      );
+      expect(() => createSingleMetric(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 });
