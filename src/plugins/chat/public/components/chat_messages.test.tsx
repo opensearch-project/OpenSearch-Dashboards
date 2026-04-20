@@ -795,3 +795,58 @@ describe('share button visibility', () => {
     expect(streamingAnswer?.getAttribute('data-has-timeline')).toBe('false');
   });
 });
+
+describe('share button with running tool calls', () => {
+  const defaultProps = {
+    layoutMode: ChatLayoutMode.SIDECAR,
+    timeline: [] as Message[],
+    isStreaming: false,
+    threadId: 'thread-1',
+  };
+
+  it('should not pass timeline when tool calls are still running', () => {
+    // Simulate a turn where the assistant has text content but a tool call has no result yet
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      {
+        id: '2',
+        role: 'assistant',
+        content: 'Let me look into that...',
+        toolCalls: [
+          { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
+        ],
+      } as AssistantMessage,
+      // No ToolMessage for tc1 — tool is still running
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) =>
+      el.textContent?.includes('Let me look into that')
+    );
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('false');
+  });
+
+  it('should pass timeline when all tool calls have completed', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      {
+        id: '2',
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
+        ],
+      } as AssistantMessage,
+      { id: '3', role: 'tool', content: 'Results', toolCallId: 'tc1' } as ToolMessage,
+      { id: '4', role: 'assistant', content: 'Here is the answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const finalRow = messageRows.find((el) => el.textContent === 'Here is the answer');
+    expect(finalRow?.getAttribute('data-has-timeline')).toBe('true');
+  });
+});

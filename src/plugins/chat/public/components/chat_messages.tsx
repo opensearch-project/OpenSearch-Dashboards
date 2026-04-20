@@ -409,17 +409,32 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
             const assistantMsg = message as AssistantMessage;
 
             // Only show share button on the last assistant message before the next user message
-            // (or end of timeline), and not while streaming. This prevents sharing incomplete
-            // responses and showing share on intermediate tool-call responses.
+            // (or end of timeline), and not while streaming or while tool calls are still running.
+            // This prevents sharing incomplete responses and showing share on intermediate
+            // tool-call responses.
             const isShareable =
               !isStreaming &&
               (() => {
+                // Check if any tool calls in the current turn are still running (no result yet)
+                for (let j = index; j >= 0; j--) {
+                  const prev = messageRows[j];
+                  if (prev.role === 'user') break;
+                  if (prev.role === 'toolCall' && prev.toolCall.status === 'running') return false;
+                  if (prev.role === 'toolCallGroup') {
+                    if (prev.toolCalls.some((tc) => tc.status === 'running')) return false;
+                  }
+                }
+
                 for (let j = index + 1; j < messageRows.length; j++) {
                   const next = messageRows[j];
                   if (next.role === 'user') return true;
                   if (next.role === 'assistant' && (next as AssistantMessage).content) return false;
+                  if (next.role === 'toolCall' && next.toolCall.status === 'running') return false;
+                  if (next.role === 'toolCallGroup') {
+                    if (next.toolCalls.some((tc) => tc.status === 'running')) return false;
+                  }
                 }
-                return true; // Last message in timeline
+                return true; // Last message in timeline with no running tools
               })();
 
             const renderAssistantContent = () => {
