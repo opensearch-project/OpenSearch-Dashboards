@@ -166,7 +166,16 @@ const BreakdownPanel: React.FC<{
             <EuiTitle size="xxs">
               <h3>{s.labelValue}</h3>
             </EuiTitle>
-            <div style={{ marginTop: 4 }}>
+            <div
+              style={{
+                marginTop: 4,
+                minHeight: 160,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: s.values.length > 0 ? undefined : 'center',
+                width: '100%',
+              }}
+            >
               {s.values.length > 0 ? (
                 <SparklineChart
                   values={s.values}
@@ -197,7 +206,16 @@ const BreakdownPanel: React.FC<{
             {data.label} ({data.cardinality})
           </h3>
         </EuiTitle>
-        <div style={{ marginTop: 4 }}>
+        <div
+          style={{
+            marginTop: 4,
+            minHeight: 160,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: data.series.length > 0 ? undefined : 'center',
+            width: '100%',
+          }}
+        >
           {data.series.length > 0 ? (
             <SparklineChart
               series={data.series.map((s) => ({
