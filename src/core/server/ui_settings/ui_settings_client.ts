@@ -147,37 +147,9 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async get<T = any>(key: string, scope?: UiSettingScope): Promise<T> {
-    // If a specific scope is provided, use it directly
-    if (scope) {
-      const all = await this.getAll(scope);
-      return all[key];
-    }
-
-    const scopeValue = this.defaults[key]?.scope;
-    const scopes = scopeValue ? (Array.isArray(scopeValue) ? scopeValue : [scopeValue]) : [];
-
-    // If no scope is provided and the key has multiple scopes
-    if (scopes && scopes?.length > 1) {
-      const validScopes = [...scopes].sort((a, b) => {
-        const indexA = UiSettingScopeReadOptions.findIndex((opt) => opt.scope === a);
-        const indexB = UiSettingScopeReadOptions.findIndex((opt) => opt.scope === b);
-        return indexB - indexA;
-      });
-
-      for (const s of validScopes) {
-        const userProvided = await this.getUserProvided(s);
-
-        if (userProvided && Object.prototype.hasOwnProperty.call(userProvided, key)) {
-          // align with getUserProvided, higher scope takes priority
-          return userProvided[key].userValue as T;
-        }
-      }
-    }
-
-    // For single scope
-    // or no user-provided value is found, fallback to default value
-    const all = await this.getAll(scopes?.[0] as UiSettingScope | undefined);
-    return all[key];
+    const raw = await this.getRaw(scope, key);
+    const item = raw[key];
+    return ('userValue' in item ? item.userValue : item?.value) as T;
   }
 
   async getAll<T = any>(scope?: UiSettingScope) {
@@ -190,15 +162,24 @@ export class UiSettingsClient implements IUiSettingsClient {
     }, {} as Record<string, T>);
   }
 
-  async getUserProvided<T = unknown>(scope?: UiSettingScope): Promise<UserProvided<T>> {
+  async getUserProvided<T = unknown>(
+    scope?: UiSettingScope,
+    key?: string
+  ): Promise<UserProvided<T>> {
     let userProvided: UserProvided<T> = {};
     if (scope) {
       const readOptions = UiSettingScopeReadOptions.find((option) => option.scope === scope);
       userProvided = this.onReadHook<T>(await this.read(readOptions));
     } else {
-      // default will get from all scope and merge
-      // loop UiSettingScopeReadOptions
-      for (const readOptions of UiSettingScopeReadOptions) {
+      // If a key is provided, only read from the scopes that key belongs to.
+      // Otherwise, read from all scopes and merge.
+      const scopeValue = key ? this.defaults[key]?.scope : undefined;
+      const keyScopes = scopeValue ? (Array.isArray(scopeValue) ? scopeValue : [scopeValue]) : null;
+      const scopesToRead = keyScopes
+        ? UiSettingScopeReadOptions.filter((opt) => keyScopes.includes(opt.scope as UiSettingScope))
+        : UiSettingScopeReadOptions;
+
+      for (const readOptions of scopesToRead) {
         userProvided = { ...userProvided, ...this.onReadHook<T>(await this.read(readOptions)) };
       }
     }
@@ -262,8 +243,8 @@ export class UiSettingsClient implements IUiSettingsClient {
     }
   }
 
-  private async getRaw(scope?: UiSettingScope): Promise<UiSettingsRaw> {
-    const userProvided = await this.getUserProvided(scope);
+  private async getRaw(scope?: UiSettingScope, key?: string): Promise<UiSettingsRaw> {
+    const userProvided = await this.getUserProvided(scope, key);
     return defaultsDeep(userProvided, this.defaults);
   }
 
