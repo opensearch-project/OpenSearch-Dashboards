@@ -494,6 +494,43 @@ describe('convertResult', () => {
     expect(result.hits.hits[0].highlight).toBeUndefined();
   });
 
+  it('should not crash processing nested object fields when index is an unhydrated string', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: 0, max_score: 0, hits: [] },
+      body: {
+        fields: [
+          {
+            name: 'metadata',
+            type: 'object',
+            values: [{ created_at: mockDateString, status: 'active' }],
+          },
+        ],
+        size: 1,
+        name: 'test-index',
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const options: ISearchOptions = {
+      formatter: (dateStr: string, type: OSD_FIELD_TYPES) =>
+        type === OSD_FIELD_TYPES.DATE
+          ? moment.utc(dateStr).format('YYYY-MM-DDTHH:mm:ssZ')
+          : dateStr,
+    };
+
+    // `index` is the raw string id — no `.fields` to iterate.
+    const fields: SearchSourceFields = { index: ('abc-123' as unknown) as IndexPattern };
+
+    expect(() => convertResult({ response, fields, options })).not.toThrow();
+    const result = convertResult({ response, fields, options });
+    // Nested date isn't formatted (no index pattern fields to look up the type), but
+    // the row still renders instead of crashing the whole result converter.
+    expect(result.hits.hits[0]._source.metadata.status).toBe('active');
+  });
+
   it('should transform instant data from meta to instantHits format', () => {
     const instantRows = [
       { Time: 1702483200000, cpu: '0', mode: 'idle', Value: 0.95 },

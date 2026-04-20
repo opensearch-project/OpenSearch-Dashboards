@@ -311,6 +311,130 @@ describe('ExploreEmbeddableFactory', () => {
     expect(result).toBeInstanceOf(ErrorEmbeddable);
   });
 
+  describe('hydrates non-INDEX_PATTERN dataset index', () => {
+    const hydratedPattern = { id: 'indexes-id', title: 'train-ticket-logs', fields: [] };
+    const dataset = { id: 'indexes-id', title: 'train-ticket-logs', type: 'INDEXES' };
+
+    const buildServicesWithDataset = (overrides: Record<string, unknown> = {}) => {
+      const searchSourceState: Record<string, unknown> = {
+        index: 'indexes-id',
+        query: { query: '', language: 'PPL', dataset },
+      };
+      const setField = jest.fn((field: string, value: unknown) => {
+        searchSourceState[field] = value;
+      });
+      const getField = jest.fn((field: string) => searchSourceState[field] ?? null);
+      const cacheDataset = jest.fn().mockResolvedValue(undefined);
+      const getIndexPattern = jest.fn().mockResolvedValue(hydratedPattern);
+
+      const services = {
+        ...mockedGetServicesResults,
+        getSavedExploreById: jest.fn().mockResolvedValue({
+          id: 'test-id',
+          title: 'Test Explore',
+          type: 'logs',
+          searchSource: { getField, setField },
+        }),
+        uiSettings: {},
+        savedObjects: {},
+        toastNotifications: {},
+        http: {},
+        data: {
+          indexPatterns: { get: getIndexPattern },
+          query: {
+            queryString: {
+              getDatasetService: () => ({ cacheDataset }),
+            },
+          },
+        },
+        ...overrides,
+      };
+
+      return { services, setField, getField, cacheDataset, getIndexPattern };
+    };
+
+    test('caches the dataset and swaps searchSource.index for a hydrated IndexPattern', async () => {
+      const { services, setField, cacheDataset, getIndexPattern } = buildServicesWithDataset();
+      jest.spyOn(OsdServices, 'getServices').mockReturnValue(services as any);
+
+      const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
+      await factory.createFromSavedObject('test-id', input as any);
+
+      expect(cacheDataset).toHaveBeenCalledWith(
+        dataset,
+        expect.objectContaining({
+          uiSettings: services.uiSettings,
+          savedObjects: services.savedObjects,
+          notifications: services.toastNotifications,
+          http: services.http,
+          data: services.data,
+        })
+      );
+      expect(getIndexPattern).toHaveBeenCalledWith('indexes-id', true);
+      expect(setField).toHaveBeenCalledWith('index', hydratedPattern);
+      expect(ExploreEmbeddable).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPatterns: [hydratedPattern] }),
+        input,
+        mockStartServices.executeTriggerActions,
+        undefined
+      );
+    });
+
+    test('skips hydration for INDEX_PATTERN datasets', async () => {
+      const getField = jest.fn((field) => {
+        if (field === 'index') return 'pattern-id';
+        if (field === 'query')
+          return {
+            query: '',
+            language: 'PPL',
+            dataset: { id: 'pattern-id', type: 'INDEX_PATTERN' },
+          };
+        return null;
+      });
+      const cacheDataset = jest.fn();
+      jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+        ...mockedGetServicesResults,
+        getSavedExploreById: jest.fn().mockResolvedValue({
+          id: 'test-id',
+          title: 'Test Explore',
+          type: 'logs',
+          searchSource: { getField, setField: jest.fn() },
+        }),
+        data: {
+          indexPatterns: { get: jest.fn() },
+          query: { queryString: { getDatasetService: () => ({ cacheDataset }) } },
+        },
+      } as any);
+
+      const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
+      await factory.createFromSavedObject('test-id', input as any);
+
+      expect(cacheDataset).not.toHaveBeenCalled();
+    });
+
+    test('falls through without crashing if cacheDataset throws', async () => {
+      const { services, setField } = buildServicesWithDataset({
+        data: {
+          indexPatterns: { get: jest.fn() },
+          query: {
+            queryString: {
+              getDatasetService: () => ({
+                cacheDataset: jest.fn().mockRejectedValue(new Error('boom')),
+              }),
+            },
+          },
+        },
+      });
+      jest.spyOn(OsdServices, 'getServices').mockReturnValue(services as any);
+
+      const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
+      const result = await factory.createFromSavedObject('test-id', input as any);
+
+      expect(setField).not.toHaveBeenCalled();
+      expect(result).not.toBeInstanceOf(ErrorEmbeddable);
+    });
+  });
+
   test('createFromSavedObject works when indexPattern is null', async () => {
     jest.spyOn(OsdServices, 'getServices').mockReturnValue({
       ...mockedGetServicesResults,

@@ -58,13 +58,22 @@ export const createSearchSource = (
   const fields = { ...searchSourceFields };
 
   // hydrating index pattern
-  if (
-    fields.index &&
-    typeof fields.index === 'string' &&
-    (!fields.query?.dataset?.type ||
-      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
-  ) {
-    fields.index = await indexPatterns.get(fields.index as string);
+  if (fields.index && typeof fields.index === 'string') {
+    const isIndexPattern =
+      !fields.query?.dataset?.type ||
+      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+    try {
+      // Non-INDEX_PATTERN datasets (e.g. INDEXES) have no saved object, so fall back
+      // to a cache-only lookup populated by datasetService.cacheDataset.
+      const pattern = isIndexPattern
+        ? await indexPatterns.get(fields.index as string)
+        : await indexPatterns.get(fields.index as string, true);
+      if (pattern) {
+        fields.index = pattern;
+      }
+    } catch (e) {
+      // leave fields.index as a string; downstream consumers must guard for this.
+    }
   }
 
   const searchSource = new SearchSource(fields, searchSourceDependencies);

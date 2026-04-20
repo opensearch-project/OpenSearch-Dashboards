@@ -135,4 +135,36 @@ describe('createSearchSource', () => {
       language: 'lucene',
     });
   });
+
+  describe('index hydration by dataset type', () => {
+    it('hydrates via full get() when no dataset type is set', async () => {
+      await createSearchSource({ index: 'abc-123' } as any);
+      expect(indexPatternContractMock.get).toHaveBeenCalledWith('abc-123');
+    });
+
+    it('hydrates via full get() for INDEX_PATTERN datasets', async () => {
+      await createSearchSource({
+        index: 'abc-123',
+        query: { query: '', language: 'PPL', dataset: { id: 'abc-123', type: 'INDEX_PATTERN' } },
+      } as any);
+      expect(indexPatternContractMock.get).toHaveBeenCalledWith('abc-123');
+    });
+
+    it('hydrates via cache-only get() for non-INDEX_PATTERN datasets', async () => {
+      await createSearchSource({
+        index: 'abc-123',
+        query: { query: '', language: 'PPL', dataset: { id: 'abc-123', type: 'INDEXES' } },
+      } as any);
+      expect(indexPatternContractMock.get).toHaveBeenCalledWith('abc-123', true);
+    });
+
+    it('leaves index as string when hydration throws', async () => {
+      indexPatternContractMock.get.mockRejectedValueOnce(new Error('not found'));
+      const searchSource = await createSearchSource({
+        index: 'abc-123',
+        query: { query: '', language: 'PPL', dataset: { id: 'abc-123', type: 'INDEXES' } },
+      } as any);
+      expect(searchSource.getField('index')).toBe('abc-123');
+    });
+  });
 });

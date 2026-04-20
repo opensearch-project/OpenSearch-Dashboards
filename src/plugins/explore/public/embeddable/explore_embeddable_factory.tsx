@@ -15,10 +15,12 @@ import {
   ErrorEmbeddable,
 } from '../../../embeddable/public';
 import {
+  ISearchSource,
   TimeRange,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
 } from '../../../data/public';
+import { DEFAULT_DATA } from '../../../data/common';
 import { ExploreInput, ExploreOutput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { ExploreEmbeddable } from './explore_embeddable';
@@ -29,6 +31,39 @@ import { SavedExplore } from '../saved_explore';
 interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
   isEditable: () => boolean;
+}
+
+/**
+ * For non-INDEX_PATTERN datasets (e.g. INDEXES), the saved search source stores the
+ * index as a string id and there is no backing saved-object to resolve it. Prime the
+ * dataset cache and swap the `index` field to a hydrated IndexPattern so downstream
+ * code that assumes a full IndexPattern (flattenHit, fields.forEach, etc.) works.
+ */
+async function hydrateSearchSourceIndex(
+  searchSource: ISearchSource,
+  services: ReturnType<typeof getServices>
+) {
+  const index = searchSource.getField('index');
+  if (!index || typeof index !== 'string') return;
+  const query = searchSource.getField('query');
+  const dataset = query?.dataset;
+  if (!dataset || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) return;
+  try {
+    const datasetService = services.data.query.queryString.getDatasetService();
+    await datasetService.cacheDataset(dataset, {
+      uiSettings: services.uiSettings,
+      savedObjects: services.savedObjects,
+      notifications: services.toastNotifications,
+      http: services.http,
+      data: services.data,
+    });
+    const pattern = await services.data.indexPatterns.get(dataset.id, true);
+    if (pattern) {
+      searchSource.setField('index', pattern);
+    }
+  } catch (e) {
+    // Leave as string; downstream has defensive guards.
+  }
 }
 
 export class ExploreEmbeddableFactory
@@ -91,6 +126,7 @@ export class ExploreEmbeddableFactory
       if (!savedObject) {
         throw new Error('Saved object not found');
       }
+      await hydrateSearchSourceIndex(savedObject.searchSource, services);
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
       const { ExploreEmbeddable: ExploreEmbeddableClass } = await import('./explore_embeddable');
@@ -151,6 +187,7 @@ export class ExploreEmbeddableFactory
       );
       searchSourceValues = injectSearchSourceReferences(searchSourceValues, references);
       const searchSource = await services.data.search.searchSource.create(searchSourceValues);
+      await hydrateSearchSourceIndex(searchSource, services);
       const indexPattern = searchSource.getField('index');
 
       const savedExplore = {
