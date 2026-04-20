@@ -2583,6 +2583,13 @@
   dependencies:
     "@hapi/hoek" "9.x.x"
 
+"@hapi/boom@^10.0.0":
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-10.0.1.tgz#ebb14688275ae150aa6af788dbe482e6a6062685"
+  integrity sha512-ERcCZaEjdH3OgSJlyjVk8pHIFeus91CjKP3v+MpgBNp5IvGzP2l/bRiD78nqYcKPaZdbKkK5vDBVPd2ohHBlsA==
+  dependencies:
+    "@hapi/hoek" "^11.0.2"
+
 "@hapi/bounce@2.x.x", "@hapi/bounce@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@hapi/bounce/-/bounce-2.0.0.tgz#e6ef56991c366b1e2738b2cd83b01354d938cf3d"
@@ -2622,12 +2629,12 @@
     "@hapi/podium" "4.x.x"
     "@hapi/validate" "1.x.x"
 
-"@hapi/content@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@hapi/content/-/content-5.0.2.tgz#ae57954761de570392763e64cdd75f074176a804"
-  integrity sha512-mre4dl1ygd4ZyOH3tiYBrOUBzV7Pu/EOs8VLGf58vtOEECWed8Uuw6B4iR9AN/8uQt42tB04qpVaMyoMQh0oMw==
+"@hapi/content@^5.0.2", "@hapi/content@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@hapi/content/-/content-6.0.1.tgz#b0afe7523c9f754726852204dd2d32ec1578cb64"
+  integrity sha512-lQ2vOoFMNYxwKVnKf+3Pi3PfoviM4EJYlT9JbrBPfEc0xKMiVDqqXF8UTE1S1oKhHQliWSP5t6zTKNlmaXBGcQ==
   dependencies:
-    "@hapi/boom" "9.x.x"
+    "@hapi/boom" "^10.0.0"
 
 "@hapi/cookie@^11.0.2":
   version "11.0.2"
@@ -2706,6 +2713,11 @@
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
   integrity sha512-gfta+H8aziZsm8pZa0vj04KO6biEiisppNgA1kbJvFrrWu9Vm7eaUEy76DIxsuTaWvti5fkJVhllWc6ZTE+Mdw==
+
+"@hapi/hoek@^11.0.2":
+  version "11.0.7"
+  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-11.0.7.tgz#56a920793e0a42d10e530da9a64cc0d3919c4002"
+  integrity sha512-HV5undWkKzcB4RZUusqOpcgxOaq6VOAH7zhhIr2g3G8NF/MlFO75SjOr2NfuSx0Mh40+1FqCkagKLJRykUWoFQ==
 
 "@hapi/hoek@^9.3.0":
   version "9.3.0"
