@@ -60,7 +60,6 @@ import {
   VariableInterpolationService,
   IVariableInterpolationService,
 } from '../../variables/variable_interpolation_service';
-import { setActiveVariables } from '../../variables/active_variables';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
@@ -117,6 +116,7 @@ export interface DashboardContainerOptions {
   uiActions: UiActionsStart;
   data?: DataPublicPluginStart;
   initialVariables?: Variable[];
+  savedObjects?: CoreStart['savedObjects'];
 }
 
 export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
@@ -156,13 +156,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
     this.logos = options.chrome.logos;
 
-    this.variableService = new VariableService(options.data);
-
-    this.variableService.connect(
-      (input) => this.updateInput(input),
-      () => this.getInput(),
-      () => this.getInput$()
+    this.variableService = new VariableService(
+      options.data,
+      initialInput.id,
+      options.savedObjects?.client
     );
+
+    this.variableService.initialize(initialInput.variables);
 
     this.variableInterpolationService = new VariableInterpolationService(() =>
       this.variableService.getVariables()
@@ -174,11 +174,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       this.variableService.refreshAllVariableOptions();
     }
 
-    setActiveVariables(initialInput.variables);
+    // Subscribe to variable changes and update container input
+    // Use getVariablesWithoutState$() to get pure Variables (no runtime state)
     this.variableSubscriptions.push(
-      this.getInput$().subscribe({
-        next: (input) => setActiveVariables(input.variables),
-        complete: () => setActiveVariables(undefined),
+      this.variableService.getVariablesWithoutState$().subscribe((variables) => {
+        this.updateInput({ variables });
       })
     );
     this.initVariableRefreshSubscription();
@@ -190,7 +190,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.variableSubscriptions.push(
       this.getInput$().subscribe((input) => {
-        const hasQueryVariables = (input.variables || []).some((v) => v.type === 'query');
+        const variables = this.variableService.getVariables();
+        const hasQueryVariables = variables.some((v) => v.type === 'query');
         if (!hasQueryVariables) return;
 
         const timeRangeChanged = !isEqual(input.timeRange, prevTimeRange);
@@ -323,7 +324,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.variableSubscriptions.forEach((s) => s.unsubscribe());
     this.variableSubscriptions = [];
     this.variableService.destroy();
-    setActiveVariables(undefined);
   }
 
   /**

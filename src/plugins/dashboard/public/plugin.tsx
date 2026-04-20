@@ -121,14 +121,13 @@ import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
-import { AttributeService, Variable } from '.';
+import { AttributeService } from '.';
 import {
   AttributeServiceOptions,
   ATTRIBUTE_SERVICE_KEY,
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
-import { getActiveVariables } from './variables/active_variables';
 import { VariablesBar } from './application/components/dashboard_variables';
 
 declare module '../../share/public' {
@@ -179,7 +178,6 @@ export interface DashboardStart {
     embeddableId: string;
     embeddableType: string;
   }) => void | undefined;
-  getActiveVariables: () => Variable[] | undefined;
   VariablesBar: typeof VariablesBar;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
@@ -277,6 +275,7 @@ export class DashboardPlugin
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
         chrome: coreStart.chrome,
+        savedObjects: coreStart.savedObjects,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
@@ -651,7 +650,6 @@ export class DashboardPlugin
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
-      getActiveVariables,
       VariablesBar,
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,

@@ -8,6 +8,7 @@ import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import uuid from 'uuid';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { DataPublicPluginStart } from '../../../data/public';
+import { SavedObjectsClientContract } from '../../../../core/public';
 import {
   Variable,
   VariableType,
@@ -20,60 +21,104 @@ import {
 import { executeQueryForOptions, filterOptionsByRegex } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
 
-export type UpdateInputCallback = (input: {
-  variables?: Variable[];
-  lastReloadRequestTime?: number;
-}) => void;
-export type GetInputCallback = () => { variables?: Variable[] };
-export type GetInput$Callback = () => Observable<{ variables?: Variable[] }>;
-
 /**
- * VariableService — manages dashboard variables through DashboardContainer.
+ * VariableService — a self-contained feature for managing dashboard variables.
  */
 export class VariableService {
   private dataPlugin?: DataPublicPluginStart;
-  private updateInput?: UpdateInputCallback;
-  private getInput?: GetInputCallback;
-  private getInput$?: GetInput$Callback;
+  private dashboardId?: string;
+  private savedObjectsClient?: SavedObjectsClientContract;
+  private variables$ = new BehaviorSubject<Variable[]>([]);
   private refreshControllers: Map<string, AbortController> = new Map();
   private interpolationService?: IVariableInterpolationService;
   private runtimeState: Map<string, VariableState> = new Map();
   private runtimeStateChange$ = new BehaviorSubject<number>(0);
 
-  constructor(dataPlugin?: DataPublicPluginStart) {
+  /**
+   * @param dataPlugin - Data plugin for executing queries
+   * @param dashboardId - Dashboard ID for auto-saving (optional)
+   * @param savedObjectsClient - Client for saving to dashboard saved object
+   */
+  constructor(
+    dataPlugin?: DataPublicPluginStart,
+    dashboardId?: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ) {
     this.dataPlugin = dataPlugin;
+    this.dashboardId = dashboardId;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   public setInterpolationService(service: IVariableInterpolationService): void {
     this.interpolationService = service;
   }
 
-  public connect(
-    updateInput: UpdateInputCallback,
-    getInput: GetInputCallback,
-    getInput$: GetInput$Callback
-  ): void {
-    this.updateInput = updateInput;
-    this.getInput = getInput;
-    this.getInput$ = getInput$;
-    this.getVariables().forEach((v) => this.ensureRuntimeState(v));
+  /**
+   * Initialize the service with variables loaded from dashboard saved object.
+   * This should be called once after creating the service.
+   *
+   * @param initialVariables - Variables loaded from dashboard saved object
+   */
+  public initialize(initialVariables: Variable[] = []): void {
+    this.variables$.next(initialVariables);
+
+    // Initialize runtime state for all variables
+    initialVariables.forEach((v) => this.ensureRuntimeState(v));
+  }
+
+  /**
+   * Initialize the service by loading variables from dashboard saved object (asynchronous).
+   * Only works if dashboardId and savedObjectsClient were provided in constructor.
+   * This should be called once after creating the service, as an alternative to initialize().
+   */
+  public async initializeFromDashboard(): Promise<void> {
+    if (!this.dashboardId || !this.savedObjectsClient) {
+      return;
+    }
+
+    try {
+      const dashboard = await this.savedObjectsClient.get<{ variablesJSON?: string }>(
+        'dashboard',
+        this.dashboardId
+      );
+      let variables: Variable[] = [];
+
+      if (dashboard.attributes.variablesJSON) {
+        const parsed = JSON.parse(dashboard.attributes.variablesJSON);
+        variables = parsed.variables || [];
+      }
+
+      this.initialize(variables);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[VariableService] Failed to load variables from dashboard:', error);
+    }
   }
 
   /**
    * Observable of variables merged with their runtime state.
+   * Use this for UI components that need loading/error states.
    */
   public getVariables$(): Observable<VariableWithState[]> {
-    if (!this.getInput$) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
-    return combineLatest([this.getInput$(), this.runtimeStateChange$]).pipe(
-      map(([input]) => this.mergeWithState(input.variables || [])),
+    return combineLatest([this.variables$, this.runtimeStateChange$]).pipe(
+      map(([variables]) => this.mergeWithState(variables)),
       distinctUntilChanged((prev, curr) => isEqual(prev, curr))
     );
   }
 
+  /**
+   * Observable of pure variables (configuration + current values only, no runtime state).
+   * Use this for persistence/serialization where runtime state should be excluded.
+   */
+  public getVariablesWithoutState$(): Observable<Variable[]> {
+    return this.variables$.pipe(distinctUntilChanged((prev, curr) => isEqual(prev, curr)));
+  }
+
+  /**
+   * Observable of variable values (name -> current values mapping).
+   */
   public getValues$(): Observable<Record<string, string[]>> {
-    return this.getVariables$().pipe(
+    return this.variables$.pipe(
       map((variables) => {
         const values: Record<string, string[]> = {};
         variables.forEach((v) => {
@@ -85,12 +130,11 @@ export class VariableService {
     );
   }
 
-  /** Get persisted variables (without runtime state) */
+  /**
+   * Get current variables (without runtime state).
+   */
   public getVariables(): Variable[] {
-    if (!this.getInput) {
-      return [];
-    }
-    return this.getInput().variables || [];
+    return this.variables$.getValue();
   }
 
   /** Get variables merged with runtime state */
@@ -107,11 +151,10 @@ export class VariableService {
     return values;
   }
 
+  /**
+   * Add a new variable.
+   */
   public async addVariable(variable: Omit<Variable, 'id' | 'current'>): Promise<void> {
-    if (!this.updateInput || !this.getInput) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
-
     const id = this.generateId();
     const newVariable = this.buildVariable(id, variable);
 
@@ -122,7 +165,7 @@ export class VariableService {
     this.runtimeState.set(id, { options });
 
     const updatedVariables = [...this.getVariables(), newVariable];
-    this.updateInput({ variables: updatedVariables });
+    await this.saveVariables(updatedVariables);
 
     if (newVariable.type === VariableType.Query) {
       await this.refreshVariableOptions(id);
@@ -130,10 +173,6 @@ export class VariableService {
   }
 
   public async updateVariable(id: string, updates: Partial<Variable>): Promise<void> {
-    if (!this.updateInput) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
-
     const currentVariables = this.getVariables();
     const index = currentVariables.findIndex((v) => v.id === id);
     if (index === -1) {
@@ -189,38 +228,29 @@ export class VariableService {
 
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = updatedVariable;
-    this.updateInput({ variables: updatedVariables });
+    await this.saveVariables(updatedVariables);
 
     if ((updates as any).query !== undefined && updatedVariable.type === VariableType.Query) {
       await this.refreshVariableOptions(id);
     }
   }
 
-  public removeVariable(id: string): void {
-    if (!this.updateInput) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
+  public async removeVariable(id: string): Promise<void> {
     const updatedVariables = this.getVariables().filter((v) => v.id !== id);
     this.refreshControllers.get(id)?.abort();
     this.refreshControllers.delete(id);
     this.runtimeState.delete(id);
-    this.updateInput({ variables: updatedVariables });
+    await this.saveVariables(updatedVariables);
   }
 
   public reorderVariables(sourceIndex: number, destinationIndex: number): void {
-    if (!this.updateInput) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
     const vars = [...this.getVariables()];
     const [moved] = vars.splice(sourceIndex, 1);
     vars.splice(destinationIndex, 0, moved);
-    this.updateInput({ variables: vars });
+    this.variables$.next(vars);
   }
 
   public updateVariableValue(id: string, value: string[]): void {
-    if (!this.updateInput) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
     const currentVariables = this.getVariables();
     const index = currentVariables.findIndex((v) => v.id === id);
     if (index === -1) {
@@ -230,16 +260,12 @@ export class VariableService {
     const variable = currentVariables[index];
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = { ...variable, current: value } as Variable;
-    this.updateInput({ variables: updatedVariables });
+    this.variables$.next(updatedVariables);
 
     this.refreshDependentVariables(variable.name);
   }
 
   public async refreshVariableOptions(id: string): Promise<void> {
-    if (!this.updateInput) {
-      throw new Error('VariableService not connected to DashboardContainer');
-    }
-
     const variable = this.getVariables().find((v) => v.id === id);
     if (!variable || variable.type !== VariableType.Query) {
       return;
@@ -271,7 +297,7 @@ export class VariableService {
       const updatedVariables = currentVariables.map((v) =>
         v.id === id ? { ...v, current: preservedCurrent } : v
       );
-      this.updateInput({ variables: updatedVariables });
+      this.variables$.next(updatedVariables);
     } catch (error: any) {
       if (error?.name === 'AbortError') {
         return;
@@ -438,13 +464,37 @@ export class VariableService {
     return uuid.v4();
   }
 
+  /**
+   * Save variables - updates internal state and persists configuration to dashboard.
+   * @param variables - Updated variables array
+   */
+  private async saveVariables(variables: Variable[]): Promise<void> {
+    // Update internal state first for immediate UI feedback
+    this.variables$.next(variables);
+
+    if (!this.dashboardId || !this.savedObjectsClient) {
+      return;
+    }
+
+    try {
+      const variablesJSON = variables.length > 0 ? JSON.stringify({ variables }) : undefined;
+      await this.savedObjectsClient.update('dashboard', this.dashboardId, {
+        variablesJSON,
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[VariableService] Failed to save variables to dashboard:', error);
+      throw error;
+    }
+  }
+
   public destroy(): void {
     this.refreshControllers.forEach((c) => c.abort());
     this.refreshControllers.clear();
     this.runtimeState.clear();
     this.runtimeStateChange$.complete();
-    this.updateInput = undefined;
-    this.getInput = undefined;
-    this.getInput$ = undefined;
+    this.variables$.complete();
+    this.dashboardId = undefined;
+    this.savedObjectsClient = undefined;
   }
 }
