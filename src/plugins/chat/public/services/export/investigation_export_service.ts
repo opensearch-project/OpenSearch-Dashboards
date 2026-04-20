@@ -116,39 +116,14 @@ export function findPrecedingQuestion(
 }
 
 /**
- * Extract trace steps from tool calls on the target assistant message
- * and their corresponding tool result messages in the timeline.
+ * Extract trace steps from all assistant tool calls in the same Q&A turn.
+ *
+ * A turn is defined as the slice of the timeline from the preceding user message
+ * (exclusive) to the next user message (exclusive). This captures all assistant
+ * messages with tool calls and their corresponding tool results.
  */
 export function extractTraces(timeline: Message[], targetIndex: number): ChatTraceStep[] {
-  const targetMessage = timeline[targetIndex] as AssistantMessage;
-  const toolCalls = targetMessage.toolCalls || [];
-
-  if (!toolCalls.length) {
-    return extractTracesFromTurn(timeline, targetIndex);
-  }
-
-  // Scope tool result search to the same Q&A turn
-  const turnMessages = getTurnMessages(timeline, targetIndex);
-
-  return toolCalls.map((toolCall) => {
-    const toolResult = turnMessages.find(
-      (msg) => msg.role === 'tool' && (msg as ToolMessage).toolCallId === toolCall.id
-    ) as ToolMessage | undefined;
-
-    return {
-      toolName: toolCall.function.name,
-      arguments: toolCall.function.arguments,
-      result: toolResult?.content,
-      error: toolResult?.error,
-    };
-  });
-}
-
-/**
- * Get the slice of the timeline that belongs to the same Q&A turn as the target message.
- * A turn starts after the preceding user message and ends before the next user message.
- */
-export function getTurnMessages(timeline: Message[], targetIndex: number): Message[] {
+  // Find the preceding user message to determine turn start
   let turnStart = 0;
   for (let i = targetIndex - 1; i >= 0; i--) {
     if (timeline[i].role === 'user') {
@@ -157,6 +132,7 @@ export function getTurnMessages(timeline: Message[], targetIndex: number): Messa
     }
   }
 
+  // Find the next user message to determine turn end
   let turnEnd = timeline.length;
   for (let i = targetIndex + 1; i < timeline.length; i++) {
     if (timeline[i].role === 'user') {
@@ -165,32 +141,24 @@ export function getTurnMessages(timeline: Message[], targetIndex: number): Messa
     }
   }
 
-  return timeline.slice(turnStart, turnEnd);
-}
-
-/**
- * Extract traces from all assistant messages and tool results
- * in the same Q&A turn (between the preceding user message and the next user message).
- */
-export function extractTracesFromTurn(timeline: Message[], targetIndex: number): ChatTraceStep[] {
-  const turnMessages = getTurnMessages(timeline, targetIndex);
+  const turnMessages = timeline.slice(turnStart, turnEnd);
   const traces: ChatTraceStep[] = [];
 
   for (const msg of turnMessages) {
-    if (msg.role === 'assistant') {
-      const assistantMsg = msg as AssistantMessage;
-      for (const toolCall of assistantMsg.toolCalls || []) {
-        const toolResult = turnMessages.find(
-          (m) => m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
-        ) as ToolMessage | undefined;
+    if (msg.role !== 'assistant') continue;
+    const assistantMsg = msg as AssistantMessage;
 
-        traces.push({
-          toolName: toolCall.function.name,
-          arguments: toolCall.function.arguments,
-          result: toolResult?.content,
-          error: toolResult?.error,
-        });
-      }
+    for (const toolCall of assistantMsg.toolCalls || []) {
+      const toolResult = turnMessages.find(
+        (m) => m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
+      ) as ToolMessage | undefined;
+
+      traces.push({
+        toolName: toolCall.function.name,
+        arguments: toolCall.function.arguments,
+        result: toolResult?.content,
+        error: toolResult?.error,
+      });
     }
   }
 

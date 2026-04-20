@@ -8,7 +8,6 @@ import {
   collectChatExportData,
   findPrecedingQuestion,
   extractTraces,
-  extractTracesFromTurn,
 } from './investigation_export_service';
 
 describe('findPrecedingQuestion', () => {
@@ -173,7 +172,7 @@ describe('extractTraces', () => {
     expect(traces[1].toolName).toBe('ToolB');
   });
 
-  it('should fall back to extractTracesFromTurn when no toolCalls on target', () => {
+  it('should collect traces from earlier assistant messages in the same turn', () => {
     const timeline: Message[] = [
       { id: 'u1', role: 'user', content: 'Question' } as UserMessage,
       {
@@ -188,25 +187,6 @@ describe('extractTraces', () => {
     const traces = extractTraces(timeline, 3);
     expect(traces).toHaveLength(1);
     expect(traces[0].toolName).toBe('ToolA');
-  });
-});
-
-describe('extractTracesFromTurn', () => {
-  it('should extract traces from the same Q&A turn', () => {
-    const timeline: Message[] = [
-      { id: 'u1', role: 'user', content: 'Q1' } as UserMessage,
-      {
-        id: 'a1',
-        role: 'assistant',
-        toolCalls: [{ id: 'tc1', type: 'function', function: { name: 'Tool1', arguments: '{}' } }],
-      } as AssistantMessage,
-      { id: 'tr1', role: 'tool', content: 'R1', toolCallId: 'tc1' } as ToolMessage,
-      { id: 'a2', role: 'assistant', content: 'Answer' } as AssistantMessage,
-      { id: 'u2', role: 'user', content: 'Q2' } as UserMessage,
-    ];
-    const traces = extractTracesFromTurn(timeline, 3);
-    expect(traces).toHaveLength(1);
-    expect(traces[0].toolName).toBe('Tool1');
   });
 
   it('should not include traces from a different Q&A turn', () => {
@@ -231,7 +211,7 @@ describe('extractTracesFromTurn', () => {
       { id: 'tr2', role: 'tool', content: 'New result', toolCallId: 'tc2' } as ToolMessage,
       { id: 'a3', role: 'assistant', content: 'Final' } as AssistantMessage,
     ];
-    const traces = extractTracesFromTurn(timeline, 6);
+    const traces = extractTraces(timeline, 6);
     expect(traces).toHaveLength(1);
     expect(traces[0].toolName).toBe('NewTool');
   });
@@ -241,7 +221,7 @@ describe('extractTracesFromTurn', () => {
       { id: 'u1', role: 'user', content: 'Q1' } as UserMessage,
       { id: 'a1', role: 'assistant', content: 'Simple answer' } as AssistantMessage,
     ];
-    const traces = extractTracesFromTurn(timeline, 1);
+    const traces = extractTraces(timeline, 1);
     expect(traces).toHaveLength(0);
   });
 });
