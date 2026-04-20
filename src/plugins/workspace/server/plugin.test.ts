@@ -593,13 +593,7 @@ describe('Workspace server plugin', () => {
         },
       });
       const request = httpServerMock.createOpenSearchDashboardsRequest();
-<<<<<<< HEAD
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'any-user', [
-=======
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], [
->>>>>>> 7307cb0d42 (Fix PR comments)
-        'read',
-      ]);
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], ['read']);
       expect(result.authorized).toBe(true);
     });
 
@@ -615,14 +609,11 @@ describe('Workspace server plugin', () => {
         },
       });
       const request = httpServerMock.createOpenSearchDashboardsRequest();
-<<<<<<< HEAD
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], 'user1', [
-=======
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], [
->>>>>>> 7307cb0d42 (Fix PR comments)
-        'library_write',
-        'library_read',
-      ]);
+      const result = await workspaceStart.authorizeWorkspace(
+        request,
+        ['ws-1'],
+        ['library_write', 'library_read']
+      );
       expect(result.authorized).toBe(true);
     });
 
@@ -662,13 +653,7 @@ describe('Workspace server plugin', () => {
           result: { id: 'ws-2', permissions: { read: { users: ['other-user'] } } },
         });
       const request = httpServerMock.createOpenSearchDashboardsRequest();
-<<<<<<< HEAD
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1', 'ws-2'], 'user1', [
-=======
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1', 'ws-2'], [
->>>>>>> 7307cb0d42 (Fix PR comments)
-        'read',
-      ]);
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1', 'ws-2'], ['read']);
       expect(result.authorized).toBe(false);
       expect(result.unauthorizedWorkspaces).toEqual(['ws-2']);
     });
@@ -691,9 +676,7 @@ describe('Workspace server plugin', () => {
     it('should skip ACL check and return authorized when principal is dashboard admin', async () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(request, { isDashboardAdmin: true });
-      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], [
-        'read',
-      ]);
+      const result = await workspaceStart.authorizeWorkspace(request, ['ws-1'], ['read']);
       expect(result.authorized).toBe(true);
       expect(clientGetSpy).not.toHaveBeenCalled();
     });
