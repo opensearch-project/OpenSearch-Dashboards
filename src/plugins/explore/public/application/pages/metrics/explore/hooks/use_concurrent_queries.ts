@@ -157,17 +157,14 @@ export function useConcurrentQueries<T>(
     } else {
       if (s.pinned.has(key)) return;
       s.viewport.delete(key);
+      // Only cancel work that hasn't started yet. Let inflight fetches finish
+      // so their results land in state (and dataCache) — scroll-back then
+      // renders immediately without a refetch.
       const timer = s.pending.get(key);
       if (timer) {
         clearTimeout(timer);
         s.pending.delete(key);
       }
-      const ctrl = s.inflight.get(key);
-      if (ctrl) {
-        ctrl.abort();
-        s.inflight.delete(key);
-      }
-      s.buffered.delete(key);
       s.queue = s.queue.filter((n) => n !== key);
     }
   }, []);
