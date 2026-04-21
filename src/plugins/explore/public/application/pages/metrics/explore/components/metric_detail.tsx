@@ -352,7 +352,9 @@ export const MetricDetail: React.FC = () => {
             fill
             data-test-subj="metricsExploreExecuteButton"
           >
-            {i18n.translate('explore.metricsExplore.execute', { defaultMessage: 'Execute' })}
+            {i18n.translate('explore.metricsExplore.execute', {
+              defaultMessage: 'Run Visualization Query',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

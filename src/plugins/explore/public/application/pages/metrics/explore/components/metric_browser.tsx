@@ -354,8 +354,7 @@ export const MetricBrowser: React.FC = () => {
                 size="s"
               >
                 {i18n.translate('explore.metricsExplore.executeSelected', {
-                  defaultMessage: 'Execute ({count})',
-                  values: { count: selected.size },
+                  defaultMessage: 'Run Visualization Query',
                 })}
               </EuiButton>
             </EuiFlexItem>
