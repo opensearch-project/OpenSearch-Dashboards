@@ -14,9 +14,7 @@ const mockStore = configureMockStore([]);
 const store = mockStore({
   tab: {
     visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
+      styleOptions: {},
     },
   },
 });
@@ -103,7 +101,6 @@ describe('AllAxesOptions', () => {
   const defaultProps = {
     standardAxes: mockStandardAxes,
     onStandardAxesChange: jest.fn(),
-    onChangeSwitchAxes: jest.fn(),
     disableGrid: false,
     axisColumnMappings: {
       [AxisRole.X]: {
@@ -150,23 +147,6 @@ describe('AllAxesOptions', () => {
     expect(screen.getByText('Show Y-Axis')).toBeInTheDocument();
   });
 
-  it('should switch label is switchAxes is true', () => {
-    const switchStore = mockStore({
-      tab: {
-        visualizations: {
-          styleOptions: {
-            switchAxes: true,
-          },
-        },
-      },
-    });
-
-    render(
-      <Provider store={switchStore}>
-        <AllAxesOptions {...defaultProps} />
-      </Provider>
-    );
-  });
   it('shows/hides label options based on show labels toggle', () => {
     render(
       <Provider store={store}>

@@ -21,13 +21,13 @@ import { VisualizationRender } from './visualization_render';
 import { StylePanelRender } from './style_panel_render';
 import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
-import { RenderChartConfig } from './types';
+import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
 
 interface VisState {
   styleOptions?: StyleOptions;
   chartType?: string;
-  axesMapping?: Record<string, string>;
+  axesMapping?: AxisFieldNameMappings;
 }
 
 interface Options {
@@ -208,7 +208,7 @@ export class VisualizationBuilder {
    */
   reuseCurrentAxesMapping(
     chartType: ChartType,
-    axesMapping: Record<string, string>,
+    axesMapping: AxisFieldNameMappings,
     data: VisData | undefined
   ) {
     const allColumns = [
@@ -321,7 +321,7 @@ export class VisualizationBuilder {
     }
   }
 
-  setAxesMapping(mapping: Record<string, string>) {
+  setAxesMapping(mapping: AxisFieldNameMappings) {
     const config = this.visConfig$.value;
     if (config && !isEqual(config.axesMapping, mapping)) {
       this.setIsVisDirty(true);
@@ -329,7 +329,7 @@ export class VisualizationBuilder {
     }
   }
 
-  syncToUrl<State>(visState: VisState, isVisDirty?: boolean) {
+  syncToUrl(visState: VisState, isVisDirty?: boolean) {
     const urlStateStorage = this.getUrlStateStorage?.();
 
     if (urlStateStorage) {

@@ -278,17 +278,17 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
 
           const seriesDisplayName = getSeriesDisplayName(
             seriesField,
-            Object.values(axisColumnMappings)
+            Object.values(axisColumnMappings).flat()
           );
 
           const categoryDisplayName = getSeriesDisplayName(
             categoryFields[0],
-            Object.values(axisColumnMappings)
+            Object.values(axisColumnMappings).flat()
           );
 
           const categoryDisplayName2 = getSeriesDisplayName(
             categoryFields[1],
-            Object.values(axisColumnMappings)
+            Object.values(axisColumnMappings).flat()
           );
 
           const categoryIndex = transformedData[0].indexOf(categoryFields[0]);

@@ -38,7 +38,6 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
   };
 
   const hasMappingSelected = !isEmpty(axisColumnMappings);
-  const isXaxisNumerical = axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -97,7 +96,6 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
             <BarGaugeExclusiveVisOptions
               styles={styleOptions.exclusive}
               onChange={(options) => updateStyleOption('exclusive', options)}
-              isXaxisNumerical={isXaxisNumerical}
             />
           </EuiFlexItem>
 

@@ -15,7 +15,6 @@ jest.mock('@osd/i18n', () => ({
 
 describe('BarGaugeExclusiveVisOptions', () => {
   const defaultStyles: ExclusiveBarGaugeConfig = {
-    orientation: 'vertical',
     displayMode: 'gradient',
     valueDisplay: 'valueColor',
     showUnfilledArea: true,
@@ -27,30 +26,9 @@ describe('BarGaugeExclusiveVisOptions', () => {
     jest.clearAllMocks();
   });
 
-  it('should call onChange when orientation is changed', () => {
-    const { getByText } = render(
-      <BarGaugeExclusiveVisOptions
-        styles={defaultStyles}
-        onChange={mockOnChange}
-        isXaxisNumerical={false}
-      />
-    );
-
-    fireEvent.click(getByText('Horizontal'));
-
-    expect(mockOnChange).toHaveBeenCalledWith({
-      ...defaultStyles,
-      orientation: 'horizontal',
-    });
-  });
-
   it('should call onChange when display style is changed', () => {
     const { getByText } = render(
-      <BarGaugeExclusiveVisOptions
-        styles={defaultStyles}
-        onChange={mockOnChange}
-        isXaxisNumerical={false}
-      />
+      <BarGaugeExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />
     );
 
     fireEvent.click(getByText('Stack'));
@@ -63,11 +41,7 @@ describe('BarGaugeExclusiveVisOptions', () => {
 
   it('should call onChange when value display is changed', () => {
     const { getByText } = render(
-      <BarGaugeExclusiveVisOptions
-        styles={defaultStyles}
-        onChange={mockOnChange}
-        isXaxisNumerical={false}
-      />
+      <BarGaugeExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />
     );
 
     fireEvent.click(getByText('Text Color'));
@@ -80,11 +54,7 @@ describe('BarGaugeExclusiveVisOptions', () => {
 
   it('should call onChange when unfilled area switch is toggled', () => {
     const { getByRole } = render(
-      <BarGaugeExclusiveVisOptions
-        styles={defaultStyles}
-        onChange={mockOnChange}
-        isXaxisNumerical={false}
-      />
+      <BarGaugeExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />
     );
 
     const switchElement = getByRole('switch');
@@ -98,17 +68,13 @@ describe('BarGaugeExclusiveVisOptions', () => {
 
   it('should handle undefined styles with defaults', () => {
     const { getByText } = render(
-      <BarGaugeExclusiveVisOptions
-        styles={undefined as any}
-        onChange={mockOnChange}
-        isXaxisNumerical={false}
-      />
+      <BarGaugeExclusiveVisOptions styles={undefined as any} onChange={mockOnChange} />
     );
 
-    fireEvent.click(getByText('Horizontal'));
+    fireEvent.click(getByText('Stack'));
 
     expect(mockOnChange).toHaveBeenCalledWith({
-      orientation: 'horizontal',
+      displayMode: 'stack',
     });
   });
 });
