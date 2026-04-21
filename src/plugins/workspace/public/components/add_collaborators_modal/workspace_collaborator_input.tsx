@@ -87,7 +87,7 @@ export const WorkspaceCollaboratorInput = ({
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
       abortController.current?.abort();
 
-      if (!identitySource || !http || !searchValue) {
+      if (!identitySource || !http || !searchValue || searchValue.length > 1024) {
         setOptions([]);
         return;
       }
