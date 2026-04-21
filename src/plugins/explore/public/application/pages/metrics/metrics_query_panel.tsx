@@ -23,11 +23,14 @@ import { monaco } from '@osd/monaco';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
+import { QueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
+import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
-import { useSetEditorTextWithQuery } from '../../../application/hooks';
+import { useEditorRef, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
   selectIsLoading,
+  selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
@@ -55,8 +58,10 @@ export const MetricsQueryPanel: React.FC = () => {
   const promptToQueryIsLoading = useSelector(selectPromptToQueryIsLoading);
   const isLoading = queryIsLoading || promptToQueryIsLoading;
   const dataConnectionId = useSelector((state: RootState) => state.query.dataset?.id || '');
+  const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
 
+  const editorRef = useEditorRef();
   const setEditorText = useSetEditorText();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   usePPLExecuteQueryAction(setEditorTextWithQuery);
@@ -136,9 +141,9 @@ export const MetricsQueryPanel: React.FC = () => {
   const addRow = useCallback(() => {
     const result = parsePromQL('');
     setRows((prev) => {
-      const next = [
+      const next: QueryRow[] = [
         ...prev,
-        { id: nextRowId(), mode: 'builder' as RowMode, query: '', builderState: result.state },
+        { id: nextRowId(), mode: 'builder', query: '', builderState: result.state },
       ];
       syncEditorText(next);
       return next;
@@ -179,6 +184,24 @@ export const MetricsQueryPanel: React.FC = () => {
     return () => disposable.dispose();
   }, [services]);
 
+  // Entering AI mode should start with an empty prompt rather than inheriting
+  // the builder's PromQL text from the shared editor state. The prompt editor
+  // mounts on a later frame, so retry via requestAnimationFrame until the ref
+  // is populated — self-terminating, no arbitrary delay.
+  useEffect(() => {
+    if (!isPromptMode) return;
+    let rafId = 0;
+    const tryClear = () => {
+      if (editorRef.current) {
+        editorRef.current.setValue('');
+        return;
+      }
+      rafId = requestAnimationFrame(tryClear);
+    };
+    tryClear();
+    return () => cancelAnimationFrame(rafId);
+  }, [isPromptMode, editorRef]);
+
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
@@ -187,51 +210,60 @@ export const MetricsQueryPanel: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiDragDropContext onDragEnd={onDragEnd}>
-        <EuiDroppable droppableId="queryRows" spacing="none">
-          {rows.map((row, idx) => (
-            <EuiDraggable
-              key={row.id}
-              index={idx}
-              draggableId={row.id}
-              customDragHandle={true}
-              spacing="none"
-              hasInteractiveChildren={true}
-              isDragDisabled={rows.length <= 1}
-            >
-              {(provided, snapshot) => (
-                <QueryRowComponent
-                  row={row}
-                  label={getQueryLabel(idx)}
-                  client={client}
-                  onBuilderChange={onBuilderChange}
-                  onCodeChange={onCodeChange}
-                  onModeChange={onModeChange}
-                  onRemove={removeRow}
-                  canRemove={rows.length > 1}
-                  isDragging={snapshot.isDragging}
-                  dragHandleProps={provided.dragHandleProps}
-                />
-              )}
-            </EuiDraggable>
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
+      {isPromptMode ? (
+        <div className="exploreQueryPanel__editorsWrapper">
+          <QueryPanelEditor />
+          <QueryPanelGeneratedQuery />
+        </div>
+      ) : (
+        <>
+          <EuiDragDropContext onDragEnd={onDragEnd}>
+            <EuiDroppable droppableId="queryRows" spacing="none">
+              {rows.map((row, idx) => (
+                <EuiDraggable
+                  key={row.id}
+                  index={idx}
+                  draggableId={row.id}
+                  customDragHandle={true}
+                  spacing="none"
+                  hasInteractiveChildren={true}
+                  isDragDisabled={rows.length <= 1}
+                >
+                  {(provided, snapshot) => (
+                    <QueryRowComponent
+                      row={row}
+                      label={getQueryLabel(idx)}
+                      client={client}
+                      onBuilderChange={onBuilderChange}
+                      onCodeChange={onCodeChange}
+                      onModeChange={onModeChange}
+                      onRemove={removeRow}
+                      canRemove={rows.length > 1}
+                      isDragging={snapshot.isDragging}
+                      dragHandleProps={provided.dragHandleProps}
+                    />
+                  )}
+                </EuiDraggable>
+              ))}
+            </EuiDroppable>
+          </EuiDragDropContext>
 
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
-        className="mqpAddQueryRow"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addRow}>
-            {i18n.translate('explore.metricsQueryPanel.addQuery', {
-              defaultMessage: 'Add query',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            className="mqpAddQueryRow"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addRow}>
+                {i18n.translate('explore.metricsQueryPanel.addQuery', {
+                  defaultMessage: 'Add query',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
 
       {isLoading && (
         <EuiProgress

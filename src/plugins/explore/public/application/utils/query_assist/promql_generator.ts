@@ -111,8 +111,7 @@ export async function generatePromQLWithAgUi({
         messages,
         dataSourceName,
         language: 'PROMQL',
-        // ml-commons agent currently do not support multiple tool calls: https://github.com/opensearch-project/ml-commons/issues/4548
-        // tools: PROMQL_FRONTEND_TOOLS,
+        tools: PROMQL_FRONTEND_TOOLS,
         dataSourceId,
       });
 
