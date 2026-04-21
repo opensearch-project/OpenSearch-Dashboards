@@ -11,13 +11,13 @@ describe('injectSystemPrompt', () => {
 
     injectSystemPrompt(messages, 'PROMQL');
 
-    expect(messages).toHaveLength(2);
+    expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({
+      id: 'msg-1',
       role: 'user',
       content: expect.stringContaining('You are a PromQL expert'),
     });
-    expect((messages[0] as any).id).toMatch(/^system-/);
-    expect(messages[1]).toEqual({ id: 'msg-1', role: 'user', content: 'Show CPU usage' });
+    expect((messages[0] as any).content).toContain('Show CPU usage');
   });
 
   it('should not modify messages when language is undefined', () => {
