@@ -695,6 +695,22 @@ describe('Workspace server plugin', () => {
       expect(result.authorized).toBe(true);
       expect(clientGetSpy).toHaveBeenCalled();
     });
+
+    it('should return unauthorized for all workspaces when permissionControl is not initialized', async () => {
+      const initCtx = coreMock.createPluginInitializerContext({
+        enabled: true,
+        permission: { enabled: false },
+      });
+      const plugin = new WorkspacePlugin(initCtx);
+      await plugin.setup(setupMock, mockDeps);
+      const start = await plugin.start(startMock);
+      const request = httpServerMock.createOpenSearchDashboardsRequest();
+      const result = await start.authorizeWorkspace(request, ['ws-1', 'ws-2'], ['read']);
+      expect(result.authorized).toBe(false);
+      if (!result.authorized) {
+        expect(result.unauthorizedWorkspaces).toEqual(['ws-1', 'ws-2']);
+      }
+    });
   });
 
   it('#stop', () => {

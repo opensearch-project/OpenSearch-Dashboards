@@ -26,7 +26,7 @@ import {
   initializeClientCallAuditor,
   updateWorkspaceState,
 } from 'opensearch-dashboards/server/utils';
-import { ACL, Permissions } from 'opensearch-dashboards/server';
+import { ACL, Permissions, PermissionModeId } from 'opensearch-dashboards/server';
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -42,7 +42,12 @@ import {
   PRIORITY_FOR_REPOSITORY_WRAPPER,
   OPENSEARCHDASHBOARDS_CONFIG_PATH,
 } from '../common/constants';
-import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
+import {
+  IWorkspaceClientImpl,
+  WorkspaceAuthResult,
+  WorkspacePluginSetup,
+  WorkspacePluginStart,
+} from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
@@ -319,27 +324,38 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       authorizeWorkspace: async (
         request: OpenSearchDashboardsRequest,
         workspaceIds: string[],
-        permissionModes: string[] = ['read']
-      ) => {
-        const principals = this.permissionControl!.getPrincipalsFromRequest(request);
-
+        permissionModes: PermissionModeId[] = ['read']
+      ): Promise<WorkspaceAuthResult> => {
         const { isDashboardAdmin } = getWorkspaceState(request);
         if (isDashboardAdmin) {
-          this.logger.debug(
-            `Workspace authorization skipped: caller is dashboard admin`
-          );
-          return { authorized: true as const };
+          this.logger.debug('Workspace authorization skipped: caller is dashboard admin');
+          return { authorized: true };
         }
 
         if (!workspaceIds.length) {
-          return { authorized: false as const, unauthorizedWorkspaces: [] as string[] };
+          this.logger.warn('Workspace authorization called with empty workspaceIds');
+          return { authorized: false, unauthorizedWorkspaces: [] };
         }
 
+        if (!this.permissionControl) {
+          this.logger.warn(
+            'Workspace authorization: permissionControl not initialized, denying access'
+          );
+          return { authorized: false, unauthorizedWorkspaces: workspaceIds };
+        }
+
+        const principals = this.permissionControl.getPrincipalsFromRequest(request);
+        const results = await Promise.all(
+          workspaceIds.map((id) =>
+            (this.client as IWorkspaceClientImpl).get({ request }, id).then((result) => ({
+              id,
+              result,
+            }))
+          )
+        );
+
         const unauthorizedWorkspaces: string[] = [];
-
-        for (const workspaceId of workspaceIds) {
-          const result = await (this.client as IWorkspaceClientImpl).get({ request }, workspaceId);
-
+        for (const { id: workspaceId, result } of results) {
           if (!result.success) {
             this.logger.warn(`Workspace authorization: workspace ${workspaceId} not found`);
             unauthorizedWorkspaces.push(workspaceId);
@@ -363,8 +379,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         }
 
         return unauthorizedWorkspaces.length === 0
-          ? { authorized: true as const }
-          : { authorized: false as const, unauthorizedWorkspaces };
+          ? { authorized: true }
+          : { authorized: false, unauthorizedWorkspaces };
       },
     };
   }

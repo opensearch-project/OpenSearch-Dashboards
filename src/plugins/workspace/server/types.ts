@@ -185,6 +185,6 @@ export interface WorkspacePluginStart {
   authorizeWorkspace: (
     request: OpenSearchDashboardsRequest,
     workspaceIds: string[],
-    permissionModes?: string[]
+    permissionModes?: PermissionModeId[]
   ) => Promise<WorkspaceAuthResult>;
 }
