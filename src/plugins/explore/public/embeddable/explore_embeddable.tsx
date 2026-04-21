@@ -9,7 +9,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
-import { RequestAdapter, Adapters } from '../../../inspector/public';
+import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
 import {
   opensearchFilters,
   Filter,
@@ -163,8 +163,10 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    // manage data adapters for CSV export
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
+      data: new DataAdapter(),
     };
 
     // Initialize variable support BEFORE search props so the interpolation
@@ -555,6 +557,41 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
+
+    // set tabular for DataViewComponent to display via adapters.data.getTabular()
+    if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
+      const allColumns = [
+        ...(visualizationData.numericalColumns ?? []),
+        ...(visualizationData.categoricalColumns ?? []),
+        ...(visualizationData.dateColumns ?? []),
+      ];
+      const indexPattern = searchSource.getField('index');
+
+      this.inspectorAdaptors.data.setTabularLoader(
+        () => ({
+          columns: allColumns.map((col) => ({
+            name: col.name,
+            field: col.column,
+          })),
+
+          // format data rows and transform into shape {raw, formatted}
+          rows: visualizationData.transformedData.map((row) => {
+            const formattedRow: Record<string, FormattedData> = {};
+            for (const col of allColumns) {
+              const value = row[col.column];
+              const field = indexPattern?.fields.getByName(col.name);
+              const formatted =
+                field && indexPattern?.getFormatterForField
+                  ? indexPattern.getFormatterForField(field).convert(value)
+                  : String(value ?? '');
+              formattedRow[col.column] = new FormattedData(value, formatted);
+            }
+            return formattedRow;
+          }),
+        }),
+        { returnsFormattedValues: true }
+      );
+    }
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
