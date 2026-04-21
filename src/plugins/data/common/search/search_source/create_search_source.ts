@@ -61,26 +61,35 @@ export const createSearchSource = (
   if (fields.index && typeof fields.index === 'string') {
     const dataset = fields.query?.dataset;
     const isIndexPattern = !dataset?.type || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+    // For non-INDEX_PATTERN datasets, the saved `index` id may be stale; the
+    // authoritative id for cache lookup is `dataset.id`, which is what
+    // `datasetService.cacheDataset` uses as the cache key.
+    const lookupId =
+      !isIndexPattern && dataset?.id ? (dataset.id as string) : (fields.index as string);
+    let pattern;
     try {
-      let pattern = isIndexPattern
-        ? await indexPatterns.get(fields.index as string)
-        : await indexPatterns.get(fields.index as string, true);
-
-      // Non-INDEX_PATTERN datasets (e.g. INDEXES, S3, Prometheus) have no backing
-      // saved object. On a cache miss, ask the public layer to prime the dataset
-      // cache via `hydrateDataset`, then try the cache-only lookup again. This
-      // centralizes hydration so Discover, Explore embeddables, and any other
-      // consumer of `searchSource.create()` all benefit.
-      if (!pattern && !isIndexPattern && dataset && searchSourceDependencies.hydrateDataset) {
-        await searchSourceDependencies.hydrateDataset(dataset);
-        pattern = await indexPatterns.get(fields.index as string, true);
-      }
-
-      if (pattern) {
-        fields.index = pattern;
-      }
+      pattern = isIndexPattern
+        ? await indexPatterns.get(lookupId)
+        : await indexPatterns.get(lookupId, true);
     } catch (e) {
-      // leave fields.index as a string; downstream consumers must guard for this.
+      // swallow — fall through to hydrateDataset
+    }
+
+    // On a cache miss (or lookup failure), ask the public layer to prime the
+    // dataset cache via `hydrateDataset`, then retry the cache-only lookup.
+    // Centralized here so Discover, Explore embeddables, and any other consumer
+    // of `searchSource.create()` all benefit.
+    if (!pattern && dataset && searchSourceDependencies.hydrateDataset) {
+      try {
+        await searchSourceDependencies.hydrateDataset(dataset);
+        pattern = await indexPatterns.get(lookupId, true);
+      } catch (e) {
+        // leave fields.index as a string; downstream consumers must guard for this.
+      }
+    }
+
+    if (pattern) {
+      fields.index = pattern;
     }
   }
 
