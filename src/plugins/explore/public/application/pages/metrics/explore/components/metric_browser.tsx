@@ -22,6 +22,7 @@ import {
   SEARCH_DEBOUNCE_MS,
   LayoutMode,
   breakdownGridStyle,
+  inferMetricType,
 } from '../types';
 import { useExploration } from '../contexts/exploration_context';
 import { MetricCard } from './metric_card';
@@ -341,7 +342,10 @@ export const MetricBrowser: React.FC = () => {
                 fill
                 onClick={() => {
                   const queries = Array.from(selected).map((selName) => {
-                    const type = metadata[selName]?.type || MetricType.GAUGE;
+                    const type = inferMetricType(
+                      selName,
+                      metadata[selName]?.type || MetricType.UNKNOWN
+                    );
                     return queryGen.forMetric(selName, type, stepSec, state.filters);
                   });
                   const multiQuery = queries.map((q) => `${q};`).join('\n');
