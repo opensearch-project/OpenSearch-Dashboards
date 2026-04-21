@@ -167,7 +167,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
       // Check if aborted after async operation
       if (abortController.signal.aborted) return;
-      
+
       eventHandler.clearState();
       setIsLoading(false);
 
@@ -598,6 +598,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
+            threadId={chatService.getThreadId()}
             {...enhancedProps}
             startResponse={startResponse}
           />
