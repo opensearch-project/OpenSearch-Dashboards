@@ -185,7 +185,8 @@
     "**/body-parser": "^2.2.1",
     "**/@tootallnate/once": "^3.0.1",
     "**/fast-xml-parser": "^5.3.8",
-    "**/grunt/minimatch": "^3.1.5"
+    "**/grunt/minimatch": "^3.1.5",
+    "**/@hapi/content": "^6.0.1"
   },
   "workspaces": {
     "packages": [
