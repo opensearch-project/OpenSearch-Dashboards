@@ -19,6 +19,7 @@ export {
   Role,
   ChatWindowState,
   SavedConversation,
+  TextInputContent,
   ConversationMemoryProvider,
   ConversationPaginationParams,
   PaginatedConversations,

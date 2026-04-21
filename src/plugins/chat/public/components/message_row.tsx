@@ -6,22 +6,29 @@
 import React, { useState } from 'react';
 import { EuiPanel, EuiButtonIcon } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
-import type { Message } from '../../common/types';
+import type { Message, AssistantMessage } from '../../common/types';
+import { ShareModal } from './share_modal';
 import './message_row.scss';
 
 interface MessageRowProps {
   message: Message;
   isStreaming?: boolean;
   onResend?: (message: Message) => void;
+  timeline?: Message[];
+  threadId?: string;
 }
 
 export const MessageRow: React.FC<MessageRowProps> = ({
   message,
   isStreaming = false,
   onResend,
+  timeline,
+  threadId,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleResend = () => {
     if (onResend) {
@@ -119,7 +126,41 @@ export const MessageRow: React.FC<MessageRowProps> = ({
             />
           </div>
         )}
+
+        {/* Share action for assistant messages — appears on hover */}
+        {message.role === 'assistant' &&
+          message.content &&
+          timeline &&
+          (() => {
+            const shareLabel = i18n.translate('chat.messageRow.shareInvestigation', {
+              defaultMessage: 'Share',
+            });
+            return (
+              <div
+                className={`messageRow__actions ${isHovered ? 'messageRow__actions--visible' : ''}`}
+              >
+                <EuiButtonIcon
+                  iconType="share"
+                  color="primary"
+                  size="s"
+                  display="base"
+                  onClick={() => setShowShareModal(true)}
+                  aria-label={shareLabel}
+                  title={shareLabel}
+                />
+              </div>
+            );
+          })()}
       </div>
+
+      {showShareModal && message.role === 'assistant' && timeline && (
+        <ShareModal
+          onClose={() => setShowShareModal(false)}
+          timeline={timeline}
+          targetMessage={message as AssistantMessage}
+          threadId={threadId}
+        />
+      )}
     </div>
   );
 };
