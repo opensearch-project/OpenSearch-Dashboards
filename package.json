@@ -331,7 +331,7 @@
     "tslib": "^2.0.0",
     "type-detect": "^4.0.8",
     "use-sync-external-store": "^1.5.0",
-    "uuid": "3.3.2",
+    "uuid": "8.3.2",
     "whatwg-fetch": "^3.0.0",
     "yauzl": "^2.10.0"
   },
