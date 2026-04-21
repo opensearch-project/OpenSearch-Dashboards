@@ -363,7 +363,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           }
 
           const { permissions } = result.result as { permissions?: Permissions };
-          const hasAccess = permissions
+          // Skip explicit ACL check for read-only modes — workspace client.get() already
+          // enforces read permission via WorkspaceSavedObjectsClientWrapper
+          const wsReadOnlyModes: string[] = ['library_read'];
+          const isReadOnly = permissionModes.every((mode) => wsReadOnlyModes.includes(mode));
+          const hasAccess = isReadOnly
+            ? true
+            : permissions
             ? new ACL(permissions).hasPermission(permissionModes, principals)
             : false;
 
