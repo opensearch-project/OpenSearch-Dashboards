@@ -174,6 +174,11 @@ export type WorkspaceAuthResult =
 export interface WorkspacePluginStart {
   client: IWorkspaceClientImpl;
   /**
+   * Endpoint patterns that require workspace ACL enforcement.
+   * Configured via `workspace.aclEnforceEndpointPatterns` in opensearch_dashboards.yml.
+   */
+  aclEnforceEndpointPatterns: string[];
+  /**
    * Check if the given principal has access to the specified workspaces.
    * Fetches workspace details and checks permissions against the principal.
    *

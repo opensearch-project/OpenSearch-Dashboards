@@ -78,6 +78,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
   private workspaceConfig$: Observable<ConfigSchema>;
   private env: PluginInitializerContext['env'];
+  private aclEnforceEndpointPatterns: string[] = [];
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -243,6 +244,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       maximum_workspaces: workspaceConfig.maximum_workspaces,
     });
 
+    this.aclEnforceEndpointPatterns = workspaceConfig.aclEnforceEndpointPatterns;
+
     await this.client.setup(core);
 
     this.workspaceConflictControl = new WorkspaceConflictSavedObjectsClientWrapper();
@@ -321,6 +324,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     return {
       client: this.client as IWorkspaceClientImpl,
+      aclEnforceEndpointPatterns: this.aclEnforceEndpointPatterns,
       authorizeWorkspace: async (
         request: OpenSearchDashboardsRequest,
         workspaceIds: string[],
