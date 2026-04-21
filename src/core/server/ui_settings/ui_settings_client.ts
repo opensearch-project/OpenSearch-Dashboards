@@ -149,7 +149,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   async get<T = any>(key: string, scope?: UiSettingScope): Promise<T> {
     const raw = await this.getRaw(scope, key);
     const item = raw[key];
-    return ('userValue' in item ? item.userValue : item?.value) as T;
+    return (item && 'userValue' in item ? item.userValue : item?.value) as T;
   }
 
   async getAll<T = any>(scope?: UiSettingScope) {
@@ -186,9 +186,11 @@ export class UiSettingsClient implements IUiSettingsClient {
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
-    for (const [key, value] of Object.entries(this.overrides)) {
-      userProvided[key] =
-        value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
+    for (const [overrideKey, overrideValue] of Object.entries(this.overrides)) {
+      userProvided[overrideKey] =
+        overrideValue === null
+          ? { isOverridden: true }
+          : { isOverridden: true, userValue: overrideValue };
     }
 
     return userProvided;
