@@ -30,7 +30,7 @@ import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
 
-interface DashboardAttributes {
+export interface DashboardAttributes {
   title?: string;
 }
 export type DashboardInterface = SimpleSavedObject<DashboardAttributes>;
@@ -38,8 +38,6 @@ export type DashboardInterface = SimpleSavedObject<DashboardAttributes>;
 export interface OnSaveProps {
   savedExplore: SavedExplore;
   newTitle: string;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
   mode: 'existing' | 'new';
   selectDashboard: DashboardInterface | null;
   newDashboardName: string;
@@ -90,8 +88,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const handleSave = async ({
     savedExplore,
     newTitle,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
     mode,
     selectDashboard,
     newDashboardName,
@@ -109,8 +105,9 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     );
 
     const saveOptions = {
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
+      // allow user to save objects with duplicate title
+      // will display warning at modal level
+      isTitleDuplicateConfirmed: true,
     };
     try {
       // by passing newCopyOnSave as true, to ensure every time add to dashboard will create a new explore
