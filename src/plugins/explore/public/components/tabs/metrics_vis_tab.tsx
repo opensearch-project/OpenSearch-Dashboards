@@ -22,10 +22,26 @@ import { RootState } from '../../application/utils/state_management/store';
 import { ChartType } from '../visualizations/utils/use_visualization_types';
 
 const QUICK_CHART_TYPES: Array<{ id: ChartType; label: string; iconType: string }> = [
-  { id: 'line', label: 'Line', iconType: 'visLine' },
-  { id: 'bar', label: 'Bar', iconType: 'visBarVertical' },
-  { id: 'area', label: 'Area', iconType: 'visArea' },
-  { id: 'metric', label: 'Metric', iconType: 'visMetric' },
+  {
+    id: 'line',
+    label: i18n.translate('explore.metricsVisTab.chartTypeLine', { defaultMessage: 'Line' }),
+    iconType: 'visLine',
+  },
+  {
+    id: 'bar',
+    label: i18n.translate('explore.metricsVisTab.chartTypeBar', { defaultMessage: 'Bar' }),
+    iconType: 'visBarVertical',
+  },
+  {
+    id: 'area',
+    label: i18n.translate('explore.metricsVisTab.chartTypeArea', { defaultMessage: 'Area' }),
+    iconType: 'visArea',
+  },
+  {
+    id: 'metric',
+    label: i18n.translate('explore.metricsVisTab.chartTypeMetric', { defaultMessage: 'Metric' }),
+    iconType: 'visMetric',
+  },
 ];
 
 export const MetricsVisTab = () => {
@@ -60,7 +76,9 @@ export const MetricsVisTab = () => {
   const chartTypeToggle = showSettings && visConfig?.type && (
     <div className="metricsVisTab__chartTypeToggle">
       <EuiButtonGroup
-        legend="Chart type"
+        legend={i18n.translate('explore.metricsVisTab.chartTypeLegend', {
+          defaultMessage: 'Chart type',
+        })}
         options={QUICK_CHART_TYPES.map(({ id, label }) => ({
           id,
           label,

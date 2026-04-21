@@ -168,9 +168,10 @@ const prometheusDatasetTestSuite = () => {
       describe('Prometheus Connection and Query', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          cy.getElementByTestId('metricsPageTab-query').should('be.visible');
-          cy.wait(1000);
-          cy.getElementByTestId('metricsPageTab-query').click();
+          cy.getElementByTestId('metricsPageTab-query')
+            .should('be.visible')
+            .and('not.be.disabled')
+            .click();
         });
 
         it('should have Prometheus dataset pre-selected and verify PromQL language', function () {
@@ -400,9 +401,10 @@ const prometheusDatasetTestSuite = () => {
       describe('Metrics Explore Tab', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          cy.getElementByTestId('metricsPageTab-explore').should('be.visible');
-          cy.wait(1000);
-          cy.getElementByTestId('metricsPageTab-explore').click();
+          cy.getElementByTestId('metricsPageTab-explore')
+            .should('be.visible')
+            .and('not.be.disabled')
+            .click();
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
         });
 
@@ -499,9 +501,10 @@ const prometheusDatasetTestSuite = () => {
       describe('Multi-Query Functionality', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          cy.getElementByTestId('metricsPageTab-query').should('be.visible');
-          cy.wait(1000);
-          cy.getElementByTestId('metricsPageTab-query').click();
+          cy.getElementByTestId('metricsPageTab-query')
+            .should('be.visible')
+            .and('not.be.disabled')
+            .click();
         });
 
         it('should display Value #A and Value #B columns in Table view for multi-query', function () {

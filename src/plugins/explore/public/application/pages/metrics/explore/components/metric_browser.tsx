@@ -83,7 +83,7 @@ export const MetricBrowser: React.FC = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [debouncedSearch, setDebouncedSearch] = useState(state.search);
   const [searchResults, setSearchResults] = useState<string[] | null>(null);
-  const [displayCount, setDisplayCount] = useState(100);
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE * 2);
   const [labelNames, setLabelNames] = useState<string[]>([]);
   const [labelValues, setLabelValues] = useState<Record<string, Array<{ label: string }>>>({});
   const [activeName, setActiveName] = useState('');
@@ -94,7 +94,13 @@ export const MetricBrowser: React.FC = () => {
     client
       .getLabelNames()
       .then(setLabelNames)
-      .catch(() => setLabelNames(['job', 'instance']));
+      .catch((e) => {
+        if (e?.name !== 'AbortError') {
+          // eslint-disable-next-line no-console
+          console.debug('Failed to fetch label names', e);
+        }
+        setLabelNames(['job', 'instance']);
+      });
   }, [client]);
 
   useEffect(() => {
@@ -127,7 +133,12 @@ export const MetricBrowser: React.FC = () => {
       .then((result) => {
         if (!cancelled) setMetadata(result);
       })
-      .catch(() => {});
+      .catch((e) => {
+        if (e?.name !== 'AbortError') {
+          // eslint-disable-next-line no-console
+          console.debug('Failed to fetch metric metadata', e);
+        }
+      });
     return () => {
       cancelled = true;
     };
@@ -239,13 +250,27 @@ export const MetricBrowser: React.FC = () => {
   }
 
   const groupingOptions = [
-    { id: GroupingStrategy.ALPHABETICAL, label: 'A-Z' },
-    { id: GroupingStrategy.PREFIX, label: 'Prefix' },
+    {
+      id: GroupingStrategy.ALPHABETICAL,
+      label: i18n.translate('explore.metricsExplore.groupingAlphabetical', {
+        defaultMessage: 'A-Z',
+      }),
+    },
+    {
+      id: GroupingStrategy.PREFIX,
+      label: i18n.translate('explore.metricsExplore.groupingPrefix', { defaultMessage: 'Prefix' }),
+    },
   ];
 
   const layoutOptions = [
-    { id: LayoutMode.GRID, label: 'Grid' },
-    { id: LayoutMode.ROWS, label: 'Rows' },
+    {
+      id: LayoutMode.GRID,
+      label: i18n.translate('explore.metricsExplore.layoutGrid', { defaultMessage: 'Grid' }),
+    },
+    {
+      id: LayoutMode.ROWS,
+      label: i18n.translate('explore.metricsExplore.layoutRows', { defaultMessage: 'Rows' }),
+    },
   ];
 
   const totalMetrics = searchResults?.length ?? allMetrics.length;
@@ -292,7 +317,9 @@ export const MetricBrowser: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend="Grouping"
+            legend={i18n.translate('explore.metricsExplore.groupingLegend', {
+              defaultMessage: 'Grouping',
+            })}
             options={groupingOptions}
             idSelected={state.grouping}
             onChange={(id) => dispatch({ type: 'SET_GROUPING', grouping: id as GroupingStrategy })}
@@ -301,7 +328,9 @@ export const MetricBrowser: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend="Layout"
+            legend={i18n.translate('explore.metricsExplore.layoutLegend', {
+              defaultMessage: 'Layout',
+            })}
             options={layoutOptions}
             idSelected={state.layout}
             onChange={(id) => dispatch({ type: 'SET_LAYOUT', layout: id as LayoutMode })}

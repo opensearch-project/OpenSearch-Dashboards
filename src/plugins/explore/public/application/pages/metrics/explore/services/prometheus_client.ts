@@ -8,9 +8,44 @@ import { MetricMetadata, MetricType, CACHE_TTL_DATA, CACHE_TTL_METADATA } from '
 import { LRUCache } from './lru_cache';
 import { escapeLabelValue } from './query_generator';
 
+export interface QueryRangeSeries {
+  metric: Record<string, string>;
+  values: Array<[number, string]>;
+}
+
+interface PrometheusResourceClientLike {
+  getMetrics(dataConnectionId: string): Promise<string[]>;
+  getMetricMetadata(
+    dataConnectionId: string,
+    meta: Record<string, unknown> | undefined,
+    metric?: string
+  ): Promise<Record<string, Array<{ type?: string; help?: string; unit?: string }>>>;
+  getSeries(dataConnectionId: string, match: string): Promise<Array<Record<string, string>>>;
+  getLabels(
+    dataConnectionId: string,
+    meta?: Record<string, unknown>,
+    metric?: string
+  ): Promise<string[]>;
+  getLabelValues(
+    dataConnectionId: string,
+    meta: Record<string, unknown> | undefined,
+    label: string
+  ): Promise<string[]>;
+}
+
+interface PrometheusSearchHit {
+  _source?: {
+    Series?: string;
+    Metric?: string;
+    Time?: number | string;
+    Value?: number | string;
+    Labels?: Record<string, string>;
+  };
+}
+
 export class PrometheusClient {
-  private metadataCache = new LRUCache<any>(CACHE_TTL_METADATA);
-  private dataCache = new LRUCache<any>(CACHE_TTL_DATA);
+  private metadataCache = new LRUCache<unknown>(CACHE_TTL_METADATA);
+  private dataCache = new LRUCache<unknown>(CACHE_TTL_DATA);
   private activeControllers = new Set<AbortController>();
   private aborted = false;
 
@@ -31,16 +66,20 @@ export class PrometheusClient {
     this.activeControllers.clear();
   }
 
-  private getResourceClient() {
-    return this.services.data.resourceClientFactory.get<any>('prometheus');
+  private getResourceClient(): PrometheusResourceClientLike {
+    const rc = this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>(
+      'prometheus'
+    );
+    if (!rc) throw new Error('Prometheus resource client is not registered');
+    return rc;
   }
 
   async getMetricNames(): Promise<string[]> {
     const key = `names:${this.dataConnectionId}`;
-    const cached = this.metadataCache.get(key);
+    const cached = this.metadataCache.get(key) as string[] | undefined;
     if (cached) return cached;
     const rc = this.getResourceClient();
-    const names: string[] = await rc.getMetrics(this.dataConnectionId);
+    const names = await rc.getMetrics(this.dataConnectionId);
     this.metadataCache.set(key, names);
     return names;
   }
@@ -49,13 +88,13 @@ export class PrometheusClient {
     const key = metric
       ? `metadata:${this.dataConnectionId}:${metric}`
       : `metadata:${this.dataConnectionId}`;
-    const cached = this.metadataCache.get(key);
+    const cached = this.metadataCache.get(key) as Record<string, MetricMetadata> | undefined;
     if (cached) return cached;
     const rc = this.getResourceClient();
     const raw = await rc.getMetricMetadata(this.dataConnectionId, undefined, metric);
     const result: Record<string, MetricMetadata> = {};
     for (const [name, entries] of Object.entries(raw)) {
-      const entry = (entries as any[])[0] || {};
+      const entry = entries[0] || {};
       result[name] = {
         name,
         type: (entry.type as MetricType) || MetricType.UNKNOWN,
@@ -69,7 +108,7 @@ export class PrometheusClient {
 
   async getSeries(match: string): Promise<Array<Record<string, string>>> {
     const key = `series:${this.dataConnectionId}:${match}`;
-    const cached = this.dataCache.get(key);
+    const cached = this.dataCache.get(key) as Array<Record<string, string>> | undefined;
     if (cached) return cached;
     const rc = this.getResourceClient();
     const data = await rc.getSeries(this.dataConnectionId, match);
@@ -79,10 +118,10 @@ export class PrometheusClient {
 
   async getLabelsForMetric(metric: string): Promise<string[]> {
     const key = `labels:${this.dataConnectionId}:${metric}`;
-    const cached = this.metadataCache.get(key);
+    const cached = this.metadataCache.get(key) as string[] | undefined;
     if (cached) return cached;
     const rc = this.getResourceClient();
-    const labels: string[] = await rc.getLabels(this.dataConnectionId, undefined, metric);
+    const labels = await rc.getLabels(this.dataConnectionId, undefined, metric);
     const filtered = labels.filter((l) => l !== '__name__').sort();
     this.metadataCache.set(key, filtered);
     return filtered;
@@ -90,10 +129,10 @@ export class PrometheusClient {
 
   async getLabelNames(): Promise<string[]> {
     const key = `labelNames:${this.dataConnectionId}`;
-    const cached = this.metadataCache.get(key);
+    const cached = this.metadataCache.get(key) as string[] | undefined;
     if (cached) return cached;
     const rc = this.getResourceClient();
-    const labels: string[] = await rc.getLabels(this.dataConnectionId);
+    const labels = await rc.getLabels(this.dataConnectionId);
     const filtered = labels.filter((l) => l !== '__name__').sort();
     this.metadataCache.set(key, filtered);
     return filtered;
@@ -101,7 +140,7 @@ export class PrometheusClient {
 
   async searchMetricNames(search: string, limit = 100): Promise<string[]> {
     const key = `search:${this.dataConnectionId}:${search}`;
-    const cached = this.dataCache.get(key);
+    const cached = this.dataCache.get(key) as string[] | undefined;
     if (cached) return cached;
 
     // Use series API with regex match for server-side filtering.
@@ -122,7 +161,7 @@ export class PrometheusClient {
 
   async getLabelValues(label: string, metric?: string): Promise<string[]> {
     const key = `lv:${this.dataConnectionId}:${label}:${metric || ''}`;
-    const cached = this.dataCache.get(key);
+    const cached = this.dataCache.get(key) as string[] | undefined;
     if (cached) return cached;
     const rc = this.getResourceClient();
     const meta = metric ? { 'match[]': `{__name__="${escapeLabelValue(metric)}"}` } : undefined;
@@ -131,11 +170,11 @@ export class PrometheusClient {
     return data;
   }
 
-  async queryRange(promql: string, signal?: AbortSignal): Promise<any> {
+  async queryRange(promql: string, signal?: AbortSignal): Promise<QueryRangeSeries[]> {
     if (this.aborted) return [];
     const timeRange = this.services.data.query.timefilter.timefilter.getTime();
     const key = `qr:${this.dataConnectionId}:${timeRange.from}:${timeRange.to}:${promql}`;
-    const cached = this.dataCache.get(key);
+    const cached = this.dataCache.get(key) as QueryRangeSeries[] | undefined;
     if (cached) return cached;
     return this.executeQueryRange(promql, key, signal);
   }
@@ -155,7 +194,7 @@ export class PrometheusClient {
     promql: string,
     cacheKey: string,
     signal?: AbortSignal
-  ): Promise<any> {
+  ): Promise<QueryRangeSeries[]> {
     const dataView = await this.resolveDataView();
     if (!dataView) return [];
 
@@ -177,7 +216,8 @@ export class PrometheusClient {
 
     try {
       const rawResults = await searchSource.fetch({ abortSignal: controller.signal });
-      const result = this.transformHitsToSeries(rawResults?.hits?.hits || []);
+      const hits = ((rawResults?.hits?.hits ?? []) as unknown) as PrometheusSearchHit[];
+      const result = this.transformHitsToSeries(hits);
       if (!this.aborted && !controller.signal.aborted) {
         this.dataCache.set(cacheKey, result);
       }
@@ -185,7 +225,7 @@ export class PrometheusClient {
     } catch (err) {
       if (!controller.signal.aborted) {
         // eslint-disable-next-line no-console
-        console.error('PrometheusClient.executeQueryRange failed', err);
+        console.debug('PrometheusClient.executeQueryRange failed', err);
       }
       return [];
     } finally {
@@ -197,7 +237,7 @@ export class PrometheusClient {
   // Groups hits back into series. Relies on the server (promql_search_strategy)
   // emitting a structured `Labels` object per row, so we never parse labels out
   // of the formatted `Series` string.
-  private transformHitsToSeries(hits: any[]): any[] {
+  private transformHitsToSeries(hits: PrometheusSearchHit[]): QueryRangeSeries[] {
     const seriesMap = new Map<
       string,
       { labels: Record<string, string>; values: Array<[number, string]> }
@@ -208,10 +248,10 @@ export class PrometheusClient {
       const time = Number(src.Time) / 1000;
       const value = String(src.Value ?? '');
       if (!seriesMap.has(seriesName)) {
-        const labels = (src.Labels && typeof src.Labels === 'object' ? src.Labels : {}) as Record<
-          string,
-          string
-        >;
+        const labels =
+          src.Labels && typeof src.Labels === 'object'
+            ? src.Labels
+            : ({} as Record<string, string>);
         seriesMap.set(seriesName, { labels, values: [] });
       }
       seriesMap.get(seriesName)!.values.push([time, value]);

@@ -5,7 +5,8 @@
 
 import './metrics_page_tabs.scss';
 import React from 'react';
-import { EuiTabs, EuiTab, EuiPageBody } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiPageBody, EuiIcon } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { useSelector, useDispatch } from 'react-redux';
 import { MetricsExploreTab } from './explore';
 import { QueryPanel } from '../../../components/query_panel';
@@ -18,9 +19,17 @@ import { MetricsPageMode, MetricsPageModeContext } from './metrics_page_mode_con
 
 export { useMetricsPageMode } from './metrics_page_mode_context';
 
-const PAGE_TABS: Array<{ id: MetricsPageMode; label: string }> = [
-  { id: 'explore', label: 'Explore' },
-  { id: 'query', label: 'Query' },
+const PAGE_TABS: Array<{ id: MetricsPageMode; label: string; iconType: string }> = [
+  {
+    id: 'explore',
+    label: i18n.translate('explore.metricsPage.exploreTab', { defaultMessage: 'Explore' }),
+    iconType: 'compass',
+  },
+  {
+    id: 'query',
+    label: i18n.translate('explore.metricsPage.queryTab', { defaultMessage: 'Query' }),
+    iconType: 'editorCodeBlock',
+  },
 ];
 
 export const MetricsPageTabs: React.FC = () => {
@@ -38,6 +47,7 @@ export const MetricsPageTabs: React.FC = () => {
               onClick={() => dispatch(setMetricsPageMode(tab.id))}
               data-test-subj={`metricsPageTab-${tab.id}`}
             >
+              <EuiIcon type={tab.iconType} size="m" style={{ marginRight: 6 }} />
               {tab.label}
             </EuiTab>
           ))}

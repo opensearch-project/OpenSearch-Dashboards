@@ -10,7 +10,12 @@ export interface MetricsExploreTabState {
   search?: string;
   metric?: string;
   label?: string;
-  filters?: Array<{ name: string; value: string }>;
+  filters?: Array<{
+    name: string;
+    operator: '=' | '!=' | '=~' | '!~';
+    value: string;
+    enabled?: boolean;
+  }>;
   grouping?: string;
 }
 

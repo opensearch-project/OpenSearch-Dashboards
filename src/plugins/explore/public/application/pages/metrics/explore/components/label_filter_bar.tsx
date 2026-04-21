@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -232,24 +232,37 @@ export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({ metric, client, 
       .then((names) => {
         if (!cancelled) setLabelNames(names);
       })
-      .catch(() => {});
+      .catch((e) => {
+        if (e?.name !== 'AbortError') {
+          // eslint-disable-next-line no-console
+          console.debug('Failed to fetch labels', e);
+        }
+      });
     return () => {
       cancelled = true;
     };
   }, [client, metric]);
 
+  const valueOptionsRef = useRef(valueOptions);
+  valueOptionsRef.current = valueOptions;
+
   const loadValues = useCallback(
     (name: string) => {
       setActiveName(name);
-      if (!name || valueOptions[name]) return;
+      if (!name || valueOptionsRef.current[name]) return;
       client
         .getLabelValues(name, metric)
         .then((vals) => {
           setValueOptions((prev) => ({ ...prev, [name]: vals.map((v) => ({ label: v })) }));
         })
-        .catch(() => {});
+        .catch((e) => {
+          if (e?.name !== 'AbortError') {
+            // eslint-disable-next-line no-console
+            console.debug('Failed to fetch label values', e);
+          }
+        });
     },
-    [client, metric, valueOptions]
+    [client, metric]
   );
 
   return (

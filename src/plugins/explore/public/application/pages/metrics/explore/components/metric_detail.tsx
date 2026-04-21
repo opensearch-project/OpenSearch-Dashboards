@@ -39,12 +39,24 @@ interface LabelBreakdownData {
   series: BreakdownSeries[];
 }
 
+function seriesLabelForType(type: MetricType): string {
+  switch (type) {
+    case MetricType.COUNTER:
+      return 'sum(rate)';
+    case MetricType.HISTOGRAM:
+      return 'histogram_quantile(0.95)';
+    default:
+      return 'avg';
+  }
+}
+
 const BreakdownPanel: React.FC<{
   labelName: string;
   data: LabelBreakdownData | null;
   selectedLabelName: string;
   breakdownYRange?: { yMin: number; yMax: number };
   layout: LayoutMode;
+  metricType: MetricType;
   onVisibilityChange: (key: string, visible: boolean) => void;
   onTimeRangeChange?: (from: string, to: string) => void;
 }> = ({
@@ -53,6 +65,7 @@ const BreakdownPanel: React.FC<{
   selectedLabelName,
   breakdownYRange,
   layout,
+  metricType,
   onVisibilityChange,
   onTimeRangeChange,
 }) => {
@@ -115,7 +128,7 @@ const BreakdownPanel: React.FC<{
                 <SparklineChart
                   values={s.values}
                   height={160}
-                  label="sum(rate)"
+                  label={seriesLabelForType(metricType)}
                   stroke={SERIES_COLORS[i % SERIES_COLORS.length]}
                   isDarkMode={darkMode}
                   onTimeRangeChange={onTimeRangeChange}
@@ -418,10 +431,22 @@ export const MetricDetail: React.FC = () => {
             <EuiFlexItem grow />
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
-                legend="Layout"
+                legend={i18n.translate('explore.metricsExplore.layoutLegend', {
+                  defaultMessage: 'Layout',
+                })}
                 options={[
-                  { id: LayoutMode.GRID, label: 'Grid' },
-                  { id: LayoutMode.ROWS, label: 'Rows' },
+                  {
+                    id: LayoutMode.GRID,
+                    label: i18n.translate('explore.metricsExplore.layoutGrid', {
+                      defaultMessage: 'Grid',
+                    }),
+                  },
+                  {
+                    id: LayoutMode.ROWS,
+                    label: i18n.translate('explore.metricsExplore.layoutRows', {
+                      defaultMessage: 'Rows',
+                    }),
+                  },
                 ]}
                 idSelected={state.layout}
                 onChange={(id) => dispatch({ type: 'SET_LAYOUT', layout: id as LayoutMode })}
@@ -441,6 +466,7 @@ export const MetricDetail: React.FC = () => {
                 selectedLabelName={selectedLabelName}
                 breakdownYRange={breakdownYRange}
                 layout={state.layout}
+                metricType={metricType}
                 onVisibilityChange={onVisibilityChange}
                 onTimeRangeChange={onTimeRangeChange}
               />
