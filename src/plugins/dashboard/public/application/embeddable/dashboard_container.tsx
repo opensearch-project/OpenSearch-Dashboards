@@ -178,7 +178,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // Use getVariablesWithoutState$() to get pure Variables (no runtime state)
     this.variableSubscriptions.push(
       this.variableService.getVariablesWithoutState$().subscribe((variables) => {
-        this.updateInput({ variables });
+        const currentVariables = this.getInput().variables;
+        // Normalize undefined and empty array for comparison to avoid unnecessary updates
+        const currentNormalized = currentVariables ?? [];
+        const newNormalized = variables ?? [];
+        if (!isEqual(currentNormalized, newNormalized)) {
+          this.updateInput({ variables });
+        }
       })
     );
     this.initVariableRefreshSubscription();
