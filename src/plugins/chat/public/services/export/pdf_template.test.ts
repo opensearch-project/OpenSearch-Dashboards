@@ -170,4 +170,15 @@ describe('generatePDFReport', () => {
     expect(result).not.toContain('<script>alert');
     expect(result).toContain('&lt;script&gt;');
   });
+
+  it('should escape HTML in questionImage mimeType', () => {
+    const data = {
+      ...baseData,
+      questionImage: { base64: 'abc', mimeType: '" onerror="alert(1)' },
+    };
+    const result = generatePDFReport(data, baseOptions);
+    // The " should be escaped to &quot; preventing attribute breakout
+    expect(result).not.toContain('" onerror="');
+    expect(result).toContain('&quot;');
+  });
 });
