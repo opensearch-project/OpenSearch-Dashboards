@@ -183,7 +183,9 @@ const prometheusDatasetTestSuite = () => {
           // Wait for explore tab initial render to settle before switching tabs
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
           cy.getElementByTestId('metricsPageTab-query').should('not.be.disabled').click();
-          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
+          // Query tab defaults to Builder mode so exploreQueryPanelEditor may not
+          // exist — wait for the query row container instead.
+          cy.getElementByTestId('queryRow-A').should('be.visible');
         });
 
         it('should have Prometheus dataset pre-selected and verify PromQL language', function () {
@@ -415,9 +417,14 @@ const prometheusDatasetTestSuite = () => {
       describe('Metrics Explore Tab', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          // Wait for explore tab initial render to settle
-          cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
-          cy.getElementByTestId('metricsPageTab-explore').should('not.be.disabled').click();
+          // Explore tab is the default on mount — wait for its content instead of
+          // clicking. Clicking an already-selected tab dispatches a Redux action
+          // that re-renders the tabs and can detach the element mid-click.
+          cy.getElementByTestId('metricsPageTab-explore').should(
+            'have.attr',
+            'aria-selected',
+            'true'
+          );
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
         });
 
@@ -517,7 +524,9 @@ const prometheusDatasetTestSuite = () => {
           // Wait for explore tab initial render to settle before switching tabs
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
           cy.getElementByTestId('metricsPageTab-query').should('not.be.disabled').click();
-          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
+          // Query tab defaults to Builder mode so exploreQueryPanelEditor may not
+          // exist — wait for the query row container instead.
+          cy.getElementByTestId('queryRow-A').should('be.visible');
         });
 
         it('should display Value #A and Value #B columns in Table view for multi-query', function () {
