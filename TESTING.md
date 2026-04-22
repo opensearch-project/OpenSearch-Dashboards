@@ -118,6 +118,67 @@ To run specific unit test groups:
 
 `yarn test:jest --ci-group=1 --ci-group=2`
 
+### Testing with SQLite in-memory backend
+
+For tests that interact with saved objects, you can use `SqliteSavedObjectsRepository` with `:memory:` mode instead of requiring a running OpenSearch cluster. This makes tests faster and more reliable.
+
+#### Running the tests
+
+```bash
+# Run all SQLite repository tests (29 tests)
+yarn test:jest src/core/server/saved_objects/storage/
+```
+
+#### When to use SQLite for testing
+
+**Good fit — use SQLite in-memory backend:**
+- Saved object CRUD operations (create, get, update, delete, bulk ops)
+- Plugin saved object type registration and persistence
+- Workspace CRUD and workspace-scoped saved object isolation
+- Saved object import/export logic
+- Saved object client wrapper behavior
+- Document migration verification
+- Any test that currently mocks `SavedObjectsRepository` and would benefit from a real storage layer
+
+**Still needs OpenSearch:**
+- Tests that depend on OpenSearch query DSL (KQL, Lucene, aggregations)
+- Index pattern field discovery and mapping tests
+- Saved object index-level migration tests
+- Full-text search behavior tests
+- Tests that verify OpenSearch-specific error handling
+
+#### Example: using SqliteSavedObjectsRepository in tests
+
+```typescript
+import { SqliteSavedObjectsRepository } from 'src/core/server/saved_objects/storage/sqlite_repository';
+import { SavedObjectTypeRegistry } from 'src/core/server/saved_objects/saved_objects_type_registry';
+import { SavedObjectsSerializer } from 'src/core/server/saved_objects/serialization';
+
+describe('MyPlugin saved objects', () => {
+  let repo: SqliteSavedObjectsRepository;
+
+  beforeEach(() => {
+    const typeRegistry = new SavedObjectTypeRegistry();
+    repo = new SqliteSavedObjectsRepository({
+      dbPath: ':memory:',
+      migrator: { migrateDocument: (doc) => doc } as any,
+      typeRegistry,
+      serializer: new SavedObjectsSerializer(typeRegistry),
+    });
+  });
+
+  afterEach(() => {
+    repo.shutdown();
+  });
+
+  it('creates and retrieves a saved object', async () => {
+    await repo.create('my-type', { key: 'value' }, { id: 'test-1' });
+    const fetched = await repo.get('my-type', 'test-1');
+    expect(fetched.attributes).toEqual({ key: 'value' });
+  });
+});
+```
+
 ### Integration tests
 
 To run all the integration tests:
@@ -184,7 +245,11 @@ If you prefer to run functional tests using Docker, you can find instructions on
 
 ### Performance tests
 
-To run performance tests:
+To run performance tests locally, first install Lighthouse CI:
+
+`yarn add --dev @lhci/cli`
+
+Then run:
 
 `yarn lhci autorun`
 

@@ -121,7 +121,7 @@ export class IndexPatternsService {
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       perPage: 10000,
     });
 

@@ -13,6 +13,7 @@ import {
   Logger,
   CoreStart,
   SharedGlobalConfig,
+  OpenSearchDashboardsRequest,
 } from 'opensearch-dashboards/server';
 import {
   cleanWorkspaceId,
@@ -25,6 +26,7 @@ import {
   initializeClientCallAuditor,
   updateWorkspaceState,
 } from 'opensearch-dashboards/server/utils';
+import { ACL, Permissions, PermissionModeId } from 'opensearch-dashboards/server';
 import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -40,7 +42,12 @@ import {
   PRIORITY_FOR_REPOSITORY_WRAPPER,
   OPENSEARCHDASHBOARDS_CONFIG_PATH,
 } from '../common/constants';
-import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
+import {
+  IWorkspaceClientImpl,
+  WorkspaceAuthResult,
+  WorkspacePluginSetup,
+  WorkspacePluginStart,
+} from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
@@ -71,6 +78,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
   private workspaceConfig$: Observable<ConfigSchema>;
   private env: PluginInitializerContext['env'];
+  private aclEnforceEndpointPatterns: string[] = [];
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -236,6 +244,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       maximum_workspaces: workspaceConfig.maximum_workspaces,
     });
 
+    this.aclEnforceEndpointPatterns = workspaceConfig.aclEnforceEndpointPatterns;
+
     await this.client.setup(core);
 
     this.workspaceConflictControl = new WorkspaceConflictSavedObjectsClientWrapper();
@@ -314,6 +324,74 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     return {
       client: this.client as IWorkspaceClientImpl,
+      aclEnforceEndpointPatterns: this.aclEnforceEndpointPatterns,
+      authorizeWorkspace: async (
+        request: OpenSearchDashboardsRequest,
+        workspaceIds: string[],
+        permissionModes: PermissionModeId[] = ['read']
+      ): Promise<WorkspaceAuthResult> => {
+        const { isDashboardAdmin } = getWorkspaceState(request);
+        if (isDashboardAdmin) {
+          this.logger.debug('Workspace authorization skipped: caller is dashboard admin');
+          return { authorized: true };
+        }
+
+        if (!workspaceIds.length) {
+          this.logger.warn('Workspace authorization called with empty workspaceIds');
+          return { authorized: false, unauthorizedWorkspaces: [] };
+        }
+
+        if (!this.permissionControl) {
+          this.logger.warn(
+            'Workspace authorization: permissionControl not initialized, denying access'
+          );
+          return { authorized: false, unauthorizedWorkspaces: workspaceIds };
+        }
+
+        const principals = this.permissionControl.getPrincipalsFromRequest(request);
+        const results = await Promise.all(
+          workspaceIds.map((id) =>
+            (this.client as IWorkspaceClientImpl).get({ request }, id).then((result) => ({
+              id,
+              result,
+            }))
+          )
+        );
+
+        const unauthorizedWorkspaces: string[] = [];
+        for (const { id: workspaceId, result } of results) {
+          if (!result.success) {
+            this.logger.warn(`Workspace authorization: workspace ${workspaceId} not found`);
+            unauthorizedWorkspaces.push(workspaceId);
+            continue;
+          }
+
+          const { permissions } = result.result as { permissions?: Permissions };
+          // Skip explicit ACL check for read-only modes — workspace client.get() already
+          // enforces read permission via WorkspaceSavedObjectsClientWrapper
+          const wsReadOnlyModes: string[] = ['library_read'];
+          const isReadOnly = permissionModes.every((mode) => wsReadOnlyModes.includes(mode));
+          const hasAccess = isReadOnly
+            ? true
+            : permissions
+            ? new ACL(permissions).hasPermission(permissionModes, principals)
+            : false;
+
+          this.logger.debug(
+            `Workspace authorization: workspace=${workspaceId}, modes=${permissionModes.join(
+              ','
+            )}, authorized=${hasAccess}`
+          );
+
+          if (!hasAccess) {
+            unauthorizedWorkspaces.push(workspaceId);
+          }
+        }
+
+        return unauthorizedWorkspaces.length === 0
+          ? { authorized: true }
+          : { authorized: false, unauthorizedWorkspaces };
+      },
     };
   }
 

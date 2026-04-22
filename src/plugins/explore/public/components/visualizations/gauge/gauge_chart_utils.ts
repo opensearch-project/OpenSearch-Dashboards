@@ -56,7 +56,7 @@ export const createGaugeSeries = ({
       return;
     }
 
-    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     const numericalValues: number[] = [];
 
@@ -243,7 +243,7 @@ export const createGaugeSeries = ({
               style: {
                 x: 0,
                 y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: displayValue,
+                text: displayValue as string,
                 textAlign: 'center',
                 fontSize: valueFontSize,
                 fontWeight: 'bold',

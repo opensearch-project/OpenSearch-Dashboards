@@ -14,7 +14,10 @@ export const DashboardApp = () => {
       <Route path={[DashboardConstants.CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl(':id')]}>
         <div className="app-container dshAppContainer">
           <DashboardEditor />
-          <div id="dashboardViewport" />
+          <div className="dshViewportRow">
+            <div id="dashboardViewport" />
+            <div id="variablePanelContent" />
+          </div>
         </div>
       </Route>
       <Route exact path={['/', DashboardConstants.LANDING_PAGE_PATH]}>

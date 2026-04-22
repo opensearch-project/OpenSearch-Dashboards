@@ -80,7 +80,7 @@ export const transformToMultiSeriesWithSize = (
     const y = row[yFieldIndex];
     const category = String(row[colorFieldIndex] || 'undefined');
     const size = Number(row[sizeFieldIndex]);
-    if (isNaN(size) || size <= 0) return;
+    if (isNaN(size)) return;
     // Track size range
     minSize = Math.min(minSize, size);
     maxSize = Math.max(maxSize, size);
@@ -88,6 +88,12 @@ export const transformToMultiSeriesWithSize = (
     // Add point to corresponding category
     seriesData[category].push([x, y, size]);
   });
+
+  // Handle case where no valid data points were found
+  if (minSize === Infinity || maxSize === -Infinity) {
+    minSize = 0;
+    maxSize = 0;
+  }
 
   return {
     categories,
@@ -120,7 +126,7 @@ export const createScatterSeries = <T extends BaseChartStyle>({
   const series = [
     {
       type: 'scatter',
-      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings)),
+      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings).flat()),
       symbolSize: 8,
       symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
       symbolRotate: styles.exclusive?.angle || 0,

@@ -213,7 +213,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     log.info(`${folder} API: updated documentation ✔`);
   }
 
-  // If the api signature changed or any errors or warnings occured, exit with an error
+  // If the api signature changed or any errors or warnings occurred, exit with an error
   // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
   //  api-extractor will not return `succeeded: false` when the API changes.
   return !apiReportChanged && succeeded;

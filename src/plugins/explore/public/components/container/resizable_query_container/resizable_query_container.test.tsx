@@ -5,10 +5,31 @@
 
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { ResizableQueryContainer } from './resizable_query_container';
+import { ResizableQueryContainer, getInitialQueryPanelSize } from './resizable_query_container';
 
 // Mock the scss import
 jest.mock('./resizable_query_container.scss', () => ({}));
+
+// Mock react-redux
+const mockUseSelector = jest.fn();
+jest.mock('react-redux', () => ({
+  useSelector: (selector: any) => mockUseSelector(selector),
+}));
+
+// Mock the selectors module
+jest.mock('../../../application/utils/state_management/selectors', () => ({
+  selectLastExecutedTranslatedQuery: jest.fn(),
+  selectIsPromptEditorMode: 'selectIsPromptEditorMode',
+}));
+
+// Mock ResizeObserver (still needed by EUI internals)
+const mockObserve = jest.fn();
+const mockDisconnect = jest.fn();
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: mockObserve,
+  unobserve: jest.fn(),
+  disconnect: mockDisconnect,
+}));
 
 // Track resize events
 const resizeEvents: Event[] = [];
@@ -18,6 +39,11 @@ describe('ResizableQueryContainer', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     resizeEvents.length = 0;
+    // Default: not in prompt mode (PPL/resizable path)
+    mockUseSelector.mockImplementation((selector: any) => {
+      if (selector === 'selectIsPromptEditorMode') return false;
+      return '';
+    });
     window.dispatchEvent = jest.fn((event: Event) => {
       resizeEvents.push(event);
       return originalDispatchEvent.call(window, event);
@@ -78,27 +104,61 @@ describe('ResizableQueryContainer', () => {
   });
 
   it('computes initial size based on viewport height', () => {
-    // window.innerHeight defaults to 768 in jsdom
-    // 72 / 768 * 100 ≈ 9.375%, clamped between 5-15%
-    renderComponent();
-
-    const container = document.querySelector('.exploreResizableQueryContainer');
-    expect(container).toBeInTheDocument();
-    // Panel should render with computed size
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('content-panel')).toBeInTheDocument();
+    Object.defineProperty(window, 'innerHeight', { value: 768, writable: true });
+    // 80 / 768 * 100 ≈ 10.42%
+    expect(getInitialQueryPanelSize()).toBeCloseTo(10.42, 0);
   });
 
-  it('dispatches resize event on panel width change', () => {
+  it('clamps initial size to minimum 5%', () => {
+    Object.defineProperty(window, 'innerHeight', { value: 2000, writable: true });
+    // 80 / 2000 * 100 = 4%, clamped to 5%
+    expect(getInitialQueryPanelSize()).toBe(5);
+  });
+
+  it('clamps initial size to maximum 15%', () => {
+    Object.defineProperty(window, 'innerHeight', { value: 200, writable: true });
+    // 80 / 200 * 100 = 40%, clamped to 15%
+    expect(getInitialQueryPanelSize()).toBe(15);
+  });
+
+  it('dispatches resize event after mount timeout', () => {
     renderComponent();
 
-    // Clear events from mount
-    resizeEvents.length = 0;
+    // No resize events should have been dispatched yet (timer hasn't fired)
+    const preTimerResizes = resizeEvents.filter((e) => e.type === 'resize').length;
 
     act(() => {
-      window.dispatchEvent(new Event('resize'));
+      jest.advanceTimersByTime(100);
     });
 
-    expect(resizeEvents.length).toBeGreaterThan(0);
+    const postTimerResizes = resizeEvents.filter((e) => e.type === 'resize').length;
+    expect(postTimerResizes).toBeGreaterThan(preTimerResizes);
+  });
+
+  describe('prompt mode', () => {
+    beforeEach(() => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === 'selectIsPromptEditorMode') return true;
+        return '';
+      });
+    });
+
+    it('adds the prompt mode class to the container', () => {
+      renderComponent();
+
+      const container = document.querySelector('.exploreResizableQueryContainer--promptMode');
+      expect(container).toBeInTheDocument();
+    });
+
+    it('still renders query panel, content, and resize handle in the DOM', () => {
+      renderComponent();
+
+      expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('content-panel')).toBeInTheDocument();
+
+      // Resize handle is still in the DOM (just hidden via CSS)
+      const handle = document.querySelector('.exploreResizableQueryContainer__resizeHandle');
+      expect(handle).toBeInTheDocument();
+    });
   });
 });

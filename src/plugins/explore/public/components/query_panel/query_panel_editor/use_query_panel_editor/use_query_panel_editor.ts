@@ -376,9 +376,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         const contentHeight = editor.getContentHeight();
         // Read the resizable panel's allocated height rather than the editor's
         // immediate parent, which may have been pushed taller by content.
-        const panelEl = editor.getDomNode()?.closest('.exploreResizableQueryContainer__queryPanel');
+        const domNode = editor.getDomNode();
+        const panelEl = domNode?.closest('.exploreResizableQueryContainer__queryPanel');
         const containerHeight =
-          panelEl?.clientHeight || editor.getDomNode()?.parentElement?.clientHeight || 100;
+          panelEl?.clientHeight ?? domNode?.parentElement?.clientHeight ?? 100;
         const maxHeight = Math.max(containerHeight, 36);
         const finalHeight = Math.min(contentHeight, maxHeight);
 
@@ -386,7 +387,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           width: editor.getLayoutInfo().width,
           height: finalHeight,
         });
-
         editor.updateOptions({
           scrollBeyondLastLine: false,
           scrollbar: {

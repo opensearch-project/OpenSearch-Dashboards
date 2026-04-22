@@ -107,7 +107,7 @@ function DefaultEditorAggSelect({
         defaultMessage:
           'The index pattern {indexPatternTitle} does not have any aggregatable fields.',
         values: {
-          indexPatternTitle: indexPattern && indexPattern.title,
+          indexPatternTitle: indexPattern && (indexPattern.displayName || indexPattern.title),
         },
       })
     );

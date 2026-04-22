@@ -45,6 +45,8 @@ describe('Header', () => {
         onChangeIncludingSystemIndices={() => {}}
         isIncludingSystemIndices={false}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        displayName=""
+        onDisplayNameChanged={() => {}}
       />
     );
 
@@ -64,9 +66,34 @@ describe('Header', () => {
         onChangeIncludingSystemIndices={() => {}}
         isIncludingSystemIndices={false}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        displayName=""
+        onDisplayNameChanged={() => {}}
       />
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should render with display name', () => {
+    const component = shallowWithI18nProvider(
+      <Header
+        isInputInvalid={false}
+        errors={[]}
+        characterList={'%'}
+        query={'logs-*'}
+        onQueryChanged={() => {}}
+        goToNextStep={() => {}}
+        isNextStepDisabled={false}
+        onChangeIncludingSystemIndices={() => {}}
+        isIncludingSystemIndices={false}
+        stepInfo={{ totalStepNumber: 2, currentStepNumber: 1 }}
+        displayName="Production Logs"
+        onDisplayNameChanged={() => {}}
+      />
+    );
+
+    expect(
+      component.find('[data-test-subj="createIndexPatternDisplayNameInput"]').prop('value')
+    ).toBe('Production Logs');
   });
 });

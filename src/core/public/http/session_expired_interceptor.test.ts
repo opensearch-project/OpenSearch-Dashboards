@@ -206,6 +206,70 @@ describe('setupSessionExpiredInterceptor', () => {
     expect(controller.halt).not.toHaveBeenCalled();
   });
 
+  it('allows cross-origin AWS console redirect URLs', () => {
+    const awsConsoleURL =
+      'https://us-east-2.console.aws.amazon.com/aos/home?region=us-east-2#opensearch/applications/test/redirectToDashboardURL';
+    const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': awsConsoleURL });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(controller.halt).toHaveBeenCalledTimes(1);
+
+    jest.advanceTimersByTime(5000);
+    expect(window.location.href).toBe(awsConsoleURL);
+  });
+
+  it('allows cross-origin amazonaws.com redirect URLs', () => {
+    const awsURL = 'https://some-service.us-east-1.amazonaws.com/auth/login';
+    const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': awsURL });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(controller.halt).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects non-HTTPS URLs to trusted domains', () => {
+    const httpURL = 'http://us-east-2.console.aws.amazon.com/login';
+    const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': httpURL });
+    const mockResponse = { status: 401, headers: mockHeaders } as Response;
+
+    interceptor.responseError!(
+      {
+        error: new Error('Unauthorized'),
+        response: mockResponse,
+        request: {} as Request,
+        fetchOptions: { path: '/api/test' } as any,
+        body: undefined,
+      },
+      controller
+    );
+
+    expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(controller.halt).not.toHaveBeenCalled();
+  });
+
   it('allows same-origin absolute URLs', () => {
     // In jsdom, window.location.origin is typically 'http://localhost'
     (window as any).location = { href: '', origin: 'http://localhost' };

@@ -894,6 +894,122 @@ describe('PPLSearchInterceptor', () => {
       expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
     });
 
+    it('should not apply filters when skipFilters is true in request body', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index | fields *',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      };
+
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [mockQuery],
+            },
+            skipFilters: true,
+          },
+          index: 'mock-index',
+        },
+      };
+
+      const mockFilters = [
+        {
+          meta: { disabled: false, type: 'phrase', params: { query: 'test' } },
+          query: { match_phrase: { field: 'test' } },
+        },
+      ];
+
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue(mockFilters);
+      (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue(mockQuery);
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn().mockReturnValue({
+          languageOverrides: {
+            PPL: {
+              hideDatePicker: true,
+            },
+          },
+        }),
+      });
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('WHERE field = "test"');
+
+      const mockIndex = {};
+      (mockDataService.indexPatterns.getByTitle as jest.Mock).mockReturnValue(mockIndex);
+      (mockCoreStart.uiSettings.get as jest.Mock).mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      // Filter manager filters should NOT be applied
+      expect(mockPPLFilterUtils.convertFiltersToWhereClause).not.toHaveBeenCalled();
+      // Time filter should still be applied
+      expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalled();
+      expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
+    });
+
+    it('should apply filters when skipFilters is not set in request body', async () => {
+      const mockQuery = {
+        language: 'PPL',
+        query: 'source=test_index | fields *',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      };
+
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [mockQuery],
+            },
+            // skipFilters is NOT set
+          },
+          index: 'mock-index',
+        },
+      };
+
+      const mockFilters = [
+        {
+          meta: { disabled: false, type: 'phrase', params: { query: 'test' } },
+          query: { match_phrase: { field: 'test' } },
+        },
+      ];
+
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue(mockFilters);
+      (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue(mockQuery);
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn().mockReturnValue({
+          languageOverrides: {
+            PPL: {
+              hideDatePicker: true,
+            },
+          },
+        }),
+      });
+      mockIsPPLSearchQuery.mockReturnValue(true);
+      mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('WHERE field = "test"');
+
+      const mockIndex = {};
+      (mockDataService.indexPatterns.getByTitle as jest.Mock).mockReturnValue(mockIndex);
+      (mockCoreStart.uiSettings.get as jest.Mock).mockReturnValue(true);
+
+      const result = await (pplSearchInterceptor as any).buildQuery(mockRequest);
+
+      // Filter manager filters SHOULD be applied
+      expect(mockPPLFilterUtils.convertFiltersToWhereClause).toHaveBeenCalledWith(
+        mockFilters,
+        mockIndex,
+        true
+      );
+      expect(result.query).toBe(
+        'source=test_index | WHERE @timestamp >= "2023-01-01" | WHERE field = "test" | fields *'
+      );
+    });
+
     describe('S3 default head limit', () => {
       const setupS3Test = (query: string, datasetType: string = DATASET.S3) => {
         const mockQuery = {

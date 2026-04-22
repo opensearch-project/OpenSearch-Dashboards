@@ -47,16 +47,14 @@ export async function getTitle(
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
   }
 
+  const displayTitle = savedObject.attributes.displayName || savedObject.attributes.title;
   // @ts-expect-error TS2345 TODO(ts-error): fixme
   const dataSourceReference = getDataSourceReference(savedObject.references);
 
   if (dataSourceReference) {
     const dataSourceId = dataSourceReference.id;
     if (dataSourceIdToTitle.has(dataSourceId)) {
-      return concatDataSourceWithIndexPattern(
-        dataSourceIdToTitle.get(dataSourceId)!,
-        savedObject.attributes.title
-      );
+      return concatDataSourceWithIndexPattern(dataSourceIdToTitle.get(dataSourceId)!, displayTitle);
     }
   }
 
@@ -64,5 +62,5 @@ export async function getTitle(
     await client.get<DataSourceAttributes>('data-source', id);
 
   // @ts-expect-error TS2345 TODO(ts-error): fixme
-  return getIndexPatternTitle(savedObject.attributes.title, savedObject.references, getDataSource);
+  return getIndexPatternTitle(displayTitle, savedObject.references, getDataSource);
 }
