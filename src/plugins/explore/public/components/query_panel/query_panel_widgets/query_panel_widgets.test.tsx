@@ -55,6 +55,10 @@ jest.mock('./ask_ai_button', () => ({
   AskAIButton: () => <div data-test-subj="ask-ai-button">Ask AI Button</div>,
 }));
 
+jest.mock('../../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => 'logs'),
+}));
+
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));

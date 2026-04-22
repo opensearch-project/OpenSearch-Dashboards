@@ -43,6 +43,10 @@ jest.mock('./metrics_bottom_container/bottom_right_container', () => ({
   ),
 }));
 
+jest.mock('./metrics_page_tabs', () => ({
+  MetricsPageTabs: () => <div data-test-subj="metrics-page-tabs">Metrics Page Tabs</div>,
+}));
+
 jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
   NewExperienceBanner: () => (
     <div data-test-subj="new-experience-banner">New Experience Banner</div>
@@ -178,8 +182,7 @@ describe('MetricsPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
@@ -195,7 +198,7 @@ describe('MetricsPage', () => {
     );
 
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
   });
 
   it('renders when dataset is loading', () => {
@@ -207,7 +210,7 @@ describe('MetricsPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 });

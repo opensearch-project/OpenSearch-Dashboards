@@ -93,23 +93,26 @@ describe('promqlSearchStrategy', () => {
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.name).toBe('dataset-1');
 
-      // Check visualization schema (Time, Series, Value)
+      // Check visualization schema (Time, Series, Labels, Value)
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.schema).toEqual([
         { name: 'Time', type: 'time', values: [] },
         { name: 'Series', type: 'string', values: [] },
+        { name: 'Labels', type: 'object', values: [] },
         { name: 'Value', type: 'number', values: [] },
       ]);
 
       // Check fields contain visualization data
       // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(result.body.fields.length).toBe(3);
+      expect(result.body.fields.length).toBe(4);
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields[0].name).toBe('Time');
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(result.body.fields[1].name).toBe('Series');
       // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(result.body.fields[2].name).toBe('Value');
+      expect(result.body.fields[2].name).toBe('Labels');
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(result.body.fields[3].name).toBe('Value');
 
       // Verify we have 4 rows total (2 series * 2 timestamps)
       // @ts-expect-error TS2339 TODO(ts-error): fixme
@@ -210,6 +213,15 @@ describe('promqlSearchStrategy', () => {
       expect(seriesField).toBeDefined();
       expect(seriesField?.values[0]).toContain('instance="localhost:9090"');
       expect(seriesField?.values[0]).toContain('job="prometheus"');
+
+      // Labels should be exposed as a structured object alongside Series,
+      // so consumers don't need to parse the formatted string.
+      // @ts-expect-error TS2339, TS7006 TODO(ts-error): fixme
+      const labelsField = result.body.fields.find((f) => f.name === 'Labels');
+      expect(labelsField?.values[0]).toEqual({
+        instance: 'localhost:9090',
+        job: 'prometheus',
+      });
     });
 
     it('should create instant schema with all label keys', async () => {
