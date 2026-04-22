@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiSearchBarProps,
   EuiBasicTableColumn,
@@ -164,12 +164,16 @@ export const WorkspaceCollaboratorTable = ({
     services: { notifications, http },
   } = useOpenSearchDashboards();
   const [idToNameMap, setIdToNameMap] = useState<Record<string, string>>({});
+  const idToNameMapRef = useRef(idToNameMap);
+  idToNameMapRef.current = idToNameMap;
 
   useEffect(() => {
     if (!http) return;
+    const abortController = new AbortController();
     const fetchNames = async () => {
       // Group collaborator IDs by (source, type) from their matching WorkspaceCollaboratorType
       const groupMap = new Map<string, { source: string; type: string; ids: string[] }>();
+      const keysWithNewId = new Set<string>();
       permissionSettings.forEach((setting) => {
         if (!isWorkspacePermissionSetting(setting)) return;
         const collaborator = convertPermissionSettingToWorkspaceCollaborator(setting);
@@ -183,31 +187,41 @@ export const WorkspaceCollaboratorTable = ({
         const id =
           setting.type === WorkspacePermissionItemType.User ? setting.userId : setting.group;
         if (!id) return;
+        if (!(id in idToNameMapRef.current)) keysWithNewId.add(key);
         if (!groupMap.has(key)) {
           groupMap.set(key, { ...identitySource, ids: [] });
         }
         groupMap.get(key)!.ids.push(id);
       });
 
-      const newMap: Record<string, string> = {};
+      if (keysWithNewId.size === 0) return;
+
+      const newMap: Record<string, string> = { ...idToNameMapRef.current };
       await Promise.all(
-        Array.from(groupMap.values()).map(async ({ source, type, ids }) => {
-          try {
-            const resp = await http.post<Array<{ id: string; name: string }>>(
-              '/api/security/identity/_entries',
-              { body: JSON.stringify({ source, type, ids }) }
-            );
-            resp?.forEach(({ id, name }) => {
-              newMap[id] = name;
-            });
-          } catch {
-            // silently ignore, Name column will remain empty
-          }
-        })
+        Array.from(groupMap.entries())
+          .filter(([key]) => keysWithNewId.has(key))
+          .map(async ([, { source, type, ids }]) => {
+            const newIds = ids.filter((id) => !(id in idToNameMapRef.current));
+            try {
+              const resp = await http.post<Array<{ id: string; name: string }>>(
+                '/api/security/identity/_entries',
+                {
+                  body: JSON.stringify({ source, type, ids: newIds }),
+                  signal: abortController.signal,
+                }
+              );
+              resp?.forEach(({ id, name }) => {
+                newMap[id] = name;
+              });
+            } catch {
+              // silently ignore, Name column will remain empty
+            }
+          })
       );
-      setIdToNameMap(newMap);
+      if (!abortController.signal.aborted) setIdToNameMap(newMap);
     };
     fetchNames();
+    return () => abortController.abort();
   }, [permissionSettings, displayedCollaboratorTypes, http]);
 
   const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {

@@ -141,6 +141,7 @@ describe('WorkspaceCollaboratorTable', () => {
     await waitFor(() => {
       expect(httpPostMock).toHaveBeenCalledWith('/api/security/identity/_entries', {
         body: expect.any(String),
+        signal: expect.any(AbortSignal),
       });
     });
 

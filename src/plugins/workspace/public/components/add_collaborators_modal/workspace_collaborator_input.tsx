@@ -87,7 +87,7 @@ export const WorkspaceCollaboratorInput = ({
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
       abortController.current?.abort();
 
-      if (!identitySource || !http || !searchValue || searchValue.length > 1024) {
+      if (!identitySource || !http || !searchValue) {
         setOptions([]);
         return;
       }
@@ -103,7 +103,7 @@ export const WorkspaceCollaboratorInput = ({
             query: {
               source: identitySource.source,
               type: identitySource.type,
-              keyword: searchValue,
+              keyword: searchValue.trim(),
             },
             signal: abortController.current.signal,
           });
@@ -111,7 +111,7 @@ export const WorkspaceCollaboratorInput = ({
         } catch (e) {
           if ((e as Error).name !== 'AbortError') setOptions([]);
         } finally {
-          setIsLoading(false);
+          if (!abortController.current?.signal.aborted) setIsLoading(false);
         }
       }, 300);
     },
