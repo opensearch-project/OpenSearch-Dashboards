@@ -18,6 +18,8 @@ interface MessageRowProps {
   onResend?: (message: Message) => void;
   timeline?: Message[];
   threadId?: string;
+  /** Original assistant message for ShareModal when rendering synthetic array content messages */
+  shareTargetMessage?: AssistantMessage;
 }
 
 export const MessageRow: React.FC<MessageRowProps> = ({
@@ -26,6 +28,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
   onResend,
   timeline,
   threadId,
+  shareTargetMessage,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -157,7 +160,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
         <ShareModal
           onClose={() => setShowShareModal(false)}
           timeline={timeline}
-          targetMessage={message as AssistantMessage}
+          targetMessage={(shareTargetMessage || message) as AssistantMessage}
           threadId={threadId}
         />
       )}
