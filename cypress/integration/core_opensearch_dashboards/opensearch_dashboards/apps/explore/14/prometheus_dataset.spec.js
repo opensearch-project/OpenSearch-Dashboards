@@ -168,10 +168,10 @@ const prometheusDatasetTestSuite = () => {
       describe('Prometheus Connection and Query', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          cy.getElementByTestId('metricsPageTab-query')
-            .should('be.visible')
-            .and('not.be.disabled')
-            .click();
+          // Wait for explore tab initial render to settle before switching tabs
+          cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
+          cy.getElementByTestId('metricsPageTab-query').should('not.be.disabled').click();
+          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
         });
 
         it('should have Prometheus dataset pre-selected and verify PromQL language', function () {
@@ -401,10 +401,9 @@ const prometheusDatasetTestSuite = () => {
       describe('Metrics Explore Tab', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          cy.getElementByTestId('metricsPageTab-explore')
-            .should('be.visible')
-            .and('not.be.disabled')
-            .click();
+          // Wait for explore tab initial render to settle
+          cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
+          cy.getElementByTestId('metricsPageTab-explore').should('not.be.disabled').click();
           cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
         });
 
@@ -501,10 +500,10 @@ const prometheusDatasetTestSuite = () => {
       describe('Multi-Query Functionality', () => {
         beforeEach(() => {
           cy.visit(`/w/${workspaceId}/app/explore/metrics`);
-          cy.getElementByTestId('metricsPageTab-query')
-            .should('be.visible')
-            .and('not.be.disabled')
-            .click();
+          // Wait for explore tab initial render to settle before switching tabs
+          cy.getElementByTestId('metricsExploreSearchInput').should('be.visible');
+          cy.getElementByTestId('metricsPageTab-query').should('not.be.disabled').click();
+          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
         });
 
         it('should display Value #A and Value #B columns in Table view for multi-query', function () {
