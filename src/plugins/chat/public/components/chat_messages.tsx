@@ -465,6 +465,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                       }}
                       timeline={isShareable ? timeline : undefined}
                       threadId={isShareable ? threadId : undefined}
+                      shareTargetMessage={isShareable ? assistantMsg : undefined}
                     />
                   ));
               }
