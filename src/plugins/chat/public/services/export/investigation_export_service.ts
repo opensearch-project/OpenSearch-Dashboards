@@ -27,6 +27,9 @@ export async function collectChatExportData(
   options: ChatExportOptions
 ): Promise<ChatExportData> {
   const targetIndex = timeline.findIndex((m) => m.id === targetMessage.id);
+  if (targetIndex === -1) {
+    throw new Error(`Target message ${targetMessage.id} not found in timeline`);
+  }
   const { text: question, image: questionImage } = findPrecedingQuestion(timeline, targetIndex);
 
   return {
