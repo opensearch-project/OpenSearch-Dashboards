@@ -107,6 +107,7 @@ export class ExplorePlugin
   private stopUrlTrackingCallbackByApp: Partial<Record<ExploreFlavor | 'explore', () => void>> = {};
   private currentHistory?: ScopedHistory;
   private readonly DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
+  private readonly METRICS_VISUALIZATION_NAME = 'MetricsVisualization';
   private readonly VISUALIZATION_EDITOR_NAME = 'VisualizationEditor';
 
   /** discover */
@@ -823,6 +824,20 @@ export class ExplorePlugin
       appExtensions,
     });
     setupDeps.visualizations.registerAlias({
+      name: this.METRICS_VISUALIZATION_NAME,
+      aliasPath: '#/?_a=(ui:(metricsPageMode:query))',
+      aliasApp: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+      title: i18n.translate('explore.visualization.metrics.title', {
+        defaultMessage: 'Visualize with Metrics',
+      }),
+      description: i18n.translate('explore.visualization.metrics.description', {
+        defaultMessage: 'Create visualization with Metrics',
+      }),
+      icon: 'metricsApp',
+      stage: 'production',
+      appExtensions,
+    });
+    setupDeps.visualizations.registerAlias({
       name: this.VISUALIZATION_EDITOR_NAME,
       // Create new visualization
       // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
@@ -866,7 +881,9 @@ export class ExplorePlugin
         .getAliases()
         .filter(
           (v) =>
-            v.name === this.DISCOVER_VISUALIZATION_NAME || v.name === this.VISUALIZATION_EDITOR_NAME
+            v.name === this.DISCOVER_VISUALIZATION_NAME ||
+            v.name === this.METRICS_VISUALIZATION_NAME ||
+            v.name === this.VISUALIZATION_EDITOR_NAME
         )
         .forEach((visAlias) => {
           // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
