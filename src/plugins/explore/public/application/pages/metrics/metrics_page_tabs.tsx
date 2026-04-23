@@ -38,7 +38,7 @@ export const MetricsPageTabs: React.FC = () => {
     <MetricsPageModeContext.Provider value={mode}>
       <div className="metricsPageTabs__tabBar">
         <DatasetSelectWidget />
-        <EuiTabs size="s" className="metricsPageTabs__tabs">
+        <EuiTabs size="s" className="metricsPageTabs__tabs" bottomBorder={false}>
           {PAGE_TABS.map((tab) => (
             <EuiTab
               key={tab.id}

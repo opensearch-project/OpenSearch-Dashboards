@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiPopover,
   EuiSmallButtonEmpty,
-  EuiIcon,
   EuiFormRow,
   EuiSuperSelect,
 } from '@elastic/eui';
@@ -113,13 +112,13 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
       button={
         <EuiSmallButtonEmpty
           onClick={() => setIsOpen((v) => !v)}
+          iconType="filter"
           aria-label={i18n.translate('explore.metricsExplore.addLabelFilterAriaLabel', {
             defaultMessage: 'Add label filter',
           })}
           data-test-subj="addLabelFilter"
         >
           {i18n.translate('explore.metricsExplore.labelFilter', { defaultMessage: 'Label' })}
-          <EuiIcon type="filter" style={{ marginLeft: 4 }} />
         </EuiSmallButtonEmpty>
       }
       anchorPosition="downLeft"

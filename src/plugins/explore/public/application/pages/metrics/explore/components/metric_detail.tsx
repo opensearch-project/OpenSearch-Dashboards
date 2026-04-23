@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiButton,
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiTitle,
   EuiText,
   EuiPanel,
@@ -118,7 +118,7 @@ const BreakdownPanel: React.FC<{
   if (error) {
     return (
       <div ref={panelRef}>
-        <EuiPanel paddingSize="s" hasBorder>
+        <EuiPanel paddingSize="none" style={{ padding: 8 }} hasBorder>
           <EuiTitle size="xxs">
             <h3>{labelName}</h3>
           </EuiTitle>
@@ -131,7 +131,7 @@ const BreakdownPanel: React.FC<{
   if (!data) {
     return (
       <div ref={panelRef}>
-        <EuiPanel paddingSize="s" hasBorder>
+        <EuiPanel paddingSize="none" style={{ padding: 8 }} hasBorder>
           <EuiTitle size="xxs">
             <h3>{labelName}</h3>
           </EuiTitle>
@@ -162,7 +162,12 @@ const BreakdownPanel: React.FC<{
         }}
       >
         {data.series.map((s, i) => (
-          <EuiPanel key={`${data.label}-${s.labelValue}`} paddingSize="s" hasBorder>
+          <EuiPanel
+            key={`${data.label}-${s.labelValue}`}
+            paddingSize="none"
+            style={{ padding: 8 }}
+            hasBorder
+          >
             <EuiTitle size="xxs">
               <h3>{s.labelValue}</h3>
             </EuiTitle>
@@ -200,7 +205,7 @@ const BreakdownPanel: React.FC<{
 
   return (
     <div ref={panelRef}>
-      <EuiPanel paddingSize="s" hasBorder>
+      <EuiPanel paddingSize="none" style={{ padding: 8 }} hasBorder>
         <EuiTitle size="xxs">
           <h3>
             {data.label} ({data.cardinality})
@@ -369,14 +374,19 @@ export const MetricDetail: React.FC = () => {
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiButtonEmpty
             iconType="arrowLeft"
             aria-label={i18n.translate('explore.metricsExplore.backToMetrics', {
               defaultMessage: 'Back to all metrics',
             })}
             onClick={() => dispatch({ type: 'GO_BACK' })}
             data-test-subj="metricsExploreBackButton"
-          />
+            size="s"
+          >
+            {i18n.translate('explore.metricsExplore.back', {
+              defaultMessage: 'Back',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap responsive={false}>
@@ -413,7 +423,7 @@ export const MetricDetail: React.FC = () => {
             data-test-subj="metricsExploreExecuteButton"
           >
             {i18n.translate('explore.metricsExplore.execute', {
-              defaultMessage: 'Run Visualization Query',
+              defaultMessage: 'Query Metric',
             })}
           </EuiButton>
         </EuiFlexItem>

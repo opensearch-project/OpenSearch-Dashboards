@@ -12,7 +12,7 @@ import {
   EuiSpacer,
   EuiButton,
   EuiTitle,
-  EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -335,39 +335,39 @@ export const MetricBrowser: React.FC = () => {
             buttonSize="compressed"
           />
         </EuiFlexItem>
-        {selected.size > 0 && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={() => {
-                  const queries = Array.from(selected).map((selName) => {
-                    const type = inferMetricType(
-                      selName,
-                      metadata[selName]?.type || MetricType.UNKNOWN
-                    );
-                    return queryGen.forMetric(selName, type, stepSec, state.filters);
-                  });
-                  const multiQuery = queries.map((q) => `${q};`).join('\n');
-                  executePromQL(multiQuery);
-                }}
-                iconType="play"
-                size="s"
-              >
-                {i18n.translate('explore.metricsExplore.executeSelected', {
-                  defaultMessage: 'Run Visualization Query',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setSelected(new Set())} size="s">
-                {i18n.translate('explore.metricsExplore.clearSelection', {
-                  defaultMessage: 'Clear',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              selected.size === 0
+                ? i18n.translate('explore.metricsExplore.selectMetricsTooltip', {
+                    defaultMessage: 'Select one or more metrics to query',
+                  })
+                : undefined
+            }
+          >
+            <EuiButton
+              fill
+              onClick={() => {
+                const queries = Array.from(selected).map((selName) => {
+                  const type = inferMetricType(
+                    selName,
+                    metadata[selName]?.type || MetricType.UNKNOWN
+                  );
+                  return queryGen.forMetric(selName, type, stepSec, state.filters);
+                });
+                const multiQuery = queries.map((q) => `${q};`).join('\n');
+                executePromQL(multiQuery);
+              }}
+              iconType="play"
+              size="s"
+              isDisabled={selected.size === 0}
+            >
+              {i18n.translate('explore.metricsExplore.executeSelected', {
+                defaultMessage: 'Query Metrics',
+              })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <LabelFilterBadges />

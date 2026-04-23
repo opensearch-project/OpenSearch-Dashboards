@@ -112,10 +112,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <div ref={cardRef}>
       <EuiPanel
-        paddingSize="s"
+        paddingSize="none"
         hasBorder
         onClick={onToggleSelect}
         style={{
+          padding: 6,
           cursor: 'pointer',
           height: '100%',
           display: 'flex',
