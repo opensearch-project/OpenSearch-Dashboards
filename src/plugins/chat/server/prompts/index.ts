@@ -33,14 +33,7 @@ export function injectSystemPrompt(messages: unknown[], language?: string): void
   const systemPrompt = SYSTEM_PROMPTS[language];
   if (!systemPrompt) return;
 
-  // use 'user' role for now because 'system' role messages are ignored by ag-ui agent.
-  // Merge into the first user message to keep Bedrock's alternating-role requirement.
-  const first = messages[0] as { role?: string; content?: string } | undefined;
-  if (first && first.role === 'user' && typeof first.content === 'string') {
-    first.content = `${systemPrompt}\n\n${first.content}`;
-    return;
-  }
-
+  // use 'user' role for now because 'system' role messages are ignored by ag-ui agent
   const systemMessage = { id: `system-${Date.now()}`, role: 'user', content: systemPrompt };
   messages.unshift(systemMessage);
 }

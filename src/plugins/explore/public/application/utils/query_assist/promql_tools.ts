@@ -25,15 +25,15 @@ export const PROMQL_FRONTEND_TOOLS: Tool[] = [
         },
         metricsLimit: {
           type: 'number',
-          description: 'Maximum number of metrics to return. Defaults to 10.',
+          description: 'Maximum number of metrics to return. Defaults to 20.',
         },
         labelsLimit: {
           type: 'number',
-          description: 'Maximum number of labels per metric. Defaults to 10.',
+          description: 'Maximum number of labels per metric. Defaults to 20.',
         },
         valuesLimit: {
           type: 'number',
-          description: 'Maximum number of sample values per label. Defaults to 3.',
+          description: 'Maximum number of sample values per label. Defaults to 5.',
         },
       },
       required: [],

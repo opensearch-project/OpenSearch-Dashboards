@@ -568,11 +568,13 @@ describe('Chat Proxy Routes', () => {
         const fetchCall = mockFetch.mock.calls[0];
         const requestBody = JSON.parse(fetchCall[1]!.body as string);
 
-        // System prompt should be merged into first user message
-        expect(requestBody.messages).toHaveLength(1);
+        // System prompt should be prepended
+        expect(requestBody.messages).toHaveLength(2);
         expect(requestBody.messages[0].role).toBe('user');
         expect(requestBody.messages[0].content).toContain('You are a PromQL expert');
-        expect(requestBody.messages[0].content).toContain('Hello');
+        expect(requestBody.messages[0].id).toMatch(/^system-/);
+        // Original message should follow
+        expect(requestBody.messages[1]).toEqual(validRequest.messages[0]);
       });
 
       it('should not inject system prompt when queryAssistLanguage is not provided', async () => {

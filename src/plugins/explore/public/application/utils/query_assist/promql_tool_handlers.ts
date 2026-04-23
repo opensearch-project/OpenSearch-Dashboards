@@ -7,16 +7,19 @@ import { DataPublicPluginStart, TimeRange } from '../../../../../data/public';
 import { PromQLToolName } from './promql_tools';
 
 /** Default limit for metrics */
-const DEFAULT_METRICS_LIMIT = 10;
+const DEFAULT_METRICS_LIMIT = 20;
 
 /** Default limit for labels per metric */
-const DEFAULT_LABELS_LIMIT = 10;
+const DEFAULT_LABELS_LIMIT = 20;
 
 /** Default limit for sample values per label */
-const DEFAULT_VALUES_LIMIT = 3;
+const DEFAULT_VALUES_LIMIT = 5;
 
-/** Maximum concurrent requests */
+/** Maximum concurrent requests for series API batches */
 const MAX_CONCURRENT_REQUESTS = 5;
+
+/** Maximum metrics per series API call to avoid URL length limits */
+const MAX_METRICS_PER_SERIES_BATCH = 10;
 
 async function executeWithConcurrencyLimit<T>(
   tasks: Array<() => Promise<T>>,
@@ -29,6 +32,16 @@ async function executeWithConcurrencyLimit<T>(
     results.push(...batchResults);
   }
   return results;
+}
+
+/**
+ * Escapes special regex characters in metric names for use in Prometheus match
+ * selector. This is needed because currently backend only supports one match[]
+ * value, and we are sending multiple names as regex.
+ * TODO use multiple match[] parameters when backend supports it.
+ */
+function escapeRegexForPrometheus(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 interface SearchPrometheusMetadataArgs {
@@ -75,6 +88,12 @@ interface PrometheusResourceClient {
     label?: string,
     timeRange?: TimeRange
   ) => Promise<string[]>;
+  getSeries: (
+    dataConnectionId: string,
+    match: string,
+    meta?: Record<string, unknown>,
+    timeRange?: TimeRange
+  ) => Promise<Array<Record<string, string>>>;
 }
 
 interface MetricMetadata {
@@ -151,25 +170,58 @@ export class PromQLToolHandlers {
         return { labelsCommonToAllMetrics: [], metrics: [], labelValues: {} };
       }
 
-      // Use getLabels per metric instead of the expensive getSeries endpoint.
-      // getLabels hits /api/v1/labels?match[]={__name__="metric"} which only
-      // returns label names — orders of magnitude cheaper than /api/v1/series.
-      const labelTasks = metricNames.map((metric) => () =>
-        this.prometheusClient
-          .getLabels(this.dataSourceName, this.dataSourceMeta, metric, timeRange)
-          .then((labels) => labels.filter((l) => l !== '__name__'))
-          .catch(() => [] as string[])
-      );
+      // Batch metrics to avoid URL length limits
+      const metricBatches: string[][] = [];
+      for (let i = 0; i < metricNames.length; i += MAX_METRICS_PER_SERIES_BATCH) {
+        metricBatches.push(metricNames.slice(i, i + MAX_METRICS_PER_SERIES_BATCH));
+      }
 
-      const [metadata, labelsPerMetric] = await Promise.all([
-        this.prometheusClient
-          .getMetricMetadata(this.dataSourceName, this.dataSourceMeta, undefined, timeRange)
-          .catch(() => ({} as Record<string, Array<{ type: string; help: string }>>)),
-        executeWithConcurrencyLimit(labelTasks, MAX_CONCURRENT_REQUESTS),
+      // Build match selectors for each batch: {__name__=~"metric1|metric2|..."}
+      const seriesTasks = metricBatches.map((batch) => () => {
+        const escapedMetrics = batch.map(escapeRegexForPrometheus);
+        const matchSelector = `{__name__=~"${escapedMetrics.join('|')}"}`;
+        return this.prometheusClient
+          .getSeries(this.dataSourceName, matchSelector, this.dataSourceMeta, timeRange)
+          .catch(() => []);
+      });
+
+      const [metadata, seriesResults] = await Promise.all([
+        this.prometheusClient.getMetricMetadata(
+          this.dataSourceName,
+          this.dataSourceMeta,
+          undefined,
+          timeRange
+        ),
+        executeWithConcurrencyLimit(seriesTasks, MAX_CONCURRENT_REQUESTS),
       ]);
 
-      // Compute labels common to all metrics
-      const allLabelSets = labelsPerMetric.map((labels) => labels.slice(0, labelsLimit));
+      const seriesData = seriesResults.flat();
+
+      const labelsPerMetric: Map<string, Set<string>> = new Map();
+      const valuesPerLabel: Map<string, Set<string>> = new Map();
+      metricNames.forEach((name) => labelsPerMetric.set(name, new Set()));
+
+      for (const series of seriesData) {
+        const metricName = series.__name__;
+        if (metricName && labelsPerMetric.has(metricName)) {
+          const labelSet = labelsPerMetric.get(metricName)!;
+          for (const [labelName, labelValue] of Object.entries(series)) {
+            if (labelName !== '__name__') {
+              labelSet.add(labelName);
+              if (!valuesPerLabel.has(labelName)) {
+                valuesPerLabel.set(labelName, new Set());
+              }
+              valuesPerLabel.get(labelName)!.add(labelValue);
+            }
+          }
+        }
+      }
+
+      const allLabelSets: string[][] = metricNames.map((name) => {
+        const labelSet = labelsPerMetric.get(name) || new Set<string>();
+        return Array.from(labelSet).slice(0, labelsLimit);
+      });
+
       const labelsCommonToAllMetrics =
         allLabelSets.length > 0
           ? allLabelSets.reduce((common, labels) =>
@@ -177,7 +229,6 @@ export class PromQLToolHandlers {
             )
           : [];
 
-      // Collect all unique label names for value fetching
       const allLabelNames = new Set<string>();
       const metrics: MetricInfo[] = metricNames.map((name, index) => {
         const metaInfo = (metadata as MetricMetadata)?.[name];
@@ -191,22 +242,11 @@ export class PromQLToolHandlers {
         };
       });
 
-      // Fetch sample values for each label using the lightweight getLabelValues API
-      const labelNames = Array.from(allLabelNames);
-      const valueTasks = labelNames.map((label) => () =>
-        this.prometheusClient
-          .getLabelValues(this.dataSourceName, this.dataSourceMeta, label, timeRange)
-          .then((values) => values.slice(0, valuesLimit))
-          .catch(() => [] as string[])
-      );
-      const valuesResults = await executeWithConcurrencyLimit(valueTasks, MAX_CONCURRENT_REQUESTS);
-
       const labelValues: Record<string, string[]> = {};
-      labelNames.forEach((label, i) => {
-        if (valuesResults[i].length > 0) {
-          labelValues[label] = valuesResults[i];
-        }
-      });
+      for (const labelName of allLabelNames) {
+        const values = valuesPerLabel.get(labelName) || new Set<string>();
+        labelValues[labelName] = Array.from(values).slice(0, valuesLimit);
+      }
 
       return { labelsCommonToAllMetrics, metrics, labelValues };
     } catch (error) {
