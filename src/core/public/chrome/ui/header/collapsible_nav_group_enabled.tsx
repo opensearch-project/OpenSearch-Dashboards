@@ -229,7 +229,7 @@ export function CollapsibleNavGroupEnabled({
 
   // ── Original nav rendering (EuiFlyout push — used when enableIconSideNav is OFF) ──
 
-  const rendeLeftNav = (props?: Partial<EuiFlyoutProps>) => (
+  const renderLeftNav = (props?: Partial<EuiFlyoutProps>) => (
     <EuiFlyout
       data-test-subj="collapsibleNav"
       id={id}
@@ -520,10 +520,10 @@ export function CollapsibleNavGroupEnabled({
   // Default: original EuiFlyout-based nav
   return (
     <>
-      <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
+      <EuiHideFor sizes={['xs', 's', 'm']}>{renderLeftNav()}</EuiHideFor>
       {isNavOpen ? (
         <EuiShowFor sizes={['xs', 's', 'm']}>
-          {rendeLeftNav({
+          {renderLeftNav({
             type: 'overlay',
             size: undefined,
             outsideClickCloses: true,

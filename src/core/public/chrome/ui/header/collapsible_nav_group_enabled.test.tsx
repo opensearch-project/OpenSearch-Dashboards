@@ -98,6 +98,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       logos: getLogos({}, mockBasePath.serverBasePath),
       navGroupsMap$,
       navControlsLeftBottom$: new BehaviorSubject([]),
+      navControlsIconSideNavFooter$: new BehaviorSubject([]),
       currentNavGroup$,
       setCurrentNavGroup: (val: string | undefined) => {
         if (val) {
@@ -221,5 +222,197 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const { getByText } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
     // Should render manage category
     expect(getByText(DEFAULT_APP_CATEGORIES.manage.label)).toBeInTheDocument();
+  });
+
+  describe('workspace and flag combinations', () => {
+    const mockDesktopMatchMedia = () => {
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: jest.fn().mockImplementation((query: string) => ({
+          matches: query === '(min-width: 992px)',
+          media: query,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        })),
+      });
+    };
+
+    const mockMobileMatchMedia = () => {
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: jest.fn().mockImplementation((query: string) => ({
+          matches: false,
+          media: query,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+        })),
+      });
+    };
+
+    afterEach(() => {
+      document.documentElement.style.removeProperty('--osd-sidebar-width');
+    });
+
+    describe('Observability workspace + flag ON', () => {
+      it('should render icon side nav expanded when nav is open', () => {
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: true,
+        });
+        const { getByTestId, queryByTestId } = render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(getByTestId('obsExpandedNav')).toBeInTheDocument();
+        expect(queryByTestId('collapsibleNavAppLink-link-in-observability')).toBeNull();
+      });
+
+      it('should render icon side nav collapsed when nav is closed', () => {
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: false,
+          enableIconSideNav: true,
+        });
+        const { getByTestId } = render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(getByTestId('obsCollapsedNav')).toBeInTheDocument();
+      });
+
+      it('should set CSS variable for expanded sidebar width on desktop', () => {
+        mockDesktopMatchMedia();
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: true,
+        });
+        render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe(
+          '270px'
+        );
+      });
+
+      it('should set CSS variable for collapsed sidebar width (64px) on desktop', () => {
+        mockDesktopMatchMedia();
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: false,
+          enableIconSideNav: true,
+        });
+        render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('64px');
+      });
+
+      it('should clean up CSS variable on unmount', () => {
+        mockDesktopMatchMedia();
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: true,
+        });
+        const { unmount } = render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe(
+          '270px'
+        );
+        unmount();
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('');
+      });
+
+      it('should not set CSS variable on mobile', () => {
+        mockMobileMatchMedia();
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: true,
+        });
+        render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('');
+      });
+    });
+
+    describe('Observability workspace + flag OFF', () => {
+      it('should render classic EuiFlyout nav, not icon side nav', () => {
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: false,
+        });
+        const { queryByTestId, getByTestId } = render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(queryByTestId('obsExpandedNav')).toBeNull();
+        expect(queryByTestId('obsCollapsedNav')).toBeNull();
+        expect(getByTestId('collapsibleNav')).toBeInTheDocument();
+      });
+
+      it('should not set CSS variable', () => {
+        mockDesktopMatchMedia();
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: false,
+        });
+        render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('');
+      });
+    });
+
+    describe('Search workspace + flag ON (should behave like flag OFF)', () => {
+      it('should render classic EuiFlyout nav, not icon side nav', () => {
+        // enableIconSideNav is computed in Header and would be false for search workspace.
+        // Here we pass enableIconSideNav=false to verify the component renders classic nav.
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.search.id,
+          navGroupsMap: {
+            ...defaultNavGroupMap,
+            [DEFAULT_NAV_GROUPS.search.id]: {
+              ...DEFAULT_NAV_GROUPS.search,
+              navLinks: [{ id: 'link-in-search', title: 'link-in-search' }],
+            },
+          },
+          navLinks: [{ id: 'link-in-search', title: 'link-in-search', baseUrl: '', href: '' }],
+          isNavOpen: true,
+          enableIconSideNav: false,
+        });
+        const { queryByTestId, getByTestId } = render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(queryByTestId('obsExpandedNav')).toBeNull();
+        expect(queryByTestId('obsCollapsedNav')).toBeNull();
+        expect(getByTestId('collapsibleNav')).toBeInTheDocument();
+      });
+
+      it('should not set CSS variable even if passed enableIconSideNav=false', () => {
+        mockDesktopMatchMedia();
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.search.id,
+          navGroupsMap: {
+            ...defaultNavGroupMap,
+            [DEFAULT_NAV_GROUPS.search.id]: {
+              ...DEFAULT_NAV_GROUPS.search,
+              navLinks: [{ id: 'link-in-search', title: 'link-in-search' }],
+            },
+          },
+          navLinks: [{ id: 'link-in-search', title: 'link-in-search', baseUrl: '', href: '' }],
+          isNavOpen: true,
+          enableIconSideNav: false,
+        });
+        render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('');
+      });
+    });
+
+    describe('Search workspace + flag OFF', () => {
+      it('should render classic EuiFlyout nav', () => {
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.search.id,
+          navGroupsMap: {
+            ...defaultNavGroupMap,
+            [DEFAULT_NAV_GROUPS.search.id]: {
+              ...DEFAULT_NAV_GROUPS.search,
+              navLinks: [{ id: 'link-in-search', title: 'link-in-search' }],
+            },
+          },
+          navLinks: [{ id: 'link-in-search', title: 'link-in-search', baseUrl: '', href: '' }],
+          isNavOpen: true,
+          enableIconSideNav: false,
+        });
+        const { queryByTestId, getByTestId } = render(<CollapsibleNavGroupEnabled {...props} />);
+        expect(queryByTestId('obsExpandedNav')).toBeNull();
+        expect(getByTestId('collapsibleNav')).toBeInTheDocument();
+      });
+    });
   });
 });

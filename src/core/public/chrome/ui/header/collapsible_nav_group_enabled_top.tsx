@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@osd/i18n';
 import { Logos } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
@@ -110,7 +111,15 @@ export const CollapsibleNavTop = ({
                   iconType={isLocked ? 'lock' : 'lockOpen'}
                   color="subdued"
                   display="empty"
-                  aria-label={isLocked ? 'Unlock navigation' : 'Lock navigation'}
+                  aria-label={
+                    isLocked
+                      ? i18n.translate('core.ui.primaryNav.unlockNavigation', {
+                          defaultMessage: 'Unlock navigation',
+                        })
+                      : i18n.translate('core.ui.primaryNav.lockNavigation', {
+                          defaultMessage: 'Lock navigation',
+                        })
+                  }
                   data-test-subj="collapsibleNavLockButton"
                   size="xs"
                 />
@@ -120,7 +129,9 @@ export const CollapsibleNavTop = ({
                 iconType="menuLeft"
                 color="subdued"
                 display="empty"
-                aria-label="Collapse navigation"
+                aria-label={i18n.translate('core.ui.primaryNav.collapseNavigation', {
+                  defaultMessage: 'Collapse navigation',
+                })}
                 data-test-subj="collapsibleNavToggleButton"
                 size="xs"
               />
@@ -133,7 +144,9 @@ export const CollapsibleNavTop = ({
               iconType="menu"
               color="subdued"
               display="empty"
-              aria-label="Expand navigation"
+              aria-label={i18n.translate('core.ui.primaryNav.expandNavigation', {
+                defaultMessage: 'Expand navigation',
+              })}
               data-test-subj="collapsibleNavToggleButton"
               size="s"
             />

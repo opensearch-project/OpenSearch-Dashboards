@@ -71,6 +71,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 3500,
   },
+  traceAnalytics: {
+    id: 'traceAnalytics',
+    label: i18n.translate('core.ui.traceAnalytics.label', {
+      defaultMessage: 'Trace Analytics',
+    }),
+    order: 3500,
+  },
   security: {
     id: 'securitySolution',
     label: i18n.translate('core.ui.securityNavList.label', {

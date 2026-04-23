@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPopover, EuiPopoverProps } from '@elastic/eui';
 
 interface SimplePopoverProps extends Omit<EuiPopoverProps, 'button' | 'isOpen' | 'closePopover'> {
@@ -24,6 +24,14 @@ export function SimplePopover({
 }: SimplePopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const cancelClose = useCallback(() => {
     if (closeTimeoutRef.current) {

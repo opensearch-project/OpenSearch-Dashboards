@@ -9,7 +9,6 @@ import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink } from '../../nav_group';
-import { AppCategory } from '../../../../types';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 
 type MergedNavLink = ChromeNavLink & ChromeRegistrationNavLink;

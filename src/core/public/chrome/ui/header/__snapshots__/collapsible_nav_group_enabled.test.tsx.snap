@@ -34,9 +34,9 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
               class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
               data-test-subj="global-search-input"
               placeholder="Search menu or assets"
-              readonly=""
-              style="cursor: pointer;"
+              style="padding-right: 32px;"
               type="search"
+              value=""
             />
             <div
               class="euiFormControlLayoutIcons"
@@ -118,23 +118,31 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
       <div
         class="searchBarIcon euiHeaderSectionItemButton"
       >
-        <span
-          class="euiToolTipAnchor"
+        <div
+          class="euiPopover euiPopover--anchorDownCenter"
         >
-          <button
-            aria-label="search"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-            data-test-subj="globalSearch-leftNav-icon"
-            type="button"
+          <div
+            class="euiPopover__anchor"
           >
             <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="search"
-            />
-          </button>
-        </span>
+              class="euiToolTipAnchor"
+            >
+              <button
+                aria-label="search"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="globalSearch-leftNav-icon"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="search"
+                />
+              </button>
+            </span>
+          </div>
+        </div>
       </div>
       <div
         class="flex-1-container"
@@ -181,9 +189,9 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
               class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed searchInput"
               data-test-subj="global-search-input"
               placeholder="Search menu or assets"
-              readonly=""
-              style="cursor: pointer;"
+              style="padding-right: 32px;"
               type="search"
+              value=""
             />
             <div
               class="euiFormControlLayoutIcons"

@@ -89,6 +89,7 @@ import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
 import { GlobalSearchCommand } from '../../global_search';
 import { HeaderBanner } from './header_banner';
+import { OBSERVABILITY_USE_CASE_ID } from '../../../../../core/utils';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -181,7 +182,7 @@ export function Header({
     !!enableIconSideNavSetting &&
     !!useUpdatedHeader &&
     navGroupEnabled &&
-    currentNavGroup?.id === 'observability';
+    currentNavGroup?.id === OBSERVABILITY_USE_CASE_ID;
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);

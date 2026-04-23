@@ -77,7 +77,7 @@ function CollapsedLeafIcon({
           navigateToApp(link.id);
         }}
         className="obsCollapsedNavIcon"
-        size="l"
+        size="m"
         data-test-subj={`obsCollapsedIcon-${link.id}`}
       />
     </EuiToolTip>
@@ -109,7 +109,7 @@ function CollapsedParentIcon({
         color={active ? 'primary' : 'text'}
         display={active ? 'base' : 'empty'}
         className="obsCollapsedNavIcon"
-        size="l"
+        size="m"
         data-test-subj={`obsCollapsedIcon-${parentLink?.id || 'parent'}`}
       />
       <EuiIcon type="arrowRight" size="s" className="obsCollapsedNav-popoverArrow" />
@@ -181,7 +181,7 @@ function CollapsedCategoryIcon({
         color={active ? 'primary' : 'text'}
         display={active ? 'base' : 'empty'}
         className="obsCollapsedNavIcon"
-        size="l"
+        size="m"
         data-test-subj={`obsCollapsedIcon-${category.label}`}
       />
       <EuiIcon type="arrowRight" size="s" className="obsCollapsedNav-popoverArrow" />
