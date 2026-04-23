@@ -30,6 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+// @ts-expect-error TS2307 TODO(ts-upgrade): fixme
 import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
 import {
   IContainer,

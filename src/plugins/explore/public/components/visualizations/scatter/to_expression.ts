@@ -4,8 +4,8 @@
  */
 
 import { ScatterChartStyle } from './scatter_vis_config';
-import { VisColumn, AxisColumnMappings, AxisRole } from '../types';
-import { getSwappedAxisRole } from '../utils/utils';
+import { AxisRole, VisColumn } from '../types';
+import { getAxisConfig } from '../utils/utils';
 import {
   pipe,
   createBaseConfig,
@@ -22,39 +22,33 @@ import { convertTo2DArray, transform, pivot } from '../utils/data_transformation
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getAxisConfig(styles);
+  const xCol = axisColumnMappings[AxisRole.X];
+  const yCol = axisColumnMappings[AxisRole.Y];
 
-  const xField = axisConfig.xAxis?.column;
-  const yField = axisConfig.yAxis?.column;
-
-  if (!xField || !yField) throw Error('Missing axis config for scatter chart');
-
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = Object.values(axisColumnMappings).map((m) => m.column);
 
   const result = pipe(
     transform(convertTo2DArray(allColumns)),
-    createBaseConfig({ title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name}` }),
+    createBaseConfig({ title: `${xCol.name} vs ${yCol.name}` }),
     buildAxisConfigs,
     buildVisMap({
-      seriesFields: (headers) => (headers ?? []).filter((h) => h === yField),
+      seriesFields: (headers) => (headers ?? []).filter((h) => h === yCol.column),
     }),
     createScatterSeries({
       styles,
-      xField,
-      yField,
+      xField: xCol.column,
+      yField: yCol.column,
     }),
     assembleSpec
   )({
     data: transformedData,
     styles,
     axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisColumnMappings,
   });
 
   return result.spec;
@@ -62,48 +56,43 @@ export const createTwoMetricScatter = (
 
 export const createTwoMetricOneCateScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
+  }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-
-  const xField = axisConfig.xAxis?.column;
-  const yField = axisConfig.yAxis?.column;
-  const colorField = axisColumnMappings?.[AxisRole.COLOR]?.column;
-
-  if (!xField || !yField || !colorField)
-    throw Error('Missing axis config for colored scatter chart');
+  const axisConfig = getAxisConfig(styles);
+  const xCol = axisColumnMappings[AxisRole.X];
+  const yCol = axisColumnMappings[AxisRole.Y];
+  const colorCol = axisColumnMappings[AxisRole.COLOR];
 
   const result = pipe(
     transform(
       pivot({
-        groupBy: xField,
-        pivot: colorField,
-        field: yField,
+        groupBy: xCol.column,
+        pivot: colorCol.column,
+        field: yCol.column,
       }),
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
-        axisColumnMappings?.[AxisRole.COLOR]?.name
-      }`,
+      title: `${xCol.name} vs ${yCol.name} by ${colorCol.name}`,
     }),
     buildAxisConfigs,
     createCategoryScatterSeries({
       styles,
-      xField,
-      yField,
-      colorField,
+      xField: xCol.column,
+      yField: yCol.column,
+      colorField: colorCol.column,
     }),
     assembleSpec
   )({
     data: transformedData,
     styles,
     axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisColumnMappings,
   });
 
   return result.spec;
@@ -111,46 +100,41 @@ export const createTwoMetricOneCateScatter = (
 
 export const createThreeMetricOneCateScatter = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: ScatterChartStyle,
-  axisColumnMappings?: AxisColumnMappings
-): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-
-  const xField = axisConfig.xAxis?.column;
-  const yField = axisConfig.yAxis?.column;
-  const colorField = axisColumnMappings?.[AxisRole.COLOR]?.column;
-  const sizeField = axisColumnMappings?.[AxisRole.SIZE]?.column;
-
-  if (!xField || !yField || !colorField || !sizeField) {
-    throw Error('Missing axis config for size scatter chart');
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
+    [AxisRole.SIZE]: VisColumn;
   }
+): any => {
+  const axisConfig = getAxisConfig(styles);
+  const xCol = axisColumnMappings[AxisRole.X];
+  const yCol = axisColumnMappings[AxisRole.Y];
+  const colorCol = axisColumnMappings[AxisRole.COLOR];
+  const sizeCol = axisColumnMappings[AxisRole.SIZE];
 
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = Object.values(axisColumnMappings).map((m) => m.column);
 
   const result = pipe(
     transform(convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
-        axisColumnMappings?.[AxisRole.COLOR]?.name
-      } (Size: ${axisColumnMappings?.[AxisRole.SIZE]?.name})`,
+      title: `${xCol.name} vs ${yCol.name} by ${colorCol.name} (Size: ${sizeCol.name})`,
     }),
     buildAxisConfigs,
     createSizeScatterSeries({
       styles,
-      xField,
-      yField,
-      colorField,
-      sizeField,
+      xField: xCol.column,
+      yField: yCol.column,
+      colorField: colorCol.column,
+      sizeField: sizeCol.column,
     }),
     assembleSpec
   )({
     data: transformedData,
     styles,
     axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisColumnMappings,
   });
 
   return result.spec;

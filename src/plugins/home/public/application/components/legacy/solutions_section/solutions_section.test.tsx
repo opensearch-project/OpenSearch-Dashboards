@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { SolutionsSection } from './solutions_section';
 import { FeatureCatalogueCategory } from '../../../../services';

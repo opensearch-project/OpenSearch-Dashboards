@@ -15,7 +15,8 @@
     "test_helpers/**/*",
     "utils/**/*",
     "index.ts",
-    "typings.ts"
+    "typings.ts",
+    "../../typings/**/*"
   ],
   "references": [
     { "path": "../test_utils/" }

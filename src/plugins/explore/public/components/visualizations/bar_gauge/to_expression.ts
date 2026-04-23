@@ -4,23 +4,19 @@
  */
 
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { VisColumn, AxisColumnMappings, VisFieldType } from '../types';
-import { getBarOrientation, createBarGaugeSeries, assembleBarGaugeSpec } from './bar_gauge_utils';
+import { VisFieldType } from '../types';
+import { createBarGaugeSeries, assembleBarGaugeSpec } from './bar_gauge_utils';
 import { pipe, createBaseConfig } from '../utils/echarts_spec';
 import { aggregate, transform } from '../utils/data_transformation';
+import { BarGaugeAxisMapping } from './types';
 
 export const createBarGaugeSpec = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styleOptions: BarGaugeChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: BarGaugeAxisMapping
 ): any => {
-  const { xAxis, yAxis } = getBarOrientation(styleOptions, axisColumnMappings);
-  if (!xAxis || !yAxis) {
-    throw Error('Missing axis config for bar gauge chart');
-  }
+  const xAxis = axisColumnMappings.x;
+  const yAxis = axisColumnMappings.y;
 
   let categoryField = '';
   let valueField = '';
@@ -42,7 +38,7 @@ export const createBarGaugeSpec = (
       })
     ), // Bar gauge uses individual series with custom itemStyle per bar, can't use 2d array format
     createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, legend: { show: false } }),
-    createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
+    createBarGaugeSeries({ styles: styleOptions, categoryField, valueField, axisColumnMappings }),
     assembleBarGaugeSpec
   )({
     data: transformedData,

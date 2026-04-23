@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { SavedQueryManagementComponent } from './saved_query_management_component';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Query } from 'src/plugins/data/common';

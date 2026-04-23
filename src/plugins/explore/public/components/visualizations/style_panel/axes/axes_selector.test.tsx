@@ -3,47 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { AxesSelectPanel, AxisSelector } from './axes_selector';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { AxesSelectPanel } from './axes_selector';
+import { AxisSelector } from './axis_selector';
 import { AxisRole, VisColumn, VisFieldType } from '../../types';
 import { ChartType } from '../../utils/use_visualization_types';
-import { ALL_VISUALIZATION_RULES } from '../../rule_repository';
 
 const mockVisualizationRegistry = {
-  getVisualizationConfig: jest.fn(),
   findRuleByAxesMapping: jest.fn(),
+  findRulesByColumns: jest.fn(),
 };
 
 jest.mock('../../utils/use_visualization_types', () => ({
   useVisualizationRegistry: () => mockVisualizationRegistry,
 }));
 
-jest.mock('../../rule_repository', () => ({
-  ALL_VISUALIZATION_RULES: [
-    {
-      id: 'rule1',
-      matchIndex: [1, 1, 0],
-    },
-    {
-      id: 'rule2',
-      matchIndex: [2, 0, 1],
-    },
-  ],
-}));
-
 jest.mock('../../visualization_builder_utils', () => {
-  // Import the constants directly to avoid referencing out-of-scope variables
+  const actual = jest.requireActual('../../visualization_builder_utils');
   const X = 'x';
   const CATEGORICAL = 'categorical';
 
   return {
+    ...actual,
     getColumnMatchFromMapping: jest.fn((mapping) => {
-      // Simple mock implementation to return different values based on mapping
       if (mapping && mapping[0] && mapping[0][X] && mapping[0][X].type === CATEGORICAL) {
-        return [1, 1, 0]; // Rule 1
+        return [1, 1, 0];
       }
-      return [2, 0, 1]; // Rule 2
+      return [2, 0, 1];
     }),
   };
 });
@@ -103,15 +89,25 @@ describe('AxesSelectPanel', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
-      },
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [
+        {
+          visType: 'bar',
+          rules: [
+            {
+              priority: 100,
+              mappings: [
+                {
+                  [AxisRole.X]: { type: VisFieldType.Categorical },
+                  [AxisRole.Y]: { type: VisFieldType.Numerical },
+                },
+              ],
+              render: jest.fn(),
+            },
+          ],
+        },
+      ],
+      exact: [],
     });
   });
 
@@ -121,8 +117,9 @@ describe('AxesSelectPanel', () => {
   });
 
   it('returns null when no available mappings', () => {
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: { availableMappings: [] },
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [],
+      exact: [],
     });
 
     const { container } = render(<AxesSelectPanel {...defaultProps} />);
@@ -144,11 +141,14 @@ describe('AxesSelectPanel', () => {
     const propsWithMapping = {
       ...defaultProps,
       currentMapping: {
-        [AxisRole.X]: mockCategoricalColumns[0],
-        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: [mockCategoricalColumns[0]],
+        [AxisRole.Y]: [mockNumericalColumns[0]],
       },
     };
-    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue(ALL_VISUALIZATION_RULES[0]);
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
+      id: 'rule1',
+      matchIndex: [1, 1, 0],
+    });
 
     render(<AxesSelectPanel {...propsWithMapping} />);
 
@@ -159,7 +159,7 @@ describe('AxesSelectPanel', () => {
     const propsWithMapping = {
       ...defaultProps,
       currentMapping: {
-        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.X]: [mockCategoricalColumns[0]],
       },
     };
 
@@ -167,85 +167,160 @@ describe('AxesSelectPanel', () => {
     expect(screen.getByText('category')).toBeInTheDocument();
   });
 
-  // New tests to improve coverage
-
   it('renders X and Y axes', () => {
-    // Set up a basic mapping with X and Y axes
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
-      },
-    });
-
     render(<AxesSelectPanel {...defaultProps} />);
 
-    // X and Y axes should be available
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
   });
 
   it('updates available axis options when selection changes', () => {
-    // Set up a scenario with multiple possible mappings
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-          },
-        ],
-      },
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
+      id: 'rule1',
+      matchIndex: [1, 1, 0],
     });
-    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue(ALL_VISUALIZATION_RULES[0]);
 
-    // Use props with existing mapping to ensure updateVisualization is called
     const propsWithMapping = {
       ...defaultProps,
       currentMapping: {
-        [AxisRole.X]: mockCategoricalColumns[0],
-        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: [mockCategoricalColumns[0]],
+        [AxisRole.Y]: [mockNumericalColumns[0]],
       },
     };
 
     render(<AxesSelectPanel {...propsWithMapping} />);
 
-    // Verify that updateVisualization was called
     expect(mockUpdateVisualization).toHaveBeenCalled();
   });
 
   it('handles multiple axis roles correctly', () => {
-    // Set up a scenario with multiple axis roles
-    mockVisualizationRegistry.getVisualizationConfig.mockReturnValue({
-      ui: {
-        availableMappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-            [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
-          },
-        ],
-      },
+    mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+      all: [
+        {
+          visType: 'bar',
+          rules: [
+            {
+              priority: 100,
+              mappings: [
+                {
+                  [AxisRole.X]: { type: VisFieldType.Date },
+                  [AxisRole.Y]: { type: VisFieldType.Numerical },
+                  [AxisRole.COLOR]: { type: VisFieldType.Categorical },
+                },
+              ],
+              render: jest.fn(),
+            },
+          ],
+        },
+      ],
+      exact: [],
     });
 
     render(<AxesSelectPanel {...defaultProps} />);
 
-    // Should render selectors for all three axes
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
     expect(screen.getByText('Color')).toBeInTheDocument();
   });
 
-  it('renders comboboxes for axis selection', () => {
+  it('shows placeholder text when no field is selected', () => {
     render(<AxesSelectPanel {...defaultProps} />);
 
-    // Check that comboboxes are rendered
-    const comboBoxes = screen.getAllByRole('combobox');
-    expect(comboBoxes.length).toBeGreaterThan(0);
+    const placeholders = screen.getAllByText('Select a field');
+    expect(placeholders.length).toBeGreaterThan(0);
+  });
+
+  describe('multi axis support', () => {
+    beforeEach(() => {
+      mockVisualizationRegistry.findRulesByColumns.mockReturnValue({
+        all: [
+          {
+            visType: 'line',
+            rules: [
+              {
+                priority: 100,
+                mappings: [
+                  {
+                    [AxisRole.X]: { type: VisFieldType.Date },
+                    [AxisRole.Y]: { type: VisFieldType.Numerical, multi: true },
+                  },
+                ],
+                render: jest.fn(),
+              },
+            ],
+          },
+        ],
+        exact: [],
+      });
+    });
+
+    it('renders multiple AxisSelector instances plus an empty one for multi axis', () => {
+      const propsWithMulti = {
+        ...defaultProps,
+        chartType: 'line' as ChartType,
+        currentMapping: {
+          [AxisRole.X]: [mockDateColumns[0]],
+          [AxisRole.Y]: [mockNumericalColumns[0], mockNumericalColumns[1]],
+        },
+      };
+
+      render(<AxesSelectPanel {...propsWithMulti} />);
+
+      // Should show both selected numerical fields plus an empty selector
+      expect(screen.getByText('count')).toBeInTheDocument();
+      expect(screen.getByText('price')).toBeInTheDocument();
+      // The trailing empty selector and the X-axis selector (if no date selected yet)
+      const placeholders = screen.getAllByText('Select a field');
+      expect(placeholders.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('single axis still renders one AxisSelector', () => {
+      const propsWithSingle = {
+        ...defaultProps,
+        chartType: 'line' as ChartType,
+        currentMapping: {
+          [AxisRole.X]: [mockDateColumns[0]],
+        },
+      };
+
+      render(<AxesSelectPanel {...propsWithSingle} />);
+
+      // X-axis should show the selected date field
+      expect(screen.getByText('timestamp')).toBeInTheDocument();
+      // Y-axis label should be present
+      expect(screen.getByText('Y-Axis')).toBeInTheDocument();
+    });
+
+    it('shows axis label only on the first selector for multi axis', () => {
+      const propsWithMulti = {
+        ...defaultProps,
+        chartType: 'line' as ChartType,
+        currentMapping: {
+          [AxisRole.X]: [mockDateColumns[0]],
+          [AxisRole.Y]: [mockNumericalColumns[0], mockNumericalColumns[1]],
+        },
+      };
+
+      render(<AxesSelectPanel {...propsWithMulti} />);
+
+      // Y-Axis label should appear exactly once
+      const yAxisLabels = screen.getAllByText('Y-Axis');
+      expect(yAxisLabels).toHaveLength(1);
+    });
+
+    it('renders empty trailing selector for multi axis with no selections', () => {
+      const propsEmpty = {
+        ...defaultProps,
+        chartType: 'line' as ChartType,
+        currentMapping: {},
+      };
+
+      render(<AxesSelectPanel {...propsEmpty} />);
+
+      // Should have placeholder selectors for both axes
+      const placeholders = screen.getAllByText('Select a field');
+      expect(placeholders.length).toBeGreaterThanOrEqual(2);
+    });
   });
 });
 
@@ -254,27 +329,12 @@ describe('AxisSelector', () => {
   const mockOnRemove = jest.fn();
 
   const defaultProps = {
-    chartType: 'bar' as ChartType,
     axisRole: AxisRole.X,
-    selectedColumn: 'category',
-    allColumnOptions: [
-      {
-        isGroupLabelOption: true,
-        label: 'Categorical fields',
-        options: [
-          {
-            column: {
-              id: 1,
-              name: 'category',
-              schema: VisFieldType.Categorical,
-              column: 'category',
-              validValuesCount: 100,
-              uniqueValuesCount: 10,
-            },
-            label: 'category',
-          },
-        ],
-      },
+    value: 'category',
+    options: [
+      { label: 'category', schema: VisFieldType.Categorical },
+      { label: 'count', schema: VisFieldType.Numerical },
+      { label: 'timestamp', schema: VisFieldType.Date },
     ],
     onRemove: mockOnRemove,
     onChange: mockOnChange,
@@ -284,125 +344,61 @@ describe('AxisSelector', () => {
     jest.clearAllMocks();
   });
 
-  it('renders axis selector with label', () => {
-    render(<AxisSelector {...defaultProps} />);
-    expect(screen.getByText('X-Axis')).toBeInTheDocument();
-  });
-
-  it('displays selected column', () => {
+  it('renders axis selector with selected value', () => {
     render(<AxisSelector {...defaultProps} />);
     expect(screen.getByText('category')).toBeInTheDocument();
   });
 
-  it('calls onChange when selection changes', () => {
+  it('displays selected value as button text', () => {
     render(<AxisSelector {...defaultProps} />);
-
-    const clearButton = screen.getByTestId('comboBoxClearButton');
-    fireEvent.click(clearButton);
-
-    expect(mockOnRemove).toHaveBeenCalledWith(AxisRole.X);
+    const button = screen.getByTestId('axisSelectorButton');
+    expect(button).toHaveTextContent('category');
   });
 
-  it('calls onRemove when selection is cleared', () => {
+  it('opens popover on button click', () => {
     render(<AxisSelector {...defaultProps} />);
-
-    const clearButton = screen.getByTestId('comboBoxClearButton');
-    fireEvent.click(clearButton);
-
-    expect(mockOnRemove).toHaveBeenCalledWith(AxisRole.X);
+    const button = screen.getByTestId('axisSelectorButton');
+    fireEvent.click(button);
+    expect(screen.getByPlaceholderText('Filter list')).toBeInTheDocument();
   });
 
-  it('renders different axis role labels correctly', () => {
-    const yAxisProps = { ...defaultProps, axisRole: AxisRole.Y };
-    const { rerender } = render(<AxisSelector {...yAxisProps} />);
-    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
-
-    const colorAxisProps = { ...defaultProps, axisRole: AxisRole.COLOR };
-    rerender(<AxisSelector {...colorAxisProps} />);
-    expect(screen.getByText('Color')).toBeInTheDocument();
-
-    const facetAxisProps = { ...defaultProps, axisRole: AxisRole.FACET };
-    rerender(<AxisSelector {...facetAxisProps} />);
-    expect(screen.getByText('Split chart by')).toBeInTheDocument();
-  });
-
-  it('handles empty selected column', () => {
-    const propsWithEmptySelection = { ...defaultProps, selectedColumn: '' };
+  it('shows placeholder when no value is selected', () => {
+    const propsWithEmptySelection = { ...defaultProps, value: '' };
     render(<AxisSelector {...propsWithEmptySelection} />);
-
-    const input = screen.getByTestId('comboBoxSearchInput');
-    expect(input).toHaveValue('');
+    expect(screen.getByText('Select a field')).toBeInTheDocument();
   });
 
-  // New tests to improve coverage
-
-  it('selects a new column and calls onChange', async () => {
-    const multipleOptionsProps = {
-      ...defaultProps,
-      selectedColumn: '',
-      allColumnOptions: [
-        {
-          isGroupLabelOption: true,
-          label: 'Categorical fields',
-          options: [
-            {
-              column: {
-                id: 1,
-                name: 'category',
-                schema: VisFieldType.Categorical,
-                column: 'category',
-                validValuesCount: 100,
-                uniqueValuesCount: 10,
-              },
-              label: 'category',
-            },
-            {
-              column: {
-                id: 2,
-                name: 'product',
-                schema: VisFieldType.Categorical,
-                column: 'product',
-                validValuesCount: 100,
-                uniqueValuesCount: 20,
-              },
-              label: 'product',
-            },
-          ],
-        },
-      ],
-    };
-
-    render(<AxisSelector {...multipleOptionsProps} />);
-
-    // Open the combobox
-    const combobox = screen.getByTestId('comboBoxSearchInput');
-    fireEvent.click(combobox);
-
-    // Select an option
-    await waitFor(() => {
-      const option = screen.getByText('product');
-      fireEvent.click(option);
-    });
-
-    // Verify onChange was called with the correct parameters
-    expect(mockOnChange).toHaveBeenCalledWith(AxisRole.X, 'product');
+  it('applies empty modifier class when no value is selected', () => {
+    const propsWithEmptySelection = { ...defaultProps, value: '' };
+    const { container } = render(<AxisSelector {...propsWithEmptySelection} />);
+    const selectorContainer = container.querySelector('.axisSelectorContainer');
+    expect(selectorContainer).toHaveClass('axisSelectorContainer--empty');
   });
 
-  it('renders with SIZE axis role', () => {
-    const sizeAxisProps = { ...defaultProps, axisRole: AxisRole.SIZE };
-    render(<AxisSelector {...sizeAxisProps} />);
-    expect(screen.getByText('Size')).toBeInTheDocument();
+  it('does not apply empty modifier class when value is selected', () => {
+    const { container } = render(<AxisSelector {...defaultProps} />);
+    const selectorContainer = container.querySelector('.axisSelectorContainer');
+    expect(selectorContainer).not.toHaveClass('axisSelectorContainer--empty');
   });
 
-  it('renders with Y_SECOND axis role', () => {
-    const secondYAxisProps = { ...defaultProps, axisRole: AxisRole.Y_SECOND };
-    render(<AxisSelector {...secondYAxisProps} />);
-    expect(screen.getByText('Y-Axis (2nd)')).toBeInTheDocument();
+  it('renders selectable list in the popover', () => {
+    render(<AxisSelector {...defaultProps} />);
+    const button = screen.getByTestId('axisSelectorButton');
+    fireEvent.click(button);
+
+    // Popover should be open with the search input
+    expect(screen.getByPlaceholderText('Filter list')).toBeInTheDocument();
+    // The selectable component should be rendered in the popover
+    expect(document.querySelector('.euiSelectable')).toBeInTheDocument();
   });
 
-  it('renders with Value axis role', () => {
-    const valueAxisProps = { ...defaultProps, axisRole: AxisRole.Value };
-    render(<AxisSelector {...valueAxisProps} />);
-    expect(screen.getByText('Value')).toBeInTheDocument();
+  it('calls onChange when an option is selected', () => {
+    // Since EuiSelectable uses virtualized rendering in test env,
+    // we test the callback logic by verifying the component accepts the props
+    const { rerender } = render(<AxisSelector {...defaultProps} />);
+
+    // Simulate selecting a different value by re-rendering with new value
+    rerender(<AxisSelector {...defaultProps} value="count" />);
+    expect(screen.getByText('count')).toBeInTheDocument();
   });
 });

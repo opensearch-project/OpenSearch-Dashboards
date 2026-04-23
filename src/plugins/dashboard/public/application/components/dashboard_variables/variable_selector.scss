@@ -1,0 +1,65 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Variable selector card with label on border
+ */
+.variableSelectorContainer {
+  position: relative;
+  background-color: $euiPageBackgroundColor;
+  border: 1px solid $euiColorMediumShade;
+  border-radius: $euiBorderRadius;
+  padding: 5px 12px 2px;
+
+  &:hover {
+    border-color: $euiColorPrimary;
+  }
+
+  &::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -9px;
+    left: 8px;
+    font-size: 10px;
+    line-height: 1;
+    padding: 2px 4px;
+    background-color: $euiPageBackgroundColor;
+    color: $euiTextColor;
+    z-index: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Error state styling
+  &.variableSelectorContainer--error {
+    border-color: $euiColorDanger;
+
+    &:hover {
+      border-color: $euiColorDanger;
+    }
+
+    &::before {
+      color: $euiColorDanger;
+    }
+  }
+}
+
+.variableSelectorPopoverButton {
+  &:hover,
+  &:focus,
+  &:focus-within,
+  &:active {
+    transition: none !important;
+    transform: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+}
+
+.variableSelectorErrorIcon {
+  pointer-events: auto !important;
+  cursor: help !important;
+}

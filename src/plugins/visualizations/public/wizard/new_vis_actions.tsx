@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiModal, EuiText } from '@elastic/eui';
 import { take } from 'rxjs/operators';
 import {
@@ -70,12 +69,21 @@ export const createNewVisActions = (services: {
     })
     .sort((a, b) => a.title.localeCompare(b.title));
 
-  async function navigateTo(appId: string, path: string, originatingApp?: string) {
+  async function navigateTo(
+    appId: string,
+    path: string,
+    originatingApp?: string,
+    containerInfo?: {
+      containerId: string;
+      containerName: string;
+    }
+  ) {
     if (originatingApp) {
       await stateTransfer.navigateToEditor(appId, {
         path,
         state: {
           originatingApp,
+          containerInfo,
         },
       });
     } else {
@@ -102,9 +110,14 @@ export const createNewVisActions = (services: {
               description={visType.promotion?.description ?? ''}
             />
           )),
-          execute: async () => {
+          execute: async (context) => {
             const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
-            await navigateTo(visType.aliasApp, visType.aliasPath, currentAppId);
+            await navigateTo(
+              visType.aliasApp,
+              visType.aliasPath,
+              currentAppId,
+              context?.containerInfo
+            );
           },
           isCompatible: async () => {
             return !Boolean(
@@ -116,9 +129,14 @@ export const createNewVisActions = (services: {
         uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
           ...actionConfig,
           order: 10 * (visTypes.length - i),
-          execute: async () => {
+          execute: async (context) => {
             const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
-            await navigateTo(visType.aliasApp, visType.aliasPath, currentAppId);
+            await navigateTo(
+              visType.aliasApp,
+              visType.aliasPath,
+              currentAppId,
+              context?.containerInfo
+            );
           },
         });
       }

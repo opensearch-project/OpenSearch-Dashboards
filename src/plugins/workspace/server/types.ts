@@ -168,6 +168,29 @@ export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;
 }
 
+export type WorkspaceAuthResult =
+  | { authorized: true }
+  | { authorized: false; unauthorizedWorkspaces: string[] };
+
 export interface WorkspacePluginStart {
   client: IWorkspaceClientImpl;
+  /**
+   * Endpoint patterns that require workspace ACL enforcement.
+   * Configured via `workspace.aclEnforceEndpointPatterns` in opensearch_dashboards.yml.
+   */
+  aclEnforceEndpointPatterns: string[];
+  /**
+   * Check if the given principal has access to the specified workspaces.
+   * Fetches workspace details and checks permissions against the principal.
+   *
+   * @param request - the incoming request (used to scope the saved objects client and extract principals)
+   * @param workspaceIds - workspace IDs to check
+   * @param permissionModes - permission modes to check (defaults to ['read'])
+   * @returns WorkspaceAuthResult with authorized flag and any unauthorized workspace IDs
+   */
+  authorizeWorkspace: (
+    request: OpenSearchDashboardsRequest,
+    workspaceIds: string[],
+    permissionModes?: PermissionModeId[]
+  ) => Promise<WorkspaceAuthResult>;
 }

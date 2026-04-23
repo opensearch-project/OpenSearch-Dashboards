@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
@@ -13,7 +12,15 @@ import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
 import { defaultTableChartStyles } from './table/table_vis_config';
 import { defaultMetricChartStyles } from './metric/metric_vis_config';
-import { createVisSpec } from './utils/create_vis_spec';
+
+const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>);
+const mockFindRuleByAxesMapping = jest.fn();
+
+jest.mock('./visualization_registry', () => ({
+  visualizationRegistry: {
+    findRuleByAxesMapping: (...args: any[]) => mockFindRuleByAxesMapping(...args),
+  },
+}));
 
 jest.mock('./table/table_vis', () => ({
   TableVis: jest.fn(() => <div data-test-subj="tableVisualization">Table Visualization</div>),
@@ -22,20 +29,6 @@ jest.mock('./table/table_vis', () => ({
 jest.mock('./visualization_empty_state', () => ({
   VisualizationEmptyState: jest.fn(() => (
     <div data-test-subj="visualizationEmptyState">Empty State</div>
-  )),
-}));
-
-jest.mock('./utils/create_vis_spec', () => ({
-  createVisSpec: jest.fn(),
-}));
-
-jest.mock('./echarts_render', () => ({
-  EchartsRender: jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>),
-}));
-
-jest.mock('./metric/metric_component', () => ({
-  MetricChartRender: jest.fn(() => (
-    <div data-test-subj="metricChartRender">Metric Chart Render</div>
   )),
 }));
 
@@ -108,7 +101,8 @@ describe('VisualizationRender', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (createVisSpec as jest.Mock).mockReturnValue({ spec: { type: 'bar' }, axisColumnMappings: {} });
+    mockRender.mockReturnValue(<div data-test-subj="echartsRender">Echarts Render</div>);
+    mockFindRuleByAxesMapping.mockReturnValue({ render: mockRender });
   });
 
   it('returns null when no visualization data is provided', () => {
@@ -214,10 +208,7 @@ describe('VisualizationRender', () => {
   });
 
   it('renders MetricChartRender when config type is metric', () => {
-    (createVisSpec as jest.Mock).mockReturnValue({
-      spec: { type: 'metric' },
-      axisColumnMappings: {},
-    });
+    mockRender.mockReturnValue(<div data-test-subj="metricChartRender">Metric Chart Render</div>);
 
     const metricConfig: RenderChartConfig = {
       type: 'metric',
@@ -236,8 +227,8 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('metricChartRender')).toBeInTheDocument();
   });
 
-  it('returns null when createVisSpec returns no spec', () => {
-    (createVisSpec as jest.Mock).mockReturnValue({ spec: undefined, axisColumnMappings: {} });
+  it('returns null when no matching rule is found', () => {
+    mockFindRuleByAxesMapping.mockReturnValue(null);
 
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);

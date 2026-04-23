@@ -29,7 +29,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+
 import { TopNavMenuItem } from './top_nav_menu_item';
 import {
   TopNavMenuData,

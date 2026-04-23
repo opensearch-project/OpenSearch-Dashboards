@@ -12,7 +12,7 @@ import {
   EuiIcon,
   EuiSimplifiedBreadcrumbs,
 } from '@elastic/eui';
-import React from 'react';
+
 import { DevToolApp } from '../dev_tool';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { DEVTOOL_TRIGGER_ID } from '../plugin';

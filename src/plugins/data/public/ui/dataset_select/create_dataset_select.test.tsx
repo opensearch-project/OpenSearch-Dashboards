@@ -131,6 +131,7 @@ describe('createDatasetSelect', () => {
 
     // Test that the component can be created with required props
     expect(() => {
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       React.createElement(CreatedDatasetSelect, {
         onSelect: mockOnSelect,
         appName: mockAppName,
@@ -148,6 +149,7 @@ describe('createDatasetSelect', () => {
     // Verify the factory returns a component
     expect(
       React.isValidElement(
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         React.createElement(CreatedDatasetSelect, {
           onSelect: mockOnSelect,
           appName: mockAppName,

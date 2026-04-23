@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 

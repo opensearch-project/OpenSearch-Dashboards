@@ -30,6 +30,8 @@
 
 import './_dashboard_container.scss';
 
+import { isEqual } from 'lodash';
+import { Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
@@ -50,7 +52,15 @@ import {
   EmbeddableOutput,
 } from '../../../../embeddable/public';
 import { UiActionsStart } from '../../../../ui_actions/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { VariableService } from '../../variables/variable_service';
+import { Variable } from '../../variables/types';
+import {
+  VariableInterpolationService,
+  IVariableInterpolationService,
+} from '../../variables/variable_interpolation_service';
+import { setActiveVariables } from '../../variables/active_variables';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
@@ -78,6 +88,7 @@ export interface DashboardContainerInput extends ContainerInput {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
   isEmptyState?: boolean;
+  variables?: Variable[];
 }
 
 interface IndexSignature {
@@ -104,6 +115,8 @@ export interface DashboardContainerOptions {
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: UiActionsStart;
+  data?: DataPublicPluginStart;
+  initialVariables?: Variable[];
 }
 
 export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
@@ -122,6 +135,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
   private readonly logos: Logos;
   private root?: Root;
+  private variableSubscriptions: Subscription[] = [];
+  public readonly variableService: VariableService;
+  public readonly variableInterpolationService: IVariableInterpolationService;
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -139,6 +155,54 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
     this.embeddablePanel = options.embeddable.getEmbeddablePanel(stateTransfer);
     this.logos = options.chrome.logos;
+
+    this.variableService = new VariableService(options.data);
+
+    this.variableService.connect(
+      (input) => this.updateInput(input),
+      () => this.getInput(),
+      () => this.getInput$()
+    );
+
+    this.variableInterpolationService = new VariableInterpolationService(() =>
+      this.variableService.getVariables()
+    );
+
+    this.variableService.setInterpolationService(this.variableInterpolationService);
+
+    if (initialInput.variables && initialInput.variables.length > 0) {
+      this.variableService.refreshAllVariableOptions();
+    }
+
+    setActiveVariables(initialInput.variables);
+    this.variableSubscriptions.push(
+      this.getInput$().subscribe({
+        next: (input) => setActiveVariables(input.variables),
+        complete: () => setActiveVariables(undefined),
+      })
+    );
+    this.initVariableRefreshSubscription();
+  }
+
+  private initVariableRefreshSubscription() {
+    let prevTimeRange = this.getInput().timeRange;
+    let prevReloadTime = this.getInput().lastReloadRequestTime;
+
+    this.variableSubscriptions.push(
+      this.getInput$().subscribe((input) => {
+        const hasQueryVariables = (input.variables || []).some((v) => v.type === 'query');
+        if (!hasQueryVariables) return;
+
+        const timeRangeChanged = !isEqual(input.timeRange, prevTimeRange);
+        const reloadTriggered = input.lastReloadRequestTime !== prevReloadTime;
+
+        if (timeRangeChanged || reloadTriggered) {
+          prevTimeRange = input.timeRange;
+          prevReloadTime = input.lastReloadRequestTime;
+          this.variableService.refreshAllVariableOptions();
+        }
+      })
+    );
   }
 
   protected createNewPanelState<
@@ -252,6 +316,34 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         </OpenSearchDashboardsContextProvider>
       </I18nProvider>
     );
+  }
+
+  public destroy() {
+    super.destroy();
+    this.variableSubscriptions.forEach((s) => s.unsubscribe());
+    this.variableSubscriptions = [];
+    this.variableService.destroy();
+    setActiveVariables(undefined);
+  }
+
+  /**
+   * Get query strings from all panel embeddables.
+   * Used to detect variable references in visualizations.
+   */
+  public getPanelQueries(): string[] {
+    const queries: string[] = [];
+    for (const id of this.getChildIds()) {
+      try {
+        const child = this.getChild<any>(id);
+        if (child?.originalQuery && typeof child.originalQuery === 'string') {
+          queries.push(child.originalQuery);
+        }
+      } catch {
+        // Skip embeddables that can't be accessed or aren't loaded yet
+        continue;
+      }
+    }
+    return queries;
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

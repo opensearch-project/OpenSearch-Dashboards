@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { last } from 'lodash';
 
 import { i18n } from '@osd/i18n';
@@ -61,6 +61,7 @@ function ColorRanges({
   }, [colorsRange]);
 
   const validateRange = useCallback(
+    // @ts-expect-error TS7031, TS7006 TODO(ts-error): fixme
     ({ from, to }, index) => {
       if (!colorsRange[index]) {
         return [false, false];

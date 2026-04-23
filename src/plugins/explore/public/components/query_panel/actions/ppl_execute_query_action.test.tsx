@@ -5,16 +5,21 @@
 
 import { renderHook } from '@testing-library/react';
 import { act } from 'react';
+import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+import {
+  usePPLExecuteQueryAction,
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+  registerDisabledPPLExecuteQueryAction,
+} from './ppl_execute_query_action';
 
-// Mock functions - defined BEFORE jest.mock calls
 const mockDispatch = jest.fn();
-const mockUseAssistantAction = jest.fn();
+const mockRegisterAssistantAction = jest.fn();
 const mockSetEditorTextWithQuery = jest.fn();
-const mockGetState = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
+const mockSetTime = jest.fn();
+const mockGetState = jest.fn();
 const mockPrepareQueryForLanguage = jest.fn();
 
-// Mock modules with functions that reference the mock variables
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: () => mockDispatch,
@@ -23,15 +28,16 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
     services: {
-      data: { query: { queryString: { getQuery: jest.fn() } } },
-      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
-      store: {
-        getState: mockGetState,
-      },
-      contextProvider: {
-        hooks: {
-          useAssistantAction: mockUseAssistantAction,
+      data: {
+        query: {
+          timefilter: { timefilter: { setTime: mockSetTime } },
+          queryString: { getQuery: jest.fn() },
         },
+      },
+      notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      store: { getState: mockGetState },
+      contextProvider: {
+        actions: { registerAssistantAction: mockRegisterAssistantAction },
       },
     },
   }),
@@ -45,6 +51,15 @@ jest.mock('../../../application/utils/languages', () => ({
   prepareQueryForLanguage: (...args: any[]) => mockPrepareQueryForLanguage(...args),
 }));
 
+jest.mock(
+  '../../../application/utils/state_management/slices/query_editor/query_editor_slice',
+  () => ({
+    setDateRange: jest.fn((payload) => ({ type: 'queryEditor/setDateRange', payload })),
+  })
+);
+
+jest.mock('../../../application/utils/state_management/store', () => ({}));
+
 jest.mock('../../../application/utils/state_management/types', () => ({
   QueryExecutionStatus: {
     UNINITIALIZED: 'uninitialized',
@@ -53,479 +68,396 @@ jest.mock('../../../application/utils/state_management/types', () => ({
     ERROR: 'error',
     NO_RESULTS: 'no_results',
   },
-  EditorMode: {
-    Query: 'query',
-    Prompt: 'prompt',
-  },
 }));
 
 jest.mock('../../../application/hooks', () => ({
   useSetEditorTextWithQuery: jest.fn(),
 }));
 
-// Import modules AFTER mocks are defined
-import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
-import {
-  usePPLExecuteQueryAction,
-  PPL_QUERY_EXECUTION_TIMEOUT_MS,
-  PPL_QUERY_POLL_INTERVAL_MS,
-} from './ppl_execute_query_action';
+const TEST_CACHE_KEY = 'source=logs | head 10';
 
 describe('usePPLExecuteQueryAction', () => {
-  // Track the call count at the start of each test
-  let initialCallCount: number;
+  const makeQueryState = (status: string, error?: any) =>
+    ({
+      query: { language: 'PPL', query: 'source=logs | head 10' },
+      queryEditor: {
+        queryStatusMap: {
+          [TEST_CACHE_KEY]: { status, error },
+        },
+      },
+    } as any);
 
   beforeEach(() => {
-    // Use fake timers with legacy mode for React 18 compatibility
-    jest.useFakeTimers({ legacyFakeTimers: true });
-
-    // Track the initial call count (don't clear, just track)
-    initialCallCount = mockUseAssistantAction.mock.calls.length;
-
-    // Reset specific mocks that need fresh state
     mockDispatch.mockClear();
     mockSetEditorTextWithQuery.mockClear();
-    mockGetState.mockClear();
     mockLoadQueryActionCreator.mockClear();
+    mockSetTime.mockClear();
+    mockRegisterAssistantAction.mockClear();
+    mockGetState.mockClear();
     mockPrepareQueryForLanguage.mockClear();
 
-    // Configure default implementations
+    mockDispatch.mockResolvedValue(undefined);
     mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
-    mockPrepareQueryForLanguage.mockReturnValue({ query: 'test-cache-key' });
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: { queryStatusMap: {} },
-    });
+    mockPrepareQueryForLanguage.mockReturnValue({ query: TEST_CACHE_KEY });
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.READY));
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  // Helper to render hook and get handler
   const renderAndGetHandler = () => {
     act(() => {
       renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
     });
-    // Check that a new call was made since the test started
-    const currentCallCount = mockUseAssistantAction.mock.calls.length;
-    expect(currentCallCount).toBeGreaterThan(initialCallCount);
-    // Get the latest call's handler
-    return mockUseAssistantAction.mock.calls[currentCallCount - 1][0].handler;
+    expect(mockRegisterAssistantAction).toHaveBeenCalled();
+    return mockRegisterAssistantAction.mock.calls[
+      mockRegisterAssistantAction.mock.calls.length - 1
+    ][0].handler;
   };
 
-  it('should register assistant action with correct configuration', () => {
+  it('should register assistant action with correct name and required parameters', () => {
     renderAndGetHandler();
-
     const latestCall =
-      mockUseAssistantAction.mock.calls[mockUseAssistantAction.mock.calls.length - 1][0];
-    expect(latestCall).toMatchObject({
-      name: 'execute_ppl_query',
-      description:
-        'Update the query bar with a PPL query, optionally set the time range, and execute it. The query should NOT contain time filters - use the from/to parameters to specify the time range instead.',
-      parameters: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'string',
-            description: 'The PPL query to set in the query bar (without time filters)',
-          },
-          autoExecute: {
-            type: 'boolean',
-            description: 'Whether to automatically execute the query (default: true)',
-          },
-          description: {
-            type: 'string',
-            description: 'Optional description of what the query does',
-          },
-        },
-        required: ['query'],
-      },
-      handler: expect.any(Function),
-    });
+      mockRegisterAssistantAction.mock.calls[mockRegisterAssistantAction.mock.calls.length - 1][0];
+    expect(latestCall.name).toBe('execute_ppl_query');
+    expect(latestCall.parameters.required).toContain('query');
+    expect(latestCall.handler).toBeInstanceOf(Function);
   });
 
-  it('should export correct constants', () => {
-    expect(PPL_QUERY_EXECUTION_TIMEOUT_MS).toBe(10000);
-    expect(PPL_QUERY_POLL_INTERVAL_MS).toBe(1000);
-  });
-
-  it('should execute query by default and wait for successful completion', async () => {
+  it('should execute query and return success on READY status', async () => {
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
 
-    // Mock successful query execution
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.READY,
-          },
-        },
-      },
-    });
+    const result = await handler({ query: 'source=logs | head 10' });
 
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
-
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
+    expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+      expect.anything(),
+      mockSetEditorTextWithQuery,
+      'source=logs | head 10'
+    );
     expect(result).toEqual({
       success: true,
       executed: true,
       query: 'source=logs | head 10',
-      message: 'Query updated and executed successfully.',
+      resultsCount: undefined,
       timeRange: undefined,
+      message: 'Query updated and executed successfully.',
     });
   });
 
-  it('should handle query errors when autoExecute is true', async () => {
+  it('should use prepareQueryForLanguage to derive cache key from state', async () => {
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10', autoExecute: true };
-
+    const stateQuery = { language: 'PPL', query: 'source=logs | head 10' };
     mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.ERROR,
-            error: {
-              message: {
-                details: 'Invalid syntax',
-                reason: 'Parse error',
-                type: 'SyntaxError',
-              },
-            },
-          },
-        },
-      },
+      query: stateQuery,
+      queryEditor: { queryStatusMap: { [TEST_CACHE_KEY]: { status: QueryExecutionStatus.READY } } },
+    } as any);
+
+    await handler({ query: 'source=logs | head 10' });
+
+    expect(mockPrepareQueryForLanguage).toHaveBeenCalledWith({
+      ...stateQuery,
+      query: 'source=logs | head 10',
     });
+  });
 
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
+  it('should return success with resultsCount 0 on NO_RESULTS status', async () => {
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.NO_RESULTS));
+    const handler = renderAndGetHandler();
 
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
+    const result = await handler({ query: 'source=logs | head 10' });
+
+    expect(result).toEqual({
+      success: true,
+      executed: true,
+      query: 'source=logs | head 10',
+      resultsCount: 0,
+      timeRange: undefined,
+      message: 'Query executed successfully but returned no results.',
+    });
+  });
+
+  it('should return failure on ERROR status with full error message', async () => {
+    mockGetState.mockReturnValue(
+      makeQueryState(QueryExecutionStatus.ERROR, {
+        message: { type: 'SyntaxError', details: 'Invalid syntax', reason: 'Parse error' },
+      })
+    );
+    const handler = renderAndGetHandler();
+
+    const result = await handler({ query: 'source=logs | bad query' });
+
     expect(result).toEqual({
       success: false,
       executed: false,
-      query: 'source=logs | head 10',
-      message: 'Query execution failed: Parse error',
+      query: 'source=logs | bad query',
+      message: 'Query execution failed: SyntaxError: Invalid syntax',
       error: 'SyntaxError: Invalid syntax',
     });
   });
 
-  it('should only update editor when autoExecute is false', async () => {
+  it('should format error without type when type is missing', async () => {
+    mockGetState.mockReturnValue(
+      makeQueryState(QueryExecutionStatus.ERROR, {
+        message: { details: 'Something went wrong', reason: 'Unknown' },
+      })
+    );
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10', autoExecute: false };
-    const result = await handler(args);
 
-    expect(mockDispatch).not.toHaveBeenCalled();
+    const result = await handler({ query: 'source=logs' });
+
+    expect(result.error).toBe('Something went wrong');
+    expect(result.message).toBe('Query execution failed: Something went wrong');
+  });
+
+  it('should use fallback error message when error.message is missing', async () => {
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.ERROR));
+    const handler = renderAndGetHandler();
+
+    const result = await handler({ query: 'source=logs' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Query execution failed');
+  });
+
+  it('should not execute query and only update editor when autoExecute is false', async () => {
+    const handler = renderAndGetHandler();
+
+    const result = await handler({ query: 'source=logs | head 10', autoExecute: false });
+
+    expect(mockLoadQueryActionCreator).not.toHaveBeenCalled();
     expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith('source=logs | head 10');
     expect(result).toEqual({
       success: true,
       executed: false,
       query: 'source=logs | head 10',
+      timeRange: undefined,
       message: 'Query updated.',
-      timeRange: undefined,
     });
   });
 
-  it('should handle query execution timeout', async () => {
+  it('should update time range and include it in response when from/to provided', async () => {
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
 
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.LOADING,
-          },
-        },
-      },
+    const result = await handler({ query: 'source=logs', from: 'now-1h', to: 'now' });
+
+    expect(mockSetTime).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
+    expect(result.timeRange).toEqual({ from: 'now-1h', to: 'now' });
+    expect(result.message).toContain('Time range set to now-1h - now');
+  });
+
+  it('should include time range message in no-results response', async () => {
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.NO_RESULTS));
+    const handler = renderAndGetHandler();
+
+    const result = await handler({ query: 'source=logs', from: 'now-7d', to: 'now' });
+
+    expect(result.message).toBe(
+      'Query executed successfully but returned no results. Time range set to now-7d - now.'
+    );
+  });
+
+  it('should not set time range when only from is provided', async () => {
+    const handler = renderAndGetHandler();
+
+    await handler({ query: 'source=logs', from: 'now-1h' });
+
+    expect(mockSetTime).not.toHaveBeenCalled();
+  });
+
+  it('should catch unexpected errors thrown outside of query execution', async () => {
+    mockLoadQueryActionCreator.mockImplementation(() => {
+      throw new Error('Unexpected setup error');
     });
+    const handler = renderAndGetHandler();
 
-    const resultPromise = handler(args);
-    jest.advanceTimersByTime(PPL_QUERY_EXECUTION_TIMEOUT_MS + 1000);
-    const result = await resultPromise;
+    const result = await handler({ query: 'source=logs' });
 
     expect(result).toEqual({
       success: false,
-      executed: false,
-      query: 'source=logs | head 10',
-      message: 'Query execution timed out',
-      error: 'Query execution took too long to complete',
+      error: 'Unexpected setup error',
+      query: 'source=logs',
     });
   });
 
-  it('should handle errors gracefully', async () => {
-    const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
-    const error = new Error('Test error');
-
+  it('should handle non-Error thrown values', async () => {
     mockLoadQueryActionCreator.mockImplementation(() => {
-      throw error;
+      throw 'string error'; // eslint-disable-line no-throw-literal
     });
-
-    const result = await handler(args);
-
-    expect(result).toEqual({
-      success: false,
-      error: 'Test error',
-      query: 'source=logs | head 10',
-    });
-  });
-
-  it('should handle query with NO_RESULTS status as success', async () => {
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
 
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.NO_RESULTS,
-          },
-        },
-      },
-    });
-
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
-
-    expect(result).toEqual({
-      success: true,
-      executed: true,
-      query: 'source=logs | head 10',
-      message: 'Query updated and executed successfully.',
-      timeRange: undefined,
-    });
-  });
-
-  it('should wait for query status to appear in the store', async () => {
-    const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
-
-    let callCount = 0;
-    mockGetState.mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return {
-          query: { dataSource: 'test-source' },
-          queryEditor: { queryStatusMap: {} },
-        };
-      }
-      return {
-        query: { dataSource: 'test-source' },
-        queryEditor: {
-          queryStatusMap: {
-            'test-cache-key': {
-              status: QueryExecutionStatus.READY,
-            },
-          },
-        },
-      };
-    });
-
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
-
-    expect(result.success).toBe(true);
-  });
-
-  it('should handle non-Error exceptions', async () => {
-    const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
-
-    mockLoadQueryActionCreator.mockImplementation(() => {
-      // eslint-disable-next-line no-throw-literal
-      throw 'String error';
-    });
-
-    const result = await handler(args);
+    const result = await handler({ query: 'source=logs' });
 
     expect(result).toEqual({
       success: false,
       error: 'Unknown error',
-      query: 'source=logs | head 10',
+      query: 'source=logs',
     });
   });
 
-  it('should handle UNINITIALIZED status as timeout', async () => {
+  it('should pass services and setEditorTextWithQuery to loadQueryActionCreator', async () => {
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
 
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.UNINITIALIZED,
-          },
-        },
-      },
-    });
+    await handler({ query: 'source=logs' });
 
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
+    expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.anything() }),
+      mockSetEditorTextWithQuery,
+      'source=logs'
+    );
+  });
+
+  it('should return failure when query is still LOADING', async () => {
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.LOADING));
+    const handler = renderAndGetHandler();
+
+    const result = await handler({ query: 'source=logs | head 10' });
 
     expect(result).toEqual({
       success: false,
       executed: false,
       query: 'source=logs | head 10',
-      message: 'Query execution timed out',
-      error: 'Query execution took too long to complete',
+      message: 'Query execution was cancelled or did not complete. Status: loading',
+      error: 'Query execution was interrupted',
     });
   });
 
-  it('should handle missing error details in error status', async () => {
+  it('should return failure when query status is UNINITIALIZED', async () => {
+    mockGetState.mockReturnValue(makeQueryState(QueryExecutionStatus.UNINITIALIZED));
     const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
 
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source' },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.ERROR,
-            error: {},
-          },
-        },
-      },
-    });
-
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
+    const result = await handler({ query: 'source=logs' });
 
     expect(result).toEqual({
       success: false,
       executed: false,
-      query: 'source=logs | head 10',
-      message: 'Query execution failed: Unknown error',
-      error: 'undefined: Query execution failed',
+      query: 'source=logs',
+      message: 'Query execution was cancelled or did not complete. Status: uninitialized',
+      error: 'Query execution was interrupted',
     });
   });
 
-  it('should use prepareQueryForLanguage to generate cache key', async () => {
-    const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | where status="error"' };
+  it('should replace action with disabled version after unmount', () => {
+    const { unmount } = renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
 
-    mockGetState.mockReturnValue({
-      query: { dataSource: 'test-source', timeRange: { from: 'now-1h', to: 'now' } },
-      queryEditor: {
-        queryStatusMap: {
-          'test-cache-key': {
-            status: QueryExecutionStatus.READY,
-          },
-        },
-      },
-    });
+    expect(mockRegisterAssistantAction).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        available: 'disabled',
+      })
+    );
 
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    await resultPromise;
+    unmount();
 
-    expect(mockPrepareQueryForLanguage).toHaveBeenCalledWith({
-      dataSource: 'test-source',
-      timeRange: { from: 'now-1h', to: 'now' },
-      query: 'source=logs | where status="error"',
-    });
+    expect(mockRegisterAssistantAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        available: 'disabled',
+      })
+    );
+  });
+});
+
+describe('EXECUTE_PPL_QUERY_TOOL_DEFINITION', () => {
+  it('should have the correct tool name', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.name).toBe('execute_ppl_query');
   });
 
-  it('should respect polling interval when waiting for query status', async () => {
-    const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
-
-    let pollCount = 0;
-    mockGetState.mockImplementation(() => {
-      pollCount++;
-      if (pollCount <= 2) {
-        return {
-          query: { dataSource: 'test-source' },
-          queryEditor: { queryStatusMap: {} },
-        };
-      }
-      return {
-        query: { dataSource: 'test-source' },
-        queryEditor: {
-          queryStatusMap: {
-            'test-cache-key': {
-              status: QueryExecutionStatus.READY,
-            },
-          },
-        },
-      };
-    });
-
-    const resultPromise = handler(args);
-    jest.advanceTimersByTime(PPL_QUERY_POLL_INTERVAL_MS * 2);
-    const result = await resultPromise;
-
-    expect(result.success).toBe(true);
-    expect(pollCount).toBeGreaterThan(1);
+  it('should have a description', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description).toContain('PPL query');
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description).toContain('time range');
   });
 
-  it('should handle query status transitions correctly', async () => {
-    const handler = renderAndGetHandler();
-    const args = { query: 'source=logs | head 10' };
+  it('should have correct parameter properties', () => {
+    const { parameters } = EXECUTE_PPL_QUERY_TOOL_DEFINITION;
 
-    let callCount = 0;
-    mockGetState.mockImplementation(() => {
-      callCount++;
-      switch (callCount) {
-        case 1:
-          return {
-            query: { dataSource: 'test-source' },
-            queryEditor: { queryStatusMap: {} },
-          };
-        case 2:
-          return {
-            query: { dataSource: 'test-source' },
-            queryEditor: {
-              queryStatusMap: {
-                'test-cache-key': {
-                  status: QueryExecutionStatus.LOADING,
-                },
-              },
-            },
-          };
-        default:
-          return {
-            query: { dataSource: 'test-source' },
-            queryEditor: {
-              queryStatusMap: {
-                'test-cache-key': {
-                  status: QueryExecutionStatus.READY,
-                },
-              },
-            },
-          };
-      }
-    });
-
-    const resultPromise = handler(args);
-    jest.runAllTimers();
-    const result = await resultPromise;
-
-    expect(result).toEqual({
-      success: true,
-      executed: true,
-      query: 'source=logs | head 10',
-      message: 'Query updated and executed successfully.',
-      timeRange: undefined,
-    });
+    expect(parameters.type).toBe('object');
+    expect(parameters.properties).toHaveProperty('query');
+    expect(parameters.properties).toHaveProperty('autoExecute');
+    expect(parameters.properties).toHaveProperty('description');
+    expect(parameters.properties).toHaveProperty('from');
+    expect(parameters.properties).toHaveProperty('to');
+    expect(parameters.required).toEqual(['query']);
   });
 
-  it('should work with all dependencies (integration)', () => {
-    renderAndGetHandler();
-    const currentCallCount = mockUseAssistantAction.mock.calls.length;
-    expect(currentCallCount).toBeGreaterThan(initialCallCount);
+  it('should have query parameter as string type', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.query.type).toBe('string');
+  });
+
+  it('should have autoExecute parameter as boolean type', () => {
+    expect(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.autoExecute.type).toBe(
+      'boolean'
+    );
+  });
+
+  it('should have time range parameters with descriptions', () => {
+    const fromParam = EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.from;
+    const toParam = EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters.properties.to;
+
+    expect(fromParam.type).toBe('string');
+    expect(fromParam.description).toContain('Start time');
+    expect(toParam.type).toBe('string');
+    expect(toParam.description).toContain('End time');
+  });
+});
+
+describe('registerDisabledPPLExecuteQueryAction', () => {
+  it('should not throw if registerAction is undefined', () => {
+    expect(() => registerDisabledPPLExecuteQueryAction(undefined as any)).not.toThrow();
+  });
+
+  it('should call registerAction with correct structure', () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    expect(mockRegisterAction).toHaveBeenCalledTimes(1);
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+
+    expect(registeredAction.name).toBe('execute_ppl_query');
+    expect(registeredAction.available).toBe('disabled');
+    expect(registeredAction.handler).toBeDefined();
+    expect(typeof registeredAction.handler).toBe('function');
+  });
+
+  it('should register action with same parameters as enabled version', () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+    expect(registeredAction.description).toBe(EXECUTE_PPL_QUERY_TOOL_DEFINITION.description);
+    expect(registeredAction.parameters).toEqual(EXECUTE_PPL_QUERY_TOOL_DEFINITION.parameters);
+  });
+
+  it('should return error when handler is called', async () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+    const result = await registeredAction.handler({ query: 'test' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('STOP');
+    expect(result.error).toContain('Tool not available');
+    expect(result.message).toContain('IMPORTANT');
+    expect(result.message).toContain('Do not attempt to use any more tools');
+    expect(result.stop_tool_execution).toBe(true);
+    expect(result.context_lost).toBe(true);
+  });
+
+  it('should provide explicit instruction to stop tool execution', async () => {
+    const mockRegisterAction = jest.fn();
+
+    registerDisabledPPLExecuteQueryAction(mockRegisterAction);
+
+    const registeredAction = mockRegisterAction.mock.calls[0][0];
+    const result = await registeredAction.handler({ query: 'test' });
+
+    // Should tell agent to stop using tools and respond directly
+    expect(result.message).toContain('Do not attempt to use any more tools');
+    expect(result.message).toContain('respond directly to the user');
+    expect(result.message).toContain('Logs');
+    expect(result.message).toContain('Traces');
+    expect(result.message).toContain('Metrics');
+
+    // Should have flags for programmatic handling
+    expect(result.stop_tool_execution).toBe(true);
+    expect(result.context_lost).toBe(true);
   });
 });

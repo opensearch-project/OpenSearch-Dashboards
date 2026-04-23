@@ -3,27 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiSpacer,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiSwitch,
-} from '@elastic/eui';
-import { isEmpty, isEqual } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
+import { EuiSpacer, EuiFormRow, EuiSelectableOption } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { AxisColumnMappings, AxisRole, VisColumn, VisFieldType } from '../../types';
 import { UpdateVisualizationProps } from '../../visualization_container';
-import { ChartType, useVisualizationRegistry } from '../../utils/use_visualization_types';
+import {
+  AxisTypeMapping,
+  ChartType,
+  useVisualizationRegistry,
+} from '../../utils/use_visualization_types';
 import { StyleAccordion } from '../style_accordion';
-import { getColumnMatchFromMapping } from '../../visualization_builder_utils';
-
-interface VisColumnOption {
-  column: VisColumn;
-  label: string;
-}
+import { convertMappingsToStrings } from '../../visualization_builder_utils';
+import { AxisSelector } from './axis_selector';
 
 interface AxesSelectPanelProps {
   chartType: ChartType;
@@ -32,8 +25,6 @@ interface AxesSelectPanelProps {
   dateColumns: VisColumn[];
   currentMapping: AxisColumnMappings;
   updateVisualization: (data: UpdateVisualizationProps) => void;
-  onSwitchAxes?: (v: boolean) => void;
-  switchAxes?: boolean;
 }
 
 const AXIS_SELECT_LABEL = {
@@ -63,6 +54,13 @@ const AXIS_SELECT_LABEL = {
   }),
 };
 
+const getAxisLabel = (axisRole: AxisRole): string => {
+  return AXIS_SELECT_LABEL[axisRole];
+};
+
+const isMultiAxis = (axisRole: AxisRole, mappings: AxisTypeMapping[]): boolean =>
+  mappings.some((mapping) => mapping[axisRole]?.multi === true);
+
 export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   chartType,
   numericalColumns,
@@ -70,58 +68,28 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   dateColumns,
   currentMapping,
   updateVisualization,
-  onSwitchAxes,
-  switchAxes,
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
-  const firstSelectorInput = useRef<HTMLInputElement | undefined>(undefined);
-
-  // switchAxes only support heatmap scatter and bar
-  const showSwitch = chartType === 'heatmap' || chartType === 'bar' || chartType === 'scatter';
-
-  const swapAxes = () => {
-    if (showSwitch && onSwitchAxes) {
-      onSwitchAxes(!switchAxes);
-    }
-  };
-
-  useEffect(() => {
-    // Make sure to initially focus on first axis field selector if current field selection is empty
-    if (isEmpty(currentMapping)) {
-      setTimeout(() => {
-        if (firstSelectorInput.current) {
-          firstSelectorInput.current.focus();
-        }
-      }, 500);
-    }
-  }, [currentMapping]);
-
-  // All axis mappings of the selected chart type
-  const allMappings = useMemo(
-    () => visualizationRegistry.getVisualizationConfig(chartType)?.ui.availableMappings,
-    [chartType, visualizationRegistry]
-  );
-
-  const columnsCount = useMemo(
-    () => [numericalColumns.length, categoricalColumns.length, dateColumns.length],
-    [numericalColumns.length, categoricalColumns.length, dateColumns.length]
-  );
+  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
 
   // Filter available chart mappings based on the data's column types
   // This ensures we only show mappings that are compatible with the current dataset structure
   const availableMappings = useMemo(() => {
-    if (!allMappings) {
-      return [];
-    }
+    const mappings: AxisTypeMapping[] = [];
+    const ruleMatch = visualizationRegistry.findRulesByColumns(
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      chartType
+    );
 
-    return allMappings.filter((mapping) => {
-      const [ruleNum, ruleCat, ruleDate] = getColumnMatchFromMapping(mapping);
-      const [currNum, currCat, currDate] = columnsCount;
-      return ruleNum <= currNum && ruleCat <= currCat && ruleDate <= currDate;
+    ruleMatch.all.forEach((match) => {
+      match.rules.forEach((rule) => {
+        mappings.push(...rule.mappings);
+      });
     });
-  }, [columnsCount, allMappings]);
-
-  const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
+    return mappings;
+  }, [categoricalColumns, chartType, dateColumns, numericalColumns, visualizationRegistry]);
 
   useEffect(() => {
     // This is an intentional design since we want to modify the mapping object from outside
@@ -138,9 +106,13 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     () =>
       availableMappings.filter((mapping) => {
         return Object.entries(currentSelections).every(([role, selectedCol]) => {
-          if (!selectedCol) return true;
+          if (!selectedCol || selectedCol.length === 0) return true;
           const mappingRole = mapping[role as AxisRole];
-          return mappingRole && mappingRole.type === selectedCol.schema;
+          if (!mappingRole) return false;
+          if (mappingRole.type !== selectedCol[0]?.schema) return false;
+          // If multiple columns are selected, the mapping must support multi
+          if (selectedCol.length > 1 && !mappingRole.multi) return false;
+          return true;
         });
       }),
     [availableMappings, currentSelections]
@@ -154,58 +126,27 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 
   useEffect(() => {
     // Current selected axis mapping
-    const updatedAxes: AxisColumnMappings = {};
-
-    const allColumns = [
-      ...(categoricalColumns ?? []),
-      ...(numericalColumns ?? []),
-      ...(dateColumns ?? []),
-    ];
-
-    // ensure current selections are always compatible with the visualization data
-    // to prevent stale axis mappings from being written back
-    const isValid = Object.values(currentSelections)
-      .filter(Boolean)
-      .every((columnName) => allColumns.some((col) => col?.name === columnName?.name));
-
-    if (!isValid) return;
-
+    const normalizedAxesSelections: AxisColumnMappings = {};
     Object.entries(currentSelections).forEach(([key, value]) => {
-      if (value) {
-        updatedAxes[key as AxisRole] = value;
+      if (value && value.length > 0) {
+        normalizedAxesSelections[key as AxisRole] = value;
       }
     });
+    const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
+      chartType,
+      convertMappingsToStrings(normalizedAxesSelections),
+      [...numericalColumns, ...categoricalColumns, ...dateColumns]
+    );
 
-    // Find the mapping based on current selected axis mapping, if found, then current selection is valid
-    const found = remainingMappings.find((m) => {
-      if (Object.keys(m).length === Object.keys(updatedAxes).length) {
-        return Object.keys(m).every(
-          (key) => m[key as AxisRole]?.type === updatedAxes[key as AxisRole]?.schema
-        );
-      }
-      return false;
-    });
-
-    if (found) {
-      // Find a vis rule for the current mapping
-      const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
-        Object.fromEntries(
-          Object.entries(currentSelections)
-            .filter(([, value]) => !!value)
-            .map(([key, value]) => [key, value.name])
-        ),
-        [...numericalColumns, ...categoricalColumns, ...dateColumns]
-      );
-      // If rule can be found, update visualization with the new axes mapping
-      // Limitation: the current implementation will only call updateVisualization() when the select
-      // mapping is valid and has rule mapped, which means partial selections won't trigger visualization
-      // updates until they form a complete valid mapping configuration.
-      // From the user's perspective, this means no visual feedback is provided during the selection
-      // process until a complete valid configuration is achieved, potentially leading to confusion
-      // about whether their partial selections are having any effect.
-      if (ruleToUse) {
-        updateVisualization({ mappings: updatedAxes });
-      }
+    // If rule can be found, update visualization with the new axes mapping
+    // Limitation: the current implementation will only call updateVisualization() when the select
+    // mapping is valid and has rule mapped, which means partial selections won't trigger visualization
+    // updates until they form a complete valid mapping configuration.
+    // From the user's perspective, this means no visual feedback is provided during the selection
+    // process until a complete valid configuration is achieved, potentially leading to confusion
+    // about whether their partial selections are having any effect.
+    if (ruleToUse) {
+      updateVisualization({ mappings: convertMappingsToStrings(normalizedAxesSelections) });
     }
   }, [
     updateVisualization,
@@ -215,6 +156,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     numericalColumns,
     categoricalColumns,
     dateColumns,
+    chartType,
   ]);
 
   const findColumns = useMemo(
@@ -232,23 +174,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     },
     [numericalColumns, categoricalColumns, dateColumns]
   );
-
-  const getFieldTypeLabel = (type: VisFieldType) => {
-    switch (type) {
-      case VisFieldType.Categorical:
-        return i18n.translate('explore.stylePanel.fieldType.categorical', {
-          defaultMessage: 'Categorical fields',
-        });
-      case VisFieldType.Date:
-        return i18n.translate('explore.stylePanel.fieldType.date', {
-          defaultMessage: 'Date fields',
-        });
-      default:
-        return i18n.translate('explore.stylePanel.fieldType.numerical', {
-          defaultMessage: 'Numerical fields',
-        });
-    }
-  };
 
   if (availableMappings.length === 0) {
     return null;
@@ -271,9 +196,13 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
         ([role]) => role !== axisRole
       );
       const isCompatible = otherSelections.every(([role, selectedCol]) => {
-        if (!selectedCol) return true;
+        if (!selectedCol || selectedCol.length === 0) return true;
         const mappingRole = mapping[role as AxisRole];
-        return mappingRole && mappingRole.type === selectedCol.schema;
+        if (!mappingRole) return false;
+        if (mappingRole.type !== selectedCol[0]?.schema) return false;
+        // If multiple columns are selected, the mapping must support multi
+        if (selectedCol.length > 1 && !mappingRole.multi) return false;
+        return true;
       });
 
       const roleColumn = mapping[axisRole];
@@ -282,19 +211,17 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       }
     });
 
-    const allColumns: Array<EuiComboBoxOptionOption<VisColumnOption>> = [];
+    const selectedNames = new Set((currentSelections[axisRole] ?? []).map((col) => col.name));
+    const allOptions: Array<EuiSelectableOption & { schema?: VisFieldType }> = [];
     availableTypes.forEach((type) => {
-      allColumns.push({
-        isGroupLabelOption: true,
-        label: getFieldTypeLabel(type),
-        options: findColumns(type).map((col) => ({
-          column: col,
-          label: col.name,
-        })),
+      findColumns(type).forEach((col) => {
+        if (!selectedNames.has(col.name)) {
+          allOptions.push({ label: col.name, schema: col.schema });
+        }
       });
     });
 
-    return allColumns;
+    return allOptions;
   };
 
   return (
@@ -306,103 +233,112 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       initialIsOpen={true}
     >
       <>
-        {showSwitch && (
-          <EuiFormRow>
-            <EuiSwitch
-              label={i18n.translate('explore.vis.axesSwitch.switchAxes', {
-                defaultMessage: 'Switch axes',
-              })}
-              compressed
-              checked={!!switchAxes}
-              onChange={swapAxes}
-              disabled={!currentSelections[AxisRole.X] || !currentSelections[AxisRole.Y]}
-            />
-          </EuiFormRow>
-        )}
+        {Array.from(allAxisRolesFromSelection).map((axisRole) => {
+          const currentSelection = currentSelections[axisRole] ?? [];
+          const label = getAxisLabel(axisRole);
+          const multi = isMultiAxis(axisRole, remainingMappings);
 
-        {Array.from(allAxisRolesFromSelection).map((axisRole, i) => {
-          const currentSelection = currentSelections[axisRole];
+          if (multi) {
+            return (
+              <React.Fragment key={axisRole}>
+                {currentSelection.map((col, index) => (
+                  <React.Fragment key={`${axisRole}-${index}`}>
+                    <EuiFormRow
+                      label={index === 0 ? label : ''}
+                      data-test-subj={`field-${axisRole}`}
+                    >
+                      <AxisSelector
+                        axisRole={axisRole}
+                        value={col.name}
+                        options={getAxisOptions(axisRole)}
+                        onRemove={() => {
+                          setCurrentSelections((prev) => {
+                            const updated = [...(prev[axisRole] ?? [])];
+                            updated.splice(index, 1);
+                            return {
+                              ...prev,
+                              [axisRole]: updated.length > 0 ? updated : undefined,
+                            };
+                          });
+                        }}
+                        onChange={(_role, v) => {
+                          const allColumns = [
+                            ...numericalColumns,
+                            ...categoricalColumns,
+                            ...dateColumns,
+                          ];
+                          const selectedCol = allColumns.find((c) => c.name === v);
+                          if (selectedCol) {
+                            setCurrentSelections((prev) => {
+                              const updated = [...(prev[axisRole] ?? [])];
+                              updated[index] = selectedCol;
+                              return { ...prev, [axisRole]: updated };
+                            });
+                          }
+                        }}
+                      />
+                    </EuiFormRow>
+                    <EuiSpacer size="xs" />
+                  </React.Fragment>
+                ))}
+                <EuiFormRow
+                  label={currentSelection.length === 0 ? label : ''}
+                  data-test-subj={`field-${axisRole}`}
+                >
+                  <AxisSelector
+                    axisRole={axisRole}
+                    value=""
+                    options={getAxisOptions(axisRole)}
+                    onRemove={() => {}}
+                    onChange={(_role, v) => {
+                      const allColumns = [
+                        ...numericalColumns,
+                        ...categoricalColumns,
+                        ...dateColumns,
+                      ];
+                      const selectedCol = allColumns.find((c) => c.name === v);
+                      if (selectedCol) {
+                        setCurrentSelections((prev) => ({
+                          ...prev,
+                          [axisRole]: [...(prev[axisRole] ?? []), selectedCol],
+                        }));
+                      }
+                    }}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="xs" />
+              </React.Fragment>
+            );
+          }
+
           return (
-            <AxisSelector
-              key={axisRole}
-              axisRole={axisRole}
-              selectedColumn={currentSelection?.name || ''}
-              allColumnOptions={getAxisOptions(axisRole)}
-              switchAxes={switchAxes}
-              inputRef={(input) => (i === 0 ? (firstSelectorInput.current = input) : undefined)}
-              onRemove={(role) => {
-                setCurrentSelections((prev) => ({
-                  ...prev,
-                  [role]: undefined,
-                }));
-              }}
-              onChange={(role, v) => {
-                const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
-                const selectedCol = allColumns.find((col) => col.name === v);
-                setCurrentSelections((prev) => ({
-                  ...prev,
-                  [role]: selectedCol,
-                }));
-              }}
-            />
+            <React.Fragment key={axisRole}>
+              <EuiFormRow label={label} data-test-subj={`field-${axisRole}`}>
+                <AxisSelector
+                  axisRole={axisRole}
+                  value={currentSelection[0]?.name || ''}
+                  options={getAxisOptions(axisRole)}
+                  onRemove={(role) => {
+                    setCurrentSelections((prev) => ({
+                      ...prev,
+                      [role]: undefined,
+                    }));
+                  }}
+                  onChange={(role, v) => {
+                    const allColumns = [...numericalColumns, ...categoricalColumns, ...dateColumns];
+                    const selectedCol = allColumns.find((col) => col.name === v);
+                    setCurrentSelections((prev) => ({
+                      ...prev,
+                      [role]: selectedCol ? [selectedCol] : undefined,
+                    }));
+                  }}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="xs" />
+            </React.Fragment>
           );
         })}
       </>
     </StyleAccordion>
-  );
-};
-
-interface AxesSelectorOptions {
-  axisRole: AxisRole;
-  selectedColumn: string;
-  allColumnOptions: Array<EuiComboBoxOptionOption<VisColumnOption>>;
-  onRemove: (axisRole: AxisRole) => void;
-  onChange: (axisRole: AxisRole, value: string) => void;
-  switchAxes?: boolean;
-  autoFocus?: boolean;
-  inputRef?: (instance: HTMLInputElement) => void;
-}
-
-export const AxisSelector: React.FC<AxesSelectorOptions> = ({
-  axisRole,
-  selectedColumn,
-  allColumnOptions,
-  onRemove,
-  onChange,
-  switchAxes,
-  inputRef,
-}) => {
-  const getLabel = () => {
-    if (switchAxes && (axisRole === AxisRole.X || axisRole === AxisRole.Y)) {
-      const swappedRole = axisRole === AxisRole.X ? AxisRole.Y : AxisRole.X;
-      return AXIS_SELECT_LABEL[swappedRole];
-    }
-
-    return AXIS_SELECT_LABEL[axisRole];
-  };
-
-  return (
-    <React.Fragment key={`${axisRole}Selector`}>
-      <EuiFormRow label={getLabel()}>
-        <EuiFlexItem>
-          <EuiComboBox
-            data-test-subj={`field-${axisRole}`}
-            compressed
-            inputRef={inputRef}
-            selectedOptions={[{ label: selectedColumn }]}
-            singleSelection={{ asPlainText: true }}
-            options={allColumnOptions}
-            onChange={(value) => {
-              if (Boolean(value.length)) {
-                onChange(axisRole, value[0].label);
-              } else {
-                onRemove(axisRole);
-              }
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFormRow>
-      <EuiSpacer size="xs" />
-    </React.Fragment>
   );
 };

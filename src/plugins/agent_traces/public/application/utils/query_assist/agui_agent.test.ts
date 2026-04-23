@@ -38,6 +38,7 @@ describe('AgUiAgent', () => {
       },
     };
 
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     agent = new AgUiAgent(mockHttp);
   });
 
@@ -411,7 +412,9 @@ describe('AgUiAgent', () => {
 
   describe('thread ID format', () => {
     it('should generate unique thread IDs', () => {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const agent1 = new AgUiAgent(mockHttp);
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       const agent2 = new AgUiAgent(mockHttp);
 
       const id1 = agent1.getThreadId();

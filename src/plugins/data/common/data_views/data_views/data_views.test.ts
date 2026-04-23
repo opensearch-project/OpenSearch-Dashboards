@@ -144,23 +144,20 @@ describe('DataViews', () => {
       },
     });
 
-    // Create a normal index patterns
+    // get() is read-only and does not trigger a save
     const pattern = await dataViews.get('foo');
-
-    expect(pattern.version).toBe('fooa');
+    expect(pattern.version).toBe('foo');
     dataViews.clearCache();
 
-    // Create the same one - we're going to handle concurrency
     const samePattern = await dataViews.get('foo');
+    expect(samePattern.version).toBe('foo');
 
-    expect(samePattern.version).toBe('fooaa');
-
-    // This will conflict because samePattern did a save (from refreshFields)
-    // but the resave should work fine
+    // First save succeeds and bumps the version
     pattern.title = 'foo2';
     await dataViews.updateSavedObject(pattern);
+    expect(pattern.version).toBe('fooa');
 
-    // This should not be able to recover
+    // Second save conflicts because samePattern still has the old version
     samePattern.title = 'foo3';
 
     let result;
@@ -520,6 +517,102 @@ describe('DataViews', () => {
 
       expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
       expect(results[0]).toBe(properDataView);
+    });
+
+    test('getMultiple() skips not-found saved objects instead of throwing', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(undefined),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      setDocsourcePayload('valid-id', {
+        id: 'valid-id',
+        version: '1',
+        attributes: { title: 'valid-*' },
+      });
+
+      savedObjectsClient.bulkGet = jest.fn().mockResolvedValue({
+        savedObjects: [
+          { id: 'valid-id', version: '1', attributes: { title: 'valid-*' }, references: [] },
+          {
+            id: 'orphaned-id',
+            attributes: {},
+            type: 'index-pattern',
+            error: { statusCode: 404, message: 'Not found' },
+            references: [],
+          },
+        ],
+      });
+
+      const results = await localDataViews.getMultiple(['valid-id', 'orphaned-id']);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(DataView);
+      expect(results[0].id).toBe('valid-id');
+    });
+
+    test('getMultiple() skips objects that throw during processing without breaking others', async () => {
+      const onErrorMock = jest.fn();
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(undefined),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: onErrorMock,
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      setDocsourcePayload('valid-id', {
+        id: 'valid-id',
+        version: '1',
+        attributes: { title: 'valid-*' },
+      });
+
+      savedObjectsClient.bulkGet = jest.fn().mockResolvedValue({
+        savedObjects: [
+          { id: 'valid-id', version: '1', attributes: { title: 'valid-*' }, references: [] },
+          {
+            id: 'corrupt-id',
+            version: '1',
+            attributes: { title: 'corrupt-*', fieldFormatMap: '{invalid json' },
+            references: [],
+          },
+        ],
+      });
+
+      const results = await localDataViews.getMultiple(['valid-id', 'corrupt-id']);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(DataView);
+      expect(results[0].id).toBe('valid-id');
+      expect(onErrorMock).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: 'Failed to load data view "corrupt-id"' })
+      );
     });
   });
 });

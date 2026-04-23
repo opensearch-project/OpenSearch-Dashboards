@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';

@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "bundler",
+    "rootDir": "./src",
     "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-telemetry-tools"
   },
   "include": [

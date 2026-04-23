@@ -74,7 +74,7 @@ export const convertResult = ({
           const flattenedFieldName = `${field.name}.${nestedField}`;
 
           // Go through search source fields to find the field type of the nested field
-          fields?.index?.fields.forEach((searchSourceField) => {
+          fields?.index?.fields?.forEach((searchSourceField) => {
             if (
               searchSourceField.displayName === flattenedFieldName &&
               searchSourceField.type === 'date'
@@ -368,6 +368,7 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     id: id ?? DATA_FRAME_TYPES.DEFAULT,
     title: dataFrame.name,
     timeFieldName: getTimeField(dataFrame, dataFrame.meta?.queryConfig)?.name,
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSourceRef: {
       id: dataFrame.meta?.queryConfig?.dataSourceId,
       name: dataFrame.meta?.queryConfig?.dataSourceName,

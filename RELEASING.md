@@ -40,7 +40,7 @@ The release process for OpenSearch is centralized. Jenkins workflows are in plac
 
 #### Write release notes
 
-OpenSearch Dashboards maintains a [CHANGELOG.md](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CHANGELOG.md) and verifies it as part of the PR checklist step. For the time being, the RM should create release notes PR with the label `doc`, referring to the `CHANGELOG.md` (see example [PR](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2318))
+Release notes will be auto created.
 
 ### Release Phase 3 - Release testing
 

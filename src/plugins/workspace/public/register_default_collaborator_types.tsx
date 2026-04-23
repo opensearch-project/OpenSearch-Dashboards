@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { CoreSetup, OverlayRef } from '../../../core/public';
 import { toMountPoint } from '../../../plugins/opensearch_dashboards_react/public';

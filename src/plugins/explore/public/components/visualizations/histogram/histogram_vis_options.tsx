@@ -25,8 +25,6 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {
@@ -88,6 +86,7 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            {/* @ts-expect-error TS2741 TODO(ts-error): fixme */}
             <BarExclusiveVisOptions
               type="histogram"
               barSizeMode={styleOptions.barSizeMode}

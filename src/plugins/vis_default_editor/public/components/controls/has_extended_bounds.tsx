@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import { search } from '../../../../data/public';

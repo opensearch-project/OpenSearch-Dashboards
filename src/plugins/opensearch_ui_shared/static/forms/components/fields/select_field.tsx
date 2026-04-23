@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactNode, OptionHTMLAttributes } from 'react';
+import { ReactNode, OptionHTMLAttributes } from 'react';
 import { EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
@@ -51,6 +51,7 @@ export const SelectField = ({ field, euiFieldProps, ...rest }: Props) => {
   return (
     <EuiCompressedFormRow
       label={field.label}
+      // @ts-expect-error TS2349 TODO(ts-error): fixme
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

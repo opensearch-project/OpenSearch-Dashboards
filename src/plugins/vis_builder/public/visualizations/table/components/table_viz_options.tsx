@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import produce from 'immer';
@@ -34,6 +34,7 @@ function TableVizOptions() {
 
   return (
     <>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.params.settingsTitle', {
           defaultMessage: 'Settings',

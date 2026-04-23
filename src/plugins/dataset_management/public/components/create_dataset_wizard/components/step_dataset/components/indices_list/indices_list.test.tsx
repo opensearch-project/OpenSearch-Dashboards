@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IndicesList } from '../indices_list';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';

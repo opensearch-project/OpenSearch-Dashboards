@@ -18,6 +18,7 @@ describe('createTimefilterSyncMiddleware', () => {
     mockServices.data.query.timefilter.timefilter.setTime = jest.fn();
 
     mockStore = createMockStore({
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       queryEditor: {
         queryStatusMap: {},
         overallQueryStatus: {

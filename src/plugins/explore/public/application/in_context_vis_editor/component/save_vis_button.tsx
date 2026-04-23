@@ -5,7 +5,7 @@
  */
 
 import { useObservable } from 'react-use';
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -22,8 +22,9 @@ import { Query } from '../../../../../data/common';
 import { SavedExplore } from '../../../saved_explore';
 import { SaveVisModal } from './save_vis_modal';
 import { useCurrentExploreId } from '../hooks/use_explore_id';
-import { useVisualizationEditor } from '../../context';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
+import { EditorMode } from '../../utils/state_management/types';
+import { ContainerState, CONTAINER_URL_KEY } from '../types';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -32,16 +33,16 @@ export interface OnSaveProps {
   onTitleDuplicate: () => void;
 }
 
-const saveButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
-  defaultMessage: 'Save and back to dashboard',
+const saveAndBackButtonText = i18n.translate('explore.topNav.saveVisButton.saveBack', {
+  defaultMessage: 'Save and back',
 });
 
 const discardButtonText = i18n.translate('explore.topNav.saveVisButton.discard', {
-  defaultMessage: 'Discard panel changes',
+  defaultMessage: 'Discard changes',
 });
 
-const saveButtonWithoutBackText = i18n.translate('explore.topNav.saveVisButton.save', {
-  defaultMessage: 'Save visualization',
+const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
+  defaultMessage: 'Save',
 });
 
 export const SaveVisButton = () => {
@@ -55,14 +56,17 @@ export const SaveVisButton = () => {
 
   const { savedExplore } = useSavedExplore(exploreId);
 
-  const { toastNotifications, chrome, embeddable } = services;
+  const { toastNotifications, chrome, embeddable, osdUrlStateStorage } = services;
   const stateTransfer = embeddable.getStateTransfer();
   const [showModal, setShowModal] = useState(false);
 
   const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
   const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
+  const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
 
-  const originatingApp = useVisualizationEditor().originatingApp;
+  // directly read from url storage
+  const originatingApp = osdUrlStateStorage?.get<ContainerState>(CONTAINER_URL_KEY)?.originatingApp;
+
   const searchContext = useSearchContext();
 
   const navigateTo = useCallback(
@@ -85,7 +89,7 @@ export const SaveVisButton = () => {
               visTitle: newTitle,
             },
           }),
-          'data-test-subj': 'saveVisualizationSuccess',
+          'data-test-subj': 'updateVisualizationSuccess',
         });
       }
       if (originatingApp) {
@@ -144,6 +148,13 @@ export const SaveVisButton = () => {
 
       if (searchSourceInstance) {
         searchSourceInstance.query = searchContext.query as Query;
+        if (isPromptMode) {
+          // for prompt mode, store previous generated query string
+          searchSourceInstance.query = {
+            ...searchSourceInstance.query,
+            query: queryEditorState.lastExecutedTranslatedQuery ?? '',
+          };
+        }
         searchSourceInstance.filter = searchContext.filters;
       }
 
@@ -180,6 +191,8 @@ export const SaveVisButton = () => {
       searchContext.query,
       searchContext.filters,
       toastNotifications,
+      isPromptMode,
+      queryEditorState.lastExecutedTranslatedQuery,
     ]
   );
 
@@ -222,7 +235,7 @@ export const SaveVisButton = () => {
       color="primary"
       size="s"
     >
-      {originatingApp ? saveButtonText : saveButtonWithoutBackText}
+      {originatingApp ? saveAndBackButtonText : saveButtonText}
     </EuiButtonEmpty>
   );
 
@@ -230,7 +243,6 @@ export const SaveVisButton = () => {
 
   const discardButton = (
     <EuiButtonEmpty
-      isDisabled={!isQueryEditorDirty && !isVisDirty}
       onClick={handleDiscard}
       data-test-subj="discardVisualizationEditorButton"
       color={discardButtonColor}

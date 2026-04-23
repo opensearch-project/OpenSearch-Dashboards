@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import * as React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { UiComponent } from '../../../opensearch_dashboards_utils/public';
 import { uiToReactComponent } from './ui_to_react_component';

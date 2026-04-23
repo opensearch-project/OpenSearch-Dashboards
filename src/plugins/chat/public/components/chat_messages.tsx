@@ -64,6 +64,7 @@ interface ChatMessagesProps {
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
   startResponse?: boolean;
+  threadId?: string;
 }
 
 /**
@@ -234,6 +235,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onRejectConfirmation,
   onFillInput,
   startResponse,
+  threadId,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -351,6 +353,43 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
     return lastAssistantMessageIndex > lastUserMessageIndex;
   }, [messageRows, isStreaming, lastAssistantMessageIndex]);
 
+  /**
+   * Determine if an assistant message at the given index is shareable.
+   * A message is shareable when:
+   * 1. The response is not currently streaming
+   * 2. No tool calls in the current turn are still running (awaiting results)
+   * 3. It is the last assistant message with content before the next user message (or end of timeline)
+   */
+  const isMessageShareable = useCallback(
+    (index: number): boolean => {
+      if (isStreaming) return false;
+
+      // Walk backward: check if any tool calls in this turn are still running
+      for (let j = index; j >= 0; j--) {
+        const prev = messageRows[j];
+        if (prev.role === 'user') break;
+        if (prev.role === 'toolCall' && prev.toolCall.status === 'running') return false;
+        if (prev.role === 'toolCallGroup') {
+          if (prev.toolCalls.some((tc) => tc.status === 'running')) return false;
+        }
+      }
+
+      // Walk forward: check for a later assistant message with content or running tools
+      for (let j = index + 1; j < messageRows.length; j++) {
+        const next = messageRows[j];
+        if (next.role === 'user') return true;
+        if (next.role === 'assistant' && (next as AssistantMessage).content) return false;
+        if (next.role === 'toolCall' && next.toolCall.status === 'running') return false;
+        if (next.role === 'toolCallGroup') {
+          if (next.toolCalls.some((tc) => tc.status === 'running')) return false;
+        }
+      }
+
+      return true; // Last message in timeline with no running tools
+    },
+    [messageRows, isStreaming]
+  );
+
   return (
     <>
       {/* Context Tree View: Hiding this for now. Uncomment for development */}
@@ -406,6 +445,8 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
 
+            const isShareable = isMessageShareable(index);
+
             const renderAssistantContent = () => {
               if (!assistantMsg.content) {
                 return null;
@@ -422,12 +463,21 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                         content: content.text,
                         id: `${assistantMsg.id}-${contentIndex}`,
                       }}
+                      timeline={isShareable ? timeline : undefined}
+                      threadId={isShareable ? threadId : undefined}
+                      shareTargetMessage={isShareable ? assistantMsg : undefined}
                     />
                   ));
               }
 
               if (assistantMsg.content.trim()) {
-                return <MessageRow message={assistantMsg} />;
+                return (
+                  <MessageRow
+                    message={assistantMsg}
+                    timeline={isShareable ? timeline : undefined}
+                    threadId={isShareable ? threadId : undefined}
+                  />
+                );
               }
 
               return null;

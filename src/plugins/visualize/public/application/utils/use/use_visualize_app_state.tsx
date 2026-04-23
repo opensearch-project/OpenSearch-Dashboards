@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { getEmbeddable, getCore } from '../../services';

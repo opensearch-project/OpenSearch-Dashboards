@@ -17,7 +17,6 @@ import {
 } from 'echarts';
 import {
   AggregationType,
-  AxisColumnMappings,
   Positions,
   StandardAxes,
   TimeUnit,
@@ -25,6 +24,7 @@ import {
   Threshold,
   ThresholdOptions,
   AxisRole,
+  VisColumn,
 } from '../types';
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
@@ -44,7 +44,6 @@ export interface BaseChartStyle {
     aggregationType?: AggregationType;
     bucketTimeUnit?: TimeUnit;
   };
-  switchAxes?: boolean;
   standardAxes?: StandardAxes[];
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
@@ -62,23 +61,20 @@ interface Axis {
 /**
  * Configuration for ECharts axes (after swapping)
  */
-export interface EChartsAxisConfig {
-  xAxis?: Axis;
-  yAxis?: Axis;
+interface EChartsAxisConfig {
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
-  y2Axis?: Axis;
   y2AxisStyle?: StandardAxes;
 }
 
 /**
  * Input for ECharts spec pipeline
  */
-export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
+interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
   axisConfig?: EChartsAxisConfig;
-  axisColumnMappings: AxisColumnMappings;
+  axisColumnMappings: { [K in AxisRole]?: VisColumn | VisColumn[] };
   timeRange?: { from: string; to: string };
 }
 
@@ -126,10 +122,11 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-export function getAxisType(axis: Axis | undefined): 'category' | 'value' | 'time' {
-  if (!axis) return 'value';
+export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'value' | 'time' {
+  const effectiveAxis = Array.isArray(axis) ? axis[0] : axis;
+  if (!effectiveAxis) return 'value';
 
-  switch (axis.schema) {
+  switch (effectiveAxis.schema) {
     case VisFieldType.Categorical:
       return 'category';
     case VisFieldType.Date:
@@ -188,10 +185,10 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
-  const hasY2 = axisColumnMappings.y2 !== undefined && axisConfig?.y2Axis;
+  const hasY2 = axisColumnMappings.y2 !== undefined;
 
   const getConfig = (
-    axis: Axis | undefined,
+    axis: Axis | Axis[] | undefined,
     axisStyle: StandardAxes | undefined,
     gridNumber?: number,
     addSplitLineStyle: boolean = false
@@ -213,19 +210,24 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   if (hasFacet) {
     // each grids needs an axis config
     xAxisConfig = transformedData.map((_: any, index: number) => {
-      return getConfig(axisConfig.xAxis, axisConfig.xAxisStyle, index);
+      return getConfig(axisColumnMappings.x, axisConfig.xAxisStyle, index);
     });
 
     yAxisConfig = transformedData.map((_: any, index: number) => {
-      return getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, index);
+      return getConfig(axisColumnMappings.y, axisConfig.yAxisStyle, index);
     });
   } else {
-    xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
+    xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle);
 
-    yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+    yAxisConfig = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle);
 
     if (hasY2) {
-      const y2AxisConfig = getConfig(axisConfig.y2Axis, axisConfig.y2AxisStyle, undefined, true);
+      const y2AxisConfig = getConfig(
+        axisColumnMappings.y2,
+        axisConfig.y2AxisStyle,
+        undefined,
+        true
+      );
       yAxisConfig = [yAxisConfig, y2AxisConfig];
     }
   }
@@ -442,7 +444,7 @@ export const applyTimeRange = <T extends BaseChartStyle>(
   }
 
   const timeAxisEntry = Object.entries(axisColumnMappings).find(
-    ([, col]) => col?.schema === VisFieldType.Date
+    ([, axis]) => getAxisType(axis) === 'time'
   );
 
   if (!timeAxisEntry) {

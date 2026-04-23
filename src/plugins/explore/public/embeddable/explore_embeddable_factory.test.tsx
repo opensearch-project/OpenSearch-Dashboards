@@ -73,7 +73,7 @@ describe('ExploreEmbeddableFactory', () => {
   });
 
   test('has the correct display name', () => {
-    expect(factory.getDisplayName()).toBe('visualization in discover');
+    expect(factory.getDisplayName()).toBe('visualization');
   });
 
   test('cannot create new embeddables directly', () => {
@@ -130,7 +130,7 @@ describe('ExploreEmbeddableFactory', () => {
       references: [],
     };
 
-    const result = await factory.create(input as any);
+    await factory.create(input as any);
 
     expect(ExploreEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -177,7 +177,7 @@ describe('ExploreEmbeddableFactory', () => {
       references: [],
     };
 
-    const result = await factory.create(input as any);
+    await factory.create(input as any);
 
     expect(ExploreEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({

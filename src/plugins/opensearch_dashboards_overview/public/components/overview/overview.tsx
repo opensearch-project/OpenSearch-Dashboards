@@ -29,7 +29,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import {
   EuiCard,
   EuiFlexGroup,

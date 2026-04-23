@@ -5,7 +5,7 @@
 
 import './results_action_bar.scss';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { useObservable } from 'react-use';
@@ -20,7 +20,11 @@ import {
   selectWrapCellText,
 } from '../../../../application/utils/state_management/selectors';
 import { setWrapCellText } from '../../../../application/utils/state_management/slices';
-import { EXPLORE_LOGS_TAB_ID } from '../../../../../common';
+import {
+  EXPLORE_LOGS_TAB_ID,
+  EXPLORE_PATTERNS_TAB_ID,
+  EXPLORE_STATISTICS_TAB_ID,
+} from '../../../../../common';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { SlotItemsForType } from '../../../../services/slot_registry';
@@ -52,9 +56,11 @@ export const DiscoverResultsActionBar = ({
   const currentTab = useSelector(selectActiveTabId);
   const wrapCellText = useSelector(selectWrapCellText);
   const isLogsTab = currentTab === EXPLORE_LOGS_TAB_ID;
-  const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
-  const shouldShowExportButton = currentTab !== 'explore_patterns_tab';
-  const showTabSpecificSettings = currentTab === 'explore_patterns_tab';
+  const shouldShowAddToDashboardButton =
+    currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
+  const shouldShowExportButton =
+    currentTab !== EXPLORE_PATTERNS_TAB_ID && currentTab !== EXPLORE_STATISTICS_TAB_ID;
+  const showTabSpecificSettings = currentTab === EXPLORE_PATTERNS_TAB_ID;
   const visualizationBuilder = getVisualizationBuilder();
   const visConfig = useObservable(visualizationBuilder.visConfig$);
   const showRawTable = useObservable(visualizationBuilder.showRawTable$);

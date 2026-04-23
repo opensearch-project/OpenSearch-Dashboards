@@ -353,6 +353,7 @@ function createDataFrame(
           allVizRows.push({
             Time: timeMs,
             Series: escapedSeriesName,
+            Labels: labelsWithoutName,
             Value: Number(value),
           });
         }
@@ -399,6 +400,7 @@ function createDataFrame(
   const vizSchema = [
     { name: 'Time', type: 'time', values: [] },
     { name: 'Series', type: 'string', values: [] },
+    { name: 'Labels', type: 'object', values: [] },
     { name: 'Value', type: 'number', values: [] },
   ];
 

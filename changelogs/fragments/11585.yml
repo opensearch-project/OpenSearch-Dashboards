@@ -1,3 +1,0 @@
-fix:
-- Scale captured screenshots to stay under 8k pixel limit ([#11585](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11585))
-- Clear screenshot data immediately after sending message ([#11585](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11585))
