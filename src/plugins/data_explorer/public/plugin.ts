@@ -128,13 +128,15 @@ export class DataExplorerPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        order: 301, // The nav link should be put behind discover
-        euiIconType: 'discoverApp',
-      },
-    ]);
+    if (!core.chrome.getIsIconSideNavEnabled()) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: PLUGIN_ID,
+          order: 301, // The nav link should be put behind discover
+          euiIconType: 'discoverApp',
+        },
+      ]);
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {

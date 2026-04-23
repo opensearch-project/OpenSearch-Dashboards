@@ -129,7 +129,6 @@ export class AdvancedSettingsPlugin
         id: 'settings',
         title: titleInGroup,
         order: 100,
-        euiIconType: 'advancedSettingsApp',
       },
     ]);
 
@@ -165,7 +164,6 @@ export class AdvancedSettingsPlugin
         {
           id: USER_SETTINGS_APPID,
           order: 101, // just right after application settings which order is 100
-          euiIconType: 'advancedSettingsApp',
         },
       ]);
     }
@@ -192,9 +190,7 @@ export class AdvancedSettingsPlugin
 
   public start(core: CoreStart) {
     const enableUserControl = core.uiSettings.get('theme:enableUserControl');
-    const useIconSideNav = core.uiSettings.get('home:enableIconSideNav', false);
-    // Always show theme toggle in icon side nav; otherwise respect enableUserControl
-    if (enableUserControl || useIconSideNav) {
+    if (enableUserControl) {
       setupTopNavThemeButton(core, core.uiSettings.get('home:useNewHomePage'));
     }
 

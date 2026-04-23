@@ -156,7 +156,7 @@
 // ════════════════════════════════════════════════════════════════
 
 $osd-sidebar-width: 270px;
-$osd-sidebar-width-collapsed: 48px;
+$osd-sidebar-width-collapsed: 64px;
 $osd-sidebar-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
 // Gap div (hidden — layout push handled via CSS variable on app-wrapper)
@@ -372,6 +372,19 @@ $osd-sidebar-top-min-height: 116px;
 // ════════════════════════════════════════════════════════════════
 // ── Observability hardcoded nav styles ──
 // ════════════════════════════════════════════════════════════════
+
+// Cluster gap: inserted in the expanded nav before a top-level item whose
+// registration opts into `startCluster`, and before every category block.
+// Provides the "visual grouping" intended by plugins without changing
+// ordering semantics.
+.obs-nav-cluster-gap {
+  height: $euiSizeM;
+}
+
+// Cluster gap for the collapsed icon rail — same intent, just vertical space.
+.obsCollapsedNav-clusterGap {
+  height: $euiSizeM;
+}
 
 // Remove blue focus ring on mouse click — keep :focus-visible for keyboard a11y
 .obs-expanded-nav {

@@ -37,4 +37,3 @@ export const USE_NEW_HOME_PAGE = 'home:useNewHomePage';
  */
 export const IMPORT_SAMPLE_DATA_APP_ID = 'import_sample_data';
 export const SEARCH_WORKSPACE_DISMISS_GET_STARTED = 'searchWorkspace:dismissGetStarted';
-export const ENABLE_ICON_SIDE_NAV = 'home:enableIconSideNav';

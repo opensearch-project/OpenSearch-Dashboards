@@ -116,6 +116,7 @@ export interface HeaderProps {
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
   navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
   navControlsPrimaryHeaderRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsIconSideNavFooter$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -326,9 +327,6 @@ export function Header({
   );
 
   const renderNavToggle = () => {
-    // When icon side nav is active, the sidebar has its own hamburger — hide the header's toggle.
-    if (enableIconSideNav) return null;
-
     const renderNavToggleWithExtraProps = (
       props: EuiHeaderSectionItemButtonProps & { isSmallScreen?: boolean }
     ) => {
@@ -383,13 +381,15 @@ export function Header({
     };
     return useUpdatedHeader ? (
       <>
-        {isNavOpen
-          ? null
-          : renderNavToggleWithExtraProps({
+        {/* Large-screen toggle: hide when icon side nav is active (its sidebar has its own hamburger) */}
+        {!enableIconSideNav && !isNavOpen
+          ? renderNavToggleWithExtraProps({
               className: 'navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m',
               // Nav toggle button has a fixed position and its left size is 0 be default, it should have a left size if sidecar is docked to left.
               style: sidecarLeftNavStyle,
-            })}
+            })
+          : null}
+        {/* Small-screen toggle: always render so users can open the nav on mobile. */}
         {renderNavToggleWithExtraProps({
           flush: 'both',
           className:
@@ -743,6 +743,7 @@ export function Header({
             logos={logos}
             navGroupsMap$={observables.navGroupsMap$}
             navControlsLeftBottom$={observables.navControlsLeftBottom$}
+            navControlsIconSideNavFooter$={observables.navControlsIconSideNavFooter$}
             currentNavGroup$={observables.currentNavGroup$}
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
@@ -752,7 +753,6 @@ export function Header({
             isLocked={isLocked}
             onIsLockedUpdate={onIsLockedUpdate}
             openNav={() => setIsNavOpen(true)}
-            applications$={application.applications$}
           />
         ) : (
           <CollapsibleNav

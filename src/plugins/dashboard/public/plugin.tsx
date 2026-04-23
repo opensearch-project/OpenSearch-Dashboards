@@ -464,7 +464,7 @@ export class DashboardPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: app.id,
-        order: 400,
+        order: core.chrome.getIsIconSideNavEnabled() ? 100 : 400,
         category: undefined,
         euiIconType: 'dashboardApp',
       },

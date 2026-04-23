@@ -29,12 +29,8 @@ import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
 import { HeaderSearchBar, HeaderSearchBarIcon } from './header_search_bar';
-import { AppStatus, PublicAppInfo } from '../../../application/types';
-import { OBSERVABILITY_NAV_SECTIONS, filterByInstalledApps } from './observability_nav_config';
-import { ObservabilityExpandedNav } from './observability_expanded_nav';
-import { ObservabilityCollapsedNav } from './observability_collapsed_nav';
-
-const EMPTY_APP_MAP: ReadonlyMap<string, PublicAppInfo> = new Map();
+import { ExpandedSideNav } from './expanded_side_nav';
+import { CollapsedSideNav } from './collapsed_side_nav';
 
 export interface CollapsibleNavGroupEnabledProps {
   appId$: InternalApplicationStart['currentAppId$'];
@@ -51,6 +47,7 @@ export interface CollapsibleNavGroupEnabledProps {
   logos: Logos;
   navGroupsMap$: Rx.Observable<Record<string, NavGroupItemInMap>>;
   navControlsLeftBottom$: Rx.Observable<readonly ChromeNavControl[]>;
+  navControlsIconSideNavFooter$: Rx.Observable<readonly ChromeNavControl[]>;
   currentNavGroup$: Rx.Observable<NavGroupItemInMap | undefined>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
@@ -60,7 +57,6 @@ export interface CollapsibleNavGroupEnabledProps {
   isLocked?: boolean;
   onIsLockedUpdate?: (isLocked: boolean) => void;
   openNav?: () => void;
-  applications$?: Rx.Observable<ReadonlyMap<string, PublicAppInfo>>;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -69,7 +65,12 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
 
 enum NavWidth {
   Expanded = 270,
-  Collapsed = 48, // The Collapsed width is supposed to be aligned with the hamburger icon on the top left navigation.
+  // Width used by the classic EuiFlyout-push nav (flag OFF or non-observability workspaces).
+  // The Collapsed width is aligned with the hamburger icon on the top left navigation.
+  Collapsed = 48,
+  // Width used by the icon side nav in the observability workspace — wider so
+  // the larger (size="l") icons + bigger hit targets feel comfortable.
+  IconSideNavCollapsed = 64,
 }
 
 export function CollapsibleNavGroupEnabled({
@@ -99,28 +100,6 @@ export function CollapsibleNavGroupEnabled({
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const globalSearchCommands = useObservable(observables.globalSearchCommands$);
 
-  // Filter hardcoded observability nav config against installed apps
-  const registeredApps = useObservable(observables.applications$ ?? Rx.EMPTY, EMPTY_APP_MAP);
-  const obsNavSections = useMemo(() => {
-    if (!enableIconSideNav) return [];
-    const accessibleIds = new Set<string>();
-    registeredApps.forEach((app, appIdKey) => {
-      if (app.status === AppStatus.accessible) {
-        accessibleIds.add(appIdKey);
-      }
-    });
-    const sections = filterByInstalledApps(OBSERVABILITY_NAV_SECTIONS, accessibleIds);
-    // Inject custom onClick for dev_tools — opens as modal instead of page navigation
-    for (const section of sections) {
-      for (const item of section.items) {
-        if (item.id === 'dev_tools') {
-          item.onClick = () => document.dispatchEvent(new CustomEvent('osd:openDevToolsModal'));
-        }
-      }
-    }
-    return sections;
-  }, [enableIconSideNav, registeredApps]);
-
   // Set CSS variable so app-wrapper and header can offset for the fixed sidebar.
   // Only active when enableIconSideNav is ON (two-div pattern).
   // When OFF, the original EuiFlyout handles layout push natively.
@@ -129,10 +108,28 @@ export function CollapsibleNavGroupEnabled({
   // per-frame relayout on heavy pages like Discover/Traces. The fixed-position
   // sidebar visually masks the content jump as it slides open/closed.
   useLayoutEffect(() => {
-    if (!enableIconSideNav) return;
-    const width = isNavOpen ? `${NavWidth.Expanded}px` : `${NavWidth.Collapsed}px`;
-    document.documentElement.style.setProperty('--osd-sidebar-width', width);
+    // The margin is only applied on desktop where the fixed icon-side-nav rail
+    // is visible. On mobile the nav is either hidden (collapsed) or an overlay
+    // (EuiFlyout type="overlay" handles its own positioning), so the wrapping
+    // page content should not be pushed over.
+    const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
+
+    const applyMargin = () => {
+      if (!enableIconSideNav || !isDesktop()) {
+        document.documentElement.style.removeProperty('--osd-sidebar-width');
+        return;
+      }
+      const width = isNavOpen ? `${NavWidth.Expanded}px` : `${NavWidth.IconSideNavCollapsed}px`;
+      document.documentElement.style.setProperty('--osd-sidebar-width', width);
+    };
+
+    applyMargin();
+    // Re-apply when the viewport crosses the desktop/mobile breakpoint.
+    const mql = window.matchMedia('(min-width: 992px)');
+    mql.addEventListener('change', applyMargin);
+
     return () => {
+      mql.removeEventListener('change', applyMargin);
       document.documentElement.style.removeProperty('--osd-sidebar-width');
     };
   }, [enableIconSideNav, isNavOpen]);
@@ -375,22 +372,22 @@ export function CollapsibleNavGroupEnabled({
           'obs-nav-hidden': !isNavOpen,
         })}
       >
-        <ObservabilityExpandedNav
-          sections={obsNavSections}
+        <ExpandedSideNav
+          navLinks={navLinksForRender}
           appId={appId}
           navigateToApp={navigateToApp}
           basePath={basePath}
         />
       </div>
       <div className={classNames('obsCollapsedNav-wrapper', { 'obs-nav-hidden': isNavOpen })}>
-        <ObservabilityCollapsedNav
-          sections={obsNavSections}
+        <CollapsedSideNav
+          navLinks={navLinksForRender}
           appId={appId}
           navigateToApp={navigateToApp}
           basePath={basePath}
         />
       </div>
-      {isNavOpen && (
+      {isNavOpen ? (
         <div
           className={classNames({
             'bottom-container': true,
@@ -400,6 +397,16 @@ export function CollapsibleNavGroupEnabled({
         >
           <HeaderNavControls
             navControls$={observables.navControlsLeftBottom$}
+            className="nav-controls-padding"
+          />
+        </div>
+      ) : (
+        // Collapsed-state footer — only shows controls opted into the icon-side-nav
+        // footer slot (e.g., Dev Tools). Keeps the rail slim while preserving a
+        // utility entry-point.
+        <div className={classNames('bottom-container', 'bottom-container-collapsed')}>
+          <HeaderNavControls
+            navControls$={observables.navControlsIconSideNavFooter$}
             className="nav-controls-padding"
           />
         </div>
@@ -474,18 +481,11 @@ export function CollapsibleNavGroupEnabled({
           color="transparent"
           style={{ paddingTop: 0 }}
         >
-          <NavGroups
+          <ExpandedSideNav
             navLinks={navLinksForRender}
-            navigateToApp={navigateToApp}
-            onNavItemClick={(event, navItem) => {
-              if (navItem.title === titleForSeeAll && navItem.category?.id) {
-                const navGroup = navGroupsMap[navItem.category.id];
-                onGroupClick(event, navGroup);
-              }
-            }}
             appId={appId}
-            categoryCollapsible={currentNavGroupId === ALL_USE_CASE_ID}
-            currentWorkspaceId={currentWorkspace?.id}
+            navigateToApp={navigateToApp}
+            basePath={basePath}
           />
         </EuiPanel>
         <div

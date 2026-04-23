@@ -121,6 +121,7 @@ export interface ChromeGlobalBanner {
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export interface StartDeps {
@@ -153,7 +154,6 @@ export class ChromeService {
   private useUpdatedHeader = false;
   private enableIconSideNav = false;
   private updatedHeaderSubscription: Subscription | undefined;
-  private iconSideNavSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   private navGroupStart?: ChromeNavGroupServiceStartContract;
   private applicationStart?: InternalApplicationStart;
@@ -222,9 +222,11 @@ export class ChromeService {
     );
   }
 
-  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+  public setup({ uiSettings, injectedMetadata }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
+
+    this.enableIconSideNav = injectedMetadata.getEnableIconSideNav();
 
     globalSearch.registerSearchCommand({
       id: 'pagesSearch',
@@ -245,6 +247,7 @@ export class ChromeService {
       },
       navGroup,
       globalSearch,
+      getIsIconSideNavEnabled: () => this.enableIconSideNav,
     };
   }
 
@@ -268,11 +271,7 @@ export class ChromeService {
         this.useUpdatedHeader = value;
       });
 
-    this.iconSideNavSubscription = uiSettings
-      .get$('home:enableIconSideNav', false)
-      .subscribe((value) => {
-        this.enableIconSideNav = value;
-      });
+    this.enableIconSideNav = injectedMetadata.getEnableIconSideNav();
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
@@ -334,7 +333,6 @@ export class ChromeService {
                 opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
-                keyboardShortcutService={keyboardShortcut}
               />
             </I18nProvider>
           );
@@ -419,6 +417,7 @@ export class ChromeService {
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           navControlsLeftBottom$={navControls.getLeftBottom$()}
           navControlsPrimaryHeaderRight$={navControls.getPrimaryHeaderRight$()}
+          navControlsIconSideNavFooter$={navControls.getIconSideNavFooter$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
@@ -507,6 +506,8 @@ export class ChromeService {
       setGlobalBanner: (banner?: ChromeGlobalBanner) => {
         this.globalBanner$.next(banner);
       },
+
+      getIsIconSideNavEnabled: () => this.enableIconSideNav,
     };
   }
 
@@ -514,7 +515,6 @@ export class ChromeService {
     this.navLinks.stop();
     this.navGroup.stop();
     this.updatedHeaderSubscription?.unsubscribe();
-    this.iconSideNavSubscription?.unsubscribe();
     this.stop$.next();
   }
 }
@@ -534,6 +534,7 @@ export interface ChromeSetup {
   navGroup: ChromeNavGroupServiceSetupContract;
   /** {@inheritdoc GlobalSearchService} */
   globalSearch: GlobalSearchServiceSetupContract;
+  getIsIconSideNavEnabled: () => boolean;
 }
 
 /**
@@ -697,6 +698,11 @@ export interface ChromeStart {
    * Set or unset the global banner component
    */
   setGlobalBanner(banner?: ChromeGlobalBanner): void;
+
+  /**
+   * Returns whether the icon side nav is enabled via config.
+   */
+  getIsIconSideNavEnabled(): boolean;
 }
 
 /** @internal */

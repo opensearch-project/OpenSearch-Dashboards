@@ -29,13 +29,11 @@ export function DevToolsIcon({
   devTools,
   deps,
   title,
-  hideButton,
 }: {
   core: CoreStart;
   devTools: readonly DevToolApp[];
   deps: DevToolsSetupDependencies;
   title: string;
-  hideButton?: boolean;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [devToolTab, setDevToolTab] = useState('');
@@ -116,13 +114,6 @@ export function DevToolsIcon({
     };
   }, [modalVisible, core.keyboardShortcut, closeModal]);
 
-  // Listen for custom event from sidebar nav to open dev tools modal
-  useEffect(() => {
-    const handleOpenDevTools = () => setModalVisible(true);
-    document.addEventListener('osd:openDevToolsModal', handleOpenDevTools);
-    return () => document.removeEventListener('osd:openDevToolsModal', handleOpenDevTools);
-  }, []);
-
   const closeModalVisible = useCallback(() => {
     setModalVisible(false);
   }, []);
@@ -156,23 +147,21 @@ export function DevToolsIcon({
 
   return (
     <>
-      {!hideButton && (
-        <EuiToolTip
-          content={i18n.translate('devTools.icon.nav.title', {
-            defaultMessage: 'Developer tools',
-          })}
-        >
-          <EuiButtonIcon
-            aria-label="go-to-dev-tools"
-            iconType="consoleApp"
-            data-test-subj="openDevToolsModal"
-            onClick={() => {
-              setModalVisible(true);
-            }}
-            color="text"
-          />
-        </EuiToolTip>
-      )}
+      <EuiToolTip
+        content={i18n.translate('devTools.icon.nav.title', {
+          defaultMessage: 'Developer tools',
+        })}
+      >
+        <EuiButtonIcon
+          aria-label="go-to-dev-tools"
+          iconType="consoleApp"
+          data-test-subj="openDevToolsModal"
+          onClick={() => {
+            setModalVisible(true);
+          }}
+          color="text"
+        />
+      </EuiToolTip>
       {modalVisible ? (
         /**
          * We can not use OuiModal component here because OuiModal uses OuiOverlayMask as its parent node

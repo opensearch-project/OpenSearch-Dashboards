@@ -53,8 +53,6 @@ import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
-import { KeyboardShortcutHelpModal } from '../../../keyboard_shortcut/keyboard_shortcut_help_modal';
-import { KeyboardShortcutService } from '../../../keyboard_shortcut/keyboard_shortcut_service';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -128,7 +126,6 @@ interface Props {
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
-  keyboardShortcutService?: KeyboardShortcutService;
 }
 
 interface State {
@@ -139,7 +136,6 @@ interface State {
 
 class HeaderHelpMenuUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
-  private shortcutTriggerRef = React.createRef<HTMLSpanElement>();
 
   constructor(props: Props) {
     super(props);
@@ -257,28 +253,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
             defaultMessage="Open an issue in GitHub"
           />
         </EuiButtonEmpty>
-
-        {this.props.keyboardShortcutService && (
-          <>
-            <EuiHorizontalRule margin="s" />
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              iconType="keyboardShortcut"
-              onClick={() => {
-                this.closeMenu();
-                // Small delay so popover closes before modal opens
-                setTimeout(() => this.shortcutTriggerRef.current?.click(), 100);
-              }}
-              data-test-subj="helpMenuKeyboardShortcuts"
-            >
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuKeyboardShortcuts"
-                defaultMessage="Keyboard shortcuts"
-              />
-            </EuiButtonEmpty>
-          </>
-        )}
       </Fragment>
     ) : null;
 
@@ -394,51 +368,43 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     );
 
     return (
-      <>
-        <EuiPopover
-          anchorPosition={useUpdatedAppearance ? 'rightDown' : 'downRight'}
-          button={button}
-          closePopover={this.closeMenu}
-          data-test-subj="helpMenuButton"
-          id="headerHelpMenu"
-          isOpen={this.state.isOpen}
-          ownFocus
-          repositionOnScroll
-          panelPaddingSize="s"
-        >
-          <EuiPopoverTitle>
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem>
-                <h2>
-                  <FormattedMessage
-                    id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
-                    defaultMessage="Help"
-                  />
-                </h2>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
+      <EuiPopover
+        anchorPosition={useUpdatedAppearance ? 'rightDown' : 'downRight'}
+        button={button}
+        closePopover={this.closeMenu}
+        data-test-subj="helpMenuButton"
+        id="headerHelpMenu"
+        isOpen={this.state.isOpen}
+        ownFocus
+        repositionOnScroll
+        panelPaddingSize="s"
+      >
+        <EuiPopoverTitle>
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem>
+              <h2>
                 <FormattedMessage
-                  id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
-                  defaultMessage="v {version}"
-                  values={{ version: opensearchDashboardsVersion }}
+                  id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
+                  defaultMessage="Help"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopoverTitle>
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
+                defaultMessage="v {version}"
+                values={{ version: opensearchDashboardsVersion }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
 
-          <div style={{ maxWidth: 270 }}>
-            {defaultContent}
-            {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
-            {customContent}
-          </div>
-        </EuiPopover>
-        {this.props.keyboardShortcutService && (
-          <KeyboardShortcutHelpModal
-            trigger={<span ref={this.shortcutTriggerRef} style={{ display: 'none' }} />}
-            keyboardShortcutService={this.props.keyboardShortcutService}
-          />
-        )}
-      </>
+        <div style={{ maxWidth: 270 }}>
+          {defaultContent}
+          {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
+          {customContent}
+        </div>
+      </EuiPopover>
     );
   }
 
