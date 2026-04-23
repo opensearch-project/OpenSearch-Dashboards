@@ -162,10 +162,13 @@ export class VariableService {
     const options = this.deriveOptions(newVariable);
     const current = options.length > 0 ? [options[0]] : undefined;
     newVariable.current = current;
-    this.runtimeState.set(id, { options });
 
     const updatedVariables = [...this.getVariables(), newVariable];
     await this.saveVariables(updatedVariables);
+
+    // Update runtime state only after successful save
+    this.runtimeState.set(id, { options });
+    this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
 
     if (newVariable.type === VariableType.Query) {
       await this.refreshVariableOptions(id);
@@ -181,6 +184,7 @@ export class VariableService {
 
     const existing = currentVariables[index];
     let updatedVariable: Variable;
+    let newRuntimeState: VariableState | undefined;
 
     if (updates.type && updates.type !== existing.type) {
       // Type changed — rebuild from scratch
@@ -190,7 +194,7 @@ export class VariableService {
       >);
       const options = this.deriveOptions(updatedVariable);
       updatedVariable.current = options.length > 0 ? [options[0]] : undefined;
-      this.runtimeState.set(id, { options });
+      newRuntimeState = { options };
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -204,7 +208,7 @@ export class VariableService {
         )
       ) {
         const options = this.deriveOptions(updatedVariable);
-        this.runtimeState.set(id, { ...this.getRuntimeState(id), options });
+        newRuntimeState = { ...this.getRuntimeState(id), options };
         updatedVariable.current = this.resolveCurrentValue(
           updatedVariable.current,
           options,
@@ -222,13 +226,19 @@ export class VariableService {
       if (updates.sort !== undefined && updates.sort !== existing.sort) {
         const currentState = this.getRuntimeState(id);
         const sorted = this.sortOptions(currentState.options, updates.sort);
-        this.runtimeState.set(id, { ...currentState, options: sorted });
+        newRuntimeState = { ...currentState, options: sorted };
       }
     }
 
     const updatedVariables = [...currentVariables];
     updatedVariables[index] = updatedVariable;
     await this.saveVariables(updatedVariables);
+
+    // Update runtime state only after successful save
+    if (newRuntimeState) {
+      this.runtimeState.set(id, newRuntimeState);
+      this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
+    }
 
     if ((updates as any).query !== undefined && updatedVariable.type === VariableType.Query) {
       await this.refreshVariableOptions(id);
@@ -238,9 +248,12 @@ export class VariableService {
   public async removeVariable(id: string): Promise<void> {
     const updatedVariables = this.getVariables().filter((v) => v.id !== id);
     this.refreshControllers.get(id)?.abort();
+    await this.saveVariables(updatedVariables);
+
+    // Clean up runtime state only after successful save
     this.refreshControllers.delete(id);
     this.runtimeState.delete(id);
-    await this.saveVariables(updatedVariables);
+    this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
   }
 
   public reorderVariables(sourceIndex: number, destinationIndex: number): void {
@@ -248,6 +261,18 @@ export class VariableService {
     const [moved] = vars.splice(sourceIndex, 1);
     vars.splice(destinationIndex, 0, moved);
     this.variables$.next(vars);
+  }
+
+  /**
+   * Toggle variable visibility in memory without persisting to backend.
+   * Changes will be saved when the dashboard is saved.
+   */
+  public toggleVariableHide(id: string): void {
+    const currentVariables = this.getVariables();
+    const updatedVariables = currentVariables.map((v) =>
+      v.id === id ? ({ ...v, hide: !v.hide } as Variable) : v
+    );
+    this.variables$.next(updatedVariables);
   }
 
   public updateVariableValue(id: string, value: string[]): void {
@@ -469,9 +494,6 @@ export class VariableService {
    * @param variables - Updated variables array
    */
   private async saveVariables(variables: Variable[]): Promise<void> {
-    // Update internal state first for immediate UI feedback
-    this.variables$.next(variables);
-
     if (!this.dashboardId || !this.savedObjectsClient) {
       return;
     }
@@ -481,6 +503,8 @@ export class VariableService {
       await this.savedObjectsClient.update('dashboard', this.dashboardId, {
         variablesJSON,
       });
+
+      this.variables$.next(variables);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('[VariableService] Failed to save variables to dashboard:', error);

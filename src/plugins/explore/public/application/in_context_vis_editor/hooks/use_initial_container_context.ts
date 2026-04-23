@@ -25,11 +25,14 @@ export const useInitialContainerContext = () => {
   const [needsDashboardSelection, setNeedsDashboardSelection] = useState(false);
 
   const loadDashboardVariables = useCallback(
-    async (dashboardId: string) => {
+    async (dashboardId: string, signal?: AbortSignal) => {
       try {
         const savedObject = await core.savedObjects.client.get<{
           variablesJSON?: string;
         }>('dashboard', dashboardId);
+
+        // Check if operation was aborted
+        if (signal?.aborted) return;
 
         if (savedObject.attributes.variablesJSON) {
           const parsed = JSON.parse(savedObject.attributes.variablesJSON);
@@ -55,10 +58,16 @@ export const useInitialContainerContext = () => {
               return variable;
             });
 
-            setContainerVariables(variablesWithValues);
+            // Check again before updating state
+            if (!signal?.aborted) {
+              setContainerVariables(variablesWithValues);
+            }
           }
         }
       } catch (error) {
+        // Don't show error if operation was aborted
+        if (signal?.aborted) return;
+
         notifications.toasts.addError(error, {
           title: i18n.translate('explore.inContextEditor.loadDashboardVariables.errorToastTitle', {
             defaultMessage: 'Error loading dashboard variables',
@@ -72,6 +81,7 @@ export const useInitialContainerContext = () => {
   useEffect(() => {
     const incomingStates = embeddable.getStateTransfer(scopedHistory).getIncomingEditorState();
     const hasIncomingStates = incomingStates?.originatingApp || incomingStates?.containerInfo;
+    const abortController = new AbortController();
 
     const init = async () => {
       if (hasIncomingStates) {
@@ -87,6 +97,7 @@ export const useInitialContainerContext = () => {
           });
         }
 
+        if (abortController.signal.aborted) return;
         setContext(stateFromTransfer);
 
         // Load dashboard variables if coming from a dashboard
@@ -94,7 +105,10 @@ export const useInitialContainerContext = () => {
           incomingStates.originatingApp === 'dashboards' &&
           incomingStates.containerInfo?.containerId
         ) {
-          await loadDashboardVariables(incomingStates.containerInfo.containerId);
+          await loadDashboardVariables(
+            incomingStates.containerInfo.containerId,
+            abortController.signal
+          );
         }
       } else {
         // No incoming states from state transfer: check URL state first
@@ -102,10 +116,14 @@ export const useInitialContainerContext = () => {
 
         if (urlContainerState?.originatingApp === 'dashboards') {
           // Use URL state if available
+          if (abortController.signal.aborted) return;
           setContext(urlContainerState);
 
           if (urlContainerState.containerInfo?.containerId) {
-            await loadDashboardVariables(urlContainerState.containerInfo.containerId);
+            await loadDashboardVariables(
+              urlContainerState.containerInfo.containerId,
+              abortController.signal
+            );
           }
         } else {
           // No container context: check for dashboard references
@@ -119,6 +137,8 @@ export const useInitialContainerContext = () => {
               visualizationId,
               notifications
             );
+
+            if (abortController.signal.aborted) return;
 
             if (dashboards.length === 1) {
               // Auto-select single dashboard
@@ -138,7 +158,7 @@ export const useInitialContainerContext = () => {
               }
 
               setContext(containerState);
-              await loadDashboardVariables(dashboard.id);
+              await loadDashboardVariables(dashboard.id, abortController.signal);
             } else if (dashboards.length > 1) {
               // Multiple dashboards: show selection modal
               setReferencingDashboards(dashboards);
@@ -150,6 +170,10 @@ export const useInitialContainerContext = () => {
     };
 
     init();
+
+    return () => {
+      abortController.abort();
+    };
   }, [
     core.savedObjects.client,
     embeddable,

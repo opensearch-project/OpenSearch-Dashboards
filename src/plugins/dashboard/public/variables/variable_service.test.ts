@@ -147,7 +147,7 @@ describe('VariableService', () => {
 
   describe('updateVariable — same type', () => {
     it('should update label without touching current', async () => {
-      const { service } = createService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
 
       await service.updateVariable('custom-1', { label: 'Environment' });
 
@@ -157,7 +157,7 @@ describe('VariableService', () => {
     });
 
     it('should re-derive options when customOptions changes', async () => {
-      const { service } = createService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
 
       await service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any);
 
@@ -167,16 +167,24 @@ describe('VariableService', () => {
     });
 
     it('should preserve current if still valid after customOptions change', async () => {
-      const { service } = createService([makeCustomVariable({ current: ['staging'] })]);
+      const { service } = createService(
+        [makeCustomVariable({ current: ['staging'] })],
+        'dashboard-123'
+      );
 
-      await service.updateVariable('custom-1', { customOptions: ['dev', 'staging', 'new'] } as any);
+      await service.updateVariable('custom-1', {
+        customOptions: ['dev', 'staging', 'new'],
+      } as any);
 
       const withState = service.getVariablesWithState();
       expect(withState[0].current).toEqual(['staging']);
     });
 
     it('should not re-derive options when customOptions is unchanged', async () => {
-      const { service } = createService([makeCustomVariable({ current: ['staging'] })]);
+      const { service } = createService(
+        [makeCustomVariable({ current: ['staging'] })],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', {
         customOptions: ['dev', 'staging', 'prod'],
@@ -187,9 +195,10 @@ describe('VariableService', () => {
     });
 
     it('should trim current to first value when switching from multi to single', async () => {
-      const { service } = createService([
-        makeCustomVariable({ multi: true, current: ['dev', 'staging', 'prod'] }),
-      ]);
+      const { service } = createService(
+        [makeCustomVariable({ multi: true, current: ['dev', 'staging', 'prod'] })],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', { multi: false });
 
@@ -199,7 +208,10 @@ describe('VariableService', () => {
     });
 
     it('should keep current as-is when switching from single to multi', async () => {
-      const { service } = createService([makeCustomVariable({ multi: false, current: ['dev'] })]);
+      const { service } = createService(
+        [makeCustomVariable({ multi: false, current: ['dev'] })],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', { multi: true });
 
@@ -211,7 +223,7 @@ describe('VariableService', () => {
 
   describe('updateVariable — type switch', () => {
     it('should strip query fields when switching from Query to Custom', async () => {
-      const { service } = createService([makeQueryVariable()]);
+      const { service } = createService([makeQueryVariable()], 'dashboard-123');
 
       await service.updateVariable('query-1', {
         type: VariableType.Custom,
@@ -228,7 +240,7 @@ describe('VariableService', () => {
 
     it('should strip custom fields when switching from Custom to Query', async () => {
       mockExecuteQuery.mockResolvedValue(['x', 'y']);
-      const { service } = createService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
 
       await service.updateVariable('custom-1', {
         type: VariableType.Query,
@@ -251,11 +263,27 @@ describe('VariableService', () => {
   });
 
   describe('removeVariable', () => {
-    it('should remove a variable by id', () => {
-      const { service } = createService([makeCustomVariable(), makeQueryVariable()]);
-      service.removeVariable('custom-1');
+    it('should remove a variable by id', async () => {
+      const { service } = createService(
+        [makeCustomVariable(), makeQueryVariable()],
+        'dashboard-123'
+      );
+      await service.removeVariable('custom-1');
       expect(service.getVariables()).toHaveLength(1);
       expect(service.getVariables()[0].id).toBe('query-1');
+    });
+
+    it('should not remove variable if save fails', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable(), makeQueryVariable()],
+        'dashboard-123'
+      );
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Save failed'));
+
+      await expect(service.removeVariable('custom-1')).rejects.toThrow('Save failed');
+
+      // Variables should still have both items
+      expect(service.getVariables()).toHaveLength(2);
     });
   });
 
@@ -515,17 +543,153 @@ describe('VariableService', () => {
     });
 
     it('should re-sort options when sort setting changes', async () => {
-      const { service } = createService([
-        makeCustomVariable({
-          customOptions: ['cherry', 'apple', 'banana'],
-          sort: VariableSortOrder.Disabled,
-        }),
-      ]);
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            customOptions: ['cherry', 'apple', 'banana'],
+            sort: VariableSortOrder.Disabled,
+          }),
+        ],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', { sort: VariableSortOrder.AlphabeticalAsc });
 
       const withState = service.getVariablesWithState();
       expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
+    });
+  });
+
+  describe('toggleVariableHide', () => {
+    it('should toggle hide property in memory without saving', () => {
+      const { service, mockSavedObjectsClient } = createService([
+        makeCustomVariable({ hide: false }),
+      ]);
+
+      service.toggleVariableHide('custom-1');
+
+      const updated = service.getVariables()[0];
+      expect(updated.hide).toBe(true);
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should toggle from hidden to visible', () => {
+      const { service } = createService([makeCustomVariable({ hide: true })]);
+
+      service.toggleVariableHide('custom-1');
+
+      const updated = service.getVariables()[0];
+      expect(updated.hide).toBe(false);
+    });
+  });
+
+  describe('save failure rollback', () => {
+    it('should rollback when addVariable save fails', async () => {
+      const { service, mockSavedObjectsClient } = createService([], 'dashboard-123');
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
+
+      await expect(
+        service.addVariable({
+          name: 'test',
+          type: VariableType.Custom,
+          customOptions: ['a', 'b'],
+        } as any)
+      ).rejects.toThrow('Network error');
+
+      // Should not add the variable
+      expect(service.getVariables()).toHaveLength(0);
+    });
+
+    it('should rollback when updateVariable save fails', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable({ label: 'Original' })],
+        'dashboard-123'
+      );
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
+
+      await expect(service.updateVariable('custom-1', { label: 'Updated' })).rejects.toThrow(
+        'Network error'
+      );
+
+      // Should keep original label
+      const variable = service.getVariables()[0];
+      expect(variable.label).toBe('Original');
+    });
+
+    it('should rollback runtime state when updateVariable with customOptions fails', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable({ customOptions: ['dev', 'staging', 'prod'] })],
+        'dashboard-123'
+      );
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
+
+      const originalState = service.getVariablesWithState()[0];
+
+      await expect(
+        service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any)
+      ).rejects.toThrow('Network error');
+
+      // Runtime state should not change
+      const currentState = service.getVariablesWithState()[0];
+      expect(currentState.options).toEqual(originalState.options);
+    });
+  });
+
+  describe('runtimeStateChange$ observable', () => {
+    it('should trigger when addVariable succeeds', async () => {
+      const { service } = createService([], 'dashboard-123');
+      const emissions: any[] = [];
+
+      service.getVariables$().subscribe((vars) => {
+        emissions.push(vars);
+      });
+
+      await service.addVariable({
+        name: 'test',
+        type: VariableType.Custom,
+        customOptions: ['a', 'b'],
+      } as any);
+
+      // Should have initial emission + emission after add
+      expect(emissions.length).toBeGreaterThan(1);
+      expect(emissions[emissions.length - 1][0].options).toEqual(['a', 'b']);
+    });
+
+    it('should trigger when updateVariable changes runtime state', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ customOptions: ['dev', 'staging', 'prod'] })],
+        'dashboard-123'
+      );
+      const emissions: any[] = [];
+
+      service.getVariables$().subscribe((vars) => {
+        emissions.push(vars);
+      });
+
+      const initialEmissions = emissions.length;
+
+      await service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any);
+
+      // Should emit after update
+      expect(emissions.length).toBeGreaterThan(initialEmissions);
+      expect(emissions[emissions.length - 1][0].options).toEqual(['alpha', 'beta']);
+    });
+
+    it('should trigger when removeVariable succeeds', async () => {
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
+      const emissions: any[] = [];
+
+      service.getVariables$().subscribe((vars) => {
+        emissions.push(vars);
+      });
+
+      const initialEmissions = emissions.length;
+
+      await service.removeVariable('custom-1');
+
+      // Should emit after remove
+      expect(emissions.length).toBeGreaterThan(initialEmissions);
+      expect(emissions[emissions.length - 1]).toHaveLength(0);
     });
   });
 

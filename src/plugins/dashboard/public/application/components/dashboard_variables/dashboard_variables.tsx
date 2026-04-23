@@ -5,12 +5,15 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@osd/i18n';
 import { VariablesBar } from './variables_bar';
 import { VariableEditorFlyout } from './variable_editor_flyout';
 import { VariableManagementFlyout } from './variable_management_flyout';
 import { Variable } from '../../../variables/types';
 import { VariableService } from '../../../variables/variable_service';
 import { IVariableInterpolationService } from '../../../variables/variable_interpolation_service';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DashboardServices } from '../../../types';
 
 export interface DashboardVariablesProps {
   variableService: VariableService;
@@ -29,6 +32,8 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
   isEditMode,
   getPanelQueries,
 }) => {
+  const { services } = useOpenSearchDashboards<DashboardServices>();
+  const { notifications } = services;
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const [isVariableManagementOpen, setIsVariableManagementOpen] = useState(false);
   const [editingVariable, setEditingVariable] = useState<Variable | undefined>(undefined);
@@ -58,15 +63,33 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
 
   const handleSaveVariable = useCallback(
     async (variableConfig: any) => {
-      if (editingVariable) {
-        await variableService.updateVariable(editingVariable.id, variableConfig);
-      } else {
-        await variableService.addVariable(variableConfig);
+      const isUpdate = !!editingVariable;
+      try {
+        if (isUpdate) {
+          await variableService.updateVariable(editingVariable.id, variableConfig);
+        } else {
+          await variableService.addVariable(variableConfig);
+        }
+        handleCloseVariableEditor();
+        notifications.toasts.addSuccess({
+          title: isUpdate
+            ? i18n.translate('dashboard.variableEditor.update.success', {
+                defaultMessage: 'Variable updated',
+              })
+            : i18n.translate('dashboard.variableEditor.add.success', {
+                defaultMessage: 'Variable added',
+              }),
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboard.variableEditor.save.error', {
+            defaultMessage: 'Failed to save variable',
+          }),
+          text: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
-      setIsVariableEditorOpen(false);
-      setEditingVariable(undefined);
     },
-    [variableService, editingVariable]
+    [editingVariable, handleCloseVariableEditor, variableService, notifications.toasts]
   );
 
   const handleCloseVariableManagement = useCallback(() => {

@@ -212,39 +212,31 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     if (!validateForm()) return;
 
     setIsSaving(true);
-    setError(null);
+    const variableConfig: Omit<Variable, 'id' | 'current'> = {
+      name: name.trim(),
+      label: label.trim() || undefined,
+      description: description.trim() || undefined,
+      type,
+      multi,
+      includeAll,
+      sort,
+    };
 
-    try {
-      const variableConfig: Omit<Variable, 'id' | 'current'> = {
-        name: name.trim(),
-        label: label.trim() || undefined,
-        description: description.trim() || undefined,
-        type,
-        multi,
-        includeAll,
-        sort,
-      };
-
-      if (type === VariableType.Query) {
-        Object.assign(variableConfig, {
-          query: query.trim(),
-          language,
-          dataset: dataset || undefined,
-          regex: regex.trim() || undefined,
-        });
-      } else if (type === VariableType.Custom) {
-        Object.assign(variableConfig, {
-          customOptions: customValues.map((v) => v.label),
-        });
-      }
-
-      await onSave(variableConfig);
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save variable');
-    } finally {
-      setIsSaving(false);
+    if (type === VariableType.Query) {
+      Object.assign(variableConfig, {
+        query: query.trim(),
+        language,
+        dataset: dataset || undefined,
+        regex: regex.trim() || undefined,
+      });
+    } else if (type === VariableType.Custom) {
+      Object.assign(variableConfig, {
+        customOptions: customValues.map((v) => v.label),
+      });
     }
+
+    await onSave(variableConfig);
+    setIsSaving(false);
   }, [
     name,
     label,
@@ -259,7 +251,6 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     sort,
     regex,
     onSave,
-    onClose,
     validateForm,
   ]);
 

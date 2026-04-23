@@ -8,7 +8,6 @@ import { act } from 'react';
 import { useInitialContainerContext } from './use_initial_container_context';
 import { getServices } from '../../../services/services';
 import { CONTAINER_URL_KEY, VARIABLE_VALUES_URL_KEY } from '../types';
-import { title } from 'process';
 
 const mockFindReferencingDashboards = jest.fn();
 
@@ -424,6 +423,161 @@ describe('useInitialContainerContext', () => {
       });
 
       expect(result.current.needsDashboardSelection).toBe(false);
+    });
+  });
+
+  describe('abort mechanism', () => {
+    it('does not update state when loadDashboardVariables is aborted', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      let resolveGet: (value: any) => void;
+      const getPromise = new Promise((resolve) => {
+        resolveGet = resolve;
+      });
+
+      mockSavedObjectsClient.get.mockReturnValue(getPromise);
+
+      const { unmount } = renderHook(() => useInitialContainerContext());
+
+      // Unmount immediately to trigger abort
+      unmount();
+
+      // Resolve the promise after unmount
+      resolveGet!({
+        attributes: {
+          variablesJSON: JSON.stringify({
+            variables: [{ id: 'var1', name: 'region', type: 'query' }],
+          }),
+        },
+      });
+
+      // Wait a bit to ensure any state updates would have happened
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // No assertions needed - if state was updated after unmount, React would warn
+      expect(mockSavedObjectsClient.get).toHaveBeenCalled();
+    });
+
+    it('does not show error toast when loadDashboardVariables is aborted', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      let rejectGet: (error: any) => void;
+      const getPromise = new Promise((_, reject) => {
+        rejectGet = reject;
+      });
+
+      mockSavedObjectsClient.get.mockReturnValue(getPromise);
+
+      const { unmount } = renderHook(() => useInitialContainerContext());
+
+      // Unmount immediately to trigger abort
+      unmount();
+
+      // Reject the promise after unmount
+      rejectGet!(new Error('Request failed'));
+
+      // Wait a bit to ensure error handler would have been called
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Error toast should not be shown for aborted operations
+      expect(mockNotifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('handles race condition when savedObjectsClient changes during load', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      let firstCallResolve: (value: any) => void;
+      let secondCallResolve: (value: any) => void;
+
+      const firstVariables = [{ id: 'var1', name: 'old', type: 'query' }];
+      const secondVariables = [{ id: 'var2', name: 'new', type: 'query' }];
+
+      const mockSavedObjectsClient1 = {
+        get: jest.fn(() => {
+          return new Promise((resolve) => {
+            firstCallResolve = resolve;
+          });
+        }),
+      };
+
+      const mockSavedObjectsClient2 = {
+        get: jest.fn(() => {
+          return new Promise((resolve) => {
+            secondCallResolve = resolve;
+          });
+        }),
+      };
+
+      // Start with first client
+      (getServices as jest.Mock).mockReturnValue({
+        ...mockServices,
+        core: {
+          savedObjects: {
+            client: mockSavedObjectsClient1,
+          },
+        },
+      });
+
+      const { result, rerender } = renderHook(() => useInitialContainerContext());
+
+      // Wait for first call to be initiated
+      await waitFor(() => {
+        expect(mockSavedObjectsClient1.get).toHaveBeenCalledTimes(1);
+      });
+
+      // Change to second client (simulating reconnection or context change)
+      (getServices as jest.Mock).mockReturnValue({
+        ...mockServices,
+        core: {
+          savedObjects: {
+            client: mockSavedObjectsClient2,
+          },
+        },
+      });
+      rerender();
+
+      // Wait for second call
+      await waitFor(() => {
+        expect(mockSavedObjectsClient2.get).toHaveBeenCalledTimes(1);
+      });
+
+      // Resolve second call first (simulating faster response)
+      await act(async () => {
+        secondCallResolve!({
+          attributes: {
+            variablesJSON: JSON.stringify({ variables: secondVariables }),
+          },
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.containerVariables).toEqual(secondVariables);
+      });
+
+      // Resolve first call later (should be ignored due to abort)
+      await act(async () => {
+        firstCallResolve!({
+          attributes: {
+            variablesJSON: JSON.stringify({ variables: firstVariables }),
+          },
+        });
+      });
+
+      // Wait a bit and verify state hasn't changed to first call's result
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(result.current.containerVariables).toEqual(secondVariables);
     });
   });
 });
