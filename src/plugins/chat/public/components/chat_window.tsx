@@ -500,6 +500,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
             threadId={chatService.getThreadId()}
+            onShowHistory={handleShowHistory}
             {...enhancedProps}
             startResponse={startResponse}
           />

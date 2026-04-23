@@ -80,6 +80,30 @@ describe('ChatMessages', () => {
     });
   });
 
+  describe('conversation history card in empty state', () => {
+    it('should render conversation history card alongside existing starter suggestions and call onShowHistory when clicked', () => {
+      const onShowHistory = jest.fn();
+      const { getByText } = render(
+        <ChatMessages {...defaultProps} onShowHistory={onShowHistory} />
+      );
+
+      // Verify all starter suggestions are still present
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+      expect(getByText('/investigate an issue')).toBeTruthy();
+      expect(getByText('Explain a concept')).toBeTruthy();
+      // And the new history card
+      expect(getByText('View conversation history')).toBeTruthy();
+
+      // Click the history card
+      const historyCard = getByText('View conversation history').closest(
+        '.chatMessages__suggestionCard'
+      );
+      historyCard?.click();
+
+      expect(onShowHistory).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('smart scroll functionality', () => {
     // Mock scrollIntoView
     beforeEach(() => {

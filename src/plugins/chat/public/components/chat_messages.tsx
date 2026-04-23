@@ -31,7 +31,8 @@ interface SuggestionItem {
   icon: string;
   iconColor?: string;
   text: string;
-  prompt: string;
+  prompt?: string;
+  action?: () => void;
 }
 
 const STARTER_SUGGESTIONS: SuggestionItem[] = [
@@ -65,6 +66,7 @@ interface ChatMessagesProps {
   onFillInput?: (content: string) => void;
   startResponse?: boolean;
   threadId?: string;
+  onShowHistory?: () => void;
 }
 
 /**
@@ -236,6 +238,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onFillInput,
   startResponse,
   threadId,
+  onShowHistory,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -418,7 +421,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   paddingSize="m"
                   hasBorder
                   className="chatMessages__suggestionCard"
-                  onClick={() => onFillInput?.(suggestion.prompt)}
+                  onClick={() => {
+                    if (suggestion.action) {
+                      suggestion.action();
+                    } else if (suggestion.prompt) {
+                      onFillInput?.(suggestion.prompt);
+                    }
+                  }}
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -432,6 +441,25 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   </EuiFlexGroup>
                 </EuiPanel>
               ))}
+              {onShowHistory && (
+                <EuiPanel
+                  paddingSize="m"
+                  hasBorder
+                  className="chatMessages__suggestionCard"
+                  onClick={onShowHistory}
+                >
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="clock" color="accent" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <span>View conversation history</span>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              )}
             </div>
           </div>
         )}
