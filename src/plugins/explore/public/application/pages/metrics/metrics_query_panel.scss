@@ -13,7 +13,8 @@
 
   &--dragging {
     background: $euiColorLightestShade;
-    box-shadow: $euiBottomShadow;
+
+    @include euiBottomShadow;
   }
 }
 
@@ -32,6 +33,14 @@
 
 .mqpDragHandle {
   cursor: grab;
+}
+
+.mqpRowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: $euiSizeXS;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .mqpAddQueryRow {
