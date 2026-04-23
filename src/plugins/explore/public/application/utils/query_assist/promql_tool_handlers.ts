@@ -153,8 +153,12 @@ export class PromQLToolHandlers {
       );
 
       if (args.query) {
+        // Split multi-word queries into individual terms joined by OR (|)
+        // so "latency duration" matches metrics containing either word
+        const terms = args.query.split(/\s+/).filter(Boolean).map(escapeRegexForPrometheus);
+        const pattern = terms.length > 1 ? terms.join('|') : args.query;
         try {
-          const regex = new RegExp(args.query, 'i');
+          const regex = new RegExp(pattern, 'i');
           metricNames = (metricNames || []).filter((name) => regex.test(name));
         } catch {
           const queryLower = args.query.toLowerCase();
