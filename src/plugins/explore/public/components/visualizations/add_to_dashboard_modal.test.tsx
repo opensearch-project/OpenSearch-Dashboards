@@ -363,7 +363,9 @@ describe('AddToDashboardModal', () => {
     // Check for duplicate warning callout
     await waitFor(() => {
       expect(screen.getByTestId('titleDupicateWarnMsg')).toBeInTheDocument();
-      expect(screen.getByText('A search with this name already exists.')).toBeInTheDocument();
+      expect(
+        screen.getByText('A visualization with this name already exists.')
+      ).toBeInTheDocument();
     });
   });
 

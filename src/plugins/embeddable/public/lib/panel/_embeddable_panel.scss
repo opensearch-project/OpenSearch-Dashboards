@@ -7,13 +7,10 @@
   min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
 
-  &__loadingSpinner {
-    position: absolute;
-    inset: 0;
-    display: flex;
+  &-isLoading {
+    // completely center the loading indicator
     justify-content: center;
     align-items: center;
-    z-index: $euiZLevel1;
   }
 
   // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change

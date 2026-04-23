@@ -28,12 +28,7 @@
  * under the License.
  */
 
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiLoadingSpinner,
-  EuiPanel,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
@@ -271,11 +266,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         <EmbeddableErrorLabel error={this.state.error} />
-        {this.state.loading && (
-          <div className="embPanel__loadingSpinner">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        )}
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
       </EuiPanel>
     );

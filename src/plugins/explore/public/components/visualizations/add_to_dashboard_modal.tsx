@@ -135,7 +135,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
     return (
       <EuiCallOut
         title={i18n.translate('explore.addtoDashboardModal.exploreDuplicateWarning', {
-          defaultMessage: 'A search with this name already exists.',
+          defaultMessage: 'A visualization with this name already exists.',
         })}
         color="warning"
         iconType="alert"
