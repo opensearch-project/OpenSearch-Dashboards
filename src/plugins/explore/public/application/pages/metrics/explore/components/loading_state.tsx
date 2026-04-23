@@ -24,7 +24,7 @@ export function ErrorCallout({ error }: { error: string }): JSX.Element {
       iconColor="danger"
       title={
         <h2>
-          {i18n.translate('explore.metricsExplore.errorTitle', {
+          {i18n.translate('explore.metricsExplore.unableToLoadMetrics', {
             defaultMessage: 'Unable to load metrics',
           })}
         </h2>

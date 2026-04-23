@@ -4,12 +4,10 @@
  */
 
 // Metrics page: allow full page scrolling instead of internal scroll regions
-$osdHeaderOffset: $euiHeaderHeightCompensation;
-
 .metricsPage {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - #{$osdHeaderOffset});
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
 
   // Break out of the fixed viewport height constraint from explore-layout
   .explore-layout {
