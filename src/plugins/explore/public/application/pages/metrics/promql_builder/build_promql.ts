@@ -9,6 +9,7 @@ import {
   Operation,
   OperationGrouping,
   RANGE_FUNCTIONS,
+  nextFilterId,
 } from './promql_parser';
 import { AGGREGATION_IDS } from './operation_categories';
 import { escapeLabelValue } from '../explore/services/query_generator';
@@ -32,7 +33,7 @@ export type BuilderAction =
   | { type: 'SET_METRIC'; metric: string }
   | { type: 'SET_LABEL_FILTER'; index: number; filter: Partial<LabelFilter> }
   | { type: 'ADD_LABEL_FILTER' }
-  | { type: 'ADD_LABEL_FILTER_WITH_VALUE'; filter: LabelFilter }
+  | { type: 'ADD_LABEL_FILTER_WITH_VALUE'; filter: Omit<LabelFilter, 'id'> }
   | { type: 'REMOVE_LABEL_FILTER'; index: number }
   | { type: 'ADD_OPERATION'; operation: Operation }
   | { type: 'REMOVE_OPERATION'; index: number }
@@ -44,7 +45,12 @@ export type BuilderAction =
   | { type: 'REMOVE_RANGE' }
   | { type: 'RESET' };
 
-export const emptyFilter = (): LabelFilter => ({ label: '', op: '=', value: '' });
+export const emptyFilter = (): LabelFilter => ({
+  id: nextFilterId(),
+  label: '',
+  op: '=',
+  value: '',
+});
 
 export function builderReducer(state: BuilderState, action: BuilderAction): BuilderState {
   switch (action.type) {
@@ -58,7 +64,10 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
     case 'ADD_LABEL_FILTER':
       return { ...state, labelFilters: [...state.labelFilters, emptyFilter()] };
     case 'ADD_LABEL_FILTER_WITH_VALUE':
-      return { ...state, labelFilters: [...state.labelFilters, action.filter] };
+      return {
+        ...state,
+        labelFilters: [...state.labelFilters, { id: nextFilterId(), ...action.filter }],
+      };
     case 'REMOVE_LABEL_FILTER':
       return { ...state, labelFilters: state.labelFilters.filter((_, i) => i !== action.index) };
     case 'ADD_OPERATION':

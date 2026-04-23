@@ -98,7 +98,7 @@ export const PromQLBuilder: React.FC<PromQLBuilderProps> = ({
       </EuiFlexItem>
       {state.labelFilters.map((filter, idx) => (
         <LabelFilterRow
-          key={idx}
+          key={filter.id}
           filter={filter}
           idx={idx}
           labelOptions={labelOptions}

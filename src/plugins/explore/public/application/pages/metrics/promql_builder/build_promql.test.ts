@@ -120,7 +120,7 @@ describe('buildPromQL', () => {
   it('builds metric with label filters', () => {
     const state: BuilderState = {
       metric: 'http_requests_total',
-      labelFilters: [{ label: 'job', op: '=', value: 'api' }],
+      labelFilters: [{ id: 'f1', label: 'job', op: '=', value: 'api' }],
       operations: [],
     };
     expect(buildPromQL(state)).toBe('http_requests_total{job="api"}');

@@ -22,10 +22,16 @@ import {
 import { OP_DEF_MAP } from './operation_lookup';
 
 export interface LabelFilter {
+  // Stable id generated at creation so React keys survive reordering/removal
+  // from the middle of the list — index keys swap combo box focus state.
+  id: string;
   label: string;
   op: string;
   value: string;
 }
+
+let filterIdCounter = 0;
+export const nextFilterId = (): string => `lf-${++filterIdCounter}`;
 
 export interface OperationGrouping {
   mode: 'by' | 'without';
@@ -100,7 +106,7 @@ const BINARY_OP_ID_MAP: Record<number, string> = {
 
 const emptyState = (): BuilderState => ({
   metric: '',
-  labelFilters: [{ label: '', op: '=', value: '' }],
+  labelFilters: [{ id: nextFilterId(), label: '', op: '=', value: '' }],
   operations: [],
 });
 
@@ -145,7 +151,7 @@ export function parsePromQL(query: string): ParseResult {
             labelFilters:
               visitor.labelFilters.length > 0
                 ? visitor.labelFilters
-                : [{ label: '', op: '=', value: '' }],
+                : [{ id: nextFilterId(), label: '', op: '=', value: '' }],
             operations: visitor.operations,
             ...(visitor.range ? { range: visitor.range } : {}),
           },
@@ -290,7 +296,7 @@ class BuilderStateVisitor extends PromQLParserVisitor<void> {
     ) {
       value = value.slice(1, -1);
     }
-    this.labelFilters.push({ label, op, value });
+    this.labelFilters.push({ id: nextFilterId(), label, op, value });
   };
 
   visitFunction = (ctx: FunctionContext) => {

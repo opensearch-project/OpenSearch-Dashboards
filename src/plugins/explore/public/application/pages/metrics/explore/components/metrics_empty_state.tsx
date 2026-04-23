@@ -92,24 +92,17 @@ export const MetricsEmptyState: React.FC<MetricsEmptyStateProps> = ({
                   </EuiText>
                   <EuiSpacer size="xs" />
                   {onSelectQuery ? (
-                    <div
+                    <button
+                      type="button"
                       className="metricsEmptyState__sampleTrigger"
-                      role="button"
-                      tabIndex={0}
                       onClick={() => onSelectQuery(sample.query)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onSelectQuery(sample.query);
-                        }
-                      }}
                       aria-label={i18n.translate('explore.metricsExplore.useSampleQuery', {
                         defaultMessage: 'Use sample query: {label}',
                         values: { label: sample.label },
                       })}
                     >
                       {codeBlock}
-                    </div>
+                    </button>
                   ) : (
                     codeBlock
                   )}

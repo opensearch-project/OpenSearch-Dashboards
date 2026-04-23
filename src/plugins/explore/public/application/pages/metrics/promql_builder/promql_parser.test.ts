@@ -24,8 +24,12 @@ describe('parsePromQL', () => {
     expect(result.canBuild).toBe(true);
     expect(result.state.metric).toBe('http_requests_total');
     expect(result.state.labelFilters).toHaveLength(2);
-    expect(result.state.labelFilters[0]).toEqual({ label: 'job', op: '=', value: 'api' });
-    expect(result.state.labelFilters[1]).toEqual({ label: 'status', op: '=', value: '200' });
+    expect(result.state.labelFilters[0]).toMatchObject({ label: 'job', op: '=', value: 'api' });
+    expect(result.state.labelFilters[1]).toMatchObject({
+      label: 'status',
+      op: '=',
+      value: '200',
+    });
   });
 
   it('parses rate with range', () => {
@@ -90,7 +94,7 @@ describe('parsePromQL', () => {
   it('parses regex label matcher', () => {
     const result = parsePromQL('up{job=~"api.*"}');
     expect(result.canBuild).toBe(true);
-    expect(result.state.labelFilters[0]).toEqual({ label: 'job', op: '=~', value: 'api.*' });
+    expect(result.state.labelFilters[0]).toMatchObject({ label: 'job', op: '=~', value: 'api.*' });
   });
 
   it('parses standalone range vector', () => {

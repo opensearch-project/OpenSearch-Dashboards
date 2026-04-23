@@ -43,17 +43,14 @@ describe('MetricsEmptyState', () => {
     );
   });
 
-  it('invokes onSelectQuery on Enter and Space keydown', () => {
-    const onSelectQuery = jest.fn();
-    render(<MetricsEmptyState title="t" body="b" onSelectQuery={onSelectQuery} />);
+  it('renders sample triggers as native <button> for built-in keyboard activation', () => {
+    render(<MetricsEmptyState title="t" body="b" onSelectQuery={jest.fn()} />);
 
     const trigger = screen.getByRole('button', {
       name: 'Use sample query: CPU usage per instance',
     });
-    fireEvent.keyDown(trigger, { key: 'Enter' });
-    fireEvent.keyDown(trigger, { key: ' ' });
-    fireEvent.keyDown(trigger, { key: 'a' });
 
-    expect(onSelectQuery).toHaveBeenCalledTimes(2);
+    expect(trigger.tagName).toBe('BUTTON');
+    expect(trigger).toHaveAttribute('type', 'button');
   });
 });
