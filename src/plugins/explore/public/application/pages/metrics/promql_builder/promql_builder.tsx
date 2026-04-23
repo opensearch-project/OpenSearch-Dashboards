@@ -180,12 +180,14 @@ export const PromQLBuilder: React.FC<PromQLBuilderProps> = ({
         : metricRow}
 
       <EuiSpacer size="s" />
-      <EuiCode language="promql" transparentBackground className="pqbQueryPreview">
-        {query ||
-          i18n.translate('explore.promqlBuilder.queryPreviewPlaceholder', {
-            defaultMessage: 'Select a metric to start.',
-          })}
-      </EuiCode>
+      <div className="pqbQueryPreviewStrip" data-test-subj="promqlBuilderQueryPreview">
+        <EuiCode language="promql" transparentBackground className="pqbQueryPreview">
+          {query ||
+            i18n.translate('explore.promqlBuilder.queryPreviewPlaceholder', {
+              defaultMessage: 'Select a metric to start.',
+            })}
+        </EuiCode>
+      </div>
     </div>
   );
 };

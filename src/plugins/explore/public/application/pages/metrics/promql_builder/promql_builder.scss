@@ -151,7 +151,9 @@
 }
 
 .pqbBuilder {
-  padding: 0 $euiSizeXS;
+  padding: $euiSizeS;
+  background: transparentize($euiColorLightestShade, 0.75);
+  border-radius: $euiBorderRadiusSmall;
 }
 
 .pqbOpsMenuDescription {
@@ -190,6 +192,43 @@
 
 .pqbQueryPreview {
   font-size: $euiFontSizeXS;
+  background: transparent !important;
+  padding: 0 !important;
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.pqbQueryPreviewStrip {
+  display: flex;
+  align-items: flex-start;
+  padding: $euiSizeXS $euiSizeS;
+  border-left: 2px solid $euiColorPrimary;
+  background: transparentize($euiColorPrimary, 0.96);
+  border-radius: 0 $euiBorderRadiusSmall $euiBorderRadiusSmall 0;
+}
+
+// Suggested filter chips — dashed outline + muted count to distinguish them
+// from applied filter chips.
+.pqbSuggestedBadge.euiBadge {
+  border: 1px dashed $euiColorMediumShade;
+  background: $euiColorLightestShade;
+  color: $euiColorDarkestShade;
+  font-weight: $euiFontWeightMedium;
+
+  &:hover,
+  &:focus {
+    border-style: solid;
+    border-color: $euiColorPrimary;
+    background: transparentize($euiColorPrimary, 0.9);
+  }
+
+  &__count {
+    color: $euiColorMediumShade;
+    font-weight: $euiFontWeightRegular;
+    margin-left: 2px;
+  }
 }
 
 .pqbOperatorSelect {

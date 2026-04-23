@@ -4,27 +4,30 @@
  */
 
 .mqpQueryRow {
-  padding: $euiSizeS 0 $euiSizeXS;
-  border-bottom: $euiBorderThin;
+  position: relative;
+  padding: $euiSizeS $euiSizeS $euiSizeXS;
+  margin-bottom: $euiSizeS;
+  border-radius: $euiBorderRadius;
+  background: $euiColorEmptyShade;
+  transition: background-color 150ms ease;
 
   &--dragging {
     background: $euiColorLightestShade;
-  }
-
-  &[data-test-subj="queryRow-A"] {
-    border-top: $euiBorderWidthThin solid transparent;
-  }
-
-  &--builder[data-test-subj="queryRow-A"] {
-    border-top: $euiBorderThin;
+    box-shadow: $euiBottomShadow;
   }
 }
 
 .mqpRowLabel {
-  font-weight: $euiFontWeightSemiBold;
-  min-width: $euiSizeM;
+  display: inline-block;
+  font-weight: $euiFontWeightBold;
+  min-width: $euiSizeL;
   text-align: center;
   line-height: $euiSizeXL;
+  border-radius: $euiBorderRadiusSmall;
+  background: transparentize($euiColorLightestShade, 0.75);
+  color: $euiColorPrimaryText;
+  letter-spacing: 0.05em;
+  padding: 0 $euiSizeXS;
 }
 
 .mqpDragHandle {

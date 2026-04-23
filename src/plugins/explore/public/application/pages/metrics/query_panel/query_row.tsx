@@ -171,84 +171,80 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  isOpen={showCodeConfirm}
-                  closePopover={() => setShowCodeConfirm(false)}
-                  anchorPosition="downRight"
-                  button={
-                    <EuiToolTip content={modeToggleTooltip} position="top">
-                      <EuiButtonGroup
-                        legend={i18n.translate('explore.metricsQueryPanel.queryModeLabel', {
-                          defaultMessage: 'Query {label} mode',
-                          values: { label },
-                        })}
-                        options={modeButtons}
-                        idSelected={row.mode}
-                        onChange={handleModeChange}
-                        buttonSize="compressed"
-                      />
-                    </EuiToolTip>
-                  }
-                >
-                  <div className="pqbCodeConfirmPopover">
-                    <EuiText size="s">
-                      <p>
-                        {i18n.translate('explore.promqlBuilder.switchToCodeWarning', {
-                          defaultMessage:
-                            'This query cannot be represented in Builder mode. Switching to Code is irreversible.',
-                        })}
-                      </p>
-                    </EuiText>
-                    <EuiSpacer />
-                    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton size="s" onClick={() => setShowCodeConfirm(false)}>
-                          {i18n.translate('explore.promqlBuilder.switchToCodeCancel', {
-                            defaultMessage: 'Cancel',
-                          })}
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          size="s"
-                          color="warning"
-                          fill
-                          onClick={() => {
-                            setShowCodeConfirm(false);
-                            onModeChange(row.id, 'code');
-                          }}
-                        >
-                          {i18n.translate('explore.promqlBuilder.switchToCodeConfirm', {
-                            defaultMessage: 'Switch',
-                          })}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </div>
-                </EuiPopover>
-              </EuiFlexItem>
-              {canRemove && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate('explore.metricsQueryPanel.removeQuery', {
-                      defaultMessage: 'Remove query',
-                    })}
-                  >
-                    <EuiButtonIcon
-                      iconType="cross"
-                      color="text"
-                      size="s"
-                      aria-label={i18n.translate('explore.metricsQueryPanel.removeQuery', {
-                        defaultMessage: 'Remove query',
+            <div className="mqpRowActions">
+              <EuiPopover
+                isOpen={showCodeConfirm}
+                closePopover={() => setShowCodeConfirm(false)}
+                anchorPosition="downRight"
+                button={
+                  <EuiToolTip content={modeToggleTooltip} position="top">
+                    <EuiButtonGroup
+                      legend={i18n.translate('explore.metricsQueryPanel.queryModeLabel', {
+                        defaultMessage: 'Query {label} mode',
+                        values: { label },
                       })}
-                      onClick={() => onRemove(row.id)}
+                      options={modeButtons}
+                      idSelected={row.mode}
+                      onChange={handleModeChange}
+                      buttonSize="compressed"
                     />
                   </EuiToolTip>
-                </EuiFlexItem>
+                }
+              >
+                <div className="pqbCodeConfirmPopover">
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('explore.promqlBuilder.switchToCodeWarning', {
+                        defaultMessage:
+                          'This query cannot be represented in Builder mode. Switching to Code is irreversible.',
+                      })}
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton size="s" onClick={() => setShowCodeConfirm(false)}>
+                        {i18n.translate('explore.promqlBuilder.switchToCodeCancel', {
+                          defaultMessage: 'Cancel',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        color="warning"
+                        fill
+                        onClick={() => {
+                          setShowCodeConfirm(false);
+                          onModeChange(row.id, 'code');
+                        }}
+                      >
+                        {i18n.translate('explore.promqlBuilder.switchToCodeConfirm', {
+                          defaultMessage: 'Switch',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              </EuiPopover>
+              {canRemove && (
+                <EuiToolTip
+                  content={i18n.translate('explore.metricsQueryPanel.removeQuery', {
+                    defaultMessage: 'Remove query',
+                  })}
+                >
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="text"
+                    size="s"
+                    aria-label={i18n.translate('explore.metricsQueryPanel.removeQuery', {
+                      defaultMessage: 'Remove query',
+                    })}
+                    onClick={() => onRemove(row.id)}
+                  />
+                </EuiToolTip>
               )}
-            </EuiFlexGroup>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

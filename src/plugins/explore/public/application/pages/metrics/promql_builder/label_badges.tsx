@@ -100,6 +100,7 @@ export const LabelBadges: React.FC<LabelBadgesProps> = ({
           <EuiPopover
             button={
               <EuiBadge
+                className="pqbSuggestedBadge"
                 color="hollow"
                 onClick={() => onLabelBadgeClick(label)}
                 onClickAriaLabel={i18n.translate('explore.promqlBuilder.showLabelValues', {
@@ -107,7 +108,7 @@ export const LabelBadges: React.FC<LabelBadgesProps> = ({
                   values: { label },
                 })}
               >
-                {label} ({count})
+                {label} <span className="pqbSuggestedBadge__count">({count})</span>
               </EuiBadge>
             }
             isOpen={labelPopover === label}
@@ -179,6 +180,7 @@ export const LabelBadges: React.FC<LabelBadgesProps> = ({
               .join(', ')}
           >
             <EuiBadge
+              className="pqbSuggestedBadge"
               color="hollow"
               onClick={() => setLabelsExpanded(true)}
               onClickAriaLabel={i18n.translate('explore.promqlBuilder.showMoreLabels', {
@@ -194,6 +196,7 @@ export const LabelBadges: React.FC<LabelBadgesProps> = ({
       {labelsExpanded && overflow > 0 && (
         <EuiFlexItem grow={false}>
           <EuiBadge
+            className="pqbSuggestedBadge"
             color="hollow"
             iconType="minimize"
             iconSide="right"
