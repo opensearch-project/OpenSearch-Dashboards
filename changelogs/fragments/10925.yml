@@ -1,0 +1,2 @@
+fix:
+- Prevent index patterns from disappearing when Query Enhancements is enabled ([#10925](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/10925))
