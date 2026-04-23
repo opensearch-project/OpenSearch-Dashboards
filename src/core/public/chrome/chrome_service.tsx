@@ -271,8 +271,6 @@ export class ChromeService {
         this.useUpdatedHeader = value;
       });
 
-    this.enableIconSideNav = injectedMetadata.getEnableIconSideNav();
-
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
