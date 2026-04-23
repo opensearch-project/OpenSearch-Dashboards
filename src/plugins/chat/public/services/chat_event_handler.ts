@@ -63,6 +63,7 @@ export class ChatEventHandler {
   private onStartResponse: (flag: boolean) => void;
   private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
+  private toolResultSubscription: any = null;
 
   // Telemetry tracking
   private interactionStartTime: number | null = null;
@@ -674,7 +675,7 @@ export class ChatEventHandler {
       // Set streaming state and subscribe to the response stream
       this.onStreamingStateChange(true);
 
-      observable.subscribe({
+      const subscription = observable.subscribe({
         next: (event: ChatEvent) => {
           // Handle the assistant's response to the tool result
           this.handleEvent(event);
@@ -684,12 +685,17 @@ export class ChatEventHandler {
           console.error('Tool result response error:', error);
           this.onStreamingStateChange(false);
           this.onStartResponse(false);
+          this.toolResultSubscription = null;
         },
         complete: () => {
           this.onStreamingStateChange(false);
           this.onStartResponse(false);
+          this.toolResultSubscription = null;
         },
       });
+
+      // Store subscription so it can be unsubscribed in clearState
+      this.toolResultSubscription = subscription;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to send tool result:', error);
@@ -722,5 +728,18 @@ export class ChatEventHandler {
     this.lastTextMessageStartId = null;
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     this._lastAssistantMessageId = null;
+
+    // Stop tool result streaming if active
+    this.stopToolResultStreaming();
+  }
+
+  /**
+   * Stop tool result streaming if active
+   */
+  stopToolResultStreaming(): void {
+    if (this.toolResultSubscription) {
+      this.toolResultSubscription.unsubscribe();
+      this.toolResultSubscription = null;
+    }
   }
 }

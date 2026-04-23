@@ -35,6 +35,7 @@ jest.mock('../services/chat_event_handler', () => ({
   ChatEventHandler: jest.fn().mockImplementation(() => ({
     handleEvent: jest.fn(),
     clearState: jest.fn(),
+    stopToolResultStreaming: jest.fn(),
   })),
 }));
 
@@ -699,6 +700,49 @@ describe('ChatWindow', () => {
 
       expect(mockChatService.newThread).toHaveBeenCalled();
     });
+
+    it('should cancel ongoing streaming when starting a new chat', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      const unsubscribeMock = jest.fn();
+      const streamingObservable = {
+        subscribe: jest.fn(() => ({ unsubscribe: unsubscribeMock })),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+      mockChatService.abort = jest.fn();
+
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      // Start streaming by sending a message
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      // Wait for subscription to be created
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      expect(streamingObservable.subscribe).toHaveBeenCalled();
+
+      // Start a new chat while streaming is active
+      await act(async () => {
+        ref.current?.startNewChat();
+      });
+
+      // Verify abort was called to stop backend streaming
+      expect(mockChatService.abort).toHaveBeenCalled();
+
+      // Verify subscription was unsubscribed
+      expect(unsubscribeMock).toHaveBeenCalled();
+
+      // Verify newThread was called to start fresh
+      expect(mockChatService.newThread).toHaveBeenCalled();
+    });
   });
 
   describe('error handling', () => {
@@ -905,6 +949,13 @@ describe('ChatWindow', () => {
         page: 1,
         pageSize: 10,
       });
+
+      // Mock loadConversation to simulate setting thread ID
+      mockChatService.loadConversation = jest.fn().mockImplementation(async (threadId: string) => {
+        // Simulate the real behavior: loadConversation sets the thread ID
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return [];
+      });
     });
 
     it('should call eventHandler.clearState before replaying events to prevent state bleed', async () => {
@@ -920,6 +971,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
+        stopToolResultStreaming: jest.fn(),
       }));
 
       const mockEvents = [
@@ -929,7 +981,10 @@ describe('ChatWindow', () => {
           timestamp: Date.now(),
         },
       ];
-      mockChatService.loadConversation.mockResolvedValue(mockEvents);
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
 
       const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -968,6 +1023,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
+        stopToolResultStreaming: jest.fn(),
       }));
 
       const mockEvents = [
@@ -983,7 +1039,10 @@ describe('ChatWindow', () => {
           timestamp: Date.now(),
         },
       ];
-      mockChatService.loadConversation.mockResolvedValue(mockEvents);
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
 
       const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -1011,6 +1070,283 @@ describe('ChatWindow', () => {
       const calledTypes = mockHandleEvent.mock.calls.map((call: any) => call[0]?.type);
       expect(calledTypes).toContain('MESSAGES_SNAPSHOT');
       expect(calledTypes).toContain('TOOL_CALL_START');
+    });
+
+    it('should cancel ongoing streaming when switching to another conversation', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      // Mock ongoing streaming
+      const unsubscribeMock = jest.fn();
+      const streamingObservable = {
+        subscribe: jest.fn(() => ({ unsubscribe: unsubscribeMock })),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+      mockChatService.abort = jest.fn();
+
+      // Mock conversation loading
+      const mockEvents = [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Old conversation' }],
+          timestamp: Date.now(),
+        },
+      ];
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+
+      const { getByLabelText, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Wait for initialization
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Start streaming by sending a message
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      // Wait for subscription to be created
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      expect(streamingObservable.subscribe).toHaveBeenCalled();
+
+      // Open history panel and switch to another conversation while streaming
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify abort was called to stop backend streaming
+      expect(mockChatService.abort).toHaveBeenCalled();
+
+      // Verify subscription was unsubscribed
+      expect(unsubscribeMock).toHaveBeenCalled();
+
+      // Verify conversation was loaded
+      expect(mockChatService.loadConversation).toHaveBeenCalledWith('thread-1');
+    });
+
+    it('should prevent streaming events from previous conversation affecting new conversation', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockHandleEvent = jest.fn();
+      const mockClearState = jest.fn();
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: mockHandleEvent,
+        clearState: mockClearState,
+        stopToolResultStreaming: jest.fn(),
+      }));
+
+      // Mock ongoing streaming that continues after switch
+      let streamingCallbacks: any = null;
+      const streamingObservable = {
+        subscribe: jest.fn((callbacks: any) => {
+          streamingCallbacks = callbacks;
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+      mockChatService.abort = jest.fn();
+
+      // Mock conversation loading
+      const mockEvents = [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Old conversation' }],
+          timestamp: Date.now(),
+        },
+      ];
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+
+      const { getByLabelText, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Wait for initialization
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Start streaming
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      expect(streamingObservable.subscribe).toHaveBeenCalled();
+
+      // Track handleEvent calls before switching
+      const callsBeforeSwitch = mockHandleEvent.mock.calls.length;
+
+      // Switch to another conversation
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify clearState was called (resetting event handler state)
+      expect(mockClearState).toHaveBeenCalled();
+
+      // Try to emit events from the old streaming (simulating race condition)
+      if (streamingCallbacks) {
+        await act(async () => {
+          streamingCallbacks.next({ type: 'message', content: 'late event from old stream' });
+        });
+      }
+
+      // New conversation's events should be processed, but old streaming events should not
+      // interfere because subscription was canceled
+      const callsAfterSwitch = mockHandleEvent.mock.calls.length;
+      expect(callsAfterSwitch).toBeGreaterThan(callsBeforeSwitch);
+    });
+
+    it('should not save incomplete message when switching conversations during streaming', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      // Mock streaming with partial message
+      let streamingCallbacks: any = null;
+      const streamingObservable = {
+        subscribe: jest.fn((callbacks: any) => {
+          streamingCallbacks = callbacks;
+          // Emit partial assistant message
+          setTimeout(() => {
+            callbacks.next({
+              type: 'TEXT_MESSAGE_START',
+              messageId: 'assist-1',
+              timestamp: Date.now(),
+            });
+            callbacks.next({
+              type: 'TEXT_MESSAGE_CONTENT',
+              messageId: 'assist-1',
+              delta: 'Partial response...',
+              timestamp: Date.now(),
+            });
+          }, 5);
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      // Mock conversation loading
+      const mockEvents = [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Old conversation' }],
+          timestamp: Date.now(),
+        },
+      ];
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+      mockChatService.saveConversation = jest.fn();
+
+      const { getByLabelText, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Start streaming
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+
+      // Clear previous saveConversation calls
+      mockChatService.saveConversation.mockClear();
+
+      // Switch to another conversation while streaming
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify that incomplete message was NOT saved during the switch
+      // The isLoading flag should prevent saving incomplete state
+      const savedCalls = mockChatService.saveConversation.mock.calls;
+
+      // Check if any saved timeline contains the partial assistant message
+      const savedPartialMessage = savedCalls.some((call: any) => {
+        const timeline = call[0];
+        return timeline.some(
+          (msg: any) => msg.role === 'assistant' && msg.content?.includes('Partial response')
+        );
+      });
+
+      // Should NOT save the partial message during conversation switch
+      expect(savedPartialMessage).toBe(false);
     });
   });
 

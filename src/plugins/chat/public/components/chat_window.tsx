@@ -71,6 +71,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [isLoading, setIsLoading] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
+  const conversationLoadAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
@@ -323,17 +324,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
   }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
 
-  const handleNewChat = useCallback(() => {
-    chatService.newThread();
-    setTimeline([]);
-    setCurrentRunId(null);
-    setIsStreaming(false);
-    setPendingConfirmation(null);
-    confirmationService.cleanAll();
-    setShowHistory(false);
-  }, [chatService, confirmationService]);
-
-  const handleStop = useCallback(() => {
+  // Helper function to stop streaming and clean up subscriptions
+  const stopStreaming = useCallback(() => {
     // Abort the current streaming request
     chatService.abort();
     // Unsubscribe from current observable if exists
@@ -342,11 +334,30 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       currentSubscriptionRef.current = null;
     }
 
+    // Stop tool result streaming if active
+    eventHandler.stopToolResultStreaming();
+
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
     setStartResponse(false);
-  }, [chatService]);
+  }, [chatService, eventHandler]);
+
+  const handleNewChat = useCallback(() => {
+    // Stop any ongoing streaming before starting a new chat
+    stopStreaming();
+
+    chatService.newThread();
+    setTimeline([]);
+    setCurrentRunId(null);
+    setPendingConfirmation(null);
+    confirmationService.cleanAll();
+    setShowHistory(false);
+  }, [chatService, confirmationService, stopStreaming]);
+
+  const handleStop = useCallback(() => {
+    stopStreaming();
+  }, [stopStreaming]);
 
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {
@@ -408,42 +419,71 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
+    // Stop any ongoing streaming before switching conversations
+    stopStreaming();
+
+    // Abort any ongoing conversation loading
+    if (conversationLoadAbortControllerRef.current) {
+      conversationLoadAbortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this load operation
+    const abortController = new AbortController();
+    conversationLoadAbortControllerRef.current = abortController;
+
     setIsLoading(true);
 
     try {
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
 
+      // Check if this load was aborted (user switched to another conversation)
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       if (events) {
         // Reset UI state
         eventHandler.clearState();
         setCurrentRunId(null);
-        setIsStreaming(false);
         setPendingConfirmation(null);
         confirmationService.cleanAll();
         setShowHistory(false);
         setIsLoading(false);
 
+        // Replay all events to reconstruct the conversation
         for (const event of events) {
+          // Check abort signal during replay
+          if (abortController.signal.aborted) {
+            return;
+          }
           await eventHandler.handleEvent(event);
         }
       }
     } catch (error: any) {
-      toasts?.addWarning({
-        title: i18n.translate('chat.window.loadConversationErrorTitle', {
-          defaultMessage: 'Failed to load conversation',
-        }),
-        text:
-          error instanceof Error
-            ? error.message
-            : i18n.translate('chat.window.loadConversationErrorMessage', {
-                defaultMessage: 'An unexpected error occurred while loading the conversation.',
-              }),
-      });
+      if (!abortController.signal.aborted) {
+        toasts?.addWarning({
+          title: i18n.translate('chat.window.loadConversationErrorTitle', {
+            defaultMessage: 'Failed to load conversation',
+          }),
+          text:
+            error instanceof Error
+              ? error.message
+              : i18n.translate('chat.window.loadConversationErrorMessage', {
+                  defaultMessage: 'An unexpected error occurred while loading the conversation.',
+                }),
+        });
+      }
     } finally {
-      setIsLoading(false);
+      if (!abortController.signal.aborted) {
+        setIsLoading(false);
+      }
+      // Clear abort controller reference
+      if (conversationLoadAbortControllerRef.current === abortController) {
+        conversationLoadAbortControllerRef.current = null;
+      }
     }
-  }, [chatService, eventHandler, confirmationService, toasts]);
+  }, [chatService, eventHandler, confirmationService, toasts, stopStreaming]);
 
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
     startNewChat: () => handleNewChat(),
