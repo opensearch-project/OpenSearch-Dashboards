@@ -68,11 +68,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [restoreError, setRestoreError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
-  const loadingAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
@@ -150,54 +148,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
-  // Extracted restoration logic to avoid duplication
-  const restoreConversationTimeline = useCallback(async () => {
-    // Create abort controller for this loading operation
-    const abortController = new AbortController();
-    loadingAbortControllerRef.current = abortController;
-
-    setIsLoading(true);
-    setRestoreError(null);
-
-    try {
-      // Check if aborted before starting
-      if (abortController.signal.aborted) return;
-
-      const events = await chatService.restoreLatestConversation();
-
-      // Check if aborted after async operation
-      if (abortController.signal.aborted) return;
-
-      eventHandler.clearState();
-      setIsLoading(false);
-
-      if (events) {
-        for (const event of events) {
-          if (abortController.signal.aborted) return;
-          await eventHandler.handleEvent(event);
-        }
-      }
-    } catch (error: any) {
-      // Don't show error if aborted
-      if (!abortController.signal.aborted) {
-        console.error('Error restoring conversation:', error);
-        setRestoreError(error.message || 'Failed to restore conversation');
-      }
-    } finally {
-      // Only update loading state if not aborted
-      if (!abortController.signal.aborted) {
-        setIsLoading(false);
-      }
-      // Clear the abort controller reference
-      if (loadingAbortControllerRef.current === abortController) {
-        loadingAbortControllerRef.current = null;
-      }
-    }
-  }, [chatService, eventHandler]);
-
-  // Restore timeline from latest conversation on component mount
+  // Initialize with fresh conversation on mount
   useMount(() => {
-    restoreConversationTimeline();
+    chatService.newThread();
   });
 
   // Save conversation to history whenever timeline changes
@@ -207,7 +160,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
-  // Clear thread ID so next mount can restore the latest conversation
+  // Clear thread ID on unmount to start fresh next time
   useUnmount(() => {
     services.core.chat.resetThreadId()
   });
@@ -378,7 +331,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setPendingConfirmation(null);
     confirmationService.cleanAll();
     setShowHistory(false);
-    setRestoreError(null);
   }, [chatService, confirmationService]);
 
   const handleStop = useCallback(() => {
@@ -448,40 +400,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline]);
 
   const handleShowHistory = useCallback(() => {
-    loadingAbortControllerRef.current?.abort();
-    setIsLoading(false);
     setShowHistory(true);
-    setRestoreError(null);
   }, []);
 
   const handleCloseHistory = useCallback(() => {
-    // Abort any ongoing loading operation
-    if (loadingAbortControllerRef.current) {
-      loadingAbortControllerRef.current.abort();
-      loadingAbortControllerRef.current = null;
-    }
-
-    // Reset loading state and show history panel
-    setIsLoading(false);
     setShowHistory(false);
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
-    // Create abort controller for this loading operation
-    const abortController = new AbortController();
-    loadingAbortControllerRef.current = abortController;
-
     setIsLoading(true);
 
     try {
-      // Check if aborted before starting
-      if (abortController.signal.aborted) return;
-
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
-
-      // Check if aborted after async operation
-      if (abortController.signal.aborted) return;
 
       if (events) {
         // Reset UI state
@@ -494,34 +425,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         setIsLoading(false);
 
         for (const event of events) {
-          if (abortController.signal.aborted) return;
           await eventHandler.handleEvent(event);
         }
       }
     } catch (error: any) {
-      // Don't show error if aborted
-      if (!abortController.signal.aborted) {
-        toasts?.addWarning({
-          title: i18n.translate('chat.window.loadConversationErrorTitle', {
-            defaultMessage: 'Failed to load conversation',
-          }),
-          text:
-            error instanceof Error
-              ? error.message
-              : i18n.translate('chat.window.loadConversationErrorMessage', {
-                  defaultMessage: 'An unexpected error occurred while loading the conversation.',
-                }),
-        });
-      }
+      toasts?.addWarning({
+        title: i18n.translate('chat.window.loadConversationErrorTitle', {
+          defaultMessage: 'Failed to load conversation',
+        }),
+        text:
+          error instanceof Error
+            ? error.message
+            : i18n.translate('chat.window.loadConversationErrorMessage', {
+                defaultMessage: 'An unexpected error occurred while loading the conversation.',
+              }),
+      });
     } finally {
-      // Only update loading state if not aborted
-      if (!abortController.signal.aborted) {
-        setIsLoading(false);
-      }
-      // Clear the abort controller reference
-      if (loadingAbortControllerRef.current === abortController) {
-        loadingAbortControllerRef.current = null;
-      }
+      setIsLoading(false);
     }
   }, [chatService, eventHandler, confirmationService, toasts]);
 
@@ -563,25 +483,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               defaultMessage: 'Loading conversation...',
             })}
           </EuiText>
-        </div>
-      ) : restoreError ? (
-        <div className="chatWindow__errorContainer">
-          <EuiText color="danger" textAlign="center">
-            <h3>
-              {i18n.translate('chat.window.restoreErrorTitle', {
-                defaultMessage: 'Failed to restore conversation',
-              })}
-            </h3>
-            <p>{restoreError}</p>
-          </EuiText>
-          <EuiButton
-            onClick={restoreConversationTimeline}
-            iconType="refresh"
-          >
-            {i18n.translate('chat.window.retryButton', {
-              defaultMessage: 'Retry',
-            })}
-          </EuiButton>
         </div>
       ) : showHistory ? (
         <ConversationHistoryPanel
