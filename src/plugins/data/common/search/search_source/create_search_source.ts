@@ -61,35 +61,41 @@ export const createSearchSource = (
   if (fields.index && typeof fields.index === 'string') {
     const dataset = fields.query?.dataset;
     const isIndexPattern = !dataset?.type || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
-    // For non-INDEX_PATTERN datasets, the saved `index` id may be stale; the
-    // authoritative id for cache lookup is `dataset.id`, which is what
-    // `datasetService.cacheDataset` uses as the cache key.
-    const lookupId =
-      !isIndexPattern && dataset?.id ? (dataset.id as string) : (fields.index as string);
-    let pattern;
-    try {
-      pattern = isIndexPattern
-        ? await indexPatterns.get(lookupId)
-        : await indexPatterns.get(lookupId, true);
-    } catch (e) {
-      // swallow — fall through to hydrateDataset
-    }
 
-    // On a cache miss (or lookup failure), ask the public layer to prime the
-    // dataset cache via `hydrateDataset`, then retry the cache-only lookup.
-    // Centralized here so Discover, Explore embeddables, and any other consumer
-    // of `searchSource.create()` all benefit.
-    if (!pattern && dataset && searchSourceDependencies.hydrateDataset) {
+    if (isIndexPattern) {
+      // Legacy/INDEX_PATTERN path: let SavedObjectNotFound propagate so callers
+      // like `applyOpenSearchResp` can record `unresolvedIndexPatternReference`
+      // and drive the import-conflict UI.
+      fields.index = await indexPatterns.get(fields.index as string);
+    } else {
+      // Non-INDEX_PATTERN datasets (INDEXES, S3, Prometheus, etc.) have no
+      // backing saved object; the authoritative id for cache lookup is
+      // `dataset.id`, which is what `datasetService.cacheDataset` uses as the
+      // cache key.
+      const lookupId = (dataset?.id ?? fields.index) as string;
+      let pattern;
       try {
-        await searchSourceDependencies.hydrateDataset(dataset);
         pattern = await indexPatterns.get(lookupId, true);
       } catch (e) {
-        // leave fields.index as a string; downstream consumers must guard for this.
+        // swallow — fall through to hydrateDataset
       }
-    }
 
-    if (pattern) {
-      fields.index = pattern;
+      // On a cache miss (or lookup failure), ask the public layer to prime the
+      // dataset cache via `hydrateDataset`, then retry the cache-only lookup.
+      // Centralized here so Discover, Explore embeddables, and any other
+      // consumer of `searchSource.create()` all benefit.
+      if (!pattern && dataset && searchSourceDependencies.hydrateDataset) {
+        try {
+          await searchSourceDependencies.hydrateDataset(dataset);
+          pattern = await indexPatterns.get(lookupId, true);
+        } catch (e) {
+          // leave fields.index as a string; downstream consumers must guard for this.
+        }
+      }
+
+      if (pattern) {
+        fields.index = pattern;
+      }
     }
   }
 
