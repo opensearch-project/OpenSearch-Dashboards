@@ -128,11 +128,15 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           },
         ],
         render(props) {
-          const spec = createNumericalStateTimeline(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for state timeline');
+          const spec = createNumericalStateTimeline(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
@@ -146,11 +150,15 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           },
         ],
         render(props) {
-          const spec = createCategoricalStateTimeline(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !y || !color) throw Error('Missing axis config for state timeline');
+          const spec = createCategoricalStateTimeline(props.transformedData, props.styleOptions, {
+            [AxisRole.X]: x,
+            [AxisRole.Y]: y,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
@@ -163,10 +171,13 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !color) throw Error('Missing axis config for state timeline');
           const spec = createSingleCategoricalStateTimeline(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings
+            { [AxisRole.X]: x, [AxisRole.COLOR]: color }
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
@@ -180,10 +191,13 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           },
         ],
         render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!x || !color) throw Error('Missing axis config for state timeline');
           const spec = createSingleNumericalStateTimeline(
             props.transformedData,
             props.styleOptions,
-            props.axisColumnMappings
+            { [AxisRole.X]: x, [AxisRole.COLOR]: color }
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },

@@ -12,6 +12,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dash
 import { uiReducer } from '../../application/utils/state_management/slices';
 import { queryReducer } from '../../application/utils/state_management/slices';
 import { resultsReducer } from '../../application/utils/state_management/slices';
+import { queryEditorReducer } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import {
   setActiveTab,
   clearQueryStatusMapByKey,
@@ -42,10 +43,26 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
     payload: {},
   })),
   defaultPrepareQueryString: jest.fn((query) => `cache-key-${query.query}`),
+  shouldSkipQueryExecution: jest.fn(() => false),
 }));
 
 jest.mock('./error_guard/error_guard', () => ({
   ErrorGuard: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../application/context', () => ({
+  useDatasetContext: jest.fn(() => ({ dataset: undefined })),
+}));
+
+jest.mock(
+  '../../application/legacy/discover/application/components/uninitialized/uninitialized',
+  () => ({
+    DiscoverUninitialized: () => <div>Uninitialized</div>,
+  })
+);
+
+jest.mock('../../application/legacy/discover/application/components/no_results/no_results', () => ({
+  DiscoverNoResults: () => <div>No Results</div>,
 }));
 
 const mockSetActiveTab = setActiveTab as jest.MockedFunction<typeof setActiveTab>;
@@ -89,8 +106,10 @@ describe('ExploreTabsComponent', () => {
         ui: uiReducer,
         query: queryReducer,
         results: resultsReducer,
+        queryEditor: queryEditorReducer,
       },
       preloadedState: {
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: '',
           showHistogram: true,
@@ -186,6 +205,9 @@ describe('ExploreTabsComponent', () => {
         activeTabId: 'explore_visualization_tab',
         showHistogram: true,
       },
+      queryEditor: {
+        overallQueryStatus: { status: 'ready' },
+      },
     });
 
     render(
@@ -220,6 +242,9 @@ describe('ExploreTabsComponent', () => {
       ui: {
         activeTabId: '',
         showHistogram: true,
+      },
+      queryEditor: {
+        overallQueryStatus: { status: 'ready' },
       },
     });
 

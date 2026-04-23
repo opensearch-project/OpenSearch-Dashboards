@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './agent_traces_embeddable';
 import { VisualizationNoResults } from '../../../visualizations/public';
@@ -86,6 +86,7 @@ export const AgentTracesEmbeddableComponent = ({ searchProps }: AgentTracesEmbed
     // Render visualization chart if saved from a visualization tab
     if (searchProps.visualizationBuilder) {
       const visElement = searchProps.visualizationBuilder.renderVisualization({
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
         searchContext: searchProps.searchContext,
       });
       if (visElement) {

@@ -110,6 +110,7 @@ describe('correlation_validation', () => {
 
   describe('checkMissingFieldMappings', () => {
     it('should return empty array when all required fields are present', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -128,6 +129,7 @@ describe('correlation_validation', () => {
     });
 
     it('should return missing fields when some are not present', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -198,6 +200,7 @@ describe('correlation_validation', () => {
     });
 
     it('should detect empty string values as missing', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -220,6 +223,7 @@ describe('correlation_validation', () => {
 
   describe('validateFieldMappings', () => {
     it('should return valid result when all datasets have complete mappings', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const datasets = [
         {
           id: 'dataset-1',
@@ -253,6 +257,7 @@ describe('correlation_validation', () => {
     });
 
     it('should return invalid result with errors when some datasets have missing fields', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const datasets = [
         {
           id: 'dataset-1',
@@ -311,6 +316,7 @@ describe('correlation_validation', () => {
 
   describe('hasValidFieldMappings', () => {
     it('should return true when dataset has all required field mappings', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -328,6 +334,7 @@ describe('correlation_validation', () => {
     });
 
     it('should return false when dataset has missing field mappings', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',

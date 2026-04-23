@@ -11,7 +11,7 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useObservable } from 'react-use';
 import { WORKSPACE_COLLABORATORS_APP_ID } from '../../../common/constants';

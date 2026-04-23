@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import {
   getSupportedScriptingLanguages,
@@ -24,6 +24,7 @@ interface ScriptedFieldsTableProps {
   };
   onRemoveField?: () => void;
   painlessDocLink: string;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   saveDataset: DataPublicPluginStart['datasets']['updateSavedObject'];
   useUpdatedUX: boolean;
 }

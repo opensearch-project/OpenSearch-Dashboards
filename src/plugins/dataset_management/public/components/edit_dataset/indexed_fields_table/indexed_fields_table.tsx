@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { createSelector } from 'reselect';
 import { IndexPatternField, DataView, IFieldType } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';

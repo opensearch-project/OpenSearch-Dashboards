@@ -53,7 +53,6 @@ import {
   executeErrorCountQuery,
   executeLatencyQuery,
 } from './trace_query_actions';
-import { QueryExecutionStatus } from '../types';
 import { Query, DataView } from 'src/plugins/data/common';
 import { AgentTracesServices } from '../../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
@@ -349,7 +348,6 @@ describe('Trace Query Actions - Test Suite', () => {
 
     describe('executeRequestCountQuery', () => {
       it('should execute request count query successfully', async () => {
-        const { executeTabQuery: mockExecuteTabQuery } = jest.requireMock('./query_actions');
         const params = {
           services: mockServices,
           cacheKey: 'trace-requests:source=traces',

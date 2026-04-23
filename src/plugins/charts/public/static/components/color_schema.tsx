@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';

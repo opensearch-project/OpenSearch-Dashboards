@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -137,6 +136,7 @@ describe('ExploreDataTable', () => {
           isDirty: false,
           lineCount: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: 'logs',
           showHistogram: true,

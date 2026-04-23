@@ -177,6 +177,7 @@ export const createSavedQueryService = (
     const queryString = savedQuery.attributes.query?.query as string | undefined;
     let parsedQuery;
     try {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       parsedQuery = JSON.parse(queryString);
       parsedQuery = isObject(parsedQuery) ? parsedQuery : queryString;
     } catch (error) {

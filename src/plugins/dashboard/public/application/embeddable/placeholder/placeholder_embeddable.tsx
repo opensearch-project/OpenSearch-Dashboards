@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
@@ -38,7 +37,6 @@ export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
-  private node?: HTMLElement;
   private root?: Root;
 
   constructor(initialInput: EmbeddableInput, parent?: IContainer) {
@@ -49,7 +47,8 @@ export class PlaceholderEmbeddable extends Embeddable {
     if (this.root) {
       this.root.unmount();
     }
-    this.node = node;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this.__node = node;
     this.root = createRoot(node);
 
     const classes = classNames('embPanel', 'embPanel-isLoading');

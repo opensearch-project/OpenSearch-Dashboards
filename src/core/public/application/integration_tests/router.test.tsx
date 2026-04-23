@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';

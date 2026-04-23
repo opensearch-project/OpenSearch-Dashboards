@@ -45,10 +45,8 @@ export const mockAttributeService = <
   type: string,
   options: AttributeServiceOptions<A>,
   customCore?: jest.Mocked<CoreStart>
-  // @ts-expect-error TS2344 TODO(ts-error): fixme
 ): AttributeService<A, V, R> => {
   const core = customCore ? customCore : coreMock.createStart();
-  // @ts-expect-error TS2344 TODO(ts-error): fixme
   return new AttributeService<A, V, R>(
     type,
     jest.fn(),

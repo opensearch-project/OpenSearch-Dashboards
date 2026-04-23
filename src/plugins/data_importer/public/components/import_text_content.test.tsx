@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { ImportTextContentBody } from './import_text_content';
 import { DEFAULT_SUPPORTED_FILE_TYPES_LIST } from '../../common';

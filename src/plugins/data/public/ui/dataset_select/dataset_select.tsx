@@ -87,6 +87,14 @@ export interface DatasetSelectProps {
   signalType: string | null | string[];
   showNonTimeFieldDatasets?: boolean;
   appName?: string;
+  /**
+   * When provided, the component operates in "controlled" mode:
+   * - The selected dataset is determined by this prop instead of `queryString.getQuery().dataset`
+   * - This avoids calling `queryString.setQuery()` which would trigger global searches
+   * - Useful when embedding DatasetSelect in contexts like Dashboard variable editors
+   *   where modifying the global query state is undesirable
+   */
+  controlledSelectedDataset?: DetailedDataset;
 }
 
 interface ViewDatasetsModalProps {
@@ -157,6 +165,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
   const handleDatasetClick = useCallback(
     (dataset: DetailedDataset) => {
       onClose();
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       application.navigateToApp('datasets', {
         path: `/patterns/${dataset.id}`,
       });
@@ -272,6 +281,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
             onClick: () => handleDatasetClick(dataset),
             style: { cursor: 'pointer' },
           })}
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           pagination={{
             pageSize: 10,
             pageSizeOptions: [10],
@@ -290,7 +300,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   supportedTypes,
   signalType,
   showNonTimeFieldDatasets = true,
+  controlledSelectedDataset,
 }) => {
+  const isControlled = controlledSelectedDataset !== undefined;
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
@@ -327,7 +339,17 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     }
   }, [signalType]);
 
+  // Controlled mode: sync selectedDataset from prop
   useEffect(() => {
+    if (isControlled) {
+      setSelectedDataset(controlledSelectedDataset);
+    }
+  }, [isControlled, controlledSelectedDataset]);
+
+  // Uncontrolled mode: sync selectedDataset from queryString
+  useEffect(() => {
+    if (isControlled) return; // Skip in controlled mode
+
     const updateSelectedDataset = async () => {
       if (!currentDataset) {
         setSelectedDataset(undefined);
@@ -387,6 +409,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     };
     updateSelectedDataset();
   }, [
+    isControlled,
     currentDataset,
     dataViews,
     datasets,
@@ -491,6 +514,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         new Map(filteredDatasets.map((dataset) => [dataset.id, dataset])).values()
       );
 
+      // @ts-expect-error TS7034 TODO(ts-error): fixme
       let defaultDataView;
       try {
         defaultDataView = await dataViews.getDefault();
@@ -503,6 +527,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         console.warn('[DatasetSelect] Default dataset not found, using first available:', error);
       }
       const defaultDataset =
+        // @ts-expect-error TS7005 TODO(ts-error): fixme
         deduplicatedDatasets.find((d) => d.id === defaultDataView?.id) ?? deduplicatedDatasets[0];
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;

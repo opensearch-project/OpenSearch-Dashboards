@@ -107,7 +107,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
         <EuiModalHeaderTitle>
           <h2 data-test-subj="saveVisModalTitle">
             {i18n.translate('explore.saveVisModalTitle.title', {
-              defaultMessage: 'Save and back to Dashboard',
+              defaultMessage: 'Save your visualization',
             })}
           </h2>
         </EuiModalHeaderTitle>

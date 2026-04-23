@@ -10,14 +10,7 @@ import {
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
-import {
-  VisColumn,
-  VisFieldType,
-  ThresholdMode,
-  Positions,
-  AxisRole,
-  AxisColumnMappings,
-} from '../types';
+import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
 import { AreaChartStyle } from './area_vis_config';
 
 describe('Area Chart to_expression', () => {
@@ -88,14 +81,9 @@ describe('Area Chart to_expression', () => {
     showFullTimeRange: false,
   };
 
-  const mockTimeRange = {
-    from: '2023-01-01',
-    to: '2023-01-04',
-  };
-
   describe('createSimpleAreaChart', () => {
-    const axisColumnMappings: AxisColumnMappings = {
-      [AxisRole.Y]: mockNumericalColumn,
+    const axisColumnMappings = {
+      [AxisRole.Y]: [mockNumericalColumn],
       [AxisRole.X]: mockDateColumn,
     };
 
@@ -146,7 +134,7 @@ describe('Area Chart to_expression', () => {
   });
 
   describe('createMultiAreaChart', () => {
-    const axisColumnMappings: AxisColumnMappings = {
+    const axisColumnMappings = {
       [AxisRole.Y]: mockNumericalColumn,
       [AxisRole.X]: mockDateColumn,
       [AxisRole.COLOR]: mockCategoricalColumns[0],
@@ -179,7 +167,7 @@ describe('Area Chart to_expression', () => {
   });
 
   describe('createFacetedMultiAreaChart', () => {
-    const axisColumnMappings: AxisColumnMappings = {
+    const axisColumnMappings = {
       [AxisRole.Y]: mockNumericalColumn,
       [AxisRole.X]: mockDateColumn,
       [AxisRole.COLOR]: mockCategoricalColumns[0],
@@ -216,8 +204,8 @@ describe('Area Chart to_expression', () => {
   });
 
   describe('createCategoryAreaChart', () => {
-    const axisColumnMappings: AxisColumnMappings = {
-      [AxisRole.Y]: mockNumericalColumn,
+    const axisColumnMappings = {
+      [AxisRole.Y]: [mockNumericalColumn],
       [AxisRole.X]: mockCategoricalColumns[0],
     };
 
@@ -248,7 +236,7 @@ describe('Area Chart to_expression', () => {
   });
 
   describe('createStackedAreaChart', () => {
-    const axisColumnMappings: AxisColumnMappings = {
+    const axisColumnMappings = {
       [AxisRole.Y]: mockNumericalColumn,
       [AxisRole.X]: mockCategoricalColumns[0],
       [AxisRole.COLOR]: mockCategoricalColumns[1],

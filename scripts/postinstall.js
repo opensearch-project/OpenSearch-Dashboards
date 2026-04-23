@@ -90,6 +90,26 @@ const run = async () => {
     ])
   );
 
+  promises.push(
+    patchFile('node_modules/kbn-handlebars/target/types/packages/kbn-handlebars/src/utils.js', {
+      // kbn-handlebars calls new Function() at startup to probe for unsafe-eval support,
+      // which fires a CSP violation report on every page load. Since our CSP forbids
+      // unsafe-eval, hardcode return false to skip the probe entirely.
+      from: `function allowUnsafeEval() {
+    try {
+        new Function();
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}`,
+      to: `function allowUnsafeEval() {
+    return false;
+}`,
+    })
+  );
+
   await Promise.all(promises);
 };
 

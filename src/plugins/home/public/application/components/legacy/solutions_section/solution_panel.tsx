@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { Logos } from 'opensearch-dashboards/public';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../../';

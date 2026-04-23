@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiResizableContainer, EuiPageBody, useIsWithinBreakpoints } from '@elastic/eui';
 import { CanvasPanel } from '../../panel/canvas_panel';
 import { DiscoverPanel } from '../../fields_selector/fields_selector_panel';

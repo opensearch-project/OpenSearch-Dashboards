@@ -153,7 +153,6 @@ import {
   selectQueryLanguage,
   selectQueryString,
   selectIsQueryEditorDirty,
-  selectDataset,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockUseSelector = jest.mocked(useSelector);
@@ -187,6 +186,10 @@ describe('useQueryPanelEditor', () => {
       trigger: jest.fn(),
       focus: jest.fn(),
       getContentHeight: jest.fn(() => 50),
+      getDomNode: jest.fn(() => ({
+        parentElement: { clientHeight: 100 },
+        closest: jest.fn(() => ({ clientHeight: 100 })),
+      })),
       getLayoutInfo: jest.fn(() => ({ width: 800 })),
       layout: jest.fn(),
       updateOptions: jest.fn(),
@@ -767,6 +770,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );
@@ -809,6 +813,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );

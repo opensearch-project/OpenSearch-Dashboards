@@ -138,6 +138,7 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   getOverrideOrDefault<T = unknown>(key: string): T {
     // Note: this.overrides is an object with simple values, whereas this.defaults contains UiSettingsParams as the value for each key.
+    // @ts-expect-error TS2345 TODO Fix me
     return this.isOverridden(key) ? this.overrides[key] : this.defaults[key]?.value;
   }
 

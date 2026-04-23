@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FieldIconProps, FieldIcon } from '../../../../../../../opensearch_dashboards_react/public';
 import { shortenDottedString } from '../../../../../helpers/shorten_dotted_string';

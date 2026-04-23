@@ -47,13 +47,17 @@ export const serializeToJson5: Serializer = (messages, formats = i18n.formats) =
       : '';
 
     jsonBuffer = Buffer.concat([
+      // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
       jsonBuffer,
+      // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
       Buffer.from(`    '${mapKey}': '${formattedMessage}',`),
+      // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
       Buffer.from(formattedDescription ? ` // ${formattedDescription}\n` : '\n'),
     ]);
   }
 
   // append previously removed closing curly braces
+  // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
   jsonBuffer = Buffer.concat([jsonBuffer, Buffer.from('  },\n}\n')]);
 
   return jsonBuffer.toString();

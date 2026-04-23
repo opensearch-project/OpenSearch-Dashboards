@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
@@ -47,8 +47,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const [screenTitle, setScreenTitle] = useState<string>('');
 
   useEffect(() => {
-    setScreenTitle(savedExplore?.title ? `${savedExplore?.title}` : '');
-  }, [savedExplore?.title]);
+    setScreenTitle(savedExplore?.id ? `Edit ${savedExplore?.title}` : 'Create');
+  }, [savedExplore?.id, savedExplore?.title]);
 
   const showDatePicker = useMemo(() => {
     return dataset?.isTimeBased() ?? false;

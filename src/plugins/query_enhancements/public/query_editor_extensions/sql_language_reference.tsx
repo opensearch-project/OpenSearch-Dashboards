@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { FormattedMessage } from 'react-intl';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { IDataPluginServices } from 'src/plugins/data/public';
@@ -54,6 +54,7 @@ export const sqlLanguageReference = (selectedLanguage) => {
 
   return (
     <LanguageReference
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       body={<SQLReference />}
       autoShow={shouldAutoShow}
       selectedLanguage={selectedLanguage}

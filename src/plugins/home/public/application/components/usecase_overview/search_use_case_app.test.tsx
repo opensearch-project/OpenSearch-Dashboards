@@ -4,7 +4,7 @@
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
-import React from 'react';
+
 import { coreMock } from '../../../../../../core/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { contentManagementPluginMocks } from '../../../../../content_management/public/mocks';

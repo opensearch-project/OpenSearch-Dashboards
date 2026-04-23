@@ -8,7 +8,7 @@ import {
   createTwoMetricOneCateScatter,
   createThreeMetricOneCateScatter,
 } from './to_expression';
-import { VisColumn, VisFieldType, Positions, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, Positions, AxisRole } from '../types';
 import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
 
 describe('Scatter Chart to_expression', () => {
@@ -61,7 +61,7 @@ describe('Scatter Chart to_expression', () => {
   };
 
   describe('createTwoMetricScatter', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockNumericalColumns[0],
       [AxisRole.Y]: mockNumericalColumns[1],
     };
@@ -107,7 +107,7 @@ describe('Scatter Chart to_expression', () => {
   });
 
   describe('createTwoMetricOneCateScatter', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockNumericalColumns[0],
       [AxisRole.Y]: mockNumericalColumns[1],
       [AxisRole.COLOR]: mockCategoricalColumn,
@@ -139,13 +139,13 @@ describe('Scatter Chart to_expression', () => {
         createTwoMetricOneCateScatter(mockData, mockStyles, {
           [AxisRole.X]: mockNumericalColumns[0],
           [AxisRole.Y]: mockNumericalColumns[1],
-        })
+        } as any)
       ).toThrow();
     });
   });
 
   describe('createThreeMetricOneCateScatter', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockNumericalColumns[0],
       [AxisRole.Y]: mockNumericalColumns[1],
       [AxisRole.COLOR]: mockCategoricalColumn,
@@ -186,7 +186,7 @@ describe('Scatter Chart to_expression', () => {
           [AxisRole.X]: mockNumericalColumns[0],
           [AxisRole.Y]: mockNumericalColumns[1],
           [AxisRole.COLOR]: mockCategoricalColumn,
-        })
+        } as any)
       ).toThrow();
     });
   });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
@@ -178,30 +177,36 @@ describe('AreaVisStyleControls', () => {
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
-      [AxisRole.X]: {
-        id: 1,
-        name: 'Date',
-        schema: VisFieldType.Date,
-        column: 'date',
-        validValuesCount: 100,
-        uniqueValuesCount: 50,
-      },
-      [AxisRole.Y]: {
-        id: 2,
-        name: 'Count',
-        schema: VisFieldType.Numerical,
-        column: 'count',
-        validValuesCount: 100,
-        uniqueValuesCount: 50,
-      },
-      [AxisRole.COLOR]: {
-        id: 3,
-        name: 'Category',
-        schema: VisFieldType.Categorical,
-        column: 'category',
-        validValuesCount: 10,
-        uniqueValuesCount: 5,
-      },
+      [AxisRole.X]: [
+        {
+          id: 1,
+          name: 'Date',
+          schema: VisFieldType.Date,
+          column: 'date',
+          validValuesCount: 100,
+          uniqueValuesCount: 50,
+        },
+      ],
+      [AxisRole.Y]: [
+        {
+          id: 2,
+          name: 'Count',
+          schema: VisFieldType.Numerical,
+          column: 'count',
+          validValuesCount: 100,
+          uniqueValuesCount: 50,
+        },
+      ],
+      [AxisRole.COLOR]: [
+        {
+          id: 3,
+          name: 'Category',
+          schema: VisFieldType.Categorical,
+          column: 'category',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
+      ],
     },
     updateVisualization: jest.fn(),
   };
@@ -224,14 +229,16 @@ describe('AreaVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...defaultProps.axisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 3,
-          name: 'Category',
-          schema: VisFieldType.Categorical,
-          column: 'category',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 3,
+            name: 'Category',
+            schema: VisFieldType.Categorical,
+            column: 'category',
+            validValuesCount: 10,
+            uniqueValuesCount: 5,
+          },
+        ],
       },
     };
 
@@ -249,14 +256,16 @@ describe('AreaVisStyleControls', () => {
       },
       axisColumnMappings: {
         ...defaultProps.axisColumnMappings,
-        [AxisRole.FACET]: {
-          id: 4,
-          name: 'Facet',
-          schema: VisFieldType.Categorical,
-          column: 'facet',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.FACET]: [
+          {
+            id: 4,
+            name: 'Facet',
+            schema: VisFieldType.Categorical,
+            column: 'facet',
+            validValuesCount: 10,
+            uniqueValuesCount: 5,
+          },
+        ],
       },
     };
 

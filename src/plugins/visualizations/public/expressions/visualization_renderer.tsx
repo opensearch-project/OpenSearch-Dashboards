@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { ExpressionRenderDefinition } from '../../../expressions/public';

@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 
-import React, { ReactFragment, useEffect, useState } from 'react';
+import { ReactFragment, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 export const LanguageReference = (props: {

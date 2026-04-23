@@ -24,6 +24,7 @@
       - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
+    - [Pluggable_storage_backend](saved_objects/pluggable_storage_backend.md)
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry
     - [Telemetry](telemetry/telemetry.md)
@@ -213,6 +214,7 @@
     - [Opensearch dashboards.release notes 3.3.0](../release-notes/opensearch-dashboards.release-notes-3.3.0.md)
     - [Opensearch dashboards.release notes 3.4.0](../release-notes/opensearch-dashboards.release-notes-3.4.0.md)
     - [Opensearch dashboards.release notes 3.5.0](../release-notes/opensearch-dashboards.release-notes-3.5.0.md)
+    - [Opensearch dashboards.release notes 3.6.0](../release-notes/opensearch-dashboards.release-notes-3.6.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)

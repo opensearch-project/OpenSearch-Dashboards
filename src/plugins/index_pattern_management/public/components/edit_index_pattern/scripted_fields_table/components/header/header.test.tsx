@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from 'opensearch-dashboards/public';

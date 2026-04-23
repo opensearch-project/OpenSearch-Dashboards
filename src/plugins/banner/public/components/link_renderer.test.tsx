@@ -9,7 +9,6 @@
  * GitHub history for details.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { LinkRenderer } from './link_renderer';
 

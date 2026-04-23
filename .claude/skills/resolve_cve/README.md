@@ -137,9 +137,6 @@ Resolves security vulnerability in project dependencies:
 
 ## Testing the changes
 [CVE-specific verification commands]
-
-## Changelog
-- fix: Resolve CVE-2025-54798 in tmp dependency
 ```
 
 **Failure Reports: `tmp/cve-failure-report.md`** - Detailed analysis if resolution fails

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from '../types';
@@ -12,7 +11,11 @@ import { convertTimelineToMessageRows } from './chat_messages';
 
 // Mock the child components
 jest.mock('./message_row', () => ({
-  MessageRow: ({ message }: any) => <div data-test-subj="message-row">{message.content}</div>,
+  MessageRow: ({ message, timeline }: any) => (
+    <div data-test-subj="message-row" data-has-timeline={!!timeline}>
+      {message.content}
+    </div>
+  ),
 }));
 
 jest.mock('./tool_call_row', () => ({
@@ -167,6 +170,7 @@ describe('ChatMessages', () => {
 
     it('should filter out empty text content from array assistant messages', () => {
       const timeline: Message[] = [
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
         {
           id: '1',
           role: 'assistant',
@@ -225,6 +229,7 @@ describe('ChatMessages', () => {
 
     it('should filter out array content with null/undefined text', () => {
       const timeline: Message[] = [
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
         {
           id: '1',
           role: 'assistant',
@@ -715,5 +720,133 @@ describe('convertTimelineToMessageRows', () => {
       status: 'error',
       result: 'Error occurred',
     });
+  });
+});
+
+describe('share button visibility', () => {
+  const defaultProps = {
+    layoutMode: ChatLayoutMode.SIDECAR,
+    timeline: [] as Message[],
+    isStreaming: false,
+    threadId: 'thread-1',
+  };
+
+  it('should pass timeline to the last assistant message in a turn (share enabled)', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'Answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) => el.textContent === 'Answer');
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('true');
+  });
+
+  it('should not pass timeline to intermediate assistant messages in a turn', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'Let me check...' } as AssistantMessage,
+      { id: '3', role: 'assistant', content: 'Final answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const intermediateRow = messageRows.find((el) => el.textContent === 'Let me check...');
+    const finalRow = messageRows.find((el) => el.textContent === 'Final answer');
+    expect(intermediateRow?.getAttribute('data-has-timeline')).toBe('false');
+    expect(finalRow?.getAttribute('data-has-timeline')).toBe('true');
+  });
+
+  it('should not pass timeline when streaming (share disabled)', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'Streaming response...' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(
+      <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+    );
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) => el.textContent === 'Streaming response...');
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('false');
+  });
+
+  it('should not pass timeline to any assistant message when streaming', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'First question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'First answer' } as AssistantMessage,
+      { id: '3', role: 'user', content: 'Second question' } as UserMessage,
+      { id: '4', role: 'assistant', content: 'Still streaming...' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(
+      <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+    );
+
+    const messageRows = getAllByTestId('message-row');
+    const firstAnswer = messageRows.find((el) => el.textContent === 'First answer');
+    const streamingAnswer = messageRows.find((el) => el.textContent === 'Still streaming...');
+    // All share buttons disabled while any response is streaming
+    expect(firstAnswer?.getAttribute('data-has-timeline')).toBe('false');
+    expect(streamingAnswer?.getAttribute('data-has-timeline')).toBe('false');
+  });
+});
+
+describe('share button with running tool calls', () => {
+  const defaultProps = {
+    layoutMode: ChatLayoutMode.SIDECAR,
+    timeline: [] as Message[],
+    isStreaming: false,
+    threadId: 'thread-1',
+  };
+
+  it('should not pass timeline when tool calls are still running', () => {
+    // Simulate a turn where the assistant has text content but a tool call has no result yet
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      {
+        id: '2',
+        role: 'assistant',
+        content: 'Let me look into that...',
+        toolCalls: [
+          { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
+        ],
+      } as AssistantMessage,
+      // No ToolMessage for tc1 — tool is still running
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) =>
+      el.textContent?.includes('Let me look into that')
+    );
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('false');
+  });
+
+  it('should pass timeline when all tool calls have completed', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      {
+        id: '2',
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
+        ],
+      } as AssistantMessage,
+      { id: '3', role: 'tool', content: 'Results', toolCallId: 'tc1' } as ToolMessage,
+      { id: '4', role: 'assistant', content: 'Here is the answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const finalRow = messageRows.find((el) => el.textContent === 'Here is the answer');
+    expect(finalRow?.getAttribute('data-has-timeline')).toBe('true');
   });
 });

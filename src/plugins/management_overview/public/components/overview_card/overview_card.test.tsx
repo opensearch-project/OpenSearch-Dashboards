@@ -5,7 +5,6 @@
 
 import { render } from '@testing-library/react';
 import { OverviewCard } from './overview_card';
-import React from 'react';
 
 function renderOverviewCard() {
   return render(

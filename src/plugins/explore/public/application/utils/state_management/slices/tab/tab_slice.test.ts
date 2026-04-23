@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { setTabState, tabReducer, TabState } from './tab_slice';
+import { setMetricsExploreState, setTabState, tabReducer, TabState } from './tab_slice';
 
 describe('tabSlice reducers', () => {
   const initialState: TabState = {
@@ -41,6 +41,52 @@ describe('tabSlice reducers', () => {
 
       const state = tabReducer(initialState, setTabState(newState));
       expect(state).toEqual(newState);
+    });
+  });
+
+  describe('setMetricsExploreState', () => {
+    it('persists filters with operator and enabled fields', () => {
+      const payload = {
+        level: 'detail',
+        metric: 'http_requests_total',
+        filters: [
+          { name: 'job', operator: '=' as const, value: 'api' },
+          { name: 'status', operator: '!=' as const, value: '200', enabled: false },
+          { name: 'path', operator: '=~' as const, value: '/api/.*' },
+          { name: 'region', operator: '!~' as const, value: 'dev-.*', enabled: true },
+        ],
+      };
+
+      const state = tabReducer(initialState, setMetricsExploreState(payload));
+
+      expect(state.metricsExplore).toEqual(payload);
+      expect(state.metricsExplore?.filters).toHaveLength(4);
+      expect(state.metricsExplore?.filters?.[1]).toEqual({
+        name: 'status',
+        operator: '!=',
+        value: '200',
+        enabled: false,
+      });
+    });
+
+    it('overwrites prior metricsExplore state on subsequent dispatches', () => {
+      const first = tabReducer(
+        initialState,
+        setMetricsExploreState({
+          metric: 'foo',
+          filters: [{ name: 'a', operator: '=' as const, value: '1' }],
+        })
+      );
+      const second = tabReducer(
+        first,
+        setMetricsExploreState({
+          metric: 'bar',
+          filters: [],
+        })
+      );
+
+      expect(second.metricsExplore?.metric).toBe('bar');
+      expect(second.metricsExplore?.filters).toEqual([]);
     });
   });
 

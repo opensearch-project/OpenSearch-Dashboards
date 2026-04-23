@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { AddDeleteButtons } from './add_delete_buttons';
 

@@ -51,6 +51,7 @@ export const createBatchedFunction = <Func extends Fn, BatchEntry>(
   });
 
   const fn: Func = ((...args) => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const [result, batchEntry] = onCall(...args);
     buffer.write(batchEntry);
     return result;

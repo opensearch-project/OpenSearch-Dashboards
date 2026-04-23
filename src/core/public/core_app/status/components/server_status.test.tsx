@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ServerStatus } from './server_status';
 import { FormattedStatus } from '../lib';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

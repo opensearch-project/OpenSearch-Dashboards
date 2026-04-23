@@ -23,7 +23,7 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
   const dateFormat = services.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   const rows = searchResult?.instantHits?.hits || emptyHits;
@@ -50,7 +50,9 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
     setSortingColumns(newSortingColumns);
   }, []);
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   const renderCellValue: EuiDataGridCellProps['renderCellValue'] = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ rowIndex, columnId }) => {
       const hit = rows[rowIndex];
       if (!hit?._source) return '—';

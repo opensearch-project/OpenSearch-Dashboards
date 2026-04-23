@@ -56,7 +56,7 @@ export const createGaugeSeries = ({
       return;
     }
 
-    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     const numericalValues: number[] = [];
 
@@ -225,6 +225,7 @@ export const createGaugeSeries = ({
           value: calculatedValue,
         },
       ],
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       renderItem(params, api) {
         const width = api.getWidth();
         const height = api.getHeight();
@@ -242,7 +243,7 @@ export const createGaugeSeries = ({
               style: {
                 x: 0,
                 y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: displayValue,
+                text: displayValue as string,
                 textAlign: 'center',
                 fontSize: valueFontSize,
                 fontWeight: 'bold',

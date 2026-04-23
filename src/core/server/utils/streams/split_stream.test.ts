@@ -57,6 +57,7 @@ describe('splitStream', () => {
   });
 
   test('supports buffer split chunks', async () => {
+    // @ts-expect-error TS2345 TODO Fix me
     const output = await split(createSplitStream(Buffer.from('&')), ['foo&b', 'ar']);
     expect(output).toEqual(['foo', 'bar']);
   });

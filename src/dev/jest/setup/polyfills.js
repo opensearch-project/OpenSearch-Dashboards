@@ -45,3 +45,9 @@ require('whatwg-fetch');
 const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
+
+// Make React available globally for the classic JSX runtime.
+// With "jsx": "react-jsx" in tsconfig, source files don't import React,
+// but Jest's Babel transform uses the classic runtime (React.createElement)
+// to avoid issues with jest.mock() factory functions.
+global.React = require('react');

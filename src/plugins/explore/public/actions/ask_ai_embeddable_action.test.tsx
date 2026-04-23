@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { AskAIEmbeddableAction } from './ask_ai_embeddable_action';
 import { ExploreEmbeddable } from '../embeddable/explore_embeddable';
@@ -148,6 +147,7 @@ describe('AskAIEmbeddableAction', () => {
       document.body.appendChild(mockElement);
 
       // Mock html2canvas
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       (html2canvas as jest.Mock).mockResolvedValue({
         toDataURL: jest.fn().mockReturnValue('data:image/png;base64,mockImageData'),
       });

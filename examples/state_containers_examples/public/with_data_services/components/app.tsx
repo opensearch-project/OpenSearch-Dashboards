@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { History } from 'history';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { Router } from 'react-router-dom';
@@ -191,6 +191,7 @@ function useGlobalStateSyncing(
   }, [query, osdUrlStateStorage]);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 function useAppStateSyncing<AppState extends QueryState>(
   appStateContainer: BaseStateContainer<AppState>,
   query: DataPublicPluginStart['query'],

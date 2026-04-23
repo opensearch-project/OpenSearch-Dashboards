@@ -11,7 +11,7 @@ import {
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { MemoryRouter, Route } from 'react-router-dom';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { DataSourceSelectionService } from '../../../service/data_source_selection_service';

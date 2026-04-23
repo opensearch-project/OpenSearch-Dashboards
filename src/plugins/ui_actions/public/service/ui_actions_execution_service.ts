@@ -57,6 +57,7 @@ export class UiActionsExecutionService {
     context: BaseContext;
     trigger: Trigger;
   }): Promise<void> {
+    // @ts-expect-error TS2869 TODO(ts-upgrade): fixme
     const shouldBatch = !(await action.shouldAutoExecute?.({ ...context, trigger })) ?? false;
     const task: ExecuteActionTask = {
       action,

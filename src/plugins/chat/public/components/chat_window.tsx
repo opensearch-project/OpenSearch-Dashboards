@@ -6,7 +6,7 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
-import { useUnmount } from 'react-use';
+import { useUnmount, useMount } from 'react-use';
 import moment from "moment";
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
@@ -17,7 +17,6 @@ import { ConfirmationRequest } from '../services/confirmation_service';
 import {
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
-  EventType,
 } from '../../common/events';
 import type {
   Message,
@@ -151,83 +150,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
-  // Restore unfinished tool calls by re-triggering their events
-  const restoreUnfinishedToolCalls = useCallback(async (
-    messages: Message[],
-    abortController: AbortController
-  ): Promise<boolean> => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.role !== 'assistant' || !lastMessage.toolCalls) {
-      return false;
-    }
-
-    // Find tool calls without corresponding tool result messages
-    const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
-      const hasToolResult = messages.some(msg =>
-        msg.role === 'tool' && msg.toolCallId === toolCall.id
-      );
-      return !hasToolResult;
-    });
-
-    if (unfinishedToolCalls.length === 0) {
-      return false;
-    }
-
-    // Remove unfinished tool calls from the last message to show a clean timeline.
-    // The unfinished tools will be re-triggered below and may require user confirmation
-    // (e.g., clicking approve/reject buttons), so we need to show the UI early.
-    const lastMessageWithoutUnfinishedTools = {
-      ...lastMessage,
-      toolCalls: lastMessage.toolCalls.filter((toolCall) => !unfinishedToolCalls.includes(toolCall))
-    };
-
-    // Set loading to false early so users can see and interact with confirmation dialogs
-    setIsLoading(false);
-    setTimeline([...messages.slice(0, -1), lastMessageWithoutUnfinishedTools]);
-
-    // Helper to apply event only if not aborted
-    const applyEventHandler = async (event: ChatEvent): Promise<void> => {
-      if (abortController.signal.aborted) {
-        return;
-      }
-      await eventHandler.handleEvent(event);
-    };
-
-    // Trigger tool call events for unfinished tool calls
-    for (const toolCall of unfinishedToolCalls) {
-      if (abortController.signal.aborted) {
-        return true;
-      }
-
-      try {
-        await applyEventHandler({
-          type: EventType.TOOL_CALL_START,
-          toolCallId: toolCall.id,
-          toolCallName: toolCall.function.name,
-          parentMessageId: lastMessage.id,
-          timestamp: Date.now(),
-        });
-
-        await applyEventHandler({
-          type: EventType.TOOL_CALL_ARGS,
-          toolCallId: toolCall.id,
-          delta: toolCall.function.arguments,
-          timestamp: Date.now(),
-        });
-
-        await applyEventHandler({
-          type: EventType.TOOL_CALL_END,
-          toolCallId: toolCall.id,
-          timestamp: Date.now(),
-        });
-      } catch (error: any) {
-        console.error(`Error restoring tool call for ${toolCall.function.name}:`, error);
-      }
-    }
-
-    return true;
-  }, [eventHandler]);
-
   // Extracted restoration logic to avoid duplication
   const restoreConversationTimeline = useCallback(async () => {
     // Create abort controller for this loading operation
@@ -239,30 +161,20 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     try {
       // Check if aborted before starting
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
-      const result = await chatService.restoreLatestConversation();
+      const events = await chatService.restoreLatestConversation();
 
       // Check if aborted after async operation
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
-      if (result && result.messages.length > 0) {
-        const { messages } = result;
+      eventHandler.clearState();
+      setIsLoading(false);
 
-        // Restore unfinished tool calls if any exist
-        const timelineUpdated = await restoreUnfinishedToolCalls(messages, abortController);
-
-        // Check if aborted before setting timeline
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        if (!timelineUpdated) {
-          setTimeline(messages);
+      if (events) {
+        for (const event of events) {
+          if (abortController.signal.aborted) return;
+          await eventHandler.handleEvent(event);
         }
       }
     } catch (error: any) {
@@ -281,12 +193,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         loadingAbortControllerRef.current = null;
       }
     }
-  }, [chatService, restoreUnfinishedToolCalls]);
+  }, [chatService, eventHandler]);
 
   // Restore timeline from latest conversation on component mount
-  useEffect(() => {
+  useMount(() => {
     restoreConversationTimeline();
-  }, [restoreConversationTimeline]);
+  });
 
   // Save conversation to history whenever timeline changes
   useEffect(() => {
@@ -563,29 +475,28 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     try {
       // Check if aborted before starting
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
 
       // Check if aborted after async operation
-      if (abortController.signal.aborted) {
-        return;
-      }
+      if (abortController.signal.aborted) return;
 
       if (events) {
-        // Process each event through the event handler for proper state restoration
-        for (const event of events) {
-          await eventHandler.handleEvent(event);
-        }
-
         // Reset UI state
+        eventHandler.clearState();
         setCurrentRunId(null);
         setIsStreaming(false);
         setPendingConfirmation(null);
+        confirmationService.cleanAll();
         setShowHistory(false);
+        setIsLoading(false);
+
+        for (const event of events) {
+          if (abortController.signal.aborted) return;
+          await eventHandler.handleEvent(event);
+        }
       }
     } catch (error: any) {
       // Don't show error if aborted
@@ -612,13 +523,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         loadingAbortControllerRef.current = null;
       }
     }
-  }, [chatService, eventHandler, toasts]);
+  }, [chatService, eventHandler, confirmationService, toasts]);
 
-  const handleRetryRestore = useCallback(() => {
-    restoreConversationTimeline();
-  }, [restoreConversationTimeline]);
-
-  // Build window instance object
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
     startNewChat: () => handleNewChat(),
     sendMessage: async ({content, messages}) => (await handleSendRef.current?.({input:content, messages}))
@@ -669,7 +575,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             <p>{restoreError}</p>
           </EuiText>
           <EuiButton
-            onClick={handleRetryRestore}
+            onClick={restoreConversationTimeline}
             iconType="refresh"
           >
             {i18n.translate('chat.window.retryButton', {
@@ -692,6 +598,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
+            threadId={chatService.getThreadId()}
             {...enhancedProps}
             startResponse={startResponse}
           />

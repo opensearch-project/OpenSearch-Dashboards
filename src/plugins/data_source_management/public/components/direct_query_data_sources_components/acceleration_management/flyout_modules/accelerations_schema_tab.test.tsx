@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { AccelerationSchemaTab } from './accelerations_schema_tab';
 import { EuiInMemoryTable } from '@elastic/eui';

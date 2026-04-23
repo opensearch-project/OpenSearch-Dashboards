@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render } from '@testing-library/react';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';

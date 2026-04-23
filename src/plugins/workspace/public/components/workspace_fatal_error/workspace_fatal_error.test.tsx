@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { WorkspaceFatalError } from './workspace_fatal_error';
@@ -13,6 +12,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 describe('<WorkspaceFatalError />', () => {
   it('render normally', async () => {
     const { findByText, container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <WorkspaceFatalError />
       </IntlProvider>
@@ -23,6 +23,7 @@ describe('<WorkspaceFatalError />', () => {
 
   it('render error with callout', async () => {
     const { findByText, container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <WorkspaceFatalError error="errorInCallout" />
       </IntlProvider>
@@ -38,6 +39,7 @@ describe('<WorkspaceFatalError />', () => {
       // @ts-ignore
       delete window.location;
     }
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = {} as Location;
     Object.defineProperty(window.location, 'href', {
       get: () => 'http://localhost/',
@@ -45,6 +47,7 @@ describe('<WorkspaceFatalError />', () => {
     });
     const coreStartMock = coreMock.createStart();
     const { getByText } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <context.Provider
           value={
@@ -66,6 +69,7 @@ describe('<WorkspaceFatalError />', () => {
         container: document.body,
       }
     );
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = location;
   });
 });

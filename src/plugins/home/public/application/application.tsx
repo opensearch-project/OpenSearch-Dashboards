@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { ScopedHistory, CoreStart, MountPoint } from 'opensearch-dashboards/public';

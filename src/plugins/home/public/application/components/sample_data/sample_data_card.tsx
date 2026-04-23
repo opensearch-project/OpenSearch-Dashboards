@@ -4,7 +4,7 @@
  */
 
 import { CoreStart } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { EuiI18n, EuiIcon, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
