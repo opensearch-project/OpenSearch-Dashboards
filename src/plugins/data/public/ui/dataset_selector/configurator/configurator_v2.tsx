@@ -72,7 +72,7 @@ export const ConfiguratorV2 = ({
     if (languages.includes(currentLanguage)) {
       return currentLanguage;
     }
-    return languages[0];
+    return languages[0] || currentLanguage;
   });
 
   // State

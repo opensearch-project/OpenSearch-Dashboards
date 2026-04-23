@@ -171,7 +171,7 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
                       spacing="m"
                     >
                       {(provided) => (
-                        <EuiPanel paddingSize="s" hasBorder>
+                        <EuiPanel hasShadow={false} paddingSize="s" hasBorder>
                           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                             {/* Drag handle */}
                             <EuiFlexItem grow={false}>
@@ -186,7 +186,7 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
                             </EuiFlexItem>
 
                             {/* Variable info */}
-                            <EuiFlexItem grow style={{ minWidth: 0 }}>
+                            <EuiFlexItem grow style={{ minWidth: 0, marginLeft: '8px' }}>
                               <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
                                 <EuiFlexItem>
                                   <EuiFlexGroup

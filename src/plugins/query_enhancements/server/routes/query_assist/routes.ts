@@ -23,15 +23,15 @@ export function registerQueryAssistRoutes(router: IRouter) {
       },
     },
     async (context, request, response) => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      const config = await context.query_assist.configPromise;
-      const client =
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
-        context.query_assist.dataSourceEnabled && request.query.dataSourceId
-          ? await context.dataSource.opensearch.getClient(request.query.dataSourceId)
-          : context.core.opensearch.client.asCurrentUser;
       const configuredLanguages: string[] = [];
       try {
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
+        const config = await context.query_assist.configPromise;
+        const client =
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
+          context.query_assist.dataSourceEnabled && request.query.dataSourceId
+            ? await context.dataSource.opensearch.getClient(request.query.dataSourceId)
+            : context.core.opensearch.client.asCurrentUser;
         // @ts-expect-error TS2339 TODO(ts-error): fixme
         const capabilitiesResolver = context.query_assist.getCapabilitiesResolver?.();
         if (capabilitiesResolver) {
