@@ -499,6 +499,7 @@
     "grunt-cli": "^1.4.3",
     "grunt-peg": "^2.0.1",
     "grunt-run": "^0.8.1",
+    "gulp-babel": "^8.0.0",
     "has-ansi": "^3.0.0",
     "history": "^4.9.0",
     "immer": "^9.0.6",
