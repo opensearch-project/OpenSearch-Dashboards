@@ -16,7 +16,19 @@ const mockDispose = jest.fn();
 const mockIsDisposed = jest.fn(() => false);
 const mockDispatchAction = jest.fn();
 const mockGetHeight = jest.fn(() => 200);
-const mockGetZr = jest.fn(() => ({ on: jest.fn(), off: jest.fn() }));
+const mockGetWidth = jest.fn(() => 400);
+const mockConvertToPixel = jest.fn(() => [100, 50]);
+const mockConvertFromPixel = jest.fn(() => [1000, 15]);
+const mockZrOn = jest.fn();
+const mockZrOff = jest.fn();
+const mockZrAdd = jest.fn();
+const mockZrRemove = jest.fn();
+const mockGetZr = jest.fn(() => ({
+  on: mockZrOn,
+  off: mockZrOff,
+  add: mockZrAdd,
+  remove: mockZrRemove,
+}));
 
 const mockEchartsInstance = {
   setOption: mockSetOption,
@@ -27,28 +39,50 @@ const mockEchartsInstance = {
   isDisposed: mockIsDisposed,
   dispatchAction: mockDispatchAction,
   getHeight: mockGetHeight,
+  getWidth: mockGetWidth,
+  convertToPixel: mockConvertToPixel,
+  convertFromPixel: mockConvertFromPixel,
   getZr: mockGetZr,
 };
 
-jest.mock('echarts', () => ({
-  init: jest.fn(() => mockEchartsInstance),
-}));
+jest.mock('echarts', () => {
+  class MockZrShape {
+    attr = jest.fn();
+    constructor(public opts: any = {}) {}
+  }
+  return {
+    init: jest.fn(() => mockEchartsInstance),
+    graphic: {
+      Line: MockZrShape,
+      Circle: MockZrShape,
+    },
+  };
+});
 
-// --- shared cursor mock ---
-const mockPublishCursor = jest.fn();
-let mockSharedCursor: { idx: number; yRatio: number } | null = null;
+// --- shared cursor bus mock ---
+let mockBusSubscriber: ((s: { idx: number; yRatio: number } | null) => void) | null = null;
+const mockPublish = jest.fn();
+const mockSubscribe = jest.fn((cb) => {
+  mockBusSubscriber = cb;
+  return () => {
+    mockBusSubscriber = null;
+  };
+});
+let mockBus: { publish: jest.Mock; subscribe: jest.Mock } | null = {
+  publish: mockPublish,
+  subscribe: mockSubscribe,
+};
 
 jest.mock('../hooks/cursor_context', () => ({
-  useSharedCursor: () => [mockSharedCursor, mockPublishCursor],
+  useCursorBus: () => mockBus,
 }));
 
 // --- ResizeObserver mock ---
-class MockResizeObserver {
-  observe = jest.fn();
-  unobserve = jest.fn();
-  disconnect = jest.fn();
-}
-global.ResizeObserver = MockResizeObserver as any;
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+})) as any;
 
 // --- helpers ---
 const singleValues: Array<[number, string]> = [
@@ -77,7 +111,8 @@ const multiSeries = [
 describe('SparklineChart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSharedCursor = null;
+    mockBusSubscriber = null;
+    mockBus = { publish: mockPublish, subscribe: mockSubscribe };
   });
 
   // --- formatValue (tested indirectly via yAxis formatter) ---
@@ -115,8 +150,10 @@ describe('SparklineChart', () => {
     render(<SparklineChart values={singleValues} height={150} />);
 
     expect(echarts.init).toHaveBeenCalled();
-    expect(mockSetOption).toHaveBeenCalledTimes(1);
-    const opts = mockSetOption.mock.calls[0][0];
+    // Find the setOption call that carries the chart config (has `series`).
+    const configCall = mockSetOption.mock.calls.find(([opt]: any) => opt && opt.series);
+    expect(configCall).toBeDefined();
+    const opts = configCall![0];
     expect(opts.series).toHaveLength(1);
     expect(opts.series[0].name).toBe('value');
     expect(opts.series[0].data).toEqual([
@@ -167,20 +204,25 @@ describe('SparklineChart', () => {
   });
 
   // --- shared cursor ---
-  it('dispatches showTip when sharedCursor is set', () => {
-    mockSharedCursor = { idx: 1, yRatio: 0.5 };
-    render(<SparklineChart values={singleValues} height={100} />);
-
-    expect(mockDispatchAction).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'showTip', dataIndex: 1 })
-    );
+  it('subscribes to the cursor bus and adds zr shapes on mount', () => {
+    render(<SparklineChart series={multiSeries} height={100} />);
+    expect(mockSubscribe).toHaveBeenCalled();
+    // 2 crosshair lines + one dot per series
+    expect(mockZrAdd).toHaveBeenCalledTimes(2 + multiSeries.length);
   });
 
-  it('dispatches hideTip when sharedCursor is null', () => {
-    mockSharedCursor = null;
+  it('hides tooltip on remote-cursor null event', () => {
     render(<SparklineChart values={singleValues} height={100} />);
-
+    // Trigger a null update via the bus
+    mockBusSubscriber?.(null);
     expect(mockDispatchAction).toHaveBeenCalledWith(expect.objectContaining({ type: 'hideTip' }));
+  });
+
+  it('unsubscribes and removes zr shapes on unmount', () => {
+    const { unmount } = render(<SparklineChart series={multiSeries} height={100} />);
+    const addCalls = mockZrAdd.mock.calls.length;
+    unmount();
+    expect(mockZrRemove).toHaveBeenCalledTimes(addCalls);
   });
 
   // --- cleanup ---

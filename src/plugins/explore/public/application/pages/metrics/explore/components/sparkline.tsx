@@ -8,7 +8,7 @@ import * as echarts from 'echarts';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { useSharedCursor } from '../hooks/cursor_context';
+import { useCursorBus } from '../hooks/cursor_context';
 
 interface SeriesData {
   name: string;
@@ -47,6 +47,9 @@ export const SERIES_COLORS = [
   '#5A467A',
 ];
 
+// Grid padding constants (kept in sync with the chart `grid` option below).
+const GRID = { top: 8, right: 36, bottom: 48, left: 60 };
+
 function formatValue(v: number): string {
   const abs = Math.abs(v);
   if (abs >= 1e9) return (v / 1e9).toFixed(1) + ' G';
@@ -72,7 +75,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<echarts.ECharts | null>(null);
-  const [sharedCursor, publishCursor] = useSharedCursor();
+  const bus = useCursorBus();
 
   const allSeries = useMemo(() => {
     if (multiSeries && multiSeries.length > 0) return multiSeries;
@@ -119,12 +122,7 @@ export const SparklineChart: React.FC<ChartProps> = ({
     const baseOption: echarts.EChartsOption = {
       animation: false,
       color: allSeries.map((_, i) => getColor(i)),
-      grid: {
-        top: 8,
-        right: 36,
-        bottom: 48,
-        left: 60,
-      },
+      grid: GRID,
       legend: legendConfig,
       tooltip: {
         trigger: 'axis',
@@ -248,47 +246,179 @@ export const SparklineChart: React.FC<ChartProps> = ({
     };
   }, [onTimeRangeChange]);
 
-  // Shared cursor: publish on hover
+  // Shared cursor: draw crosshair + per-series dots directly on the zrender
+  // layer. Using zrender shapes (not setOption/graphic) keeps mouse moves cheap
+  // — we just mutate shape attrs. The chart under the real cursor also shows
+  // the native tooltip; remote charts get lines + dots only.
   useEffect(() => {
     const inst = instanceRef.current;
-    if (!inst) return;
+    if (!inst || !bus) return;
+    const zr = inst.getZr();
+    const zrGraphic: any = (echarts as any).graphic;
+    if (!zrGraphic?.Line || !zrGraphic?.Circle) return;
 
-    const onAxisPointer = (params: any) => {
-      const dataIndex = params.batch?.[0]?.dataIndex;
-      if (dataIndex != null && timestamps.length > 0) {
-        const plotH = inst.getHeight() - 8 - 28;
-        publishCursor({ idx: dataIndex, yRatio: 0.5 });
-      }
-    };
-    const onGlobalOut = () => publishCursor(null);
+    const lineColor = isDarkMode ? '#555' : '#999';
+    const dotStroke = isDarkMode ? '#1e1e1e' : '#fff';
 
-    inst.on('updateAxisPointer', onAxisPointer);
-    inst.getZr().on('globalout', onGlobalOut);
-    return () => {
-      if (!inst.isDisposed()) {
-        inst.off('updateAxisPointer', onAxisPointer);
-        inst.getZr().off('globalout', onGlobalOut);
-      }
-    };
-  }, [publishCursor, timestamps]);
+    const vLine = new zrGraphic.Line({
+      z: 100,
+      silent: true,
+      invisible: true,
+      style: { stroke: lineColor, lineWidth: 1, lineDash: [3, 3] },
+    });
+    const hLine = new zrGraphic.Line({
+      z: 100,
+      silent: true,
+      invisible: true,
+      style: { stroke: lineColor, lineWidth: 1, lineDash: [3, 3] },
+    });
+    zr.add(vLine);
+    zr.add(hLine);
 
-  // Shared cursor: receive from other charts
-  useEffect(() => {
-    const inst = instanceRef.current;
-    if (!inst || sharedCursor === null) {
-      if (instanceRef.current && !instanceRef.current.isDisposed()) {
-        instanceRef.current.dispatchAction({ type: 'hideTip' });
-      }
-      return;
-    }
-    if (sharedCursor.idx < timestamps.length) {
-      inst.dispatchAction({
-        type: 'showTip',
-        seriesIndex: 0,
-        dataIndex: sharedCursor.idx,
+    // One dot per series, positioned at (xIdx, seriesValue).
+    const dots: any[] = parsed.map((_, i) => {
+      const dot = new zrGraphic.Circle({
+        z: 101,
+        silent: true,
+        invisible: true,
+        shape: { cx: 0, cy: 0, r: 3 },
+        style: { fill: getColor(i), stroke: dotStroke, lineWidth: 1 },
       });
-    }
-  }, [sharedCursor, timestamps]);
+      zr.add(dot);
+      return dot;
+    });
+
+    let isLocalHover = false;
+
+    const hideOverlay = () => {
+      vLine.attr({ invisible: true });
+      hLine.attr({ invisible: true });
+      dots.forEach((d) => d.attr({ invisible: true }));
+    };
+
+    const showOverlay = (idx: number, yRatio: number) => {
+      const plotTop = GRID.top;
+      const plotBot = inst.getHeight() - GRID.bottom;
+      const plotLeft = GRID.left;
+      const plotRight = inst.getWidth() - GRID.right;
+      if (plotBot <= plotTop || plotRight <= plotLeft) return;
+      if (idx < 0 || idx >= timestamps.length) return;
+
+      const xValue = timestamps[idx];
+      const xyPx = inst.convertToPixel({ gridIndex: 0 }, [xValue, 0]) as
+        | [number, number]
+        | null
+        | undefined;
+      if (!xyPx) return;
+      const xPx = xyPx[0];
+      const yPx = plotTop + yRatio * (plotBot - plotTop);
+
+      vLine.attr({
+        invisible: false,
+        shape: { x1: xPx, y1: plotTop, x2: xPx, y2: plotBot },
+      });
+      hLine.attr({
+        invisible: false,
+        shape: { x1: plotLeft, y1: yPx, x2: plotRight, y2: yPx },
+      });
+
+      // Position a dot at the data value of each series for the given index.
+      parsed.forEach((s, i) => {
+        const pt = s.data[idx];
+        const dot = dots[i];
+        if (!pt || isNaN(pt[1])) {
+          dot.attr({ invisible: true });
+          return;
+        }
+        const px = inst.convertToPixel({ gridIndex: 0 }, [pt[0], pt[1]]) as
+          | [number, number]
+          | null
+          | undefined;
+        if (!px) {
+          dot.attr({ invisible: true });
+          return;
+        }
+        dot.attr({
+          invisible: false,
+          shape: { cx: px[0], cy: px[1], r: 3 },
+        });
+      });
+    };
+
+    const onMouseMove = (params: any) => {
+      if (timestamps.length === 0) return;
+      const x = params.offsetX;
+      const y = params.offsetY;
+
+      const plotTop = GRID.top;
+      const plotBot = inst.getHeight() - GRID.bottom;
+      const plotLeft = GRID.left;
+      const plotRight = inst.getWidth() - GRID.right;
+      if (x < plotLeft || x > plotRight || y < plotTop || y > plotBot || plotBot <= plotTop) {
+        return;
+      }
+
+      const pt = inst.convertFromPixel({ gridIndex: 0 }, [x, y]) as
+        | [number, number]
+        | null
+        | undefined;
+      if (!pt || pt[0] == null) return;
+      const xValue = pt[0];
+
+      let idx = 0;
+      let minDist = Infinity;
+      for (let i = 0; i < timestamps.length; i++) {
+        const d = Math.abs(timestamps[i] - xValue);
+        if (d < minDist) {
+          minDist = d;
+          idx = i;
+        }
+      }
+
+      const yRatio = Math.max(0, Math.min(1, (y - plotTop) / (plotBot - plotTop)));
+
+      isLocalHover = true;
+      // Show overlay locally too — the per-series dots are useful even on the
+      // hovered chart. The native axisPointer vertical line will also render
+      // but they overlap visually; the tooltip stays local because we do not
+      // hideTip here.
+      showOverlay(idx, yRatio);
+      bus.publish({ idx, yRatio });
+    };
+
+    const onGlobalOut = () => {
+      isLocalHover = false;
+      hideOverlay();
+      bus.publish(null);
+    };
+
+    zr.on('mousemove', onMouseMove);
+    zr.on('globalout', onGlobalOut);
+
+    const unsubscribe = bus.subscribe((state) => {
+      if (isLocalHover) return; // local hover is handled by onMouseMove
+      if (!state) {
+        hideOverlay();
+        if (!inst.isDisposed()) inst.dispatchAction({ type: 'hideTip' });
+        return;
+      }
+      // Remote update — make sure any lingering tooltip/pointer on this chart
+      // is hidden, then render our overlay.
+      if (!inst.isDisposed()) inst.dispatchAction({ type: 'hideTip' });
+      showOverlay(state.idx, state.yRatio);
+    });
+
+    return () => {
+      unsubscribe();
+      if (!inst.isDisposed()) {
+        zr.off('mousemove', onMouseMove);
+        zr.off('globalout', onGlobalOut);
+        zr.remove(vLine);
+        zr.remove(hLine);
+        dots.forEach((d) => zr.remove(d));
+      }
+    };
+  }, [bus, timestamps, parsed, isDarkMode, getColor]);
 
   if (!hasData) {
     return (
