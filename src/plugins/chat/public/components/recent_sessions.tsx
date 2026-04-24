@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import { useMount, useUnmount } from 'react-use';
 import {
   EuiText,
   EuiFlexGroup,
@@ -64,12 +65,13 @@ export const RecentSessions: React.FC<RecentSessionsProps> = ({
     }
   }, [conversationHistoryService]);
 
-  useEffect(() => {
+  useMount(() => {
     loadRecentConversations();
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, [loadRecentConversations]);
+  });
+
+  useUnmount(() => {
+    isMountedRef.current = false;
+  });
 
   if (isLoading) {
     return (
