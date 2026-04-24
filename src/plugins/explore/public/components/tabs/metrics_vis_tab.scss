@@ -11,8 +11,14 @@
 
   &__chartTypeToggle {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
+    gap: $euiSizeS;
     padding: $euiSizeXS;
+
+    [data-test-subj="seriesLimitDisclaimer"] {
+      margin-right: auto;
+    }
   }
 
   &__chartArea {

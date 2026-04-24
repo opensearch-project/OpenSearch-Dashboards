@@ -19,6 +19,11 @@ export interface IPrometheusSearchResult extends ISearchResult {
     total: number;
   };
   instantFieldSchema?: Array<Partial<IFieldType>>;
+  truncation?: {
+    tableTruncated: boolean;
+    totalSeriesCount: number;
+    displayedSeriesCount: number;
+  };
 }
 
 export interface ResultMetadata {

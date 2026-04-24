@@ -7,6 +7,7 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -225,9 +226,27 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
+  const truncation = searchResult?.truncation;
+
   return (
     <>
       <EuiSpacer size="s" />
+      {truncation?.tableTruncated && (
+        <EuiCallOut
+          size="s"
+          color="warning"
+          iconType="alert"
+          title={i18n.translate('explore.metricsRawTable.truncationWarning', {
+            defaultMessage:
+              'Showing {displayed} of {total} series. Refine your query to see all results.',
+            values: {
+              displayed: truncation.displayedSeriesCount.toLocaleString(),
+              total: truncation.totalSeriesCount.toLocaleString(),
+            },
+          })}
+          data-test-subj="metricsRawTableTruncationWarning"
+        />
+      )}
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup
