@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   EuiText,
   EuiFlexGroup,
@@ -34,6 +34,7 @@ export const RecentSessions: React.FC<RecentSessionsProps> = ({
   const [conversations, setConversations] = useState<SavedConversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
 
   const loadRecentConversations = useCallback(async () => {
     setIsLoading(true);
@@ -43,10 +44,12 @@ export const RecentSessions: React.FC<RecentSessionsProps> = ({
         page: 0,
         pageSize: 3,
       });
+      if (!isMountedRef.current) return;
       setConversations(result.conversations);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to load recent conversations:', err);
+      if (!isMountedRef.current) return;
       setError(
         err instanceof Error
           ? err.message
@@ -55,12 +58,17 @@ export const RecentSessions: React.FC<RecentSessionsProps> = ({
             })
       );
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [conversationHistoryService]);
 
   useEffect(() => {
     loadRecentConversations();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [loadRecentConversations]);
 
   if (isLoading) {

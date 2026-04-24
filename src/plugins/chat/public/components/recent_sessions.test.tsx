@@ -300,4 +300,51 @@ describe('RecentSessions', () => {
       .closest('.recentSessions__item');
     expect(invalidConv?.textContent).toBe('Invalid timestamp conversation');
   });
+
+  it('should not update state after component unmounts', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const delayedService = ({
+      getConversations: jest.fn().mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  conversations: mockConversations,
+                  hasMore: false,
+                  total: 3,
+                }),
+              50
+            )
+          )
+      ),
+    } as unknown) as ConversationHistoryService;
+
+    const { unmount } = render(
+      <RecentSessions
+        conversationHistoryService={delayedService}
+        onSelectConversation={mockOnSelectConversation}
+        onViewAll={mockOnViewAll}
+      />
+    );
+
+    // Unmount before the async call completes
+    unmount();
+
+    // Wait for the async call to complete
+    await waitFor(
+      () => {
+        expect(delayedService.getConversations).toHaveBeenCalled();
+      },
+      { timeout: 100 }
+    );
+
+    // No React state update warnings should be logged
+    expect(consoleError).not.toHaveBeenCalledWith(
+      expect.stringContaining("Can't perform a React state update on an unmounted component")
+    );
+
+    consoleError.mockRestore();
+  });
 });
