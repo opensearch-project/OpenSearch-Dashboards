@@ -541,6 +541,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onFillInput={setInput}
             threadId={chatService.getThreadId()}
             onShowHistory={handleShowHistory}
+            conversationHistoryService={chatService.conversationHistoryService}
+            onSelectConversation={handleSelectConversation}
             {...enhancedProps}
             startResponse={startResponse}
           />

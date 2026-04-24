@@ -14,6 +14,11 @@ import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
 import { AssistantActionService } from '../../../context_provider/public';
+import { RecentSessions } from './recent_sessions';
+import {
+  ConversationHistoryService,
+  SavedConversation,
+} from '../services/conversation_history_service';
 
 /**
  * Determine tool status based on tool call and result
@@ -67,6 +72,8 @@ interface ChatMessagesProps {
   startResponse?: boolean;
   threadId?: string;
   onShowHistory?: () => void;
+  conversationHistoryService?: ConversationHistoryService;
+  onSelectConversation?: (conversation: SavedConversation) => void;
 }
 
 /**
@@ -239,6 +246,8 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   startResponse,
   threadId,
   onShowHistory,
+  conversationHistoryService,
+  onSelectConversation,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -441,26 +450,14 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   </EuiFlexGroup>
                 </EuiPanel>
               ))}
-              {onShowHistory && (
-                <EuiPanel
-                  paddingSize="m"
-                  hasBorder
-                  className="chatMessages__suggestionCard"
-                  onClick={onShowHistory}
-                >
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="clock" color="accent" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <span>View conversation history</span>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              )}
             </div>
+            {conversationHistoryService && onSelectConversation && onShowHistory && (
+              <RecentSessions
+                conversationHistoryService={conversationHistoryService}
+                onSelectConversation={onSelectConversation}
+                onViewAll={onShowHistory}
+              />
+            )}
           </div>
         )}
 

@@ -1,0 +1,25 @@
+.recentSessions {
+  width: 100%;
+  max-width: 320px;
+
+  &__item {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
+  }
+
+  &__itemTitle {
+    min-width: 0;
+
+    span {
+      overflow: hidden;
+    }
+  }
+}

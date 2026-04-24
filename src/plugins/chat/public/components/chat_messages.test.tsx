@@ -80,10 +80,10 @@ describe('ChatMessages', () => {
     });
   });
 
-  describe('conversation history card in empty state', () => {
-    it('should render conversation history card alongside existing starter suggestions and call onShowHistory when clicked', () => {
+  describe('conversation history in empty state', () => {
+    it('should render starter suggestions without conversation history when services are not provided', () => {
       const onShowHistory = jest.fn();
-      const { getByText } = render(
+      const { getByText, queryByText } = render(
         <ChatMessages {...defaultProps} onShowHistory={onShowHistory} />
       );
 
@@ -91,16 +91,44 @@ describe('ChatMessages', () => {
       expect(getByText('Ask questions about your data')).toBeTruthy();
       expect(getByText('/investigate an issue')).toBeTruthy();
       expect(getByText('Explain a concept')).toBeTruthy();
-      // And the new history card
-      expect(getByText('View conversation history')).toBeTruthy();
+      // RecentSessions should not render without required props
+      expect(queryByText('RECENT')).toBeNull();
+    });
 
-      // Click the history card
-      const historyCard = getByText('View conversation history').closest(
-        '.chatMessages__suggestionCard'
+    it('should render RecentSessions component when all required props are provided', async () => {
+      const onShowHistory = jest.fn();
+      const onSelectConversation = jest.fn();
+      const mockConversationHistoryService = {
+        getConversations: jest.fn().mockResolvedValue({
+          conversations: [
+            {
+              id: '1',
+              threadId: 'thread-1',
+              name: 'Test conversation',
+              messages: [],
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ],
+          hasMore: false,
+          total: 1,
+        }),
+      };
+
+      const { findByText } = render(
+        <ChatMessages
+          {...defaultProps}
+          onShowHistory={onShowHistory}
+          conversationHistoryService={mockConversationHistoryService as any}
+          onSelectConversation={onSelectConversation}
+        />
       );
-      historyCard?.click();
 
-      expect(onShowHistory).toHaveBeenCalledTimes(1);
+      // Verify starter suggestions are present
+      expect(await findByText('Ask questions about your data')).toBeTruthy();
+      // RecentSessions should render with required props
+      expect(await findByText('RECENT')).toBeTruthy();
+      expect(await findByText('Test conversation')).toBeTruthy();
     });
   });
 
