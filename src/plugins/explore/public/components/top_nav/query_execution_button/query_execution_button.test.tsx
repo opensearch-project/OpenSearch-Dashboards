@@ -248,6 +248,17 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByText('Update')).toBeInTheDocument();
     // Verify the button has the primary color (blue) for consistent theming
     expect(button).toHaveClass('euiButton--primary');
+    // Verify the button is filled when needsUpdate is true
+    expect(button).toHaveClass('euiButton--fill');
+  });
+
+  it('shows unfilled button in Refresh state', () => {
+    renderWithProvider(<QueryExecutionButton />);
+
+    const button = screen.getByTestId('exploreQueryExecutionButton');
+    expect(screen.getByText('Refresh')).toBeInTheDocument();
+    expect(button).toHaveClass('euiButton--primary');
+    expect(button).not.toHaveClass('euiButton--fill');
   });
 
   describe('Cancel Button Functionality', () => {
