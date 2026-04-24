@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Subscription } from 'rxjs';
 import { EventType } from '../../common/events';
 import type {
   Event as ChatEvent,
@@ -63,7 +64,7 @@ export class ChatEventHandler {
   private onStartResponse: (flag: boolean) => void;
   private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
-  private toolResultSubscription: any = null;
+  private toolResultSubscription: Subscription | null = null;
 
   // Telemetry tracking
   private interactionStartTime: number | null = null;
@@ -740,6 +741,8 @@ export class ChatEventHandler {
     if (this.toolResultSubscription) {
       this.toolResultSubscription.unsubscribe();
       this.toolResultSubscription = null;
+      this.onStreamingStateChange(false);
+      this.onStartResponse(false);
     }
   }
 }
