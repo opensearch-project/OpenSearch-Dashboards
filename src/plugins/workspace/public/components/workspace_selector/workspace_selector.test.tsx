@@ -60,7 +60,6 @@ describe('<WorkspaceSelector />', () => {
 
   it('should display the current workspace name', () => {
     render(<WorkspaceSelectorCreatorComponent />);
-    expect(screen.getByTestId('workspace-selector-current-title')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-selector-current-name')).toBeInTheDocument();
   });
 

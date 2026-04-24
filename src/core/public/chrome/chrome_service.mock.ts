@@ -44,6 +44,7 @@ const createSetupContractMock = () => {
     globalSearch: {
       registerSearchCommand: jest.fn(),
     },
+    getIsIconSideNavEnabled: jest.fn().mockReturnValue(false),
   };
 };
 
@@ -77,11 +78,13 @@ const createStartContractMock = () => {
       registerRight: jest.fn(),
       registerLeftBottom: jest.fn(),
       registerPrimaryHeaderRight: jest.fn(),
+      registerIconSideNavFooter: jest.fn(),
       getLeft$: jest.fn(),
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
       getLeftBottom$: jest.fn(),
       getPrimaryHeaderRight$: jest.fn(),
+      getIconSideNavFooter$: jest.fn(),
     },
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
@@ -117,6 +120,7 @@ const createStartContractMock = () => {
     setCustomNavLink: jest.fn(),
     getGlobalBanner$: jest.fn(),
     setGlobalBanner: jest.fn(),
+    getIsIconSideNavEnabled: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
@@ -128,6 +132,7 @@ const createStartContractMock = () => {
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getGlobalBanner$.mockReturnValue(new BehaviorSubject(undefined));
+  startContract.getIsIconSideNavEnabled.mockReturnValue(false);
   return startContract;
 };
 

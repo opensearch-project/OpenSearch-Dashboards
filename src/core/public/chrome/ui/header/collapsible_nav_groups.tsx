@@ -4,15 +4,24 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSideNavItemType,
+  EuiSideNav,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
+import { Observable } from 'rxjs';
 import classNames from 'classnames';
 import { ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 import { CollapsibleNavGroupsLabel, getIsCategoryOpen } from './collapsible_nav_groups_label';
+import { NavLinkBadge } from './nav_link_badge';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
@@ -26,6 +35,7 @@ export interface NavGroupsProps {
   ) => void;
   categoryCollapsible?: boolean;
   currentWorkspaceId?: string;
+  enableIconSideNav?: boolean;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -43,6 +53,7 @@ export function NavGroups({
   onNavItemClick,
   categoryCollapsible,
   currentWorkspaceId,
+  enableIconSideNav,
 }: NavGroupsProps) {
   const [, setRenderKey] = useState(Date.now());
   const createNavItem = ({
@@ -62,13 +73,43 @@ export function NavGroups({
       },
     });
 
+    const renderName = () => {
+      if (!enableIconSideNav) {
+        return <EuiText>{link.title}</EuiText>;
+      }
+      const linkBadge$ = (link as ChromeNavLink & {
+        badge$?: Observable<number | string | undefined>;
+      }).badge$;
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {link.euiIconType && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={link.euiIconType} size="m" className="nav-link-icon" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <span className="nav-link-label">
+              <EuiText>{link.title}</EuiText>
+            </span>
+          </EuiFlexItem>
+          {linkBadge$ && (
+            <EuiFlexItem grow={false}>
+              <NavLinkBadge badge$={linkBadge$} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    };
+
     return {
       id: `${link.id}-${link.title}`,
-      name: <EuiText>{link.title}</EuiText>,
+      name: renderName(),
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
-      className: `nav-link-item ${className || ''}`,
+      className: classNames('nav-link-item', className, {
+        'nav-link-item--active': euiListItem.isActive,
+      }),
       buttonClassName: 'nav-link-item-btn',
       'data-test-subj': euiListItem['data-test-subj'],
       'aria-label': link.title,

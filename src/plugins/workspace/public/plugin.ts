@@ -476,6 +476,7 @@ export class WorkspacePlugin
           title: i18n.translate('workspace.nav.essential_overview.title', {
             defaultMessage: 'Overview',
           }),
+          euiIconType: 'home',
         },
       ]);
 
@@ -514,6 +515,7 @@ export class WorkspacePlugin
           title: i18n.translate('workspace.nav.analyticsAll_overview.title', {
             defaultMessage: 'Overview',
           }),
+          euiIconType: 'home',
         },
       ]);
 
@@ -538,6 +540,7 @@ export class WorkspacePlugin
         title: i18n.translate('workspace.settings.workspaces', {
           defaultMessage: 'Workspaces',
         }),
+        euiIconType: 'workspacesApp',
       },
     ]);
 

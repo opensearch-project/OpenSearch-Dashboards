@@ -284,6 +284,7 @@ export class ManagementPlugin
       {
         id: settingsLandingPageId,
         order: 0,
+        euiIconType: 'managementApp',
       },
     ]);
 
@@ -291,6 +292,7 @@ export class ManagementPlugin
       {
         id: dataAdministrationLandingPageId,
         order: 0,
+        euiIconType: 'managementApp',
       },
     ]);
 

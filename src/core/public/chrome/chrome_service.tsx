@@ -121,6 +121,7 @@ export interface ChromeGlobalBanner {
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export interface StartDeps {
@@ -151,6 +152,7 @@ export class ChromeService {
   private readonly navGroup = new ChromeNavGroupService();
   private readonly globalSearch = new GlobalSearchService();
   private useUpdatedHeader = false;
+  private enableIconSideNav = false;
   private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   private navGroupStart?: ChromeNavGroupServiceStartContract;
@@ -220,9 +222,11 @@ export class ChromeService {
     );
   }
 
-  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+  public setup({ uiSettings, injectedMetadata }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
+
+    this.enableIconSideNav = injectedMetadata.getEnableIconSideNav();
 
     globalSearch.registerSearchCommand({
       id: 'pagesSearch',
@@ -243,6 +247,7 @@ export class ChromeService {
       },
       navGroup,
       globalSearch,
+      getIsIconSideNavEnabled: () => this.enableIconSideNav,
     };
   }
 
@@ -410,6 +415,7 @@ export class ChromeService {
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           navControlsLeftBottom$={navControls.getLeftBottom$()}
           navControlsPrimaryHeaderRight$={navControls.getPrimaryHeaderRight$()}
+          navControlsIconSideNavFooter$={navControls.getIconSideNavFooter$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
@@ -424,6 +430,7 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
+          enableIconSideNav={this.enableIconSideNav}
           globalSearchCommands$={globalSearch.getAllSearchCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
           keyboardShortcut={keyboardShortcut}
@@ -497,6 +504,8 @@ export class ChromeService {
       setGlobalBanner: (banner?: ChromeGlobalBanner) => {
         this.globalBanner$.next(banner);
       },
+
+      getIsIconSideNavEnabled: () => this.enableIconSideNav,
     };
   }
 
@@ -523,6 +532,7 @@ export interface ChromeSetup {
   navGroup: ChromeNavGroupServiceSetupContract;
   /** {@inheritdoc GlobalSearchService} */
   globalSearch: GlobalSearchServiceSetupContract;
+  getIsIconSideNavEnabled: () => boolean;
 }
 
 /**
@@ -686,6 +696,11 @@ export interface ChromeStart {
    * Set or unset the global banner component
    */
   setGlobalBanner(banner?: ChromeGlobalBanner): void;
+
+  /**
+   * Returns whether the icon side nav is enabled via config.
+   */
+  getIsIconSideNavEnabled(): boolean;
 }
 
 /** @internal */

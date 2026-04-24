@@ -69,6 +69,13 @@ export interface ChromeNavControls {
   registerLeftBottom(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the right side of the primary chrome header. */
   registerPrimaryHeaderRight(navControl: ChromeNavControl): void;
+  /**
+   * Register a nav control to be presented at the bottom of the icon side navigation
+   * (visible in the collapsed state of the observability workspace's icon rail).
+   * Plugins opt into this slot to keep a utility entry-point reachable while the
+   * sidebar is collapsed.
+   */
+  registerIconSideNavFooter(navControl: ChromeNavControl): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
@@ -79,6 +86,8 @@ export interface ChromeNavControls {
   getLeftBottom$(): Observable<ChromeNavControl[]>;
   /** @internal */
   getPrimaryHeaderRight$(): Observable<ChromeNavControl[]>;
+  /** @internal */
+  getIconSideNavFooter$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */
@@ -95,6 +104,9 @@ export class NavControlsService {
     );
     const navControlsLeftBottom$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsPrimaryHeaderRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
+      new Set()
+    );
+    const navControlsIconSideNavFooter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
       new Set()
     );
 
@@ -130,6 +142,11 @@ export class NavControlsService {
           new Set([...navControlsPrimaryHeaderRight$.value.values(), navControl])
         ),
 
+      registerIconSideNavFooter: (navControl: ChromeNavControl) =>
+        navControlsIconSideNavFooter$.next(
+          new Set([...navControlsIconSideNavFooter$.value.values(), navControl])
+        ),
+
       getLeft$: () =>
         navControlsLeft$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
@@ -162,6 +179,11 @@ export class NavControlsService {
         ),
       getPrimaryHeaderRight$: () =>
         navControlsPrimaryHeaderRight$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getIconSideNavFooter$: () =>
+        navControlsIconSideNavFooter$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
