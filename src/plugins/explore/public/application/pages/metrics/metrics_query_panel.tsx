@@ -90,6 +90,7 @@ export const MetricsQueryPanel: React.FC = () => {
   const syncEditorText = useCallback(
     (updatedRows: QueryRow[]) => {
       const combined = joinRows(updatedRows);
+      if (combined === lastDispatchedRef.current) return;
       lastDispatchedRef.current = combined;
       setEditorText(combined);
       const currentQuery = queryString.getQuery();
