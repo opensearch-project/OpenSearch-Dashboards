@@ -130,10 +130,18 @@ export const SparklineChart: React.FC<ChartProps> = ({
         backgroundColor: isDarkMode ? '#1e1e1e' : '#fff',
         borderColor: isDarkMode ? '#444' : '#ddd',
         textStyle: { fontSize: 12, color: isDarkMode ? '#ddd' : '#333' },
+        // Build the tooltip with DOM APIs and assign user-controlled strings
+        // via textContent so Prometheus-supplied series names cannot inject
+        // markup. ECharts accepts HTMLElement / DocumentFragment return values.
         formatter: (params: any) => {
           const items = Array.isArray(params) ? params : [params];
           if (!items.length) return '';
-          const time = new Date(items[0].value[0]).toLocaleString([], {
+          const frag = document.createDocumentFragment();
+
+          const header = document.createElement('div');
+          header.style.fontWeight = '500';
+          header.style.marginBottom = '4px';
+          header.textContent = new Date(items[0].value[0]).toLocaleString([], {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
@@ -141,18 +149,33 @@ export const SparklineChart: React.FC<ChartProps> = ({
             minute: '2-digit',
             second: '2-digit',
           });
+          frag.appendChild(header);
+
           const sorted = [...items].sort((a, b) => (b.value[1] ?? 0) - (a.value[1] ?? 0));
-          const lines = sorted.map(
-            (p: any) =>
-              `<span style="display:inline-block;width:10px;height:3px;background:${
-                p.color
-              };border-radius:1px;margin-right:6px"></span>${
-                p.seriesName
-              } <b style="float:right;margin-left:12px">${formatValue(p.value[1])}</b>`
-          );
-          return `<div style="font-weight:500;margin-bottom:4px">${time}</div>${lines.join(
-            '<br/>'
-          )}`;
+          sorted.forEach((p: any, i: number) => {
+            if (i > 0) frag.appendChild(document.createElement('br'));
+
+            const swatch = document.createElement('span');
+            swatch.style.display = 'inline-block';
+            swatch.style.width = '10px';
+            swatch.style.height = '3px';
+            // Series color is sourced from our SERIES_COLORS palette, not user
+            // input, so setting it as a style value is safe.
+            swatch.style.background = p.color;
+            swatch.style.borderRadius = '1px';
+            swatch.style.marginRight = '6px';
+            frag.appendChild(swatch);
+
+            frag.appendChild(document.createTextNode(`${p.seriesName} `));
+
+            const value = document.createElement('b');
+            value.style.float = 'right';
+            value.style.marginLeft = '12px';
+            value.textContent = formatValue(p.value[1]);
+            frag.appendChild(value);
+          });
+
+          return frag as any;
         },
       },
       xAxis: {
