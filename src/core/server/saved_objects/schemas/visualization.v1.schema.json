@@ -1,0 +1,436 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opensearch.org/schemas/saved-objects/visualization.v1.schema.json",
+  "title": "OpenSearch Dashboards Visualization Saved Object v1",
+  "description": "Schema for a visualization saved object, representing a configured chart or data display with aggregation and rendering parameters.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title of the visualization."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the visualization."
+    },
+    "version": {
+      "type": "integer",
+      "description": "Saved object schema version for migration tracking."
+    },
+    "visState": {
+      "type": "string",
+      "description": "JSON-serialized visualization state including type, params, and aggregation configuration.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/visStateObject"
+      }
+    },
+    "uiStateJSON": {
+      "type": "string",
+      "description": "JSON-serialized UI state (e.g. legend open/closed, per-series colors, collapsed agg rows).",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/uiStateObject"
+      }
+    },
+    "savedSearchRefName": {
+      "type": "string",
+      "description": "Reference name linking to a saved search, resolved via the references array."
+    },
+    "kibanaSavedObjectMeta": {
+      "$ref": "common.schema.json#/$defs/kibanaSavedObjectMeta"
+    },
+    "references": {
+      "$ref": "common.schema.json#/$defs/references"
+    }
+  },
+  "required": ["title", "visState"],
+  "additionalProperties": false,
+  "$defs": {
+    "visStateObject": {
+      "type": "object",
+      "description": "Parsed visualization state containing type, rendering params, and aggregation definitions.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title embedded in the visualization state (should match the top-level title)."
+        },
+        "type": {
+          "type": "string",
+          "description": "Visualization type identifier (e.g. 'histogram', 'pie', 'line', 'metric', 'table', 'markdown', 'vega', 'area', 'region_map', 'tile_map', 'tagcloud', 'gauge', 'goal', 'heatmap', 'input_control_vis', 'timelion')."
+        },
+        "params": {
+          "$ref": "#/$defs/visParams"
+        },
+        "aggs": {
+          "type": "array",
+          "description": "Aggregation configurations that define what data the visualization queries.",
+          "items": {
+            "$ref": "#/$defs/aggConfig"
+          }
+        }
+      },
+      "required": ["type"],
+      "additionalProperties": true
+    },
+    "visParams": {
+      "type": "object",
+      "description": "Visualization rendering parameters. Schema varies by visualization type.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Rendering type hint (e.g. 'histogram', 'line')."
+        },
+        "grid": {
+          "type": "object",
+          "description": "Grid line configuration for chart axes.",
+          "properties": {
+            "categoryLines": {
+              "type": "boolean"
+            },
+            "valueAxis": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "categoryAxes": {
+          "type": "array",
+          "description": "Category (X) axis configurations.",
+          "items": {
+            "$ref": "#/$defs/axis"
+          }
+        },
+        "valueAxes": {
+          "type": "array",
+          "description": "Value (Y) axis configurations.",
+          "items": {
+            "$ref": "#/$defs/axis"
+          }
+        },
+        "seriesParams": {
+          "type": "array",
+          "description": "Per-series rendering settings.",
+          "items": {
+            "$ref": "#/$defs/seriesParam"
+          }
+        },
+        "addLegend": {
+          "type": "boolean",
+          "description": "Whether to show the legend."
+        },
+        "addTooltip": {
+          "type": "boolean",
+          "description": "Whether to show tooltips on hover."
+        },
+        "legendPosition": {
+          "type": "string",
+          "description": "Legend placement.",
+          "enum": ["top", "bottom", "left", "right"]
+        },
+        "times": {
+          "type": "array",
+          "description": "Time marker configurations."
+        },
+        "addTimeMarker": {
+          "type": "boolean",
+          "description": "Whether to show a time marker line."
+        },
+        "labels": {
+          "$ref": "common.schema.json#/$defs/labels"
+        },
+        "thresholdLine": {
+          "type": "object",
+          "description": "Threshold line configuration.",
+          "properties": {
+            "show": { "type": "boolean" },
+            "value": { "type": "number" },
+            "width": { "type": "number" },
+            "style": { "type": "string" },
+            "color": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "dimensions": {
+          "type": "object",
+          "description": "Dimensional mapping for expression-based rendering.",
+          "additionalProperties": true
+        },
+        "perPage": {
+          "type": "integer",
+          "description": "Rows per page for table visualizations."
+        },
+        "percentageCol": {
+          "type": "string",
+          "description": "Column to show percentages for in table visualizations."
+        },
+        "showPartialRows": {
+          "type": "boolean"
+        },
+        "showMetricsAtAllLevels": {
+          "type": "boolean"
+        },
+        "showTotal": {
+          "type": "boolean"
+        },
+        "totalFunc": {
+          "type": "string",
+          "enum": ["sum", "avg", "min", "max", "count"]
+        },
+        "isDonut": {
+          "type": "boolean",
+          "description": "Whether to render a pie chart as a donut."
+        },
+        "fontSize": {
+          "type": "number",
+          "description": "Font size for metric/markdown visualizations."
+        },
+        "markdown": {
+          "type": "string",
+          "description": "Markdown content for markdown visualizations."
+        },
+        "annotations": {
+          "$ref": "common.schema.json#/$defs/annotations"
+        }
+      },
+      "additionalProperties": true
+    },
+    "axis": {
+      "type": "object",
+      "description": "Axis configuration for chart visualizations.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["category", "value"]
+        },
+        "name": {
+          "type": "string"
+        },
+        "show": {
+          "type": "boolean"
+        },
+        "position": {
+          "type": "string",
+          "enum": ["top", "bottom", "left", "right"]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["normal", "percentage", "wiggle", "silhouette"]
+        },
+        "title": {
+          "type": "object",
+          "properties": {
+            "text": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "labels": {
+          "$ref": "common.schema.json#/$defs/labels"
+        },
+        "scale": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["linear", "log", "square root"]
+            },
+            "mode": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "style": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": true
+    },
+    "seriesParam": {
+      "type": "object",
+      "description": "Configuration for a single data series in a chart.",
+      "properties": {
+        "show": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string",
+          "description": "Chart type for this series.",
+          "enum": ["histogram", "line", "area"]
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["normal", "stacked", "percentage"]
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string" },
+            "id": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "valueAxis": {
+          "type": "string"
+        },
+        "drawLinesBetweenPoints": {
+          "type": "boolean"
+        },
+        "showCircles": {
+          "type": "boolean"
+        },
+        "interpolate": {
+          "type": "string"
+        },
+        "lineWidth": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    },
+    "aggConfig": {
+      "type": "object",
+      "description": "Aggregation configuration defining a metric or bucket aggregation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this aggregation."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this aggregation is active."
+        },
+        "type": {
+          "type": "string",
+          "description": "Aggregation type (e.g. 'count', 'avg', 'sum', 'min', 'max', 'terms', 'date_histogram', 'histogram', 'range', 'filters', 'significant_terms', 'percentiles', 'percentile_ranks', 'top_hits', 'cardinality', 'median', 'std_dev', 'geo_bounds', 'geo_centroid')."
+        },
+        "schema": {
+          "type": "string",
+          "description": "Aggregation schema role (e.g. 'metric', 'segment', 'group', 'split', 'radius', 'width')."
+        },
+        "params": {
+          "type": "object",
+          "description": "Aggregation-specific parameters (e.g. field, interval, order, size).",
+          "properties": {
+            "field": {
+              "type": "string",
+              "description": "Field name to aggregate on."
+            },
+            "interval": {
+              "description": "Bucket interval (numeric or keyword like 'auto', '1h')."
+            },
+            "order": {
+              "type": "string",
+              "enum": ["desc", "asc"]
+            },
+            "orderBy": {
+              "type": ["string", "integer"],
+              "description": "Metric ID or special value ('_key', '_count') to order buckets by."
+            },
+            "size": {
+              "type": "integer",
+              "description": "Number of buckets to return."
+            },
+            "min_doc_count": {
+              "type": "integer"
+            },
+            "extended_bounds": {
+              "type": "object",
+              "properties": {
+                "min": {},
+                "max": {}
+              },
+              "additionalProperties": false
+            },
+            "customLabel": {
+              "type": "string",
+              "description": "Custom display label for the aggregation."
+            },
+            "json": {
+              "type": "string",
+              "description": "Raw JSON to merge into the aggregation DSL."
+            },
+            "percents": {
+              "type": "array",
+              "items": { "type": "number" },
+              "description": "Percentile values for percentile aggregations."
+            },
+            "ranges": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "from": {},
+                  "to": {}
+                },
+                "additionalProperties": true
+              }
+            },
+            "filters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "input": {
+                    "type": "object",
+                    "properties": {
+                      "query": { "type": "string" },
+                      "language": { "type": "string" }
+                    },
+                    "additionalProperties": true
+                  },
+                  "label": { "type": "string" }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["id", "type", "schema"],
+      "additionalProperties": true
+    },
+    "uiStateObject": {
+      "type": "object",
+      "description": "UI-level state not part of the visualization definition but persisted for user convenience.",
+      "properties": {
+        "vis": {
+          "type": "object",
+          "description": "Visualization UI state (e.g. legend open, per-series visibility).",
+          "properties": {
+            "legendOpen": {
+              "type": "boolean"
+            },
+            "colors": {
+              "type": "object",
+              "description": "Map of series label to color override.",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "spy": {
+          "type": "object",
+          "description": "Spy panel (data table inspector) UI state.",
+          "properties": {
+            "mode": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
