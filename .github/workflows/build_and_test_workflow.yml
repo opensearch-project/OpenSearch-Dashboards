@@ -201,6 +201,46 @@ jobs:
           path: ${{ env.YARN_CACHE_LOCATION }}
           key: yarn-Windows-${{ hashFiles('**/yarn.lock') }}
 
+  build-sanity:
+    name: Build release artifact sanity check
+    needs: [changes]
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Restore Yarn Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-Linux-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: yarn-Linux-
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Build release artifact
+        run: yarn build --skip-os-packages --release
+
   build-test:
     name: Build and Verify on ${{ matrix.name }} (ciGroup${{ matrix.group }})
     needs: [changes, prepare-source, prepare-windows-cache]
@@ -957,6 +997,7 @@ jobs:
     if: always()
     needs:
       - changes
+      - build-sanity
       - build-test
       - build-plugins-artifact
       - integration-tests
@@ -970,6 +1011,7 @@ jobs:
         run: |
           results=( \
             "${{ needs.lint-and-validate.result }}" \
+            "${{ needs.build-sanity.result }}" \
             "${{ needs.build-test.result }}" \
             "${{ needs.integration-tests.result }}" \
             "${{ needs.functional-tests.result }}" \
