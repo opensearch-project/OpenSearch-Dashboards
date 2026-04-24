@@ -14,6 +14,11 @@ import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
 import { AssistantActionService } from '../../../context_provider/public';
+import { RecentSessions } from './recent_sessions';
+import {
+  ConversationHistoryService,
+  SavedConversation,
+} from '../services/conversation_history_service';
 
 /**
  * Determine tool status based on tool call and result
@@ -31,7 +36,8 @@ interface SuggestionItem {
   icon: string;
   iconColor?: string;
   text: string;
-  prompt: string;
+  prompt?: string;
+  action?: () => void;
 }
 
 const STARTER_SUGGESTIONS: SuggestionItem[] = [
@@ -65,6 +71,9 @@ interface ChatMessagesProps {
   onFillInput?: (content: string) => void;
   startResponse?: boolean;
   threadId?: string;
+  onShowHistory?: () => void;
+  conversationHistoryService?: ConversationHistoryService;
+  onSelectConversation?: (conversation: SavedConversation) => void;
 }
 
 /**
@@ -236,6 +245,9 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onFillInput,
   startResponse,
   threadId,
+  onShowHistory,
+  conversationHistoryService,
+  onSelectConversation,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -418,7 +430,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   paddingSize="m"
                   hasBorder
                   className="chatMessages__suggestionCard"
-                  onClick={() => onFillInput?.(suggestion.prompt)}
+                  onClick={() => {
+                    if (suggestion.action) {
+                      suggestion.action();
+                    } else if (suggestion.prompt) {
+                      onFillInput?.(suggestion.prompt);
+                    }
+                  }}
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -433,6 +451,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                 </EuiPanel>
               ))}
             </div>
+            {conversationHistoryService && onSelectConversation && onShowHistory && (
+              <RecentSessions
+                conversationHistoryService={conversationHistoryService}
+                onSelectConversation={onSelectConversation}
+                onViewAll={onShowHistory}
+              />
+            )}
           </div>
         )}
 

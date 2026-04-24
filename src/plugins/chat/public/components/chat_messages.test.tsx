@@ -80,6 +80,58 @@ describe('ChatMessages', () => {
     });
   });
 
+  describe('conversation history in empty state', () => {
+    it('should render starter suggestions without conversation history when services are not provided', () => {
+      const onShowHistory = jest.fn();
+      const { getByText, queryByText } = render(
+        <ChatMessages {...defaultProps} onShowHistory={onShowHistory} />
+      );
+
+      // Verify all starter suggestions are still present
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+      expect(getByText('/investigate an issue')).toBeTruthy();
+      expect(getByText('Explain a concept')).toBeTruthy();
+      // RecentSessions should not render without required props
+      expect(queryByText('RECENT')).toBeNull();
+    });
+
+    it('should render RecentSessions component when all required props are provided', async () => {
+      const onShowHistory = jest.fn();
+      const onSelectConversation = jest.fn();
+      const mockConversationHistoryService = {
+        getConversations: jest.fn().mockResolvedValue({
+          conversations: [
+            {
+              id: '1',
+              threadId: 'thread-1',
+              name: 'Test conversation',
+              messages: [],
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ],
+          hasMore: false,
+          total: 1,
+        }),
+      };
+
+      const { findByText } = render(
+        <ChatMessages
+          {...defaultProps}
+          onShowHistory={onShowHistory}
+          conversationHistoryService={mockConversationHistoryService as any}
+          onSelectConversation={onSelectConversation}
+        />
+      );
+
+      // Verify starter suggestions are present
+      expect(await findByText('Ask questions about your data')).toBeTruthy();
+      // RecentSessions should render with required props
+      expect(await findByText('RECENT')).toBeTruthy();
+      expect(await findByText('Test conversation')).toBeTruthy();
+    });
+  });
+
   describe('smart scroll functionality', () => {
     // Mock scrollIntoView
     beforeEach(() => {
