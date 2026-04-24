@@ -16,10 +16,14 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiSmallButtonIcon,
+  EuiPanel,
+  EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { VariableService } from '../../../variables/variable_service';
 import { VariableWithState } from '../../../variables/types';
+import './variable_selector.scss';
 
 export interface VariablesBarProps {
   variableService: VariableService;
@@ -102,6 +106,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
         .filter((opt) => opt.checked === 'on' && opt.key !== ALL_OPTION_VALUE)
         .map((opt) => opt.label);
       onValuesChange(variable.id, values);
+
+      // Close popover after selection for single-select mode
+      if (!variable.multi && values.length > 0) {
+        setIsOpen(false);
+      }
     },
     [
       variable.id,
@@ -121,19 +130,21 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
   }, [variable.options]);
 
   const isLoading = !!variable.loading;
+  const isError = !!variable.error;
 
   const getDisplayText = () => {
+    // Priority order: loading > error > selected values > empty state
+    if (isLoading) {
+      return i18n.translate('dashboard.variables.loading', { defaultMessage: 'Loading...' });
+    }
+    if (isError) {
+      return i18n.translate('dashboard.variables.error', { defaultMessage: 'Error' });
+    }
     if (isAllSelected) {
       return i18n.translate('dashboard.variables.allSelected', { defaultMessage: 'All' });
     }
     if (selectedValues.length > 0) {
       return selectedValues[0];
-    }
-    if (isLoading) {
-      return i18n.translate('dashboard.variables.loading', { defaultMessage: 'Loading...' });
-    }
-    if (variable.error) {
-      return i18n.translate('dashboard.variables.error', { defaultMessage: 'Error' });
     }
     if (variable.options.length === 0) {
       return i18n.translate('dashboard.variables.displayNoOptions', {
@@ -143,99 +154,103 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     return i18n.translate('dashboard.variables.selectValue', { defaultMessage: 'Select value' });
   };
   const selectedCount = isAllSelected ? variable.options.length : selectedValues.length;
+  const displayLabel = variable.label || variable.name;
+  const calculatedMinWidth = Math.max(60, displayLabel.length * 5 + 60);
+
+  // Container class with error state
+  const containerClassName = `variableSelectorContainer ${
+    variable.error ? 'variableSelectorContainer--error' : ''
+  }`;
 
   // Button that triggers the popover
   const button = (
-    <EuiSmallButtonEmpty
-      onClick={() => setIsOpen(!isOpen)}
-      iconType="arrowDown"
-      iconSide="right"
-      iconSize="s"
-      color="text"
-      isLoading={isLoading}
-      style={{ width: 'fit-content', maxWidth: 'none', padding: '0px' }}
-      data-test-subj={`variable-${variable.name}`}
-      className="euiSuperSelectControl euiSuperSelectControl--compressed euiSuperSelectControl--inGroup"
-    >
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={true}>
-          <EuiText
-            size="s"
-            style={{
-              maxWidth: '50vw',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
+    <EuiToolTip content={variable.description} position="bottom">
+      <div
+        className={containerClassName}
+        data-label={displayLabel}
+        data-test-subj={`variable-${variable.name}`}
+        style={{ minWidth: `${calculatedMinWidth}px` }}
+      >
+        <EuiPanel
+          data-test-subj="variable-selector-button"
+          paddingSize="none"
+          color="transparent"
+          hasBorder={false}
+          hasShadow={false}
+          onClick={() => setIsOpen(!isOpen)}
+          className="variableSelectorPopoverButton"
+          disabled={isLoading || isError}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            justifyContent="spaceBetween"
+            responsive={false}
           >
-            {getDisplayText()}
-          </EuiText>
-        </EuiFlexItem>
-        {variable.multi && selectedCount > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{selectedCount}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiSmallButtonEmpty>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" justifyContent="flexStart" responsive={false}>
+                <EuiFlexItem style={{ maxWidth: '300px' }}>
+                  <EuiText color="subdued" size="s" data-test-subj="variable-selector-current">
+                    <div className="eui-textTruncate">{getDisplayText()}</div>
+                  </EuiText>
+                </EuiFlexItem>
+                {!isError && !isLoading && variable.multi && selectedCount > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{selectedCount}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isLoading ? (
+                <EuiLoadingSpinner />
+              ) : isError ? (
+                <span className="variableSelectorErrorIcon">
+                  <EuiIconTip color="warning" type="alert" size="m" content={variable.error} />
+                </span>
+              ) : (
+                <EuiIcon type="arrowDown" size="m" />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </div>
+    </EuiToolTip>
   );
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="stretch" responsive={false}>
-      <EuiFlexItem
-        grow={false}
-        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+    <EuiPopover
+      button={button}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      panelStyle={{ width: popoverWidth }}
+    >
+      <EuiSelectable
+        options={selectableOptions}
+        onChange={handleChange}
+        searchable
+        searchProps={{
+          placeholder: i18n.translate('dashboard.variables.searchPlaceholder', {
+            defaultMessage: 'Contains...',
+          }),
+          compressed: true,
+        }}
+        height={300}
+        singleSelection={variable.multi ? false : 'always'}
+        emptyMessage={i18n.translate('dashboard.variables.noOptions', {
+          defaultMessage: 'No options available',
+        })}
       >
-        <EuiText size="xs" color="subdued">
-          <strong style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            {variable.label || variable.name}
-            {variable.description && (
-              <EuiToolTip content={variable.description} position="bottom">
-                <EuiIcon type="iInCircle" style={{ padding: 0, width: 16 }} />
-              </EuiToolTip>
-            )}
-            {variable.error && (
-              <EuiToolTip content={variable.error} position="bottom">
-                <EuiIcon type="alert" color="danger" style={{ padding: 0, width: 16 }} />
-              </EuiToolTip>
-            )}
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={button}
-          isOpen={isOpen}
-          closePopover={() => setIsOpen(false)}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          panelStyle={{ width: popoverWidth }}
-        >
-          <EuiSelectable
-            options={selectableOptions}
-            onChange={handleChange}
-            searchable
-            searchProps={{
-              placeholder: i18n.translate('dashboard.variables.searchPlaceholder', {
-                defaultMessage: 'Contains...',
-              }),
-              compressed: true,
-            }}
-            height={300}
-            singleSelection={variable.multi ? false : 'always'}
-            emptyMessage={i18n.translate('dashboard.variables.noOptions', {
-              defaultMessage: 'No options available',
-            })}
-          >
-            {(list, search) => (
-              <div>
-                <div style={{ padding: '8px 8px 0 8px' }}>{search}</div>
-                {list}
-              </div>
-            )}
-          </EuiSelectable>
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        {(list, search) => (
+          <div>
+            <div style={{ padding: '8px 8px 0 8px' }}>{search}</div>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };
 
