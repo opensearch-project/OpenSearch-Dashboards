@@ -4,6 +4,10 @@
     - [Read_only_mode](capabilities/read_only_mode.md)
   - Charts
     - [Current_usage](charts/current_usage.md)
+  - [Dashboards as code](dashboards-as-code/README.md)
+  - Design
+    - [Openapi client generation](design/openapi-client-generation.md)
+    - [Perses compatibility layer](design/perses-compatibility-layer.md)
   - Docker dev
     - [Docker dev setup manual](docker-dev/docker-dev-setup-manual.md)
   - Multi datasource
@@ -23,6 +27,9 @@
       - [Explore plugin components](plugins/explore/explore-plugin-components.md)
       - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
+  - Requirements
+    - [RFC](requirements/RFC.md)
+    - [Dashboards as code requirements](requirements/dashboards-as-code-requirements.md)
   - Saved_objects
     - [Pluggable_storage_backend](saved_objects/pluggable_storage_backend.md)
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
@@ -128,7 +135,6 @@
     - [Osd ace](../packages/osd-ace/README.md)
     - [Osd agents](../packages/osd-agents/README.md)
     - [Osd apm config loader](../packages/osd-apm-config-loader/README.md)
-    - [Osd apm topology](../packages/osd-apm-topology/README.md)
     - [Osd babel preset](../packages/osd-babel-preset/README.md)
     - [Osd config](../packages/osd-config/README.md)
     - [Osd config schema](../packages/osd-config-schema/README.md)
@@ -213,13 +219,11 @@
     - [Opensearch dashboards.release notes 3.2.0](../release-notes/opensearch-dashboards.release-notes-3.2.0.md)
     - [Opensearch dashboards.release notes 3.3.0](../release-notes/opensearch-dashboards.release-notes-3.3.0.md)
     - [Opensearch dashboards.release notes 3.4.0](../release-notes/opensearch-dashboards.release-notes-3.4.0.md)
-    - [Opensearch dashboards.release notes 3.5.0](../release-notes/opensearch-dashboards.release-notes-3.5.0.md)
-    - [Opensearch dashboards.release notes 3.6.0](../release-notes/opensearch-dashboards.release-notes-3.6.0.md)
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
   - [Theme](theme.md)
-  - [CLAUDE](../CLAUDE.md)
+  - [CHANGELOG](../CHANGELOG.md)
   - [CODE_OF_CONDUCT](../CODE_OF_CONDUCT.md)
   - [COMMUNICATIONS](../COMMUNICATIONS.md)
   - [CONTRIBUTING](../CONTRIBUTING.md)
