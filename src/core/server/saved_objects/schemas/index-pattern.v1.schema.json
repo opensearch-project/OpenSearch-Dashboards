@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opensearch.org/schemas/saved-objects/index-pattern.v1.schema.json",
+  "title": "OpenSearch Dashboards Index Pattern Saved Object v1",
+  "description": "Schema for an index pattern saved object, defining the mapping between an OpenSearch index (or index pattern wildcard) and the fields, formats, and metadata used by Dashboards.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The index pattern string (e.g. 'logs-*', 'opensearch_dashboards_sample_data_logs')."
+    },
+    "timeFieldName": {
+      "type": "string",
+      "description": "Name of the time field used for time-based queries and visualizations."
+    },
+    "intervalName": {
+      "type": "string",
+      "description": "Time interval name for time-based index patterns (deprecated)."
+    },
+    "fields": {
+      "type": "string",
+      "description": "JSON-serialized array of field specifications defining all known fields in the index pattern.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/fieldsArray"
+      }
+    },
+    "fieldFormatMap": {
+      "type": "string",
+      "description": "JSON-serialized map of field name to serialized field format configuration.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/fieldFormatMapObject"
+      }
+    },
+    "sourceFilters": {
+      "type": "string",
+      "description": "JSON-serialized array of source filter objects that control which _source fields are returned.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/sourceFiltersArray"
+      }
+    },
+    "typeMeta": {
+      "type": "string",
+      "description": "JSON-serialized type metadata including aggregation restrictions for rollup index patterns.",
+      "contentMediaType": "application/json",
+      "contentSchema": {
+        "$ref": "#/$defs/typeMetaObject"
+      }
+    },
+    "type": {
+      "type": "string",
+      "description": "Index pattern type identifier (e.g. 'rollup' for rollup index patterns). Omitted for standard patterns."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Optional display name shown instead of the index pattern title in the UI."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the index pattern."
+    },
+    "signalType": {
+      "type": "string",
+      "description": "Signal type classification (e.g. 'logs', 'metrics', 'traces')."
+    },
+    "schemaMappings": {
+      "type": "string",
+      "description": "JSON-serialized schema mappings for field name normalization across data sources.",
+      "contentMediaType": "application/json"
+    },
+    "references": {
+      "$ref": "common.schema.json#/$defs/references"
+    }
+  },
+  "required": ["title"],
+  "additionalProperties": false,
+  "$defs": {
+    "fieldsArray": {
+      "type": "array",
+      "description": "Array of field specifications.",
+      "items": {
+        "$ref": "#/$defs/fieldSpec"
+      }
+    },
+    "fieldSpec": {
+      "type": "object",
+      "description": "Specification for a single field in the index pattern.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Field name as it appears in the index mapping."
+        },
+        "type": {
+          "type": "string",
+          "description": "Logical field type (e.g. 'string', 'number', 'date', 'boolean', 'ip', 'geo_point', 'geo_shape', 'murmur3', 'conflict', 'unknown')."
+        },
+        "esTypes": {
+          "type": "array",
+          "description": "OpenSearch mapping types for this field.",
+          "items": { "type": "string" }
+        },
+        "count": {
+          "type": "integer",
+          "description": "Popularity count tracking how often this field is used.",
+          "minimum": 0
+        },
+        "scripted": {
+          "type": "boolean",
+          "description": "Whether this is a scripted field."
+        },
+        "script": {
+          "type": "string",
+          "description": "Painless script for scripted fields."
+        },
+        "lang": {
+          "type": "string",
+          "description": "Script language (e.g. 'painless')."
+        },
+        "searchable": {
+          "type": "boolean",
+          "description": "Whether this field can be searched."
+        },
+        "aggregatable": {
+          "type": "boolean",
+          "description": "Whether this field can be used in aggregations."
+        },
+        "readFromDocValues": {
+          "type": "boolean",
+          "description": "Whether field values are read from doc_values."
+        },
+        "indexed": {
+          "type": "boolean",
+          "description": "Whether this field is indexed."
+        },
+        "subType": {
+          "type": "object",
+          "description": "Sub-type information for multi-fields and nested fields.",
+          "properties": {
+            "multi": {
+              "type": "object",
+              "properties": {
+                "parent": { "type": "string" }
+              },
+              "required": ["parent"],
+              "additionalProperties": false
+            },
+            "nested": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" }
+              },
+              "required": ["path"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "format": {
+          "$ref": "#/$defs/serializedFieldFormat"
+        },
+        "conflictDescriptions": {
+          "type": "object",
+          "description": "Map of field type to list of index names where the conflict occurs.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "required": ["name", "type", "searchable", "aggregatable"],
+      "additionalProperties": true
+    },
+    "serializedFieldFormat": {
+      "type": "object",
+      "description": "Serialized field formatter configuration.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Field format identifier (e.g. 'bytes', 'number', 'date', 'string', 'url', 'color', 'truncate')."
+        },
+        "params": {
+          "type": "object",
+          "description": "Parameters for the field formatter.",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "fieldFormatMapObject": {
+      "type": "object",
+      "description": "Map of field name to serialized field format.",
+      "additionalProperties": {
+        "$ref": "#/$defs/serializedFieldFormat"
+      }
+    },
+    "sourceFiltersArray": {
+      "type": "array",
+      "description": "Array of source filter objects.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Glob pattern for the source field filter."
+          }
+        },
+        "required": ["value"],
+        "additionalProperties": false
+      }
+    },
+    "typeMetaObject": {
+      "type": "object",
+      "description": "Type metadata for special index patterns (e.g. rollup).",
+      "properties": {
+        "aggs": {
+          "type": "object",
+          "description": "Map of field name to allowed aggregation restrictions.",
+          "additionalProperties": {
+            "type": "object",
+            "description": "Aggregation restrictions for a field.",
+            "properties": {
+              "agg": { "type": "string" },
+              "interval": { "type": "number" },
+              "fixed_interval": { "type": "string" },
+              "calendar_interval": { "type": "string" },
+              "delay": { "type": "string" },
+              "time_zone": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
