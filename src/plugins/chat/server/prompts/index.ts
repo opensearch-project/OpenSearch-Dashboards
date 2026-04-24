@@ -17,7 +17,9 @@ const PROMQL_SYSTEM_PROMPT = `You are a PromQL expert. Your task is to convert n
 4. If it requires multiple queries, use \`;\` and a new line to separate them.
 5. Do not output explanations. Output 'OOD' if question is out of domain.
 
-Only call the 'search_prometheus_metadata' tool once. If you see tool result, then write the PromQL query.`;
+Only call the 'search_prometheus_metadata' tool once. This is the only tool available because we are generating a PROMETHEUS, NOT OPENSEARCH query. If you see tool result, then write the PromQL query with your best guess.
+---
+`;
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   PROMQL: PROMQL_SYSTEM_PROMPT,

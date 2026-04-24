@@ -13,6 +13,8 @@ import {
   EuiToolTip,
   EuiLoadingChart,
   EuiButtonEmpty,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
@@ -24,6 +26,7 @@ interface MetricCardProps {
   name: string;
   metadata?: MetricMetadata;
   sparkline: Array<[number, string]> | null;
+  sparklineError?: string | null;
   isSelected: boolean;
   colorIndex: number;
   onToggleSelect: () => void;
@@ -35,6 +38,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   name,
   metadata,
   sparkline,
+  sparklineError,
   isSelected,
   colorIndex,
   onToggleSelect,
@@ -67,6 +71,30 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const chartColor = SERIES_COLORS[colorIndex % SERIES_COLORS.length];
 
   function renderSparklineContent() {
+    if (sparklineError) {
+      return (
+        <EuiToolTip content={sparklineError}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            style={{ textAlign: 'center' }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="alert" color="danger" size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="danger">
+                {i18n.translate('explore.metricsExplore.sparklineError', {
+                  defaultMessage: 'Query failed',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiToolTip>
+      );
+    }
     if (sparkline)
       return (
         <SparklineChart
@@ -84,10 +112,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <div ref={cardRef}>
       <EuiPanel
-        paddingSize="s"
+        paddingSize="none"
         hasBorder
         onClick={onToggleSelect}
         style={{
+          padding: 6,
           cursor: 'pointer',
           height: '100%',
           display: 'flex',
@@ -158,7 +187,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             minHeight: 160,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: !sparkline ? 'center' : undefined,
+            justifyContent: !sparkline || sparklineError ? 'center' : undefined,
             width: '100%',
           }}
         >

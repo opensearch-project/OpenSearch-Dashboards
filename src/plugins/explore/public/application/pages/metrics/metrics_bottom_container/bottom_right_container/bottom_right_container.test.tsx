@@ -54,6 +54,7 @@ jest.mock('../../../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('../../../../utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   defaultPrepareQueryString: jest.fn(() => 'mock-query-string'),
+  shouldSkipQueryExecution: jest.fn(() => false),
 }));
 
 // Mock onEditorRunActionCreator
@@ -151,7 +152,7 @@ describe('BottomRightContainer', () => {
     );
   };
 
-  it('renders no index patterns when dataset is null', () => {
+  it('renders data source empty state when dataset is null', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: undefined,
       isLoading: false,
@@ -159,7 +160,7 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent();
-    expect(screen.getByTestId('no-index-patterns')).toBeInTheDocument();
+    expect(screen.getByText('Select a Prometheus data source')).toBeInTheDocument();
   });
 
   it('renders tabs when status is UNINITIALIZED', () => {
@@ -322,7 +323,7 @@ describe('BottomRightContainer', () => {
     });
 
     renderComponent();
-    expect(screen.getByTestId('no-index-patterns')).toBeInTheDocument();
+    expect(screen.getByText('Select a Prometheus data source')).toBeInTheDocument();
   });
 
   it('should render tabs when status is NO_RESULTS', () => {

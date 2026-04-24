@@ -48,6 +48,7 @@ describe('useMultiQueryDecorations', () => {
     mockEditor = {
       getModel: jest.fn().mockReturnValue(mockModel),
       createDecorationsCollection: jest.fn().mockReturnValue(mockCollection),
+      updateOptions: jest.fn(),
     };
     // Clean up DOM
     const styleEl = document.getElementById('query-label-dynamic-styles');
@@ -254,6 +255,7 @@ describe('useMultiQueryDecorations', () => {
     const newMockEditor = {
       getModel: jest.fn().mockReturnValue(mockModel),
       createDecorationsCollection: jest.fn().mockReturnValue(newMockCollection),
+      updateOptions: jest.fn(),
     };
 
     // Update with new editor

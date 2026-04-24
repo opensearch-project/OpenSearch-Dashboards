@@ -75,9 +75,10 @@ export const SaveQueryButton = () => {
       const clonedQuery = cloneDeep(query);
       delete clonedQuery.dataset;
 
+      const editorText = getEditorText();
       const queryToSave = {
         ...clonedQuery,
-        query: getEditorText(),
+        query: editorText || String(services.data.query.queryString.getQuery().query || ''),
       };
 
       const attributes: any = {

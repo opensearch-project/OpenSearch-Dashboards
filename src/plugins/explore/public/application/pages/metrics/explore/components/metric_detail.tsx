@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiButton,
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiTitle,
   EuiText,
   EuiPanel,
@@ -17,6 +17,7 @@ import {
   EuiComboBox,
   EuiButtonGroup,
   EuiLoadingChart,
+  EuiIcon,
 } from '@elastic/eui';
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
@@ -39,6 +40,33 @@ interface LabelBreakdownData {
   series: BreakdownSeries[];
 }
 
+const BreakdownErrorContent: React.FC<{ error: string }> = ({ error }) => (
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="xs"
+    alignItems="center"
+    justifyContent="center"
+    responsive={false}
+    style={{ height: 160 }}
+  >
+    <EuiFlexItem grow={false}>
+      <EuiIcon type="alert" color="danger" size="m" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="danger">
+        {i18n.translate('explore.metricsExplore.breakdownError', {
+          defaultMessage: 'Query failed',
+        })}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued" style={{ maxWidth: 240, textAlign: 'center' }}>
+        {error}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 function seriesLabelForType(type: MetricType): string {
   switch (type) {
     case MetricType.COUNTER:
@@ -53,6 +81,7 @@ function seriesLabelForType(type: MetricType): string {
 const BreakdownPanel: React.FC<{
   labelName: string;
   data: LabelBreakdownData | null;
+  error?: string | null;
   selectedLabelName: string;
   breakdownYRange?: { yMin: number; yMax: number };
   layout: LayoutMode;
@@ -62,6 +91,7 @@ const BreakdownPanel: React.FC<{
 }> = ({
   labelName,
   data,
+  error,
   selectedLabelName,
   breakdownYRange,
   layout,
@@ -85,10 +115,23 @@ const BreakdownPanel: React.FC<{
     };
   }, [labelName, onVisibilityChange]);
 
+  if (error) {
+    return (
+      <div ref={panelRef}>
+        <EuiPanel paddingSize="none" style={{ padding: 8 }} hasBorder>
+          <EuiTitle size="xxs">
+            <h3>{labelName}</h3>
+          </EuiTitle>
+          <BreakdownErrorContent error={error} />
+        </EuiPanel>
+      </div>
+    );
+  }
+
   if (!data) {
     return (
       <div ref={panelRef}>
-        <EuiPanel paddingSize="s" hasBorder>
+        <EuiPanel paddingSize="none" style={{ padding: 8 }} hasBorder>
           <EuiTitle size="xxs">
             <h3>{labelName}</h3>
           </EuiTitle>
@@ -119,11 +162,25 @@ const BreakdownPanel: React.FC<{
         }}
       >
         {data.series.map((s, i) => (
-          <EuiPanel key={`${data.label}-${s.labelValue}`} paddingSize="s" hasBorder>
+          <EuiPanel
+            key={`${data.label}-${s.labelValue}`}
+            paddingSize="none"
+            style={{ padding: 8 }}
+            hasBorder
+          >
             <EuiTitle size="xxs">
               <h3>{s.labelValue}</h3>
             </EuiTitle>
-            <div style={{ marginTop: 4 }}>
+            <div
+              style={{
+                marginTop: 4,
+                minHeight: 160,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: s.values.length > 0 ? undefined : 'center',
+                width: '100%',
+              }}
+            >
               {s.values.length > 0 ? (
                 <SparklineChart
                   values={s.values}
@@ -148,13 +205,22 @@ const BreakdownPanel: React.FC<{
 
   return (
     <div ref={panelRef}>
-      <EuiPanel paddingSize="s" hasBorder>
+      <EuiPanel paddingSize="none" style={{ padding: 8 }} hasBorder>
         <EuiTitle size="xxs">
           <h3>
             {data.label} ({data.cardinality})
           </h3>
         </EuiTitle>
-        <div style={{ marginTop: 4 }}>
+        <div
+          style={{
+            marginTop: 4,
+            minHeight: 160,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: data.series.length > 0 ? undefined : 'center',
+            width: '100%',
+          }}
+        >
           {data.series.length > 0 ? (
             <SparklineChart
               series={data.series.map((s) => ({
@@ -264,10 +330,9 @@ export const MetricDetail: React.FC = () => {
     [client, queryGen, state.metric, metricType, stepSec, state.filters]
   );
 
-  const { results: breakdowns, onVisibilityChange } = useConcurrentQueries<LabelBreakdownData>(
-    breakdownFetch,
-    [client, state.filters, refreshCounter, selectedLabelName, loading]
-  );
+  const { results: breakdowns, errors: breakdownErrors, onVisibilityChange } = useConcurrentQueries<
+    LabelBreakdownData
+  >(breakdownFetch, [client, state.filters, refreshCounter, selectedLabelName, loading]);
 
   const labelOptions = useMemo(() => labels.map((l) => ({ label: l.name })), [labels]);
 
@@ -309,14 +374,19 @@ export const MetricDetail: React.FC = () => {
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiButtonEmpty
             iconType="arrowLeft"
             aria-label={i18n.translate('explore.metricsExplore.backToMetrics', {
               defaultMessage: 'Back to all metrics',
             })}
             onClick={() => dispatch({ type: 'GO_BACK' })}
             data-test-subj="metricsExploreBackButton"
-          />
+            size="s"
+          >
+            {i18n.translate('explore.metricsExplore.back', {
+              defaultMessage: 'Back',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap responsive={false}>
@@ -353,7 +423,7 @@ export const MetricDetail: React.FC = () => {
             data-test-subj="metricsExploreExecuteButton"
           >
             {i18n.translate('explore.metricsExplore.execute', {
-              defaultMessage: 'Run Visualization Query',
+              defaultMessage: 'Query Metrics',
             })}
           </EuiButton>
         </EuiFlexItem>
@@ -465,6 +535,7 @@ export const MetricDetail: React.FC = () => {
                 key={l.name}
                 labelName={l.name}
                 data={breakdowns.get(l.name) ?? null}
+                error={breakdownErrors.get(l.name) ?? null}
                 selectedLabelName={selectedLabelName}
                 breakdownYRange={breakdownYRange}
                 layout={state.layout}

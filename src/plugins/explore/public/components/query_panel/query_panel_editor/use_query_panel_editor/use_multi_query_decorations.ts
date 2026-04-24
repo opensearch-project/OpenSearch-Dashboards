@@ -88,6 +88,7 @@ export const useMultiQueryDecorations = () => {
 
       if (language !== 'PROMQL') {
         collection.clear();
+        editor.updateOptions({ glyphMargin: false });
         return;
       }
 
@@ -99,8 +100,11 @@ export const useMultiQueryDecorations = () => {
 
       if (queries.length <= 1) {
         collection.clear();
+        editor.updateOptions({ glyphMargin: false });
         return;
       }
+
+      editor.updateOptions({ glyphMargin: true });
 
       const queriesByLine = new Map<number, ParsedQueryWithPosition[]>();
       for (const query of queries) {

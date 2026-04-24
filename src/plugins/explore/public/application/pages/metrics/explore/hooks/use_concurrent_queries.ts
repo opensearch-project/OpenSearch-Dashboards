@@ -21,6 +21,7 @@ export function useConcurrentQueries<T>(
   concurrency = DEFAULT_CONCURRENCY
 ) {
   const [results, setResults] = useState<Map<string, T>>(new Map());
+  const [errors, setErrors] = useState<Map<string, string>>(new Map());
   const stateRef = useRef({
     queue: [] as string[],
     inflight: new Map<string, AbortController>(),
@@ -31,6 +32,7 @@ export function useConcurrentQueries<T>(
     // Results that completed since the last render, buffered so a burst of
     // concurrent fetches finishing in the same tick produces a single render.
     buffered: new Map<string, T>(),
+    bufferedErrors: new Map<string, string>(),
     flushScheduled: false,
   });
 
@@ -42,14 +44,24 @@ export function useConcurrentQueries<T>(
     s.flushScheduled = true;
     Promise.resolve().then(() => {
       s.flushScheduled = false;
-      if (s.buffered.size === 0) return;
-      const batch = s.buffered;
-      s.buffered = new Map();
-      setResults((prev) => {
-        const next = new Map(prev);
-        for (const [k, v] of batch) next.set(k, v);
-        return next;
-      });
+      if (s.buffered.size > 0) {
+        const batch = s.buffered;
+        s.buffered = new Map();
+        setResults((prev) => {
+          const next = new Map(prev);
+          for (const [k, v] of batch) next.set(k, v);
+          return next;
+        });
+      }
+      if (s.bufferedErrors.size > 0) {
+        const errBatch = s.bufferedErrors;
+        s.bufferedErrors = new Map();
+        setErrors((prev) => {
+          const next = new Map(prev);
+          for (const [k, v] of errBatch) next.set(k, v);
+          return next;
+        });
+      }
     });
   }, []);
 
@@ -74,7 +86,12 @@ export function useConcurrentQueries<T>(
             s.buffered.set(key, value);
             scheduleFlush();
           })
-          .catch(() => {})
+          .catch((err) => {
+            if (controller.signal.aborted) return;
+            s.fetched.add(key);
+            s.bufferedErrors.set(key, err?.message ? String(err.message) : String(err));
+            scheduleFlush();
+          })
           .finally(() => {
             s.inflight.delete(key);
             drainRef.current();
@@ -97,7 +114,9 @@ export function useConcurrentQueries<T>(
     for (const [, timer] of s.pending) clearTimeout(timer);
     s.pending.clear();
     s.buffered.clear();
+    s.bufferedErrors.clear();
     setResults(new Map());
+    setErrors(new Map());
     // Re-queue everything still in viewport
     s.queue = Array.from(s.viewport);
     drainRef.current();
@@ -138,17 +157,14 @@ export function useConcurrentQueries<T>(
     } else {
       if (s.pinned.has(key)) return;
       s.viewport.delete(key);
+      // Only cancel work that hasn't started yet. Let inflight fetches finish
+      // so their results land in state (and dataCache) — scroll-back then
+      // renders immediately without a refetch.
       const timer = s.pending.get(key);
       if (timer) {
         clearTimeout(timer);
         s.pending.delete(key);
       }
-      const ctrl = s.inflight.get(key);
-      if (ctrl) {
-        ctrl.abort();
-        s.inflight.delete(key);
-      }
-      s.buffered.delete(key);
       s.queue = s.queue.filter((n) => n !== key);
     }
   }, []);
@@ -165,5 +181,5 @@ export function useConcurrentQueries<T>(
     drainRef.current();
   }, []);
 
-  return { results, onVisibilityChange, enqueueAll };
+  return { results, errors, onVisibilityChange, enqueueAll };
 }
