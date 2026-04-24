@@ -61,9 +61,6 @@ export class VariableService {
    */
   public initialize(initialVariables: Variable[] = []): void {
     this.variables$.next(initialVariables);
-
-    // Initialize runtime state for all variables
-    initialVariables.forEach((v) => this.ensureRuntimeState(v));
   }
 
   /**
@@ -115,40 +112,10 @@ export class VariableService {
   }
 
   /**
-   * Observable of variable values (name -> current values mapping).
-   */
-  public getValues$(): Observable<Record<string, string[]>> {
-    return this.variables$.pipe(
-      map((variables) => {
-        const values: Record<string, string[]> = {};
-        variables.forEach((v) => {
-          values[v.name] = v.current ?? [];
-        });
-        return values;
-      }),
-      distinctUntilChanged((prev, curr) => isEqual(prev, curr))
-    );
-  }
-
-  /**
    * Get current variables (without runtime state).
    */
   public getVariables(): Variable[] {
     return this.variables$.getValue();
-  }
-
-  /** Get variables merged with runtime state */
-  public getVariablesWithState(): VariableWithState[] {
-    return this.mergeWithState(this.getVariables());
-  }
-
-  public getCurrentValues(): Record<string, string[]> {
-    const variables = this.getVariables();
-    const values: Record<string, string[]> = {};
-    variables.forEach((v) => {
-      values[v.name] = v.current ?? [];
-    });
-    return values;
   }
 
   /**
@@ -165,10 +132,7 @@ export class VariableService {
 
     const updatedVariables = [...this.getVariables(), newVariable];
     await this.saveVariables(updatedVariables);
-
-    // Update runtime state only after successful save
-    this.runtimeState.set(id, { options });
-    this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
+    this.updateRuntimeState(id, { options });
 
     if (newVariable.type === VariableType.Query) {
       await this.refreshVariableOptions(id);
@@ -224,7 +188,7 @@ export class VariableService {
 
       // When sort changes, re-sort the existing options
       if (updates.sort !== undefined && updates.sort !== existing.sort) {
-        const currentState = this.getRuntimeState(id);
+        const currentState = newRuntimeState || this.getRuntimeState(id);
         const sorted = this.sortOptions(currentState.options, updates.sort);
         newRuntimeState = { ...currentState, options: sorted };
       }
@@ -236,8 +200,7 @@ export class VariableService {
 
     // Update runtime state only after successful save
     if (newRuntimeState) {
-      this.runtimeState.set(id, newRuntimeState);
-      this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
+      this.updateRuntimeState(id, newRuntimeState);
     }
 
     if ((updates as any).query !== undefined && updatedVariable.type === VariableType.Query) {
@@ -250,7 +213,6 @@ export class VariableService {
     this.refreshControllers.get(id)?.abort();
     await this.saveVariables(updatedVariables);
 
-    // Clean up runtime state only after successful save
     this.refreshControllers.delete(id);
     this.runtimeState.delete(id);
     this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
@@ -314,8 +276,7 @@ export class VariableService {
         queryVariable.multi
       );
 
-      this.runtimeState.set(id, { options: sortedOptions, loading: false, error: undefined });
-      this.runtimeStateChange$.next(this.runtimeStateChange$.value + 1);
+      this.updateRuntimeState(id, { options: sortedOptions, loading: false, error: undefined });
 
       // Update current in persisted state if it changed
       const currentVariables = this.getVariables();
@@ -347,12 +308,6 @@ export class VariableService {
 
   private getRuntimeState(id: string): VariableState {
     return this.runtimeState.get(id) ?? { options: [] };
-  }
-
-  private ensureRuntimeState(variable: Variable): void {
-    if (!this.runtimeState.has(variable.id)) {
-      this.runtimeState.set(variable.id, { options: this.deriveOptions(variable) });
-    }
   }
 
   /** Derive options from the variable definition (Custom only; Query returns []) */
@@ -440,7 +395,9 @@ export class VariableService {
   /** Merge persisted variables with in-memory runtime state */
   private mergeWithState(variables: Variable[]): VariableWithState[] {
     return variables.map((v) => {
-      this.ensureRuntimeState(v);
+      if (!this.runtimeState.has(v.id)) {
+        this.runtimeState.set(v.id, { options: this.deriveOptions(v) });
+      }
       return {
         ...v,
         ...this.getRuntimeState(v.id),

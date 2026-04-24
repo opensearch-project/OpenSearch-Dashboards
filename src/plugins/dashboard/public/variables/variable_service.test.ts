@@ -42,6 +42,28 @@ function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVari
   };
 }
 
+// Helper function to get variables with state synchronously
+function getVariablesWithState(service: VariableService) {
+  let result: any[] = [];
+  service
+    .getVariables$()
+    .subscribe((vars) => {
+      result = vars;
+    })
+    .unsubscribe();
+  return result;
+}
+
+// Helper function to get current values
+function getCurrentValues(service: VariableService): Record<string, string[]> {
+  const variables = service.getVariables();
+  const values: Record<string, string[]> = {};
+  variables.forEach((v) => {
+    values[v.name] = v.current ?? [];
+  });
+  return values;
+}
+
 function makeQueryVariable(overrides: Partial<QueryVariable> = {}): QueryVariable {
   return {
     id: 'query-1',
@@ -84,7 +106,7 @@ describe('VariableService', () => {
   describe('getVariablesWithState', () => {
     it('should merge runtime state with persisted variables', () => {
       const { service } = createService([makeCustomVariable()]);
-      const vars = service.getVariablesWithState();
+      const vars = getVariablesWithState(service);
       expect(vars[0].options).toEqual(['dev', 'staging', 'prod']);
       expect(vars[0].name).toBe('env');
     });
@@ -93,12 +115,12 @@ describe('VariableService', () => {
   describe('getCurrentValues', () => {
     it('should return name-value map', () => {
       const { service } = createService([makeCustomVariable(), makeQueryVariable()]);
-      expect(service.getCurrentValues()).toEqual({ env: ['dev'], service: ['api'] });
+      expect(getCurrentValues(service)).toEqual({ env: ['dev'], service: ['api'] });
     });
 
     it('should return empty array for undefined current', () => {
       const { service } = createService([makeCustomVariable({ current: undefined })]);
-      expect(service.getCurrentValues()).toEqual({ env: [] });
+      expect(getCurrentValues(service)).toEqual({ env: [] });
     });
   });
 
@@ -118,7 +140,7 @@ describe('VariableService', () => {
       expect(vars[0].current).toEqual(['dev']);
 
       // Options are in runtime state, not persisted
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['dev', 'staging', 'prod']);
     });
   });
@@ -140,7 +162,7 @@ describe('VariableService', () => {
       expect(vars[0].current).toEqual(['api']);
       expect(mockExecuteQuery).toHaveBeenCalled();
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['api', 'web', 'worker']);
     });
   });
@@ -161,7 +183,7 @@ describe('VariableService', () => {
 
       await service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['alpha', 'beta']);
       expect(withState[0].current).toEqual(['alpha']);
     });
@@ -176,7 +198,7 @@ describe('VariableService', () => {
         customOptions: ['dev', 'staging', 'new'],
       } as any);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].current).toEqual(['staging']);
     });
 
@@ -190,7 +212,7 @@ describe('VariableService', () => {
         customOptions: ['dev', 'staging', 'prod'],
       } as any);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].current).toEqual(['staging']);
     });
 
@@ -348,7 +370,7 @@ describe('VariableService', () => {
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['api', 'web', 'new-svc']);
       expect(withState[0].current).toEqual(['api']);
       expect(withState[0].loading).toBe(false);
@@ -368,7 +390,7 @@ describe('VariableService', () => {
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].loading).toBe(false);
       expect(withState[0].error).toBe('Network error');
     });
@@ -379,7 +401,7 @@ describe('VariableService', () => {
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].error).toBeUndefined();
     });
 
@@ -401,7 +423,7 @@ describe('VariableService', () => {
       const second = service.refreshVariableOptions('query-1');
       await Promise.all([first, second]);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['result-2']);
     });
 
@@ -482,7 +504,7 @@ describe('VariableService', () => {
           sort: VariableSortOrder.AlphabeticalAsc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
     });
 
@@ -493,7 +515,7 @@ describe('VariableService', () => {
           sort: VariableSortOrder.AlphabeticalDesc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['cherry', 'banana', 'apple']);
     });
 
@@ -504,7 +526,7 @@ describe('VariableService', () => {
           sort: VariableSortOrder.NumericalAsc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['1', '2', '10', '100']);
     });
 
@@ -515,7 +537,7 @@ describe('VariableService', () => {
           sort: VariableSortOrder.NumericalDesc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['100', '10', '2', '1']);
     });
 
@@ -526,7 +548,7 @@ describe('VariableService', () => {
           sort: VariableSortOrder.Disabled,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['cherry', 'apple', 'banana']);
     });
 
@@ -538,7 +560,7 @@ describe('VariableService', () => {
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['apple', 'mango', 'zebra']);
     });
 
@@ -553,9 +575,12 @@ describe('VariableService', () => {
         'dashboard-123'
       );
 
+      // Initialize runtime state by getting variables with state first
+      getVariablesWithState(service);
+
       await service.updateVariable('custom-1', { sort: VariableSortOrder.AlphabeticalAsc });
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
     });
   });
@@ -623,14 +648,14 @@ describe('VariableService', () => {
       );
       mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
 
-      const originalState = service.getVariablesWithState()[0];
+      const originalState = getVariablesWithState(service)[0];
 
       await expect(
         service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any)
       ).rejects.toThrow('Network error');
 
       // Runtime state should not change
-      const currentState = service.getVariablesWithState()[0];
+      const currentState = getVariablesWithState(service)[0];
       expect(currentState.options).toEqual(originalState.options);
     });
   });

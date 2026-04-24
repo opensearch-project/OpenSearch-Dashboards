@@ -193,6 +193,134 @@ describe('useInitialContainerContext', () => {
       });
     });
 
+    it('ignores invalid URL variable values (not an array)', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      mockSavedObjectsClient.get.mockResolvedValue({
+        attributes: {
+          variablesJSON: JSON.stringify({ variables }),
+        },
+      });
+
+      mockOsdUrlStateStorage.get.mockImplementation((key: string) => {
+        if (key === VARIABLE_VALUES_URL_KEY) {
+          return { region: 'not-an-array' }; // Invalid: string instead of array
+        }
+        return null;
+      });
+
+      const { result } = renderHook(() => useInitialContainerContext());
+
+      await waitFor(() => {
+        // Should keep original value, not the invalid URL value
+        expect(result.current.containerVariables).toEqual([
+          { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
+        ]);
+      });
+    });
+
+    it('ignores invalid URL variable values (non-string array elements)', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      mockSavedObjectsClient.get.mockResolvedValue({
+        attributes: {
+          variablesJSON: JSON.stringify({ variables }),
+        },
+      });
+
+      mockOsdUrlStateStorage.get.mockImplementation((key: string) => {
+        if (key === VARIABLE_VALUES_URL_KEY) {
+          return { region: [123, true, {}] }; // Invalid: non-string elements
+        }
+        return null;
+      });
+
+      const { result } = renderHook(() => useInitialContainerContext());
+
+      await waitFor(() => {
+        // Should keep original value
+        expect(result.current.containerVariables).toEqual([
+          { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
+        ]);
+      });
+    });
+
+    it('ignores empty array in URL variable values', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      mockSavedObjectsClient.get.mockResolvedValue({
+        attributes: {
+          variablesJSON: JSON.stringify({ variables }),
+        },
+      });
+
+      mockOsdUrlStateStorage.get.mockImplementation((key: string) => {
+        if (key === VARIABLE_VALUES_URL_KEY) {
+          return { region: [] }; // Invalid: empty array
+        }
+        return null;
+      });
+
+      const { result } = renderHook(() => useInitialContainerContext());
+
+      await waitFor(() => {
+        // Should keep original value
+        expect(result.current.containerVariables).toEqual([
+          { id: 'var1', name: 'region', type: 'query', current: ['us-west'] },
+        ]);
+      });
+    });
+
+    it('prevents prototype pollution from URL values', async () => {
+      const incomingState = {
+        originatingApp: 'dashboards',
+        containerInfo: { containerName: 'Dashboard', containerId: 'dashboard-123' },
+      };
+      mockGetIncomingEditorState.mockReturnValue(incomingState);
+
+      const variables = [{ id: 'var1', name: 'region', type: 'query', current: ['us-west'] }];
+      mockSavedObjectsClient.get.mockResolvedValue({
+        attributes: {
+          variablesJSON: JSON.stringify({ variables }),
+        },
+      });
+
+      mockOsdUrlStateStorage.get.mockImplementation((key: string) => {
+        if (key === VARIABLE_VALUES_URL_KEY) {
+          return {
+            __proto__: ['malicious'],
+            constructor: ['attack'],
+            region: ['us-east'],
+          };
+        }
+        return null;
+      });
+
+      const { result } = renderHook(() => useInitialContainerContext());
+
+      await waitFor(() => {
+        // Should only use the valid 'region' property
+        expect(result.current.containerVariables).toEqual([
+          { id: 'var1', name: 'region', type: 'query', current: ['us-east'] },
+        ]);
+      });
+    });
+
     it('handles dashboard without variables', async () => {
       const incomingState = {
         originatingApp: 'dashboards',

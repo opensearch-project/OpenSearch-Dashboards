@@ -49,11 +49,23 @@ export const useInitialContainerContext = () => {
             );
 
             const variablesWithValues = parsed.variables.map((variable: Variable) => {
-              if (urlVariableValues && urlVariableValues[variable.name]) {
-                return {
-                  ...variable,
-                  current: urlVariableValues[variable.name],
-                };
+              // Validate URL variable values
+              if (
+                urlVariableValues &&
+                Object.prototype.hasOwnProperty.call(urlVariableValues, variable.name)
+              ) {
+                const urlValue = urlVariableValues[variable.name];
+                // Ensure URL value is a non-empty array of strings
+                if (
+                  Array.isArray(urlValue) &&
+                  urlValue.length > 0 &&
+                  urlValue.every((v) => typeof v === 'string')
+                ) {
+                  return {
+                    ...variable,
+                    current: urlValue,
+                  };
+                }
               }
               return variable;
             });
