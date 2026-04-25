@@ -209,18 +209,6 @@ export async function getIndices({
   });
   requests.push(promiseResolve);
 
-  if (isCCS) {
-    // CCS supports ±1 major version. We won't be able to expect resolve endpoint to exist until v9
-    const promiseSearch = getIndicesViaSearch({
-      getIndexTags,
-      pattern,
-      searchClient,
-      showAllIndices,
-      dataSourceId,
-    }).catch(() => []);
-    requests.push(promiseSearch);
-  }
-
   const responses = await Promise.all(requests);
 
   if (responses.length === 2) {
