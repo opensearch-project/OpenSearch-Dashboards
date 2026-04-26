@@ -32,6 +32,8 @@ import Fs from 'fs';
 import { basename, join } from 'path';
 import { promisify } from 'util';
 
+import { ToolingLog } from '@osd/dev-utils';
+
 // @ts-ignore
 import { assertAbsolute, mkdirp } from './fs';
 
@@ -39,7 +41,15 @@ const statAsync = promisify(Fs.stat);
 const mkdirAsync = promisify(Fs.mkdir);
 const utimesAsync = promisify(Fs.utimes);
 const copyFileAsync = promisify(Fs.copyFile);
+const linkAsync = promisify(Fs.link);
 const readdirAsync = promisify(Fs.readdir);
+
+// Hardlinks share the inode so they're ~instant and use no extra disk. We fall back to a
+// reflink-preferred copy if linking fails (cross-filesystem, permissions, etc.). Opt out
+// entirely with OSD_BUILD_NO_HARDLINK=1 (optional) to force a full byte-for-byte copy.
+// Read per-call (matching the other OSD_BUILD_* env vars) so operators/tests can flip it
+// without needing a module reload.
+const isHardlinkDisabled = () => process.env.OSD_BUILD_NO_HARDLINK === '1';
 
 interface Options {
   /**
@@ -58,6 +68,11 @@ interface Options {
    * Date to use for atime/mtime
    */
   time?: Date;
+  /**
+   * Optional logger. When set, the hardlink→copy fallback notice routes through
+   * `log.warning` instead of writing a one-shot line to stderr.
+   */
+  log?: ToolingLog;
 }
 
 class Record {
@@ -72,9 +87,28 @@ class Record {
 /**
  * Copy all of the files from one directory to another, optionally filtered with a
  * function or modifying mtime/atime for each file.
+ *
+ * ⚠ HARDLINK CONTRACT — destination files MUST NOT be mutated in-place.
+ *
+ * By default (no `time` option, `OSD_BUILD_NO_HARDLINK` unset), each copied file is a
+ * hardlink that shares its inode with the source. Writing to `dest` with `fs.writeFile`,
+ * `sed -i`, `chmod`, `truncate`, etc. would therefore mutate the original source file
+ * too — and, if multiple destinations were produced from the same source (e.g.
+ * per-platform copies), every sibling destination.
+ *
+ * Safe downstream patterns:
+ *   • Read-only operations (archiving, scanning, stat).
+ *   • Delete-then-replace (`fs.unlink` + write new file) — `unlink` only decrements
+ *     the link count, so the source copy is unaffected.
+ *
+ * Unsafe patterns:
+ *   • In-place writes / chmods / truncations of copied files.
+ *
+ * If a caller genuinely needs to mutate copied files, either pass `time` (disables
+ * linking) or set `OSD_BUILD_NO_HARDLINK=1`.
  */
 export async function scanCopy(options: Options) {
-  const { source, destination, filter, time } = options;
+  const { source, destination, filter, time, log } = options;
 
   assertAbsolute(source);
   assertAbsolute(destination);
@@ -99,12 +133,41 @@ export async function scanCopy(options: Options) {
     await Promise.all(children.map(async (child) => await copy(child)));
   };
 
+  // Hardlink-preferred: hardlinks share the inode (no data copy, ~instant). We skip linking
+  // when `time` is provided because updating mtime on a hardlink would also mutate the source's
+  // mtime. Any failure (EXDEV, EPERM, EACCES, ENOTSUP, ...) falls back to a full byte copy.
+  const shouldTryLink = !isHardlinkDisabled() && !time;
+  let linkFallbackLogged = false;
+
+  const copyFileOrLink = async (src: string, dest: string) => {
+    if (shouldTryLink) {
+      try {
+        await linkAsync(src, dest);
+        return;
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        // EEXIST means the destination really exists — preserve the original
+        // COPYFILE_EXCL semantic by re-throwing rather than silently overwriting.
+        if (code === 'EEXIST') throw err;
+        if (!linkFallbackLogged) {
+          linkFallbackLogged = true;
+          const msg =
+            `[scan_copy] hardlink failed (${code || 'unknown'}); falling back to byte copy. ` +
+            `Set OSD_BUILD_NO_HARDLINK=1 to silence.`;
+          if (log) log.warning(msg);
+          else process.stderr.write(`${msg}\n`);
+        }
+      }
+    }
+    await copyFileAsync(src, dest, Fs.constants.COPYFILE_EXCL);
+  };
+
   // create or copy a record and recurse into directories
   const copy = async (record: Record) => {
     if (record.isDirectory) {
       await mkdirAsync(record.absoluteDest);
     } else {
-      await copyFileAsync(record.absolute, record.absoluteDest, Fs.constants.COPYFILE_EXCL);
+      await copyFileOrLink(record.absolute, record.absoluteDest);
     }
 
     if (record.isDirectory) {

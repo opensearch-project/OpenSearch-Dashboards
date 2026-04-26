@@ -96,3 +96,48 @@ export const CreateDockerUbiPackage: Task = {
     await runDockerGeneratorForUBI(config, log, build);
   },
 };
+
+/**
+ * Runs the provided fpm-based OS package tasks in parallel. fpm invocations read the
+ * platform-specific linux build tree (disjoint by arch) and write disjoint files in
+ * target/, so they're safe to run concurrently. Concurrency is capped via
+ * OSD_BUILD_FPM_CONCURRENCY (optional; default = tasks.length, i.e. all in parallel).
+ */
+export const createOsPackagesTask = (tasks: Task[]): Task => ({
+  description: `Creating OS packages (${tasks.length})`,
+  async run(config, log, build) {
+    const envConcurrency = Number(process.env.OSD_BUILD_FPM_CONCURRENCY);
+    const concurrency =
+      Number.isInteger(envConcurrency) && envConcurrency >= 1 ? envConcurrency : tasks.length;
+
+    log.info(
+      `Creating OS packages: ${tasks.length} task(s), concurrency=${Math.min(
+        concurrency,
+        tasks.length
+      )}`
+    );
+    log.debug(`os package concurrency=${concurrency} of ${tasks.length}`);
+
+    const queue = [...tasks];
+    // Shared failure sentinel: once any worker throws, the others stop pulling new tasks
+    // from the queue. In-flight tasks still run to completion (we can't safely interrupt
+    // an fpm subprocess mid-run), but we avoid starting new ones after a known failure.
+    let failed = false;
+    const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+      while (queue.length && !failed) {
+        const task = queue.shift();
+        if (!task) break;
+        const start = Date.now();
+        log.info(`▶ ${task.description}`);
+        try {
+          await task.run(config, log, build);
+        } catch (err) {
+          failed = true;
+          throw err;
+        }
+        log.info(`✓ ${task.description} (${((Date.now() - start) / 1000).toFixed(1)} sec)`);
+      }
+    });
+    await Promise.all(workers);
+  },
+});

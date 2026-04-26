@@ -30,11 +30,11 @@
 
 import globby from 'globby';
 
-import { getFileHash, write, GlobalTask } from '../lib';
+import { getFileHashes, write, GlobalTask } from '../lib';
 
 export const WriteShaSums: GlobalTask = {
   global: true,
-  description: 'Writing sha1sums of archives and packages in target directory',
+  description: 'Writing sha1 and sha256 checksums of archives and packages in target directory',
 
   async run(config) {
     const artifacts = await globby(['*.zip', '*.tar.gz', '*.deb', '*.rpm'], {
@@ -42,8 +42,16 @@ export const WriteShaSums: GlobalTask = {
       absolute: true,
     });
 
+    // Process artifacts sequentially: the single-pass getFileHashes() already halves the
+    // disk reads per artifact (the gain that matters), and parallel streaming across all
+    // artifacts would open N ReadStreams at once and lose the old code's error-containment
+    // behaviour (one bad artifact aborts the rest of the loop immediately).
     for (const artifact of artifacts) {
-      await write(`${artifact}.sha1.txt`, await getFileHash(artifact, 'sha1'));
+      const { sha1, sha256 } = await getFileHashes(artifact, ['sha1', 'sha256'] as const);
+      await Promise.all([
+        write(`${artifact}.sha1.txt`, sha1),
+        write(`${artifact}.sha256.txt`, sha256),
+      ]);
     }
   },
 };

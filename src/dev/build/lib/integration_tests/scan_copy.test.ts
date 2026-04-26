@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { chmodSync, statSync } from 'fs';
+import { chmodSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 import del from 'del';
@@ -138,4 +138,75 @@ it('supports atime and mtime', async () => {
   expect(Math.abs(barTxt.atimeMs - time.getTime())).toBeLessThan(oneDay);
   expect(Math.abs(barTxt.mtimeMs - time.getTime())).toBeLessThan(oneDay);
   expect(Math.abs(fooDir.atimeMs - time.getTime())).toBeLessThan(oneDay);
+});
+
+describe('hardlink-preferred copy', () => {
+  const SRC_FILE = resolve(FIXTURES, 'foo_dir/bar.txt');
+
+  it('creates hardlinks on the same filesystem (same inode as source)', async () => {
+    const destination = resolve(TMP, 'hardlink');
+    await scanCopy({ source: FIXTURES, destination });
+
+    const srcInode = statSync(SRC_FILE).ino;
+    const dstInode = statSync(resolve(destination, 'foo_dir/bar.txt')).ino;
+    // In same-FS mode, hardlinks share the inode, so they must be equal.
+    expect(dstInode).toBe(srcInode);
+  });
+
+  it('falls back to full copy when OSD_BUILD_NO_HARDLINK=1 (different inode)', async () => {
+    const destination = resolve(TMP, 'no-hardlink');
+    process.env.OSD_BUILD_NO_HARDLINK = '1';
+    try {
+      // scan_copy reads OSD_BUILD_NO_HARDLINK per-call, so no module reset needed.
+      await scanCopy({ source: FIXTURES, destination });
+    } finally {
+      delete process.env.OSD_BUILD_NO_HARDLINK;
+    }
+
+    const srcInode = statSync(SRC_FILE).ino;
+    const dstInode = statSync(resolve(destination, 'foo_dir/bar.txt')).ino;
+    expect(dstInode).not.toBe(srcInode);
+  });
+
+  it('skips hardlink when `time` is provided (different inode)', async () => {
+    const destination = resolve(TMP, 'time');
+    await scanCopy({ source: FIXTURES, destination, time: new Date(1425298511000) });
+
+    const srcInode = statSync(SRC_FILE).ino;
+    const dstInode = statSync(resolve(destination, 'foo_dir/bar.txt')).ino;
+    // With `time`, scan_copy avoids linking so the mtime override doesn't mutate the source.
+    expect(dstInode).not.toBe(srcInode);
+  });
+
+  it('rejects when the destination file already exists (EEXIST not swallowed)', async () => {
+    const destination = resolve(TMP, 'eexist');
+    // Pre-create the same relative path so the copy collides.
+    await scanCopy({ source: FIXTURES, destination });
+    // Second call must fail rather than silently overwrite — preserves COPYFILE_EXCL semantics.
+    await expect(scanCopy({ source: FIXTURES, destination })).rejects.toBeDefined();
+  });
+
+  it('[CONTRACT] hardlinked copies share state with source — mutating dest mutates source', async () => {
+    // This test intentionally demonstrates the behavior that callers MUST respect.
+    // If it starts failing because scanCopy switched to a true byte-copy by default,
+    // either (a) the performance optimization was intentionally reverted — in which
+    // case delete this test — or (b) something regressed and we lost ~40 s of build
+    // time; investigate before deleting.
+    //
+    // IMPORTANT: stage a private source tree under TMP so mutating the destination
+    // can't corrupt the git-tracked FIXTURES/ on a crash between the write and a
+    // cleanup step. Everything under TMP is removed by afterEach.
+    const src = resolve(TMP, 'contract-src/foo_dir');
+    const srcFile = resolve(src, 'bar.txt');
+    const destination = resolve(TMP, 'contract');
+    mkdirSync(src, { recursive: true });
+    writeFileSync(srcFile, 'ORIGINAL');
+
+    await scanCopy({ source: resolve(TMP, 'contract-src'), destination });
+    const dstFile = resolve(destination, 'foo_dir/bar.txt');
+
+    // Unsafe mutation pattern: write new bytes through the dest path.
+    writeFileSync(dstFile, 'MUTATED');
+    expect(readFileSync(srcFile, 'utf8')).toBe('MUTATED');
+  });
 });
