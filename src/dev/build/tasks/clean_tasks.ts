@@ -35,7 +35,14 @@ import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask, normalizeP
 const TYPESCRIPT_REGEXPS: RegExp[] = [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.json$/];
 
 const makeRegexps = (patterns: string[]) =>
-  patterns.map((pattern) => minimatch.makeRe(pattern, { nocase: true }));
+  patterns.map((pattern) => {
+    const re = minimatch.makeRe(pattern, { nocase: true });
+    // scanDelete matches against paths produced by `path.join`, which uses the OS native
+    // separator (backslash on Windows). minimatch emits `/`-only regexes, which silently
+    // miss on Windows. Relax every literal `/` in the pattern to match either separator
+    // so the task behaves identically on Linux, macOS, and Windows.
+    return new RegExp((re as RegExp).source.replace(/\\\//g, '[\\/\\\\]'), (re as RegExp).flags);
+  });
 
 const EXTRA_FILES_FROM_MODULES_REGEXPS: RegExp[] = makeRegexps([
   // tests

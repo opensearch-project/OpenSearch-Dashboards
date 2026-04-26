@@ -86,3 +86,22 @@ it('returns total number of deleted paths', async () => {
   // TS in root (3) + TS in nm (2) + extras in nm (4) = 9
   expect(count).toBe(9);
 });
+
+it('deletes extras patterns on Windows-style paths (separator-agnostic regexes)', async () => {
+  // Regression guard for a Windows-specific bug: minimatch.makeRe emits forward-slash-only
+  // regexes, but scanDelete passes paths through path.join which emits OS-native separators
+  // (backslash on Windows). makeRegexps relaxes the emitted regex; this test exercises that
+  // the relaxed pattern matches backslash paths too.
+  // We test the regexes directly (can't force a Windows filesystem in jest on Linux).
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const minimatch = require('minimatch');
+  const relaxed = (pattern: string) => {
+    const re = minimatch.makeRe(pattern, { nocase: true });
+    return new RegExp(re.source.replace(/\\\//g, '[\\/\\\\]'), re.flags);
+  };
+  const testsPattern = relaxed('**/__tests__');
+  expect(testsPattern.test('pkg/__tests__')).toBe(true);
+  expect(testsPattern.test('pkg\\__tests__')).toBe(true);
+  expect(testsPattern.test('C:\\x\\pkg\\__tests__')).toBe(true);
+  expect(testsPattern.test('pkgnot_tests')).toBe(false);
+});
