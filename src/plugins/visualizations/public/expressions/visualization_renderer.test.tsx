@@ -76,11 +76,13 @@ describe('visualization renderer', () => {
     renderedTrees.length = 0;
   });
 
-  // The renderer creates a fresh ExprVis on every call. <Visualization>'s React
-  // constructor only runs on the initial mount, so without an explicit assignment
-  // here later ExprVis instances would carry an empty PersistedState. When the
-  // chart unmounts and remounts (e.g. data goes to zero hits and then returns)
-  // the legend and color lookup would lose saved colors / legend visibility.
+  // Regression test for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/9597
+  // The renderer creates a fresh ExprVis on every call. Without explicitly wiring
+  // its uiState from handlers.uiState, only the first ExprVis has the persisted
+  // uiState (set by <Visualization>'s constructor). After the chart unmounts (e.g.
+  // a filter narrows the result set to zero hits) and remounts, the new
+  // VislibVisController is built from the latest ExprVis, whose uiState was never
+  // wired up — so saved pie-slice colors and legend visibility are lost.
   it('wires handlers.uiState onto every ExprVis it constructs', async () => {
     const renderer = visualization();
     const domNode = document.createElement('div');
