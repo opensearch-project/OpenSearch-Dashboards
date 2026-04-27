@@ -3,33 +3,35 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryPanelGeneratedQuery } from './generated_query_panel';
-import { EditorMode } from '../../utils/state_management/types';
-import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { useEditorOperations } from '../hooks/use_editor_operations';
-import { useEditorFocus } from '../../../application/hooks';
+import { EditorMode } from '../../../utils/state_management/types';
+import { QueryPanelFullProps } from './query_panel_context';
 
-jest.mock('../hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest.fn() }));
-jest.mock('../hooks/use_editor_operations', () => ({ useEditorOperations: jest.fn() }));
-jest.mock('../../../application/hooks', () => ({ useEditorFocus: jest.fn() }));
-
-const mockUpdateQueryEditorState = jest.fn();
+const mockHandleEditorChange = jest.fn();
 const mockSetEditorText = jest.fn();
-const mockFocusOnEditor = jest.fn();
+const mockFocusEditor = jest.fn();
+
+jest.mock('./query_panel_context', () => ({
+  useQueryPanelContext: (): Partial<QueryPanelFullProps> => ({
+    queryEditorState: mockQueryEditorState,
+    handleEditorChange: mockHandleEditorChange,
+    editorOperations: {
+      setEditorText: mockSetEditorText,
+      focusEditor: mockFocusEditor,
+    } as any,
+  }),
+}));
+
+let mockQueryEditorState: any;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useEditorOperations as jest.Mock).mockReturnValue({ setEditorText: mockSetEditorText });
-  (useEditorFocus as jest.Mock).mockReturnValue(mockFocusOnEditor);
+  mockQueryEditorState = { lastExecutedTranslatedQuery: undefined };
 });
 
 const renderWithQuery = (lastExecutedTranslatedQuery?: string) => {
-  (useQueryBuilderState as jest.Mock).mockReturnValue({
-    queryEditorState: { lastExecutedTranslatedQuery },
-    queryBuilder: { updateQueryEditorState: mockUpdateQueryEditorState },
-  });
+  mockQueryEditorState = { lastExecutedTranslatedQuery };
   return render(<QueryPanelGeneratedQuery />);
 };
 
@@ -60,7 +62,7 @@ describe('QueryPanelGeneratedQuery', () => {
   it('clicking edit switches editor mode to Query and clears lastExecutedTranslatedQuery', () => {
     renderWithQuery('source=logs');
     fireEvent.click(screen.getByTestId('exploreQueryPanelGeneratedQueryEditButton'));
-    expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({
+    expect(mockHandleEditorChange).toHaveBeenCalledWith({
       editorMode: EditorMode.Query,
       lastExecutedTranslatedQuery: undefined,
     });
@@ -69,6 +71,6 @@ describe('QueryPanelGeneratedQuery', () => {
   it('clicking edit focuses the editor', () => {
     renderWithQuery('source=logs');
     fireEvent.click(screen.getByTestId('exploreQueryPanelGeneratedQueryEditButton'));
-    expect(mockFocusOnEditor).toHaveBeenCalledWith(true);
+    expect(mockFocusEditor).toHaveBeenCalledWith(true);
   });
 });

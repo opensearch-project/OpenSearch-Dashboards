@@ -7,8 +7,10 @@ import { monaco } from '@osd/monaco';
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 
-import { ExploreServices } from '../../../../types';
-import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
+import {
+  getEffectiveLanguageForAutoComplete,
+  DataPublicPluginStart,
+} from '../../../../../../data/public';
 
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
@@ -180,13 +182,14 @@ export const buildCompletionItems = async (
   params: {
     isPromptModeRef: React.MutableRefObject<boolean>;
     queryLanguage: string;
-    services: ExploreServices;
+    services: DataPublicPluginStart & { appName: string };
   }
 ): Promise<monaco.languages.CompletionList> => {
   const {
     dataViews,
     query: { queryString },
-  } = params.services.data;
+    autocomplete,
+  } = params.services;
   if (token.isCancellationRequested) {
     return { suggestions: [], incomplete: false };
   }
@@ -213,7 +216,7 @@ export const buildCompletionItems = async (
     );
 
     // Use the current Dataset to avoid stale data
-    const suggestions = await params.services?.data?.autocomplete?.getQuerySuggestions({
+    const suggestions = await autocomplete?.getQuerySuggestions({
       query: autocompleteCtx.queryText,
       selectionStart: autocompleteCtx.selectionStart,
       selectionEnd: autocompleteCtx.selectionEnd,

@@ -3,43 +3,47 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LanguageToggle } from './lauguage_toggle';
-import { EditorMode } from '../../utils/state_management/types';
-import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { useEditorOperations } from '../hooks/use_editor_operations';
+import { EditorMode } from '../../../utils/state_management/types';
+import { QueryPanelFullProps } from './query_panel_context';
 
-jest.mock('../hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest.fn() }));
-jest.mock('../hooks/use_editor_operations', () => ({ useEditorOperations: jest.fn() }));
-jest.mock('../query_builder/query_builder', () => ({
-  SupportLanguageType: { ppl: 'PPL', promQL: 'PROMQL', ai: 'AI' },
-}));
-
-const mockUpdateQueryEditorState = jest.fn();
+const mockHandleEditorChange = jest.fn();
+const mockHandleLanguageTypeChange = jest.fn();
 const mockSwitchEditorMode = jest.fn();
 const mockClearEditor = jest.fn();
 const mockFocusEditor = jest.fn();
 
-const buildQueryBuilderState = (options: Record<string, any> = {}) => ({
-  queryEditorState: {
-    languageType: 'PPL',
-    editorMode: EditorMode.Query,
-    promptModeIsAvailable: false,
-    ...options,
-  },
-  queryBuilder: { updateQueryEditorState: mockUpdateQueryEditorState },
+let mockQueryEditorState: any;
+
+jest.mock('../../query_builder/query_builder', () => ({
+  SupportLanguageType: { ppl: 'PPL', promQL: 'PROMQL', ai: 'AI' },
+}));
+
+jest.mock('./query_panel_context', () => ({
+  useQueryPanelContext: (): Partial<QueryPanelFullProps> => ({
+    queryEditorState: mockQueryEditorState,
+    handleEditorChange: mockHandleEditorChange,
+    handleLanguageTypeChange: mockHandleLanguageTypeChange,
+    editorOperations: {
+      focusEditor: mockFocusEditor,
+      clearEditor: mockClearEditor,
+      switchEditorMode: mockSwitchEditorMode,
+    } as any,
+  }),
+}));
+
+const buildQueryEditorState = (options: Record<string, any> = {}) => ({
+  languageType: 'PPL',
+  editorMode: EditorMode.Query,
+  promptModeIsAvailable: false,
+  ...options,
 });
 
 beforeEach(() => {
   jest.useFakeTimers();
   jest.clearAllMocks();
-  (useQueryBuilderState as jest.Mock).mockReturnValue(buildQueryBuilderState());
-  (useEditorOperations as jest.Mock).mockReturnValue({
-    switchEditorMode: mockSwitchEditorMode,
-    clearEditor: mockClearEditor,
-    focusEditor: mockFocusEditor,
-  });
+  mockQueryEditorState = buildQueryEditorState();
 });
 
 afterEach(() => {
@@ -62,17 +66,13 @@ describe('LanguageToggle', () => {
   });
 
   it('shows PromQL label when language is PROMQL', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildQueryBuilderState({ languageType: 'PROMQL' })
-    );
+    mockQueryEditorState = buildQueryEditorState({ languageType: 'PROMQL' });
     render(<LanguageToggle />);
     expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toHaveTextContent('PromQL');
   });
 
   it('shows AI label when in prompt mode', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildQueryBuilderState({ editorMode: EditorMode.Prompt })
-    );
+    mockQueryEditorState = buildQueryEditorState({ editorMode: EditorMode.Prompt });
     render(<LanguageToggle />);
     expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toHaveTextContent('AI');
   });
@@ -92,9 +92,7 @@ describe('LanguageToggle', () => {
   });
 
   it('shows AI option when promptModeIsAvailable is true', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildQueryBuilderState({ promptModeIsAvailable: true })
-    );
+    mockQueryEditorState = buildQueryEditorState({ promptModeIsAvailable: true });
     render(<LanguageToggle />);
     openPopover();
     expect(screen.getByTestId('queryPanelFooterLanguageToggle-AI')).toBeInTheDocument();
@@ -107,18 +105,17 @@ describe('LanguageToggle', () => {
   });
 
   it('disables PromQL option when already on PROMQL', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildQueryBuilderState({ languageType: 'PROMQL' })
-    );
+    mockQueryEditorState = buildQueryEditorState({ languageType: 'PROMQL' });
     render(<LanguageToggle />);
     openPopover();
     expect(screen.getByTestId('queryPanelFooterLanguageToggle-PromQL')).toBeDisabled();
   });
 
   it('disables AI option when already in prompt mode', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildQueryBuilderState({ editorMode: EditorMode.Prompt, promptModeIsAvailable: true })
-    );
+    mockQueryEditorState = buildQueryEditorState({
+      editorMode: EditorMode.Prompt,
+      promptModeIsAvailable: true,
+    });
     render(<LanguageToggle />);
     openPopover();
     expect(screen.getByTestId('queryPanelFooterLanguageToggle-AI')).toBeDisabled();
@@ -128,20 +125,18 @@ describe('LanguageToggle', () => {
     render(<LanguageToggle />);
     openPopover();
     fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle-PromQL'));
-    expect(mockSwitchEditorMode).toHaveBeenCalledWith(EditorMode.Query);
-    expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({ languageType: 'PROMQL' });
+    expect(mockHandleEditorChange).toHaveBeenCalledWith({ editorMode: EditorMode.Query });
+    expect(mockHandleLanguageTypeChange).toHaveBeenCalledWith('PROMQL');
     expect(mockClearEditor).toHaveBeenCalled();
   });
 
   it('switches to prompt mode when AI is clicked', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(
-      buildQueryBuilderState({ promptModeIsAvailable: true })
-    );
+    mockQueryEditorState = buildQueryEditorState({ promptModeIsAvailable: true });
     render(<LanguageToggle />);
     openPopover();
     fireEvent.click(screen.getByTestId('queryPanelFooterLanguageToggle-AI'));
-    expect(mockSwitchEditorMode).toHaveBeenCalledWith(EditorMode.Prompt);
-    expect(mockUpdateQueryEditorState).not.toHaveBeenCalled();
+    expect(mockHandleEditorChange).toHaveBeenCalledWith({ editorMode: EditorMode.Prompt });
+    expect(mockHandleLanguageTypeChange).not.toHaveBeenCalled();
   });
 
   it('focuses editor after language switch', async () => {

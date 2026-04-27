@@ -19,7 +19,6 @@ import {
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
 import { generatePromQLWithAgUi } from '../../../application/utils/query_assist/promql_generator';
 import { getPromptModeIsAvailable } from '../../../application/utils/get_prompt_mode_is_available';
-import { getSummaryAgentIsAvailable } from '../../../application/utils/get_summary_agent_is_available';
 
 const mockQuery = {
   query: 'source=logs | head 10',
@@ -82,10 +81,6 @@ const mockGetServices = () =>
 
 jest.mock('../../utils/get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn(),
-}));
-
-jest.mock('../../utils/get_summary_agent_is_available', () => ({
-  getSummaryAgentIsAvailable: jest.fn(),
 }));
 
 jest.mock('./utils', () => ({
@@ -446,7 +441,6 @@ describe('QueryBuilder', () => {
       const result = await (builder as any).handleDatasetChange(undefined);
       expect(result).toBeUndefined();
       expect(builder.queryEditorState$.value.promptModeIsAvailable).toBe(false);
-      expect(builder.queryEditorState$.value.summaryAgentIsAvailable).toBe(false);
     });
 
     it('fetches dataView and checks agent availability for dataset', async () => {
@@ -507,42 +501,12 @@ describe('QueryBuilder', () => {
     });
   });
 
-  describe('checkAgentAvailability', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
+  it('updates agent flag when both checks succeed', async () => {
+    (getPromptModeIsAvailable as jest.Mock).mockResolvedValue(true);
 
-    it('updates both flags when both checks succeed', async () => {
-      (getPromptModeIsAvailable as jest.Mock).mockResolvedValue(true);
-      (getSummaryAgentIsAvailable as jest.Mock).mockResolvedValue(true);
+    await (builder as any).checkAgentAvailability('ds-123');
 
-      await (builder as any).checkAgentAvailability('ds-123');
-
-      expect(builder.queryEditorState$.value.promptModeIsAvailable).toBe(true);
-      expect(builder.queryEditorState$.value.summaryAgentIsAvailable).toBe(true);
-    });
-
-    it('handles partial failures gracefully', async () => {
-      (getPromptModeIsAvailable as jest.Mock).mockRejectedValue(new Error('error'));
-      (getSummaryAgentIsAvailable as jest.Mock).mockResolvedValue(true);
-
-      await (builder as any).checkAgentAvailability('ds-123');
-
-      // State should remain unchanged partially
-      expect(builder.queryEditorState$.value.summaryAgentIsAvailable).toBe(true);
-      expect(builder.queryEditorState$.value.promptModeIsAvailable).toBe(false);
-    });
-
-    it('handles all failures gracefully', async () => {
-      (getPromptModeIsAvailable as jest.Mock).mockRejectedValue(new Error('error 1'));
-      (getSummaryAgentIsAvailable as jest.Mock).mockRejectedValue(new Error('error 2'));
-
-      await expect((builder as any).checkAgentAvailability('ds-123')).resolves.not.toThrow();
-
-      // State should remain unchanged (default values)
-      expect(builder.queryEditorState$.value.promptModeIsAvailable).toBe(false);
-      expect(builder.queryEditorState$.value.summaryAgentIsAvailable).toBe(false);
-    });
+    expect(builder.queryEditorState$.value.promptModeIsAvailable).toBe(true);
   });
 
   describe('setupGlobalDataRangeSync', () => {
