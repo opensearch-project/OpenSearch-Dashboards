@@ -54,6 +54,14 @@ export class VariableService {
   }
 
   /**
+   * Update the dashboard ID after dashboard is saved.
+   * This allows variables to be saved to the dashboard after it gets an ID.
+   */
+  public setDashboardId(dashboardId: string): void {
+    this.dashboardId = dashboardId;
+  }
+
+  /**
    * Initialize the service with variables loaded from dashboard saved object.
    * This should be called once after creating the service.
    *
@@ -451,8 +459,9 @@ export class VariableService {
    * @param variables - Updated variables array
    */
   private async saveVariables(variables: Variable[]): Promise<void> {
+    // Dashboard must be saved before adding/updating variables
     if (!this.dashboardId || !this.savedObjectsClient) {
-      return;
+      throw new Error('Dashboard must be saved before adding variables');
     }
 
     try {

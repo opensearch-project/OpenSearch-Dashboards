@@ -20,6 +20,8 @@ export interface DashboardVariablesProps {
   interpolationService?: IVariableInterpolationService;
   isEditMode: boolean;
   getPanelQueries?: () => string[];
+  dashboardId?: string;
+  onSaveDashboard?: () => void;
 }
 
 /**
@@ -31,6 +33,8 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
   interpolationService,
   isEditMode,
   getPanelQueries,
+  dashboardId,
+  onSaveDashboard,
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { notifications } = services;
@@ -39,10 +43,28 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
   const [editingVariable, setEditingVariable] = useState<Variable | undefined>(undefined);
 
   const handleAddVariable = useCallback(() => {
+    // Check if dashboard is saved before adding variable
+    if (!dashboardId) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('dashboard.variableEditor.saveDashboardFirst.title', {
+          defaultMessage: 'Save dashboard first',
+        }),
+        text: i18n.translate('dashboard.variableEditor.saveDashboardFirst.text', {
+          defaultMessage: 'Please save the dashboard before adding variables.',
+        }),
+      });
+
+      // Trigger dashboard save
+      if (onSaveDashboard) {
+        onSaveDashboard();
+      }
+      return;
+    }
+
     setEditingVariable(undefined);
     setIsVariableManagementOpen(false);
     setIsVariableEditorOpen(true);
-  }, []);
+  }, [dashboardId, notifications.toasts, onSaveDashboard]);
 
   const handleManageVariables = useCallback(() => {
     setIsVariableEditorOpen(false);
