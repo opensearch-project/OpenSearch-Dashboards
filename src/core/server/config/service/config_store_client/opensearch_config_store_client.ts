@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BulkOperationContainer, SearchHit } from '@opensearch-project/opensearch/api/types';
+import { Types } from '@opensearch-project/opensearch';
+
+type BulkOperationContainer = Types.Core_Bulk.OperationContainer;
+type SearchHit<T = Record<string, any>> = Types.Core_Search.Hit & { _source?: T };
+
 import {
   DynamicConfigurationClientOptions,
   IDynamicConfigStoreClient,
@@ -263,7 +267,7 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
 
     // Update the existing configs with the new config blob
     const bulkConfigs: Array<
-      ConfigDocument | BulkOperationContainer
+      ConfigDocument | BulkOperationContainer | any
       // @ts-expect-error TS2345 TODO Fix me
     > = existingConfigs.body.hits.hits.flatMap((config) => {
       const configName = config._source?.config_name!;

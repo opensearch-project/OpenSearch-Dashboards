@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import type { opensearchtypes } from '@opensearch-project/opensearch';
+import type { Types } from '@opensearch-project/opensearch';
 
 /**
  * Describe a saved object type mapping.
@@ -117,7 +117,7 @@ export interface SavedObjectsMappingProperties {
  *
  * @public
  */
-export type SavedObjectsFieldMapping = opensearchtypes.MappingProperty & {
+export type SavedObjectsFieldMapping = Types.Common_Mapping.Property & {
   /**
    * The dynamic property of the mapping, either `false` or `'strict'`. If
    * unspecified `dynamic: 'strict'` will be inherited from the top-level

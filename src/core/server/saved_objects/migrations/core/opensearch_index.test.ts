@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import type { opensearchtypes } from '@opensearch-project/opensearch';
 import _ from 'lodash';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import * as Index from './opensearch_index';
@@ -67,11 +66,10 @@ describe('OpenSearchIndex', () => {
         return opensearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
-            // @ts-expect-error pass unsupported mappings 'spock' for test purpose
             mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } as any } },
             settings: {},
           },
-        } as opensearchtypes.IndicesGetResponse);
+        } as any);
       });
 
       // @ts-expect-error TS2345 TODO Fix me
@@ -88,13 +86,12 @@ describe('OpenSearchIndex', () => {
           [index]: {
             aliases: { foo: index },
             mappings: {
-              // @ts-expect-error pass multiple root types 'doc' and 'doctor' for test purpose
               doc: { dynamic: 'strict', properties: { a: 'b' } as any },
               doctor: { dynamic: 'strict', properties: { a: 'b' } as any },
             },
             settings: {},
           },
-        } as opensearchtypes.IndicesGetResponse);
+        } as any);
       });
 
       // @ts-expect-error TS2345 TODO Fix me
@@ -113,7 +110,7 @@ describe('OpenSearchIndex', () => {
             mappings: { dynamic: 'strict', properties: { a: 'b' } as any },
             settings: {},
           },
-        } as opensearchtypes.IndicesGetResponse);
+        } as any);
       });
 
       // @ts-expect-error TS2345 TODO Fix me
@@ -246,12 +243,12 @@ describe('OpenSearchIndex', () => {
       client.reindex.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
           task: 'abc',
-        } as opensearchtypes.ReindexResponse)
+        } as any)
       );
       client.tasks.get.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
-        } as opensearchtypes.TaskGetResponse)
+        } as any)
       );
 
       const info = {
@@ -325,10 +322,9 @@ describe('OpenSearchIndex', () => {
       client.reindex.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
           task: 'abc',
-        } as opensearchtypes.ReindexResponse)
+        } as any)
       );
       client.tasks.get.mockResolvedValue(
-        // @ts-expect-error @opensearch-project/opensearch GetTaskResponse requires a `task` property even on errors
         opensearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
           error: {
@@ -336,7 +332,7 @@ describe('OpenSearchIndex', () => {
             reason: 'all shards failed',
             failed_shards: [],
           },
-        } as opensearchtypes.TaskGetResponse)
+        } as any)
       );
 
       const info = {
@@ -385,7 +381,7 @@ describe('OpenSearchIndex', () => {
       client.bulk.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
           items: [] as any[],
-        } as opensearchtypes.BulkResponse)
+        } as any)
       );
 
       const index = '.myalias';
@@ -423,7 +419,7 @@ describe('OpenSearchIndex', () => {
       client.bulk.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
           items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
-        } as opensearchtypes.BulkResponse)
+        } as any)
       );
 
       const index = '.myalias';

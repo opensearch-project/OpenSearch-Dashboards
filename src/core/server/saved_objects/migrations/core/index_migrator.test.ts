@@ -29,7 +29,6 @@
  */
 
 import _ from 'lodash';
-import type { opensearchtypes } from '@opensearch-project/opensearch';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -825,12 +824,12 @@ function withIndex(
     opensearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },
-    } as opensearchtypes.ReindexResponse)
+    } as any)
   );
   client.tasks.get.mockReturnValue(
     opensearchClientMock.createSuccessTransportRequestPromise({
       completed: true,
-    } as opensearchtypes.TaskGetResponse)
+    } as any)
   );
   client.search.mockReturnValue(
     opensearchClientMock.createSuccessTransportRequestPromise(searchResult(0) as any)
@@ -838,13 +837,13 @@ function withIndex(
   client.bulk.mockReturnValue(
     opensearchClientMock.createSuccessTransportRequestPromise({
       items: [] as any[],
-    } as opensearchtypes.BulkResponse)
+    } as any)
   );
   client.count.mockReturnValue(
     opensearchClientMock.createSuccessTransportRequestPromise({
       count: numOutOfDate,
       _shards: { successful: 1, total: 1 },
-    } as opensearchtypes.CountResponse)
+    } as any)
   );
   // this setting is fine for test purpose
   client.scroll.mockImplementation(() => {

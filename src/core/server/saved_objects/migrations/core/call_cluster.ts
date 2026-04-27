@@ -34,14 +34,14 @@
  * funcationality contained here.
  */
 
-import { opensearchtypes } from '@opensearch-project/opensearch';
+import { Types } from '@opensearch-project/opensearch';
 import { IndexMapping } from '../../mappings';
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'count', opts: CountOpts): Promise<{
     count: number;
-    _shards: opensearchtypes.ShardStatistics;
+    _shards: Types.Common.ShardStatistics;
   }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
@@ -179,7 +179,7 @@ export interface SearchResults {
     hits: RawDoc[];
   };
   _scroll_id?: string;
-  _shards: opensearchtypes.ShardStatistics;
+  _shards: Types.Common.ShardStatistics;
 }
 
 export interface ErrorResponse {

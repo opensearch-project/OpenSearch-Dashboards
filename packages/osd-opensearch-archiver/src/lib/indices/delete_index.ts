@@ -101,7 +101,7 @@ export async function waitForSnapshotCompletion(client: Client, index: string, l
     });
 
     log.debug(`Snapshot ${repository}/${snapshot} is ${status.state}`);
-    return PENDING_SNAPSHOT_STATUSES.includes(status.state);
+    return PENDING_SNAPSHOT_STATUSES.includes(status.state ?? '');
   };
 
   const getInProgressSnapshots = async (repository: string) => {
@@ -122,7 +122,7 @@ export async function waitForSnapshotCompletion(client: Client, index: string, l
       continue;
     }
 
-    while (await isSnapshotPending(repository, found.snapshot)) {
+    while (await isSnapshotPending(repository, found.snapshot ?? '')) {
       // wait a bit before getting status again
       await new Promise((resolve) => setTimeout(resolve, 500));
     }

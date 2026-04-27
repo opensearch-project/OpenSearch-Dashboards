@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SearchResponse } from '../../../opensearch';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import { DYNAMIC_APP_CONFIG_ALIAS, DYNAMIC_APP_CONFIG_INDEX_PREFIX } from '../../utils/constants';
 import { OpenSearchConfigStoreClient } from './opensearch_config_store_client';
 import { ConfigDocument } from './types';
 import _ from 'lodash';
 import { ConfigBlob } from '../../types';
-import {
-  BulkOperationContainer,
-  CatIndicesResponse,
-  IndicesGetAliasResponse,
-} from '@opensearch-project/opensearch/api/types';
+import { Types } from '@opensearch-project/opensearch';
+
+type BulkOperationContainer = Types.Core_Bulk.OperationContainer;
+type CatIndicesResponse = Types.Cat_Indices.IndicesRecord[];
+type IndicesGetAliasResponse = Record<string, Types.Indices_GetAlias.IndexAliases>;
+
 import { getDynamicConfigIndexName } from '../../utils/utils';
 
 describe('OpenSearchConfigStoreClient', () => {
@@ -56,19 +56,19 @@ describe('OpenSearchConfigStoreClient', () => {
     const mockClient = opensearchClientMock.createOpenSearchClient();
 
     mockClient.indices.existsAlias.mockResolvedValue(
-      opensearchClientMock.createApiResponse<boolean>({
+      opensearchClientMock.createApiResponse({
         body: existsAliasResult as any,
       })
     );
 
     mockClient.cat.indices.mockResolvedValue(
-      opensearchClientMock.createApiResponse<CatIndicesResponse>({
+      opensearchClientMock.createApiResponse({
         body: catIndicesResult,
       })
     );
 
     mockClient.indices.getAlias.mockResolvedValue(
-      opensearchClientMock.createApiResponse<IndicesGetAliasResponse>({
+      opensearchClientMock.createApiResponse({
         body: getAliasIndicesResult,
       })
     );
@@ -84,7 +84,7 @@ describe('OpenSearchConfigStoreClient', () => {
           });
 
       return Promise.resolve(
-        opensearchClientMock.createApiResponse<SearchResponse<ConfigDocument>>({
+        opensearchClientMock.createApiResponse({
           body: {
             hits: {
               hits: mockHits.map((hit) => ({
@@ -614,7 +614,10 @@ describe('OpenSearchConfigStoreClient', () => {
         });
         const configMap = new Map();
         const expectedBulkRequest: Array<
-          ConfigDocument | { doc: Pick<ConfigDocument, 'config_blob'> } | BulkOperationContainer
+          | ConfigDocument
+          | { doc: Pick<ConfigDocument, 'config_blob'> }
+          | BulkOperationContainer
+          | any
         > = [];
         const bulkCreateConfigsRequest: ConfigBlob[] = [];
 
