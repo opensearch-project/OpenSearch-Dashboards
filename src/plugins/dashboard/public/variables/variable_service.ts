@@ -459,8 +459,11 @@ export class VariableService {
    * @param variables - Updated variables array
    */
   private async saveVariables(variables: Variable[]): Promise<void> {
+    if (!this.savedObjectsClient) {
+      throw new Error('SavedObjectsClient is not initialized');
+    }
     // Dashboard must be saved before adding/updating variables
-    if (!this.dashboardId || !this.savedObjectsClient) {
+    if (!this.dashboardId) {
       throw new Error('Dashboard must be saved before adding variables');
     }
 
@@ -472,8 +475,6 @@ export class VariableService {
 
       this.variables$.next(variables);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[VariableService] Failed to save variables to dashboard:', error);
       throw error;
     }
   }
