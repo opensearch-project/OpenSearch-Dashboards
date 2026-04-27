@@ -162,6 +162,10 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
               onSave={handleSaveVariable}
               existingVariable={editingVariable}
               existingVariableNames={variableService.getVariables().map((v) => v.name)}
+              existingVariableLabels={variableService
+                .getVariables()
+                .map((v) => v.label)
+                .filter((label): label is string => Boolean(label))}
               interpolationService={interpolationService}
             />,
             panelContainer

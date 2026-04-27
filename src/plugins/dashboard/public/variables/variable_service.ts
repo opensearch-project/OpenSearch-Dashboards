@@ -159,14 +159,14 @@ export class VariableService {
     let newRuntimeState: VariableState | undefined;
 
     if (updates.type && updates.type !== existing.type) {
-      // Type changed — rebuild from scratch
+      // Type changed — rebuild from scratch and clear any error/loading states
       updatedVariable = this.buildVariable(id, { ...existing, ...updates } as Omit<
         Variable,
         'id' | 'current'
       >);
       const options = this.deriveOptions(updatedVariable);
       updatedVariable.current = options.length > 0 ? [options[0]] : undefined;
-      newRuntimeState = { options };
+      newRuntimeState = { options, loading: false, error: undefined };
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 

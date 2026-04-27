@@ -32,6 +32,7 @@ export interface VariableEditorFlyoutProps {
   onSave: (variable: Omit<Variable, 'id' | 'current'>) => Promise<void>;
   existingVariable?: Variable;
   existingVariableNames?: string[];
+  existingVariableLabels?: string[];
   interpolationService?: IVariableInterpolationService;
 }
 
@@ -83,6 +84,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   onSave,
   existingVariable,
   existingVariableNames = [],
+  existingVariableLabels = [],
   interpolationService,
 }) => {
   const [name, setName] = useState(existingVariable?.name || '');
@@ -161,16 +163,25 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       return false;
     }
 
-    // Check for duplicate variable names (skip the current variable when editing)
+    // Build a set of all existing names and labels (excluding current variable when editing)
+    const allExistingIdentifiers = new Set<string>();
+    existingVariableNames.forEach((n) => {
+      if (!existingVariable || existingVariable.name !== n) {
+        allExistingIdentifiers.add(n);
+      }
+    });
+    existingVariableLabels.forEach((l) => {
+      if (!existingVariable || existingVariable.label !== l) {
+        allExistingIdentifiers.add(l);
+      }
+    });
+
+    // Check if name conflicts with any existing name or label
     const trimmedName = name.trim();
-    const isDuplicate = existingVariableNames.some(
-      (existingName) =>
-        existingName === trimmedName && (!existingVariable || existingVariable.name !== trimmedName)
-    );
-    if (isDuplicate) {
+    if (allExistingIdentifiers.has(trimmedName)) {
       setError(
-        i18n.translate('dashboard.variableEditor.nameDuplicate', {
-          defaultMessage: 'A variable with the name "{name}" already exists',
+        i18n.translate('dashboard.variableEditor.nameConflict', {
+          defaultMessage: 'The name "{name}" conflicts with an existing variable name or label',
           values: { name: trimmedName },
         })
       );
@@ -181,6 +192,18 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       setError(
         i18n.translate('dashboard.variableEditor.labelTooLong', {
           defaultMessage: 'Variable label must not exceed 40 characters',
+        })
+      );
+      return false;
+    }
+
+    // Check if label conflicts with any existing name or label
+    const trimmedLabel = label.trim();
+    if (trimmedLabel && allExistingIdentifiers.has(trimmedLabel)) {
+      setError(
+        i18n.translate('dashboard.variableEditor.labelConflict', {
+          defaultMessage: 'The label "{label}" conflicts with an existing variable name or label',
+          values: { label: trimmedLabel },
         })
       );
       return false;
@@ -206,7 +229,16 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
     setError(null);
     return true;
-  }, [name, label, type, query, customValues, existingVariableNames, existingVariable]);
+  }, [
+    name,
+    label,
+    type,
+    query,
+    customValues,
+    existingVariableNames,
+    existingVariableLabels,
+    existingVariable,
+  ]);
 
   const handleSave = useCallback(async () => {
     if (!validateForm()) return;
@@ -371,7 +403,10 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
             <EuiSuperSelect
               options={variableTypeOptions}
               valueOfSelected={type}
-              onChange={(t) => setType(t)}
+              onChange={(t) => {
+                setType(t);
+                setError(null);
+              }}
               data-test-subj="variableEditorType"
               compressed
             />
