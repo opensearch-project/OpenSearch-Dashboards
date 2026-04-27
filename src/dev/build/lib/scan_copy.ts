@@ -44,9 +44,16 @@ const copyFileAsync = promisify(Fs.copyFile);
 const linkAsync = promisify(Fs.link);
 const readdirAsync = promisify(Fs.readdir);
 
-// Hardlinks share the inode so they're ~instant and use no extra disk. We fall back to a
-// reflink-preferred copy if linking fails (cross-filesystem, permissions, etc.). Opt out
-// entirely with OSD_BUILD_NO_HARDLINK=1 (optional) to force a full byte-for-byte copy.
+// Three-tier fast-copy strategy (first that succeeds wins):
+//   1. Reflink (CoW) via COPYFILE_FICLONE_FORCE — destinations are independent of the source
+//      at the page level (writes on either side trigger a copy-on-write). Works on xfs w/
+//      reflink=1 (RHEL 8+ default), btrfs, APFS. Fails fast with ENOTSUP on ext4 so we fall
+//      through to hardlink without silently byte-copying.
+//   2. Hardlink — shares the inode (~instant, no extra disk), but destinations MUST NOT be
+//      mutated in-place; see HARDLINK CONTRACT below.
+//   3. Byte copy — always works; used when both of the above fail (cross-filesystem,
+//      permissions, ENOTSUP, etc.).
+// OSD_BUILD_NO_HARDLINK=1 (optional) skips both fast paths and forces a plain byte copy.
 // Read per-call (matching the other OSD_BUILD_* env vars) so operators/tests can flip it
 // without needing a module reload.
 const isHardlinkDisabled = () => process.env.OSD_BUILD_NO_HARDLINK === '1';
@@ -88,24 +95,32 @@ class Record {
  * Copy all of the files from one directory to another, optionally filtered with a
  * function or modifying mtime/atime for each file.
  *
- * ⚠ HARDLINK CONTRACT — destination files MUST NOT be mutated in-place.
+ * ⚠ HARDLINK CONTRACT — applies only when the hardlink tier is used.
  *
- * By default (no `time` option, `OSD_BUILD_NO_HARDLINK` unset), each copied file is a
- * hardlink that shares its inode with the source. Writing to `dest` with `fs.writeFile`,
- * `sed -i`, `chmod`, `truncate`, etc. would therefore mutate the original source file
- * too — and, if multiple destinations were produced from the same source (e.g.
- * per-platform copies), every sibling destination.
+ * Default copy order (no `time`, `OSD_BUILD_NO_HARDLINK` unset):
+ *   1. **Reflink** via `COPYFILE_FICLONE_FORCE` on CoW filesystems (xfs w/ reflink=1,
+ *      btrfs, APFS). Reflinked files are independent on the first write (copy-on-write),
+ *      so in-place mutation of `dest` is SAFE and does NOT affect `source`.
+ *   2. **Hardlink** when reflink isn't supported (ext4, cross-FS, etc.). Hardlinks share
+ *      the inode — writing to `dest` with `fs.writeFile`, `sed -i`, `chmod`, `truncate`,
+ *      etc. mutates the original source file too, and every sibling destination.
+ *   3. **Byte copy** as the final fallback (linking failed entirely — `EXDEV`, `EPERM`,
+ *      `EACCES`, `ENOTSUP`, etc.).
+ *
+ * Because tier 2 might be selected on ext4 / cross-FS runners, callers should treat
+ * destinations as if they were hardlinks unless they're certain every target filesystem
+ * is CoW. Safe and unsafe patterns:
  *
  * Safe downstream patterns:
  *   • Read-only operations (archiving, scanning, stat).
- *   • Delete-then-replace (`fs.unlink` + write new file) — `unlink` only decrements
- *     the link count, so the source copy is unaffected.
+ *   • Delete-then-replace (`fs.unlink` + write new file) — `unlink` only decrements the
+ *     link count, so the source copy is unaffected on both reflink and hardlink.
  *
- * Unsafe patterns:
+ * Unsafe patterns (under hardlink tier only — safe under reflink, but don't rely on it):
  *   • In-place writes / chmods / truncations of copied files.
  *
- * If a caller genuinely needs to mutate copied files, either pass `time` (disables
- * linking) or set `OSD_BUILD_NO_HARDLINK=1`.
+ * If a caller genuinely needs to mutate copied files regardless of filesystem, either
+ * pass `time` (disables both fast paths) or set `OSD_BUILD_NO_HARDLINK=1`.
  */
 export async function scanCopy(options: Options) {
   const { source, destination, filter, time, log } = options;
@@ -133,32 +148,60 @@ export async function scanCopy(options: Options) {
     await Promise.all(children.map(async (child) => await copy(child)));
   };
 
-  // Hardlink-preferred: hardlinks share the inode (no data copy, ~instant). We skip linking
-  // when `time` is provided because updating mtime on a hardlink would also mutate the source's
-  // mtime. Any failure (EXDEV, EPERM, EACCES, ENOTSUP, ...) falls back to a full byte copy.
-  const shouldTryLink = !isHardlinkDisabled() && !time;
+  // See the three-tier strategy at the top of this file. We skip both fast paths when
+  // `time` is provided (updating mtime on a hardlink mutates the source's mtime) or when
+  // the caller opted out via OSD_BUILD_NO_HARDLINK. Note: reflink + utimes would actually
+  // be safe (reflinked dest has an independent inode), but disabling both tiers together
+  // keeps `shouldTryFast` a single flag; the `time` code path is rare enough that the
+  // few hundred ms lost isn't worth splitting it.
+  const shouldTryFast = !isHardlinkDisabled() && !time;
   let linkFallbackLogged = false;
 
   const copyFileOrLink = async (src: string, dest: string) => {
-    if (shouldTryLink) {
+    if (shouldTryFast) {
+      // Tier 1: reflink (CoW). FICLONE_FORCE errors with ENOTSUP on non-CoW filesystems
+      // (ext4, NTFS, HFS+), so we fall through cleanly. Plain FICLONE would silently
+      // byte-copy on those, which would be slower than the hardlink tier below.
+      let reflinkCode: string | undefined;
+      try {
+        await copyFileAsync(
+          src,
+          dest,
+          // eslint-disable-next-line no-bitwise
+          Fs.constants.COPYFILE_FICLONE_FORCE | Fs.constants.COPYFILE_EXCL
+        );
+        return;
+      } catch (err) {
+        reflinkCode = (err as NodeJS.ErrnoException).code;
+        if (reflinkCode === 'EEXIST') throw err;
+        // Any other error (ENOTSUP on ext4/NTFS expected; also EXDEV, EPERM, etc.)
+        // → try hardlink. The code is captured so the eventual fallback log reports
+        // both reflink and hardlink reasons, not just the last one.
+      }
+      // Tier 2: hardlink.
       try {
         await linkAsync(src, dest);
         return;
       } catch (err) {
-        const code = (err as NodeJS.ErrnoException).code;
+        const linkCode = (err as NodeJS.ErrnoException).code;
         // EEXIST means the destination really exists — preserve the original
         // COPYFILE_EXCL semantic by re-throwing rather than silently overwriting.
-        if (code === 'EEXIST') throw err;
+        if (linkCode === 'EEXIST') throw err;
         if (!linkFallbackLogged) {
           linkFallbackLogged = true;
+          // Honest phrasing: reflink returning ENOTSUP is expected on non-CoW
+          // filesystems (not a "failure" in the operator sense). Only call it out
+          // as a failure when both tiers gave errors and we're actually degrading.
           const msg =
-            `[scan_copy] hardlink failed (${code || 'unknown'}); falling back to byte copy. ` +
-            `Set OSD_BUILD_NO_HARDLINK=1 to silence.`;
+            `[scan_copy] fast-path copy failed ` +
+            `(reflink=${reflinkCode || 'unknown'}, hardlink=${linkCode || 'unknown'}); ` +
+            `falling back to byte copy. Set OSD_BUILD_NO_HARDLINK=1 to silence.`;
           if (log) log.warning(msg);
           else process.stderr.write(`${msg}\n`);
         }
       }
     }
+    // Tier 3: byte copy.
     await copyFileAsync(src, dest, Fs.constants.COPYFILE_EXCL);
   };
 
