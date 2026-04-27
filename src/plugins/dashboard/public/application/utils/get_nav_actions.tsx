@@ -189,7 +189,7 @@ export const getNavActions = (
             });
           },
           containerInfo: {
-            containerId: currentContainer.id,
+            containerId: currentContainer.getInput().id,
             containerName: currentContainer.getTitle(),
           },
         });

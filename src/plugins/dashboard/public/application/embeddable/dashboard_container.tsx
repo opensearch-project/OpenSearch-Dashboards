@@ -187,6 +187,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       })
     );
+
+    // Subscribe to container input changes to update VariableService dashboardId
+    this.variableSubscriptions.push(
+      this.getInput$().subscribe((input) => {
+        // When dashboard is saved and gets an ID, update VariableService
+        if (input.id && input.id !== initialInput.id) {
+          this.variableService.setDashboardId(input.id);
+        }
+      })
+    );
+
     this.initVariableRefreshSubscription();
   }
 
