@@ -102,12 +102,13 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         const fieldMapping = flattened[colName];
 
         if (shouldShowEmptyCell(row, null)) {
-          return <EmptyTableCell colName={colName} wrapCellText={wrapCellText} />;
+          return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
         }
 
         if (fieldInfo?.type === '_source') {
           return (
             <SourceFieldTableCell
+              key={colName}
               colName={colName}
               dataset={dataset}
               row={row}
@@ -120,7 +121,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         const formattedValue = formatFieldValue(dataset, row, colName);
 
         if (shouldShowEmptyCell(row, formattedValue)) {
-          return <EmptyTableCell colName={colName} wrapCellText={wrapCellText} />;
+          return <EmptyTableCell key={colName} colName={colName} wrapCellText={wrapCellText} />;
         }
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
@@ -128,6 +129,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
         if (fieldInfo?.filterable === false) {
           return (
             <NonFilterableTableCell
+              key={colName}
               colName={colName}
               className={getCellClassName(dataset.timeFieldName, colName, wrapCellText)}
               sanitizedCellValue={sanitizedCellValue}
