@@ -65,6 +65,119 @@ describe(`Workspace routes`, () => {
     );
   });
 
+  describe('custom workspace id', () => {
+    it('creates a workspace with a valid custom id', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abc-12',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ id: 'abc-12' })
+      );
+    });
+
+    it('creates a workspace with a 20-character custom id', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abcdef1234abcdef1234',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ id: 'abcdef1234abcdef1234' })
+      );
+    });
+
+    it('creates a workspace without a custom id', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.not.objectContaining({ id: expect.anything() })
+      );
+    });
+
+    it('creates a workspace with a UUID as custom id', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ id: '550e8400-e29b-41d4-a716-446655440000' })
+      );
+    });
+
+    it('returns 400 when id is shorter than 6 characters', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abc',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(400);
+      expect(result.body.message).toContain('must be a UUID or 6–20 characters');
+    });
+
+    it('returns 400 when id is longer than 20 characters', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abcdef1234abcdef12345',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(400);
+      expect(result.body.message).toContain('must be a UUID or 6–20 characters');
+    });
+
+    it('returns 400 when id contains invalid characters', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            id: 'abc!@#',
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+        })
+        .expect(400);
+      expect(result.body.message).toContain(
+        'must be a UUID or 6–20 characters using only letters, numbers, underscores, and hyphens.'
+      );
+    });
+  });
+
   describe('feature validation', () => {
     it('returns 400 when no features is provided during workspace creation', async () => {
       await supertest(httpSetup.server.listener)

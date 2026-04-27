@@ -102,6 +102,19 @@ const workspaceNameSchema = schema.string({
 });
 
 const createWorkspaceAttributesSchema = schema.object({
+  id: schema.maybe(
+    schema.string({
+      validate(value) {
+        const isCustomId = /^[a-zA-Z0-9_-]{6,20}$/.test(value);
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          value
+        );
+        if (!isCustomId && !isUuid) {
+          return 'must be a UUID or 6–20 characters using only letters, numbers, underscores, and hyphens.';
+        }
+      },
+    })
+  ),
   name: workspaceNameSchema,
   features: featuresSchema,
   ...workspaceOptionalAttributesSchema,
@@ -210,6 +223,7 @@ export function registerRoutes({
       const { attributes, settings } = req.body;
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+        id?: string;
         dataSources?: string[];
         dataConnections?: string[];
       } = attributes;
