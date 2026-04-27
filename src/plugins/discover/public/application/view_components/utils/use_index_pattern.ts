@@ -10,6 +10,7 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 import { updateIndexPattern, useSelector } from '../../utils/state_management';
+import { LAST_INDEX_PATTERN_KEY } from '../../helpers/constants';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -25,12 +26,14 @@ import { updateIndexPattern, useSelector } from '../../utils/state_management';
  * @param store - The redux store in data_explorer to dispatch actions.
  * @returns - The fetched index pattern.
  */
+
 export const useIndexPattern = (services: DiscoverViewServices) => {
   const { data, toastNotifications, uiSettings, store } = services;
   const { query } = useQueryStringManager({
     queryString: data.query.queryString,
   });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
+  const savedSearchId = useSelector((state) => state.discover?.savedSearch);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const isQueryEnhancementEnabled = useMemo(
     () => uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING),
@@ -78,7 +81,8 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           );
           if (isMounted && newId) {
             store!.dispatch(updateIndexPattern(newId));
-            handleIndexPattern();
+            const ip = await fetchIndexPatternDetails(newId);
+            if (isMounted && ip) setIndexPattern(ip);
           }
         } else {
           const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
@@ -116,6 +120,17 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     query.dataset,
     data.query.queryString,
   ]);
+
+  // Persist current index pattern when on Discover root so breadcrumb can restore it when returning from a saved search
+  useEffect(() => {
+    if (indexPattern?.id && !savedSearchId) {
+      try {
+        sessionStorage.setItem(LAST_INDEX_PATTERN_KEY, indexPattern.id);
+      } catch (_) {
+        // ignore storage errors
+      }
+    }
+  }, [indexPattern?.id, savedSearchId]);
 
   return indexPattern;
 };

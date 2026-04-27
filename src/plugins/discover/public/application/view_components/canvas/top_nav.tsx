@@ -122,11 +122,11 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
 
     if (savedSearch?.id) {
-      chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedSearch.title }]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(services), { text: savedSearch.title }]);
     } else {
-      chrome.setBreadcrumbs([...getRootBreadcrumbs()]);
+      chrome.setBreadcrumbs([...getRootBreadcrumbs(services)]);
     }
-  }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
+  }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title, services]);
 
   useEffect(() => {
     setScreenTitle(
