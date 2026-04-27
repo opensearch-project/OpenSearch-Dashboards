@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import Fs from 'fs';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -37,13 +38,92 @@ import { ICommand } from './';
 import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
 import { readYarnLock } from '../utils/yarn_lock';
-import { validateDependencies } from '../utils/validate_dependencies';
+import { validateDependencies, isMutatingSingleVersionMode } from '../utils/validate_dependencies';
+import {
+  computeFingerprint,
+  fingerprintsEqual,
+  readFingerprint,
+  writeFingerprint,
+} from '../utils/bootstrap_fingerprint';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
   name: 'bootstrap',
 
   async run(projects, projectGraph, { options, osd }) {
+    // -----------------------------------------------------------------------
+    // Fast path: if nothing relevant has changed since the last successful
+    // bootstrap and every per-project cache is still valid, skip the whole
+    // pipeline. Skipped when the user scopes the run (--include/--exclude/
+    // --skip-opensearch-dashboards-plugins/--oss), passes --no-cache, or
+    // passes --frozen-lockfile (which is a "verify the lockfile" request).
+    // -----------------------------------------------------------------------
+    const fastPathEligible =
+      options.cache !== false &&
+      !options['frozen-lockfile'] &&
+      !options.include &&
+      !options.exclude &&
+      !options['skip-opensearch-dashboards-plugins'] &&
+      !options.oss;
+
+    if (fastPathEligible) {
+      const previous = readFingerprint(osd);
+      const current = computeFingerprint(osd, projects);
+
+      const integrityOk = Fs.existsSync(osd.getAbsolute('node_modules/.yarn-integrity'));
+      log.verbose(
+        `[fingerprint] previous=${previous ? 'present' : 'absent'} match=${
+          previous ? fingerprintsEqual(previous, current) : false
+        } integrity=${integrityOk}`
+      );
+
+      if (previous && fingerprintsEqual(previous, current) && integrityOk) {
+        const yarnLock = await readYarnLock(osd);
+        const checksums = await getAllChecksums(osd, log, yarnLock);
+
+        let staleProject: string | undefined;
+        for (const project of projects.values()) {
+          // The workspace root's per-project cache is content-hashed by
+          // `git ls-files -dmto` at the repo root, which catches every
+          // transient change (including our own fingerprint file writes).
+          // Skip it here — the fingerprint itself already covers the
+          // workspace-root manifest/lockfile content.
+          if (project.isWorkspaceRoot) continue;
+
+          if (project.hasScript('osd:bootstrap') || project.hasBuildTargets()) {
+            const cacheFile = new BootstrapCacheFile(osd, project, checksums);
+            if (!cacheFile.isValid()) {
+              staleProject = project.name;
+              break;
+            }
+          }
+        }
+
+        if (!staleProject) {
+          // linkProjectExecutables is idempotent — re-linking the same bins
+          // produces the same symlinks, and self-heals if someone wiped
+          // node_modules/.bin out-of-band between runs.
+          await linkProjectExecutables(projects, projectGraph);
+
+          // validateDependencies is safe to re-run in non-mutating modes
+          // (strict/ignore), but loose/force/brute-force can mutate
+          // package.json/yarn.lock while reconciling single-version
+          // conflicts — doing that silently behind a "fast path success"
+          // log would be confusing, so defer those to a full bootstrap.
+          const singleVersion = options['single-version']?.toLowerCase?.();
+          if (!isMutatingSingleVersionMode(singleVersion)) {
+            await validateDependencies(osd, yarnLock, singleVersion);
+          }
+
+          log.success(
+            'bootstrap already up to date (fingerprint matched) — run with `--no-cache` to force a full bootstrap'
+          );
+          return;
+        }
+        log.verbose(`[fingerprint] per-project cache stale: ${staleProject}`);
+      }
+    }
+
     const batchedProjectsByWorkspace = topologicallyBatchProjects(projects, projectGraph, {
       batchByWorkspace: true,
     });
@@ -128,5 +208,12 @@ export const BootstrapCommand: ICommand = {
         log.success(`[${project.name}] bootstrap complete`);
       }
     });
+
+    // Record the successful run for next time's fast path. Only when eligible
+    // so partial/scoped runs don't clobber the fingerprint captured by a full
+    // successful bootstrap.
+    if (fastPathEligible) {
+      writeFingerprint(osd, computeFingerprint(osd, projects));
+    }
   },
 };
