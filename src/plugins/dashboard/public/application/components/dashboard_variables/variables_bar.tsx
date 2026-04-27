@@ -331,7 +331,7 @@ export const VariablesBar: React.FC<VariablesBarProps> = ({
       )}
       {!isCollapsed && (
         <>
-          {isEditMode && (
+          {isEditMode && variables.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiSmallButtonEmpty
                 iconType="list"

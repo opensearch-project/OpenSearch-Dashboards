@@ -192,10 +192,10 @@ export class VisualizeEmbeddableFactory
       );
     } else {
       const container =
-        parent?.id && parent?.getTitle()
+        parent && parent.getInput().id && parent.getTitle()
           ? {
               containerInfo: {
-                containerId: parent.id,
+                containerId: parent.getInput().id,
                 containerName: parent.getTitle() ?? '',
               },
             }

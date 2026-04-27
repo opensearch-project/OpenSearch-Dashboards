@@ -54,6 +54,14 @@ export class VariableService {
   }
 
   /**
+   * Update the dashboard ID after dashboard is saved.
+   * This allows variables to be saved to the dashboard after it gets an ID.
+   */
+  public setDashboardId(dashboardId: string): void {
+    this.dashboardId = dashboardId;
+  }
+
+  /**
    * Initialize the service with variables loaded from dashboard saved object.
    * This should be called once after creating the service.
    *
@@ -151,14 +159,14 @@ export class VariableService {
     let newRuntimeState: VariableState | undefined;
 
     if (updates.type && updates.type !== existing.type) {
-      // Type changed — rebuild from scratch
+      // Type changed — rebuild from scratch and clear any error/loading states
       updatedVariable = this.buildVariable(id, { ...existing, ...updates } as Omit<
         Variable,
         'id' | 'current'
       >);
       const options = this.deriveOptions(updatedVariable);
       updatedVariable.current = options.length > 0 ? [options[0]] : undefined;
-      newRuntimeState = { options };
+      newRuntimeState = { options, loading: false, error: undefined };
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -451,8 +459,12 @@ export class VariableService {
    * @param variables - Updated variables array
    */
   private async saveVariables(variables: Variable[]): Promise<void> {
-    if (!this.dashboardId || !this.savedObjectsClient) {
-      return;
+    if (!this.savedObjectsClient) {
+      throw new Error('SavedObjectsClient is not initialized');
+    }
+    // Dashboard must be saved before adding/updating variables
+    if (!this.dashboardId) {
+      throw new Error('Dashboard must be saved before adding variables');
     }
 
     try {
@@ -463,8 +475,6 @@ export class VariableService {
 
       this.variables$.next(variables);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[VariableService] Failed to save variables to dashboard:', error);
       throw error;
     }
   }
