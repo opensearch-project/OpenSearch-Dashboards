@@ -30,7 +30,7 @@
 
 import { ToolingLog } from '@osd/dev-utils';
 
-import { Config, createRunner, TargetPlatforms } from './lib';
+import { Config, createRunner, Task, TargetPlatforms } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -89,8 +89,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   await run(Tasks.CreateNoticeFile);
   await run(Tasks.UpdateLicenseFile);
   await run(Tasks.RemovePackageJsonDeps);
-  await run(Tasks.CleanTypescript);
-  await run(Tasks.CleanExtraFilesFromModules);
+  await run(Tasks.CleanExtraBuildFiles);
   await run(Tasks.CleanEmptyFolders);
 
   /**
@@ -99,7 +98,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   await run(Tasks.CreateArchivesSources);
   await run(Tasks.PatchNativeModules);
-  await run(Tasks.InstallChromium);
   await run(Tasks.CleanExtraBinScripts);
   await run(Tasks.CleanNodeBuilds);
 
@@ -114,21 +112,26 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --skip-archives
     await run(Tasks.CreateArchives);
   }
+
+  const fpmTasks: Task[] = [];
   if (options.createDebPackage) {
     // control w/ --deb or --skip-os-packages
-    await run(Tasks.CreateDebPackage);
+    fpmTasks.push(Tasks.CreateDebPackage);
   }
   if (options.createDebArmPackage) {
     // control w/ --deb-arm or --skip-os-packages
-    await run(Tasks.CreateDebArmPackage);
+    fpmTasks.push(Tasks.CreateDebArmPackage);
   }
   if (options.createRpmPackage) {
     // control w/ --rpm or --skip-os-packages
-    await run(Tasks.CreateRpmPackage);
+    fpmTasks.push(Tasks.CreateRpmPackage);
   }
   if (options.createRpmArmPackage) {
     // control w/ --rpm-arm or --skip-os-packages
-    await run(Tasks.CreateRpmArmPackage);
+    fpmTasks.push(Tasks.CreateRpmArmPackage);
+  }
+  if (fpmTasks.length) {
+    await run(Tasks.createOsPackagesTask(fpmTasks));
   }
   if (options.createDockerPackage) {
     // control w/ --docker or --skip-docker-ubi or --skip-os-packages
