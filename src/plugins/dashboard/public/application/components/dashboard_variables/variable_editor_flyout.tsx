@@ -31,8 +31,7 @@ export interface VariableEditorFlyoutProps {
   onClose: () => void;
   onSave: (variable: Omit<Variable, 'id' | 'current'>) => Promise<void>;
   existingVariable?: Variable;
-  existingVariableNames?: string[];
-  existingVariableLabels?: string[];
+  existingVariables?: Variable[];
   interpolationService?: IVariableInterpolationService;
 }
 
@@ -83,8 +82,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   onClose,
   onSave,
   existingVariable,
-  existingVariableNames = [],
-  existingVariableLabels = [],
+  existingVariables = [],
   interpolationService,
 }) => {
   const [name, setName] = useState(existingVariable?.name || '');
@@ -165,14 +163,12 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
     // Build a set of all existing names and labels (excluding current variable when editing)
     const allExistingIdentifiers = new Set<string>();
-    existingVariableNames.forEach((n) => {
-      if (!existingVariable || existingVariable.name !== n) {
-        allExistingIdentifiers.add(n);
-      }
-    });
-    existingVariableLabels.forEach((l) => {
-      if (!existingVariable || existingVariable.label !== l) {
-        allExistingIdentifiers.add(l);
+    existingVariables.forEach((v) => {
+      if (!existingVariable || existingVariable.id !== v.id) {
+        allExistingIdentifiers.add(v.name);
+        if (v?.label) {
+          allExistingIdentifiers.add(v.label);
+        }
       }
     });
 
@@ -229,16 +225,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
     setError(null);
     return true;
-  }, [
-    name,
-    label,
-    type,
-    query,
-    customValues,
-    existingVariableNames,
-    existingVariableLabels,
-    existingVariable,
-  ]);
+  }, [name, label, type, query, customValues, existingVariables, existingVariable]);
 
   const handleSave = useCallback(async () => {
     if (!validateForm()) return;
@@ -423,7 +410,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               onQueryChange={setQuery}
               onLanguageChange={handleLanguageChange}
               onDatasetChange={setDataset}
-              existingVariableNames={existingVariableNames}
+              existingVariableNames={existingVariables.map((v) => v.name)}
               interpolationService={interpolationService}
               regex={regex}
               onRegexChange={setRegex}

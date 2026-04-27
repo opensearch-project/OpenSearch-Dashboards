@@ -128,6 +128,12 @@ export const DashboardEditor = () => {
                   // Emit event to trigger dashboard save
                   eventEmitter.emit('triggerDashboardSave');
                 }}
+                onEnterEditMode={() => {
+                  // Switch to edit mode
+                  if (appState) {
+                    appState.transitions.set('viewMode', ViewMode.EDIT);
+                  }
+                }}
               />
             )}
           </>
