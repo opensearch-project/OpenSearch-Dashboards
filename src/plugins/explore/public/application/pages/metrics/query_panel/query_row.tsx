@@ -21,6 +21,7 @@ import {
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { queryEditorOptions } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/editor_options';
+import { getCommandEnterAction } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/command_enter_action';
 import { PrometheusClient } from '../explore/services/prometheus_client';
 import { PromQLBuilder, parsePromQL } from '../promql_builder';
 import type { BuilderState } from '../promql_builder';
@@ -42,6 +43,8 @@ export interface QueryRowProps {
   onCodeChange: (rowId: string, query: string) => void;
   onModeChange: (rowId: string, mode: RowMode) => void;
   onRemove: (rowId: string) => void;
+  onRun: () => void;
+  languageTitle: string;
   canRemove: boolean;
   isDragging: boolean;
   dragHandleProps: DragHandleProps;
@@ -56,6 +59,8 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
     onCodeChange,
     onModeChange,
     onRemove,
+    onRun,
+    languageTitle,
     canRemove,
     isDragging,
     dragHandleProps,
@@ -149,6 +154,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                   options={queryEditorOptions}
                   useLatestTheme
                   editorDidMount={(editor) => {
+                    editor.addAction(getCommandEnterAction(onRun));
                     editor.onDidContentSizeChange(() => {
                       const contentHeight = editor.getContentHeight();
                       const maxHeight = 100;
@@ -166,6 +172,14 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                     });
                   }}
                 />
+                {!row.query && (
+                  <div className="exploreQueryPanelEditor__placeholder">
+                    {i18n.translate('explore.metricsQueryPanel.codePlaceholder', {
+                      defaultMessage: 'Search using </> {language}',
+                      values: { language: languageTitle },
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </EuiFlexItem>
