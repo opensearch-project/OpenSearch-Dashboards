@@ -102,9 +102,42 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     });
 
   const commonConfig: Configuration = {
+    name: bundle.id,
     mode: worker.dist ? 'production' : 'development',
     context: Path.normalize(bundle.contextDir),
-    cache: true,
+    cache: worker.cache,
+    ...(worker.cache
+      ? {
+          experiments: {
+            cache: {
+              type: 'persistent',
+              buildDependencies: [
+                __filename,
+                require.resolve('./theme_loader'),
+                require.resolve('./entry_point_creator'),
+                require.resolve('@osd/optimizer/postcss.config.js'),
+                Path.resolve(worker.repoRoot, '.browserslistrc'),
+              ],
+              // Isolate caches when config that affects build output changes
+              version: JSON.stringify({
+                themeTags: worker.themeTags,
+                browserslistEnv: worker.browserslistEnv,
+              }),
+              snapshot: {
+                // Workspace-symlinked packages that are imported by plugin bundles
+                // must use content-hash validation instead of package.json version.
+                // Only @osd/* is entirely workspace-local; the others have specific
+                // symlinked packages alongside real npm packages in the same scope.
+                unmanagedPaths: [
+                  /[\\/]node_modules[\\/]@osd[\\/]/,
+                  /[\\/]node_modules[\\/]@elastic[\\/]safer-lodash-set[\\/]/,
+                  /[\\/]node_modules[\\/]@opensearch[\\/]datemath[\\/]/,
+                ],
+              },
+            },
+          },
+        }
+      : {}),
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
