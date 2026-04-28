@@ -1747,7 +1747,11 @@ export class SavedObjectsRepository {
    * @returns Raw document from OpenSearch.
    * @throws Will throw an error if the saved object is not found, or if it doesn't include the target namespace.
    */
-  private async preflightCheckIncludesNamespace(type: string, id: string, namespace?: string) {
+  private async preflightCheckIncludesNamespace(
+    type: string,
+    id: string,
+    namespace?: string
+  ): Promise<SavedObjectsRawDoc> {
     if (!this._registry.isMultiNamespace(type)) {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
@@ -1765,11 +1769,11 @@ export class SavedObjectsRepository {
     if (
       !indexFound ||
       !isFoundGetResponse(body) ||
-      !this.rawDocExistsInNamespace(body, namespace)
+      !this.rawDocExistsInNamespace(body as any, namespace)
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    return body;
+    return (body as unknown) as SavedObjectsRawDoc;
   }
 }
 
