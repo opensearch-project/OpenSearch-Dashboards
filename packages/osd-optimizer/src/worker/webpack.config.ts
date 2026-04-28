@@ -104,7 +104,30 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const commonConfig: Configuration = {
     mode: worker.dist ? 'production' : 'development',
     context: Path.normalize(bundle.contextDir),
-    cache: true,
+    cache: worker.cache,
+    ...(worker.cache
+      ? {
+          experiments: {
+            cache: {
+              type: 'persistent',
+              buildDependencies: [
+                __filename,
+                require.resolve('./theme_loader'),
+                require.resolve('./entry_point_creator'),
+                require.resolve('@osd/optimizer/postcss.config.js'),
+              ],
+              // Isolate caches when config that affects build output changes
+              version: JSON.stringify({
+                themeTags: worker.themeTags,
+                browserslistEnv: worker.browserslistEnv,
+              }),
+              snapshot: {
+                unmanagedPaths: [/[\\/]node_modules[\\/]@osd[\\/]/],
+              },
+            },
+          },
+        }
+      : {}),
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },

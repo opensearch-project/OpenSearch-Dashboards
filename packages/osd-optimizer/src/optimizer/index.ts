@@ -31,10 +31,8 @@
 export * from './optimizer_config';
 export { WorkerStdio } from './observe_worker';
 export * from './optimizer_state';
-export * from './cache_keys';
 export * from './watch_bundles_for_changes';
 export * from './run_workers';
-export * from './bundle_cache';
 export * from './handle_optimizer_completion';
 export * from './get_output_stats';
 export * from './opensearch_dashboards_platform_plugins';
