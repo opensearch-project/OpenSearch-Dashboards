@@ -1181,14 +1181,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -2389,14 +2385,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -3597,14 +3589,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -4805,14 +4793,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -6013,14 +5997,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -7220,14 +7200,10 @@ exports[`Dashboard top nav render with all components 1`] = `
         >
           <TopNavMenu
             appName="dashboard"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={true}
             showQueryBar={false}
