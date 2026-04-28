@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { SavedObjectsFieldMapping, IndexMapping, SavedObjectsMappingProperties } from '../types';
+import { IndexMapping, SavedObjectsMappingProperties } from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**
@@ -54,7 +54,7 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
     // we consider the existence of the properties or type of object to designate that this is an object datatype
     if (
       !omittedRootProps.includes(key) &&
-      ((value as SavedObjectsFieldMapping).properties || value.type === 'object')
+      ('properties' in value || (value as any).type === 'object')
     ) {
       acc[key] = value;
     }

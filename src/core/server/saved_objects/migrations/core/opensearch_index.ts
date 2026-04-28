@@ -34,7 +34,7 @@
  */
 
 import _ from 'lodash';
-import { opensearchtypes } from '@opensearch-project/opensearch';
+import { Types } from '@opensearch-project/opensearch';
 import { MigrationOpenSearchClient } from './migration_opensearch_client';
 import { CountResponse } from '../../../opensearch';
 import { IndexMapping } from '../../mappings';
@@ -324,7 +324,7 @@ function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
  * Object indices should only ever have a single shard. This is more to handle
  * instances where customers manually expand the shards of an index.
  */
-function assertResponseIncludeAllShards({ _shards }: { _shards: opensearchtypes.ShardStatistics }) {
+function assertResponseIncludeAllShards({ _shards }: { _shards: Types.Common.ShardStatistics }) {
   if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
     return;
   }

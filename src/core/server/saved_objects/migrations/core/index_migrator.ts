@@ -28,7 +28,9 @@
  * under the License.
  */
 
-import { DeleteByQueryRequest } from '@opensearch-project/opensearch/api/types';
+// DeleteByQueryRequest type - using any to avoid deep import issues with v3 client
+type DeleteByQueryRequest = any;
+
 import { diffMappings } from './build_active_mappings';
 import * as Index from './opensearch_index';
 import { migrateRawDocs } from './migrate_raw_docs';

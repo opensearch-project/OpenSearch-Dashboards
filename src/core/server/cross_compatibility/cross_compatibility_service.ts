@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CatPluginsResponse } from '@opensearch-project/opensearch/api/types';
+import { Types } from '@opensearch-project/opensearch';
+
+type CatPluginsResponse = Types.Cat_Plugins.PluginsRecord[];
+
 import semver from 'semver';
 import { CrossCompatibilityResult, CrossCompatibilityServiceStart } from './types';
 import { CoreContext } from '../core_context';
@@ -102,7 +105,7 @@ export class CrossCompatibilityService {
   ) {
     let isCompatible = false;
     const installedPluginVersions = new Set<string>();
-    opensearchInstalledPlugins.forEach((obj) => {
+    opensearchInstalledPlugins.forEach((obj: CatPluginsResponse[number]) => {
       if (obj.component === depPluginName && obj.version) {
         installedPluginVersions.add(obj.version);
         if (semver.satisfies(semver.coerce(obj.version)!.version, depPluginVersionRange)) {

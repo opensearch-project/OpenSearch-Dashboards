@@ -31,8 +31,10 @@
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
-import { RequestEvent, errors, Transport } from '@opensearch-project/opensearch';
+import { ApiResponse, errors, Transport } from '@opensearch-project/opensearch';
 import { TransportRequestParams, RequestBody } from '@opensearch-project/opensearch/lib/Transport';
+
+type RequestEvent<T = any> = ApiResponse & { body: T };
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';

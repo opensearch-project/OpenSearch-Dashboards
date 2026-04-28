@@ -173,12 +173,12 @@ const createSuccessTransportRequestPromise = <
 >(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {}
-): MockedTransportRequestPromise<ApiResponse<T>> => {
+): MockedTransportRequestPromise<ApiResponse> => {
   const response = createApiResponse({ body, statusCode });
   const promise = Promise.resolve(response);
-  (promise as MockedTransportRequestPromise<ApiResponse<T>>).abort = jest.fn();
+  (promise as MockedTransportRequestPromise<ApiResponse>).abort = jest.fn();
 
-  return promise as MockedTransportRequestPromise<ApiResponse<T>>;
+  return promise as MockedTransportRequestPromise<ApiResponse>;
 };
 
 const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPromise<never> => {
@@ -187,9 +187,7 @@ const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPro
   return promise as MockedTransportRequestPromise<never>;
 };
 
-function createApiResponse<TResponse = Record<string, any>>(
-  opts: Partial<ApiResponse> = {}
-): ApiResponse<TResponse> {
+function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
   return {
     body: {} as any,
     statusCode: 200,
