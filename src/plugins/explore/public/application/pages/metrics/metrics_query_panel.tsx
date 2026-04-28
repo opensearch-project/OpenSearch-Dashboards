@@ -32,9 +32,11 @@ import {
   selectIsLoading,
   selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
+  selectQueryLanguage,
   selectQueryString,
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PrometheusClient } from './explore/services/prometheus_client';
 import { RootState } from '../../../application/utils/state_management/store';
 import { getQueryLabel } from '../../../../../data/common';
@@ -65,6 +67,20 @@ export const MetricsQueryPanel: React.FC = () => {
   const setEditorText = useSetEditorText();
   const setEditorTextWithQuery = useSetEditorTextWithQuery();
   usePPLExecuteQueryAction(setEditorTextWithQuery);
+
+  const handleRun = useCallback(() => {
+    const editorText =
+      editorRef.current?.getValue() ??
+      String(services.data.query.queryString.getQuery().query || '');
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    dispatch(onEditorRunActionCreator(services, editorText));
+  }, [dispatch, services, editorRef]);
+
+  const queryLanguage = useSelector(selectQueryLanguage);
+  const languageTitle = useMemo(() => {
+    const languageService = services.data.query.queryString.getLanguageService();
+    return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
+  }, [queryLanguage, services.data.query.queryString]);
 
   const client = useMemo(() => new PrometheusClient(services, dataConnectionId), [
     services,
@@ -239,6 +255,8 @@ export const MetricsQueryPanel: React.FC = () => {
                       onCodeChange={onCodeChange}
                       onModeChange={onModeChange}
                       onRemove={removeRow}
+                      onRun={handleRun}
+                      languageTitle={languageTitle}
                       canRemove={rows.length > 1}
                       isDragging={snapshot.isDragging}
                       dragHandleProps={provided.dragHandleProps}
