@@ -1054,6 +1054,9 @@ export class SavedObjectsRepository {
       ...(updatedAt && { updated_at: updatedAt }),
       ...(permissions && { permissions }),
       ...(workspaces && { workspaces }),
+      version: encodeHitVersion(body),
+      attributes: body._source[type],
+      references: body._source.references || [],
       migrationVersion: body._source.migrationVersion,
     };
   }
@@ -1190,6 +1193,7 @@ export class SavedObjectsRepository {
     const { statusCode } = await this.client.update(
       {
         id: rawId,
+        index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult),
         refresh,
         body: {
@@ -1255,6 +1259,7 @@ export class SavedObjectsRepository {
       const { statusCode } = await this.client.update(
         {
           id: rawId,
+          index: this.getIndexForType(type),
           ...getExpectedVersionProperties(undefined, preflightResult),
           refresh,
 
@@ -1277,6 +1282,7 @@ export class SavedObjectsRepository {
       const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
         {
           id: this._serializer.generateRawId(undefined, type, id),
+          refresh,
           ...getExpectedVersionProperties(undefined, preflightResult),
           index: this.getIndexForType(type),
         },
@@ -1756,7 +1762,11 @@ export class SavedObjectsRepository {
     );
 
     const indexFound = statusCode !== 404;
-    if (!indexFound || !this.rawDocExistsInNamespace(body, namespace)) {
+    if (
+      !indexFound ||
+      !isFoundGetResponse(body) ||
+      !this.rawDocExistsInNamespace(body, namespace)
+    ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return body;
