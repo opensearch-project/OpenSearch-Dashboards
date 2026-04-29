@@ -782,7 +782,7 @@ describe('IndexMigrator', () => {
     // Configure client.index and client.get to support sentinel read/write.
     // After the initial write, any subsequent read returns what was last
     // written. This is a simplified sentinel store for the test.
-    let storedSentinel: any = undefined;
+    let storedSentinel: any;
     (client as any).index.mockImplementation((params: any) => {
       if (params.id === 'osd_migration_status') {
         storedSentinel = params.body;
@@ -795,10 +795,7 @@ describe('IndexMigrator', () => {
           _source: storedSentinel,
         });
       }
-      return opensearchClientMock.createSuccessTransportRequestPromise(
-        {},
-        { statusCode: 404 }
-      );
+      return opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 });
     });
 
     await new IndexMigrator(testOpts).migrate();
