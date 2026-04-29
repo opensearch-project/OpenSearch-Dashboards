@@ -62,11 +62,11 @@ export const createGaugeConfig = (): VisualizationType<'gauge'> => ({
           },
         ],
         render(props) {
-          const spec = createGauge(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const value = props.axisColumnMappings.value?.[0];
+          if (!value) throw Error('Missing axis config for gauge chart');
+          const spec = createGauge(props.transformedData, props.styleOptions, {
+            [AxisRole.Value]: value,
+          });
           return <EchartsRender spec={spec ?? {}} />;
         },
       },

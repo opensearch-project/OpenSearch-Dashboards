@@ -141,7 +141,7 @@ export class OptInExampleFlyout extends React.PureComponent<Props, State> {
         >
           <FormattedMessage
             id="telemetry.callout.errorLoadingClusterStatisticsDescription"
-            defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
+            defaultMessage="An unexpected error occurred while attempting to fetch the cluster statistics.
               This can occur because OpenSearch failed, OpenSearch Dashboards failed, or there is a network error.
               Check OpenSearch Dashboards, then reload the page and try again."
           />

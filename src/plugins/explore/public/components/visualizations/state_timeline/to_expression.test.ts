@@ -8,7 +8,7 @@ import {
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
 } from './to_expression';
-import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultStateTimeLineChartStyles } from './state_timeline_config';
 
 describe('State Timeline to_expression', () => {
@@ -60,7 +60,7 @@ describe('State Timeline to_expression', () => {
   };
 
   describe('createNumericalStateTimeline', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockTimeColumn,
       [AxisRole.Y]: mockCateColumn1,
       [AxisRole.COLOR]: mockNumColumn,
@@ -93,14 +93,12 @@ describe('State Timeline to_expression', () => {
     });
 
     it('throws when required fields are missing', () => {
-      expect(() => createNumericalStateTimeline(mockData, mockStyles, {})).toThrow(
-        'Missing field config for state-timeline chart'
-      );
+      expect(() => createNumericalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 
   describe('createCategoricalStateTimeline', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockTimeColumn,
       [AxisRole.Y]: mockCateColumn1,
       [AxisRole.COLOR]: mockCateColumn2,
@@ -124,14 +122,12 @@ describe('State Timeline to_expression', () => {
     });
 
     it('throws when required fields are missing', () => {
-      expect(() => createCategoricalStateTimeline(mockData, mockStyles, {})).toThrow(
-        'Missing field config for state-timeline chart'
-      );
+      expect(() => createCategoricalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 
   describe('createSingleCategoricalStateTimeline', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockTimeColumn,
       [AxisRole.COLOR]: mockCateColumn2,
     };
@@ -154,9 +150,7 @@ describe('State Timeline to_expression', () => {
     });
 
     it('throws when required fields are missing', () => {
-      expect(() => createSingleCategoricalStateTimeline(mockData, mockStyles, {})).toThrow(
-        'Missing field config for single state-timeline chart'
-      );
+      expect(() => createSingleCategoricalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 });

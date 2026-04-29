@@ -4,7 +4,12 @@
  */
 
 import { take } from 'rxjs/operators';
-import { AgentTracesFlavor, PLUGIN_ID } from '../../common';
+import {
+  AgentTracesFlavor,
+  PLUGIN_ID,
+  AGENT_TRACES_NAV_ID,
+  AGENT_SPANS_NAV_ID,
+} from '../../common';
 import { AgentTracesServices } from '../types';
 
 /**
@@ -13,8 +18,9 @@ import { AgentTracesServices } from '../types';
  * For agentTraces without a flavor suffix, defaults to Traces
  */
 export const getFlavorFromAppId = (appId: string | undefined): AgentTracesFlavor | null => {
-  // For agentTraces plugin, default to Traces flavor
-  if (appId === PLUGIN_ID) {
+  // The base plugin and both sidebar entry points (traces/spans) belong to the
+  // Traces flavor — they mount the same app with different initial tab state.
+  if (appId === PLUGIN_ID || appId === AGENT_TRACES_NAV_ID || appId === AGENT_SPANS_NAV_ID) {
     return AgentTracesFlavor.Traces;
   }
   const flavorFromAppId = appId?.split('/')?.[1];

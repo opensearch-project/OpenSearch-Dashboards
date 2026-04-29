@@ -1,0 +1,53 @@
+.axisSelectorContainer {
+  display: flex;
+  border: 1px solid transparentize($euiColorPrimary, 0.5);
+  border-radius: 12px;
+  background-color: transparentize($euiColorPrimary, 0.95);
+  flex-direction: column;
+  transition: border-color 150ms ease-in, background-color 150ms ease-in;
+
+  &:hover {
+    border-color: $euiColorPrimary;
+    background-color: transparentize($euiColorPrimary, 0.9);
+  }
+
+  &--empty {
+    border-style: dotted;
+    border-width: 2px;
+  }
+
+  .axisSelectorRow {
+    display: flex;
+    align-items: center;
+  }
+
+  .axisSelectorButton {
+    border: none;
+    height: 24px;
+    line-height: 24px;
+    font-size: 12px;
+    width: 100%;
+    text-align: left;
+    padding-left: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .axisSelectorFieldSelector {
+    flex-grow: 1;
+  }
+
+  .axisSelectorRemoveButton {
+    opacity: 0;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    transition: opacity 150ms ease-in;
+    margin-left: auto;
+    border-radius: 12px;
+  }
+
+  &:hover .axisSelectorRemoveButton {
+    opacity: 1;
+  }
+}

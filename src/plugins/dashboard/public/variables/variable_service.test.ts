@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { VariableService } from './variable_service';
 import { Variable, VariableType, VariableSortOrder, CustomVariable, QueryVariable } from './types';
 
@@ -15,22 +14,21 @@ jest.mock('./variable_query_utils', () => ({
 import { executeQueryForOptions } from './variable_query_utils';
 const mockExecuteQuery = executeQueryForOptions as jest.Mock;
 
-function createConnectedService(initialVariables: Variable[] = []) {
-  const service = new VariableService({} as any);
-  const input$ = new BehaviorSubject<{ variables?: Variable[] }>({
-    variables: initialVariables,
-  });
+function createService(initialVariables: Variable[] = [], dashboardId?: string) {
+  const mockSavedObjectsClient = {
+    update: jest.fn().mockResolvedValue({}),
+    get: jest.fn().mockResolvedValue({ attributes: {} }),
+  };
 
-  service.connect(
-    (updates) => {
-      const current = input$.getValue();
-      input$.next({ ...current, ...updates });
-    },
-    () => input$.getValue(),
-    () => input$
+  const service = new VariableService(
+    {} as any, // dataPlugin
+    dashboardId,
+    mockSavedObjectsClient as any
   );
 
-  return { service, input$ };
+  service.initialize(initialVariables);
+
+  return { service, mockSavedObjectsClient };
 }
 
 function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVariable {
@@ -42,6 +40,28 @@ function makeCustomVariable(overrides: Partial<CustomVariable> = {}): CustomVari
     customOptions: ['dev', 'staging', 'prod'],
     ...overrides,
   };
+}
+
+// Helper function to get variables with state synchronously
+function getVariablesWithState(service: VariableService) {
+  let result: any[] = [];
+  service
+    .getVariables$()
+    .subscribe((vars) => {
+      result = vars;
+    })
+    .unsubscribe();
+  return result;
+}
+
+// Helper function to get current values
+function getCurrentValues(service: VariableService): Record<string, string[]> {
+  const variables = service.getVariables();
+  const values: Record<string, string[]> = {};
+  variables.forEach((v) => {
+    values[v.name] = v.current ?? [];
+  });
+  return values;
 }
 
 function makeQueryVariable(overrides: Partial<QueryVariable> = {}): QueryVariable {
@@ -61,28 +81,32 @@ describe('VariableService', () => {
     jest.clearAllMocks();
   });
 
-  describe('connect and getVariables', () => {
-    it('should return empty array when not connected', () => {
+  describe('initialize and getVariables', () => {
+    it('should return empty array when not initialized', () => {
       const service = new VariableService();
       expect(service.getVariables()).toEqual([]);
     });
 
-    it('should return variables from input', () => {
+    it('should return variables after initialization', () => {
       const vars = [makeCustomVariable()];
-      const { service } = createConnectedService(vars);
+      const { service } = createService(vars);
       expect(service.getVariables()).toEqual(vars);
     });
 
-    it('should throw when getVariables$ called without connection', () => {
-      const service = new VariableService();
-      expect(() => service.getVariables$()).toThrow('not connected');
+    it('should return observable of variables', (done) => {
+      const vars = [makeCustomVariable()];
+      const { service } = createService(vars);
+      service.getVariables$().subscribe((variables) => {
+        expect(variables[0].name).toBe('env');
+        done();
+      });
     });
   });
 
   describe('getVariablesWithState', () => {
     it('should merge runtime state with persisted variables', () => {
-      const { service } = createConnectedService([makeCustomVariable()]);
-      const vars = service.getVariablesWithState();
+      const { service } = createService([makeCustomVariable()]);
+      const vars = getVariablesWithState(service);
       expect(vars[0].options).toEqual(['dev', 'staging', 'prod']);
       expect(vars[0].name).toBe('env');
     });
@@ -90,19 +114,19 @@ describe('VariableService', () => {
 
   describe('getCurrentValues', () => {
     it('should return name-value map', () => {
-      const { service } = createConnectedService([makeCustomVariable(), makeQueryVariable()]);
-      expect(service.getCurrentValues()).toEqual({ env: ['dev'], service: ['api'] });
+      const { service } = createService([makeCustomVariable(), makeQueryVariable()]);
+      expect(getCurrentValues(service)).toEqual({ env: ['dev'], service: ['api'] });
     });
 
-    it('should return empty string for undefined current', () => {
-      const { service } = createConnectedService([makeCustomVariable({ current: undefined })]);
-      expect(service.getCurrentValues()).toEqual({ env: [] });
+    it('should return empty array for undefined current', () => {
+      const { service } = createService([makeCustomVariable({ current: undefined })]);
+      expect(getCurrentValues(service)).toEqual({ env: [] });
     });
   });
 
   describe('addVariable — Custom', () => {
     it('should add a custom variable with derived options', async () => {
-      const { service, input$ } = createConnectedService();
+      const { service } = createService([], 'dashboard-123');
 
       await service.addVariable({
         name: 'env',
@@ -110,13 +134,13 @@ describe('VariableService', () => {
         customOptions: ['dev', 'staging', 'prod'],
       } as any);
 
-      const vars = input$.getValue().variables!;
+      const vars = service.getVariables();
       expect(vars).toHaveLength(1);
       expect(vars[0].name).toBe('env');
       expect(vars[0].current).toEqual(['dev']);
 
       // Options are in runtime state, not persisted
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['dev', 'staging', 'prod']);
     });
   });
@@ -124,7 +148,7 @@ describe('VariableService', () => {
   describe('addVariable — Query', () => {
     it('should add a query variable and trigger refresh', async () => {
       mockExecuteQuery.mockResolvedValue(['api', 'web', 'worker']);
-      const { service, input$ } = createConnectedService();
+      const { service } = createService([], 'dashboard-123');
 
       await service.addVariable({
         name: 'service',
@@ -133,77 +157,87 @@ describe('VariableService', () => {
         language: 'PPL',
       } as any);
 
-      const vars = input$.getValue().variables!;
+      const vars = service.getVariables();
       expect(vars).toHaveLength(1);
       expect(vars[0].current).toEqual(['api']);
       expect(mockExecuteQuery).toHaveBeenCalled();
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['api', 'web', 'worker']);
     });
   });
 
   describe('updateVariable — same type', () => {
     it('should update label without touching current', async () => {
-      const { service, input$ } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
 
       await service.updateVariable('custom-1', { label: 'Environment' });
 
-      const updated = input$.getValue().variables![0];
+      const updated = service.getVariables()[0];
       expect(updated.label).toBe('Environment');
       expect(updated.current).toEqual(['dev']);
     });
 
     it('should re-derive options when customOptions changes', async () => {
-      const { service } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
 
       await service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['alpha', 'beta']);
       expect(withState[0].current).toEqual(['alpha']);
     });
 
     it('should preserve current if still valid after customOptions change', async () => {
-      const { service } = createConnectedService([makeCustomVariable({ current: ['staging'] })]);
+      const { service } = createService(
+        [makeCustomVariable({ current: ['staging'] })],
+        'dashboard-123'
+      );
 
-      await service.updateVariable('custom-1', { customOptions: ['dev', 'staging', 'new'] } as any);
+      await service.updateVariable('custom-1', {
+        customOptions: ['dev', 'staging', 'new'],
+      } as any);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].current).toEqual(['staging']);
     });
 
     it('should not re-derive options when customOptions is unchanged', async () => {
-      const { service } = createConnectedService([makeCustomVariable({ current: ['staging'] })]);
+      const { service } = createService(
+        [makeCustomVariable({ current: ['staging'] })],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', {
         customOptions: ['dev', 'staging', 'prod'],
       } as any);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].current).toEqual(['staging']);
     });
 
     it('should trim current to first value when switching from multi to single', async () => {
-      const { service, input$ } = createConnectedService([
-        makeCustomVariable({ multi: true, current: ['dev', 'staging', 'prod'] }),
-      ]);
+      const { service } = createService(
+        [makeCustomVariable({ multi: true, current: ['dev', 'staging', 'prod'] })],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', { multi: false });
 
-      const updated = input$.getValue().variables![0];
+      const updated = service.getVariables()[0];
       expect(updated.multi).toBe(false);
       expect(updated.current).toEqual(['dev']);
     });
 
     it('should keep current as-is when switching from single to multi', async () => {
-      const { service, input$ } = createConnectedService([
-        makeCustomVariable({ multi: false, current: ['dev'] }),
-      ]);
+      const { service } = createService(
+        [makeCustomVariable({ multi: false, current: ['dev'] })],
+        'dashboard-123'
+      );
 
       await service.updateVariable('custom-1', { multi: true });
 
-      const updated = input$.getValue().variables![0];
+      const updated = service.getVariables()[0];
       expect(updated.multi).toBe(true);
       expect(updated.current).toEqual(['dev']);
     });
@@ -211,14 +245,14 @@ describe('VariableService', () => {
 
   describe('updateVariable — type switch', () => {
     it('should strip query fields when switching from Query to Custom', async () => {
-      const { service, input$ } = createConnectedService([makeQueryVariable()]);
+      const { service } = createService([makeQueryVariable()], 'dashboard-123');
 
       await service.updateVariable('query-1', {
         type: VariableType.Custom,
         customOptions: ['a', 'b', 'c'],
       } as any);
 
-      const updated = input$.getValue().variables![0];
+      const updated = service.getVariables()[0];
       expect(updated.type).toBe(VariableType.Custom);
       expect((updated as CustomVariable).customOptions).toEqual(['a', 'b', 'c']);
       expect(updated.current).toEqual(['a']);
@@ -228,7 +262,7 @@ describe('VariableService', () => {
 
     it('should strip custom fields when switching from Custom to Query', async () => {
       mockExecuteQuery.mockResolvedValue(['x', 'y']);
-      const { service, input$ } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
 
       await service.updateVariable('custom-1', {
         type: VariableType.Query,
@@ -236,7 +270,7 @@ describe('VariableService', () => {
         language: 'PPL',
       } as any);
 
-      const updated = input$.getValue().variables![0];
+      const updated = service.getVariables()[0];
       expect(updated.type).toBe(VariableType.Query);
       expect((updated as any).customOptions).toBeUndefined();
       expect(mockExecuteQuery).toHaveBeenCalled();
@@ -244,38 +278,46 @@ describe('VariableService', () => {
   });
 
   describe('updateVariable — errors', () => {
-    it('should throw when not connected', async () => {
-      const service = new VariableService();
-      await expect(service.updateVariable('x', {})).rejects.toThrow('not connected');
-    });
-
     it('should throw for unknown id', async () => {
-      const { service } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()]);
       await expect(service.updateVariable('nonexistent', {})).rejects.toThrow('not found');
     });
   });
 
   describe('removeVariable', () => {
-    it('should remove a variable by id', () => {
-      const { service, input$ } = createConnectedService([
-        makeCustomVariable(),
-        makeQueryVariable(),
-      ]);
-      service.removeVariable('custom-1');
-      expect(input$.getValue().variables!).toHaveLength(1);
-      expect(input$.getValue().variables![0].id).toBe('query-1');
+    it('should remove a variable by id', async () => {
+      const { service } = createService(
+        [makeCustomVariable(), makeQueryVariable()],
+        'dashboard-123'
+      );
+      await service.removeVariable('custom-1');
+      expect(service.getVariables()).toHaveLength(1);
+      expect(service.getVariables()[0].id).toBe('query-1');
+    });
+
+    it('should not remove variable if save fails', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable(), makeQueryVariable()],
+        'dashboard-123'
+      );
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Save failed'));
+
+      await expect(service.removeVariable('custom-1')).rejects.toThrow('Save failed');
+
+      // Variables should still have both items
+      expect(service.getVariables()).toHaveLength(2);
     });
   });
 
   describe('updateVariableValue', () => {
     it('should update the current value', () => {
-      const { service, input$ } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()]);
       service.updateVariableValue('custom-1', ['prod']);
-      expect(input$.getValue().variables![0].current).toEqual(['prod']);
+      expect(service.getVariables()[0].current).toEqual(['prod']);
     });
 
     it('should throw for unknown id', () => {
-      const { service } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()]);
       expect(() => service.updateVariableValue('nonexistent', ['x'])).toThrow('not found');
     });
 
@@ -287,7 +329,7 @@ describe('VariableService', () => {
         name: 'service',
         query: "source=logs | where region = '${region}' | dedup service | fields service",
       });
-      const { service } = createConnectedService([region, svc]);
+      const { service } = createService([region, svc]);
 
       service.updateVariableValue('region-1', ['eu-west']);
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -301,7 +343,7 @@ describe('VariableService', () => {
         name: 'service',
         query: 'source=logs | dedup service | fields service',
       });
-      const { service } = createConnectedService([env, svc]);
+      const { service } = createService([env, svc]);
 
       service.updateVariableValue('env-1', ['prod']);
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -313,9 +355,9 @@ describe('VariableService', () => {
     it('should swap variable positions', () => {
       const v1 = makeCustomVariable({ id: '1', name: 'a' });
       const v2 = makeCustomVariable({ id: '2', name: 'b' });
-      const { service, input$ } = createConnectedService([v1, v2]);
+      const { service } = createService([v1, v2]);
       service.reorderVariables(0, 1);
-      const vars = input$.getValue().variables!;
+      const vars = service.getVariables();
       expect(vars[0].id).toBe('2');
       expect(vars[1].id).toBe('1');
     });
@@ -324,11 +366,11 @@ describe('VariableService', () => {
   describe('refreshVariableOptions', () => {
     it('should update options and preserve valid current', async () => {
       mockExecuteQuery.mockResolvedValue(['api', 'web', 'new-svc']);
-      const { service } = createConnectedService([makeQueryVariable({ current: ['api'] })]);
+      const { service } = createService([makeQueryVariable({ current: ['api'] })]);
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['api', 'web', 'new-svc']);
       expect(withState[0].current).toEqual(['api']);
       expect(withState[0].loading).toBe(false);
@@ -336,32 +378,30 @@ describe('VariableService', () => {
 
     it('should fall back to first option when current is no longer valid', async () => {
       mockExecuteQuery.mockResolvedValue(['new-a', 'new-b']);
-      const { service, input$ } = createConnectedService([
-        makeQueryVariable({ current: ['old-value'] }),
-      ]);
+      const { service } = createService([makeQueryVariable({ current: ['old-value'] })]);
 
       await service.refreshVariableOptions('query-1');
-      expect(input$.getValue().variables![0].current).toEqual(['new-a']);
+      expect(service.getVariables()[0].current).toEqual(['new-a']);
     });
 
     it('should set error state on fetch failure', async () => {
       mockExecuteQuery.mockRejectedValue(new Error('Network error'));
-      const { service } = createConnectedService([makeQueryVariable()]);
+      const { service } = createService([makeQueryVariable()]);
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].loading).toBe(false);
       expect(withState[0].error).toBe('Network error');
     });
 
     it('should silently ignore AbortError', async () => {
       mockExecuteQuery.mockRejectedValue(new DOMException('Aborted', 'AbortError'));
-      const { service } = createConnectedService([makeQueryVariable()]);
+      const { service } = createService([makeQueryVariable()]);
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].error).toBeUndefined();
     });
 
@@ -377,28 +417,35 @@ describe('VariableService', () => {
         });
       });
 
-      const { service } = createConnectedService([makeQueryVariable()]);
+      const { service } = createService([makeQueryVariable()]);
 
       const first = service.refreshVariableOptions('query-1');
       const second = service.refreshVariableOptions('query-1');
       await Promise.all([first, second]);
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['result-2']);
     });
 
     it('should skip non-query variables', async () => {
-      const { service } = createConnectedService([makeCustomVariable()]);
+      const { service } = createService([makeCustomVariable()]);
       await service.refreshVariableOptions('custom-1');
       expect(mockExecuteQuery).not.toHaveBeenCalled();
     });
   });
 
   describe('destroy', () => {
-    it('should clear callbacks and runtime state', () => {
-      const { service } = createConnectedService([makeCustomVariable()]);
+    it('should clear runtime state and abort pending requests', () => {
+      const { service } = createService([makeCustomVariable()]);
+
+      // Before destroy, we should be able to get variables
+      expect(service.getVariables()).toHaveLength(1);
+
       service.destroy();
-      expect(service.getVariables()).toEqual([]);
+
+      // After destroy, variables snapshot is still available
+      // but the observables are completed and can't emit new values
+      expect(service.getVariables()).toHaveLength(1);
     });
   });
 
@@ -411,7 +458,7 @@ describe('VariableService', () => {
         name: 'service',
         query: "source=logs | where region = '${region}' | dedup service | fields service",
       });
-      const { service } = createConnectedService([region, svc]);
+      const { service } = createService([region, svc]);
       service.setInterpolationService({
         hasVariables: (q: string) => /\$\{\w+\}|\$\w+/.test(q),
         interpolate: (q: string) =>
@@ -442,7 +489,7 @@ describe('VariableService', () => {
 
       const v1 = makeQueryVariable({ id: 'q1', name: 'first', query: 'query-1' });
       const v2 = makeQueryVariable({ id: 'q2', name: 'second', query: 'query-2' });
-      const { service } = createConnectedService([v1, v2]);
+      const { service } = createService([v1, v2]);
 
       await service.refreshAllVariableOptions();
       expect(callOrder).toEqual(['query-1', 'query-2']);
@@ -451,84 +498,295 @@ describe('VariableService', () => {
 
   describe('sort options', () => {
     it('should sort custom variable options alphabetically ascending', () => {
-      const { service } = createConnectedService([
+      const { service } = createService([
         makeCustomVariable({
           customOptions: ['cherry', 'apple', 'banana'],
           sort: VariableSortOrder.AlphabeticalAsc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
     });
 
     it('should sort custom variable options alphabetically descending', () => {
-      const { service } = createConnectedService([
+      const { service } = createService([
         makeCustomVariable({
           customOptions: ['cherry', 'apple', 'banana'],
           sort: VariableSortOrder.AlphabeticalDesc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['cherry', 'banana', 'apple']);
     });
 
     it('should sort numerically ascending', () => {
-      const { service } = createConnectedService([
+      const { service } = createService([
         makeCustomVariable({
           customOptions: ['10', '2', '100', '1'],
           sort: VariableSortOrder.NumericalAsc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['1', '2', '10', '100']);
     });
 
     it('should sort numerically descending', () => {
-      const { service } = createConnectedService([
+      const { service } = createService([
         makeCustomVariable({
           customOptions: ['10', '2', '100', '1'],
           sort: VariableSortOrder.NumericalDesc,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['100', '10', '2', '1']);
     });
 
     it('should not sort when sort is disabled', () => {
-      const { service } = createConnectedService([
+      const { service } = createService([
         makeCustomVariable({
           customOptions: ['cherry', 'apple', 'banana'],
           sort: VariableSortOrder.Disabled,
         }),
       ]);
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['cherry', 'apple', 'banana']);
     });
 
     it('should sort query variable options after refresh', async () => {
       mockExecuteQuery.mockResolvedValue(['zebra', 'apple', 'mango']);
-      const { service } = createConnectedService([
+      const { service } = createService([
         makeQueryVariable({ sort: VariableSortOrder.AlphabeticalAsc }),
       ]);
 
       await service.refreshVariableOptions('query-1');
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['apple', 'mango', 'zebra']);
     });
 
     it('should re-sort options when sort setting changes', async () => {
-      const { service } = createConnectedService([
-        makeCustomVariable({
-          customOptions: ['cherry', 'apple', 'banana'],
-          sort: VariableSortOrder.Disabled,
-        }),
-      ]);
+      const { service } = createService(
+        [
+          makeCustomVariable({
+            customOptions: ['cherry', 'apple', 'banana'],
+            sort: VariableSortOrder.Disabled,
+          }),
+        ],
+        'dashboard-123'
+      );
+
+      // Initialize runtime state by getting variables with state first
+      getVariablesWithState(service);
 
       await service.updateVariable('custom-1', { sort: VariableSortOrder.AlphabeticalAsc });
 
-      const withState = service.getVariablesWithState();
+      const withState = getVariablesWithState(service);
       expect(withState[0].options).toEqual(['apple', 'banana', 'cherry']);
+    });
+  });
+
+  describe('toggleVariableHide', () => {
+    it('should toggle hide property in memory without saving', () => {
+      const { service, mockSavedObjectsClient } = createService([
+        makeCustomVariable({ hide: false }),
+      ]);
+
+      service.toggleVariableHide('custom-1');
+
+      const updated = service.getVariables()[0];
+      expect(updated.hide).toBe(true);
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should toggle from hidden to visible', () => {
+      const { service } = createService([makeCustomVariable({ hide: true })]);
+
+      service.toggleVariableHide('custom-1');
+
+      const updated = service.getVariables()[0];
+      expect(updated.hide).toBe(false);
+    });
+  });
+
+  describe('save failure rollback', () => {
+    it('should rollback when addVariable save fails', async () => {
+      const { service, mockSavedObjectsClient } = createService([], 'dashboard-123');
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
+
+      await expect(
+        service.addVariable({
+          name: 'test',
+          type: VariableType.Custom,
+          customOptions: ['a', 'b'],
+        } as any)
+      ).rejects.toThrow('Network error');
+
+      // Should not add the variable
+      expect(service.getVariables()).toHaveLength(0);
+    });
+
+    it('should rollback when updateVariable save fails', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable({ label: 'Original' })],
+        'dashboard-123'
+      );
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
+
+      await expect(service.updateVariable('custom-1', { label: 'Updated' })).rejects.toThrow(
+        'Network error'
+      );
+
+      // Should keep original label
+      const variable = service.getVariables()[0];
+      expect(variable.label).toBe('Original');
+    });
+
+    it('should rollback runtime state when updateVariable with customOptions fails', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable({ customOptions: ['dev', 'staging', 'prod'] })],
+        'dashboard-123'
+      );
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('Network error'));
+
+      const originalState = getVariablesWithState(service)[0];
+
+      await expect(
+        service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any)
+      ).rejects.toThrow('Network error');
+
+      // Runtime state should not change
+      const currentState = getVariablesWithState(service)[0];
+      expect(currentState.options).toEqual(originalState.options);
+    });
+  });
+
+  describe('runtimeStateChange$ observable', () => {
+    it('should trigger when addVariable succeeds', async () => {
+      const { service } = createService([], 'dashboard-123');
+      const emissions: any[] = [];
+
+      service.getVariables$().subscribe((vars) => {
+        emissions.push(vars);
+      });
+
+      await service.addVariable({
+        name: 'test',
+        type: VariableType.Custom,
+        customOptions: ['a', 'b'],
+      } as any);
+
+      // Should have initial emission + emission after add
+      expect(emissions.length).toBeGreaterThan(1);
+      expect(emissions[emissions.length - 1][0].options).toEqual(['a', 'b']);
+    });
+
+    it('should trigger when updateVariable changes runtime state', async () => {
+      const { service } = createService(
+        [makeCustomVariable({ customOptions: ['dev', 'staging', 'prod'] })],
+        'dashboard-123'
+      );
+      const emissions: any[] = [];
+
+      service.getVariables$().subscribe((vars) => {
+        emissions.push(vars);
+      });
+
+      const initialEmissions = emissions.length;
+
+      await service.updateVariable('custom-1', { customOptions: ['alpha', 'beta'] } as any);
+
+      // Should emit after update
+      expect(emissions.length).toBeGreaterThan(initialEmissions);
+      expect(emissions[emissions.length - 1][0].options).toEqual(['alpha', 'beta']);
+    });
+
+    it('should trigger when removeVariable succeeds', async () => {
+      const { service } = createService([makeCustomVariable()], 'dashboard-123');
+      const emissions: any[] = [];
+
+      service.getVariables$().subscribe((vars) => {
+        emissions.push(vars);
+      });
+
+      const initialEmissions = emissions.length;
+
+      await service.removeVariable('custom-1');
+
+      // Should emit after remove
+      expect(emissions.length).toBeGreaterThan(initialEmissions);
+      expect(emissions[emissions.length - 1]).toHaveLength(0);
+    });
+  });
+
+  describe('initializeFromDashboard', () => {
+    it('should load variables from dashboard saved object', async () => {
+      const mockVariables = [
+        makeCustomVariable({ id: 'var-1', name: 'region' }),
+        makeCustomVariable({ id: 'var-2', name: 'env' }),
+      ];
+
+      const mockSavedObjectsClient = {
+        update: jest.fn().mockResolvedValue({}),
+        get: jest.fn().mockResolvedValue({
+          attributes: {
+            variablesJSON: JSON.stringify({ variables: mockVariables }),
+          },
+        }),
+      };
+
+      const service = new VariableService(
+        {} as any,
+        'dashboard-123',
+        mockSavedObjectsClient as any
+      );
+
+      await service.initializeFromDashboard();
+
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('dashboard', 'dashboard-123');
+      expect(service.getVariables()).toEqual(mockVariables);
+    });
+
+    it('should handle empty variablesJSON', async () => {
+      const mockSavedObjectsClient = {
+        update: jest.fn().mockResolvedValue({}),
+        get: jest.fn().mockResolvedValue({
+          attributes: {},
+        }),
+      };
+
+      const service = new VariableService(
+        {} as any,
+        'dashboard-123',
+        mockSavedObjectsClient as any
+      );
+
+      await service.initializeFromDashboard();
+
+      expect(service.getVariables()).toEqual([]);
+    });
+
+    it('should handle errors gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const mockSavedObjectsClient = {
+        update: jest.fn().mockResolvedValue({}),
+        get: jest.fn().mockRejectedValue(new Error('Dashboard not found')),
+      };
+
+      const service = new VariableService(
+        {} as any,
+        'dashboard-123',
+        mockSavedObjectsClient as any
+      );
+
+      await service.initializeFromDashboard();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[VariableService] Failed to load variables from dashboard:',
+        expect.any(Error)
+      );
+      expect(service.getVariables()).toEqual([]);
+
+      consoleSpy.mockRestore();
     });
   });
 });

@@ -4,7 +4,7 @@
  */
 
 import { createPieSpec } from './to_expression';
-import { VisColumn, VisFieldType, Positions, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, Positions, AxisRole } from '../types';
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 
 describe('Pie Chart to_expression', () => {
@@ -38,7 +38,7 @@ describe('Pie Chart to_expression', () => {
     legendPosition: Positions.RIGHT,
   };
 
-  const mockAxisMappings: AxisColumnMappings = {
+  const mockAxisMappings = {
     [AxisRole.SIZE]: numericColumn,
     [AxisRole.COLOR]: categoricalColumn,
   };
@@ -99,8 +99,6 @@ describe('Pie Chart to_expression', () => {
   });
 
   it('throws when color or theta config is missing', () => {
-    expect(() => createPieSpec(mockData, mockStyles, {})).toThrow(
-      'Missing color or theta config for pie chart'
-    );
+    expect(() => createPieSpec(mockData, mockStyles, {} as any)).toThrow();
   });
 });

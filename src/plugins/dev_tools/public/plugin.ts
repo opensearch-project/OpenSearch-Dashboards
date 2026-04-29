@@ -210,9 +210,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       });
     }
     if (core.chrome.navGroup.getNavGroupEnabled()) {
-      core.chrome.navControls.registerLeftBottom({
-        order: 4,
-        mount: toMountPoint(
+      const mountDevToolsIcon = () =>
+        toMountPoint(
           React.createElement(DevToolsIcon, {
             core,
             // @ts-expect-error TS2769 TODO(ts-error): fixme
@@ -221,8 +220,21 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
             deps: this.setupDeps as DevToolsSetupDependencies,
             title: this.title,
           })
-        ),
+        );
+      core.chrome.navControls.registerLeftBottom({
+        order: 4,
+        mount: mountDevToolsIcon(),
       });
+      // Also mount Dev Tools into the icon-side-nav collapsed footer slot so
+      // users can reach it without expanding the sidebar when the observability
+      // icon-side-nav is enabled. The slot is only rendered in the icon-side-nav
+      // collapsed state, so this is a no-op elsewhere.
+      if (core.chrome.getIsIconSideNavEnabled()) {
+        core.chrome.navControls.registerIconSideNavFooter({
+          order: 4,
+          mount: mountDevToolsIcon(),
+        });
+      }
     }
     if (this.getSortedDevTools().length === 0 || core.chrome.navGroup.getNavGroupEnabled()) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));

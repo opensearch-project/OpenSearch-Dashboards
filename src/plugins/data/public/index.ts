@@ -367,6 +367,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  MonacoCompatibleQuerySuggestion,
   AutocompleteStart,
 } from './autocomplete';
 

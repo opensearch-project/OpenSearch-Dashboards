@@ -17,7 +17,8 @@ const SESSION_REDIRECT_DELAY_MS = 5000;
 
 /**
  * Validates that a redirect URL is safe to navigate to.
- * Only allows relative URLs or URLs on the same origin to prevent open redirect attacks.
+ * Allows relative URLs, same-origin URLs, and trusted AWS domain URLs
+ * (needed for auth flows where the login page is on a different AWS domain).
  */
 function isValidRedirectURL(url: string): boolean {
   // Allow relative URLs (starting with /)
@@ -25,10 +26,25 @@ function isValidRedirectURL(url: string): boolean {
     return true;
   }
 
-  // Allow same-origin absolute URLs
+  // Allow same-origin or trusted AWS domain absolute URLs
   try {
     const parsed = new URL(url);
-    return parsed.origin === window.location.origin;
+
+    if (parsed.origin === window.location.origin) {
+      return true;
+    }
+
+    // Trust AWS auth domains that the 401 response may redirect to
+    const trustedPatterns = [
+      /\.amazonaws\.com$/,
+      /\.aws\.amazon\.com$/,
+      /\.console\.aws\.amazon\.com$/,
+    ];
+
+    return (
+      parsed.protocol === 'https:' &&
+      trustedPatterns.some((pattern) => pattern.test(parsed.hostname))
+    );
   } catch {
     return false;
   }

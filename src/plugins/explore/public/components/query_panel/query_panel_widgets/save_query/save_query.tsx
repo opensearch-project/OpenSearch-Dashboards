@@ -75,9 +75,10 @@ export const SaveQueryButton = () => {
       const clonedQuery = cloneDeep(query);
       delete clonedQuery.dataset;
 
+      const editorText = getEditorText();
       const queryToSave = {
         ...clonedQuery,
-        query: getEditorText(),
+        query: editorText || String(services.data.query.queryString.getQuery().query || ''),
       };
 
       const attributes: any = {
@@ -117,7 +118,7 @@ export const SaveQueryButton = () => {
     } catch (error) {
       services.notifications.toasts.addDanger(
         i18n.translate('explore.editor.queryPanel.saveQuery.saveQueryFailure', {
-          defaultMessage: 'An error occured while saving your query{errorMessage}',
+          defaultMessage: 'An error occurred while saving your query{errorMessage}',
           values: { errorMessage: error.message ? `: ${error.message}` : '' },
         })
       );

@@ -2,38 +2,24 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
+import { useSelector } from 'react-redux';
 import { CanvasPanel } from '../../../../../components/panel/canvas_panel';
-import { ExploreServices } from '../../../../../types';
 import { useDatasetContext } from '../../../../context';
-import { useEditorRef } from '../../../../hooks';
 import { LoadingSpinner } from '../../../../legacy/discover/application/components/loading_spinner/loading_spinner';
-import { DiscoverNoIndexPatterns } from '../../../../legacy/discover/application/components/no_index_patterns/no_index_patterns';
-import { DiscoverNoResults } from '../../../../legacy/discover/application/components/no_results/no_results';
-import { DiscoverUninitialized } from '../../../../legacy/discover/application/components/uninitialized/uninitialized';
-import { defaultPrepareQueryString } from '../../../../utils/state_management/actions/query_actions';
-import { onEditorRunActionCreator } from '../../../../utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
+import {
+  defaultPrepareQueryString,
+  shouldSkipQueryExecution,
+} from '../../../../utils/state_management/actions/query_actions';
 import { selectQueryStatusMapByKey } from '../../../../utils/state_management/selectors';
 import { RootState } from '../../../../utils/state_management/store';
 import { QueryExecutionStatus } from '../../../../utils/state_management/types';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
+import { MetricsEmptyState } from '../../explore/components/metrics_empty_state';
 
 export const BottomRightContainer = () => {
-  const dispatch = useDispatch();
   const { dataset } = useDatasetContext();
-  const { services } = useOpenSearchDashboards<ExploreServices>();
-  const editorRef = useEditorRef();
-
-  const onRefresh = () => {
-    if (services) {
-      const editorText = editorRef.current?.getValue() || '';
-      // @ts-expect-error TS2345 TODO(ts-error): fixme
-      dispatch(onEditorRunActionCreator(services, editorText));
-    }
-  };
 
   const query = useSelector((state: RootState) => state.query);
   const status = useSelector((state: RootState) => {
@@ -46,31 +32,40 @@ export const BottomRightContainer = () => {
   if (dataset == null) {
     return (
       <CanvasPanel>
-        <>
-          <EuiSpacer size="xxl" />
-          <DiscoverNoIndexPatterns />
-        </>
-      </CanvasPanel>
-    );
-  }
-
-  if (status === QueryExecutionStatus.NO_RESULTS) {
-    return (
-      <CanvasPanel>
-        <DiscoverNoResults
-          queryString={services?.data?.query?.queryString}
-          query={services?.data?.query?.queryString?.getQuery()}
-          savedQuery={services?.data?.query?.savedQueries}
-          timeFieldName={dataset.timeFieldName}
+        <MetricsEmptyState
+          iconType="database"
+          title={i18n.translate('explore.metricsQuery.noDatasourceTitle', {
+            defaultMessage: 'Select a Prometheus data source',
+          })}
+          body={i18n.translate('explore.metricsQuery.noDatasourceBody', {
+            defaultMessage:
+              'Choose a Prometheus data source from the selector above to start running PromQL queries.',
+          })}
         />
       </CanvasPanel>
     );
   }
 
-  if (status === QueryExecutionStatus.UNINITIALIZED) {
+  if (shouldSkipQueryExecution(query)) {
     return (
       <CanvasPanel>
-        <DiscoverUninitialized onRefresh={onRefresh} />
+        <MetricsEmptyState
+          title={i18n.translate('explore.metricsQuery.emptyTitle', {
+            defaultMessage: 'Write a PromQL query to visualize metrics',
+          })}
+          body={i18n.translate('explore.metricsQuery.emptyBody', {
+            defaultMessage:
+              'Build a query with the builder, switch to code mode, or reference the samples below to get started.',
+          })}
+        />
+      </CanvasPanel>
+    );
+  }
+
+  if (status === QueryExecutionStatus.NO_RESULTS || status === QueryExecutionStatus.UNINITIALIZED) {
+    return (
+      <CanvasPanel>
+        <ResizableVisControlAndTabs />
       </CanvasPanel>
     );
   }

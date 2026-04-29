@@ -1,0 +1,21 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.metricsPageTabs {
+  &__tabBar {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    box-shadow: inset 0 -1px 0 0 $euiBorderColor;
+  }
+
+  &__tabs {
+    margin-bottom: 0;
+  }
+
+  &__exploreCanvas {
+    flex: 1;
+  }
+}

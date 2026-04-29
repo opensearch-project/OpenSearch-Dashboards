@@ -16,6 +16,7 @@ export type {
   UserMessage,
   ToolMessage,
   Role,
+  TextInputContent,
 } from '../../../core/public/chat';
 
 // Zod schemas for runtime validation - these ensure the core types are followed

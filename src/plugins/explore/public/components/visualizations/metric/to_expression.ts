@@ -4,26 +4,28 @@
  */
 
 import { MetricChartStyle } from './metric_vis_config';
-import { AxisRole, AxisColumnMappings, VisFieldType, RendererSpecConfig } from '../types';
+import { AxisRole, VisColumn, RendererSpecConfig } from '../types';
 import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 import { assembleForMetric, createMetricChartSeries } from './metric_utils';
 
+export interface MetricAxisMapping {
+  [AxisRole.Value]: VisColumn;
+  [AxisRole.Time]?: VisColumn;
+  [AxisRole.FACET]?: VisColumn;
+}
+
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
   styles: MetricChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.Value]: VisColumn; [AxisRole.Time]?: VisColumn }
 ) => {
-  const valueColumn = axisColumnMappings?.[AxisRole.Value];
-  const numericField = valueColumn?.column;
-  const numericFieldName = valueColumn?.name;
+  const valueColumn = axisColumnMappings[AxisRole.Value];
+  const numericField = valueColumn.column;
+  const numericFieldName = valueColumn.name;
 
-  const dateColumn = axisColumnMappings?.[AxisRole.Time];
+  const dateColumn = axisColumnMappings[AxisRole.Time];
   const dateField = dateColumn?.column;
-
-  if (!numericField) {
-    throw Error('Missing value for metric chart');
-  }
 
   if (!dateField) {
     return { spec: undefined, name: numericFieldName, data: transformedData };
@@ -44,8 +46,8 @@ export const createSingleMetric = (
   )({
     data: transformedData,
     styles,
-    axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisConfig: {},
+    axisColumnMappings,
   });
   return { spec: result.spec, name: numericFieldName, data: transformedData };
 };
@@ -53,21 +55,14 @@ export const createSingleMetric = (
 export const createMultiMetric = (
   transformedData: Array<Record<string, any>>,
   styles: MetricChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: {
+    [AxisRole.Value]: VisColumn;
+    [AxisRole.Time]?: VisColumn;
+    [AxisRole.FACET]: VisColumn;
+  }
 ) => {
-  // Get the main value field
-  const valueMapping = axisColumnMappings?.[AxisRole.Value];
-  if (!valueMapping || valueMapping.schema !== VisFieldType.Numerical) {
-    throw Error('Metric visualization requires a numerical value field');
-  }
-
-  // Get the split by (categorical) field for faceting
-  const splitByMapping = axisColumnMappings?.[AxisRole.FACET];
-  if (!splitByMapping || splitByMapping.schema !== VisFieldType.Categorical) {
-    throw Error('Multi-metric visualization requires a categorical field for splitting');
-  }
-
-  // For multi-metric, we split the data by the categorical field
+  const valueMapping = axisColumnMappings[AxisRole.Value];
+  const splitByMapping = axisColumnMappings[AxisRole.FACET];
   const splitByField = splitByMapping.column;
 
   // Group data by the split by field (categorical)
@@ -82,9 +77,16 @@ export const createMultiMetric = (
     groupedData.get(groupKey)!.push(row);
   });
 
+  const singleMapping: { [AxisRole.Value]: VisColumn; [AxisRole.Time]?: VisColumn } = {
+    [AxisRole.Value]: valueMapping,
+    ...(axisColumnMappings[AxisRole.Time] && {
+      [AxisRole.Time]: axisColumnMappings[AxisRole.Time],
+    }),
+  };
+
   const specs: RendererSpecConfig[] = [];
   for (const [key, value] of groupedData) {
-    const result = createSingleMetric(value, styles, axisColumnMappings);
+    const result = createSingleMetric(value, styles, singleMapping);
     if (result && 'spec' in result) {
       specs.push({ spec: result.spec, name: key, data: value });
     }

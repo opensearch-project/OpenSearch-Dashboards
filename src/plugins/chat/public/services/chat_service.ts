@@ -410,7 +410,6 @@ export class ChatService {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const events = await this.conversationHistoryService.getConversation(threadId);
 
         if (events) {

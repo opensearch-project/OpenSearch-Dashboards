@@ -76,7 +76,7 @@ const formatMetricString = (source: Record<string, unknown>, expanded: boolean):
 
 export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }) => {
   const [expanded, setExpanded] = useState(false);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
   const [sortField, setSortField] = useState<keyof RawTableRow | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -230,7 +230,12 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexStart" alignItems="center" className="dscResultCount">
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            className="dscResultCount"
+            data-test-subj="metricsRawResultCount"
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
                 <FormattedMessage
@@ -254,7 +259,7 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <div className="metricsRawTable">
+      <div className="metricsRawTable" data-test-subj="metricsRawTable">
         <div className="metricsRawTable__tableContainer">
           <EuiBasicTable
             items={paginatedData}

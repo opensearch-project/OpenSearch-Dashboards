@@ -59,6 +59,10 @@ export const createDatasetChangeMiddleware = (
 
       currentDataset = dataset;
 
+      // Capture the active tab *before* clearing so detectAndSetOptimalTab can
+      // restore it. The store's own activeTabId may already have been hydrated
+      // from the URL's `_a` state, e.g. when landing on `/app/agentTraces/spans`.
+      const savedTabId = store.getState().ui.activeTabId;
       store.dispatch(setActiveTab(''));
       store.dispatch(clearResults());
       store.dispatch(clearQueryStatusMap());
@@ -122,7 +126,7 @@ export const createDatasetChangeMiddleware = (
           }
 
           await store.dispatch(executeQueries({ services }) as any);
-          store.dispatch(detectAndSetOptimalTab({ services }) as any);
+          store.dispatch(detectAndSetOptimalTab({ services, savedTabId }) as any);
         } catch (error) {
           services.notifications?.toasts.addError(error, {
             title: 'Error loading dataset',

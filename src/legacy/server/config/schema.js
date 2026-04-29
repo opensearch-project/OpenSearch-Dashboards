@@ -257,6 +257,7 @@ export default () =>
         users: Joi.array().items(Joi.string()).default([]),
       }),
       futureNavigation: Joi.boolean().default(false),
+      enableIconSideNav: Joi.boolean().default(false),
       keyboardShortcuts: Joi.object({
         enabled: Joi.boolean().default(false),
       }),
