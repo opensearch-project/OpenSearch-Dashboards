@@ -79,9 +79,12 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
   );
 
   // Hook must be called unconditionally
+  const noopDynamicContext = useCallback(
+    (_options: any, _shouldCleanup?: boolean): string => '',
+    []
+  );
   const useDynamicContext =
-    services.contextProvider?.hooks?.useDynamicContext ||
-    ((_options: any, _shouldCleanup?: boolean): string => '');
+    services.contextProvider?.hooks?.useDynamicContext || noopDynamicContext;
   useDynamicContext(errorContextData, false);
 
   const handleAskAi = useCallback(async () => {
