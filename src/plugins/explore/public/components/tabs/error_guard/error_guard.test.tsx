@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { ErrorGuard } from './error_guard';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 
 // Mock the useTabError hook
 jest.mock('../../../application/utils/hooks/use_tab_error', () => ({
@@ -24,6 +28,45 @@ const mockTabDefinition: TabDefinition = {
   supportedLanguages: ['SQL'],
 };
 
+// Create a mock Redux store
+const createMockStore = () =>
+  configureStore({
+    reducer: {
+      query: () => ({ query: 'SELECT * FROM test' }),
+    },
+  });
+
+// Create mock services
+const createMockServices = () => ({
+  core: {
+    chat: {
+      isAvailable: () => false,
+    },
+  },
+  toastNotifications: {
+    addWarning: jest.fn(),
+  },
+  contextProvider: {
+    hooks: {
+      useDynamicContext: () => '',
+    },
+  },
+});
+
+// Wrapper component with providers
+const renderWithProviders = (component: React.ReactElement) => {
+  const store = createMockStore();
+  const services = createMockServices();
+
+  return render(
+    <Provider store={store}>
+      <OpenSearchDashboardsContextProvider services={services}>
+        {component}
+      </OpenSearchDashboardsContextProvider>
+    </Provider>
+  );
+};
+
 describe('ErrorGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,7 +75,7 @@ describe('ErrorGuard', () => {
   it('renders children when there is no error', () => {
     mockUseTabError.mockReturnValue(null);
 
-    render(
+    renderWithProviders(
       <ErrorGuard registryTab={mockTabDefinition}>
         <div data-testid="child-content">Child Content</div>
       </ErrorGuard>
@@ -56,7 +99,7 @@ describe('ErrorGuard', () => {
 
     mockUseTabError.mockReturnValue(mockError);
 
-    render(
+    renderWithProviders(
       <ErrorGuard registryTab={mockTabDefinition}>
         <div data-testid="child-content">Child Content</div>
       </ErrorGuard>
@@ -80,13 +123,13 @@ describe('ErrorGuard', () => {
 
     mockUseTabError.mockReturnValue(mockError);
 
-    render(
+    renderWithProviders(
       <ErrorGuard registryTab={mockTabDefinition}>
         <div data-testid="child-content">Child Content</div>
       </ErrorGuard>
     );
 
-    expect(screen.getByText('An error occurred while executing the query')).toBeInTheDocument();
+    expect(screen.getByText('Query execution failed')).toBeInTheDocument();
   });
 
   it('does not render error type section when type is not provided', () => {
@@ -102,14 +145,14 @@ describe('ErrorGuard', () => {
 
     mockUseTabError.mockReturnValue(mockError);
 
-    render(
+    renderWithProviders(
       <ErrorGuard registryTab={mockTabDefinition}>
         <div data-testid="child-content">Child Content</div>
       </ErrorGuard>
     );
 
     expect(screen.getByText('Test error reason')).toBeInTheDocument();
-    expect(screen.getByText('Details')).toBeInTheDocument();
-    expect(screen.queryByText('Type')).not.toBeInTheDocument();
+    expect(screen.getByText('Test error details')).toBeInTheDocument();
+    expect(screen.queryByText('Error type')).not.toBeInTheDocument();
   });
 });

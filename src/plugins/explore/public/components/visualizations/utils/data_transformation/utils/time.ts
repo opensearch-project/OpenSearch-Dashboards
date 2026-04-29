@@ -15,23 +15,35 @@ export const roundToTimeUnit = (timestamp: Date, unit: TimeUnit): Date => {
   const d = new Date(timestamp);
   switch (unit) {
     case TimeUnit.YEAR:
-      return new Date(d.getFullYear(), 0, 1);
+      return new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
     case TimeUnit.MONTH:
-      return new Date(d.getFullYear(), d.getMonth(), 1);
+      return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
     case TimeUnit.DATE:
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
     case TimeUnit.HOUR:
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours());
+      return new Date(
+        Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours())
+      );
     case TimeUnit.MINUTE:
-      return new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
+      return new Date(
+        Date.UTC(
+          d.getUTCFullYear(),
+          d.getUTCMonth(),
+          d.getUTCDate(),
+          d.getUTCHours(),
+          d.getUTCMinutes()
+        )
+      );
     case TimeUnit.SECOND:
       return new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate(),
-        d.getHours(),
-        d.getMinutes(),
-        d.getSeconds()
+        Date.UTC(
+          d.getUTCFullYear(),
+          d.getUTCMonth(),
+          d.getUTCDate(),
+          d.getUTCHours(),
+          d.getUTCMinutes(),
+          d.getUTCSeconds()
+        )
       );
     default:
       return d;

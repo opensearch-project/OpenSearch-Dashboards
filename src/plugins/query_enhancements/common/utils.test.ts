@@ -111,6 +111,135 @@ describe('throwFacetError', () => {
       expect(err.status).toBeUndefined();
     }
   });
+
+  it('should extract error context from OpenSearch enhanced error format', () => {
+    const response = {
+      data: {
+        body: {
+          error: {
+            type: 'SemanticCheckException',
+            reason: 'Field not found',
+            details: 'Unknown field: invalid_field',
+            context: {
+              query_pos: {
+                line: 1,
+                column: 15,
+              },
+              requested_field: 'invalid_field',
+              available_fields: ['field1', 'field2', 'field3'],
+            },
+            code: 'ERR_001',
+            location: ['SELECT', 'invalid_field'],
+          },
+          status: 400,
+        },
+        status: '400',
+      },
+    };
+
+    expect(() => throwFacetError(response)).toThrowError();
+    try {
+      throwFacetError(response);
+    } catch (err: any) {
+      expect(err.message).toBe('Unknown field: invalid_field');
+      expect(err.status).toBe('400');
+      expect(err.errorBody).toBeDefined();
+      expect(err.errorBody.error.type).toBe('SemanticCheckException');
+      expect(err.errorContext).toBeDefined();
+      expect(err.errorContext.context).toBeDefined();
+      expect(err.errorContext.context.query_pos).toEqual({ line: 1, column: 15 });
+      expect(err.errorContext.context.requested_field).toBe('invalid_field');
+      expect(err.errorContext.context.available_fields).toEqual(['field1', 'field2', 'field3']);
+      expect(err.errorContext.code).toBe('ERR_001');
+      expect(err.errorContext.type).toBe('SemanticCheckException');
+      expect(err.errorContext.location).toEqual(['SELECT', 'invalid_field']);
+    }
+  });
+
+  it('should extract error suggestion from OpenSearch enhanced error format', () => {
+    const response = {
+      data: {
+        body: {
+          error: {
+            type: 'SemanticCheckException',
+            reason: 'Field not found',
+            details: 'Unknown field: nmae',
+            suggestion: 'Did you mean: name',
+            context: {
+              requested_field: 'nmae',
+              available_fields: ['name', 'age', 'email'],
+            },
+          },
+          status: 400,
+        },
+        status: '400',
+      },
+    };
+
+    expect(() => throwFacetError(response)).toThrowError();
+    try {
+      throwFacetError(response);
+    } catch (err: any) {
+      expect(err.message).toBe('Unknown field: nmae');
+      expect(err.errorBody).toBeDefined();
+      expect(err.errorBody.error.suggestion).toBe('Did you mean: name');
+    }
+  });
+
+  it('should handle error with only reason (no details)', () => {
+    const response = {
+      data: {
+        body: {
+          error: {
+            type: 'SyntaxCheckException',
+            reason: 'Syntax error in query',
+            context: {
+              query_pos: {
+                line: 2,
+                column: 5,
+              },
+            },
+          },
+          status: 400,
+        },
+        status: '400',
+      },
+    };
+
+    expect(() => throwFacetError(response)).toThrowError();
+    try {
+      throwFacetError(response);
+    } catch (err: any) {
+      expect(err.message).toBe('Syntax error in query');
+      expect(err.errorContext.type).toBe('SyntaxCheckException');
+      expect(err.errorContext.context.query_pos).toEqual({ line: 2, column: 5 });
+    }
+  });
+
+  it('should handle error without context field', () => {
+    const response = {
+      data: {
+        body: {
+          error: {
+            type: 'GenericError',
+            reason: 'Generic error occurred',
+            details: 'Something went wrong',
+          },
+          status: 500,
+        },
+        status: '500',
+      },
+    };
+
+    expect(() => throwFacetError(response)).toThrowError();
+    try {
+      throwFacetError(response);
+    } catch (err: any) {
+      expect(err.message).toBe('Something went wrong');
+      expect(err.errorContext.type).toBe('GenericError');
+      expect(err.errorContext.context).toBeUndefined();
+    }
+  });
 });
 
 describe('formatDate', () => {
