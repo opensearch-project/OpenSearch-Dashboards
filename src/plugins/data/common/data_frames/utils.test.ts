@@ -594,4 +594,36 @@ describe('convertResult', () => {
     // Verify instantFieldSchema is preserved
     expect((result as any).instantFieldSchema).toEqual(instantSchema);
   });
+
+  it('should pass through truncation metadata from data frame meta', () => {
+    const response: IDataFrameResponse = {
+      took: 100,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { total: 0, max_score: 0, hits: [] },
+      body: {
+        fields: [
+          { name: 'Time', type: 'time', values: [1702483200000] },
+          { name: 'Value', type: 'number', values: [0.95] },
+        ],
+        size: 1,
+        name: 'prometheus-data',
+        meta: {
+          truncation: {
+            tableTruncated: true,
+            totalSeriesCount: 3000,
+            displayedSeriesCount: 2000,
+          },
+        },
+      },
+      type: DATA_FRAME_TYPES.DEFAULT,
+    };
+
+    const result = convertResult({ response });
+    expect((result as any).truncation).toEqual({
+      tableTruncated: true,
+      totalSeriesCount: 3000,
+      displayedSeriesCount: 2000,
+    });
+  });
 });

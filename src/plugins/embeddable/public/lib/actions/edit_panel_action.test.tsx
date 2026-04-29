@@ -81,7 +81,7 @@ test('redirects to app using state transfer with by value mode', async () => {
   embeddable.getRoot = jest.fn(() => ({
     getTitle: () => 'containerTitle',
     id: 'containerId',
-    getInput: () => ({ panels: {} }),
+    getInput: () => ({ id: 'containerId', panels: {} }),
   }));
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
@@ -115,6 +115,7 @@ test('redirects to app using state transfer without by value mode', async () => 
   embeddable.getRoot = jest.fn(() => ({
     getTitle: () => 'containerTitle',
     id: 'containerId',
+    getInput: () => ({ id: 'containerId' }),
   }));
 
   await action.execute({ embeddable });

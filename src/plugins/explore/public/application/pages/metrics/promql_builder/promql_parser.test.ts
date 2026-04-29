@@ -109,6 +109,11 @@ describe('parsePromQL', () => {
     expect(r1).toBe(r2);
   });
 
+  it('returns canBuild=false for bare number literal', () => {
+    const result = parsePromQL('123');
+    expect(result.canBuild).toBe(false);
+  });
+
   it('returns canBuild=false for syntax errors', () => {
     const result = parsePromQL('sum(');
     expect(result.canBuild).toBe(false);

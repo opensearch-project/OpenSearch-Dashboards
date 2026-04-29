@@ -372,8 +372,8 @@ describe('promqlSearchStrategy', () => {
       expect(instantRows[1].mode).toBe('idle');
     });
 
-    it('should respect MAX_SERIES_VIZ limit for visualization and MAX_SERIES_TABLE for table', async () => {
-      // Create 150 series - more than MAX_SERIES_VIZ (100) but less than MAX_SERIES_TABLE (2000)
+    it('should include all series up to MAX_SERIES_TABLE in visualization data', async () => {
+      // Create 150 series - all should be included in viz data (no MAX_SERIES_VIZ limit)
       const resultSeries = Array.from({ length: 150 }, (_, i) => ({
         metric: { series: `series-${i}` },
         values: [[1638316800, i]],
@@ -410,12 +410,57 @@ describe('promqlSearchStrategy', () => {
         {}
       );
 
-      // Visualization data (fields) should be limited to MAX_SERIES_VIZ (100)
+      // All 150 series should be in viz data (no MAX_SERIES_VIZ cap)
       // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(resultData.body.size).toBe(100);
+      expect(resultData.body.size).toBe(150);
       // @ts-expect-error TS2339 TODO(ts-error): fixme
       const instantRows = resultData.body.meta?.instantData.rows;
       expect(instantRows.length).toBe(150);
+    });
+
+    it('should include truncation metadata when series are not truncated', async () => {
+      const resultSeries = Array.from({ length: 5 }, (_, i) => ({
+        metric: { series: `series-${i}` },
+        values: [[1638316800, i]],
+      }));
+
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: resultSeries,
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const resultData = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'few_series',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      const truncation = resultData.body.meta?.truncation;
+      expect(truncation).toBeDefined();
+      expect(truncation.tableTruncated).toBe(false);
+      expect(truncation.totalSeriesCount).toBe(5);
+      expect(truncation.displayedSeriesCount).toBe(5);
     });
   });
 

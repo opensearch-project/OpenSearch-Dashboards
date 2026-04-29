@@ -71,21 +71,26 @@ export const TranspileBabel: Task = {
   description: 'Transpiling sources with babel',
 
   async run(config, log, build) {
-    // Transpile server code
-    await transpileWithBabel(['**/*.{js,ts,tsx}', '!**/public/**'], build, [
-      [
-        require.resolve('@osd/babel-preset/node_preset'),
-        {
-          'babel-plugin-module-resolver': { root: [build.resolvePath()], cwd: build.resolvePath() },
-        },
-      ],
-    ]);
+    await Promise.all([
+      // Transpile server code
+      transpileWithBabel(['**/*.{js,ts,tsx}', '!**/public/**'], build, [
+        [
+          require.resolve('@osd/babel-preset/node_preset'),
+          {
+            'babel-plugin-module-resolver': {
+              root: [build.resolvePath()],
+              cwd: build.resolvePath(),
+            },
+          },
+        ],
+      ]),
 
-    // Transpile client code
-    // NOTE: For the client, as we have the optimizer, we are only
-    // pre-transpiling the typescript based files
-    await transpileWithBabel(['**/public/**/*.{ts,tsx}'], build, [
-      require.resolve('@osd/babel-preset/webpack_preset'),
+      // Transpile client code
+      // NOTE: For the client, as we have the optimizer, we are only
+      // pre-transpiling the typescript based files
+      transpileWithBabel(['**/public/**/*.{ts,tsx}'], build, [
+        require.resolve('@osd/babel-preset/webpack_preset'),
+      ]),
     ]);
   },
 };

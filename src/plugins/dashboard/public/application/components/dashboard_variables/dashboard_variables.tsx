@@ -20,6 +20,9 @@ export interface DashboardVariablesProps {
   interpolationService?: IVariableInterpolationService;
   isEditMode: boolean;
   getPanelQueries?: () => string[];
+  dashboardId?: string;
+  onSaveDashboard?: () => void;
+  onEnterEditMode?: () => void;
 }
 
 /**
@@ -31,18 +34,41 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
   interpolationService,
   isEditMode,
   getPanelQueries,
+  dashboardId,
+  onSaveDashboard,
+  onEnterEditMode,
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { notifications } = services;
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const [isVariableManagementOpen, setIsVariableManagementOpen] = useState(false);
   const [editingVariable, setEditingVariable] = useState<Variable | undefined>(undefined);
+  const [pendingAddVariable, setPendingAddVariable] = useState(false);
 
   const handleAddVariable = useCallback(() => {
+    // Check if dashboard is saved before adding variable
+    if (!dashboardId) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('dashboard.variableEditor.saveDashboardFirst.title', {
+          defaultMessage: 'Save dashboard first',
+        }),
+        text: i18n.translate('dashboard.variableEditor.saveDashboardFirst.text', {
+          defaultMessage: 'Please save the dashboard before adding variables.',
+        }),
+      });
+
+      // Trigger dashboard save
+      if (onSaveDashboard) {
+        onSaveDashboard();
+        setPendingAddVariable(true);
+      }
+      return;
+    }
+
     setEditingVariable(undefined);
     setIsVariableManagementOpen(false);
     setIsVariableEditorOpen(true);
-  }, []);
+  }, [dashboardId, notifications.toasts, onSaveDashboard]);
 
   const handleManageVariables = useCallback(() => {
     setIsVariableEditorOpen(false);
@@ -105,6 +131,18 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
     }
   }, [isEditMode]);
 
+  // Open variable editor after dashboard is saved
+  useEffect(() => {
+    if (pendingAddVariable && dashboardId) {
+      setPendingAddVariable(false);
+
+      if (!isEditMode && onEnterEditMode) {
+        onEnterEditMode();
+      }
+      setIsVariableEditorOpen(true);
+    }
+  }, [pendingAddVariable, dashboardId, isEditMode, onEnterEditMode]);
+
   return (
     <>
       <VariablesBar
@@ -139,7 +177,7 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
               onClose={handleCloseVariableEditor}
               onSave={handleSaveVariable}
               existingVariable={editingVariable}
-              existingVariableNames={variableService.getVariables().map((v) => v.name)}
+              existingVariables={variableService.getVariables()}
               interpolationService={interpolationService}
             />,
             panelContainer
