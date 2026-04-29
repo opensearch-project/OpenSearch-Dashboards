@@ -442,6 +442,221 @@ describe('OpenSearchIndex', () => {
       await expect(Index.write(client as any, index, docs)).rejects.toThrow(/dern/);
       expect(client.bulk).toHaveBeenCalledTimes(1);
     });
+
+    // --- retry tests --------------------
+
+    const ZERO_BACKOFF_RETRY = {
+      enabled: true,
+      maxRetries: 5,
+      initialBackoffMs: 0, // tests run fast without real sleeps
+      maxBackoffMs: 0,
+      clusterEventTimeoutMs: 120000,
+    };
+
+    const ONE_DOC = [
+      {
+        _id: 'a:1',
+        _source: { type: 'a', a: { v: 1 } },
+      },
+    ];
+
+    test('retries a transient 503 once, succeeds on second attempt', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              {
+                index: {
+                  _id: 'a:1',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 'transient' },
+                },
+              },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [{ index: { _id: 'a:1', status: 201 } }],
+          } as opensearchtypes.BulkResponse)
+        );
+
+      await Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY);
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    test('exhausts retries on persistent 503 and throws with history', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 503,
+                error: {
+                  type: 'process_cluster_event_timeout_exception',
+                  reason: 'failed to process cluster event',
+                },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const cfg = { ...ZERO_BACKOFF_RETRY, maxRetries: 3 };
+      await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow(
+        /failed after 4 attempt\(s\)/
+      );
+      // attempt 1 + 3 retries = 4 bulk calls
+      expect(client.bulk).toHaveBeenCalledTimes(4);
+    });
+
+    test('retries ONLY the failed items, not the whole batch', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              { index: { _id: 'a:1', status: 201 } },
+              {
+                index: {
+                  _id: 'a:2',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 't' },
+                },
+              },
+              { index: { _id: 'a:3', status: 201 } },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [{ index: { _id: 'a:2', status: 201 } }],
+          } as opensearchtypes.BulkResponse)
+        );
+
+      const docs = [
+        { _id: 'a:1', _source: { type: 'a', a: { v: 1 } } },
+        { _id: 'a:2', _source: { type: 'a', a: { v: 2 } } },
+        { _id: 'a:3', _source: { type: 'a', a: { v: 3 } } },
+      ];
+
+      await Index.write(client as any, '.myalias', docs, ZERO_BACKOFF_RETRY);
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+      // Second call body should have only one action/doc pair (a:2).
+      const secondCallBody = client.bulk.mock.calls[1][0]!.body as object[];
+      expect(secondCallBody).toHaveLength(2);
+      // First element is the action header; second is the doc. Confirm
+      // the action header references a:2.
+      expect(JSON.stringify(secondCallBody[0])).toContain('a:2');
+    });
+
+    test('does NOT retry non-retriable errors (400) — throws immediately', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 400,
+                error: { type: 'mapper_parsing_exception', reason: 'bad mapping' },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      await expect(
+        Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY)
+      ).rejects.toThrow(/bad mapping/);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    test('retry.enabled=false preserves legacy single-shot behavior', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 503,
+                error: { type: 'process_cluster_event_timeout_exception', reason: 't' },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const cfg = { ...ZERO_BACKOFF_RETRY, enabled: false };
+      await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow(
+        /failed after 1 attempt/
+      );
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    test('retries cluster_block_exception but caps at maxRetries', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 429,
+                error: { type: 'cluster_block_exception', reason: 'disk watermark' },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const cfg = { ...ZERO_BACKOFF_RETRY, maxRetries: 2 };
+      await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow();
+      expect(client.bulk).toHaveBeenCalledTimes(3); // initial + 2 retries
+    });
+  });
+
+  describe('isRetriableBulkItemError', () => {
+    test('503 is retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({ status: 503, error: { type: 'x', reason: 'y' } })
+      ).toBe(true);
+    });
+
+    test('429 is retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({ status: 429, error: { type: 'x', reason: 'y' } })
+      ).toBe(true);
+    });
+
+    test('process_cluster_event_timeout_exception is retriable on any status', () => {
+      expect(
+        Index.isRetriableBulkItemError({
+          status: 500,
+          error: { type: 'process_cluster_event_timeout_exception', reason: 'x' },
+        })
+      ).toBe(true);
+    });
+
+    test('reason matching "failed to process cluster event" is retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({
+          status: 500,
+          error: { type: 'other', reason: 'failed to process cluster event (put-mapping)' },
+        })
+      ).toBe(true);
+    });
+
+    test('400 mapper_parsing_exception is NOT retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({
+          status: 400,
+          error: { type: 'mapper_parsing_exception', reason: 'nope' },
+        })
+      ).toBe(false);
+    });
+
+    test('no error = not retriable', () => {
+      expect(Index.isRetriableBulkItemError({ status: 200 })).toBe(false);
+    });
   });
 
   describe('reader', () => {

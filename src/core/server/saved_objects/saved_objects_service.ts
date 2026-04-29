@@ -373,6 +373,24 @@ export class SavedObjectsService
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
+    // Internal saved-object type used as a migration-status sentinel written
+    // by IndexMigrator. Registered here so the migration framework's
+    // strict-mapped indices include a slot for it. Hidden and
+    // non-importable/exportable so it never surfaces in management UIs.
+    this.typeRegistry.registerType({
+      name: 'osd_migration_status',
+      hidden: true,
+      namespaceType: 'agnostic',
+      mappings: {
+        // @ts-expect-error dynamic is not part of the narrow type but is accepted by OS
+        dynamic: 'false',
+        properties: {},
+      },
+      management: {
+        importableAndExportable: false,
+      },
+    });
+
     return {
       status$: this.savedObjectServiceStatus$.asObservable(),
       setClientFactoryProvider: (provider) => {
@@ -453,7 +471,8 @@ export class SavedObjectsService
     } else {
       calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
-        this.setupDeps.opensearch.status$
+        this.setupDeps.opensearch.status$,
+        this.config.migration.integrity?.waitingTimeoutMs
       )
         .pipe(
           map((defaultstatus) => {

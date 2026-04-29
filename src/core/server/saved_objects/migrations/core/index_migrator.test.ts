@@ -774,6 +774,44 @@ describe('IndexMigrator', () => {
       `"error migrating document"`
     );
   });
+
+  test('writes migration-status sentinel during a happy-path migration', async () => {
+    const { client } = testOpts;
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    // Configure client.index and client.get to support sentinel read/write.
+    // After the initial write, any subsequent read returns what was last
+    // written. This is a simplified sentinel store for the test.
+    let storedSentinel: any = undefined;
+    (client as any).index.mockImplementation((params: any) => {
+      if (params.id === 'osd_migration_status') {
+        storedSentinel = params.body;
+      }
+      return opensearchClientMock.createSuccessTransportRequestPromise({ result: 'created' });
+    });
+    (client as any).get.mockImplementation((_params: any, _options: any) => {
+      if (storedSentinel) {
+        return opensearchClientMock.createSuccessTransportRequestPromise({
+          _source: storedSentinel,
+        });
+      }
+      return opensearchClientMock.createSuccessTransportRequestPromise(
+        {},
+        { statusCode: 404 }
+      );
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    // Collect status values written to the sentinel in call order.
+    const statuses = (client as any).index.mock.calls
+      .filter((call: any[]) => call[0].id === 'osd_migration_status')
+      .map((call: any[]) => call[0].body.osd_migration_status.status);
+
+    expect(statuses[0]).toBe('in-progress');
+    expect(statuses).toContain('copied');
+    expect(statuses[statuses.length - 1]).toBe('complete');
+  });
 });
 
 function withIndex(

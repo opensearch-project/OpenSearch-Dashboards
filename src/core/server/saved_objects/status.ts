@@ -28,28 +28,53 @@
  * under the License.
  */
 
-import { Observable, combineLatest } from 'rxjs';
-import { startWith, map } from 'rxjs/operators';
+import { Observable, combineLatest, concat, of, timer } from 'rxjs';
+import { startWith, map, mapTo, switchMap } from 'rxjs/operators';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { SavedObjectStatusMeta } from './types';
 import { OpenSearchDashboardsMigratorStatus } from './migrations/opensearch_dashboards';
 
+/**
+ * Default used if a caller passes no `waitingTimeoutMs`. The production code
+ * path plumbs `migrations.integrity.waitingTimeoutMs` through; this constant
+ * only matters for tests and direct callers that skip config.
+ */
+const FALLBACK_WAITING_TIMEOUT_MS = 120_000;
+
 export const calculateStatus$ = (
   rawMigratorStatus$: Observable<OpenSearchDashboardsMigratorStatus>,
-  opensearchStatus$: Observable<ServiceStatus>
+  opensearchStatus$: Observable<ServiceStatus>,
+  waitingTimeoutMs: number = FALLBACK_WAITING_TIMEOUT_MS
 ): Observable<ServiceStatus<SavedObjectStatusMeta>> => {
   const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = rawMigratorStatus$.pipe(
-    map((migrationStatus) => {
+    // When the migrator sits in `waiting` past the configured timeout, emit
+    // `critical` so `/api/status` rolls up red. switchMap resets the timer
+    // whenever the migrator status changes, so oscillation is handled: once
+    // we reach `running` or `completed`, the prior timer disposes. The
+    // `critical` emission persists until the underlying status changes.
+    switchMap((migrationStatus) => {
       if (migrationStatus.status === 'waiting') {
-        return {
+        const waiting: ServiceStatus<SavedObjectStatusMeta> = {
           level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is waiting to start migrations`,
         };
+        const critical: ServiceStatus<SavedObjectStatusMeta> = {
+          level: ServiceStatusLevels.critical,
+          summary:
+            `SavedObjects service has been waiting for a peer migration for over ` +
+            `${Math.round(waitingTimeoutMs / 1000)}s. This likely indicates a stuck or ` +
+            `crashed migration. Inspect .kibana_* indices and consider deleting the ` +
+            `partial destination index before restarting.`,
+        };
+        // Emit `waiting` immediately, then `critical` once the timeout elapses.
+        // No further emissions — downstream distinctUntilChanged would dedupe
+        // them anyway, but stopping the timer cleanly avoids needless work.
+        return concat(of(waiting), timer(waitingTimeoutMs).pipe(mapTo(critical)));
       } else if (migrationStatus.status === 'running') {
-        return {
+        return of<ServiceStatus<SavedObjectStatusMeta>>({
           level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is running migrations`,
-        };
+        });
       }
 
       const statusCounts: SavedObjectStatusMeta['migratedIndices'] = { migrated: 0, skipped: 0 };
@@ -59,18 +84,18 @@ export const calculateStatus$ = (
         });
       }
 
-      return {
+      return of<ServiceStatus<SavedObjectStatusMeta>>({
         level: ServiceStatusLevels.available,
         summary: `SavedObjects service has completed migrations and is available`,
         meta: {
           migratedIndices: statusCounts,
         },
-      };
+      });
     }),
     startWith({
       level: ServiceStatusLevels.unavailable,
       summary: `SavedObjects service is waiting to start migrations`,
-    })
+    } as ServiceStatus<SavedObjectStatusMeta>)
   );
 
   return combineLatest([opensearchStatus$, migratorStatus$]).pipe(
@@ -80,7 +105,9 @@ export const calculateStatus$ = (
           level: ServiceStatusLevels.unavailable,
           summary: `SavedObjects service is not available without a healthy OpenSearch connection`,
         };
-      } else if (migratorStatus.level === ServiceStatusLevels.unavailable) {
+      } else if (migratorStatus.level >= ServiceStatusLevels.unavailable) {
+        // Pass through unavailable + critical escalation verbatim so status
+        // rollup to overall `/api/status` keeps the worst-child semantics.
         return migratorStatus;
       } else if (openSearchStatus.level === ServiceStatusLevels.degraded) {
         return {

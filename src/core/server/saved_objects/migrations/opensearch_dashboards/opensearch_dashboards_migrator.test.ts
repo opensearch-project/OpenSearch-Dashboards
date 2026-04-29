@@ -257,6 +257,21 @@ const mockOptions = (
         enabled: rawConfig.get('migrations.delete.enabled'),
         types: rawConfig.get('migrations.delete.types'),
       },
+      retry: {
+        enabled: true,
+        maxRetries: 5,
+        initialBackoffMs: 1000,
+        maxBackoffMs: 30000,
+        clusterEventTimeoutMs: 120000,
+      },
+      integrity: {
+        enabled: true,
+        failOnDeltaPercentPerType: 5,
+        failOnAbsoluteDeltaPerType: 10,
+        stalePeerProbeIntervalMs: 10000,
+        sentinelHeartbeatIntervalMs: 5000,
+        waitingTimeoutMs: 120000,
+      },
     },
     // @ts-expect-error TS2345 TODO Fix me
     client: opensearchClientMock.createOpenSearchClient(),

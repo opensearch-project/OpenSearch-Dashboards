@@ -52,6 +52,34 @@ export const savedObjectsMigrationConfig = {
         },
       }
     ),
+    /**
+     * Retry behavior for transient bulk-write failures during saved-object
+     * migrations. A transient `process_cluster_event_timeout_exception` on
+     * put-mapping can otherwise crash the migrator and leave `.kibana_N` in
+     * a half-written state that no subsequent OSD instance will recover
+     * from.
+     */
+    retry: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      maxRetries: schema.number({ defaultValue: 5, min: 0 }),
+      initialBackoffMs: schema.number({ defaultValue: 1000, min: 0 }),
+      maxBackoffMs: schema.number({ defaultValue: 30000, min: 0 }),
+      clusterEventTimeoutMs: schema.number({ defaultValue: 120000, min: 1000 }),
+    }),
+    /**
+     * Integrity checks applied when an OSD instance encounters an existing
+     * destination index during migration (the `handleIndexExists` path in
+     * `migration_coordinator.ts`). Prevents silently treating a crashed
+     * partial destination as a healthy in-progress peer migration.
+     */
+    integrity: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      failOnDeltaPercentPerType: schema.number({ defaultValue: 5, min: 0, max: 100 }),
+      failOnAbsoluteDeltaPerType: schema.number({ defaultValue: 10, min: 0 }),
+      stalePeerProbeIntervalMs: schema.number({ defaultValue: 10000, min: 100 }),
+      sentinelHeartbeatIntervalMs: schema.number({ defaultValue: 5000, min: 100 }),
+      waitingTimeoutMs: schema.number({ defaultValue: 120000, min: 1000 }),
+    }),
   }),
 };
 
