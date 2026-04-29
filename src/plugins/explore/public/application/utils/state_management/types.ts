@@ -24,7 +24,6 @@ export interface QueryResultStatus {
       type?: string;
     };
     originalErrorMessage: string;
-    // Rich error context from OpenSearch (PPL field errors, etc.)
     errorBody?: OpenSearchErrorResponse;
     errorContext?: {
       context?: OpenSearchErrorContext;

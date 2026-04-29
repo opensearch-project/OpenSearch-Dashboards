@@ -688,10 +688,8 @@ const executeQueryBase = async (
                 reason: parsedError?.error?.reason || 'Unknown Error',
                 type: parsedError?.error?.type,
               },
-              statusCode: error.body?.statusCode,
+              statusCode: error.body?.statusCode || 500,
               originalErrorMessage: error.body?.message,
-              // Preserve rich error context from parsed JSON error (PPL field errors with available_fields, etc.)
-              // The full error object is in parsedError.error from the JSON-stringified message
               ...(parsedError?.error && {
                 errorBody: parsedError,
                 errorContext: {

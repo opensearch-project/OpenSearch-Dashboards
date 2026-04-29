@@ -50,18 +50,15 @@ export interface ErrorGuardProps {
 }
 
 export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Element | null => {
-  // ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS (React rules of hooks)
   const error = useTabError(registryTab);
   const [isTechnicalDetailsOpen, setIsTechnicalDetailsOpen] = useState(false);
   const [isAskingAi, setIsAskingAi] = useState(false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const query = useSelector(selectQuery);
 
-  // Check if chat service is available
   const chatService = services.core?.chat;
   const isChatAvailable = chatService?.isAvailable() ?? false;
 
-  // Prepare error context for AI, w/ full tech details
   const errorContextData = useMemo(
     () =>
       error
@@ -81,20 +78,17 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
     [query, error]
   );
 
-  // Register dynamic context for AI (like AskAIActionItem pattern)
-  // Hook must be called unconditionally - it will handle null/undefined gracefully
+  // Hook must be called unconditionally
   const useDynamicContext =
     services.contextProvider?.hooks?.useDynamicContext ||
     ((_options: any, _shouldCleanup?: boolean): string => '');
   useDynamicContext(errorContextData, false);
 
-  // Handle asking AI about the error
   const handleAskAi = useCallback(async () => {
     if (!chatService || !isChatAvailable) return;
 
     setIsAskingAi(true);
     try {
-      // Pre-filled question about the error
       const question = 'Why did my query fail and how can I fix it?';
       await chatService.sendMessageWithWindow(question, []);
     } catch (err) {
@@ -107,7 +101,6 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
     }
   }, [chatService, isChatAvailable, services.toastNotifications]);
 
-  // Early returns AFTER all hooks
   if (error == null) {
     return <EuiErrorBoundary>{children}</EuiErrorBoundary>;
   }
@@ -116,11 +109,9 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
     return <PatternsErrorGuard registryTab={registryTab} />;
   }
 
-  // Extract rich error context if available
   const errorSuggestion = error.errorBody?.error?.suggestion;
   const hasSuggestion = errorSuggestion && errorSuggestion.length > 0;
 
-  // Only show details if they differ from reason (avoid redundant text)
   const shouldShowDetails = error.message.details && error.message.details !== error.message.reason;
 
   return (
@@ -132,7 +123,6 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
         gutterSize="l"
       >
         <EuiFlexItem grow={false} style={{ maxWidth: '800px', width: '100%' }}>
-          {/* Error icon and title - centered */}
           <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <EuiIcon type="alert" size="xl" color="danger" />
@@ -146,7 +136,6 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
 
           <EuiSpacer size="l" />
 
-          {/* Error details if different from reason */}
           {shouldShowDetails && (
             <>
               <EuiText size="s" textAlign="center" color="subdued">
@@ -156,7 +145,6 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
             </>
           )}
 
-          {/* Backend suggestion (e.g., "Did you mean: fieldname") */}
           {hasSuggestion && (
             <>
               <EuiText size="s" textAlign="center">
@@ -166,7 +154,6 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
             </>
           )}
 
-          {/* Ask AI button if chat is available */}
           {isChatAvailable && (
             <>
               <EuiFlexGroup justifyContent="center">
@@ -186,7 +173,6 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
             </>
           )}
 
-          {/* Collapsible technical details */}
           {(error.message.type || error.originalErrorMessage) && (
             <>
               <EuiFlexGroup justifyContent="center">

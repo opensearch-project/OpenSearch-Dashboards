@@ -161,14 +161,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     }
   }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
 
-  // Update error decorations when query status changes
   useEffect(() => {
     if (editorRef.current) {
       updateErrorDecorations(editorRef.current);
     }
   }, [updateErrorDecorations, editorRef]);
 
-  // Cleanup validation context on unmount
   useEffect(
     () => () => {
       detachValidationContextRef.current?.();
