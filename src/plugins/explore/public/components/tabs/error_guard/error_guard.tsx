@@ -11,13 +11,12 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiSpacer,
-  EuiAccordion,
   EuiText,
-  EuiBadge,
   EuiButtonEmpty,
   EuiButton,
+  EuiIcon,
+  EuiTitle,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -41,15 +40,6 @@ const typeText = i18n.translate('explore.errorPanel.type', {
 const technicalDetailsText = i18n.translate('explore.errorPanel.technicalDetails', {
   defaultMessage: 'Technical details',
 });
-const availableFieldsText = i18n.translate('explore.errorPanel.availableFields', {
-  defaultMessage: 'Available fields',
-});
-const suggestedFieldsText = i18n.translate('explore.errorPanel.suggestedFields', {
-  defaultMessage: 'Did you mean one of these fields?',
-});
-const errorSuggestionText = i18n.translate('explore.errorPanel.suggestion', {
-  defaultMessage: 'Suggestion',
-});
 const askAiButtonText = i18n.translate('explore.errorPanel.askAi', {
   defaultMessage: 'Ask AI for help',
 });
@@ -71,7 +61,7 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
   const chatService = services.core?.chat;
   const isChatAvailable = chatService?.isAvailable() ?? false;
 
-  // Prepare error context for AI (must be before early returns)
+  // Prepare error context for AI, w/ full tech details
   const errorContextData = useMemo(
     () =>
       error
@@ -81,12 +71,7 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
             value: {
               query: query?.query,
               error: {
-                reason: error.message.reason,
-                details: error.message.details,
-                type: error.message.type,
-                ...(error.errorContext?.context && { context: error.errorContext.context }),
-                ...(error.errorContext?.code && { code: error.errorContext.code }),
-                ...(error.errorContext?.location && { location: error.errorContext.location }),
+                ...(error.errorBody && { fullErrorBody: error.errorBody }),
               },
             },
             label: 'Query Error',
@@ -132,11 +117,11 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
   }
 
   // Extract rich error context if available
-  const availableFields = error.errorContext?.context?.available_fields;
-  const requestedField = error.errorContext?.context?.requested_field;
   const errorSuggestion = error.errorBody?.error?.suggestion;
-  const hasFieldSuggestions = availableFields && availableFields.length > 0;
   const hasSuggestion = errorSuggestion && errorSuggestion.length > 0;
+
+  // Only show details if they differ from reason (avoid redundant text)
+  const shouldShowDetails = error.message.details && error.message.details !== error.message.reason;
 
   return (
     <EuiErrorBoundary>
@@ -147,104 +132,90 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
         gutterSize="l"
       >
         <EuiFlexItem grow={false} style={{ maxWidth: '800px', width: '100%' }}>
-          <EuiCallOut
-            title={error.message.reason || errorDefaultTitle}
-            color="danger"
-            iconType="alert"
-            size="m"
-          >
-            {error.message.details && (
-              <>
-                <EuiText size="s">
-                  <p>{error.message.details}</p>
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            )}
+          {/* Error icon and title - centered */}
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="alert" size="xl" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>{error.message.reason || errorDefaultTitle}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-            {/* Ask AI button if chat is available */}
-            {isChatAvailable && (
-              <>
-                <EuiButton
-                  size="s"
-                  iconType="discuss"
-                  onClick={handleAskAi}
-                  isLoading={isAskingAi}
-                  disabled={isAskingAi}
-                >
-                  {askAiButtonText}
-                </EuiButton>
-                <EuiSpacer size="m" />
-              </>
-            )}
+          <EuiSpacer size="l" />
 
-            {/* Show suggestion if available */}
-            {hasSuggestion && (
-              <>
-                <EuiText size="s">
-                  <strong>{errorSuggestionText}:</strong> {errorSuggestion}
-                </EuiText>
-                <EuiSpacer size="s" />
-              </>
-            )}
+          {/* Error details if different from reason */}
+          {shouldShowDetails && (
+            <>
+              <EuiText size="s" textAlign="center" color="subdued">
+                <p>{error.message.details}</p>
+              </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          )}
 
-            {/* Show available field suggestions when a field is not found */}
-            {hasFieldSuggestions && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiText size="s">
-                  <strong>
-                    {requestedField
-                      ? `Field "${requestedField}" not found. ${suggestedFieldsText}`
-                      : suggestedFieldsText}
-                  </strong>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup wrap responsive={false} gutterSize="s">
-                  {availableFields.slice(0, 8).map((field) => (
-                    <EuiFlexItem grow={false} key={field}>
-                      <EuiBadge color="hollow">{field}</EuiBadge>
-                    </EuiFlexItem>
-                  ))}
-                  {availableFields.length > 8 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        +{availableFields.length - 8} more fields available
-                      </EuiText>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </>
-            )}
+          {/* Backend suggestion (e.g., "Did you mean: fieldname") */}
+          {hasSuggestion && (
+            <>
+              <EuiText size="s" textAlign="center">
+                <p>{errorSuggestion}</p>
+              </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          )}
 
-            {/* Collapsible technical details */}
-            {(error.message.type || error.originalErrorMessage) && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType={isTechnicalDetailsOpen ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => setIsTechnicalDetailsOpen(!isTechnicalDetailsOpen)}
-                >
-                  {technicalDetailsText}
-                </EuiButtonEmpty>
-                {isTechnicalDetailsOpen && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <div className="exploreErrorGuard__errorsSection">
-                      {error.message.type && (
-                        <ErrorCodeBlock title={typeText} text={error.message.type} />
+          {/* Ask AI button if chat is available */}
+          {isChatAvailable && (
+            <>
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    iconType="generate"
+                    onClick={handleAskAi}
+                    isLoading={isAskingAi}
+                    disabled={isAskingAi}
+                  >
+                    {askAiButtonText}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </>
+          )}
+
+          {/* Collapsible technical details */}
+          {(error.message.type || error.originalErrorMessage) && (
+            <>
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType={isTechnicalDetailsOpen ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setIsTechnicalDetailsOpen(!isTechnicalDetailsOpen)}
+                  >
+                    {technicalDetailsText}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {isTechnicalDetailsOpen && (
+                <>
+                  <EuiSpacer size="s" />
+                  <div className="exploreErrorGuard__errorsSection">
+                    {error.message.type && (
+                      <ErrorCodeBlock title={typeText} text={error.message.type} />
+                    )}
+                    {error.originalErrorMessage &&
+                      error.originalErrorMessage !== error.message.details && (
+                        <ErrorCodeBlock title={detailsText} text={error.originalErrorMessage} />
                       )}
-                      {error.originalErrorMessage &&
-                        error.originalErrorMessage !== error.message.details && (
-                          <ErrorCodeBlock title={detailsText} text={error.originalErrorMessage} />
-                        )}
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </EuiCallOut>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiErrorBoundary>

@@ -15,7 +15,11 @@ import {
   QueryStatusOptions,
 } from './types';
 import { API } from './constants';
-import { OpenSearchErrorResponse, OpenSearchErrorContext, OpenSearchError } from './error_types';
+import {
+  OpenSearchErrorResponse,
+  OpenSearchErrorContext,
+  OpenSearchError,
+} from '../../data/common';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);

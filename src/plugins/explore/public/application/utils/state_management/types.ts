@@ -4,11 +4,11 @@
  */
 
 import { RootState } from './store';
-import { ResultStatus as DataPluginResultStatus } from '../../../../../data/public';
 import {
+  ResultStatus as DataPluginResultStatus,
   OpenSearchErrorResponse,
   OpenSearchErrorContext,
-} from '../../../../../../common/error_types';
+} from '../../../../../data/public';
 
 export type QueryExecutionStatus = DataPluginResultStatus;
 export const QueryExecutionStatus = DataPluginResultStatus;

@@ -16,7 +16,7 @@ import {
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
-import { OpenSearchErrorResponse } from '../../../../../../common/error_types';
+import { OpenSearchErrorResponse } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 import {
   DataPublicPluginStart,
