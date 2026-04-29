@@ -659,6 +659,91 @@ describe('OpenSearchIndex', () => {
     });
   });
 
+  describe('findPriorSavedObjectsIndex', () => {
+    test('returns null when no matching indices exist', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      expect(result).toBeNull();
+    });
+
+    test('returns the highest-numbered prior .kibana_N', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_5': {},
+          '.kibana_6': {},
+          '.kibana_7': {},
+          '.kibana_8': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    test('ignores system-index siblings like .kibana_task_manager_1', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_7': {},
+          '.kibana_task_manager_1': {},
+          '.kibana_security_session_1': {},
+          '.kibana_8': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    test('ignores FGAC tenant indices of the form .kibana_<hash>_<tenant>_<n>', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_7': {},
+          '.kibana_8': {},
+          '.kibana_2119321993_jcoelhoopisnetcom_1': {},
+          '.kibana_2119321993_jcoelhoopisnetcom_2': {},
+          '.kibana_473215078_jpalanichamydwavesyscom_1': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    test('returns null when only non-matching siblings exist', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_8': {},
+          '.kibana_task_manager_1': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      expect(result).toBeNull();
+    });
+
+    test('escapes regex metacharacters in the alias', async () => {
+      // Verifies that an alias containing regex metacharacters (e.g., a leading
+      // dot or a period in the middle) is matched literally rather than as a
+      // regex wildcard. Otherwise `.kibana_8` would match `xkibana_8` under a
+      // naive regex build.
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_7': {},
+          '.kibana_8': {},
+          // Would be a false positive if the leading dot were treated as `.`
+          // (any character) by an un-escaped regex.
+          'xkibana_9': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+  });
+
   describe('reader', () => {
     test('returns docs in batches', async () => {
       const index = '.myalias';

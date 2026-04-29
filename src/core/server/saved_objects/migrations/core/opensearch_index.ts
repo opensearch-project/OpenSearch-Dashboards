@@ -574,7 +574,13 @@ export async function findPriorSavedObjectsIndex(
   const { body, statusCode } = await client.indices.get({ index: `${alias}*` }, { ignore: [404] });
   if (statusCode === 404 || !body) return null;
 
-  const suffixRegex = /_(\d+)$/;
+  // Match only exact versioned siblings of the alias — `${alias}_<digits>`,
+  // with no additional path segments between the alias and the number. This
+  // prevents matching sibling system indices such as `.kibana_task_manager_1`,
+  // `.kibana_security_session_1`, or FGAC tenant indices of the form
+  // `.kibana_<hash>_<tenant>_<n>`, which share the `.kibana*` prefix but are
+  // not the prior version of the saved-object alias.
+  const suffixRegex = new RegExp(`^${escapeRegex(alias)}_(\\d+)$`);
   const names = Object.keys(body).filter((n) => n !== existingDestName && suffixRegex.test(n));
   if (names.length === 0) return null;
 
@@ -584,4 +590,8 @@ export async function findPriorSavedObjectsIndex(
     return nb - na; // descending
   });
   return names[0];
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
