@@ -50,6 +50,16 @@ const createMockEditor = () => ({
   }),
   getModel: jest.fn().mockReturnValue({
     getValue: mockGetValue,
+    findMatches: jest.fn().mockReturnValue([
+      {
+        range: {
+          startLineNumber: 1,
+          startColumn: 15,
+          endLineNumber: 1,
+          endColumn: 28,
+        },
+      },
+    ]),
   }),
 });
 

@@ -18,14 +18,7 @@ const findFieldInQuery = (
   model: monaco.editor.ITextModel,
   fieldName: string
 ): monaco.Range | null => {
-  const matches = model.findMatches(
-    fieldName,
-    true,
-    false,
-    false, // PPL is case-insensitive for fields
-    null,
-    false
-  );
+  const matches = model.findMatches(fieldName, true, false, true, null, false);
 
   if (matches.length === 0) return null;
 
