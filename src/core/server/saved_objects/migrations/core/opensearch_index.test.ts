@@ -32,6 +32,7 @@ import type { opensearchtypes } from '@opensearch-project/opensearch';
 import _ from 'lodash';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import * as Index from './opensearch_index';
+import { MigrationOpenSearchClient } from './migration_opensearch_client';
 
 describe('OpenSearchIndex', () => {
   let client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
@@ -660,13 +661,21 @@ describe('OpenSearchIndex', () => {
   });
 
   describe('findPriorSavedObjectsIndex', () => {
+    // The shared Jest mock (`client`) is typed as the raw OpenSearch client
+    // mock and doesn't structurally implement every method on
+    // MigrationOpenSearchClient. This function only uses `client.indices.get`,
+    // and the rest of this suite does the same at every call boundary (the
+    // older tests suppress with `@ts-expect-error`). We prefer a localized,
+    // narrowed cast over a suppression so errors inside the function body are
+    // still type-checked.
+    const migClient = () => (client as unknown) as MigrationOpenSearchClient;
+
     test('returns null when no matching indices exist', async () => {
       client.indices.get.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
-      // @ts-expect-error TS2345 TODO Fix me
-      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBeNull();
     });
 
@@ -680,8 +689,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
-      // @ts-expect-error TS2345 TODO Fix me
-      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
 
@@ -695,8 +703,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
-      // @ts-expect-error TS2345 TODO Fix me
-      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
 
@@ -711,8 +718,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
-      // @ts-expect-error TS2345 TODO Fix me
-      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
 
@@ -724,8 +730,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
-      // @ts-expect-error TS2345 TODO Fix me
-      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBeNull();
     });
 
@@ -740,12 +745,11 @@ describe('OpenSearchIndex', () => {
           '.kibana_8': {},
           // Would be a false positive if the leading dot were treated as `.`
           // (any character) by an un-escaped regex.
-          'xkibana_9': {},
+          xkibana_9: {},
         })
       );
 
-      // @ts-expect-error TS2345 TODO Fix me
-      const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
   });
