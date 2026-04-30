@@ -77,6 +77,8 @@ export interface QueryVariable extends VariableMeta, VariableQueryParams {
   type: VariableType.Query;
   /** Regex filter — only options matching this pattern are shown */
   regex?: string;
+  /** Whether to refresh options based on time range changes (default: false) */
+  useTimeFilter?: boolean;
 }
 
 /**
@@ -85,11 +87,18 @@ export interface QueryVariable extends VariableMeta, VariableQueryParams {
 export type Variable = CustomVariable | QueryVariable;
 
 /**
+ * Option value type for query variables
+ * Maps to data types returned in query response schema
+ */
+export type VariableOptionType = 'string' | 'number' | 'boolean';
+
+/**
  * Runtime state for a variable.
  * Managed in-memory by VariableService.
  */
 export interface VariableState {
   options: string[];
+  optionType?: VariableOptionType; // Type of options for query variables (from response schema)
   loading?: boolean;
   error?: string;
 }

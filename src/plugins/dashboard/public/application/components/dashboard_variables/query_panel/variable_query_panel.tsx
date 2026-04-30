@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiFieldText,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -34,6 +35,12 @@ import { DEFAULT_DATA } from '../../../../../../data/common';
 import { LanguageToggle } from './language_toggle';
 import { DatasetSelectWidget } from './dataset_select_widget';
 import './variable_query_panel.scss';
+
+/**
+ * Maximum number of options to display in preview.
+ * This prevents performance issues with large result sets.
+ */
+const MAX_PREVIEW_OPTIONS = 100;
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
@@ -100,6 +107,11 @@ export interface VariableQueryPanelProps {
   /** Regex filter string for preview results */
   regex?: string;
   onRegexChange?: (regex: string) => void;
+  /** Whether to refresh on time range change */
+  useTimeFilter?: boolean;
+  onUseTimeFilterChange?: (useTimeFilter: boolean) => void;
+  /** Callback to notify parent about preview validation state */
+  onPreviewValidationChange?: (isValid: boolean) => void;
 }
 
 export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
@@ -113,6 +125,9 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   interpolationService,
   regex = '',
   onRegexChange,
+  useTimeFilter = false,
+  onUseTimeFilterChange,
+  onPreviewValidationChange,
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { data } = services;
@@ -121,6 +136,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [previewValues, setPreviewValues] = useState<string[]>([]);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
 
   const placeholder = useMemo(() => {
@@ -144,6 +160,13 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   useEffect(() => {
     variableNamesRef.current = existingVariableNames;
   }, [existingVariableNames]);
+
+  // Reset validation when query, dataset, or language changes
+  useEffect(() => {
+    if (onPreviewValidationChange) {
+      onPreviewValidationChange(false);
+    }
+  }, [query, dataset, language, onPreviewValidationChange]);
 
   // --- Autocomplete (adapted from useQueryPanelEditor.provideCompletionItems) ---
   const provideCompletionItems = useCallback(
@@ -343,6 +366,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     setIsLoading(true);
     setPreviewError(null);
     setPreviewValues([]);
+    setIsTruncated(false);
 
     try {
       // Interpolate variable references before executing the preview query
@@ -351,16 +375,30 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         queryToExecute = interpolationService.interpolate(queryToExecute, language);
       }
 
-      const options = await executeQueryForOptions(data, {
-        query: queryToExecute,
-        language,
-        dataset: dataset || undefined,
-      });
+      const options = await executeQueryForOptions(
+        data,
+        {
+          query: queryToExecute,
+          language,
+          dataset: dataset || undefined,
+        },
+        undefined,
+        useTimeFilter
+      );
 
       // Apply regex filter to preview results
       const filteredOptions = filterOptionsByRegex(options, regex);
 
-      setPreviewValues(filteredOptions);
+      // Check if we need to truncate
+      setIsTruncated(filteredOptions.length > MAX_PREVIEW_OPTIONS);
+
+      // Limit to MAX_PREVIEW_OPTIONS to prevent UI performance issues
+      const limitedOptions = filteredOptions.slice(0, MAX_PREVIEW_OPTIONS);
+
+      setPreviewValues(limitedOptions);
+      if (onPreviewValidationChange) {
+        onPreviewValidationChange(true);
+      }
       if (filteredOptions.length === 0) {
         setPreviewError(
           i18n.translate('dashboard.variableQueryPanel.noResults', {
@@ -369,6 +407,9 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         );
       }
     } catch (err: any) {
+      if (onPreviewValidationChange) {
+        onPreviewValidationChange(false);
+      }
       setPreviewError(
         err.message ||
           i18n.translate('dashboard.variableQueryPanel.executionFailed', {
@@ -378,7 +419,16 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [query, interpolationService, data, language, dataset, regex]);
+  }, [
+    query,
+    interpolationService,
+    data,
+    language,
+    dataset,
+    regex,
+    useTimeFilter,
+    onPreviewValidationChange,
+  ]);
 
   // Keep ref updated for use in editorDidMount closure
   useEffect(() => {
@@ -397,7 +447,8 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           defaultMessage: 'Options Query',
         })}
         helpText={i18n.translate('dashboard.variableEditor.queryHelp', {
-          defaultMessage: 'Select a dataset, write a query, and run it to preview variable options',
+          defaultMessage:
+            'Select a dataset, write a query, and run it to preview variable options. Maximum 100 options will be displayed.',
         })}
         fullWidth
       >
@@ -484,7 +535,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
             defaultMessage: 'Regex',
           })}
           helpText={i18n.translate('dashboard.variableQueryPanel.regexHelp', {
-            defaultMessage: 'Optional regex to filter options. Only matching values are shown.',
+            defaultMessage: 'Optional regex to filter options. Only matching options are shown.',
           })}
         >
           <EuiFieldText
@@ -496,17 +547,64 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
           />
         </EuiFormRow>
       )}
+      {/* Time filter toggle */}
+      {onUseTimeFilterChange && (
+        <EuiFormRow
+          label={i18n.translate('dashboard.variableQueryPanel.refreshLabel', {
+            defaultMessage: 'Refresh',
+          })}
+          helpText={i18n.translate('dashboard.variableQueryPanel.refreshHelp', {
+            defaultMessage: 'When to update the options of this variable',
+          })}
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('dashboard.variableQueryPanel.refreshLegend', {
+              defaultMessage: 'Variable refresh options',
+            })}
+            options={[
+              {
+                id: 'onDashboardLoad',
+                label: i18n.translate('dashboard.variableQueryPanel.onDashboardLoad', {
+                  defaultMessage: 'On dashboard load',
+                }),
+              },
+              {
+                id: 'onTimeRangeChange',
+                label: i18n.translate('dashboard.variableQueryPanel.onTimeRangeChange', {
+                  defaultMessage: 'On time range change',
+                }),
+              },
+            ]}
+            idSelected={useTimeFilter ? 'onTimeRangeChange' : 'onDashboardLoad'}
+            onChange={(id) => onUseTimeFilterChange(id === 'onTimeRangeChange')}
+            buttonSize="compressed"
+            data-test-subj="variableEditorUseTimeFilter"
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         fullWidth
-        label={i18n.translate('dashboard.variableQueryPanel.previewTitle', {
-          defaultMessage: 'Preview of values ({count})',
-          values: { count: previewValues.length },
-        })}
+        label={
+          isTruncated
+            ? i18n.translate('dashboard.variableQueryPanel.previewTitleTruncated', {
+                defaultMessage: 'Preview of values ({count}, showing first {max})',
+                values: { count: previewValues.length, max: MAX_PREVIEW_OPTIONS },
+              })
+            : i18n.translate('dashboard.variableQueryPanel.previewTitle', {
+                defaultMessage: 'Preview of values ({count})',
+                values: { count: previewValues.length },
+              })
+        }
       >
         <>
           {(previewValues.length > 0 || previewError) && (
             <>
-              <EuiPanel paddingSize="s" color="subdued" hasBorder={false}>
+              <EuiPanel
+                paddingSize="s"
+                color="subdued"
+                hasBorder={false}
+                style={{ maxHeight: '200px', overflowY: 'auto' }}
+              >
                 {previewError ? (
                   <EuiText size="xs" color="danger">
                     {previewError}
