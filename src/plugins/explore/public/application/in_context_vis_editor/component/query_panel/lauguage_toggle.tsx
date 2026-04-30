@@ -8,11 +8,10 @@ import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fro
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 
-import '../../../components/query_panel/query_panel_widgets/language_toggle/language_toggle.scss';
-import { EditorMode } from '../../utils/state_management/types';
-import { SupportLanguageType } from '../query_builder/query_builder';
-import { useEditorOperations } from '../hooks/use_editor_operations';
-import { useQueryBuilderState } from '../hooks/use_query_builder_state';
+import '../../../../components/query_panel/query_panel_widgets/language_toggle/language_toggle.scss';
+import { EditorMode } from '../../../utils/state_management/types';
+import { SupportLanguageType } from '../../query_builder/query_builder';
+import { useQueryPanelContext } from './query_panel_context';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
   defaultMessage: 'AI',
@@ -40,14 +39,17 @@ const getLanguageDisplayLabel = (languageType: SupportLanguageType): string => {
 };
 
 export const LanguageToggle = () => {
+  const {
+    queryEditorState,
+    handleLanguageTypeChange,
+    handleEditorChange,
+    editorOperations: { focusEditor, clearEditor, switchEditorMode },
+  } = useQueryPanelContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { focusEditor, switchEditorMode } = useEditorOperations();
-  const { queryBuilder, queryEditorState } = useQueryBuilderState();
 
   const [languageLabel, setlanguageLabel] = useState<string>(
     getLanguageDisplayLabel(queryEditorState.languageType)
   );
-  const { clearEditor } = useEditorOperations();
 
   const promptModeIsAvailable = queryEditorState.promptModeIsAvailable;
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
@@ -72,9 +74,11 @@ export const LanguageToggle = () => {
       setlanguageLabel(option as SupportLanguageType);
 
       if (option === promptOptionText) {
-        switchEditorMode(EditorMode.Prompt);
+        handleEditorChange({ editorMode: EditorMode.Prompt });
+        switchEditorMode();
       } else {
-        switchEditorMode(EditorMode.Query);
+        handleEditorChange({ editorMode: EditorMode.Query });
+        switchEditorMode();
 
         let languageType: SupportLanguageType;
 
@@ -85,15 +89,21 @@ export const LanguageToggle = () => {
         }
 
         clearEditor();
-        // Switching languages triggers a new query preparation in queryBuilder
-        queryBuilder.updateQueryEditorState({
-          languageType,
-        });
+
+        // Switching languages triggers a new query preparation
+        handleLanguageTypeChange?.(languageType);
       }
 
       setTimeout(() => focusEditor(true), 100);
     },
-    [closePopover, focusEditor, switchEditorMode, clearEditor, queryBuilder]
+    [
+      closePopover,
+      focusEditor,
+      switchEditorMode,
+      clearEditor,
+      handleEditorChange,
+      handleLanguageTypeChange,
+    ]
   );
 
   const items = useMemo(() => {

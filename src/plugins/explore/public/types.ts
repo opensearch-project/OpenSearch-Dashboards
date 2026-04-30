@@ -4,6 +4,7 @@
  */
 
 import { History } from 'history';
+import React from 'react';
 import {
   Capabilities,
   ChromeStart,
@@ -58,6 +59,7 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
+import { QueryPanelProps } from './application/in_context_vis_editor/component/query_panel';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -83,6 +85,9 @@ export interface ExplorePluginStart {
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
   slotRegistry: SlotRegistryServiceStart;
+  components: {
+    QueryPanel: React.ComponentType<QueryPanelProps>;
+  };
 }
 
 // ============================================================================

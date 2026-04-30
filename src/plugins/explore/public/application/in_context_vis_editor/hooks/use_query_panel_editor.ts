@@ -7,8 +7,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import { i18n } from '@osd/i18n';
 
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../../../types';
 import {
   usePromptIsTyping,
   promptEditorOptions,
@@ -23,16 +21,23 @@ import {
 } from '../../../components/query_panel/query_panel_editor';
 
 import { EditorMode } from '../../../application/utils/state_management/types';
-import { useEditorOperations } from './use_editor_operations';
-import { useQueryBuilderState } from './use_query_builder_state';
+import { useQueryPanelContext } from '../component/query_panel/query_panel_context';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
 export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
-  const { queryBuilder, queryState, queryEditorState } = useQueryBuilderState();
+  const {
+    services,
+    queryEditorState,
+    queryState,
+    editorOperations: { getEditorRef, setEditorRef, switchEditorMode },
+    handleQueryChange,
+    handleEditorChange,
+    onQuerySubmit,
+  } = useQueryPanelContext();
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
-  const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { keyboardShortcut } = services;
+
+  const { keyboardShortcut, notifications, data } = services;
   const { updateDecorations, clearDecorations } = useMultiQueryDecorations();
 
   const userQueryString = queryState.query;
@@ -48,17 +53,14 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
   const languageTitle = useMemo(() => {
-    const languageService = services.data.query.queryString.getLanguageService();
+    const languageService = data.query.queryString.getLanguageService();
     return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
-  }, [queryLanguage, services.data.query.queryString]);
+  }, [queryLanguage, data.query.queryString]);
 
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(queryBuilder.getEditorRef());
   const isQueryMode = !isPromptMode;
   const isPromptModeRef = useRef(isPromptMode);
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const queryLanguageRef = useRef(queryLanguage);
-
-  const { switchEditorMode, setEditorRef: setEditor } = useEditorOperations();
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -85,7 +87,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     }),
     keys: '/',
     execute: () => {
-      editorRef.current?.focus();
+      getEditorRef()?.focus();
     },
   });
 
@@ -93,28 +95,26 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
   useEffect(() => {
     if (isQueryMode) {
-      const onDidFocusDisposable = editorRef.current?.onDidFocusEditorWidget(() => {
-        editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      const editor = getEditorRef();
+      const onDidFocusDisposable = editor?.onDidFocusEditorWidget(() => {
+        editor?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
 
       if (!editorText) {
-        editorRef.current?.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        getEditorRef()?.trigger('keyboard', 'editor.action.triggerSuggest', {});
       }
 
       return () => {
         onDidFocusDisposable?.dispose();
       };
     }
-  }, [isQueryMode, editorRef, editorText]);
+  }, [isQueryMode, getEditorRef, editorText]);
 
-  const setEditorRef = useCallback(
+  const handleSetEditorRef = useCallback(
     (editor: IStandaloneCodeEditor) => {
-      if (editorRef.current !== editor) {
-        editorRef.current = editor;
-        setEditor(editor);
-      }
+      setEditorRef(editor);
     },
-    [editorRef, setEditor]
+    [setEditorRef]
   );
 
   // Real autocomplete implementation using the data plugin's autocomplete service
@@ -125,34 +125,44 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> =>
-      buildCompletionItems(model, position, _, token, { isPromptModeRef, queryLanguage, services }),
-    [isPromptModeRef, queryLanguage, services]
+      buildCompletionItems(model, position, _, token, {
+        isPromptModeRef,
+        queryLanguage,
+        services: { ...data, appName: services.appName },
+      }),
+    [isPromptModeRef, queryLanguage, data, services.appName]
   );
 
   const suggestionProvider = useMemo(() => {
-    const languageTriggerCharacters = services?.data?.autocomplete?.getTriggerCharacters(
-      queryLanguage
-    );
+    const languageTriggerCharacters = data?.autocomplete?.getTriggerCharacters(queryLanguage);
     return {
       triggerCharacters: isPromptMode
         ? ['=']
         : languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
       provideCompletionItems,
     };
-  }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
+  }, [isPromptMode, provideCompletionItems, queryLanguage, data]);
 
   const handleRun = useCallback(() => {
     // Use ref to get the latest editorMode value, avoiding stale state from React's async updates
     if (!isPromptModeRef.current) {
-      queryBuilder.updateQueryState({ query: editorTextRef.current });
+      handleQueryChange({ query: editorTextRef.current });
     }
 
-    queryBuilder.onQueryExecutionSubmit().catch((error) => {
-      services.notifications?.toasts.addError(error, {
+    onQuerySubmit().catch((error) => {
+      notifications?.toasts.addError(error, {
         title: 'Query execution failed',
       });
     });
-  }, [queryBuilder, services.notifications?.toasts]);
+  }, [notifications?.toasts, handleQueryChange, onQuerySubmit]);
+
+  const handleSwitchEditorMode = useCallback(
+    (mode: EditorMode) => {
+      handleEditorChange({ editorMode: mode });
+      switchEditorMode();
+    },
+    [handleEditorChange, switchEditorMode]
+  );
 
   const editorDidMount = useCallback(
     (editor: IStandaloneCodeEditor) =>
@@ -165,18 +175,18 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           queryLanguageRef,
         },
         {
-          setEditorRef,
+          setEditorRef: handleSetEditorRef,
           setEditorIsFocused,
           handleRun,
-          switchEditorMode,
+          switchEditorMode: handleSwitchEditorMode,
           updateDecorations,
           clearDecorations,
         }
       ),
     [
-      setEditorRef,
+      handleSetEditorRef,
       handleRun,
-      switchEditorMode,
+      handleSwitchEditorMode,
       setEditorIsFocused,
       updateDecorations,
       clearDecorations,
@@ -202,22 +212,28 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   );
 
   const onEditorClick = useCallback(() => {
-    editorRef.current?.focus();
-  }, [editorRef]);
+    getEditorRef()?.focus();
+  }, [getEditorRef]);
 
   const onChange = useCallback(
     (newText: string) => {
       setEditorText(newText);
 
-      if (!isQueryEditorDirty) {
-        queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+      if (!isQueryEditorDirty && handleEditorChange) {
+        handleEditorChange({ isQueryEditorDirty: true });
       }
 
       if (isPromptMode) {
         handleChangeForPromptIsTyping();
       }
     },
-    [setEditorText, isPromptMode, handleChangeForPromptIsTyping, isQueryEditorDirty, queryBuilder]
+    [
+      setEditorText,
+      isPromptMode,
+      handleChangeForPromptIsTyping,
+      isQueryEditorDirty,
+      handleEditorChange,
+    ]
   );
 
   return {

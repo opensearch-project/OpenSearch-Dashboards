@@ -8,7 +8,6 @@ import { render } from '@testing-library/react';
 import { TopNav } from './top_nav';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { useEditorOperations } from '../hooks/use_editor_operations';
 import {
   QueryExecutionStatus,
   EditorMode,
@@ -20,7 +19,6 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
 }));
 jest.mock('../hooks/use_query_builder_state', () => ({ useQueryBuilderState: jest.fn() }));
-jest.mock('../hooks/use_editor_operations', () => ({ useEditorOperations: jest.fn() }));
 jest.mock('../query_builder/query_builder', () => ({ abortAllActiveQueries: jest.fn() }));
 jest.mock('./query_execution_button', () => ({
   QueryExecutionButton: () => <div data-test-subj="query-execution-button" />,
@@ -49,9 +47,6 @@ const buildQueryBuilderState = (options: Record<string, any> = {}) => ({
 beforeEach(() => {
   jest.clearAllMocks();
   (useQueryBuilderState as jest.Mock).mockReturnValue(buildQueryBuilderState());
-  (useEditorOperations as jest.Mock).mockReturnValue({
-    getEditorText: jest.fn().mockReturnValue('source=logs'),
-  });
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({
     services: {
       navigation: { ui: { TopNavMenu: mockTopNavMenu } },
