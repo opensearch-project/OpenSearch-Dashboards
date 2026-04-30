@@ -185,7 +185,7 @@ const DataTableUI = ({
             (row, index: number) => {
               return (
                 <TableRow
-                  key={row._id}
+                  key={row._id ?? `row-${index}`}
                   row={row}
                   index={index}
                   columns={columnNames}

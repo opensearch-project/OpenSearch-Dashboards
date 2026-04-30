@@ -662,7 +662,7 @@ export class ChatEventHandler {
 
       const messages = this.getTimeline();
 
-      const { observable, toolMessage } = await this.chatService.sendToolResult(
+      const { observable, toolMessage, skipped } = await this.chatService.sendToolResult(
         toolCallId,
         result,
         messages
@@ -670,6 +670,19 @@ export class ChatEventHandler {
 
       // Notify that sending tool result is complete
       this.onSendToolResultStateChange?.(false);
+
+      if (skipped) {
+        // Another window already persisted a tool result for this toolCallId.
+        // Skip appending the locally-constructed toolMessage and surface an
+        // informational system message instead.
+        const infoMessage: SystemMessage = {
+          id: `tool-skipped-${toolCallId}-${Date.now()}`,
+          role: 'system',
+          content: 'This tool result was already submitted from another window.',
+        };
+        this.onTimelineUpdate((prev) => [...prev, infoMessage]);
+        return;
+      }
 
       this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
