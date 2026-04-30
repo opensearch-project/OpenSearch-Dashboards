@@ -747,11 +747,14 @@ describe('OpenSearchIndex', () => {
       ).toBe(true);
     });
 
-    test('reason matching "failed to process cluster event" is retriable', () => {
+    test('cluster_manager_not_discovered_exception is retriable by explicit type', () => {
+      // Defensive assertion: the exception currently also arrives as status 503,
+      // but the predicate's explicit type check hardens against a future
+      // status-code change. Ensure the type match alone is sufficient.
       expect(
         Index.isRetriableBulkItemError({
           status: 500,
-          error: { type: 'other', reason: 'failed to process cluster event (put-mapping)' },
+          error: { type: 'cluster_manager_not_discovered_exception', reason: 'x' },
         })
       ).toBe(true);
     });

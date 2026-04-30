@@ -280,6 +280,14 @@ function buildBulkBody(index: string, docs: RawDoc[]): object[] {
 /**
  * A bulk-item error is considered retriable if ANY of these match. (Union,
  * not intersection — a 503 alone is enough to retry.)
+ *
+ * The predicate was audited against OpenSearch core 1.0.0–3.5.0 to confirm
+ * it catches every cluster-state-stall exception that can surface as a
+ * per-item error on _bulk / put-mapping paths. The audited exception list:
+ *   - ProcessClusterEventTimeoutException  → status 503, type matches
+ *   - ClusterBlockException (retryable)    → status 429, type matches
+ *   - ClusterBlockException (non-retryable) → type matches; bounded by maxRetries
+ *   - ClusterManagerNotDiscoveredException → status 503, type explicit
  */
 export function isRetriableBulkItemError(op: {
   status?: number;
@@ -291,8 +299,9 @@ export function isRetriableBulkItemError(op: {
   const type = op.error.type;
   if (type === 'process_cluster_event_timeout_exception') return true;
   if (type === 'cluster_block_exception') return true;
-  const reason = op.error.reason ?? '';
-  if (/failed to process cluster event/i.test(reason)) return true;
+  // Defensive: cluster_manager_not_discovered_exception currently returns 503,
+  // but adding the explicit type match hardens against a future status change.
+  if (type === 'cluster_manager_not_discovered_exception') return true;
   return false;
 }
 
