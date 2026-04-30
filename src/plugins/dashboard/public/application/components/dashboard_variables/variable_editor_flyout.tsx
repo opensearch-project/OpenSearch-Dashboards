@@ -111,9 +111,17 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   const [regex, setRegex] = useState(
     existingVariable?.type === VariableType.Query ? existingVariable.regex ?? '' : ''
   );
+  const [useTimeFilter, setUseTimeFilter] = useState(
+    existingVariable?.type === VariableType.Query ? existingVariable.useTimeFilter ?? false : false
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // When editing an existing variable, assume preview is valid (user already saved it before)
+  // For new variables, require preview before saving
+  const [isPreviewValid, setIsPreviewValid] = useState(
+    Boolean(existingVariable && existingVariable.type === VariableType.Query)
+  );
 
   const isEditing = Boolean(existingVariable);
 
@@ -126,11 +134,23 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       if (wasPromQL !== isPromQL) {
         setDataset(null);
         setQuery('');
+        setIsPreviewValid(false);
       }
       setLanguage(newLanguage);
     },
     [language]
   );
+
+  // Reset preview validation when query or dataset changes
+  const handleQueryChange = useCallback((newQuery: string) => {
+    setQuery(newQuery);
+    setIsPreviewValid(false);
+  }, []);
+
+  const handleDatasetChange = useCallback((newDataset: any) => {
+    setDataset(newDataset);
+    setIsPreviewValid(false);
+  }, []);
 
   const validateForm = useCallback(() => {
     if (!name.trim()) {
@@ -214,6 +234,15 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       return false;
     }
 
+    if (type === VariableType.Query && !isPreviewValid) {
+      setError(
+        i18n.translate('dashboard.variableEditor.previewRequired', {
+          defaultMessage: 'You must preview the query successfully before saving',
+        })
+      );
+      return false;
+    }
+
     if (type === VariableType.Custom && customValues.length === 0) {
       setError(
         i18n.translate('dashboard.variableEditor.customValuesRequired', {
@@ -225,7 +254,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
 
     setError(null);
     return true;
-  }, [name, label, type, query, customValues, existingVariables, existingVariable]);
+  }, [name, label, type, query, customValues, existingVariables, existingVariable, isPreviewValid]);
 
   const handleSave = useCallback(async () => {
     if (!validateForm()) return;
@@ -247,6 +276,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
         language,
         dataset: dataset || undefined,
         regex: regex.trim() || undefined,
+        useTimeFilter,
       });
     } else if (type === VariableType.Custom) {
       Object.assign(variableConfig, {
@@ -264,6 +294,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     description,
     language,
     dataset,
+    useTimeFilter,
     customValues,
     multi,
     includeAll,
@@ -336,7 +367,6 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
             <EuiFieldText
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="service"
               maxLength={30}
               data-test-subj="variableEditorName"
               compressed
@@ -354,7 +384,6 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
             <EuiFieldText
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Service"
               maxLength={40}
               data-test-subj="variableEditorLabel"
               compressed
@@ -372,7 +401,6 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
             <EuiFieldText
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Filter by service name"
               maxLength={100}
               data-test-subj="variableEditorDescription"
               compressed
@@ -393,6 +421,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               onChange={(t) => {
                 setType(t);
                 setError(null);
+                setIsPreviewValid(false);
               }}
               data-test-subj="variableEditorType"
               compressed
@@ -407,39 +436,55 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               query={query}
               language={language}
               dataset={dataset}
-              onQueryChange={setQuery}
+              onQueryChange={handleQueryChange}
               onLanguageChange={handleLanguageChange}
-              onDatasetChange={setDataset}
+              onDatasetChange={handleDatasetChange}
               existingVariableNames={existingVariables.map((v) => v.name)}
               interpolationService={interpolationService}
               regex={regex}
               onRegexChange={setRegex}
+              useTimeFilter={useTimeFilter}
+              onUseTimeFilterChange={setUseTimeFilter}
+              onPreviewValidationChange={setIsPreviewValid}
             />
           )}
 
           {type === VariableType.Custom && (
-            <EuiFormRow
-              label={i18n.translate('dashboard.variableEditor.customOptionsLabel', {
-                defaultMessage: 'Custom options',
-              })}
-              helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
-                defaultMessage: 'Type a option and press Enter to add it',
-              })}
-            >
-              <EuiComboBox
-                selectedOptions={customValues}
-                onChange={setCustomValues}
-                onCreateOption={(value) => {
-                  const trimmed = value.trim();
-                  if (trimmed && !customValues.some((v) => v.label === trimmed)) {
-                    setCustomValues([...customValues, { label: trimmed }]);
-                  }
-                }}
-                placeholder="Type and press Enter..."
-                data-test-subj="variableEditorCustomValues"
-                compressed
-              />
-            </EuiFormRow>
+            <>
+              <EuiFormRow
+                label={i18n.translate('dashboard.variableEditor.customOptionsLabel', {
+                  defaultMessage: 'Custom options',
+                })}
+                helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
+                  defaultMessage:
+                    'Type a option and press Enter to add it. Maximum 100 options will be displayed.',
+                })}
+              >
+                <EuiComboBox
+                  selectedOptions={customValues}
+                  onChange={setCustomValues}
+                  onCreateOption={(value) => {
+                    const trimmed = value.trim();
+                    if (trimmed && !customValues.some((v) => v.label === trimmed)) {
+                      setCustomValues([...customValues, { label: trimmed }]);
+                    }
+                  }}
+                  placeholder="Type and press Enter..."
+                  data-test-subj="variableEditorCustomValues"
+                  compressed
+                />
+              </EuiFormRow>
+              {customValues.length > 100 && (
+                <EuiCallOut
+                  title={i18n.translate('dashboard.variableEditor.tooManyOptionsWarning', {
+                    defaultMessage: 'Only the first 100 options will be displayed',
+                  })}
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                />
+              )}
+            </>
           )}
         </EuiFlexItem>
 

@@ -73,8 +73,10 @@ describe('useVariables', () => {
       initialize: jest.fn(),
       setInterpolationService: jest.fn(),
       refreshAllVariableOptions: jest.fn(),
+      refreshTimeFilteredVariableOptions: jest.fn(),
       getVariables: jest.fn(() => []),
       getVariables$: jest.fn(() => mockVariables$),
+      getVariablesWithState: jest.fn(() => []),
       destroy: jest.fn(),
     };
 
@@ -211,13 +213,13 @@ describe('useVariables', () => {
 
       renderHook(() => useVariables(variables));
 
-      mockVariableService.refreshAllVariableOptions.mockClear();
+      mockVariableService.refreshTimeFilteredVariableOptions.mockClear();
 
       mockTimeUpdate$.next({ from: 'now-15m', to: 'now' });
-      expect(mockVariableService.refreshAllVariableOptions).toHaveBeenCalledTimes(1);
+      expect(mockVariableService.refreshTimeFilteredVariableOptions).toHaveBeenCalledTimes(1);
 
       mockTimeUpdate$.next({ from: 'now-30m', to: 'now' });
-      expect(mockVariableService.refreshAllVariableOptions).toHaveBeenCalledTimes(2);
+      expect(mockVariableService.refreshTimeFilteredVariableOptions).toHaveBeenCalledTimes(2);
     });
 
     it('unsubscribes from time updates on unmount', () => {
