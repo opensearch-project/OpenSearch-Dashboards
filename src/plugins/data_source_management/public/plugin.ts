@@ -18,6 +18,7 @@ import {
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { DashboardDirectQuerySyncBanner } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync_banner';
 import { parseUrlHash } from '../../opensearch_dashboards_utils/public';
+import semver from 'semver';
 
 import { PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
@@ -121,6 +122,7 @@ export class DataSourceManagementPlugin
   private core: CoreStart | null = null;
   private currentAppId: string | undefined = undefined;
   private config: ConfigSchema;
+  private managementApp: any = null;
 
   constructor(initializerContext: { config: { get: () => ConfigSchema } }) {
     this.config = initializerContext.config.get();
@@ -148,7 +150,7 @@ export class DataSourceManagementPlugin
 
     this.featureFlagStatus = !!dataSource;
 
-    opensearchDashboardsSection.registerApp({
+    this.managementApp = opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 1,
@@ -255,6 +257,17 @@ export class DataSourceManagementPlugin
   public start(core: CoreStart): DataSourceManagementPluginStart {
     this.started = true;
     this.core = core;
+
+    if (!this.featureFlagStatus && this.managementApp) {
+      core.http
+        .get<{ version: string }>('/internal/data-source-management/localClusterVersion')
+        .then(({ version }) => {
+          if (semver.satisfies(version, '~1.3.0 || ~2.11.0')) {
+            this.managementApp.disable();
+          }
+        })
+        .catch(() => {});
+    }
 
     setApplication(core.application);
     setWorkspaces(core.workspaces);
