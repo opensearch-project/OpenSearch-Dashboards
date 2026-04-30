@@ -251,6 +251,7 @@
     "@smithy/node-http-handler": "^4.4.9",
     "@smithy/protocol-http": "^5.3.8",
     "@smithy/signature-v4": "^5.3.8",
+    "@tailwindcss/postcss": "4.2.4",
     "@types/ndjson": "^2.0.4",
     "@types/yauzl": "^2.9.1",
     "@xyflow/react": "^12.8.2",
