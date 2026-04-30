@@ -310,7 +310,26 @@ async function migrateSourceToDest(context: Context) {
       client,
       dest.indexName,
       await migrateRawDocs(serializer, documentMigrator.migrate, docs, log),
-      retry
+      retry,
+      {
+        // Live-while-retrying invariant: fire a heartbeat between each
+        // Index.write retry attempt so a concurrent peer's staleness probe
+        // doesn't mistake our in-flight retry budget for a crashed winner.
+        // Best-effort — heartbeat write failures are swallowed inside
+        // heartbeatMigrationSentinel itself, but wrap in try/catch anyway to
+        // preserve the contract that onBeforeRetry never aborts the retry
+        // loop even if a future refactor makes the heartbeat helper throw.
+        onBeforeRetry: async () => {
+          try {
+            await heartbeatMigrationSentinel(client, dest.indexName);
+          } catch (e) {
+            log.warning(
+              `Mid-retry heartbeat to migration sentinel on ${dest.indexName} failed: ` +
+                `${(e as Error).message}. Retry loop continues.`
+            );
+          }
+        },
+      }
     );
 
     // Heartbeat the sentinel after each successful batch. The staleness

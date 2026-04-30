@@ -613,6 +613,116 @@ describe('OpenSearchIndex', () => {
       await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow();
       expect(client.bulk).toHaveBeenCalledTimes(3); // initial + 2 retries
     });
+
+    // Live-while-retrying invariant (§5.1 of the design doc). The retry loop
+    // accepts an optional onBeforeRetry callback that fires once per retry
+    // attempt, before the backoff sleep, so callers can advance liveness
+    // markers (e.g. the sentinel heartbeat) during a retry window. Without
+    // this, a retry budget of up to ~62s looks indistinguishable from a
+    // crashed winner to a concurrent peer reading the sentinel.
+    test('U1.15 invokes onBeforeRetry once per retry attempt with { attempt, lastError }', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              {
+                index: {
+                  _id: 'a:1',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 'stall-1' },
+                },
+              },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              {
+                index: {
+                  _id: 'a:1',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 'stall-2' },
+                },
+              },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [{ index: { _id: 'a:1', status: 201 } }],
+          } as opensearchtypes.BulkResponse)
+        );
+
+      const onBeforeRetry = jest.fn();
+      await Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY, {
+        onBeforeRetry,
+      });
+
+      expect(client.bulk).toHaveBeenCalledTimes(3); // initial + 2 retries
+      expect(onBeforeRetry).toHaveBeenCalledTimes(2); // one per retry decision
+      expect(onBeforeRetry.mock.calls[0][0]).toEqual({
+        attempt: 1,
+        lastError: expect.objectContaining({
+          type: 'process_cluster_event_timeout_exception',
+          reason: 'stall-1',
+        }),
+      });
+      expect(onBeforeRetry.mock.calls[1][0]).toEqual({
+        attempt: 2,
+        lastError: expect.objectContaining({
+          type: 'process_cluster_event_timeout_exception',
+          reason: 'stall-2',
+        }),
+      });
+    });
+
+    test('U1.16 onBeforeRetry errors are swallowed; retry loop continues', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              {
+                index: {
+                  _id: 'a:1',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 't' },
+                },
+              },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [{ index: { _id: 'a:1', status: 201 } }],
+          } as opensearchtypes.BulkResponse)
+        );
+
+      const onBeforeRetry = jest.fn().mockRejectedValue(new Error('heartbeat write failed'));
+
+      // Should NOT throw — callback errors must not abort the retry loop.
+      await Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY, {
+        onBeforeRetry,
+      });
+
+      expect(onBeforeRetry).toHaveBeenCalledTimes(1);
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    test('U1.17 does NOT invoke onBeforeRetry when the first attempt succeeds', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [{ index: { _id: 'a:1', status: 201 } }],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const onBeforeRetry = jest.fn();
+      await Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY, {
+        onBeforeRetry,
+      });
+
+      expect(onBeforeRetry).not.toHaveBeenCalled();
+    });
   });
 
   describe('isRetriableBulkItemError', () => {

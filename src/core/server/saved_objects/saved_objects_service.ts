@@ -386,6 +386,13 @@ export class SavedObjectsService
         dynamic: 'false',
         properties: {},
       },
+      // Explicit empty migrations map. The document migrator will encounter
+      // sentinel docs while iterating per-type transformations; an empty
+      // map makes the no-op contract visible. A future release that bumps
+      // the sentinel shape MUST register a migration function here rather
+      // than relying on permissive mapping — otherwise a post-patch sentinel
+      // could be read by a pre-patch upgrade path with the new shape.
+      migrations: {},
       management: {
         importableAndExportable: false,
       },
