@@ -9,7 +9,7 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
 import { take } from 'rxjs/operators';
-import { DEFAULT_NAV_GROUPS, isNavGroupInFeatureConfigs } from 'opensearch-dashboards/public';
+import { DEFAULT_NAV_GROUPS, isNavGroupInFeatureConfigs } from '../../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig, getTopNavRightConfig, getTopNavLegacyConfig } from './top_nav';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../../types';
