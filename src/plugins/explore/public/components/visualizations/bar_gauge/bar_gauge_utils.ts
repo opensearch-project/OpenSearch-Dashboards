@@ -390,7 +390,7 @@ const createBarSeries = ({
   }
 };
 
-const insertMinbaseThreshold = ({
+export const insertMinbaseThreshold = ({
   thresholds,
   defaultColor,
   maxBase,
@@ -398,7 +398,7 @@ const insertMinbaseThreshold = ({
 }: {
   thresholds: Threshold[];
   defaultColor: string;
-  valueStops: number[];
+  valueStops?: number[];
   maxBase: number;
   minBase: number;
 }) => {
@@ -414,6 +414,7 @@ const insertMinbaseThreshold = ({
     }
   }
   allThresholds.unshift(minThreshold);
+
   return allThresholds;
 };
 
