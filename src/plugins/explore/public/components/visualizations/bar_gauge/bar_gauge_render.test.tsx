@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BarGaugeRender } from './bar_gauge_render';
 import { defaultBarGaugeChartStyles } from './bar_gauge_vis_config';
@@ -19,9 +18,11 @@ jest.mock('./bar_gauge_component.scss', () => ({}));
 
 // Mock BarGaugeItem to isolate render logic from item rendering details
 jest.mock('./bar_gauge_item', () => ({
-  BarGaugeItem: function MockBarGaugeItem(props: any) {
-    return React.createElement('div', {
-      'data-testid': 'bar-gauge-item',
+  BarGaugeItem: function MockBarGaugeItem(props) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mockReact = require('react');
+    return mockReact.createElement('div', {
+      'data-test-subj': 'bar-gauge-item',
       'data-category': props.item.category,
       'data-value': String(props.item.value),
       'data-percentage': String(props.item.percentage),
