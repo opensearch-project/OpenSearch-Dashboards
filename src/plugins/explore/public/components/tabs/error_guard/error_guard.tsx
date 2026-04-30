@@ -28,13 +28,13 @@ import { PatternsErrorGuard } from './patterns_error_guard';
 import { ExploreServices } from '../../../types';
 import { selectQuery } from '../../../application/utils/state_management/selectors';
 
-const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
+const errorDefaultTitle = i18n.translate('explore.errorPanel.enhancedDefaultTitle', {
   defaultMessage: 'Query execution failed',
 });
-const detailsText = i18n.translate('explore.errorPanel.details', {
+const detailsText = i18n.translate('explore.errorPanel.enhancedDetails', {
   defaultMessage: 'Error details',
 });
-const typeText = i18n.translate('explore.errorPanel.type', {
+const typeText = i18n.translate('explore.errorPanel.enhancedType', {
   defaultMessage: 'Error type',
 });
 const technicalDetailsText = i18n.translate('explore.errorPanel.technicalDetails', {
