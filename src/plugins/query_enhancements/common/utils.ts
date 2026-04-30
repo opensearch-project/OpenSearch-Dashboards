@@ -86,7 +86,7 @@ export const throwFacetError = (response: any): never => {
 
   const error = new Error(errorMessage) as EnhancedError;
   error.status = response.data.status ?? response.status ?? response.data.statusCode;
-  error.name = error.status.toString();
+  error.name = error.status !== undefined ? error.status.toString() : 'QueryError';
 
   if (typeof errorBody === 'object' && errorBody !== null) {
     if ('status' in errorBody && typeof errorBody.status === 'number') {

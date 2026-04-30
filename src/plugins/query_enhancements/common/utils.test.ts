@@ -57,7 +57,7 @@ describe('throwFacetError', () => {
     try {
       throwFacetError(response);
     } catch (err: any) {
-      expect(err.message).toBe('"fallback error message"');
+      expect(err.message).toBe('fallback error message');
       expect(err.name).toBe('404');
       expect(err.status).toBe('404');
     }
@@ -74,7 +74,7 @@ describe('throwFacetError', () => {
       throwFacetError(response);
     } catch (err: any) {
       expect(err.message).toBe('error object message');
-      expect(err.name).toBeUndefined();
+      expect(err.name).toBe('QueryError');
       expect(err.status).toBeUndefined();
     }
   });
@@ -107,8 +107,9 @@ describe('throwFacetError', () => {
       throwFacetError(response);
     } catch (err: any) {
       expect(err.message).toBe('{}');
-      expect(err.name).toBeUndefined();
+      expect(err.name).toBe('QueryError');
       expect(err.status).toBeUndefined();
+      expect(err.errorBody).toBeUndefined();
     }
   });
 
