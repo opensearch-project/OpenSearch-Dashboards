@@ -51,6 +51,7 @@ stripTailwindDeps.postcss = true;
  *
  * Layered rules always lose to unlayered ones. Since OSD's existing styles
  * (EUI, etc.) are unlayered, Tailwind utilities inside @layer get overridden.
+ * Only runs when @tailwindcss/postcss processed the file.
  *  - Removes @layer base (Tailwind reset conflicts with OSD)
  *  - Unwraps @layer theme / utilities (keeps content, drops wrapper)
  *  - Keeps @layer properties (@property declarations are fine in layers)
@@ -58,7 +59,10 @@ stripTailwindDeps.postcss = true;
 function stripCssLayers() {
   return {
     postcssPlugin: 'postcss-strip-css-layers',
-    OnceExit(root) {
+    OnceExit(root, { result }) {
+      const tailwindRan = result.messages.some((msg) => msg.plugin === '@tailwindcss/postcss');
+      if (!tailwindRan) return;
+
       root.walkAtRules('layer', (rule) => {
         const name = rule.params.trim();
         if (name === 'base' || name === 'components' || name.includes(',')) {
@@ -66,7 +70,6 @@ function stripCssLayers() {
         } else if (name === 'theme' || name === 'utilities') {
           rule.replaceWith(rule.nodes);
         }
-        // 'properties': leave as-is
       });
     },
   };
@@ -79,7 +82,7 @@ module.exports = {
     // Safe to include unconditionally. Bails out for files without Tailwind directives.
     // eslint-disable-next-line import/no-unresolved -- package uses `exports` field; resolver lacks support
     require('@tailwindcss/postcss')(),
-    stripTailwindDeps(),
     stripCssLayers(),
+    stripTailwindDeps(),
   ],
 };
