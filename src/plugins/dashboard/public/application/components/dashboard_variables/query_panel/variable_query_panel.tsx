@@ -535,7 +535,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
             defaultMessage: 'Regex',
           })}
           helpText={i18n.translate('dashboard.variableQueryPanel.regexHelp', {
-            defaultMessage: 'Optional regex to filter options. Only matching otpions are shown.',
+            defaultMessage: 'Optional regex to filter options. Only matching options are shown.',
           })}
         >
           <EuiFieldText
