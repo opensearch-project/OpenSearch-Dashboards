@@ -665,6 +665,7 @@ describe('OpenSearchIndex', () => {
         opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
       expect(result).toBeNull();
     });
@@ -679,6 +680,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
@@ -693,6 +695,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
@@ -708,6 +711,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
@@ -720,6 +724,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
       expect(result).toBeNull();
     });
@@ -739,6 +744,7 @@ describe('OpenSearchIndex', () => {
         })
       );
 
+      // @ts-expect-error TS2345 TODO Fix me
       const result = await Index.findPriorSavedObjectsIndex(client, '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
