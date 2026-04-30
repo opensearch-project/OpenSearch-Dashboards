@@ -126,6 +126,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
+    "**/axios": "^1.15.2",
     "**/browserify-rsa": "^4.1.1",
     "**/@babel/helpers": "^7.27.0",
     "**/@babel/runtime": "^7.27.0",
@@ -136,7 +137,7 @@
     "**/@langchain/core/langsmith": "0.5.18",
     "**/cipher-base": "^1.0.5",
     "**/sha.js": "^2.4.12",
-    "**/@types/node": "~20.10.5",
+    "**/@types/node": "~22.19.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/cpy/globby": "^10.0.1",
@@ -420,7 +421,7 @@
     "@types/mock-fs": "^4.10.0",
     "@types/moment-timezone": "^0.5.12",
     "@types/mustache": "^0.8.31",
-    "@types/node": "~20.10.5",
+    "@types/node": "~22.19.0",
     "@types/node-forge": "^1.0.1",
     "@types/normalize-path": "^3.0.0",
     "@types/papaparse": "^5.3.15",

@@ -29,6 +29,13 @@ describe('row_state', () => {
       expect(rows[0].builderState).not.toBeNull();
     });
 
+    it('falls back to code mode for bare number literal', () => {
+      const rows = initRows('123', nextId);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].mode).toBe('code');
+      expect(rows[0].query).toBe('123');
+    });
+
     it('assigns unique IDs', () => {
       const rows = initRows('', nextId);
       expect(rows[0].id).toBe('row-1');

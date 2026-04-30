@@ -141,7 +141,7 @@ export function parsePromQL(query: string): ParseResult {
       const visitor = new BuilderStateVisitor();
       visitor.visit(tree);
 
-      if (!visitor.canBuild) {
+      if (!visitor.canBuild || !visitor.metric) {
         result = { canBuild: false, state: emptyState() };
       } else {
         result = {

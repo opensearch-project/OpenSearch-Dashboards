@@ -141,7 +141,6 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
   const path = `${pathname}${customization.url?.search || ''}`;
   const url = new URL(path, 'http://localhost');
 
-  // @ts-expect-error TS2345 TODO Fix me
   return merge(
     {},
     {
