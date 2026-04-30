@@ -51,34 +51,54 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [isExploreDuplicate, setIsExploreDuplicate] = useState<boolean>(false);
   const [isDashboardDuplicate, setIsDashboardDuplicate] = useState<boolean>(false);
 
+  // Refs to track the latest requested name and detect stale responses
+  const latestExploreTitleRef = React.useRef<string>('');
+  const latestDashboardTitleRef = React.useRef<string>('');
+
   const checkExploreDuplicate = useCallback(
     async (name: string) => {
+      latestExploreTitleRef.current = name;
       if (!name.trim()) {
         setIsExploreDuplicate(false);
         return;
       }
-      const res = await savedObjectsClient.find<ExploreAttributes>({
-        type: 'explore',
-        search: `"${name}"`,
-        searchFields: ['title'],
-      });
-      setIsExploreDuplicate(res.savedObjects.some((o) => o.attributes?.title === name));
+      try {
+        const res = await savedObjectsClient.find<ExploreAttributes>({
+          type: 'explore',
+          search: `"${name}"`,
+          searchFields: ['title'],
+        });
+        // Ignore stale responses — only apply if this is still the latest query
+        if (latestExploreTitleRef.current === name) {
+          setIsExploreDuplicate(res.savedObjects.some((o) => o.attributes?.title === name));
+        }
+      } catch {
+        // ignore errors, leave state unchanged
+      }
     },
     [savedObjectsClient]
   );
 
   const checkDashboardDuplicate = useCallback(
     async (name: string) => {
+      latestDashboardTitleRef.current = name;
       if (!name.trim()) {
         setIsDashboardDuplicate(false);
         return;
       }
-      const res = await savedObjectsClient.find<DashboardAttributes>({
-        type: 'dashboard',
-        search: `"${name}"`,
-        searchFields: ['title'],
-      });
-      setIsDashboardDuplicate(res.savedObjects.some((o) => o.attributes?.title === name));
+      try {
+        const res = await savedObjectsClient.find<DashboardAttributes>({
+          type: 'dashboard',
+          search: `"${name}"`,
+          searchFields: ['title'],
+        });
+        // Ignore stale responses — only apply if this is still the latest query
+        if (latestDashboardTitleRef.current === name) {
+          setIsDashboardDuplicate(res.savedObjects.some((o) => o.attributes?.title === name));
+        }
+      } catch {
+        // ignore errors, leave state unchanged
+      }
     },
     [savedObjectsClient]
   );
@@ -140,7 +160,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
         color="warning"
         iconType="alert"
         size="s"
-        data-test-subj="titleDupicateWarnMsg"
+        data-test-subj="titleDuplicateWarnMsg"
       />
     );
   };
@@ -158,7 +178,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
         color="warning"
         iconType="alert"
         size="s"
-        data-test-subj="dashboardTitleDupicateWarnMsg"
+        data-test-subj="dashboardTitleDuplicateWarnMsg"
       />
     );
   };

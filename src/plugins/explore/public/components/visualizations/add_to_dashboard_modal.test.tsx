@@ -362,7 +362,7 @@ describe('AddToDashboardModal', () => {
 
     // Check for duplicate warning callout
     await waitFor(() => {
-      expect(screen.getByTestId('titleDupicateWarnMsg')).toBeInTheDocument();
+      expect(screen.getByTestId('titleDuplicateWarnMsg')).toBeInTheDocument();
       expect(
         screen.getByText('A visualization with this name already exists.')
       ).toBeInTheDocument();
@@ -393,7 +393,7 @@ describe('AddToDashboardModal', () => {
 
     // Check for duplicate warning callout
     await waitFor(() => {
-      expect(screen.getByTestId('dashboardTitleDupicateWarnMsg')).toBeInTheDocument();
+      expect(screen.getByTestId('dashboardTitleDuplicateWarnMsg')).toBeInTheDocument();
       expect(screen.getByText('A dashboard with this name already exists.')).toBeInTheDocument();
     });
   });
