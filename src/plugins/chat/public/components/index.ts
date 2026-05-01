@@ -5,3 +5,4 @@
 
 export { ChatWindow } from './chat_window';
 export { ChatHeaderButton } from './chat_header_button';
+export { RecentSessions } from './recent_sessions';

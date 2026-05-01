@@ -1205,6 +1205,79 @@ describe('ChatEventHandler', () => {
     });
   });
 
+  describe('stopToolResultStreaming', () => {
+    it('should stop active tool result streaming and reset state', async () => {
+      const toolCallId = 'tool-123';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      // Mock sendToolResult to return observable with unsubscribe
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const mockUnsubscribe = jest.fn();
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: mockUnsubscribe }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      // Trigger tool call flow to start streaming
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Verify streaming was started
+      expect(mockObservable.subscribe).toHaveBeenCalled();
+
+      // Clear previous calls
+      mockOnStreamingStateChange.mockClear();
+      mockOnStartResponse.mockClear();
+
+      // Stop the streaming
+      chatEventHandler.stopToolResultStreaming();
+
+      // Verify unsubscribe was called
+      expect(mockUnsubscribe).toHaveBeenCalled();
+
+      // Verify state was reset
+      expect(mockOnStreamingStateChange).toHaveBeenCalledWith(false);
+      expect(mockOnStartResponse).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle stopToolResultStreaming when no streaming is active', () => {
+      // Should not throw when there's no active subscription
+      expect(() => {
+        chatEventHandler.stopToolResultStreaming();
+      }).not.toThrow();
+
+      // State callbacks should not be called when there's no active streaming
+      expect(mockOnStreamingStateChange).not.toHaveBeenCalled();
+      expect(mockOnStartResponse).not.toHaveBeenCalled();
+    });
+  });
+
   describe('telemetry', () => {
     let mockTelemetryRecorder: {
       recordEvent: jest.Mock;
@@ -1367,6 +1440,200 @@ describe('ChatEventHandler', () => {
 
       // Restore Date.now
       Date.now = originalDateNow;
+    });
+  });
+
+  describe('sendToolResultToAssistant skip handling (duplicate tool result)', () => {
+    it('should append system info message (not tool message) when sendToolResult returns skipped', async () => {
+      const toolCallId = 'tool-skip-1';
+      const mockResult = { success: true, data: 'test result' };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      const constructedToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const emptyObservable = {
+        subscribe: jest.fn().mockImplementation(({ complete }) => {
+          if (complete) complete();
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: emptyObservable,
+        toolMessage: constructedToolMessage,
+        skipped: { reason: 'result_already_exists' },
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      const toolMessagesInTimeline = timeline.filter((m) => m.role === 'tool');
+      expect(toolMessagesInTimeline).not.toContainEqual(constructedToolMessage);
+
+      const systemMessages = timeline.filter((m) => m.role === 'system');
+      const skipInfoMessage = systemMessages.find((m) =>
+        (m as any).content?.includes('another window')
+      );
+      expect(skipInfoMessage).toBeDefined();
+      expect((skipInfoMessage as any).id).toMatch(/^tool-skipped-/);
+    });
+
+    it('should not subscribe to the observable or flip streaming state when skipped', async () => {
+      const toolCallId = 'tool-skip-2';
+      const mockResult = 'string result';
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      const subscribeSpy = jest.fn();
+      const emptyObservable = { subscribe: subscribeSpy };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: emptyObservable,
+        toolMessage: {
+          id: `tool-result-${toolCallId}`,
+          role: 'tool',
+          content: mockResult,
+          toolCallId,
+        },
+        skipped: { reason: 'result_already_exists' },
+      });
+
+      mockOnStreamingStateChange.mockClear();
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      expect(subscribeSpy).not.toHaveBeenCalled();
+      expect(mockOnStreamingStateChange).not.toHaveBeenCalledWith(true);
+    });
+
+    it('should still call onSendToolResultStateChange(true) then (false) when skipped', async () => {
+      const mockOnSendToolResultStateChange = jest.fn();
+      const handlerWithCallback = new ChatEventHandler({
+        assistantActionService: mockAssistantActionService,
+        chatService: mockChatService,
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
+        confirmationService: mockConfirmationService,
+        callbacks: {
+          onTimelineUpdate: mockOnTimelineUpdate,
+          onStreamingStateChange: mockOnStreamingStateChange,
+          onStartResponse: mockOnStartResponse,
+          onSendToolResultStateChange: mockOnSendToolResultStateChange,
+          getTimeline: mockGetTimeline,
+        },
+      });
+
+      const toolCallId = 'tool-skip-3';
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue({ ok: true });
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: { subscribe: jest.fn() },
+        toolMessage: {
+          id: `tool-result-${toolCallId}`,
+          role: 'tool',
+          content: '{"ok":true}',
+          toolCallId,
+        },
+        skipped: { reason: 'result_already_exists' },
+      });
+
+      await handlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      await handlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await handlerWithCallback.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(true);
+      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(false);
+    });
+
+    it('should follow the normal dispatch path when skipped is undefined', async () => {
+      const toolCallId = 'tool-no-skip';
+      const mockResult = { ok: true };
+
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
+
+      const constructedToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const subscribeSpy = jest.fn().mockReturnValue({ unsubscribe: jest.fn() });
+      const observable = { subscribe: subscribeSpy };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable,
+        toolMessage: constructedToolMessage,
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      expect(timeline).toContainEqual(constructedToolMessage);
+      const skipInfoMessage = timeline.find((m) => (m as any).id?.startsWith('tool-skipped-'));
+      expect(skipInfoMessage).toBeUndefined();
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

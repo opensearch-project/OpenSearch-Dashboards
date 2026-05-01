@@ -217,6 +217,7 @@ export class SavedObjectsManagementPlugin
       {
         id: APP_ID,
         order: 400,
+        euiIconType: 'savedObjectsApp',
       },
     ]);
 

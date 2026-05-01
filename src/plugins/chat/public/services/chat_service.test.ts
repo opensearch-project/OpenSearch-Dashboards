@@ -786,6 +786,116 @@ describe('ChatService', () => {
         'Thread ID is required to send a tool result'
       );
     });
+
+    describe('skip branch (duplicate tool result across windows)', () => {
+      // Snapshot containing both the synced tool call and a ToolMessage with
+      // the same toolCallId — another window has already persisted the result.
+      const createSnapshotWithToolResult = (toolCallId: string) => [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          timestamp: Date.now(),
+          messages: [
+            { role: 'user', id: 'user-msg-1', content: 'Run it' },
+            {
+              role: 'assistant',
+              id: 'assistant-msg-1',
+              content: 'Running',
+              toolCalls: [
+                {
+                  id: toolCallId,
+                  type: 'function',
+                  function: { name: 'test_tool', arguments: '{}' },
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              id: 'tool-msg-1',
+              content: '"already done"',
+              toolCallId,
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        mockCoreChatService.getMemoryProvider = jest
+          .fn()
+          .mockReturnValue({ includeFullHistory: false });
+      });
+
+      it('should skip dispatch and return skipped reason when tool result already exists', async () => {
+        const toolCallId = 'tool-call-duplicate';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, { ok: true }, []);
+
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect(response.skipped).toEqual({ reason: 'result_already_exists' });
+        expect(response.toolMessage).toEqual({
+          id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+          role: 'tool',
+          content: JSON.stringify({ ok: true }),
+          toolCallId,
+        });
+      });
+
+      it('should return an observable that completes without emitting on skip', async () => {
+        const toolCallId = 'tool-call-complete-only';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, 'result', []);
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        expect(nextSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should short-circuit result_already_exists over synced when both are present in the same snapshot', async () => {
+        const toolCallId = 'tool-call-both-present';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, 'result', []);
+
+        expect(response.skipped).toEqual({ reason: 'result_already_exists' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      });
+
+      it('should NOT skip when snapshot contains only the synced tool call without a tool result', async () => {
+        const toolCallId = 'tool-call-synced-only';
+        const mockObservable = new Observable<BaseEvent>();
+        mockAgent.runAgent.mockReturnValue(mockObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, { ok: true }, []);
+
+        expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
+        expect(response.skipped).toBeUndefined();
+      });
+    });
   });
 
   describe('abort', () => {

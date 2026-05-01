@@ -157,11 +157,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         dispatch(setDateRange(payload.dateRange));
       }
 
-      const editorText = editorRef.current?.getValue() || '';
+      const editorText =
+        editorRef.current?.getValue() ?? String(queryString.getQuery().query || '');
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
     },
-    [dispatch, services, editorRef]
+    [dispatch, services, editorRef, queryString]
   );
 
   const handleQueryCancel = useCallback(() => {

@@ -105,7 +105,7 @@ async function start({
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
   const service = new ChromeService();
 
-  service.setup({ uiSettings: startDeps.uiSettings });
+  service.setup({ uiSettings: startDeps.uiSettings, injectedMetadata: startDeps.injectedMetadata });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -138,7 +138,8 @@ describe('setup', () => {
     const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const chromeSetup = chrome.setup({ uiSettings, injectedMetadata });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -155,7 +156,8 @@ describe('setup', () => {
     const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const chromeSetup = chrome.setup({ uiSettings, injectedMetadata });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time
@@ -175,7 +177,8 @@ describe('setup', () => {
       registerSearchCommand: registerSearchCommandSpy,
     });
 
-    chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    chrome.setup({ uiSettings, injectedMetadata });
 
     expect(registerSearchCommandSpy).toHaveBeenCalledWith({
       id: 'pagesSearch',

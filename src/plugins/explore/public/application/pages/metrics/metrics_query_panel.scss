@@ -1,0 +1,48 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.mqpQueryRow {
+  position: relative;
+  padding: $euiSizeS $euiSizeS $euiSizeXS;
+  margin-bottom: $euiSizeS;
+  border-radius: $euiBorderRadius;
+  background: $euiColorEmptyShade;
+  transition: background-color 150ms ease;
+
+  &--dragging {
+    background: $euiColorLightestShade;
+
+    @include euiBottomShadow;
+  }
+}
+
+.mqpRowLabel {
+  display: inline-block;
+  font-weight: $euiFontWeightBold;
+  min-width: $euiSizeL;
+  text-align: center;
+  line-height: $euiSizeXL;
+  border-radius: $euiBorderRadiusSmall;
+  background: transparentize($euiColorLightestShade, 0.75);
+  color: $euiColorPrimaryText;
+  letter-spacing: 0.05em;
+  padding: 0 $euiSizeXS;
+}
+
+.mqpDragHandle {
+  cursor: grab;
+}
+
+.mqpRowActions {
+  display: inline-flex;
+  align-items: center;
+  gap: $euiSizeXS;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.mqpAddQueryRow {
+  padding: $euiSizeXS 0;
+}

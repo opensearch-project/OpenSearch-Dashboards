@@ -381,7 +381,7 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
           {
             table: {
               columns: columns.filter((column) => formattedColumnIds.includes(column.id)),
-              rows,
+              rows: sortedRows,
             },
             row: actualRowIndex,
             column: columnIndex,

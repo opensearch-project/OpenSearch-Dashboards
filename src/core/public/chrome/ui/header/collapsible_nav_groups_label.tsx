@@ -14,10 +14,24 @@ export interface CollapsibleNavGroupsLabelProps {
   storage?: Storage;
   label?: React.ReactNode;
   onToggle?: (isOpen: boolean) => void;
+  defaultOpen?: boolean;
   'data-test-subj'?: EuiFlexGroupProps['data-test-subj'];
 }
 
-export function getIsCategoryOpen(storageKey: string, storage: Storage = window.localStorage) {
+export function getIsCategoryOpen(
+  storageKey: string,
+  storage: Storage = window.localStorage,
+  defaultOpen: boolean = true
+) {
+  // The upstream getIsCategoryOpen defaults to true when no storage value exists.
+  // When defaultOpen is false, we need to check storage directly first.
+  if (!defaultOpen) {
+    const value = storage.getItem(`core.navGroup.${storageKey}`);
+    if (value === null) {
+      return false;
+    }
+    return value === 'true';
+  }
   return getIsCategoryOpenFromStorage(storageKey, storage);
 }
 

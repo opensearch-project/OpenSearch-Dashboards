@@ -170,9 +170,10 @@ describe('generatePromQLWithAgUi', () => {
 
   describe('tool call handling', () => {
     it('should execute tool calls and continue conversation', async () => {
-      const toolResultSubject = new Subject<BaseEvent>();
-      mockSendToolResult.mockReturnValue(toolResultSubject);
+      const secondStreamSubject = new Subject<BaseEvent>();
       mockExecuteTool.mockResolvedValue(['metric1', 'metric2']);
+      // First call returns streamSubject, second call (after tool execution) returns secondStreamSubject
+      mockRunAgent.mockReturnValueOnce(streamSubject).mockReturnValueOnce(secondStreamSubject);
 
       const resultPromise = generatePromQLWithAgUi(defaultOptions);
 
@@ -193,21 +194,21 @@ describe('generatePromQLWithAgUi', () => {
       } as BaseEvent);
       streamSubject.complete();
 
-      // Wait for tool execution to start
+      // Wait for tool execution and second runAgent call
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      // Complete the tool result stream with a query
-      toolResultSubject.next({
+      // Complete the second stream with a query
+      secondStreamSubject.next({
         type: EventType.TEXT_MESSAGE_CONTENT,
         delta: '```promql\nrate(cpu_usage[5m])\n```',
       } as BaseEvent);
-      toolResultSubject.next({ type: EventType.TEXT_MESSAGE_END } as BaseEvent);
-      toolResultSubject.complete();
+      secondStreamSubject.next({ type: EventType.TEXT_MESSAGE_END } as BaseEvent);
+      secondStreamSubject.complete();
 
       const result = await resultPromise;
 
       expect(mockExecuteTool).toHaveBeenCalledWith('search_metrics', { query: 'cpu' });
-      expect(mockSendToolResult).toHaveBeenCalled();
+      expect(mockRunAgent).toHaveBeenCalledTimes(2);
       expect(result.query).toBe('rate(cpu_usage[5m])');
     });
 

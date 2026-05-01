@@ -397,25 +397,44 @@ export class ChatService {
   }
 
   /**
-   * Wait for tool call result to be synced to agentic memory
-   * Polls the conversation history to check if the tool call has been saved
+   * Wait for tool call to be synced to agentic memory.
+   *
+   * Returns `{ shouldSend: false, reason: 'result_already_exists' }` if a
+   * ToolMessage with the same toolCallId is already in history (another
+   * window persisted it first). Returns `{ shouldSend: true, reason: 'synced'
+   * | 'timeout_fallback' | 'no_thread_id' }` otherwise — caller should
+   * dispatch.
    */
   private async waitForToolCallSync(
     toolCallId: string,
     maxAttempts: number = 10,
     intervalMs: number = 1000
-  ): Promise<void> {
+  ): Promise<{ shouldSend: boolean; reason: string }> {
     const threadId = this.getThreadId();
-    if (!threadId) return;
+    if (!threadId) return { shouldSend: true, reason: 'no_thread_id' };
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const events = await this.conversationHistoryService.getConversation(threadId);
 
         if (events) {
-          // Check for tool call in MESSAGES_SNAPSHOT events
-          // The tool call is stored in assistant messages' toolCalls array
+          const toolResultExists = events.some((event) => {
+            if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
+              const messages = (event as any).messages as Message[];
+              return messages.some(
+                (msg) =>
+                  msg.role === 'tool' &&
+                  'toolCallId' in msg &&
+                  (msg as any).toolCallId === toolCallId
+              );
+            }
+            return false;
+          });
+
+          if (toolResultExists) {
+            return { shouldSend: false, reason: 'result_already_exists' };
+          }
+
           const toolCallSynced = events.some((event) => {
             if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
               const messages = (event as any).messages as Message[];
@@ -431,7 +450,7 @@ export class ChatService {
           });
 
           if (toolCallSynced) {
-            return; // Tool call has been synced
+            return { shouldSend: true, reason: 'synced' };
           }
         }
       } catch (error) {
@@ -443,11 +462,13 @@ export class ChatService {
       await new Promise((resolve) => setTimeout(resolve, intervalMs));
     }
 
-    // If we've exhausted all attempts, log a warning but continue
+    // If we've exhausted all attempts, log a warning but still proceed —
+    // losing a tool result is worse than occasionally duplicating.
     // eslint-disable-next-line no-console
     console.warn(
       `Tool call sync check timed out after ${maxAttempts} attempts for toolCallId: ${toolCallId}`
     );
+    return { shouldSend: true, reason: 'timeout_fallback' };
   }
 
   public async sendToolResult(
@@ -457,6 +478,7 @@ export class ChatService {
   ): Promise<{
     observable: any;
     toolMessage: ToolMessage;
+    skipped?: { reason: 'result_already_exists' };
   }> {
     const requestId = this.generateRequestId();
 
@@ -505,7 +527,21 @@ export class ChatService {
     // Wait for tool call result to be synced to agentic memory only when not including full history
     // (when full history is included, messages are passed directly so no sync wait needed)
     if (!includeFullHistory) {
-      await this.waitForToolCallSync(toolCallId);
+      const syncResult = await this.waitForToolCallSync(toolCallId);
+
+      // Another window already persisted a tool result for this toolCallId —
+      // skip dispatch to avoid a duplicate in history. Return a completed
+      // empty observable and signal the skip via `skipped` so callers can
+      // avoid appending a phantom tool message to their local timeline.
+      if (!syncResult.shouldSend) {
+        const emptyObservable = new Observable((subscriber) => subscriber.complete());
+        this.removeActiveRequest(requestId);
+        return {
+          observable: emptyObservable,
+          toolMessage,
+          skipped: { reason: 'result_already_exists' },
+        };
+      }
     }
 
     // Continue the conversation with the tool result

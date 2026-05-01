@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -11,8 +11,10 @@ import {
   EuiFieldText,
   EuiButtonGroup,
   EuiText,
+  EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { HttpStart } from 'opensearch-dashboards/public';
 import { WorkspaceCollaboratorAccessLevel } from '../../types';
 import { WORKSPACE_ACCESS_LEVEL_NAMES } from '../../constants';
 
@@ -27,6 +29,8 @@ export interface WorkspaceCollaboratorInputProps {
   onCollaboratorIdChange: (id: string, index: number) => void;
   onAccessLevelChange: (accessLevel: WorkspaceCollaboratorAccessLevel, index: number) => void;
   onDelete: (index: number) => void;
+  identitySource?: { source: string; type: string };
+  http?: HttpStart;
 }
 
 const accessLevelKeys = Object.keys(
@@ -50,13 +54,68 @@ export const WorkspaceCollaboratorInput = ({
   onAccessLevelChange,
   onCollaboratorIdChange,
   collaboratorIdInputPlaceholder,
+  identitySource,
+  http,
 }: WorkspaceCollaboratorInputProps) => {
+  const [options, setOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [selectedOption, setSelectedOption] = useState<{ label: string; value: string } | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortController = useRef<AbortController | null>(null);
+
+  useEffect(
+    () => () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      abortController.current?.abort();
+    },
+    []
+  );
+
   const handleCollaboratorIdChange = useCallback(
     // @ts-expect-error TS7006 TODO(ts-error): fixme
     (e) => {
       onCollaboratorIdChange(e.target.value, index);
     },
     [index, onCollaboratorIdChange]
+  );
+
+  const handleSearchChange = useCallback(
+    (searchValue: string) => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      abortController.current?.abort();
+
+      if (!identitySource || !http || !searchValue) {
+        setOptions([]);
+        return;
+      }
+
+      debounceTimer.current = setTimeout(async () => {
+        abortController.current = new AbortController();
+        setIsLoading(true);
+        try {
+          const results: Array<{
+            id: string;
+            name: string;
+          }> = await http.get('/api/security/identity/_entries', {
+            query: {
+              source: identitySource.source,
+              type: identitySource.type,
+              keyword: searchValue.trim(),
+            },
+            signal: abortController.current.signal,
+          });
+          setOptions(results.map((r) => ({ label: `${r.name} (${r.id})`, value: r.id })));
+        } catch (e) {
+          if ((e as Error).name !== 'AbortError') setOptions([]);
+        } finally {
+          if (!abortController.current?.signal.aborted) setIsLoading(false);
+        }
+      }, 300);
+    },
+    [http, identitySource]
   );
 
   const handlePermissionModeOptionChange = useCallback(
@@ -75,15 +134,37 @@ export const WorkspaceCollaboratorInput = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldText
-          compressed={true}
-          onChange={handleCollaboratorIdChange}
-          value={collaboratorId}
-          data-test-subj={`workspaceCollaboratorIdInput-${index}`}
-          placeholder={collaboratorIdInputPlaceholder}
-          aria-labelledby={COLLABORATOR_ID_INPUT_LABEL_ID}
-          isInvalid={!!error}
-        />
+        {identitySource ? (
+          <EuiComboBox
+            compressed
+            singleSelection={{ asPlainText: true }}
+            placeholder={collaboratorIdInputPlaceholder}
+            options={options}
+            selectedOptions={selectedOption ? [selectedOption] : []}
+            onSearchChange={handleSearchChange}
+            onChange={(selected) => {
+              const option = selected[0]
+                ? { label: selected[0].label, value: selected[0].value as string }
+                : null;
+              setSelectedOption(option);
+              onCollaboratorIdChange(option?.value ?? '', index);
+            }}
+            isLoading={isLoading}
+            isInvalid={!!error}
+            aria-labelledby={COLLABORATOR_ID_INPUT_LABEL_ID}
+            data-test-subj={`workspaceCollaboratorIdInput-${index}`}
+          />
+        ) : (
+          <EuiFieldText
+            compressed={true}
+            onChange={handleCollaboratorIdChange}
+            value={collaboratorId}
+            data-test-subj={`workspaceCollaboratorIdInput-${index}`}
+            placeholder={collaboratorIdInputPlaceholder}
+            aria-labelledby={COLLABORATOR_ID_INPUT_LABEL_ID}
+            isInvalid={!!error}
+          />
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup

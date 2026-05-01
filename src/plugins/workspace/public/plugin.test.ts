@@ -88,6 +88,7 @@ describe('Workspace plugin', () => {
           id: 'workspace_list',
           order: 350,
           title: 'Workspaces',
+          euiIconType: 'workspacesApp',
         },
       ])
     );

@@ -74,7 +74,7 @@ export const convertResult = ({
           const flattenedFieldName = `${field.name}.${nestedField}`;
 
           // Go through search source fields to find the field type of the nested field
-          fields?.index?.fields.forEach((searchSourceField) => {
+          fields?.index?.fields?.forEach((searchSourceField) => {
             if (
               searchSourceField.displayName === flattenedFieldName &&
               searchSourceField.type === 'date'
@@ -142,6 +142,11 @@ export const convertResult = ({
       total: instantHits.length,
     };
     (searchResponse as any).instantFieldSchema = instantData.schema;
+  }
+
+  // Pass through truncation metadata for Prometheus queries
+  if (data.meta?.truncation) {
+    (searchResponse as any).truncation = data.meta.truncation;
   }
 
   if (data.hasOwnProperty('aggs')) {

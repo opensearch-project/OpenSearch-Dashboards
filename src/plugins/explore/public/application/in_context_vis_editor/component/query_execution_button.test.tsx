@@ -47,12 +47,16 @@ describe('QueryExecutionButton', () => {
   it('shows Refresh when query is not dirty', () => {
     render(<QueryExecutionButton />);
     expect(screen.getByText('Refresh')).toBeInTheDocument();
+    const button = screen.getByTestId('exploreQueryExecutionButton');
+    expect(button).not.toHaveClass('euiButton--fill');
   });
 
   it('shows Update when query is dirty', () => {
     (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({ isQueryEditorDirty: true }));
     render(<QueryExecutionButton />);
     expect(screen.getByText('Update')).toBeInTheDocument();
+    const button = screen.getByTestId('exploreQueryExecutionButton');
+    expect(button).toHaveClass('euiButton--fill');
   });
 
   it('disables button when date range is invalid', () => {
