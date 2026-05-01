@@ -89,7 +89,10 @@ export const throwFacetError = (response: any): never => {
   error.name = error.status !== undefined ? error.status.toString() : 'QueryError';
 
   if (typeof errorBody === 'object' && errorBody !== null) {
-    if ('status' in errorBody && typeof errorBody.status === 'number') {
+    if (
+      'status' in errorBody &&
+      (typeof errorBody.status === 'number' || typeof errorBody.status === 'string')
+    ) {
       error.errorBody = errorBody as OpenSearchErrorResponse;
     }
 

@@ -1553,8 +1553,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
               error: expect.objectContaining({
                 error: 'Connection failed',
                 message: {
-                  details: 'Connection failed',
-                  reason: 'This is a plain text error message, not JSON',
+                  reason: 'Connection failed',
+                  details: 'This is a plain text error message, not JSON',
                   type: 'SearchError',
                 },
                 statusCode: 500,

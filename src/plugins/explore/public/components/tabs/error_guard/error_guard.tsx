@@ -43,6 +43,15 @@ const technicalDetailsText = i18n.translate('explore.errorPanel.technicalDetails
 const askAiButtonText = i18n.translate('explore.errorPanel.askAi', {
   defaultMessage: 'Ask AI for help',
 });
+const genericQueryError = i18n.translate('explore.errorPanel.genericQueryError', {
+  defaultMessage: 'Query Error',
+});
+const whyFailedQuestion = i18n.translate('explore.errorPanel.askAiQuestion', {
+  defaultMessage: 'Why did my query fail and how can I fix it?',
+});
+const failedToSendMessage = i18n.translate('explore.errorPanel.failedToSendMessage', {
+  defaultMessage: 'Failed to send message to AI',
+});
 
 export interface ErrorGuardProps {
   registryTab: TabDefinition;
@@ -63,7 +72,7 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
     () =>
       error
         ? {
-            id: `query-error-${Date.now()}`,
+            id: `query-error`,
             description: 'Failed query with error details from Explore',
             value: {
               query: query?.query,
@@ -71,7 +80,7 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
                 ...(error.errorBody && { fullErrorBody: error.errorBody }),
               },
             },
-            label: 'Query Error',
+            label: genericQueryError,
             categories: ['explore', 'error', 'dynamic'],
           }
         : null,
@@ -85,18 +94,17 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
   );
   const useDynamicContext =
     services.contextProvider?.hooks?.useDynamicContext || noopDynamicContext;
-  useDynamicContext(errorContextData, false);
+  useDynamicContext(errorContextData, !error);
 
   const handleAskAi = useCallback(async () => {
     if (!chatService || !isChatAvailable) return;
 
     setIsAskingAi(true);
     try {
-      const question = 'Why did my query fail and how can I fix it?';
-      await chatService.sendMessageWithWindow(question, []);
+      await chatService.sendMessageWithWindow(whyFailedQuestion, []);
     } catch (err) {
       services.toastNotifications.addWarning({
-        title: 'Failed to send message to AI',
+        title: failedToSendMessage,
         text: err instanceof Error ? err.message : 'Unknown error',
       });
     } finally {

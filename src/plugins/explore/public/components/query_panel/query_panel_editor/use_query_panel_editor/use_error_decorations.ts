@@ -6,6 +6,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { monaco } from '@osd/monaco';
 import { useSelector } from 'react-redux';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { selectOverallQueryStatus } from '../../../../application/utils/state_management/selectors';
 import { QueryExecutionStatus } from '../../../../application/utils/state_management/types';
 
@@ -108,7 +109,7 @@ export const useErrorDecorations = () => {
               value: `**Query Error**\n\n${errorDetails}\n\nField: \`${requestedField}\``,
             },
             minimap: {
-              color: '#ff0000',
+              color: euiThemeVars.euiColorDanger,
               position: monaco.editor.MinimapPosition.Inline,
             },
             overviewRuler: {
