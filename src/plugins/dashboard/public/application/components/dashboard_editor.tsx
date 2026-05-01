@@ -82,7 +82,6 @@ export const DashboardEditor = () => {
     execute: handleFullScreen,
   });
 
-  const variableEnabled = localStorage.getItem('__DEVELOPMENT__.dashboard.variable.enabled');
   const [isExploreWorkspace, setIsExploreWorkspace] = useState(false);
   useEffect(() => {
     workspaces.currentWorkspace$
@@ -117,7 +116,7 @@ export const DashboardEditor = () => {
               eventEmitter={eventEmitter}
             />
             {/* Variables are only available in explore-enabled workspaces (observability / analytics) */}
-            {variableEnabled && isExploreWorkspace && currentContainer.variableService && (
+            {isExploreWorkspace && currentContainer.variableService && (
               <DashboardVariables
                 variableService={currentContainer.variableService}
                 interpolationService={currentContainer.variableInterpolationService}
