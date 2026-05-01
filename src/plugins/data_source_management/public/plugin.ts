@@ -6,6 +6,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
+import semver from 'semver';
 import {
   AppMountParameters,
   CoreSetup,
@@ -18,8 +19,8 @@ import {
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import { DashboardDirectQuerySyncBanner } from './components/direct_query_data_sources_components/direct_query_sync/direct_query_sync_banner';
 import { parseUrlHash } from '../../opensearch_dashboards_utils/public';
-import semver from 'semver';
 
+import * as pluginManifest from '../opensearch_dashboards.json';
 import { PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
 
@@ -262,10 +263,16 @@ export class DataSourceManagementPlugin
       core.http
         .get<{ version: string }>('/internal/data-source-management/localClusterVersion')
         .then(({ version }) => {
-          if (semver.satisfies(version, '~1.3.0 || ~2.11.0')) {
-            this.managementApp.disable();
+          if (
+            version &&
+            pluginManifest.supportedOSDataSourceVersions &&
+            !semver.satisfies(version, pluginManifest.supportedOSDataSourceVersions)
+          ) {
+            this.managementApp!.disable();
           }
         })
+        // Fail-open: if version fetch fails, keep the management page enabled
+        // rather than blocking access when the version is unknown
         .catch(() => {});
     }
 

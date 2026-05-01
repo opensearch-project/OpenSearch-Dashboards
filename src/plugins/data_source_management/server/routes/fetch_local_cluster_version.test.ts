@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { httpServiceMock, httpServerMock } from '../../../../../core/server/mocks';
+import { httpServiceMock, httpServerMock, loggingSystemMock } from '../../../../core/server/mocks';
 import { registerLocalClusterVersionRoute } from './fetch_local_cluster_version';
 
 describe('fetch_local_cluster_version route', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let mockContext: any;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
@@ -25,7 +26,7 @@ describe('fetch_local_cluster_version route', () => {
         },
       },
     };
-    registerLocalClusterVersionRoute(router);
+    registerLocalClusterVersionRoute(router, logger);
   });
 
   it('registers GET /internal/data-source-management/localClusterVersion', () => {
@@ -55,5 +56,6 @@ describe('fetch_local_cluster_version route', () => {
     await handler(mockContext, httpServerMock.createOpenSearchDashboardsRequest(), mockResponse);
 
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: { version: '' } });
+    expect(logger.warn).toHaveBeenCalled();
   });
 });
