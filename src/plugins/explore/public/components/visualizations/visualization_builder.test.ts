@@ -428,7 +428,7 @@ describe('VisualizationBuilder', () => {
     expect(builder.data$.value).toEqual({
       categoricalColumns: [
         {
-          column: 'field-1',
+          column: 'name',
           id: 1,
           name: 'name',
           schema: 'categorical',
@@ -439,7 +439,7 @@ describe('VisualizationBuilder', () => {
       dateColumns: [],
       numericalColumns: [
         {
-          column: 'field-0',
+          column: 'age',
           id: 0,
           name: 'age',
           schema: 'numerical',
@@ -449,8 +449,8 @@ describe('VisualizationBuilder', () => {
       ],
       transformedData: [
         {
-          'field-0': 10,
-          'field-1': 'name',
+          age: 10,
+          name: 'name',
         },
       ],
     });
