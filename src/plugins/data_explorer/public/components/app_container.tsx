@@ -28,6 +28,7 @@ import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../
 export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
     const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
+    const isEmbedded = new URLSearchParams(params.history.location.search).has('embed');
 
     const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
     const { uiSettings } = opensearchDashboards.services;
@@ -82,7 +83,8 @@ export const AppContainer = React.memo(
         <EuiPage
           className={classNames(
             'deLayout',
-            isEnhancementsEnabled && !showActionsInGroup ? 'dsc--next' : undefined
+            isEnhancementsEnabled && !showActionsInGroup ? 'dsc--next' : undefined,
+            isEmbedded ? 'deLayout--embed' : undefined
           )}
           paddingSize="none"
           grow={false}
