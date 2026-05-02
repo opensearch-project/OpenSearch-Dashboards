@@ -327,7 +327,7 @@
     "use-sync-external-store": "^1.5.0",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.2.1"
   },
   "optionalDependencies": {
     "better-sqlite3": "^12.9.0"

@@ -25,7 +25,7 @@
     "simple-git": "^3.32.3",
     "tar-fs": "^2.1.4",
     "tree-kill": "^1.2.2",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.2.1"
   },
   "devDependencies": {
     "@osd/babel-preset": "1.0.0",
