@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
 import { i18n, i18nLoader } from '@osd/i18n';
@@ -169,6 +168,7 @@ export class RenderingService {
               useExpandedHeader: brandingAssignment.useExpandedHeader,
             },
             survey: opensearchDashboardsConfig.survey.url,
+            enableIconSideNav: opensearchDashboardsConfig.enableIconSideNav,
             keyboardShortcuts: {
               enabled: opensearchDashboardsConfig.keyboardShortcuts.enabled,
             },

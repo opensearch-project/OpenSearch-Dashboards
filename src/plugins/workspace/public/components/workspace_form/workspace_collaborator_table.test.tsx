@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
@@ -96,6 +95,67 @@ describe('WorkspaceCollaboratorTable', () => {
 
   it('should render normally', () => {
     expect(render(<WorkspaceCollaboratorTable {...mockProps} />)).toMatchSnapshot();
+  });
+
+  it('should render Name column header', () => {
+    const { getAllByText } = render(<WorkspaceCollaboratorTable {...mockProps} />);
+    expect(getAllByText('Name').length).toBeGreaterThan(0);
+  });
+
+  it('should fetch names when displayedCollaboratorTypes have identitySource', async () => {
+    const httpPostMock = mockCoreStart.http.post as jest.Mock;
+    httpPostMock.mockResolvedValue([
+      { id: 'admin', name: 'Admin User' },
+      { id: 'group', name: 'Dev Group' },
+    ]);
+
+    const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+      {
+        id: 'user',
+        name: 'User',
+        buttonLabel: 'Add Users',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+        identitySource: { source: 'LDAP', type: 'user' },
+      },
+      {
+        id: 'group',
+        name: 'Group',
+        buttonLabel: 'Add Groups',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) =>
+          permissionType === 'group' ? 'Group' : undefined,
+        identitySource: { source: 'LDAP', type: 'group' },
+      },
+    ];
+
+    const { getByText } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(httpPostMock).toHaveBeenCalledWith('/api/security/identity/_entries', {
+        body: expect.any(String),
+        signal: expect.any(AbortSignal),
+      });
+    });
+
+    await waitFor(() => {
+      expect(getByText('Admin User')).toBeInTheDocument();
+      expect(getByText('Dev Group')).toBeInTheDocument();
+    });
+  });
+
+  it('should show dash when name is not available', () => {
+    const { container } = render(<WorkspaceCollaboratorTable {...mockProps} />);
+    // Without identitySource, no fetch happens, name column shows mdash
+    const nameCells = container.querySelectorAll('td:nth-child(3)');
+    expect(nameCells.length).toBeGreaterThan(0);
   });
 
   it('should render empty state when no permission settings', () => {

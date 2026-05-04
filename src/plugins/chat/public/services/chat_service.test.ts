@@ -9,9 +9,22 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { Message } from '../../common/types';
 import { ToolDefinition } from '../../../context_provider/public';
 import { ChatServiceStart } from '../../../../core/public';
+import { AssistantActionService } from '../../../context_provider/public';
 
 // Mock AgUiAgent
 jest.mock('./ag_ui_agent');
+
+// Mock AssistantActionService singleton
+jest.mock('../../../context_provider/public', () => ({
+  AssistantActionService: {
+    getInstance: jest.fn().mockReturnValue({
+      getState$: jest
+        .fn()
+        .mockReturnValue({ subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) }),
+      hasAction: jest.fn().mockReturnValue(false),
+    }),
+  },
+}));
 
 // Mock data source management
 jest.mock('../../../data_source_management/public', () => ({
@@ -773,6 +786,116 @@ describe('ChatService', () => {
         'Thread ID is required to send a tool result'
       );
     });
+
+    describe('skip branch (duplicate tool result across windows)', () => {
+      // Snapshot containing both the synced tool call and a ToolMessage with
+      // the same toolCallId — another window has already persisted the result.
+      const createSnapshotWithToolResult = (toolCallId: string) => [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          timestamp: Date.now(),
+          messages: [
+            { role: 'user', id: 'user-msg-1', content: 'Run it' },
+            {
+              role: 'assistant',
+              id: 'assistant-msg-1',
+              content: 'Running',
+              toolCalls: [
+                {
+                  id: toolCallId,
+                  type: 'function',
+                  function: { name: 'test_tool', arguments: '{}' },
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              id: 'tool-msg-1',
+              content: '"already done"',
+              toolCallId,
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        mockCoreChatService.getMemoryProvider = jest
+          .fn()
+          .mockReturnValue({ includeFullHistory: false });
+      });
+
+      it('should skip dispatch and return skipped reason when tool result already exists', async () => {
+        const toolCallId = 'tool-call-duplicate';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, { ok: true }, []);
+
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect(response.skipped).toEqual({ reason: 'result_already_exists' });
+        expect(response.toolMessage).toEqual({
+          id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+          role: 'tool',
+          content: JSON.stringify({ ok: true }),
+          toolCallId,
+        });
+      });
+
+      it('should return an observable that completes without emitting on skip', async () => {
+        const toolCallId = 'tool-call-complete-only';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, 'result', []);
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        expect(nextSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should short-circuit result_already_exists over synced when both are present in the same snapshot', async () => {
+        const toolCallId = 'tool-call-both-present';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, 'result', []);
+
+        expect(response.skipped).toEqual({ reason: 'result_already_exists' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      });
+
+      it('should NOT skip when snapshot contains only the synced tool call without a tool result', async () => {
+        const toolCallId = 'tool-call-synced-only';
+        const mockObservable = new Observable<BaseEvent>();
+        mockAgent.runAgent.mockReturnValue(mockObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, { ok: true }, []);
+
+        expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
+        expect(response.skipped).toBeUndefined();
+      });
+    });
   });
 
   describe('abort', () => {
@@ -1305,45 +1428,37 @@ describe('ChatService', () => {
   });
 
   describe('restoreLatestConversation', () => {
-    it('should restore the latest conversation with messages', async () => {
-      const mockMessages = [
-        { id: 'msg-1', role: 'user', content: 'Hello' },
-        { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
-      ];
+    const mockMessages = [
+      { id: 'msg-1', role: 'user', content: 'Hello' },
+      { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
+    ];
+    const mockThreadId = 'thread-12345';
+    const mockSnapshotEvent = {
+      type: 'MESSAGES_SNAPSHOT',
+      messages: mockMessages,
+      timestamp: Date.now(),
+    };
 
-      const mockThreadId = 'thread-12345';
-
-      // Mock the conversation history service
+    it('should return events array including MESSAGES_SNAPSHOT for the latest conversation', async () => {
       chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [
-          {
-            threadId: mockThreadId,
-            title: 'Test Conversation',
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          },
-        ],
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
         total: 1,
       });
-
-      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: mockMessages,
-          timestamp: Date.now(),
-        },
-      ]);
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([mockSnapshotEvent]);
 
       const result = await chatService.restoreLatestConversation();
 
       expect(result).not.toBeNull();
-      expect(result?.threadId).toBe(mockThreadId);
-      expect(result?.messages).toEqual(mockMessages);
+      expect(Array.isArray(result)).toBe(true);
+      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT');
+      expect(snapshot).toBeDefined();
+      expect((snapshot as any).messages).toEqual(mockMessages);
       expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
     });
 
     it('should return null and generate new thread when no conversations exist', async () => {
-      // Mock empty conversation list
       chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
         conversations: [],
         total: 0,
@@ -1352,88 +1467,284 @@ describe('ChatService', () => {
       const result = await chatService.restoreLatestConversation();
 
       expect(result).toBeNull();
-      // Should generate a new thread
-      expect(mockCoreChatService.newThread).toHaveBeenCalled();
-    });
-
-    it('should return null and generate new thread when conversation has no MESSAGES_SNAPSHOT event', async () => {
-      const mockThreadId = 'thread-12345';
-
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [
-          {
-            threadId: mockThreadId,
-            title: 'Test Conversation',
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          },
-        ],
-        total: 1,
-      });
-
-      // Return events without MESSAGES_SNAPSHOT
-      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
-        {
-          type: 'OTHER_EVENT',
-          timestamp: Date.now(),
-        },
-      ]);
-
-      const result = await chatService.restoreLatestConversation();
-
-      expect(result).toBeNull();
-      // Should generate a new thread
       expect(mockCoreChatService.newThread).toHaveBeenCalled();
     });
 
     it('should return null and generate new thread when getConversation returns null', async () => {
-      const mockThreadId = 'thread-12345';
-
       chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [
-          {
-            threadId: mockThreadId,
-            title: 'Test Conversation',
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          },
-        ],
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
         total: 1,
       });
-
       chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
 
       const result = await chatService.restoreLatestConversation();
 
       expect(result).toBeNull();
-      // Should generate a new thread
       expect(mockCoreChatService.newThread).toHaveBeenCalled();
     });
 
     it('should return null and skip restore when thread ID is already set', async () => {
-      // Mock that thread ID is already set
       mockCoreChatService.getThreadId.mockReturnValue('existing-thread-id');
-
-      // Mock conversation history (should not be called)
-      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [
-          {
-            threadId: 'thread-12345',
-            title: 'Test Conversation',
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          },
-        ],
-        total: 1,
-      });
+      chatService.conversationHistoryService.getConversations = jest.fn();
 
       const result = await chatService.restoreLatestConversation();
 
       expect(result).toBeNull();
-      // Should not call getConversations since thread is already set
       expect(chatService.conversationHistoryService.getConversations).not.toHaveBeenCalled();
-      // Should NOT generate a new thread - use existing one
       expect(mockCoreChatService.newThread).not.toHaveBeenCalled();
+    });
+
+    it('should inject synthetic tool call events for unfinished tool calls', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithUnfinished = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            {
+              id: 'tc-1',
+              type: 'function',
+              function: { name: 'run_cmd', arguments: '{"cmd":"ls"}' },
+            },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
+        total: 1,
+      });
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).toContain('TOOL_CALL_START');
+      expect(types).toContain('TOOL_CALL_ARGS');
+      expect(types).toContain('TOOL_CALL_END');
+
+      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT') as any;
+      const lastMsg = snapshot.messages[snapshot.messages.length - 1];
+      expect(lastMsg.toolCalls).toHaveLength(0);
+    });
+
+    it('should not inject synthetic events for non-frontend tool calls', async () => {
+      const mockHasAction = jest.fn().mockReturnValue(false);
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithServerTool = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'server_tool', arguments: '{}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
+        total: 1,
+      });
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).not.toContain('TOOL_CALL_START');
+    });
+  });
+
+  describe('loadConversation', () => {
+    const mockThreadId = 'thread-load-123';
+    const mockMessages = [
+      { id: 'msg-1', role: 'user', content: 'Hello' },
+      { id: 'msg-2', role: 'assistant', content: 'Hi!' },
+    ];
+
+    it('should return events array and set thread ID', async () => {
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      expect(Array.isArray(result)).toBe(true);
+      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
+    });
+
+    it('should return null when getConversation returns null', async () => {
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).toBeNull();
+    });
+
+    it('should inject synthetic tool call events for unfinished tool calls', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithUnfinished = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            {
+              id: 'tc-1',
+              type: 'function',
+              function: { name: 'run_cmd', arguments: '{"cmd":"ls"}' },
+            },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).toContain('TOOL_CALL_START');
+      expect(types).toContain('TOOL_CALL_ARGS');
+      expect(types).toContain('TOOL_CALL_END');
+    });
+
+    it('should inject synthetic events for each of multiple unfinished tool calls', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'cmd_a' || name === 'cmd_b');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithMultipleUnfinished = [
+        { id: 'user-1', role: 'user', content: 'Run two commands' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'cmd_a', arguments: '{"a":1}' } },
+            { id: 'tc-2', type: 'function', function: { name: 'cmd_b', arguments: '{"b":2}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: messagesWithMultipleUnfinished,
+          timestamp: Date.now(),
+        },
+      ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const startEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_START');
+      const argsEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_ARGS');
+      const endEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_END');
+
+      expect(startEvents).toHaveLength(2);
+      expect(argsEvents).toHaveLength(2);
+      expect(endEvents).toHaveLength(2);
+
+      const startIds = startEvents.map((e: any) => e.toolCallId);
+      expect(startIds).toContain('tc-1');
+      expect(startIds).toContain('tc-2');
+    });
+
+    it('should not inject tool call events when all tool calls have results', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithFinished = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'run_cmd', arguments: '{}' } },
+          ],
+        },
+        { id: 'tool-1', role: 'tool', content: 'done', toolCallId: 'tc-1' },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithFinished, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).not.toContain('TOOL_CALL_START');
+    });
+
+    it('should not inject synthetic events for non-frontend tool calls', async () => {
+      const mockHasAction = jest.fn().mockReturnValue(false);
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithServerTool = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'server_tool', arguments: '{}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).not.toContain('TOOL_CALL_START');
     });
   });
 

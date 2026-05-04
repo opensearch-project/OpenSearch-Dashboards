@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { cloneDeep } from 'lodash';
@@ -75,9 +75,10 @@ export const SaveQueryButton = () => {
       const clonedQuery = cloneDeep(query);
       delete clonedQuery.dataset;
 
+      const editorText = getEditorText();
       const queryToSave = {
         ...clonedQuery,
-        query: getEditorText(),
+        query: editorText || String(services.data.query.queryString.getQuery().query || ''),
       };
 
       const attributes: any = {
@@ -117,7 +118,7 @@ export const SaveQueryButton = () => {
     } catch (error) {
       services.notifications.toasts.addDanger(
         i18n.translate('explore.editor.queryPanel.saveQuery.saveQueryFailure', {
-          defaultMessage: 'An error occured while saving your query{errorMessage}',
+          defaultMessage: 'An error occurred while saving your query{errorMessage}',
           values: { errorMessage: error.message ? `: ${error.message}` : '' },
         })
       );
@@ -130,6 +131,7 @@ export const SaveQueryButton = () => {
       dispatch(setSavedQuery(savedQuery.id));
       dispatch(setQueryState(savedQuery.attributes.query));
       dispatch(
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         loadQueryActionCreator(
           services,
           setEditorTextWithQuery,
@@ -151,6 +153,7 @@ export const SaveQueryButton = () => {
 
       setIsPopoverOpen(false);
       dispatch(clearResults());
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
     [dispatch, services, setEditorTextWithQuery, timeFilter]

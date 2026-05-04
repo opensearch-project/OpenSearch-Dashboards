@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,

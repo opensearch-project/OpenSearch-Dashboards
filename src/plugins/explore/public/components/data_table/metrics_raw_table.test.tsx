@@ -4,7 +4,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+
 import { MetricsRawTable } from './metrics_raw_table';
 import { IPrometheusSearchResult } from '../../application/utils/state_management/slices';
 
@@ -14,7 +14,9 @@ describe('MetricsRawTable', () => {
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       total: { value: 0, relation: 'eq' },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       max_score: null,
       hits: [],
     },
@@ -226,6 +228,28 @@ describe('MetricsRawTable', () => {
     expect(valueBElements.length).toBeGreaterThan(0);
     expect(screen.getByText('10.5')).toBeInTheDocument();
     expect(screen.getByText('20.3')).toBeInTheDocument();
+  });
+
+  describe('truncation warning', () => {
+    it('shows warning when table data is truncated', () => {
+      const truncatedResult: IPrometheusSearchResult = {
+        ...mockSearchResult,
+        truncation: {
+          tableTruncated: true,
+          totalSeriesCount: 3000,
+          displayedSeriesCount: 2000,
+        },
+      };
+
+      render(<MetricsRawTable searchResult={truncatedResult} />);
+      expect(screen.getByTestId('metricsRawTableTruncationWarning')).toBeInTheDocument();
+      expect(screen.getByText(/2,000 of 3,000/)).toBeInTheDocument();
+    });
+
+    it('does not show warning when data is not truncated', () => {
+      render(<MetricsRawTable searchResult={mockSearchResult} />);
+      expect(screen.queryByTestId('metricsRawTableTruncationWarning')).not.toBeInTheDocument();
+    });
   });
 
   describe('sorting', () => {

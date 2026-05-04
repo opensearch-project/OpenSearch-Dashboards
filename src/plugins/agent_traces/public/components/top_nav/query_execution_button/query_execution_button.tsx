@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiSuperUpdateButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useDispatch } from 'react-redux';
@@ -68,7 +68,10 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   }, [dateRange, isQueryEditorDirty, timefilter]);
 
   const status = determineButtonStatus();
-  dispatch(setQueryExecutionButtonStatus(status));
+
+  useEffect(() => {
+    dispatch(setQueryExecutionButtonStatus(status));
+  }, [dispatch, status]);
 
   const isDisabled = status === 'DISABLED';
   const needsUpdate = status === 'UPDATE';
@@ -93,6 +96,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
       })}
       compressed={true}
       color="primary"
+      fill={needsUpdate}
     >
       {buttonText}
     </EuiSuperUpdateButton>

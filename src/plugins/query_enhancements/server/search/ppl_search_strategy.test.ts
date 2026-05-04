@@ -348,7 +348,9 @@ describe('pplSearchStrategyProvider', () => {
       {}
     );
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(result.body.meta).toBeDefined();
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(result.body.meta.highlights).toEqual(mockHighlights);
   });
 
@@ -385,6 +387,7 @@ describe('pplSearchStrategyProvider', () => {
       {}
     );
 
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(result.body.meta?.highlights).toBeUndefined();
   });
 

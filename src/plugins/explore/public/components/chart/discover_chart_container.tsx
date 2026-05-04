@@ -4,7 +4,7 @@
  */
 
 import './discover_chart_container.scss';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { ExploreFlavor } from '../../../common';
 import { ExploreServices } from '../../types';

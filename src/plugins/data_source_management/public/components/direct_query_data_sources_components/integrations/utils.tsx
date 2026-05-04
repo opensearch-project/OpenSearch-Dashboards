@@ -4,7 +4,6 @@
  */
 
 import { EuiHealth } from '@elastic/eui';
-import React from 'react';
 
 export const ASSET_FILTER_OPTIONS = [
   'index-pattern',

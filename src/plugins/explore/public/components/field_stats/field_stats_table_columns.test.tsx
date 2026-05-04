@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { getFieldStatsColumns } from './field_stats_table_columns';
 import { FieldStatsItem } from './utils/field_stats_types';

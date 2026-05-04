@@ -4,7 +4,7 @@
  */
 
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DataViewField } from '../../../../data/public';
 import { DiscoverField } from './discover_field';
 import { DiscoverSidebarProps } from './discover_sidebar';

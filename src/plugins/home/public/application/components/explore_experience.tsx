@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -13,8 +12,6 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';

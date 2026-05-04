@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableVisDynamicTable } from './table_vis_dynamic_table';
@@ -95,7 +94,7 @@ describe('TableVisDynamicTable', () => {
   });
 
   it('should render the component with title', () => {
-    const { getByTestId, getByText } = render(
+    const { getByText } = render(
       <TableVisDynamicTable
         title="Test Table"
         table={mockTable}
@@ -275,7 +274,7 @@ describe('TableVisDynamicTable', () => {
   });
 
   it('should handle pagination controls', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <TableVisDynamicTable
         table={mockTable}
         visConfig={mockVisConfig}
@@ -371,6 +370,52 @@ describe('TableVisDynamicTable', () => {
         negate: false,
       }),
     });
+  });
+
+  // Regression test for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11453
+  it('should emit sorted rows in filterBucket so the targeted cell value is preserved', () => {
+    const tableWithFilterable: FormattedTableContext = {
+      ...mockTable,
+      formattedColumns: [
+        {
+          id: 'col1',
+          title: 'Column 1',
+          formatter: { convert: (v: any) => v } as any,
+          filterable: true,
+        },
+        {
+          id: 'col2',
+          title: 'Column 2',
+          formatter: { convert: (v: any) => v } as any,
+          filterable: false,
+        },
+      ],
+    };
+
+    // Sort descending by col2 → sorted order is [value2(20), value3(15), value1(10)]
+    const uiStateSortedDesc: TableUiState = {
+      ...mockUiState,
+      sort: { colIndex: 1, direction: 'desc' },
+    };
+
+    const { getAllByTestId } = render(
+      <TableVisDynamicTable
+        table={tableWithFilterable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={uiStateSortedDesc}
+      />
+    );
+
+    fireEvent.click(getAllByTestId('tableVisFilterForValue')[0]);
+
+    const payload = (mockHandlers.event as jest.Mock).mock.calls[0][0];
+    const { table, row, column } = payload.data.data[0];
+
+    // The first rendered row after sort-desc on col2 is value2/20; the filter
+    // event must reference that same row, not the first row of the unsorted
+    // response.
+    expect(table.rows[row][table.columns[column].id]).toBe('value2');
   });
 
   it('should sanitize HTML content using dompurify', () => {

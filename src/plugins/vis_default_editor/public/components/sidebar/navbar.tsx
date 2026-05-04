@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
 import { OptionTab } from './use_option_tabs';

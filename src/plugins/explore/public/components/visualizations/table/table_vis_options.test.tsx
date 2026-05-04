@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableVisStyleControls, TableVisStyleControlsProps } from './table_vis_options';
 import { defaultTableChartStyles, TableChartStyle } from './table_vis_config';

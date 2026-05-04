@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { TimeRangeToolRegistration } from './time_range_tool_registration';
 import { TimefilterContract } from '../query/timefilter';

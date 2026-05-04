@@ -4,7 +4,6 @@
  */
 
 import { EuiButton, EuiEmptyPrompt, EuiPage, EuiText } from '@elastic/eui';
-import React from 'react';
 
 export const NoAccess = () => {
   return (

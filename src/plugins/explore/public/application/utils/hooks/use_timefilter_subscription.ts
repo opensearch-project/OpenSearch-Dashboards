@@ -26,6 +26,7 @@ export const useTimefilterSubscription = (services: ExploreServices) => {
         if (query.dataset) {
           dispatch(clearResults());
           dispatch(clearQueryStatusMap());
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(executeQueries({ services }) as unknown);
         }
       });

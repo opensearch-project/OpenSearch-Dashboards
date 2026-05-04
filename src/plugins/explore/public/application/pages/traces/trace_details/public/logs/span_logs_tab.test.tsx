@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpanLogsTab } from './span_logs_tab';
 import { LogHit } from '../../server/ppl_request_logs';
@@ -17,6 +16,7 @@ jest.mock('./url_builder', () => ({
     to: '2023-01-01T10:30:00.000Z',
   })),
   filterLogsBySpanId: jest.fn((logs, spanId) =>
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (logs || []).filter((l) => l.spanId === spanId || l?._source?.spanId === spanId)
   ),
 }));

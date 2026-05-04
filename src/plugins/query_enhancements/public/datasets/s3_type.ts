@@ -49,6 +49,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
       id: table.id,
       title: `${connection?.title}.${database?.title}.${table.title}`,
       type: DATASET.S3,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       dataSource: dataSource
         ? {
             id: dataSource.id,

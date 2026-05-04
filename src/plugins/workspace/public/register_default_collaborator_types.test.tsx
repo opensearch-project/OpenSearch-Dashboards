@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import React from 'react';
 import { coreMock } from '../../../core/public/mocks';
 import * as opensearchDashboardsReactExports from '../../../plugins/opensearch_dashboards_react/public';
@@ -15,6 +16,9 @@ import { AddCollaboratorsModalProps } from './components/add_collaborators_modal
 
 jest.mock('../../../plugins/opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
+  OpenSearchDashboardsContextProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 jest.mock('./components/add_collaborators_modal', () => ({

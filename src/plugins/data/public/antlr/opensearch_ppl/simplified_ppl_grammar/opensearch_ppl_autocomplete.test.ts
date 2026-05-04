@@ -128,6 +128,7 @@ describe('enrichAutocompleteResult', () => {
       rules,
       (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       cursor,
       query
     );
@@ -151,6 +152,7 @@ describe('enrichAutocompleteResult', () => {
       rules,
       (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       cursor,
       query
     );

@@ -33,6 +33,7 @@ describe('useDatasetFields', () => {
       meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
     } as any;
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => useDatasetFields(mockBaseDataset, mockDatasetType, false));
 
     expect(result.current.allFields).toEqual([]);
@@ -41,6 +42,7 @@ describe('useDatasetFields', () => {
   });
 
   it('returns empty arrays when datasetType is undefined', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => useDatasetFields(mockBaseDataset, undefined, true));
 
     expect(result.current.allFields).toEqual([]);
@@ -56,6 +58,7 @@ describe('useDatasetFields', () => {
       meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
     } as any;
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => useDatasetFields(mockBaseDataset, mockDatasetType, true));
 
     // Wait for the async fetch to complete
@@ -85,6 +88,7 @@ describe('useDatasetFields', () => {
       meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
     } as any;
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => useDatasetFields(mockBaseDataset, mockDatasetType, true));
 
     // Loading state is managed internally, wait for completion
@@ -102,6 +106,7 @@ describe('useDatasetFields', () => {
       meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
     } as any;
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => useDatasetFields(mockBaseDataset, mockDatasetType, true));
 
     await waitFor(() => {
@@ -119,6 +124,7 @@ describe('useDatasetFields', () => {
       meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
     } as any;
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const { result } = renderHook(() => useDatasetFields(mockBaseDataset, mockDatasetType, true));
 
     await waitFor(() => {
@@ -137,6 +143,7 @@ describe('useDatasetFields', () => {
     } as any;
 
     const { result, rerender } = renderHook(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       ({ dataset }) => useDatasetFields(dataset, mockDatasetType, true),
       {
         initialProps: { dataset: mockBaseDataset },
@@ -174,6 +181,7 @@ describe('useDatasetFields', () => {
     } as any;
 
     const { result, rerender } = renderHook(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       ({ type }) => useDatasetFields(mockBaseDataset, type, true),
       {
         initialProps: { type: mockDatasetType1 },
@@ -203,6 +211,7 @@ describe('useDatasetFields', () => {
     } as any;
 
     const { result, rerender } = renderHook(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       ({ supports }) => useDatasetFields(mockBaseDataset, mockDatasetType, supports),
       {
         initialProps: { supports: true },

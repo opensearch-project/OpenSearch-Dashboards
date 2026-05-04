@@ -85,6 +85,10 @@ import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
+import {
+  registerDisabledPPLExecuteQueryAction,
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+} from './components/query_panel/actions/ppl_execute_query_action';
 
 export class ExplorePlugin
   implements
@@ -103,6 +107,7 @@ export class ExplorePlugin
   private stopUrlTrackingCallbackByApp: Partial<Record<ExploreFlavor | 'explore', () => void>> = {};
   private currentHistory?: ScopedHistory;
   private readonly DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
+  private readonly METRICS_VISUALIZATION_NAME = 'MetricsVisualization';
   private readonly VISUALIZATION_EDITOR_NAME = 'VisualizationEditor';
 
   /** discover */
@@ -124,6 +129,7 @@ export class ExplorePlugin
   private slotRegistryService = new SlotRegistryService();
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
+  private unregisterPPLExecuteQueryAction?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -544,6 +550,7 @@ export class ExplorePlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'discoverApp' as const,
         ...(isObservability ? {} : { title: 'Explorer' }),
       },
       {
@@ -551,22 +558,48 @@ export class ExplorePlugin
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'logsApp' as const,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'apmTrace' as const,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'stats' as const,
       },
     ];
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks(true));
+    if (core.chrome.getIsIconSideNavEnabled()) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+          category: undefined,
+          order: 200,
+          euiIconType: 'discoverApp' as const,
+        },
+        {
+          id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
+          category: DEFAULT_APP_CATEGORIES.applicationPerformance,
+          order: 100,
+          euiIconType: 'apmTrace' as const,
+        },
+        {
+          id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+          category: undefined,
+          order: 300,
+          euiIconType: 'visAreaStacked' as const,
+        },
+      ]);
+    } else {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks(true));
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks(false));
     this.registerEmbeddable(core, setupDeps);
@@ -700,6 +733,18 @@ export class ExplorePlugin
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }
 
+    // Register disabled execute_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
+    if (plugins.contextProvider) {
+      registerDisabledPPLExecuteQueryAction(
+        plugins.contextProvider.actions.registerAssistantAction
+      );
+      this.unregisterPPLExecuteQueryAction = () =>
+        plugins.contextProvider!.actions.unregisterAssistantAction(
+          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
+        );
+    }
+
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: plugins.data.indexPatterns,
@@ -722,6 +767,7 @@ export class ExplorePlugin
     if (this.editorStopUrlTracking) {
       this.editorStopUrlTracking();
     }
+    this.unregisterPPLExecuteQueryAction?.();
   }
 
   private registerEmbeddable(
@@ -805,6 +851,20 @@ export class ExplorePlugin
       appExtensions,
     });
     setupDeps.visualizations.registerAlias({
+      name: this.METRICS_VISUALIZATION_NAME,
+      aliasPath: '#/?_a=(ui:(metricsPageMode:query))',
+      aliasApp: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+      title: i18n.translate('explore.visualization.metrics.title', {
+        defaultMessage: 'Visualize with Metrics',
+      }),
+      description: i18n.translate('explore.visualization.metrics.description', {
+        defaultMessage: 'Create visualization with Metrics',
+      }),
+      icon: 'metricsApp',
+      stage: 'production',
+      appExtensions,
+    });
+    setupDeps.visualizations.registerAlias({
       name: this.VISUALIZATION_EDITOR_NAME,
       // Create new visualization
       // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
@@ -848,7 +908,9 @@ export class ExplorePlugin
         .getAliases()
         .filter(
           (v) =>
-            v.name === this.DISCOVER_VISUALIZATION_NAME || v.name === this.VISUALIZATION_EDITOR_NAME
+            v.name === this.DISCOVER_VISUALIZATION_NAME ||
+            v.name === this.METRICS_VISUALIZATION_NAME ||
+            v.name === this.VISUALIZATION_EDITOR_NAME
         )
         .forEach((visAlias) => {
           // if current workspace has NO explore enabled, the explore visualization ingress should be hidden

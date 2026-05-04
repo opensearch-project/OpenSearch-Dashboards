@@ -56,7 +56,7 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
-.kiro/
+.kiro/*
 !.kiro/prompts/
 *.sublime-*
 npm-debug.log*
@@ -91,3 +91,6 @@ snapshots.js
 .lighthouserc.js
 .lhci_output.json
 /.lighthouseci/
+
+# osd-pm bootstrap fast-path fingerprint (local machine state)
+/.osd-bootstrap-fingerprint

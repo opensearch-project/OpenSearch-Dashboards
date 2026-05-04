@@ -37,6 +37,7 @@ describe('validateRuntimePPLQuery', () => {
       startRuleIndex: 0,
       pipeStartRuleIndex: parser.ruleNames.indexOf('commands'),
       grammarHash: 'runtime-validation-test-grammar',
+      // @ts-expect-error TS2353 TODO(ts-error): fixme
       lastUsed: Date.now(),
       backendVersion: '3.6.0',
       tokenDictionary: simplifiedPplAutocompleteData.tokenDictionary,

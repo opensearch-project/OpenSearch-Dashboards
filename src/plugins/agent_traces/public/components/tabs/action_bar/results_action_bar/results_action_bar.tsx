@@ -4,7 +4,7 @@
  */
 
 import './results_action_bar.scss';
-import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';

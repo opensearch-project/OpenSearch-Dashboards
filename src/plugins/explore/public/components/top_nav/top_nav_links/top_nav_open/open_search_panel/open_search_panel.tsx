@@ -10,7 +10,6 @@ TODO: This file needs to be updated.
 - this file needs unit tests once above has been resolved.
  */
 
-import React from 'react';
 import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -24,6 +23,7 @@ import {
   EuiFlyoutBody,
   EuiText,
 } from '@elastic/eui';
+import { SimpleSavedObject } from 'src/core/public';
 import { ExploreFlavor } from '../../../../../../common';
 import { SavedObjectFinderUi } from '../../../../../../../saved_objects/public';
 import { SAVED_OBJECT_TYPE } from '../../../../../saved_explore/_saved_explore';
@@ -51,6 +51,9 @@ const savedObjectMetadata = [
       defaultMessage: 'Saved explore',
     }),
     includeFields: ['kibanaSavedObjectMeta', 'type'],
+    // Filter out explores created in the in-context editor (no flavor/type)
+    showSavedObject: (savedObject: SimpleSavedObject<{ type?: string }>) =>
+      !!savedObject.attributes?.type,
   },
 ];
 

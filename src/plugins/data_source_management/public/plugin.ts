@@ -200,6 +200,7 @@ export class DataSourceManagementPlugin
         id: DSM_APP_ID,
         category: DEFAULT_APP_CATEGORIES.manageData,
         order: 100,
+        euiIconType: 'indexManagementApp',
       },
     ]);
 

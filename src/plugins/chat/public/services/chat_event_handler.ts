@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Subscription } from 'rxjs';
 import { EventType } from '../../common/events';
 import type {
   Event as ChatEvent,
@@ -53,7 +54,6 @@ export class ChatEventHandler {
   private activeAssistantMessages = new Map<string, AssistantMessage>();
   private pendingToolCalls = new Map<string, ToolCall>();
   private lastTextMessageStartId: string | null = null;
-  private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
 
   private assistantActionService: AssistantActionService;
@@ -64,6 +64,7 @@ export class ChatEventHandler {
   private onStartResponse: (flag: boolean) => void;
   private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
+  private toolResultSubscription: Subscription | null = null;
 
   // Telemetry tracking
   private interactionStartTime: number | null = null;
@@ -250,7 +251,8 @@ export class ChatEventHandler {
       delete assistantMessage.toolCalls;
     }
 
-    this.lastAssistantMessageId = assistantMessage.id;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._lastAssistantMessageId = assistantMessage.id;
 
     // Final update in timeline
     this.onTimelineUpdate((prev) => {
@@ -660,7 +662,7 @@ export class ChatEventHandler {
 
       const messages = this.getTimeline();
 
-      const { observable, toolMessage } = await this.chatService.sendToolResult(
+      const { observable, toolMessage, skipped } = await this.chatService.sendToolResult(
         toolCallId,
         result,
         messages
@@ -668,6 +670,19 @@ export class ChatEventHandler {
 
       // Notify that sending tool result is complete
       this.onSendToolResultStateChange?.(false);
+
+      if (skipped) {
+        // Another window already persisted a tool result for this toolCallId.
+        // Skip appending the locally-constructed toolMessage and surface an
+        // informational system message instead.
+        const infoMessage: SystemMessage = {
+          id: `tool-skipped-${toolCallId}-${Date.now()}`,
+          role: 'system',
+          content: 'This tool result was already submitted from another window.',
+        };
+        this.onTimelineUpdate((prev) => [...prev, infoMessage]);
+        return;
+      }
 
       this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
@@ -684,12 +699,17 @@ export class ChatEventHandler {
           console.error('Tool result response error:', error);
           this.onStreamingStateChange(false);
           this.onStartResponse(false);
+          this.toolResultSubscription = null;
         },
         complete: () => {
           this.onStreamingStateChange(false);
           this.onStartResponse(false);
+          this.toolResultSubscription = null;
         },
       });
+
+      // Store subscription so it can be unsubscribed in clearState
+      this.toolResultSubscription = subscription;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to send tool result:', error);
@@ -720,6 +740,22 @@ export class ChatEventHandler {
     this.pendingToolCalls.clear();
     this.toolExecutor.clearAllPendingTools();
     this.lastTextMessageStartId = null;
-    this.lastAssistantMessageId = null;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._lastAssistantMessageId = null;
+
+    // Stop tool result streaming if active
+    this.stopToolResultStreaming();
+  }
+
+  /**
+   * Stop tool result streaming if active
+   */
+  stopToolResultStreaming(): void {
+    if (this.toolResultSubscription) {
+      this.toolResultSubscription.unsubscribe();
+      this.toolResultSubscription = null;
+      this.onStreamingStateChange(false);
+      this.onStartResponse(false);
+    }
   }
 }

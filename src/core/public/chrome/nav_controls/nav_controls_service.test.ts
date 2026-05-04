@@ -187,4 +187,28 @@ describe('RecentlyAccessed#start()', () => {
       ]);
     });
   });
+
+  describe('icon side nav footer controls', () => {
+    it('allows registration', async () => {
+      const navControls = getStart();
+      const nc = { mount: jest.fn() };
+      navControls.registerIconSideNavFooter(nc);
+      expect(await navControls.getIconSideNavFooter$().pipe(take(1)).toPromise()).toEqual([nc]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const nc1 = { mount: jest.fn(), order: 10 };
+      const nc2 = { mount: jest.fn(), order: 0 };
+      const nc3 = { mount: jest.fn(), order: 20 };
+      navControls.registerIconSideNavFooter(nc1);
+      navControls.registerIconSideNavFooter(nc2);
+      navControls.registerIconSideNavFooter(nc3);
+      expect(await navControls.getIconSideNavFooter$().pipe(take(1)).toPromise()).toEqual([
+        nc2,
+        nc1,
+        nc3,
+      ]);
+    });
+  });
 });

@@ -4,7 +4,6 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { monaco } from '@osd/monaco';
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
 
 // Mock monaco
@@ -49,6 +48,7 @@ describe('useMultiQueryDecorations', () => {
     mockEditor = {
       getModel: jest.fn().mockReturnValue(mockModel),
       createDecorationsCollection: jest.fn().mockReturnValue(mockCollection),
+      updateOptions: jest.fn(),
     };
     // Clean up DOM
     const styleEl = document.getElementById('query-label-dynamic-styles');
@@ -255,10 +255,12 @@ describe('useMultiQueryDecorations', () => {
     const newMockEditor = {
       getModel: jest.fn().mockReturnValue(mockModel),
       createDecorationsCollection: jest.fn().mockReturnValue(newMockCollection),
+      updateOptions: jest.fn(),
     };
 
     // Update with new editor
     act(() => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       result.current.updateDecorations(newMockEditor, 'PROMQL');
     });
 

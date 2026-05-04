@@ -208,7 +208,7 @@ class PrometheusManager extends BaseConnectionManager<
 
   handlePostRequest(
     context: RequestHandlerContext,
-    request: ResourcesRequest<{ start?: number; end?: number }>
+    request: ResourcesRequest<{ start?: number; end?: number; 'match[]'?: string }>
   ) {
     const { id: dataSourceName } = request.body.connection;
     const { type: resourceType, name: resourceName } = request.body.resource;
@@ -221,6 +221,10 @@ class PrometheusManager extends BaseConnectionManager<
       queryParams.metric = resourceName;
     } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.SERIES && resourceName) {
       queryParams['match[]'] = resourceName;
+    }
+
+    if (resourceType === RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES && content?.['match[]']) {
+      queryParams['match[]'] = content['match[]'];
     }
 
     if (content?.start !== undefined) {

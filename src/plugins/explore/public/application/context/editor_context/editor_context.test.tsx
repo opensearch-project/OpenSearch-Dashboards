@@ -22,6 +22,7 @@ const TestComponent: React.FC = () => {
 };
 
 const renderWithProvider = (component: React.ReactElement) => {
+  // @ts-expect-error TS2559 TODO(ts-error): fixme
   return render(<EditorContextProvider>{component}</EditorContextProvider>);
 };
 

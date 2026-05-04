@@ -17,7 +17,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   CachedAcceleration,

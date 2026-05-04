@@ -116,6 +116,7 @@ const mockStore = {
   subscribe: jest.fn(() => () => {}), // Return unsubscribe function
   dispatch: jest.fn(),
 };
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 const wrapper: React.FC = ({ children }) => {
   return (
     // @ts-expect-error TS2769 TODO(ts-error): fixme

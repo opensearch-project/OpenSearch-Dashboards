@@ -31,7 +31,7 @@
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { ReactElement, useRef } from 'react';
+import { ReactElement, useRef } from 'react';
 
 import { MountPoint } from '../../../../core/public';
 import {
@@ -104,13 +104,17 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
 export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   const {
     config,
-    showSearchBar,
-    showDatePicker,
-    showDataSourceMenu,
-    showDatasetSelect,
+    showSearchBar = false,
+    showDatePicker = true,
+    showDataSourceMenu = false,
+    showDatasetSelect = false,
     dataSourceMenuConfig,
-    groupActions,
-    screenTitle,
+    groupActions = false,
+    screenTitle = '',
+    showCancelButton = false,
+    showQueryBar = true,
+    showQueryInput = true,
+    showFilterBar = true,
     ...searchBarProps
   } = props;
 
@@ -176,6 +180,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     const { DatasetSelect } = props.data.ui;
 
     return (
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DatasetSelect
         onSelect={props.datasetSelectProps?.onSelect || (() => {})}
         appName={props.datasetSelectProps?.appName || props.appName || ''}
@@ -190,6 +195,10 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     return (
       <SearchBar
         {...searchBarProps}
+        showQueryBar={showQueryBar}
+        showQueryInput={showQueryInput}
+        showFilterBar={showFilterBar}
+        showCancelButton={showCancelButton}
         showDatePicker={![TopNavMenuItemRenderType.OMITTED, false].includes(showDatePicker!)}
         {...overrides}
         queryStatus={props.queryStatus}
@@ -308,16 +317,3 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
   return renderLayout();
 }
-
-TopNavMenu.defaultProps = {
-  showSearchBar: false,
-  showQueryBar: true,
-  showQueryInput: true,
-  showDatePicker: true,
-  showFilterBar: true,
-  showDataSourceMenu: false,
-  showDatasetSelect: false,
-  screenTitle: '',
-  groupActions: false,
-  showCancelButton: false,
-};

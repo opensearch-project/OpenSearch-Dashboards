@@ -114,6 +114,7 @@ export class QueryEnhancementsPlugin
         'explore',
         'dataset_management',
         'agentTraces',
+        'dashboard',
       ],
       sampleQueries: [
         {

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { GettingStarted } from './getting_started';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FeatureCatalogueCategory } from 'src/plugins/home/public';

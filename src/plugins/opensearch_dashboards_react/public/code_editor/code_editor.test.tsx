@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { CodeEditor } from './code_editor';
 import { monaco } from '@osd/monaco';
 import { shallow } from 'enzyme';

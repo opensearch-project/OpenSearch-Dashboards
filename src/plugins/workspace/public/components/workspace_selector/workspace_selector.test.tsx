@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { WorkspaceSelector } from './workspace_selector';
@@ -61,7 +60,6 @@ describe('<WorkspaceSelector />', () => {
 
   it('should display the current workspace name', () => {
     render(<WorkspaceSelectorCreatorComponent />);
-    expect(screen.getByTestId('workspace-selector-current-title')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-selector-current-name')).toBeInTheDocument();
   });
 

@@ -58,11 +58,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const queryLanguageRef = useRef(queryLanguage);
 
-  const {
-    switchEditorMode,
-    setEditorRef: setEditor,
-    setEditorText: setText,
-  } = useEditorOperations();
+  const { switchEditorMode, setEditorRef: setEditor } = useEditorOperations();
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -93,11 +89,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     },
   });
 
-  // When the query changes from outside the editor, update the editor text as well
-  useEffect(() => {
-    setText(queryState.query);
-  }, [queryState.query, setText]);
-
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text
   useEffect(() => {
@@ -126,6 +117,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [editorRef, setEditor]
   );
 
+  // Get variable names from queryBuilder
+  const getVariableNames = useCallback(() => {
+    return queryBuilder.variableNames$?.value || [];
+  }, [queryBuilder]);
+
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
     async (
@@ -134,8 +130,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> =>
-      buildCompletionItems(model, position, _, token, { isPromptModeRef, queryLanguage, services }),
-    [isPromptModeRef, queryLanguage, services]
+      buildCompletionItems(model, position, _, token, {
+        isPromptModeRef,
+        queryLanguage,
+        services,
+        variableNames: getVariableNames(),
+      }),
+    [isPromptModeRef, queryLanguage, services, getVariableNames]
   );
 
   const suggestionProvider = useMemo(() => {
@@ -159,6 +160,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     queryBuilder.onQueryExecutionSubmit().catch((error) => {
       services.notifications?.toasts.addError(error, {
         title: 'Query execution failed',
+        toastLifeTimeMs: 2000,
       });
     });
   }, [queryBuilder, services.notifications?.toasts]);

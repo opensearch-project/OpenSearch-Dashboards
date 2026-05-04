@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import produce, { Draft } from 'immer';
 import { useTypedDispatch, useTypedSelector } from '../../../../application/utils/state_management';
@@ -26,6 +26,7 @@ function LineVisOptions() {
 
   return (
     <>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <Option
         title={i18n.translate('visBuilder.line.params.settingsTitle', {
           defaultMessage: 'Settings',

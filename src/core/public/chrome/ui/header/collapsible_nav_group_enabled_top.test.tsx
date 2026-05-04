@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink } from '../../nav_group';
@@ -47,10 +46,19 @@ describe('<CollapsibleNavTop />', () => {
     expect(props.navigateToApp).toBeCalledWith('home');
   });
 
-  it('should render expand icon when collapsed', async () => {
+  it('should render expand button when collapsed (original nav)', async () => {
     const { findByTestId } = render(
       <CollapsibleNavTop {...getMockedProps()} shouldShrinkNavigation />
     );
+    // In the original nav (no enableIconSideNav), collapsed state shows hamburger (menu) button
     await findByTestId('collapsibleNavShrinkButton');
+  });
+
+  it('should render home icon and toggle buttons when icon side nav enabled', async () => {
+    const { getAllByTestId } = render(
+      <CollapsibleNavTop {...getMockedProps()} shouldShrinkNavigation enableIconSideNav />
+    );
+    // Icon side nav renders both expanded and collapsed toggle buttons (CSS controls visibility)
+    expect(getAllByTestId('collapsibleNavToggleButton').length).toBeGreaterThanOrEqual(1);
   });
 });

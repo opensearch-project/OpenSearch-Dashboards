@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
@@ -69,6 +68,7 @@ jest.mock('../components/visualizations/utils/use_visualization_types', () => ({
 // Mock the visualization container utils
 jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
+  isValidMapping: jest.fn().mockReturnValue(true),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
   }),
@@ -194,6 +194,8 @@ describe('ExploreEmbeddable', () => {
 
   test('should have return inspector adaptors', () => {
     expect(embeddable.getInspectorAdapters()).not.toBeUndefined();
+    expect(embeddable.getInspectorAdapters().data).toBeDefined();
+    expect(typeof embeddable.getInspectorAdapters().data.setTabularLoader).toBe('function');
   });
 
   test('initializes search props correctly', () => {
@@ -592,6 +594,98 @@ describe('ExploreEmbeddable', () => {
 
     expect(embeddable.getOutput().error).toBeUndefined();
     expect(embeddable.getOutput().loading).toBe(false);
+  });
+
+  test('calls setTabularLoader with correct columns and rows when visualization data exists', async () => {
+    const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
+
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [{ price: 10, category: 'A', date: '2024-01-01' }],
+      numericalColumns: [{ name: 'price', column: 'price' } as any],
+      categoricalColumns: [{ name: 'category', column: 'category' } as any],
+      dateColumns: [{ name: 'date', column: 'date' } as any],
+    });
+
+    mockSavedExplore.searchSource.getField = jest.fn().mockImplementation((field: string) => {
+      if (field === 'index') {
+        return {
+          fields: { getByName: mockGetByName },
+        };
+      }
+      if (field === 'query') {
+        return { query: 'test', language: 'PPL' };
+      }
+    });
+
+    const setTabularLoaderSpy = jest.spyOn(
+      embeddable.getInspectorAdapters().data,
+      'setTabularLoader'
+    );
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    expect(setTabularLoaderSpy).toHaveBeenCalledWith(expect.any(Function), {
+      returnsFormattedValues: true,
+    });
+
+    const loader: any = setTabularLoaderSpy.mock.calls[0][0];
+    const result = loader();
+    expect(result.columns).toEqual([
+      { name: 'price', field: 'price' },
+      { name: 'category', field: 'category' },
+      { name: 'date', field: 'date' },
+    ]);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]).toHaveProperty('price');
+    expect(result.rows[0]).toHaveProperty('category');
+    expect(result.rows[0]).toHaveProperty('date');
+  });
+
+  test('formats row values using field formatter when available', async () => {
+    const mockConverter = jest.fn().mockReturnValue('formatted');
+    const mockGetFormatterForField = jest.fn().mockReturnValue({ convert: mockConverter });
+    const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
+
+    mockSavedExplore.searchSource.getField = jest.fn().mockImplementation((field: string) => {
+      if (field === 'index') {
+        return {
+          fields: { getByName: mockGetByName },
+          getFormatterForField: mockGetFormatterForField,
+        };
+      }
+      if (field === 'query') {
+        return { query: 'test', language: 'PPL' };
+      }
+    });
+
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [{ price: 42 }],
+      numericalColumns: [{ name: 'price', column: 'price' } as any],
+      categoricalColumns: [],
+      dateColumns: [],
+    });
+
+    const setTabularLoaderSpy = jest.spyOn(
+      embeddable.getInspectorAdapters().data,
+      'setTabularLoader'
+    );
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    const loader: any = setTabularLoaderSpy.mock.calls[0][0];
+    const result = loader();
+    expect(mockGetFormatterForField).toHaveBeenCalled();
+    expect(mockConverter).toHaveBeenCalledWith(42);
+    expect(result.rows[0].price.raw).toBe(42);
+    expect(result.rows[0].price.formatted).toBe('formatted');
   });
 
   test('should be able to adapt deprecated styles', async () => {

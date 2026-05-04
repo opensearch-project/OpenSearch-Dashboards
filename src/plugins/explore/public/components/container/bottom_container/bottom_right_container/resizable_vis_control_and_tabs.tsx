@@ -5,7 +5,7 @@
 
 import './resizable_vis_control_and_tabs.scss';
 
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -20,11 +20,11 @@ import { PanelDirection } from '@elastic/eui/src/components/resizable_container/
 
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { ExploreTabs } from '../../../tabs/tabs';
-import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { useTabError } from '../../../../application/utils/hooks/use_tab_error';
 import { ExploreServices } from '../../../../types';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
+import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
 
 export const ResizableVisControlAndTabs = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();

@@ -154,6 +154,7 @@ export class CorrelationService {
               dataSourceRef.id
             );
             const dataSourceAttrs = dataSource.attributes as DataSourceAttributes;
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             logDataset.dataSource = {
               id: dataSource.id,
               title: dataSourceAttrs?.title || dataSourceRef.name || dataSource.id,
@@ -163,6 +164,7 @@ export class CorrelationService {
             // eslint-disable-next-line no-console
             console.warn('Failed to fetch data source details for log dataset:', dataSourceError);
             // Fallback to reference information if data source fetch fails
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             logDataset.dataSource = {
               id: dataSourceRef.id,
               title: dataSourceRef.name || dataSourceRef.id,

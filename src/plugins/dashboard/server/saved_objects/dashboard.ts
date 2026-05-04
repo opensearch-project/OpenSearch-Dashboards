@@ -63,6 +63,7 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       },
       optionsJSON: { type: 'text', index: false },
       panelsJSON: { type: 'text', index: false },
+      variablesJSON: { type: 'text', index: false },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },

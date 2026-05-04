@@ -47,6 +47,7 @@ describe('Console Proxy Route', () => {
 
   beforeEach(() => {
     request = (method: string, path: string, response: string) => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise(response);
       const requestHandlerContextMock = coreMock.createRequestHandlerContext();
       opensearchClient = requestHandlerContextMock.opensearch.client;

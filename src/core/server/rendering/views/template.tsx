@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, createElement } from 'react';
+import { FunctionComponent, createElement } from 'react';
 
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';

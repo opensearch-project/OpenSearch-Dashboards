@@ -29,7 +29,7 @@
  */
 
 import { mount, ReactWrapper } from 'enzyme';
-import React from 'react';
+
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';

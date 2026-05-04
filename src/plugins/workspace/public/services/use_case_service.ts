@@ -86,6 +86,7 @@ export class UseCaseService {
               title: i18n.translate('workspace.settings.workspaceDetails', {
                 defaultMessage: 'Workspace details',
               }),
+              euiIconType: 'spacesApp',
             },
             ...(isPermissionEnabled
               ? [
@@ -96,6 +97,7 @@ export class UseCaseService {
                     title: i18n.translate('workspace.settings.workspaceCollaborators', {
                       defaultMessage: 'Collaborators',
                     }),
+                    euiIconType: 'users',
                   },
                 ]
               : []),
@@ -103,21 +105,25 @@ export class UseCaseService {
               id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
+              euiIconType: 'database',
             },
             {
               id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
+              euiIconType: 'indexPatternApp',
             },
             {
               id: 'datasets',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
+              euiIconType: 'indexMapping',
             },
             {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,
+              euiIconType: 'package',
             },
             {
               id: 'import_sample_data',
@@ -126,6 +132,7 @@ export class UseCaseService {
               title: i18n.translate('workspace.left.sampleData.label', {
                 defaultMessage: 'Sample data',
               }),
+              euiIconType: 'navGetStarted',
             },
           ]);
         }

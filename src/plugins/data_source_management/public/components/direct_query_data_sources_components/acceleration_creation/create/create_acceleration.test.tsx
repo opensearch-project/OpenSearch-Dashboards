@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { act } from 'react';
 import { CreateAcceleration } from './create_acceleration';

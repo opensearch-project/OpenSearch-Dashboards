@@ -74,11 +74,13 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           },
         ],
         render(props) {
-          const spec = createPieSpec(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const size = props.axisColumnMappings.size?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!size || !color) throw Error('Missing axis config for pie chart');
+          const spec = createPieSpec(props.transformedData, props.styleOptions, {
+            [AxisRole.SIZE]: size,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec ?? {}} />;
         },
       },
@@ -91,11 +93,13 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           },
         ],
         render(props) {
-          const spec = createPieSpec(
-            props.transformedData,
-            props.styleOptions,
-            props.axisColumnMappings
-          );
+          const size = props.axisColumnMappings.size?.[0];
+          const color = props.axisColumnMappings.color?.[0];
+          if (!size || !color) throw Error('Missing axis config for pie chart');
+          const spec = createPieSpec(props.transformedData, props.styleOptions, {
+            [AxisRole.SIZE]: size,
+            [AxisRole.COLOR]: color,
+          });
           return <EchartsRender spec={spec ?? {}} />;
         },
       },

@@ -7,6 +7,7 @@ import { useCallback, useRef } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   splitMultiQueries,
+  // @ts-expect-error TS2305 TODO(ts-error): fixme
   ParsedQueryWithPosition,
 } from '../../../../application/utils/multi_query_utils';
 
@@ -87,6 +88,7 @@ export const useMultiQueryDecorations = () => {
 
       if (language !== 'PROMQL') {
         collection.clear();
+        editor.updateOptions({ glyphMargin: false });
         return;
       }
 
@@ -98,8 +100,11 @@ export const useMultiQueryDecorations = () => {
 
       if (queries.length <= 1) {
         collection.clear();
+        editor.updateOptions({ glyphMargin: false });
         return;
       }
+
+      editor.updateOptions({ glyphMargin: true });
 
       const queriesByLine = new Map<number, ParsedQueryWithPosition[]>();
       for (const query of queries) {

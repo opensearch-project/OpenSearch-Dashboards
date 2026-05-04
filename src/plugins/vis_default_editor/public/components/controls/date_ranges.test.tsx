@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DateRangesParamEditor } from './date_ranges';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';

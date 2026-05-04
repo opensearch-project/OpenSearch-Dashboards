@@ -30,6 +30,7 @@
 
 import { isObject } from 'lodash';
 import { saveAs } from 'file-saver';
+import { autoBom } from '@osd/std';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import { OpenSearchDashboardsDatatable } from '../../../expressions/public';
@@ -79,6 +80,6 @@ export const toCsv = function (formatted: boolean, { rows, columns, uiSettings }
 export const exportAsCsv = function (formatted: boolean, csvData: CSVDataProps) {
   const csv = new Blob([toCsv(formatted, csvData)], { type: 'text/csv;charset=utf-8' });
   const type = formatted ? 'formatted' : 'raw';
-  if (csvData.filename) saveAs(csv, `${csvData.filename}-${type}.csv`);
-  else saveAs(csv, `unsaved-${type}.csv`);
+  if (csvData.filename) saveAs(autoBom(csv), `${csvData.filename}-${type}.csv`);
+  else saveAs(autoBom(csv), `unsaved-${type}.csv`);
 };

@@ -60,8 +60,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
           currentMapping={axisColumnMappings}
           updateVisualization={updateVisualization}
           chartType="bar"
-          onSwitchAxes={(v) => updateStyleOption('switchAxes', v)}
-          switchAxes={styleOptions.switchAxes}
         />
       </EuiFlexItem>
       {hasMappingSelected && (
@@ -118,7 +116,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               onStandardAxesChange={(standardAxes) =>
                 updateStyleOption('standardAxes', standardAxes)
               }
-              switchAxes={styleOptions.switchAxes}
               showFullTimeRange={styleOptions.showFullTimeRange}
               onShowFullTimeRangeChange={(showFullTimeRange) =>
                 updateStyleOption('showFullTimeRange', showFullTimeRange)

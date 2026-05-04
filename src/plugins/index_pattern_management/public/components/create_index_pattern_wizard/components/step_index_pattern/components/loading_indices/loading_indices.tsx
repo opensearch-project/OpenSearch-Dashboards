@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiLoadingSpinner } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';

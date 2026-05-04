@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AccessControlTab } from './access_control_tab';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';

@@ -744,7 +744,6 @@ module.exports = {
       rules: {
         ...require('eslint-config-prettier').rules,
         ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
 

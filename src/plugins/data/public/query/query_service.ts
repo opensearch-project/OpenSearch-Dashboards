@@ -101,7 +101,13 @@ export class QueryService {
     indexPatterns,
     application,
   }: QueryServiceStartDependencies): IQueryStart {
-    this.queryStringManager.getDatasetService().init(indexPatterns);
+    const preInitDefault = this.queryStringManager.getDefaultQuery();
+    this.queryStringManager
+      .getDatasetService()
+      .init(indexPatterns)
+      .then(() => {
+        this.queryStringManager.refreshDefaultQuery(preInitDefault);
+      });
     return {
       addToQueryLog: createAddToQueryLog({
         storage,

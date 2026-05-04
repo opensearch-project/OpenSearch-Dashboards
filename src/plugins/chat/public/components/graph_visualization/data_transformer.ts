@@ -8,7 +8,6 @@ import {
   PrometheusData,
   NormalizedSeries,
   ChartData,
-  ChartError,
   TransformationResult,
   GraphTimeseriesDataArgs,
 } from './types';
