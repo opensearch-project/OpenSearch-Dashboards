@@ -1,3 +1,5 @@
 build
 target
 **/*.generated.scss
+# Tailwind v4 syntax (@theme, @layer, @utility) is not supported by stylelint's SCSS parser
+packages/osd-apm-topology/src/celestial.scss
