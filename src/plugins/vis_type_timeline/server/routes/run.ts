@@ -62,7 +62,7 @@ export function runRoute(
       path: '/api/timeline/run',
       validate: {
         body: schema.object({
-          sheet: schema.arrayOf(schema.string()),
+          sheet: schema.arrayOf(schema.string({ maxLength: 65536 }), { maxSize: 10 }),
           extended: schema.maybe(
             schema.object({
               es: schema.object({
