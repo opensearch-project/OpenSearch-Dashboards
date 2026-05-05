@@ -29,7 +29,7 @@
  */
 
 import { of, Observable, Subject } from 'rxjs';
-import { ServiceStatus, ServiceStatusLevels } from '../status';
+import { ServiceStatus, ServiceStatusLevel, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { take } from 'rxjs/operators';
 import { OpenSearchDashboardsMigratorStatus } from './migrations/opensearch_dashboards';
@@ -163,7 +163,7 @@ describe('calculateStatus$', () => {
     });
 
     beforeEach(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
     });
     afterEach(() => {
       jest.useRealTimers();
@@ -173,7 +173,7 @@ describe('calculateStatus$', () => {
       rawMigratorStatus$: Observable<OpenSearchDashboardsMigratorStatus>,
       tickMs: number,
       waitingTimeoutMs?: number
-    ): Promise<ServiceStatusLevels[]> => {
+    ): Promise<ServiceStatusLevel[]> => {
       const emissions: ServiceStatus[] = [];
       const sub = calculateStatus$(
         rawMigratorStatus$,
