@@ -1,0 +1,2 @@
+feat:
+- Allow custom ID to be specified when creating a workspace via the API ([#11631](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11631))
