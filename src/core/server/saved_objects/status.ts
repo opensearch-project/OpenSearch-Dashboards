@@ -39,12 +39,11 @@ import { OpenSearchDashboardsMigratorStatus } from './migrations/opensearch_dash
  * path plumbs `migrations.integrity.waitingTimeoutMs` through; this constant
  * only matters for tests and direct callers that skip config.
  *
- * Calibrated against observed batch-duration tails (see the design doc's
- * `batch-duration-findings.md`): a healthy `.kibana` batch was observed
- * blocked for ~177s on V2189945960 and ~41s on V2160069726 under cluster-
- * state-commit pressure. 10 minutes provides headroom for healthy large-
- * corpus migrations while still bounding the detection window for crashed
- * peers. Recalibrate post-deploy via the migration-waiting histogram.
+ * 10 minutes is chosen to provide headroom for healthy large-corpus
+ * migrations (which can sit in `waiting` for extended windows under
+ * cluster-state-commit pressure) while still bounding the detection window
+ * for crashed peers. Operators should tune this via config based on their
+ * migration-waiting latency observations.
  */
 const FALLBACK_WAITING_TIMEOUT_MS = 600_000;
 

@@ -229,8 +229,8 @@ export async function verifyDestIndexIntegrity(
     if (sentinel.status === 'in-progress') {
       log.info(
         `Peer migrator is still writing to ${existingDestName}; deferring to wait loop. ` +
-          `Layer C will escalate /api/status to critical after waitingTimeoutMs if the ` +
-          `alias swap doesn't land.`
+          `/api/status will escalate to critical after waitingTimeoutMs if the alias ` +
+          `swap doesn't land.`
       );
       return 'waiting-for-peer';
     }

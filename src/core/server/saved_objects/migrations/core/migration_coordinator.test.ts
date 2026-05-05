@@ -230,7 +230,7 @@ describe('verifyDestIndexIntegrity', () => {
     expect(verdict).toBe('peer-copied-claiming-alias');
   });
 
-  it('sentinel status=in-progress -> returns waiting-for-peer (defer to Layer C)', async () => {
+  it('sentinel status=in-progress -> returns waiting-for-peer (defer to waitingTimeoutMs)', async () => {
     const sentinel: MigrationSentinelDoc = {
       status: 'in-progress',
       startedAt: '2026-04-25T07:50:36Z',

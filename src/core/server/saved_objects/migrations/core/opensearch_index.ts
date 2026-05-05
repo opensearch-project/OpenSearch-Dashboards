@@ -251,13 +251,12 @@ function buildBulkBody(index: string, docs: RawDoc[]): object[] {
  * A bulk-item error is considered retriable if ANY of these match. (Union,
  * not intersection — a 503 alone is enough to retry.)
  *
- * The predicate was audited against OpenSearch core 1.0.0–3.5.0 to confirm
- * it catches every cluster-state-stall exception that can surface as a
- * per-item error on _bulk / put-mapping paths. The audited exception list:
- *   - ProcessClusterEventTimeoutException  → status 503, type matches
- *   - ClusterBlockException (retryable)    → status 429, type matches
- *   - ClusterBlockException (non-retryable) → type matches; bounded by maxRetries
- *   - ClusterManagerNotDiscoveredException → status 503, type explicit
+ * Covers transient cluster-state-stall failures that can surface as
+ * per-item errors on _bulk / put-mapping paths:
+ *   - HTTP 503 / 429 (server-side overload or throttling)
+ *   - `process_cluster_event_timeout_exception` (cluster-manager commit stall)
+ *   - `cluster_block_exception` (transient blocks; bounded by maxRetries)
+ *   - `cluster_manager_not_discovered_exception` (master election in flight)
  */
 export function isRetriableBulkItemError(op: {
   status?: number;
@@ -586,10 +585,10 @@ export async function findPriorSavedObjectsIndex(
 
   // Match only exact versioned siblings of the alias — `${alias}_<digits>`,
   // with no additional path segments between the alias and the number. This
-  // prevents matching sibling system indices such as `.kibana_task_manager_1`,
-  // `.kibana_security_session_1`, or FGAC tenant indices of the form
-  // `.kibana_<hash>_<tenant>_<n>`, which share the `.kibana*` prefix but are
-  // not the prior version of the saved-object alias.
+  // prevents matching sibling system indices (e.g., `.kibana_task_manager_1`,
+  // `.kibana_security_session_1`) or other multi-segment indices that share
+  // the `.kibana*` prefix but are not the prior version of the saved-object
+  // alias.
   const suffixRegex = new RegExp(`^${escapeRegex(alias)}_(\\d+)$`);
   const names = Object.keys(body).filter((n) => n !== existingDestName && suffixRegex.test(n));
   if (names.length === 0) return null;

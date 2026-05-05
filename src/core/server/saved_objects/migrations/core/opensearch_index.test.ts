@@ -710,14 +710,14 @@ describe('OpenSearchIndex', () => {
       expect(result).toBe('.kibana_7');
     });
 
-    test('ignores FGAC tenant indices of the form .kibana_<hash>_<tenant>_<n>', async () => {
+    test('ignores multi-segment sibling indices that share the alias prefix', async () => {
       client.indices.get.mockResolvedValue(
         opensearchClientMock.createSuccessTransportRequestPromise({
           '.kibana_7': {},
           '.kibana_8': {},
-          '.kibana_2119321993_jcoelhoopisnetcom_1': {},
-          '.kibana_2119321993_jcoelhoopisnetcom_2': {},
-          '.kibana_473215078_jpalanichamydwavesyscom_1': {},
+          '.kibana_1234_alpha_1': {},
+          '.kibana_1234_alpha_2': {},
+          '.kibana_5678_beta_1': {},
         })
       );
 

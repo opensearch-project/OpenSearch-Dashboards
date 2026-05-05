@@ -25,15 +25,13 @@
  *   - `aborted`:     writer caught a migration error and explicitly marked
  *                    the destination as poisoned
  *
- * An earlier revision included a per-batch heartbeat (`lastHeartbeatAt`)
- * plus a staleness probe to detect crashed peers faster than Layer C's
- * status escalation. Empirical batch-duration evidence (see the design
- * doc's `batch-duration-findings.md`) showed defensible probe intervals
- * had to tolerate ~177s single-batch windows, at which point the
- * heartbeat's detection-latency benefit over Layer C evaporated. The
- * heartbeat machinery was removed to simplify the design; Layer C's
- * `waitingTimeoutMs` is now the single time-bound signal for "peer has
- * stopped making progress."
+ * The sentinel is a static marker — it is written on state transitions
+ * only, not on every batch. A per-batch heartbeat was considered but
+ * rejected: a defensible staleness threshold had to tolerate long healthy
+ * batches, which made the heartbeat's detection-latency benefit negligible
+ * compared to the existing `waitingTimeoutMs` status escalation. A single
+ * time-bound signal ("peer has stopped making progress beyond
+ * `waitingTimeoutMs`") is simpler and sufficient.
  *
  * Using a document (not index `_meta`) avoids the cluster-event cost of
  * `put-mapping` — the status marker itself shouldn't be susceptible to
