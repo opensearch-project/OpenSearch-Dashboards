@@ -42,7 +42,7 @@ import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
 import { MigrationRetryConfig } from './migration_reconciliation';
-import { readMigrationSentinel } from './migration_sentinel';
+import { readMigrationSentinel, MIGRATION_SENTINEL_TYPE } from './migration_sentinel';
 import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
@@ -537,7 +537,9 @@ function isRetriableReindexError(err: { type?: string; reason?: string } | undef
 
 /**
  * Returns a Map<type, count> for the given saved-objects index by running a
- * `terms` aggregation on the `type` keyword field.
+ * `terms` aggregation on the `type` keyword field. The migration-status
+ * sentinel type is filtered out so it cannot contribute a noise bucket to
+ * per-type delta calculations.
  *
  * Used by `migration_coordinator.ts::verifyDestIndexIntegrity` for the
  * per-type count check when a legacy destination has no sentinel doc.
@@ -551,6 +553,11 @@ export async function countByType(
       index,
       body: {
         size: 0,
+        query: {
+          bool: {
+            must_not: [{ term: { type: MIGRATION_SENTINEL_TYPE } }],
+          },
+        },
         aggs: { by_type: { terms: { field: 'type', size: 1000 } } },
       },
     },

@@ -926,6 +926,79 @@ describe('OpenSearchIndex', () => {
     });
   });
 
+  describe('countByType', () => {
+    const migClient = () => (client as unknown) as MigrationOpenSearchClient;
+
+    test('builds a terms aggregation on the type field', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({
+        body: { aggregations: { by_type: { buckets: [] } } },
+        statusCode: 200,
+      });
+
+      await Index.countByType(migClient(), '.kibana_8');
+
+      const call = (client as any).search.mock.calls[0][0];
+      expect(call.index).toBe('.kibana_8');
+      expect(call.body.aggs.by_type.terms.field).toBe('type');
+    });
+
+    test('excludes the migration-status sentinel from the aggregation via must_not', async () => {
+      // Prevents the sentinel from contributing a noise bucket to
+      // per-type count comparisons.
+      (client as any).search = jest.fn().mockResolvedValue({
+        body: { aggregations: { by_type: { buckets: [] } } },
+        statusCode: 200,
+      });
+
+      await Index.countByType(migClient(), '.kibana_8');
+
+      const call = (client as any).search.mock.calls[0][0];
+      expect(call.body.query).toEqual({
+        bool: {
+          must_not: [{ term: { type: 'osd_migration_status' } }],
+        },
+      });
+    });
+
+    test('returns a map keyed by the type bucket', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({
+        body: {
+          aggregations: {
+            by_type: {
+              buckets: [
+                { key: 'index-pattern', doc_count: 82 },
+                { key: 'dashboard', doc_count: 12 },
+                { key: 'config', doc_count: 1 },
+              ],
+            },
+          },
+        },
+        statusCode: 200,
+      });
+
+      const result = await Index.countByType(migClient(), '.kibana_8');
+
+      expect(result.get('index-pattern')).toBe(82);
+      expect(result.get('dashboard')).toBe(12);
+      expect(result.get('config')).toBe(1);
+      expect(result.has('osd_migration_status')).toBe(false);
+    });
+
+    test('returns empty map on 404', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({ body: {}, statusCode: 404 });
+
+      const result = await Index.countByType(migClient(), '.kibana_8');
+      expect(result.size).toBe(0);
+    });
+
+    test('returns empty map when aggregations are missing', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({ body: {}, statusCode: 200 });
+
+      const result = await Index.countByType(migClient(), '.kibana_8');
+      expect(result.size).toBe(0);
+    });
+  });
+
   describe('reader', () => {
     test('returns docs in batches', async () => {
       const index = '.myalias';
