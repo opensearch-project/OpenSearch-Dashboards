@@ -1,0 +1,47 @@
+name: "Repo Health: Weekly Summary"
+
+on:
+  schedule:
+    # Run every Monday at 9:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: read
+  pull-requests: read
+
+jobs:
+  weekly-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate weekly summary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/repo_health/weekly_summary.sh
+          bash scripts/repo_health/weekly_summary.sh
+
+      - name: Upload weekly summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-summary
+          path: tmp/weekly-summary.md
+          retention-days: 90
+
+      - name: Print summary
+        if: always()
+        run: |
+          echo "## Weekly Summary" >> $GITHUB_STEP_SUMMARY
+          cat tmp/weekly-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Post to Slack
+        if: success() && secrets.SLACK_WEBHOOK_URL != ''
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload-file-path: tmp/slack-weekly-payload.json
