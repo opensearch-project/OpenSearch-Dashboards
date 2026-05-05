@@ -37,8 +37,8 @@ const detailsText = i18n.translate('explore.errorPanel.enhancedDetails', {
 const typeText = i18n.translate('explore.errorPanel.enhancedType', {
   defaultMessage: 'Error type',
 });
-const technicalDetailsText = i18n.translate('explore.errorPanel.technicalDetails', {
-  defaultMessage: 'Technical details',
+const errorDetailsText = i18n.translate('explore.errorPanel.errorDetails', {
+  defaultMessage: 'View full error details',
 });
 const askAiButtonText = i18n.translate('explore.errorPanel.askAi', {
   defaultMessage: 'Ask AI for help',
@@ -60,7 +60,7 @@ export interface ErrorGuardProps {
 
 export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Element | null => {
   const error = useTabError(registryTab);
-  const [isTechnicalDetailsOpen, setIsTechnicalDetailsOpen] = useState(false);
+  const [isErrorDetailsOpen, setIsErrorDetailsOpen] = useState(false);
   const [isAskingAi, setIsAskingAi] = useState(false);
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const query = useSelector(selectQuery);
@@ -190,14 +190,14 @@ export const ErrorGuard = ({ registryTab, children }: ErrorGuardProps): JSX.Elem
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="xs"
-                    iconType={isTechnicalDetailsOpen ? 'arrowDown' : 'arrowRight'}
-                    onClick={() => setIsTechnicalDetailsOpen(!isTechnicalDetailsOpen)}
+                    iconType={isErrorDetailsOpen ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setIsErrorDetailsOpen(!isErrorDetailsOpen)}
                   >
-                    {technicalDetailsText}
+                    {errorDetailsText}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              {isTechnicalDetailsOpen && (
+              {isErrorDetailsOpen && (
                 <>
                   <EuiSpacer size="s" />
                   <div className="exploreErrorGuard__errorsSection">
