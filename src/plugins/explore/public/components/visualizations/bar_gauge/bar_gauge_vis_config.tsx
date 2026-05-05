@@ -9,8 +9,8 @@ import { BarGaugeVisStyleControls } from './bar_gauge_vis_options';
 import { TitleOptions, AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
-import { createBarGaugeSpec } from './to_expression';
-import { EchartsRender } from '../echarts_render';
+import { BarGaugeRender } from './bar_gauge_render';
+import { aggregate } from '../utils/data_transformation';
 
 export interface ExclusiveBarGaugeConfig {
   displayMode: 'gradient' | 'stack' | 'basic';
@@ -73,11 +73,32 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
           const x = props.axisColumnMappings.x?.[0];
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y) throw Error('Missing axis config for bar gauge chart');
-          const spec = createBarGaugeSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
-          return <EchartsRender spec={spec} />;
+
+          const categoryField = x.schema === VisFieldType.Categorical ? x.column : y.column;
+          const valueField = x.schema === VisFieldType.Numerical ? x.column : y.column;
+          const isHorizontal = x.schema === VisFieldType.Numerical;
+
+          const aggregated = aggregate({
+            groupBy: categoryField,
+            field: valueField,
+            calculateType: props.styleOptions.valueCalculation,
+          })(props.transformedData);
+
+          const gaugeData = aggregated.map((row) => ({
+            category: String(row[categoryField]),
+            value:
+              row[valueField] !== undefined && row[valueField] !== null
+                ? Number(row[valueField])
+                : null,
+          }));
+
+          return (
+            <BarGaugeRender
+              data={gaugeData}
+              styles={props.styleOptions}
+              isHorizontal={isHorizontal}
+            />
+          );
         },
       },
     ];

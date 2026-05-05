@@ -44,11 +44,15 @@ export const runCreateVisTests = () => {
     after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
+
     it('should create a bar gauge visualization using a query with one metric and one category', () => {
       const query = `source=${datasetName} | stats count() by category`;
       cy.explore.createVisualizationWithQuery(query, 'bar_gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
+      // bar gauge renders as HTML divs
+      cy.get('.main-bar-gauge-container').should('be.visible');
+      cy.get('.bar-gauge-item').should('have.length.greaterThan', 0);
     });
 
     it('should change style options and the changes reflect immediately to the bar gauge visualization', () => {
@@ -56,40 +60,37 @@ export const runCreateVisTests = () => {
       cy.explore.createVisualizationWithQuery(query, 'bar_gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
-      let beforeCanvasDataUrl;
-      cy.get('.exploreVisContainer canvas')
-        .should('be.visible')
-        .then((canvas) => {
-          beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
-        });
 
-      cy.getElementByTestId('valueDisplayOption-text').click();
-      // compare with new canvas
-      cy.get('.exploreVisContainer canvas').then((canvas) => {
-        const afterCanvasDataUrl = canvas[0].toDataURL();
-        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
-      });
+      cy.get('.bar-gauge-value').first().should('be.visible');
+
+      cy.getElementByTestId('valueDisplayOption-hidden').click();
+
+      // after setting to hidden, value elements should have visibility:hidden
+      cy.get('.bar-gauge-value').should('have.css', 'visibility', 'hidden');
     });
+
     it('should add threshold for bar gauge chart and reflect immediatly to the bar gauge visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
       cy.explore.createVisualizationWithQuery(query, 'bar_gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
-      let beforeCanvasDataUrl;
-      cy.get('.exploreVisContainer canvas')
-        .should('be.visible')
-        .then((canvas) => {
-          beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
+
+      let beforeFillStyle;
+      cy.get('.bar-gauge-fill')
+        .first()
+        .then(($el) => {
+          beforeFillStyle = $el.attr('style');
         });
 
-      // Open thresholds setting
       cy.get('[aria-controls="thresholdSection"]').click();
       cy.getElementByTestId('exploreVisAddThreshold').click();
-      // compare with new canvas
-      cy.get('.exploreVisContainer canvas').then((canvas) => {
-        const afterCanvasDataUrl = canvas[0].toDataURL();
-        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
-      });
+
+      // fill style should change after threshold is added
+      cy.get('.bar-gauge-fill')
+        .first()
+        .should(($el) => {
+          expect($el.attr('style')).not.to.eq(beforeFillStyle);
+        });
     });
   });
 };
