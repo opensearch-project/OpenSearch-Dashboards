@@ -15,6 +15,11 @@ import {
   QueryStatusOptions,
 } from './types';
 import { API } from './constants';
+import {
+  OpenSearchErrorResponse,
+  OpenSearchErrorContext,
+  OpenSearchError,
+} from '../../data/common';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -46,26 +51,62 @@ export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
 };
 
-export const throwFacetError = (response: any) => {
-  let errorMessage = response.data.body?.message ?? response.data.body ?? response.data;
+export interface EnhancedError extends Error {
+  message: string;
+  status: number;
+  errorBody?: OpenSearchErrorResponse;
+  errorContext?: {
+    context?: OpenSearchErrorContext;
+    code?: string;
+    type?: string;
+    location?: string[];
+  };
+}
 
-  // Check if errorMessage is an object and handle Error objects
-  if (typeof errorMessage === 'object') {
-    if (errorMessage instanceof Error) {
-      // If errorMessage is an instance of Error, extract its message
-      errorMessage = errorMessage.message;
-    } else if (errorMessage.message) {
-      // If errorMessage has a message property, extract that message
-      errorMessage = JSON.stringify(errorMessage.message);
-    } else {
-      // If errorMessage is a plain object, stringify it
-      errorMessage = JSON.stringify(errorMessage);
+const extractErrorMessage = (errorBody: unknown): string => {
+  if (typeof errorBody !== 'object' || errorBody === null) {
+    return String(errorBody);
+  }
+  if (errorBody instanceof Error) {
+    return errorBody.message;
+  }
+  if ('error' in errorBody && typeof errorBody.error === 'object' && errorBody.error) {
+    const errObj = errorBody.error as Partial<OpenSearchError>;
+    return errObj.details ?? errObj.reason ?? JSON.stringify(errObj);
+  }
+  if ('message' in errorBody && typeof errorBody.message === 'string') {
+    return errorBody.message;
+  }
+  return JSON.stringify(errorBody);
+};
+
+export const throwFacetError = (response: any): never => {
+  const errorBody: unknown = response.data.body ?? response.data;
+  const errorMessage = extractErrorMessage(errorBody);
+
+  const error = new Error(errorMessage) as EnhancedError;
+  error.status = response.data.status ?? response.status ?? response.data.statusCode;
+  error.name = error.status !== undefined ? error.status.toString() : 'QueryError';
+
+  if (typeof errorBody === 'object' && errorBody !== null) {
+    if (
+      'status' in errorBody &&
+      (typeof errorBody.status === 'number' || typeof errorBody.status === 'string')
+    ) {
+      error.errorBody = errorBody as OpenSearchErrorResponse;
+    }
+
+    if ('error' in errorBody && typeof errorBody.error === 'object' && errorBody.error) {
+      const errObj = errorBody.error as Partial<OpenSearchError>;
+      error.errorContext = {
+        ...(errObj.context && { context: errObj.context }),
+        ...(errObj.code && { code: errObj.code }),
+        ...(errObj.type && { type: errObj.type }),
+        ...(errObj.location && { location: errObj.location }),
+      };
     }
   }
 
-  const error = new Error(errorMessage);
-  error.name = response.data.status ?? response.status ?? response.data.statusCode;
-  (error as any).status = error.name;
   throw error;
 };
 

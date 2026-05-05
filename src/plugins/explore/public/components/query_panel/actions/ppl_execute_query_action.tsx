@@ -124,12 +124,17 @@ export function usePPLExecuteQueryAction(
             const errorMessage = msg
               ? `${msg.type ? `${msg.type}: ` : ''}${msg.details}`
               : 'Query execution failed';
+
+            const errorObj = queryStatus.error?.errorBody?.error;
+            const contextData = errorObj?.context || queryStatus.error?.errorContext?.context;
+
             return {
               success: false,
               executed: false,
               query: args.query,
               message: `Query execution failed: ${errorMessage}`,
               error: errorMessage,
+              ...(contextData && { errorContext: contextData }),
             };
           }
 
