@@ -76,9 +76,7 @@ export const savedObjectsMigrationConfig = {
       enabled: schema.boolean({ defaultValue: true }),
       failOnDeltaPercentPerType: schema.number({ defaultValue: 5, min: 0, max: 100 }),
       failOnAbsoluteDeltaPerType: schema.number({ defaultValue: 10, min: 0 }),
-      stalePeerProbeIntervalMs: schema.number({ defaultValue: 10000, min: 100 }),
-      sentinelHeartbeatIntervalMs: schema.number({ defaultValue: 5000, min: 100 }),
-      waitingTimeoutMs: schema.number({ defaultValue: 120000, min: 1000 }),
+      waitingTimeoutMs: schema.number({ defaultValue: 600000, min: 1000 }),
     }),
   }),
 };

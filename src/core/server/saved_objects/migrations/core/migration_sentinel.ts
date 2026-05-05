@@ -14,17 +14,29 @@
  *
  * The sentinel is a single document stored inside the destination
  * `.kibana_N` index under a reserved _id. It tracks the migration
- * lifecycle so that:
+ * lifecycle so that restarting OSD instances can tell a half-written
+ * destination (from a crashed migrator) apart from a healthy in-progress
+ * destination (from a peer that's still actively copying).
  *
- *   - restarting OSD instances can tell a half-written destination (from a
- *     crashed migrator) apart from a healthy in-progress destination (from
- *     a peer that's still actively copying), and
- *   - the "is the peer still alive?" staleness check doesn't depend on
- *     cross-node clock sync; a single probing node reads the sentinel
- *     twice and checks whether `lastHeartbeatAt` advanced between reads.
+ * The sentinel is a static marker with four possible states:
+ *   - `in-progress`: writer has claimed the index and is actively copying
+ *   - `copied`:      scroll-copy loop complete, alias not yet swapped
+ *   - `complete`:    alias has been swapped; migration fully done
+ *   - `aborted`:     writer caught a migration error and explicitly marked
+ *                    the destination as poisoned
+ *
+ * An earlier revision included a per-batch heartbeat (`lastHeartbeatAt`)
+ * plus a staleness probe to detect crashed peers faster than Layer C's
+ * status escalation. Empirical batch-duration evidence (see the design
+ * doc's `batch-duration-findings.md`) showed defensible probe intervals
+ * had to tolerate ~177s single-batch windows, at which point the
+ * heartbeat's detection-latency benefit over Layer C evaporated. The
+ * heartbeat machinery was removed to simplify the design; Layer C's
+ * `waitingTimeoutMs` is now the single time-bound signal for "peer has
+ * stopped making progress."
  *
  * Using a document (not index `_meta`) avoids the cluster-event cost of
- * `put-mapping` — the liveness marker itself shouldn't be susceptible to
+ * `put-mapping` — the status marker itself shouldn't be susceptible to
  * the same transient cluster-state failures it's meant to detect.
  */
 
@@ -87,41 +99,11 @@ export async function writeMigrationSentinel(
  * deterministic timestamps.
  */
 export function buildInitialSentinel(now: Date = new Date()): MigrationSentinelDoc {
-  const iso = now.toISOString();
   return {
     status: 'in-progress',
-    startedAt: iso,
-    lastHeartbeatAt: iso,
+    startedAt: now.toISOString(),
     nodeHostname: safeHostname(),
   };
-}
-
-/**
- * Update `lastHeartbeatAt` only. Read-modify-write the doc so we don't clobber
- * other fields (e.g. `startedAt` or a racing abort-marker from a sibling).
- * If the read fails, the heartbeat is silently skipped — heartbeat is
- * best-effort and we must never fabricate a fresh sentinel (doing so would
- * overwrite the peer migrator's real `startedAt` value).
- */
-export async function heartbeatMigrationSentinel(
-  client: MigrationOpenSearchClient,
-  indexName: string,
-  now: Date = new Date()
-): Promise<void> {
-  let existing: MigrationSentinelDoc | null = null;
-  try {
-    existing = await readMigrationSentinel(client, indexName);
-  } catch {
-    return; // best-effort heartbeat, skip rather than fabricate a fresh doc
-  }
-  if (!existing) {
-    return; // sentinel not present (yet); nothing to heartbeat
-  }
-  const next: MigrationSentinelDoc = {
-    ...existing,
-    lastHeartbeatAt: now.toISOString(),
-  };
-  await writeMigrationSentinel(client, indexName, next);
 }
 
 /**
@@ -131,10 +113,9 @@ export async function heartbeatMigrationSentinel(
  */
 export async function markMigrationCopied(
   client: MigrationOpenSearchClient,
-  indexName: string,
-  now: Date = new Date()
+  indexName: string
 ): Promise<void> {
-  await transitionStatus(client, indexName, 'copied', now);
+  await transitionStatus(client, indexName, 'copied');
 }
 
 /**
@@ -144,10 +125,9 @@ export async function markMigrationCopied(
  */
 export async function markMigrationComplete(
   client: MigrationOpenSearchClient,
-  indexName: string,
-  now: Date = new Date()
+  indexName: string
 ): Promise<void> {
-  await transitionStatus(client, indexName, 'complete', now);
+  await transitionStatus(client, indexName, 'complete');
 }
 
 /**
@@ -169,7 +149,6 @@ export async function markMigrationAborted(
   const existing = (await readMigrationSentinel(client, indexName).catch(() => null)) ?? {
     status: 'in-progress' as const,
     startedAt: now.toISOString(),
-    lastHeartbeatAt: now.toISOString(),
     nodeHostname: safeHostname(),
   };
   const next: MigrationSentinelDoc = {
@@ -177,7 +156,6 @@ export async function markMigrationAborted(
     status: 'aborted',
     abortedAt: now.toISOString(),
     abortReason: reason,
-    lastHeartbeatAt: now.toISOString(),
   };
   await writeMigrationSentinel(client, indexName, next);
 }
@@ -185,8 +163,7 @@ export async function markMigrationAborted(
 async function transitionStatus(
   client: MigrationOpenSearchClient,
   indexName: string,
-  status: MigrationSentinelDoc['status'],
-  now: Date
+  status: MigrationSentinelDoc['status']
 ): Promise<void> {
   const existing = await readMigrationSentinel(client, indexName);
   if (!existing) {
@@ -198,7 +175,6 @@ async function transitionStatus(
   const next: MigrationSentinelDoc = {
     ...existing,
     status,
-    lastHeartbeatAt: now.toISOString(),
   };
   await writeMigrationSentinel(client, indexName, next);
 }

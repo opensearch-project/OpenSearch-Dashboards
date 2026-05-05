@@ -152,26 +152,12 @@ export function reader(
  * @param {MigrationRetryConfig} retryConfig - optional; defaults to the
  *   schema defaults. Pass `{ enabled: false, ... }` to force legacy
  *   single-shot behavior for callers that have their own retry layer.
- * @param {WriteOptions} options - optional; `onBeforeRetry` fires between
- *   a retry decision and the backoff sleep so callers can advance liveness
- *   markers (e.g. the migration-status sentinel heartbeat) without the
- *   retry loop itself having a dependency on sentinel plumbing. Callback
- *   errors are swallowed — Layer 0 correctness does not depend on Layer 1
- *   availability.
  */
-export interface WriteOptions {
-  onBeforeRetry?: (info: {
-    attempt: number;
-    lastError: { type?: string; reason?: string } | undefined;
-  }) => void | Promise<void>;
-}
-
 export async function write(
   client: MigrationOpenSearchClient,
   index: string,
   docs: RawDoc[],
-  retryConfig: MigrationRetryConfig = DEFAULT_RETRY_CONFIG,
-  options: WriteOptions = {}
+  retryConfig: MigrationRetryConfig = DEFAULT_RETRY_CONFIG
 ) {
   let attempt = 0;
   let remainingDocs = docs;
@@ -241,22 +227,6 @@ export async function write(
       reason: firstRetriable?.reason ?? 'transient error',
       type: firstRetriable?.type,
     });
-
-    // Invoke the optional liveness callback before sleeping. Swallow its
-    // errors so Layer 0 correctness does not depend on Layer 1 availability.
-    // This is the live-while-retrying invariant: a concurrent peer reading
-    // the sentinel should see lastHeartbeatAt advance at least once per
-    // retry attempt, preventing the retry budget from looking like a crash.
-    if (options.onBeforeRetry) {
-      try {
-        await options.onBeforeRetry({
-          attempt,
-          lastError: firstRetriable ?? undefined,
-        });
-      } catch {
-        // intentional: callback failures must not abort the retry loop
-      }
-    }
 
     const backoff = computeBackoff(attempt, retryConfig.initialBackoffMs, retryConfig.maxBackoffMs);
     remainingDocs = retriable;

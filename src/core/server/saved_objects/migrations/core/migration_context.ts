@@ -64,9 +64,7 @@ export const DEFAULT_MIGRATION_INTEGRITY_CONFIG: MigrationIntegrityConfig = {
   enabled: true,
   failOnDeltaPercentPerType: 5,
   failOnAbsoluteDeltaPerType: 10,
-  stalePeerProbeIntervalMs: 10000,
-  sentinelHeartbeatIntervalMs: 5000,
-  waitingTimeoutMs: 120000,
+  waitingTimeoutMs: 600000,
 };
 
 export interface MigrationOpts {

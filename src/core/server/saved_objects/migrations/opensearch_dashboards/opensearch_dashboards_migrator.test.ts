@@ -268,9 +268,7 @@ const mockOptions = (
         enabled: true,
         failOnDeltaPercentPerType: 5,
         failOnAbsoluteDeltaPerType: 10,
-        stalePeerProbeIntervalMs: 10000,
-        sentinelHeartbeatIntervalMs: 5000,
-        waitingTimeoutMs: 120000,
+        waitingTimeoutMs: 600000,
       },
     },
     // @ts-expect-error TS2345 TODO Fix me

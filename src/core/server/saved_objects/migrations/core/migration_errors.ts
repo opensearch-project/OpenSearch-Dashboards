@@ -30,21 +30,6 @@ export class SavedObjectsMigrationPoisonedDestError extends Error {
   }
 }
 
-export class SavedObjectsMigrationStalePeerError extends Error {
-  constructor(public readonly report: MigrationReconciliationReport) {
-    const lastHeartbeat = report.sentinel?.lastHeartbeatAt ?? 'never';
-    super(
-      `Migration halted: destination index ${report.destIndex} appears to be an abandoned ` +
-        `in-progress migration (last sentinel heartbeat ${lastHeartbeat}; no new heartbeat ` +
-        `in the configured probe window). No peer instance is actively migrating. ` +
-        `Alias not swapped. ` +
-        `To retry: DELETE ${report.destIndex} via the OpenSearch API and restart ` +
-        `OpenSearchDashboards.`
-    );
-    this.name = 'SavedObjectsMigrationStalePeerError';
-  }
-}
-
 export class SavedObjectsMigrationPartialDestError extends Error {
   constructor(public readonly report: MigrationReconciliationReport) {
     super(

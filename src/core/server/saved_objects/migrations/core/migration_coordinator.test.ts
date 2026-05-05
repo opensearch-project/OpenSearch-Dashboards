@@ -96,7 +96,6 @@ describe('coordinateMigration', () => {
 
 import {
   SavedObjectsMigrationPoisonedDestError,
-  SavedObjectsMigrationStalePeerError,
   SavedObjectsMigrationPartialDestError,
   verifyDestIndexIntegrity,
 } from './migration_coordinator';
@@ -108,9 +107,7 @@ function makeConfig(overrides: Partial<MigrationIntegrityConfig> = {}): Migratio
     enabled: true,
     failOnDeltaPercentPerType: 5,
     failOnAbsoluteDeltaPerType: 10,
-    stalePeerProbeIntervalMs: 0, // no real sleep in tests
-    sentinelHeartbeatIntervalMs: 5000,
-    waitingTimeoutMs: 120000,
+    waitingTimeoutMs: 600000,
     ...overrides,
   };
 }
@@ -148,7 +145,6 @@ describe('verifyDestIndexIntegrity', () => {
     const sentinel: MigrationSentinelDoc = {
       status: 'aborted',
       startedAt: '2026-04-25T07:50:36Z',
-      lastHeartbeatAt: '2026-04-25T07:53:35Z',
       abortedAt: '2026-04-25T07:53:35Z',
       abortReason: 'failed to process cluster event (put-mapping ...) within 30s',
       nodeHostname: 'ip-10-146-153-211',
@@ -194,7 +190,6 @@ describe('verifyDestIndexIntegrity', () => {
     const sentinel: MigrationSentinelDoc = {
       status: 'complete',
       startedAt: '2026-04-25T07:50:36Z',
-      lastHeartbeatAt: '2026-04-25T07:50:40Z',
       nodeHostname: 'node1',
     };
     const client = makeClientWithSentinel(sentinel);
@@ -217,7 +212,6 @@ describe('verifyDestIndexIntegrity', () => {
     const sentinel: MigrationSentinelDoc = {
       status: 'copied',
       startedAt: '2026-04-25T07:50:36Z',
-      lastHeartbeatAt: '2026-04-25T07:50:40Z',
       nodeHostname: 'node1',
     };
     const client = makeClientWithSentinel(sentinel);
@@ -236,33 +230,18 @@ describe('verifyDestIndexIntegrity', () => {
     expect(verdict).toBe('peer-copied-claiming-alias');
   });
 
-  it('sentinel in-progress with heartbeat advancing between probes -> waiting-for-peer', async () => {
-    const initial: MigrationSentinelDoc = {
+  it('sentinel status=in-progress -> returns waiting-for-peer (defer to Layer C)', async () => {
+    const sentinel: MigrationSentinelDoc = {
       status: 'in-progress',
       startedAt: '2026-04-25T07:50:36Z',
-      lastHeartbeatAt: '2026-04-25T07:50:40Z',
       nodeHostname: 'node1',
     };
-    const later: MigrationSentinelDoc = { ...initial, lastHeartbeatAt: '2026-04-25T07:50:45Z' };
-    const get = jest.fn();
-    get.mockResolvedValueOnce({
-      body: {
-        _source: { type: MIGRATION_SENTINEL_TYPE, [MIGRATION_SENTINEL_TYPE]: initial },
-      },
-      statusCode: 200,
-    });
-    get.mockResolvedValueOnce({
-      body: {
-        _source: { type: MIGRATION_SENTINEL_TYPE, [MIGRATION_SENTINEL_TYPE]: later },
-      },
-      statusCode: 200,
-    });
-    const client: any = { get };
+    const client = makeClientWithSentinel(sentinel);
 
     const verdict = await verifyDestIndexIntegrity(
       '.kibana_8',
       {
-        client,
+        client: client as any,
         config: makeConfig(),
         alias: '.kibana',
         countByType: jest.fn(async () => new Map()),
@@ -271,41 +250,6 @@ describe('verifyDestIndexIntegrity', () => {
       log
     );
     expect(verdict).toBe('waiting-for-peer');
-    expect(get).toHaveBeenCalledTimes(2); // initial read + probe
-  });
-
-  it('sentinel in-progress with NO heartbeat advance -> throws StalePeerError', async () => {
-    const stuck: MigrationSentinelDoc = {
-      status: 'in-progress',
-      startedAt: '2026-04-25T07:50:36Z',
-      lastHeartbeatAt: '2026-04-25T07:50:40Z',
-      nodeHostname: 'node1',
-    };
-    const get = jest
-      .fn()
-      .mockResolvedValueOnce({
-        body: { _source: { type: MIGRATION_SENTINEL_TYPE, [MIGRATION_SENTINEL_TYPE]: stuck } },
-        statusCode: 200,
-      })
-      .mockResolvedValueOnce({
-        body: { _source: { type: MIGRATION_SENTINEL_TYPE, [MIGRATION_SENTINEL_TYPE]: stuck } },
-        statusCode: 200,
-      });
-    const client: any = { get };
-
-    await expect(
-      verifyDestIndexIntegrity(
-        '.kibana_8',
-        {
-          client,
-          config: makeConfig(),
-          alias: '.kibana',
-          countByType: jest.fn(async () => new Map()),
-          findPriorSource: jest.fn(async () => null),
-        },
-        log
-      )
-    ).rejects.toBeInstanceOf(SavedObjectsMigrationStalePeerError);
   });
 
   it('no sentinel + per-type count delta over threshold -> throws PartialDestError', async () => {
@@ -378,10 +322,10 @@ describe('verifyDestIndexIntegrity', () => {
     expect(verdict).toBe('waiting-for-peer');
   });
 
-  it('no sentinel + empty dest + peer catches up with sentinel -> waiting-for-peer (race avoidance)', async () => {
+  it('no sentinel + empty dest + peer catches up with sentinel -> re-classifies via sentinel', async () => {
     // Simulates: primary OSD called createIndex but hadn't yet written the
     // sentinel when a peer probed. After the probe delay, the primary's
-    // sentinel write has landed and heartbeats are advancing.
+    // sentinel write has landed.
     const get = jest.fn();
     get.mockResolvedValueOnce({ body: {}, statusCode: 404 }); // initial sentinel read: not there
     get.mockResolvedValueOnce({
@@ -392,7 +336,6 @@ describe('verifyDestIndexIntegrity', () => {
           [MIGRATION_SENTINEL_TYPE]: {
             status: 'in-progress',
             startedAt: 't0',
-            lastHeartbeatAt: 't1',
             nodeHostname: 'peer',
           },
         },
@@ -400,29 +343,15 @@ describe('verifyDestIndexIntegrity', () => {
       statusCode: 200,
     });
     get.mockResolvedValueOnce({
-      // recursive verifyDestIndexIntegrity initial read
+      // recursive verifyDestIndexIntegrity initial read — routes straight
+      // to the in-progress waiting-for-peer verdict now that the sentinel
+      // is visible.
       body: {
         _source: {
           type: MIGRATION_SENTINEL_TYPE,
           [MIGRATION_SENTINEL_TYPE]: {
             status: 'in-progress',
             startedAt: 't0',
-            lastHeartbeatAt: 't1',
-            nodeHostname: 'peer',
-          },
-        },
-      },
-      statusCode: 200,
-    });
-    get.mockResolvedValueOnce({
-      // staleness probe second read: heartbeat advanced
-      body: {
-        _source: {
-          type: MIGRATION_SENTINEL_TYPE,
-          [MIGRATION_SENTINEL_TYPE]: {
-            status: 'in-progress',
-            startedAt: 't0',
-            lastHeartbeatAt: 't2',
             nodeHostname: 'peer',
           },
         },
@@ -548,7 +477,6 @@ describe('coordinateMigration with integrityVerifier', () => {
     const aborted: MigrationSentinelDoc = {
       status: 'aborted',
       startedAt: '2026-04-25T07:50:36Z',
-      lastHeartbeatAt: '2026-04-25T07:53:35Z',
       abortedAt: '2026-04-25T07:53:35Z',
       abortReason: 'boom',
       nodeHostname: 'n',

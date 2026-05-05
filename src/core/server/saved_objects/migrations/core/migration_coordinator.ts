@@ -63,14 +63,14 @@ import {
 import {
   SavedObjectsMigrationPartialDestError,
   SavedObjectsMigrationPoisonedDestError,
-  SavedObjectsMigrationStalePeerError,
 } from './migration_errors';
 
-export {
-  SavedObjectsMigrationPartialDestError,
-  SavedObjectsMigrationPoisonedDestError,
-  SavedObjectsMigrationStalePeerError,
-};
+export { SavedObjectsMigrationPartialDestError, SavedObjectsMigrationPoisonedDestError };
+
+// Brief race-avoidance sleep for the narrow window between a peer's
+// createIndex and its initial sentinel write. Short (sub-second) because
+// the peer writes the sentinel immediately after createIndex succeeds.
+const RACE_AVOIDANCE_SLEEP_MS = 500;
 
 const DEFAULT_POLL_INTERVAL = 15000;
 
@@ -227,27 +227,12 @@ export async function verifyDestIndexIntegrity(
       throw new SavedObjectsMigrationPoisonedDestError(report);
     }
     if (sentinel.status === 'in-progress') {
-      const verdict = await probeStaleness(
-        client,
-        existingDestName,
-        sentinel,
-        config.stalePeerProbeIntervalMs,
-        log
+      log.info(
+        `Peer migrator is still writing to ${existingDestName}; deferring to wait loop. ` +
+          `Layer C will escalate /api/status to critical after waitingTimeoutMs if the ` +
+          `alias swap doesn't land.`
       );
-      if (verdict === 'waiting-for-peer') return verdict;
-      const report = buildReport({
-        destIndex: existingDestName,
-        sourceIndex: null,
-        sentinel,
-        perType: [],
-        thresholds: config,
-      });
-      log.error(
-        `Migration integrity check: destination ${existingDestName} has a stale in-progress ` +
-          `sentinel (last heartbeat ${sentinel.lastHeartbeatAt}). Failing loudly.`,
-        { report }
-      );
-      throw new SavedObjectsMigrationStalePeerError(report);
+      return 'waiting-for-peer';
     }
     // Unknown status value — log and fall through to the count-based check
     // rather than silently treating as "healthy peer".
@@ -274,16 +259,16 @@ export async function verifyDestIndexIntegrity(
 
   // Race-avoidance for the narrow window between a peer's createIndex and
   // its initial sentinel write. If the destination is empty with no sentinel,
-  // sleep one probe interval and re-read sentinel + counts before deciding.
-  // This is a single-shot probe (not recursive) — after the wait we either
-  // defer to the sentinel path, accept population progress, or proceed to
-  // the count-based verdict with fresh data.
+  // sleep briefly and re-read sentinel + counts before deciding. This is a
+  // single-shot probe (not recursive) — after the wait we either defer to the
+  // sentinel path, accept population progress, or proceed to the count-based
+  // verdict with fresh data.
   if (sumCounts(destCounts) === 0 && sumCounts(sourceCounts) > 0) {
     log.info(
       `Destination ${existingDestName} is empty and has no sentinel yet; ` +
         `waiting briefly for peer to initialize before verdict.`
     );
-    await sleep(config.stalePeerProbeIntervalMs);
+    await sleep(RACE_AVOIDANCE_SLEEP_MS);
     const retrySentinel = await readMigrationSentinel(client, existingDestName).catch(() => null);
     if (retrySentinel) {
       // Peer caught up and wrote its sentinel. Re-run the gate from the
@@ -338,30 +323,18 @@ export async function verifyDestIndexIntegrity(
 }
 
 /**
- * Read the sentinel twice separated by `probeIntervalMs`. If the second read
- * shows a later `lastHeartbeatAt`, a peer is alive. Otherwise the in-progress
- * marker is stale. Comparing two reads made by the same probing node avoids
- * any cross-node clock-skew issue.
+ * Polls isMigrated every pollInterval milliseconds until it returns true.
  */
-async function probeStaleness(
-  client: MigrationOpenSearchClient,
-  indexName: string,
-  initial: MigrationSentinelDoc,
-  probeIntervalMs: number,
-  log: SavedObjectsMigrationLogger
-): Promise<'waiting-for-peer' | 'stale'> {
-  await sleep(probeIntervalMs);
-  const second = await readMigrationSentinel(client, indexName).catch(() => null);
-  if (!second) {
-    log.warning(
-      `Staleness probe: sentinel on ${indexName} disappeared between reads; treating as stale`
-    );
-    return 'stale';
+async function waitForMigration(
+  isMigrated: () => Promise<boolean>,
+  pollInterval = DEFAULT_POLL_INTERVAL
+) {
+  while (true) {
+    if (await isMigrated()) {
+      return;
+    }
+    await sleep(pollInterval);
   }
-  if (second.lastHeartbeatAt > initial.lastHeartbeatAt) {
-    return 'waiting-for-peer';
-  }
-  return 'stale';
 }
 
 function buildReport(args: {
@@ -388,21 +361,6 @@ function buildReport(args: {
       failOnAbsoluteDeltaPerType: args.thresholds.failOnAbsoluteDeltaPerType,
     },
   };
-}
-
-/**
- * Polls isMigrated every pollInterval milliseconds until it returns true.
- */
-async function waitForMigration(
-  isMigrated: () => Promise<boolean>,
-  pollInterval = DEFAULT_POLL_INTERVAL
-) {
-  while (true) {
-    if (await isMigrated()) {
-      return;
-    }
-    await sleep(pollInterval);
-  }
 }
 
 function sleep(ms: number) {

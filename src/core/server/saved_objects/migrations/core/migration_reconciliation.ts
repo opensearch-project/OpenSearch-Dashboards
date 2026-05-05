@@ -49,8 +49,6 @@ export interface MigrationSentinelDoc {
   status: 'in-progress' | 'copied' | 'complete' | 'aborted';
   /** ISO timestamp captured when the dest index was first created. */
   startedAt: string;
-  /** ISO timestamp bumped periodically during the scroll-copy loop. */
-  lastHeartbeatAt: string;
   /** ISO timestamp set when status transitions to `aborted`. */
   abortedAt?: string;
   /** Human-readable abort reason — typically the .message of the triggering error. */
@@ -89,8 +87,6 @@ export interface MigrationIntegrityConfig {
   enabled: boolean;
   failOnDeltaPercentPerType: number;
   failOnAbsoluteDeltaPerType: number;
-  stalePeerProbeIntervalMs: number;
-  sentinelHeartbeatIntervalMs: number;
   waitingTimeoutMs: number;
 }
 

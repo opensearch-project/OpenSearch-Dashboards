@@ -13,7 +13,6 @@ import {
   MIGRATION_SENTINEL_ID,
   MIGRATION_SENTINEL_TYPE,
   buildInitialSentinel,
-  heartbeatMigrationSentinel,
   markMigrationAborted,
   markMigrationComplete,
   markMigrationCopied,
@@ -39,7 +38,6 @@ describe('migration_sentinel helpers', () => {
               [MIGRATION_SENTINEL_TYPE]: {
                 status: 'in-progress',
                 startedAt: 't0',
-                lastHeartbeatAt: 't1',
                 nodeHostname: 'host',
               },
             },
@@ -49,7 +47,7 @@ describe('migration_sentinel helpers', () => {
       };
       const result = await readMigrationSentinel(client, '.kibana_8');
       expect(result?.status).toBe('in-progress');
-      expect(result?.lastHeartbeatAt).toBe('t1');
+      expect(result?.startedAt).toBe('t0');
     });
 
     it('returns null if payload is missing or malformed', async () => {
@@ -81,49 +79,11 @@ describe('migration_sentinel helpers', () => {
     });
   });
 
-  describe('heartbeatMigrationSentinel', () => {
-    it('updates only lastHeartbeatAt, preserving other fields', async () => {
-      const existing = {
-        status: 'in-progress' as const,
-        startedAt: '2026-04-25T07:50:36Z',
-        lastHeartbeatAt: '2026-04-25T07:50:40Z',
-        nodeHostname: 'host',
-      };
-      const indexFn = jest.fn().mockResolvedValue({});
-      const getFn = jest.fn().mockResolvedValue({
-        body: {
-          _source: { type: MIGRATION_SENTINEL_TYPE, [MIGRATION_SENTINEL_TYPE]: existing },
-        },
-        statusCode: 200,
-      });
-      const client: any = { get: getFn, index: indexFn };
-
-      await heartbeatMigrationSentinel(client, '.kibana_8', new Date('2026-04-25T07:50:45Z'));
-
-      const written = indexFn.mock.calls[0][0].body[MIGRATION_SENTINEL_TYPE];
-      expect(written.status).toBe('in-progress');
-      expect(written.startedAt).toBe('2026-04-25T07:50:36Z');
-      expect(written.lastHeartbeatAt).toBe(new Date('2026-04-25T07:50:45Z').toISOString());
-      expect(written.nodeHostname).toBe('host');
-    });
-
-    it('writes nothing if the sentinel does not yet exist (best-effort)', async () => {
-      const indexFn = jest.fn().mockResolvedValue({});
-      const getFn = jest.fn().mockResolvedValue({ body: {}, statusCode: 404 });
-      const client: any = { get: getFn, index: indexFn };
-
-      await heartbeatMigrationSentinel(client, '.kibana_8', new Date('2026-04-25T07:50:45Z'));
-
-      expect(indexFn).not.toHaveBeenCalled();
-    });
-  });
-
   describe('markMigrationAborted', () => {
     it('transitions existing in-progress sentinel to aborted with reason', async () => {
       const existing = {
         status: 'in-progress' as const,
         startedAt: '2026-04-25T07:50:36Z',
-        lastHeartbeatAt: '2026-04-25T07:53:00Z',
         nodeHostname: 'host',
       };
       const indexFn = jest.fn().mockResolvedValue({});
@@ -147,6 +107,18 @@ describe('migration_sentinel helpers', () => {
       // previous fields preserved
       expect(written.startedAt).toBe('2026-04-25T07:50:36Z');
     });
+
+    it('fabricates minimal sentinel if none exists (by design — abort markers must be writable)', async () => {
+      const indexFn = jest.fn().mockResolvedValue({});
+      const getFn = jest.fn().mockResolvedValue({ body: {}, statusCode: 404 });
+      const client: any = { get: getFn, index: indexFn };
+
+      await markMigrationAborted(client, '.kibana_8', 'boom', new Date('2026-04-25T07:53:35Z'));
+
+      const written = indexFn.mock.calls[0][0].body[MIGRATION_SENTINEL_TYPE];
+      expect(written.status).toBe('aborted');
+      expect(written.abortReason).toBe('boom');
+    });
   });
 
   describe('markMigrationCopied / markMigrationComplete', () => {
@@ -154,7 +126,6 @@ describe('migration_sentinel helpers', () => {
       const existing = {
         status: 'in-progress' as const,
         startedAt: 't0',
-        lastHeartbeatAt: 't1',
         nodeHostname: 'host',
       };
       const indexFn = jest.fn().mockResolvedValue({});
@@ -173,7 +144,6 @@ describe('migration_sentinel helpers', () => {
       const existing = {
         status: 'copied' as const,
         startedAt: 't0',
-        lastHeartbeatAt: 't1',
         nodeHostname: 'host',
       };
       const indexFn = jest.fn().mockResolvedValue({});
@@ -210,12 +180,11 @@ describe('migration_sentinel helpers', () => {
   });
 
   describe('buildInitialSentinel', () => {
-    it('builds an in-progress sentinel with matching startedAt and lastHeartbeatAt', () => {
+    it('builds an in-progress sentinel with the provided timestamp', () => {
       const now = new Date('2026-04-25T07:50:36Z');
       const s = buildInitialSentinel(now);
       expect(s.status).toBe('in-progress');
       expect(s.startedAt).toBe(now.toISOString());
-      expect(s.lastHeartbeatAt).toBe(now.toISOString());
       expect(typeof s.nodeHostname).toBe('string');
     });
   });
