@@ -104,7 +104,7 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(processProcOutput(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @osd/optimizer
-     │ info initialized, 0 bundles cached
+     │ info initialized, 1 bundles to build
      │ info starting worker [1 bundle]
      │ succ 1 bundles compiled successfully after <time>
      info copying assets from \`public/assets\` to build
@@ -192,7 +192,7 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
   expect(processProcOutput(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @osd/optimizer
-     │ info initialized, 0 bundles cached
+     │ info initialized, 1 bundles to build
      │ info starting worker [1 bundle]
      │ succ 1 bundles compiled successfully after <time>
      info copying assets from \`public/assets\` to build

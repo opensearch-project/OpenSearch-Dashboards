@@ -33,7 +33,7 @@ import Fs from 'fs';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
-import { includes, ascending, entriesToObject } from './array_helpers';
+import { includes } from './array_helpers';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
@@ -99,19 +99,6 @@ export class Bundle {
     this.banner = spec.banner;
 
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.osd-optimizer-cache'));
-  }
-
-  /**
-   * Calculate the cache key for this bundle based from current
-   * hash values.
-   */
-  createCacheKey(files: string[], hashes: Map<string, string | undefined>): unknown {
-    return {
-      spec: this.toSpec(),
-      hashes: entriesToObject(
-        files.map((p) => [p, hashes.get(p)] as const).sort(ascending((e) => e[0]))
-      ),
-    };
   }
 
   /**

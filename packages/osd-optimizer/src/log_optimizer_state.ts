@@ -37,11 +37,59 @@ import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
 import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
 
+function renderProgressBar(completed: number, total: number, barWidth = 30): string {
+  const pct = total > 0 ? completed / total : 0;
+  const filled = Math.round(pct * barWidth);
+  const empty = barWidth - filled;
+  const bar = '█'.repeat(filled) + '░'.repeat(empty);
+  const pctStr = `${Math.round(pct * 100)}%`;
+  return `  ${bar} ${pctStr} (${completed}/${total} bundles)`;
+}
+
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     const bundleStates = new Map<string, CompilerMsg['type']>();
     const bundlesThatWereBuilt = new Set<string>();
     let loggedInit = false;
+    let progressLineActive = false;
+    let lastCompleted = 0;
+    let lastTotal = 0;
+
+    const clearProgressLine = () => {
+      if (progressLineActive && process.stdout.isTTY) {
+        process.stdout.write('\r\x1b[K');
+        progressLineActive = false;
+      }
+    };
+
+    const writeProgressLine = (completed: number, total: number) => {
+      lastCompleted = completed;
+      lastTotal = total;
+      if (process.stdout.isTTY && total > 0) {
+        process.stdout.write(`\r\x1b[K${renderProgressBar(completed, total)}`);
+        progressLineActive = true;
+      }
+    };
+
+    const redrawProgress = () => {
+      if (progressLineActive) {
+        writeProgressLine(lastCompleted, lastTotal);
+      }
+    };
+
+    // Periodically redraw the progress bar to recover from external log output
+    // that may overwrite it, and to handle terminal resizes
+    let redrawInterval: ReturnType<typeof setInterval> | undefined;
+    if (process.stdout.isTTY) {
+      redrawInterval = setInterval(redrawProgress, 1000);
+    }
+
+    const stopRedrawInterval = () => {
+      if (redrawInterval !== undefined) {
+        clearInterval(redrawInterval);
+        redrawInterval = undefined;
+      }
+    };
 
     return update$.pipe(
       tap((update) => {
@@ -49,18 +97,6 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (event?.type === 'worker stdio') {
           log.warning(`worker`, event.stream, event.line);
-        }
-
-        if (event?.type === 'bundle not cached') {
-          log.debug(
-            `[${event.bundle.id}] bundle not cached because [${event.reason}]${
-              event.diff ? `, diff:\n${event.diff}` : ''
-            }`
-          );
-        }
-
-        if (event?.type === 'bundle cached') {
-          log.debug(`[${event.bundle.id}] bundle cached`);
         }
 
         if (event?.type === 'worker started') {
@@ -87,7 +123,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
-            log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            log.info(`initialized, ${state.onlineBundles.length} bundles to build`);
             if (config.themeTags.length !== ALL_THEMES.length) {
               log.warning(
                 `only building [${config.themeTags}] themes, customize with the OSD_OPTIMIZER_THEMES environment variable`
@@ -117,10 +153,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {
+          // Update progress bar
+          const total = state.onlineBundles.length;
+          const completed = state.compilerStates.filter(
+            (s) => s.type === 'compiler success' || s.type === 'compiler issue'
+          ).length;
+          writeProgressLine(completed, total);
           return;
         }
 
         if (state.phase === 'issue') {
+          clearProgressLine();
+          stopRedrawInterval();
           log.error(`webpack compile errors`);
           log.indent(4);
           for (const b of state.compilerStates) {
@@ -136,17 +180,15 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'success') {
+          clearProgressLine();
+          stopRedrawInterval();
           const buildCount = bundlesThatWereBuilt.size;
           bundlesThatWereBuilt.clear();
 
-          if (state.offlineBundles.length && buildCount === 0) {
-            log.success(`all bundles cached, success after ${state.durSec} sec`);
-          } else {
-            log.success(
-              `${buildCount} bundles compiled successfully after ${state.durSec} sec` +
-                (config.watch ? ', watching for changes' : '')
-            );
-          }
+          log.success(
+            `${buildCount} bundles compiled successfully after ${state.durSec} sec` +
+              (config.watch ? ', watching for changes' : '')
+          );
 
           return;
         }

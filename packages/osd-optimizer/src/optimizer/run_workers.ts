@@ -29,12 +29,11 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, toArray } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
-import { maybeMap } from '../common';
+import { Bundle, maybeMap } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
-import { BundleCacheEvent } from './bundle_cache';
 import { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { observeWorker } from './observe_worker';
@@ -43,34 +42,30 @@ import { observeWorker } from './observe_worker';
  * Create a stream of all worker events, these include messages
  * from workers and events about the status of workers. To get
  * these events we assign the bundles to workers via
- * `assignBundlesToWorkers()` and then start a worler for each
+ * `assignBundlesToWorkers()` and then start a worker for each
  * assignment with `observeWorker()`.
  *
  * Subscribes to `changeEvent$` in order to determine when more
  * bundles should be assigned to workers.
  *
- * Completes when all workers have exitted. If we are running in
+ * Completes when all workers have exited. If we are running in
  * watch mode this observable will never exit.
  */
 export function runWorkers(
   config: OptimizerConfig,
-  optimizerCacheKey: unknown,
-  bundleCache$: Rx.Observable<BundleCacheEvent>,
+  bundles: Bundle[],
   changeEvent$: Rx.Observable<ChangeEvent>
 ) {
   return Rx.concat(
-    // first batch of bundles are based on how up-to-date the cache is
-    bundleCache$.pipe(
-      maybeMap((event) => (event.type === 'bundle not cached' ? event.bundle : undefined)),
-      toArray()
-    ),
+    // first batch of bundles — all of them
+    Rx.of(bundles),
     // subsequent batches are defined by changeEvent$
     changeEvent$.pipe(maybeMap((c) => (c.type === 'changes' ? c.bundles : undefined)))
   ).pipe(
-    mergeMap((bundles) =>
-      Rx.from(assignBundlesToWorkers(bundles, config.maxWorkerCount)).pipe(
+    mergeMap((batchBundles) =>
+      Rx.from(assignBundlesToWorkers(batchBundles, config.maxWorkerCount)).pipe(
         mergeMap((assignment) =>
-          observeWorker(config, config.getWorkerConfig(optimizerCacheKey), assignment.bundles)
+          observeWorker(config, config.getWorkerConfig(), assignment.bundles)
         )
       )
     )

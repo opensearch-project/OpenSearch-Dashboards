@@ -34,24 +34,13 @@ import { WorkerMsg, CompilerMsg, Bundle, Summarizer } from '../common';
 
 import { ChangeEvent } from './watcher';
 import { WorkerStatus } from './observe_worker';
-import { BundleCacheEvent } from './bundle_cache';
 import { OptimizerConfig } from './optimizer_config';
 
 export interface OptimizerInitializedEvent {
   type: 'optimizer initialized';
 }
 
-export interface AllBundlesCachedEvent {
-  type: 'all bundles cached';
-}
-
-export type OptimizerEvent =
-  | OptimizerInitializedEvent
-  | AllBundlesCachedEvent
-  | ChangeEvent
-  | WorkerMsg
-  | WorkerStatus
-  | BundleCacheEvent;
+export type OptimizerEvent = OptimizerInitializedEvent | ChangeEvent | WorkerMsg | WorkerStatus;
 
 export interface OptimizerState {
   phase: 'initializing' | 'initialized' | 'running' | 'issue' | 'success' | 'reallocating';
@@ -89,8 +78,9 @@ function createOptimizerState(
 
 /**
  * calculate the total state, given a set of compiler messages
+ * and the total number of online bundles
  */
-function getStatePhase(states: CompilerMsg[]) {
+function getStatePhase(states: CompilerMsg[], totalOnlineBundles: number) {
   const types = states.map((s) => s.type);
 
   if (types.includes('running')) {
@@ -101,8 +91,14 @@ function getStatePhase(states: CompilerMsg[]) {
     return 'issue';
   }
 
-  if (types.every((s) => s === 'compiler success')) {
+  // Only report success when ALL online bundles have reported
+  if (states.length >= totalOnlineBundles && types.every((s) => s === 'compiler success')) {
     return 'success';
+  }
+
+  // Some bundles finished but others haven't reported yet — still running
+  if (states.length < totalOnlineBundles) {
+    return 'running';
   }
 
   throw new Error(`unable to summarize bundle states: ${JSON.stringify(states)}`);
@@ -111,22 +107,13 @@ function getStatePhase(states: CompilerMsg[]) {
 export function createOptimizerStateSummarizer(
   config: OptimizerConfig
 ): Summarizer<OptimizerEvent, OptimizerState> {
-  return (state, event, injectEvent) => {
+  return (state, event) => {
     if (event.type === 'optimizer initialized') {
-      if (state.onlineBundles.length === 0) {
-        injectEvent({
-          type: 'all bundles cached',
-        });
-      }
-
+      // All bundles are always online — they all go to workers
       return createOptimizerState(state, {
         phase: 'initialized',
-      });
-    }
-
-    if (event.type === 'all bundles cached') {
-      return createOptimizerState(state, {
-        phase: 'success',
+        onlineBundles: [...config.bundles],
+        offlineBundles: [],
       });
     }
 
@@ -151,18 +138,9 @@ export function createOptimizerStateSummarizer(
       });
     }
 
-    if (
-      event.type === 'changes' ||
-      event.type === 'bundle cached' ||
-      event.type === 'bundle not cached'
-    ) {
+    if (event.type === 'changes') {
       const onlineBundles: Bundle[] = [...state.onlineBundles];
-      if (event.type === 'changes') {
-        onlineBundles.push(...event.bundles);
-      }
-      if (event.type === 'bundle not cached') {
-        onlineBundles.push(event.bundle);
-      }
+      onlineBundles.push(...event.bundles);
 
       const offlineBundles: Bundle[] = [];
       for (const bundle of config.bundles) {
@@ -172,7 +150,7 @@ export function createOptimizerStateSummarizer(
       }
 
       return createOptimizerState(state, {
-        phase: state.phase === 'initializing' ? 'initializing' : 'running',
+        phase: 'running',
         onlineBundles,
         offlineBundles,
       });
@@ -188,7 +166,7 @@ export function createOptimizerStateSummarizer(
         event,
       ];
       return createOptimizerState(state, {
-        phase: getStatePhase(compilerStates),
+        phase: getStatePhase(compilerStates, state.onlineBundles.length),
         compilerStates,
       });
     }

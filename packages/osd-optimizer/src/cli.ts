@@ -175,7 +175,7 @@ run(
         --workers          max number of workers to use
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
-        --no-cache         disable the cache
+        --no-cache         disable rspack persistent cache (forces full rebuild)
         --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
         --no-examples      don't build the example plugins
         --dist             create bundles that are suitable for inclusion in the OpenSearch Dashboards distributable, enabled when running with --update-limits
