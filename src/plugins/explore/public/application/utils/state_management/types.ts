@@ -4,7 +4,11 @@
  */
 
 import { RootState } from './store';
-import { ResultStatus as DataPluginResultStatus } from '../../../../../data/public';
+import {
+  ResultStatus as DataPluginResultStatus,
+  OpenSearchErrorResponse,
+  OpenSearchErrorContext,
+} from '../../../../../data/public';
 
 export type QueryExecutionStatus = DataPluginResultStatus;
 export const QueryExecutionStatus = DataPluginResultStatus;
@@ -20,6 +24,13 @@ export interface QueryResultStatus {
       type?: string;
     };
     originalErrorMessage: string;
+    errorBody?: OpenSearchErrorResponse;
+    errorContext?: {
+      context?: OpenSearchErrorContext;
+      code?: string;
+      type?: string;
+      location?: string[];
+    };
   };
   elapsedMs?: number;
   startTime?: number;

@@ -34,6 +34,7 @@ import { getEscapeAction } from './escape_action';
 import { usePromptIsTyping } from './use_prompt_is_typing';
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
+import { useErrorDecorations } from './use_error_decorations';
 import { getAutocompleteContext } from '../../../../application/utils/multi_query_utils';
 import {
   attachPPLValidationContext,
@@ -97,6 +98,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     },
   } = services;
   const { updateDecorations, clearDecorations } = useMultiQueryDecorations();
+  const { updateErrorDecorations, clearErrorDecorations } = useErrorDecorations();
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
@@ -159,7 +161,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     }
   }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
 
-  // Cleanup validation context on unmount
+  useEffect(() => {
+    if (editorRef.current) {
+      updateErrorDecorations(editorRef.current);
+    }
+  }, [updateErrorDecorations, editorRef]);
+
   useEffect(
     () => () => {
       detachValidationContextRef.current?.();
@@ -417,6 +424,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         blurDisposable.dispose();
         contentChangeDisposable.dispose();
         clearDecorations(editor);
+        clearErrorDecorations(editor);
         return editor;
       };
     },
@@ -427,6 +435,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       setEditorIsFocused,
       updateDecorations,
       clearDecorations,
+      clearErrorDecorations,
       getValidationContext,
     ]
   );
