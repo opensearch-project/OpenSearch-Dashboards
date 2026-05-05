@@ -137,7 +137,12 @@ export class DataSourceManagementPlugin
       }
     );
 
-    setupRoutes({ router, client: openSearchDataSourceManagementClient, dataSourceEnabled });
+    setupRoutes({
+      router,
+      client: openSearchDataSourceManagementClient,
+      dataSourceEnabled,
+      logger: this.logger,
+    });
 
     return {};
   }
