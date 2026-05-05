@@ -48,6 +48,24 @@ import { buildActiveMappings } from './build_active_mappings';
 import { VersionedTransformer } from './document_migrator';
 import * as Index from './opensearch_index';
 import { SavedObjectsMigrationLogger, MigrationLogger } from './migration_logger';
+import { MigrationIntegrityConfig, MigrationRetryConfig } from './migration_reconciliation';
+
+/** Default retry config — matches `savedObjectsMigrationConfig.retry` schema defaults. */
+export const DEFAULT_MIGRATION_RETRY_CONFIG: MigrationRetryConfig = {
+  enabled: true,
+  maxRetries: 5,
+  initialBackoffMs: 1000,
+  maxBackoffMs: 30000,
+  clusterEventTimeoutMs: 120000,
+};
+
+/** Default integrity config — matches `savedObjectsMigrationConfig.integrity` schema defaults. */
+export const DEFAULT_MIGRATION_INTEGRITY_CONFIG: MigrationIntegrityConfig = {
+  enabled: true,
+  failOnDeltaPercentPerType: 5,
+  failOnAbsoluteDeltaPerType: 10,
+  waitingTimeoutMs: 600000,
+};
 
 export interface MigrationOpts {
   batchSize: number;
@@ -72,6 +90,17 @@ export interface MigrationOpts {
    */
   typesToDelete?: string[];
   opensearchDashboardsRawConfig?: Config;
+  /**
+   * Retry policy for transient bulk-write errors during
+   * `migrateSourceToDest`. Defaults to the config schema defaults if
+   * omitted.
+   */
+  retry?: MigrationRetryConfig;
+  /**
+   * Integrity checks for pre-existing destination indices. Defaults to the
+   * config schema defaults if omitted.
+   */
+  integrity?: MigrationIntegrityConfig;
 }
 
 /**
@@ -91,6 +120,8 @@ export interface Context {
   obsoleteIndexTemplatePattern?: string;
   typesToDelete?: string[];
   convertToAliasScript?: string;
+  retry: MigrationRetryConfig;
+  integrity: MigrationIntegrityConfig;
 }
 
 /**
@@ -122,6 +153,8 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     obsoleteIndexTemplatePattern: opts.obsoleteIndexTemplatePattern,
     typesToDelete: opts.typesToDelete,
     convertToAliasScript: opts.convertToAliasScript,
+    retry: opts.retry ?? DEFAULT_MIGRATION_RETRY_CONFIG,
+    integrity: opts.integrity ?? DEFAULT_MIGRATION_INTEGRITY_CONFIG,
   };
 }
 

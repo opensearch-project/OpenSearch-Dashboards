@@ -37,6 +37,7 @@ import { IndexMigrator } from './index_migrator';
 import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { configMock } from '../../../config/mocks';
+import { MIGRATION_SENTINEL_ID } from './migration_sentinel';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
@@ -773,6 +774,133 @@ describe('IndexMigrator', () => {
     await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error migrating document"`
     );
+  });
+
+  test('writes migration-status sentinel during a happy-path migration', async () => {
+    const { client } = testOpts;
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    // Configure client.index and client.get to support sentinel read/write.
+    // After the initial write, any subsequent read returns what was last
+    // written. This is a simplified sentinel store for the test.
+    let storedSentinel: any;
+    (client as any).index.mockImplementation((params: any) => {
+      if (params.id === MIGRATION_SENTINEL_ID) {
+        storedSentinel = params.body;
+      }
+      return opensearchClientMock.createSuccessTransportRequestPromise({ result: 'created' });
+    });
+    (client as any).get.mockImplementation((_params: any, _options: any) => {
+      if (storedSentinel) {
+        return opensearchClientMock.createSuccessTransportRequestPromise({
+          _source: storedSentinel,
+        });
+      }
+      return opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 });
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    // Collect status values written to the sentinel in call order.
+    const statuses = (client as any).index.mock.calls
+      .filter((call: any[]) => call[0].id === MIGRATION_SENTINEL_ID)
+      .map((call: any[]) => call[0].body.osd_migration_status.status);
+
+    expect(statuses[0]).toBe('in-progress');
+    expect(statuses).toContain('copied');
+    expect(statuses[statuses.length - 1]).toBe('complete');
+  });
+
+  test('sentinel failure modes — a: initial sentinel write failure does not abort the migration', async () => {
+    const { client } = testOpts;
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    // First index() call (initial sentinel write) rejects; subsequent ones pass.
+    let indexCallCount = 0;
+    (client as any).index.mockImplementation(() => {
+      indexCallCount++;
+      if (indexCallCount === 1) {
+        return Promise.reject(new Error('transient sentinel-write failure'));
+      }
+      return opensearchClientMock.createSuccessTransportRequestPromise({ result: 'created' });
+    });
+    (client as any).get.mockResolvedValue(
+      opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+    );
+
+    // Migration still resolves, despite the sentinel-write failure.
+    await expect(new IndexMigrator(testOpts).migrate()).resolves.toBeDefined();
+  });
+
+  test('sentinel failure modes — b: abort-marker write failure does not mask the original error', async () => {
+    const { client } = testOpts;
+    const migrateDoc = jest.fn(() => {
+      throw new Error('original migration error');
+    });
+
+    testOpts.documentMigrator = {
+      migrationVersion: { foo: '1.2.3' },
+      migrate: migrateDoc,
+    };
+
+    withIndex(client, {
+      numOutOfDate: 1,
+      docs: [[{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }]],
+    });
+
+    // The happy-path sentinel path needs get() to return the stored doc so
+    // markMigrationAborted can read + update it. Force it to reject so the
+    // abort-marker write itself also fails.
+    (client as any).get.mockRejectedValue(new Error('abort-read failure'));
+    (client as any).index.mockRejectedValue(new Error('abort-write failure'));
+
+    // The rejection is the original migration error, not the abort-marker
+    // write failure.
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow('original migration error');
+  });
+
+  test('sentinel failure modes — c: markMigrationCopied failure does not abort the migration', async () => {
+    const { client } = testOpts;
+
+    testOpts.documentMigrator = {
+      migrationVersion: { foo: '1.2.3' },
+      migrate: _.identity,
+    };
+
+    withIndex(client, {
+      numOutOfDate: 1,
+      docs: [[{ _id: 'foo:1', _source: { type: 'foo', foo: { name: 'Bar' } } }]],
+    });
+
+    // Allow initial sentinel write, reject the later copied/complete
+    // transition writes. transitionStatus is called after the scroll loop
+    // completes.
+    let sentinelIndexCalls = 0;
+    (client as any).index.mockImplementation((params: any) => {
+      if (params.id === MIGRATION_SENTINEL_ID) {
+        sentinelIndexCalls++;
+        // Reject the copied/complete transitions (calls 2+ on the sentinel).
+        if (sentinelIndexCalls > 1) {
+          return Promise.reject(new Error('transient transition-write failure'));
+        }
+      }
+      return opensearchClientMock.createSuccessTransportRequestPromise({ result: 'created' });
+    });
+    (client as any).get.mockResolvedValue(
+      opensearchClientMock.createSuccessTransportRequestPromise({
+        _source: {
+          type: 'osd_migration_status',
+          osd_migration_status: {
+            status: 'in-progress',
+            startedAt: '2026-04-25T07:50:36Z',
+            nodeHostname: 'test-host',
+          },
+        },
+      })
+    );
+
+    // Migration still resolves — copied/complete failures are swallowed.
+    await expect(new IndexMigrator(testOpts).migrate()).resolves.toBeDefined();
   });
 });
 

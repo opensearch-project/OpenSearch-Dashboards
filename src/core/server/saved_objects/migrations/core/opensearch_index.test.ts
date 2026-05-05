@@ -32,6 +32,7 @@ import type { opensearchtypes } from '@opensearch-project/opensearch';
 import _ from 'lodash';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
 import * as Index from './opensearch_index';
+import { MigrationOpenSearchClient } from './migration_opensearch_client';
 
 describe('OpenSearchIndex', () => {
   let client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
@@ -441,6 +442,560 @@ describe('OpenSearchIndex', () => {
 
       await expect(Index.write(client as any, index, docs)).rejects.toThrow(/dern/);
       expect(client.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    // --- retry tests --------------------
+
+    const ZERO_BACKOFF_RETRY = {
+      enabled: true,
+      maxRetries: 5,
+      initialBackoffMs: 0, // tests run fast without real sleeps
+      maxBackoffMs: 0,
+      clusterEventTimeoutMs: 120000,
+    };
+
+    const ONE_DOC = [
+      {
+        _id: 'a:1',
+        _source: { type: 'a', a: { v: 1 } },
+      },
+    ];
+
+    test('retries a transient 503 once, succeeds on second attempt', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              {
+                index: {
+                  _id: 'a:1',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 'transient' },
+                },
+              },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [{ index: { _id: 'a:1', status: 201 } }],
+          } as opensearchtypes.BulkResponse)
+        );
+
+      await Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY);
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+    });
+
+    test('exhausts retries on persistent 503 and throws with history', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 503,
+                error: {
+                  type: 'process_cluster_event_timeout_exception',
+                  reason: 'failed to process cluster event',
+                },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const cfg = { ...ZERO_BACKOFF_RETRY, maxRetries: 3 };
+      await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow(
+        /failed after 4 attempt\(s\)/
+      );
+      // attempt 1 + 3 retries = 4 bulk calls
+      expect(client.bulk).toHaveBeenCalledTimes(4);
+    });
+
+    test('retries ONLY the failed items, not the whole batch', async () => {
+      client.bulk
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [
+              { index: { _id: 'a:1', status: 201 } },
+              {
+                index: {
+                  _id: 'a:2',
+                  status: 503,
+                  error: { type: 'process_cluster_event_timeout_exception', reason: 't' },
+                },
+              },
+              { index: { _id: 'a:3', status: 201 } },
+            ],
+          } as opensearchtypes.BulkResponse)
+        )
+        .mockResolvedValueOnce(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            items: [{ index: { _id: 'a:2', status: 201 } }],
+          } as opensearchtypes.BulkResponse)
+        );
+
+      const docs = [
+        { _id: 'a:1', _source: { type: 'a', a: { v: 1 } } },
+        { _id: 'a:2', _source: { type: 'a', a: { v: 2 } } },
+        { _id: 'a:3', _source: { type: 'a', a: { v: 3 } } },
+      ];
+
+      await Index.write(client as any, '.myalias', docs, ZERO_BACKOFF_RETRY);
+      expect(client.bulk).toHaveBeenCalledTimes(2);
+      // Second call body should have only one action/doc pair (a:2).
+      const secondCallBody = client.bulk.mock.calls[1][0]!.body as object[];
+      expect(secondCallBody).toHaveLength(2);
+      // First element is the action header; second is the doc. Confirm
+      // the action header references a:2.
+      expect(JSON.stringify(secondCallBody[0])).toContain('a:2');
+    });
+
+    test('does NOT retry non-retriable errors (400) — throws immediately', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 400,
+                error: { type: 'mapper_parsing_exception', reason: 'bad mapping' },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      await expect(
+        Index.write(client as any, '.myalias', ONE_DOC, ZERO_BACKOFF_RETRY)
+      ).rejects.toThrow(/bad mapping/);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    test('retry.enabled=false preserves legacy single-shot behavior', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 503,
+                error: { type: 'process_cluster_event_timeout_exception', reason: 't' },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const cfg = { ...ZERO_BACKOFF_RETRY, enabled: false };
+      await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow(
+        /failed after 1 attempt/
+      );
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    test('retries cluster_block_exception but caps at maxRetries', async () => {
+      client.bulk.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          items: [
+            {
+              index: {
+                _id: 'a:1',
+                status: 429,
+                error: { type: 'cluster_block_exception', reason: 'disk watermark' },
+              },
+            },
+          ],
+        } as opensearchtypes.BulkResponse)
+      );
+
+      const cfg = { ...ZERO_BACKOFF_RETRY, maxRetries: 2 };
+      await expect(Index.write(client as any, '.myalias', ONE_DOC, cfg)).rejects.toThrow();
+      expect(client.bulk).toHaveBeenCalledTimes(3); // initial + 2 retries
+    });
+  });
+
+  describe('isRetriableBulkItemError', () => {
+    test('503 is retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({ status: 503, error: { type: 'x', reason: 'y' } })
+      ).toBe(true);
+    });
+
+    test('429 is retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({ status: 429, error: { type: 'x', reason: 'y' } })
+      ).toBe(true);
+    });
+
+    test('process_cluster_event_timeout_exception is retriable on any status', () => {
+      expect(
+        Index.isRetriableBulkItemError({
+          status: 500,
+          error: { type: 'process_cluster_event_timeout_exception', reason: 'x' },
+        })
+      ).toBe(true);
+    });
+
+    test('cluster_manager_not_discovered_exception is retriable by explicit type', () => {
+      // Defensive assertion: the exception currently also arrives as status 503,
+      // but the predicate's explicit type check hardens against a future
+      // status-code change. Ensure the type match alone is sufficient.
+      expect(
+        Index.isRetriableBulkItemError({
+          status: 500,
+          error: { type: 'cluster_manager_not_discovered_exception', reason: 'x' },
+        })
+      ).toBe(true);
+    });
+
+    test('400 mapper_parsing_exception is NOT retriable', () => {
+      expect(
+        Index.isRetriableBulkItemError({
+          status: 400,
+          error: { type: 'mapper_parsing_exception', reason: 'nope' },
+        })
+      ).toBe(false);
+    });
+
+    test('no error = not retriable', () => {
+      expect(Index.isRetriableBulkItemError({ status: 200 })).toBe(false);
+    });
+  });
+
+  describe('findPriorSavedObjectsIndex', () => {
+    // The shared Jest mock (`client`) is typed as the raw OpenSearch client
+    // mock and doesn't structurally implement every method on
+    // MigrationOpenSearchClient. This function only uses `client.indices.get`,
+    // and the rest of this suite does the same at every call boundary (the
+    // older tests suppress with `@ts-expect-error`). We prefer a localized,
+    // narrowed cast over a suppression so errors inside the function body are
+    // still type-checked.
+    const migClient = () => (client as unknown) as MigrationOpenSearchClient;
+
+    test('returns null when no matching indices exist', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+      expect(result).toBeNull();
+    });
+
+    test('returns the highest-numbered prior .kibana_N', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_5': {},
+          '.kibana_6': {},
+          '.kibana_7': {},
+          '.kibana_8': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    test('ignores system-index siblings like .kibana_task_manager_1', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_7': {},
+          '.kibana_task_manager_1': {},
+          '.kibana_security_session_1': {},
+          '.kibana_8': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    test('ignores multi-segment sibling indices that share the alias prefix', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_7': {},
+          '.kibana_8': {},
+          '.kibana_1234_alpha_1': {},
+          '.kibana_1234_alpha_2': {},
+          '.kibana_5678_beta_1': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    test('returns null when only non-matching siblings exist', async () => {
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_8': {},
+          '.kibana_task_manager_1': {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+      expect(result).toBeNull();
+    });
+
+    test('escapes regex metacharacters in the alias', async () => {
+      // Verifies that an alias containing regex metacharacters (e.g., a leading
+      // dot or a period in the middle) is matched literally rather than as a
+      // regex wildcard. Otherwise `.kibana_8` would match `xkibana_8` under a
+      // naive regex build.
+      client.indices.get.mockResolvedValue(
+        opensearchClientMock.createSuccessTransportRequestPromise({
+          '.kibana_7': {},
+          '.kibana_8': {},
+          // Would be a false positive if the leading dot were treated as `.`
+          // (any character) by an un-escaped regex.
+          xkibana_9: {},
+        })
+      );
+
+      const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+      expect(result).toBe('.kibana_7');
+    });
+
+    // Sentinel-aware candidate selection. The raw highest-N candidate is not
+    // always authoritative: a prior crashed migration can leave an `aborted`
+    // sentinel on `.kibana_N`, and using that partial index as a baseline
+    // produces a spurious PartialDestError for a healthy destination. These
+    // tests assert findPriorSavedObjectsIndex skips poisoned / in-progress
+    // siblings and walks down to the next usable one.
+    describe('sentinel-aware candidate selection', () => {
+      // Helper that returns a shape readMigrationSentinel can parse. Mirrors
+      // the wire shape produced by writeMigrationSentinel.
+      const mockSentinelFor = (statusByIndex: Record<string, string | null>) => {
+        client.get.mockImplementation(({ index }: any) => {
+          const status = statusByIndex[index];
+          if (!status) {
+            return opensearchClientMock.createSuccessTransportRequestPromise(
+              {},
+              { statusCode: 404 }
+            );
+          }
+          return opensearchClientMock.createSuccessTransportRequestPromise({
+            _source: {
+              type: 'osd_migration_status',
+              osd_migration_status: {
+                status,
+                startedAt: '2026-05-05T00:00:00Z',
+                nodeHostname: 'test',
+              },
+            },
+          });
+        });
+      };
+
+      test('skips the highest-N candidate when its sentinel is aborted', async () => {
+        // .kibana_7 was half-populated by a prior crashed migration and then
+        // orphaned (operator did not DELETE it). Framework should walk past
+        // it to .kibana_6 as the authoritative baseline.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': 'complete',
+          '.kibana_7': 'aborted',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_6');
+      });
+
+      test('skips candidates with in-progress sentinels', async () => {
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': 'complete',
+          '.kibana_7': 'in-progress',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_6');
+      });
+
+      test('accepts a copied-status sentinel as a valid baseline', async () => {
+        // `copied` means the scroll-copy loop finished and the alias swap is
+        // pending. Contents are authoritative for count-comparison purposes
+        // even though the alias has not moved yet.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({ '.kibana_7': 'copied' });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_7');
+      });
+
+      test('returns null when every candidate is poisoned', async () => {
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': 'aborted',
+          '.kibana_7': 'aborted',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBeNull();
+      });
+
+      test('falls back to legacy (no-sentinel) candidate when the top-N is aborted', async () => {
+        // Mixed-generation cluster: .kibana_7 was crashed mid-migration by a
+        // patched OSD (has aborted sentinel), .kibana_6 predates the patch
+        // and carries no sentinel. Legacy candidate should be accepted.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': null, // legacy, no sentinel
+          '.kibana_7': 'aborted',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_6');
+      });
+
+      test('warns and falls back to legacy when sentinel read throws (non-404 failure)', async () => {
+        // Simulates auth failure, network blip, or other non-404 sentinel-read
+        // error. The candidate is still accepted (same as pre-change behavior)
+        // but a warning is emitted so operators have a breadcrumb if later
+        // count comparisons look off.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        client.get.mockRejectedValue(new Error('connection reset'));
+
+        const log = {
+          warning: jest.fn(),
+          info: jest.fn(),
+          debug: jest.fn(),
+          error: jest.fn(),
+        };
+        const result = await Index.findPriorSavedObjectsIndex(
+          migClient(),
+          '.kibana',
+          '.kibana_8',
+          log as any
+        );
+
+        expect(result).toBe('.kibana_7');
+        expect(log.warning).toHaveBeenCalledTimes(1);
+        expect(log.warning.mock.calls[0][0]).toContain('.kibana_7');
+        expect(log.warning.mock.calls[0][0]).toContain('connection reset');
+      });
+
+      test('silent fallback when log is not provided (backward compat)', async () => {
+        // Older callers that pass no logger still get the same pre-(a) silent
+        // fallback semantics. Ensures the optional log parameter is truly optional.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        client.get.mockRejectedValue(new Error('boom'));
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_7');
+      });
+    });
+  });
+
+  describe('countByType', () => {
+    const migClient = () => (client as unknown) as MigrationOpenSearchClient;
+
+    test('builds a terms aggregation on the type field', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({
+        body: { aggregations: { by_type: { buckets: [] } } },
+        statusCode: 200,
+      });
+
+      await Index.countByType(migClient(), '.kibana_8');
+
+      const call = (client as any).search.mock.calls[0][0];
+      expect(call.index).toBe('.kibana_8');
+      expect(call.body.aggs.by_type.terms.field).toBe('type');
+    });
+
+    test('excludes the migration-status sentinel from the aggregation via must_not', async () => {
+      // Prevents the sentinel from contributing a noise bucket to
+      // per-type count comparisons.
+      (client as any).search = jest.fn().mockResolvedValue({
+        body: { aggregations: { by_type: { buckets: [] } } },
+        statusCode: 200,
+      });
+
+      await Index.countByType(migClient(), '.kibana_8');
+
+      const call = (client as any).search.mock.calls[0][0];
+      expect(call.body.query).toEqual({
+        bool: {
+          must_not: [{ term: { type: 'osd_migration_status' } }],
+        },
+      });
+    });
+
+    test('returns a map keyed by the type bucket', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({
+        body: {
+          aggregations: {
+            by_type: {
+              buckets: [
+                { key: 'index-pattern', doc_count: 82 },
+                { key: 'dashboard', doc_count: 12 },
+                { key: 'config', doc_count: 1 },
+              ],
+            },
+          },
+        },
+        statusCode: 200,
+      });
+
+      const result = await Index.countByType(migClient(), '.kibana_8');
+
+      expect(result.get('index-pattern')).toBe(82);
+      expect(result.get('dashboard')).toBe(12);
+      expect(result.get('config')).toBe(1);
+      expect(result.has('osd_migration_status')).toBe(false);
+    });
+
+    test('returns empty map on 404', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({ body: {}, statusCode: 404 });
+
+      const result = await Index.countByType(migClient(), '.kibana_8');
+      expect(result.size).toBe(0);
+    });
+
+    test('returns empty map when aggregations are missing', async () => {
+      (client as any).search = jest.fn().mockResolvedValue({ body: {}, statusCode: 200 });
+
+      const result = await Index.countByType(migClient(), '.kibana_8');
+      expect(result.size).toBe(0);
     });
   });
 

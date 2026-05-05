@@ -34,6 +34,14 @@ import * as Index from './opensearch_index';
 import { migrateRawDocs } from './migrate_raw_docs';
 import { Context, migrationContext, MigrationOpts } from './migration_context';
 import { coordinateMigration, MigrationResult } from './migration_coordinator';
+import {
+  buildInitialSentinel,
+  markMigrationAborted,
+  markMigrationComplete,
+  markMigrationCopied,
+  writeMigrationSentinel,
+  MIGRATION_SENTINEL_ID,
+} from './migration_sentinel';
 
 /*
  * Core logic for migrating the mappings and documents in an index.
@@ -74,6 +82,15 @@ export class IndexMigrator {
         }
 
         return { status: 'skipped' };
+      },
+
+      integrityVerifier: {
+        client: context.client,
+        config: context.integrity,
+        alias: context.alias,
+        countByType: (indexName) => Index.countByType(context.client, indexName),
+        findPriorSource: (alias, existingDestName) =>
+          Index.findPriorSavedObjectsIndex(context.client, alias, existingDestName, context.log),
       },
     });
   }
@@ -130,11 +147,53 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
 
   await Index.createIndex(client, dest.indexName, dest.mappings);
 
-  await migrateSourceToDest(context);
+  // Write the initial in-progress sentinel immediately after create. Best-
+  // effort; a sentinel-write failure here shouldn't abort the migration
+  // (the sentinel is a diagnostic / recovery aid, not correctness-critical).
+  try {
+    await writeMigrationSentinel(client, dest.indexName, buildInitialSentinel());
+  } catch (e) {
+    log.warning(
+      `Failed to write initial migration sentinel on ${dest.indexName}: ${(e as Error).message}. ` +
+        `Continuing migration; integrity recovery on restart may use count-fallback path only.`
+    );
+  }
+
+  try {
+    await migrateSourceToDest(context);
+  } catch (err) {
+    // Mark the dest aborted so restarting OSDs don't silently accept it as
+    // a healthy in-progress peer. Best-effort; never let the abort-marker
+    // write mask the original error.
+    try {
+      await markMigrationAborted(client, dest.indexName, (err as Error).message);
+    } catch (abortErr) {
+      log.warning(
+        `Failed to mark ${dest.indexName} aborted after migration failure: ` +
+          `${(abortErr as Error).message}. Original error still propagated.`
+      );
+    }
+    throw err;
+  }
+
+  try {
+    await markMigrationCopied(client, dest.indexName);
+  } catch (e) {
+    log.warning(`Failed to mark ${dest.indexName} copied: ${(e as Error).message}. Continuing.`);
+  }
 
   log.info(`Pointing alias ${alias} to ${dest.indexName}.`);
 
   await Index.claimAlias(client, dest.indexName, alias);
+
+  try {
+    await markMigrationComplete(client, dest.indexName);
+  } catch (e) {
+    log.warning(
+      `Failed to mark ${dest.indexName} complete: ${(e as Error).message}. ` +
+        `Migration is still successful.`
+    );
+  }
 
   const result: MigrationResult = {
     status: 'migrated',
@@ -208,7 +267,7 @@ async function deleteSavedObjectsByType(context: Context) {
  * a situation where the alias moves out from under us as we're migrating docs.
  */
 async function migrateSourceToDest(context: Context) {
-  const { client, alias, dest, source, batchSize } = context;
+  const { client, alias, dest, source, batchSize, retry } = context;
   const { scrollDuration, documentMigrator, log, serializer } = context;
 
   if (!source.exists) {
@@ -226,10 +285,21 @@ async function migrateSourceToDest(context: Context) {
   log.info(`Migrating ${source.indexName} saved objects to ${dest.indexName}`);
 
   while (true) {
-    const docs = await read();
+    const rawDocs = await read();
 
-    if (!docs || !docs.length) {
+    if (!rawDocs || !rawDocs.length) {
       return;
+    }
+
+    // The migration-status sentinel is stored inside the source index to
+    // avoid cluster-event overhead, but it isn't a user saved object and
+    // must not be carried forward via the scroll/copy path. The destination
+    // gets its own fresh sentinel written at migrateIndex startup.
+
+    const docs = rawDocs.filter((d: any) => d._id !== MIGRATION_SENTINEL_ID);
+
+    if (docs.length === 0) {
+      continue;
     }
 
     // @ts-expect-error TS2345 TODO Fix me
@@ -238,7 +308,8 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
+      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log),
+      retry
     );
   }
 }
