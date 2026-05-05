@@ -31,6 +31,11 @@ export function createCursorBus(): CursorContextValue {
   };
 }
 
+/** Returns the raw bus so callers can subscribe without triggering React re-renders. */
+export function useCursorBus(): CursorContextValue | null {
+  return useContext(CursorContext);
+}
+
 /** Hook that subscribes to the shared cursor and returns the current state. */
 export function useSharedCursor(): [CursorState | null, (state: CursorState | null) => void] {
   const bus = useContext(CursorContext);

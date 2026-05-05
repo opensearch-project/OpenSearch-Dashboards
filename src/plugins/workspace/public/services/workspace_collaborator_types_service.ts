@@ -16,6 +16,7 @@ export interface WorkspaceCollaboratorType {
   buttonLabel: string;
   getDisplayedType?: (collaborator: WorkspaceCollaborator) => string | void;
   onAdd: ({ onAddCollaborators }: OnAddOptions) => Promise<void>;
+  identitySource?: { source: string; type: string };
 }
 
 export class WorkspaceCollaboratorTypesService {

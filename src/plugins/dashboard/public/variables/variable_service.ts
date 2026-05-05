@@ -18,8 +18,14 @@ import {
   VariableState,
   VariableWithState,
 } from './types';
-import { executeQueryForOptions, filterOptionsByRegex } from './variable_query_utils';
+import { executeQueryForOptionsWithType, filterOptionsByRegex } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
+
+/**
+ * Maximum number of options to display for a variable.
+ * This prevents performance issues with large option lists in the UI.
+ */
+const MAX_DISPLAY_OPTIONS = 100;
 
 /**
  * VariableService — a self-contained feature for managing dashboard variables.
@@ -51,6 +57,14 @@ export class VariableService {
 
   public setInterpolationService(service: IVariableInterpolationService): void {
     this.interpolationService = service;
+  }
+
+  /**
+   * Update the dashboard ID after dashboard is saved.
+   * This allows variables to be saved to the dashboard after it gets an ID.
+   */
+  public setDashboardId(dashboardId: string): void {
+    this.dashboardId = dashboardId;
   }
 
   /**
@@ -119,6 +133,14 @@ export class VariableService {
   }
 
   /**
+   * Get current variables merged with runtime state (synchronous).
+   * Use this for interpolation where runtime state (optionType) is needed.
+   */
+  public getVariablesWithState(): VariableWithState[] {
+    return this.mergeWithState(this.variables$.getValue());
+  }
+
+  /**
    * Add a new variable.
    */
   public async addVariable(variable: Omit<Variable, 'id' | 'current'>): Promise<void> {
@@ -151,14 +173,14 @@ export class VariableService {
     let newRuntimeState: VariableState | undefined;
 
     if (updates.type && updates.type !== existing.type) {
-      // Type changed — rebuild from scratch
+      // Type changed — rebuild from scratch and clear any error/loading states
       updatedVariable = this.buildVariable(id, { ...existing, ...updates } as Omit<
         Variable,
         'id' | 'current'
       >);
       const options = this.deriveOptions(updatedVariable);
       updatedVariable.current = options.length > 0 ? [options[0]] : undefined;
-      newRuntimeState = { options };
+      newRuntimeState = { options, loading: false, error: undefined };
     } else {
       updatedVariable = { ...existing, ...updates } as Variable;
 
@@ -173,7 +195,7 @@ export class VariableService {
       ) {
         const options = this.deriveOptions(updatedVariable);
         newRuntimeState = { ...this.getRuntimeState(id), options };
-        updatedVariable.current = this.resolveCurrentValue(
+        updatedVariable.current = this.resolveCurrentValueForCustom(
           updatedVariable.current,
           options,
           updatedVariable.multi
@@ -267,16 +289,27 @@ export class VariableService {
     this.updateRuntimeState(id, { loading: true, error: undefined });
 
     try {
-      let options = await this.fetchOptionsForVariable(queryVariable, controller.signal);
-      options = filterOptionsByRegex(options, queryVariable.regex);
-      const sortedOptions = this.sortOptions(options, queryVariable.sort);
-      const preservedCurrent = this.resolveCurrentValue(
+      const result = await this.fetchOptionsForVariableWithType(queryVariable, controller.signal);
+
+      let options = result.options;
+      if (queryVariable.regex) {
+        options = filterOptionsByRegex(options, queryVariable.regex);
+      }
+
+      // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
+      const limitedOptions = options.slice(0, MAX_DISPLAY_OPTIONS);
+      const sortedOptions = this.sortOptions(limitedOptions, queryVariable.sort);
+      const preservedCurrent = this.resolveCurrentValueForQuery(
         queryVariable.current,
-        sortedOptions,
-        queryVariable.multi
+        sortedOptions
       );
 
-      this.updateRuntimeState(id, { options: sortedOptions, loading: false, error: undefined });
+      this.updateRuntimeState(id, {
+        options: sortedOptions,
+        optionType: result.optionType,
+        loading: false,
+        error: undefined,
+      });
 
       // Update current in persisted state if it changed
       const currentVariables = this.getVariables();
@@ -306,6 +339,19 @@ export class VariableService {
     }
   }
 
+  /**
+   * Refresh only variables that have useTimeFilter enabled.
+   * Called when time range changes.
+   */
+  public async refreshTimeFilteredVariableOptions(): Promise<void> {
+    const queryVariables = this.getVariables().filter(
+      (v) => v.type === VariableType.Query && (v as QueryVariable).useTimeFilter
+    );
+    for (const v of queryVariables) {
+      await this.refreshVariableOptions(v.id);
+    }
+  }
+
   private getRuntimeState(id: string): VariableState {
     return this.runtimeState.get(id) ?? { options: [] };
   }
@@ -314,7 +360,9 @@ export class VariableService {
   private deriveOptions(variable: Variable | Omit<Variable, 'id' | 'current'>): string[] {
     if (variable.type === VariableType.Custom) {
       const customVar = variable as CustomVariable;
-      return this.sortOptions(customVar.customOptions ?? [], (variable as any).sort);
+      // Limit to MAX_DISPLAY_OPTIONS before sorting to improve performance
+      const limited = (customVar.customOptions ?? []).slice(0, MAX_DISPLAY_OPTIONS);
+      return this.sortOptions(limited, (variable as any).sort);
     }
     return [];
   }
@@ -338,7 +386,11 @@ export class VariableService {
     }
   }
 
-  private resolveCurrentValue(
+  /**
+   * Resolve current value for Custom variables.
+   * If current value is not in options, reset to first option.
+   */
+  private resolveCurrentValueForCustom(
     currentVal: string[] | undefined,
     options: string[],
     multi?: boolean
@@ -350,6 +402,22 @@ export class VariableService {
       }
       return options.includes(currentVal[0]) ? [currentVal[0]] : [options[0]];
     }
+    return options.length > 0 ? [options[0]] : undefined;
+  }
+
+  /**
+   * Resolve current value for Query variables.
+   * Preserve current value even if not in options (options may change with time range).
+   */
+  private resolveCurrentValueForQuery(
+    currentVal: string[] | undefined,
+    options: string[]
+  ): string[] | undefined {
+    if (currentVal && currentVal.length > 0) {
+      // Always preserve user's selection for Query variables
+      return currentVal;
+    }
+    // No current value: default to first option if available
     return options.length > 0 ? [options[0]] : undefined;
   }
 
@@ -377,6 +445,7 @@ export class VariableService {
           language: v.language,
           dataset: v.dataset,
           regex: v.regex,
+          useTimeFilter: v.useTimeFilter ?? false,
         } as QueryVariable;
       }
       case VariableType.Custom: {
@@ -424,10 +493,10 @@ export class VariableService {
     }
   }
 
-  private async fetchOptionsForVariable(
+  private async fetchOptionsForVariableWithType(
     variable: QueryVariable,
     signal?: AbortSignal
-  ): Promise<string[]> {
+  ): Promise<{ options: string[]; optionType?: any }> {
     if (!this.dataPlugin) {
       throw new Error('VariableService not initialized with dataPlugin');
     }
@@ -435,10 +504,11 @@ export class VariableService {
     if (this.interpolationService && this.interpolationService.hasVariables(query)) {
       query = this.interpolationService.interpolate(query, variable.language);
     }
-    return executeQueryForOptions(
+    return executeQueryForOptionsWithType(
       this.dataPlugin,
       { query, language: variable.language, dataset: variable.dataset },
-      signal
+      signal,
+      variable.useTimeFilter ?? false
     );
   }
 
@@ -451,8 +521,12 @@ export class VariableService {
    * @param variables - Updated variables array
    */
   private async saveVariables(variables: Variable[]): Promise<void> {
-    if (!this.dashboardId || !this.savedObjectsClient) {
-      return;
+    if (!this.savedObjectsClient) {
+      throw new Error('SavedObjectsClient is not initialized');
+    }
+    // Dashboard must be saved before adding/updating variables
+    if (!this.dashboardId) {
+      throw new Error('Dashboard must be saved before adding variables');
     }
 
     try {
@@ -463,8 +537,6 @@ export class VariableService {
 
       this.variables$.next(variables);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('[VariableService] Failed to save variables to dashboard:', error);
       throw error;
     }
   }

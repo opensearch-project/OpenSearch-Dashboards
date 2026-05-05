@@ -91,3 +91,6 @@ snapshots.js
 .lighthouserc.js
 .lhci_output.json
 /.lighthouseci/
+
+# osd-pm bootstrap fast-path fingerprint (local machine state)
+/.osd-bootstrap-fingerprint

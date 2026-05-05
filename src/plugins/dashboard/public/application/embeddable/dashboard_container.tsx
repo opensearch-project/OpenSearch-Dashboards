@@ -165,7 +165,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.variableService.initialize(initialInput.variables);
 
     this.variableInterpolationService = new VariableInterpolationService(() =>
-      this.variableService.getVariables()
+      this.variableService.getVariablesWithState()
     );
 
     this.variableService.setInterpolationService(this.variableInterpolationService);
@@ -187,6 +187,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       })
     );
+
+    // Subscribe to container input changes to update VariableService dashboardId
+    this.variableSubscriptions.push(
+      this.getInput$().subscribe((input) => {
+        // When dashboard is saved and gets an ID, update VariableService
+        if (input.id && input.id !== initialInput.id) {
+          this.variableService.setDashboardId(input.id);
+        }
+      })
+    );
+
     this.initVariableRefreshSubscription();
   }
 
@@ -206,7 +217,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         if (timeRangeChanged || reloadTriggered) {
           prevTimeRange = input.timeRange;
           prevReloadTime = input.lastReloadRequestTime;
-          this.variableService.refreshAllVariableOptions();
+
+          if (reloadTriggered) {
+            // Manual reload: refresh all variables
+            this.variableService.refreshAllVariableOptions();
+          } else if (timeRangeChanged) {
+            // Only time range changed: refresh only time-filtered variables
+            this.variableService.refreshTimeFilteredVariableOptions();
+          }
         }
       })
     );
