@@ -37,6 +37,7 @@ import { IndexMigrator } from './index_migrator';
 import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { configMock } from '../../../config/mocks';
+import { MIGRATION_SENTINEL_ID } from './migration_sentinel';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
@@ -784,7 +785,7 @@ describe('IndexMigrator', () => {
     // written. This is a simplified sentinel store for the test.
     let storedSentinel: any;
     (client as any).index.mockImplementation((params: any) => {
-      if (params.id === 'osd_migration_status') {
+      if (params.id === MIGRATION_SENTINEL_ID) {
         storedSentinel = params.body;
       }
       return opensearchClientMock.createSuccessTransportRequestPromise({ result: 'created' });
@@ -802,7 +803,7 @@ describe('IndexMigrator', () => {
 
     // Collect status values written to the sentinel in call order.
     const statuses = (client as any).index.mock.calls
-      .filter((call: any[]) => call[0].id === 'osd_migration_status')
+      .filter((call: any[]) => call[0].id === MIGRATION_SENTINEL_ID)
       .map((call: any[]) => call[0].body.osd_migration_status.status);
 
     expect(statuses[0]).toBe('in-progress');
@@ -876,7 +877,7 @@ describe('IndexMigrator', () => {
     // completes.
     let sentinelIndexCalls = 0;
     (client as any).index.mockImplementation((params: any) => {
-      if (params.id === 'osd_migration_status') {
+      if (params.id === MIGRATION_SENTINEL_ID) {
         sentinelIndexCalls++;
         // Reject the copied/complete transitions (calls 2+ on the sentinel).
         if (sentinelIndexCalls > 1) {

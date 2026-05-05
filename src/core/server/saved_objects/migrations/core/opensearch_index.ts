@@ -42,6 +42,8 @@ import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
 import { MigrationRetryConfig } from './migration_reconciliation';
+import { readMigrationSentinel } from './migration_sentinel';
+import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
 
@@ -567,18 +569,33 @@ export async function countByType(
 }
 
 /**
- * Find the highest-numbered existing `.kibana_N` index that is NOT the given
- * collision target. Returns null if no plausible prior index exists.
+ * Find the highest-numbered existing `.kibana_N` index suitable as an
+ * authoritative baseline for the integrity-gate count comparison. Returns
+ * `null` if no plausible prior index exists.
  *
- * Example: alias = `.kibana`, existingDestName = `.kibana_8`. Scans indices
- * matching `.kibana*`, picks the one with the highest numeric suffix < 8 and
- * != 8. Used by `verifyDestIndexIntegrity`'s fallback per-type count check
- * when a legacy destination has no sentinel doc.
+ * Candidate enumeration picks exact versioned siblings of the alias
+ * (`${alias}_<digits>`, no extra path segments) and sorts them by numeric
+ * suffix descending. For each candidate, the sentinel doc is consulted:
+ *
+ *   - `complete` / `copied`: accepted as the baseline.
+ *   - No sentinel doc: accepted (legacy or pre-patch index; assumed
+ *     authoritative since the framework never accepted partial dests before
+ *     this patch landed).
+ *   - `aborted`: skipped. A poisoned sibling left behind by a prior crashed
+ *     migration must not be used as a reference for count comparison, or
+ *     the integrity gate will flag a healthy destination as partial against
+ *     a half-populated baseline.
+ *   - `in-progress`: skipped. An index still being populated by a live
+ *     migrator is not yet authoritative.
+ *
+ * If every candidate is skipped, returns `null` and the caller routes to
+ * the "no prior source" path (defer to wait loop for fresh bootstrap).
  */
 export async function findPriorSavedObjectsIndex(
   client: MigrationOpenSearchClient,
   alias: string,
-  existingDestName: string
+  existingDestName: string,
+  log?: SavedObjectsMigrationLogger
 ): Promise<string | null> {
   const { body, statusCode } = await client.indices.get({ index: `${alias}*` }, { ignore: [404] });
   if (statusCode === 404 || !body) return null;
@@ -598,7 +615,39 @@ export async function findPriorSavedObjectsIndex(
     const nb = parseInt(b.match(suffixRegex)![1], 10);
     return nb - na; // descending
   });
-  return names[0];
+
+  // Walk descending candidates and pick the first with a usable sentinel
+  // status (or no sentinel at all). Poisoned / in-progress siblings are
+  // skipped so the integrity gate doesn't compare against a garbage baseline.
+  for (const candidate of names) {
+    let sentinel;
+    try {
+      sentinel = await readMigrationSentinel(client, candidate);
+    } catch (e) {
+      // A non-404 failure on the sentinel read (auth, network, cluster
+      // issue) is ambiguous: the candidate may or may not have a sentinel.
+      // Treat as "no sentinel" so the candidate is still accepted — this
+      // matches pre-change behavior — but surface a warning so operators
+      // have a breadcrumb if subsequent count comparisons look off.
+      log?.warning(
+        `Unable to read migration sentinel on ${candidate} while selecting ` +
+          `prior source: ${(e as Error).message}. Treating as legacy (no-sentinel) ` +
+          `candidate.`
+      );
+      sentinel = null;
+    }
+    if (!sentinel) {
+      // Pre-patch or legacy: the only way `.kibana_N` existed without a
+      // sentinel before this change was for the framework to have accepted
+      // it as the authoritative destination at some prior boot.
+      return candidate;
+    }
+    if (sentinel.status === 'complete' || sentinel.status === 'copied') {
+      return candidate;
+    }
+    // `aborted` or `in-progress` — skip this candidate, keep walking.
+  }
+  return null;
 }
 
 function escapeRegex(s: string): string {

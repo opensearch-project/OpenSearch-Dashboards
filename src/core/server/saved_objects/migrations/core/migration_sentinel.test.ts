@@ -188,4 +188,32 @@ describe('migration_sentinel helpers', () => {
       expect(typeof s.nodeHostname).toBe('string');
     });
   });
+
+  describe('forward-compat wire shape', () => {
+    // If a destination carrying a sentinel is later read by an older OSD
+    // version (e.g., after an AMI rollback), the older code path runs the
+    // document through its scroll-copy / document-migrator pipeline. The
+    // shape below matches the convention the pre-patch `SavedObjectsSerializer`
+    // recognizes (_id = `<type>:<id>` + _source[type] populated), so the
+    // document is treated as an unknown-type saved object and passed through
+    // unchanged rather than logged as corrupt.
+    it('uses an id prefixed with the sentinel type', () => {
+      expect(MIGRATION_SENTINEL_ID.startsWith(`${MIGRATION_SENTINEL_TYPE}:`)).toBe(true);
+    });
+
+    it('the written doc satisfies the raw-saved-object shape', async () => {
+      const client: any = { index: jest.fn().mockResolvedValue({}) };
+      const doc = buildInitialSentinel(new Date('2026-04-25T07:50:36Z'));
+      await writeMigrationSentinel(client, '.kibana_8', doc);
+
+      // Rebuild what pre-patch SavedObjectsSerializer.isRawSavedObject checks:
+      //   _id.startsWith(`${type}:`) && _source.hasOwnProperty(type)
+      const call = client.index.mock.calls[0][0];
+      const rawDoc = { _id: call.id, _source: call.body };
+      const type = rawDoc._source.type;
+      expect(type).toBe(MIGRATION_SENTINEL_TYPE);
+      expect(rawDoc._id.startsWith(`${type}:`)).toBe(true);
+      expect(Object.prototype.hasOwnProperty.call(rawDoc._source, type)).toBe(true);
+    });
+  });
 });

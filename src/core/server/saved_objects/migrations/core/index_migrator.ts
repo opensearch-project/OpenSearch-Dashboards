@@ -90,7 +90,7 @@ export class IndexMigrator {
         alias: context.alias,
         countByType: (indexName) => Index.countByType(context.client, indexName),
         findPriorSource: (alias, existingDestName) =>
-          Index.findPriorSavedObjectsIndex(context.client, alias, existingDestName),
+          Index.findPriorSavedObjectsIndex(context.client, alias, existingDestName, context.log),
       },
     });
   }

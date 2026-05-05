@@ -42,7 +42,19 @@ import os from 'os';
 import { MigrationOpenSearchClient } from './migration_opensearch_client';
 import { MigrationSentinelDoc } from './migration_reconciliation';
 
-export const MIGRATION_SENTINEL_ID = 'osd_migration_status';
+/**
+ * Reserved document ID for the migration-status sentinel. The `:primary`
+ * suffix makes the stored shape conform to the saved-object raw-document
+ * convention (`<type>:<id>`), which keeps older OSD versions from logging a
+ * "corrupt saved object" error if they read the index after a rollback —
+ * such a reader sees a properly-shaped but unknown-type document and
+ * simply passes it through the migrator unchanged.
+ *
+ * This also means the sentinel document is only accessible through the
+ * migration-internal helpers in this file, never through the public
+ * saved-objects API (it is registered as a hidden type).
+ */
+export const MIGRATION_SENTINEL_ID = 'osd_migration_status:primary';
 export const MIGRATION_SENTINEL_TYPE = 'osd_migration_status';
 
 /**

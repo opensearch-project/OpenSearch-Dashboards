@@ -755,6 +755,175 @@ describe('OpenSearchIndex', () => {
       const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
       expect(result).toBe('.kibana_7');
     });
+
+    // Sentinel-aware candidate selection. The raw highest-N candidate is not
+    // always authoritative: a prior crashed migration can leave an `aborted`
+    // sentinel on `.kibana_N`, and using that partial index as a baseline
+    // produces a spurious PartialDestError for a healthy destination. These
+    // tests assert findPriorSavedObjectsIndex skips poisoned / in-progress
+    // siblings and walks down to the next usable one.
+    describe('sentinel-aware candidate selection', () => {
+      // Helper that returns a shape readMigrationSentinel can parse. Mirrors
+      // the wire shape produced by writeMigrationSentinel.
+      const mockSentinelFor = (statusByIndex: Record<string, string | null>) => {
+        client.get.mockImplementation(({ index }: any) => {
+          const status = statusByIndex[index];
+          if (!status) {
+            return opensearchClientMock.createSuccessTransportRequestPromise(
+              {},
+              { statusCode: 404 }
+            );
+          }
+          return opensearchClientMock.createSuccessTransportRequestPromise({
+            _source: {
+              type: 'osd_migration_status',
+              osd_migration_status: {
+                status,
+                startedAt: '2026-05-05T00:00:00Z',
+                nodeHostname: 'test',
+              },
+            },
+          });
+        });
+      };
+
+      test('skips the highest-N candidate when its sentinel is aborted', async () => {
+        // .kibana_7 was half-populated by a prior crashed migration and then
+        // orphaned (operator did not DELETE it). Framework should walk past
+        // it to .kibana_6 as the authoritative baseline.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': 'complete',
+          '.kibana_7': 'aborted',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_6');
+      });
+
+      test('skips candidates with in-progress sentinels', async () => {
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': 'complete',
+          '.kibana_7': 'in-progress',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_6');
+      });
+
+      test('accepts a copied-status sentinel as a valid baseline', async () => {
+        // `copied` means the scroll-copy loop finished and the alias swap is
+        // pending. Contents are authoritative for count-comparison purposes
+        // even though the alias has not moved yet.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({ '.kibana_7': 'copied' });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_7');
+      });
+
+      test('returns null when every candidate is poisoned', async () => {
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': 'aborted',
+          '.kibana_7': 'aborted',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBeNull();
+      });
+
+      test('falls back to legacy (no-sentinel) candidate when the top-N is aborted', async () => {
+        // Mixed-generation cluster: .kibana_7 was crashed mid-migration by a
+        // patched OSD (has aborted sentinel), .kibana_6 predates the patch
+        // and carries no sentinel. Legacy candidate should be accepted.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_6': {},
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        mockSentinelFor({
+          '.kibana_6': null, // legacy, no sentinel
+          '.kibana_7': 'aborted',
+        });
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_6');
+      });
+
+      test('warns and falls back to legacy when sentinel read throws (non-404 failure)', async () => {
+        // Simulates auth failure, network blip, or other non-404 sentinel-read
+        // error. The candidate is still accepted (same as pre-change behavior)
+        // but a warning is emitted so operators have a breadcrumb if later
+        // count comparisons look off.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        client.get.mockRejectedValue(new Error('connection reset'));
+
+        const log = {
+          warning: jest.fn(),
+          info: jest.fn(),
+          debug: jest.fn(),
+          error: jest.fn(),
+        };
+        const result = await Index.findPriorSavedObjectsIndex(
+          migClient(),
+          '.kibana',
+          '.kibana_8',
+          log as any
+        );
+
+        expect(result).toBe('.kibana_7');
+        expect(log.warning).toHaveBeenCalledTimes(1);
+        expect(log.warning.mock.calls[0][0]).toContain('.kibana_7');
+        expect(log.warning.mock.calls[0][0]).toContain('connection reset');
+      });
+
+      test('silent fallback when log is not provided (backward compat)', async () => {
+        // Older callers that pass no logger still get the same pre-(a) silent
+        // fallback semantics. Ensures the optional log parameter is truly optional.
+        client.indices.get.mockResolvedValue(
+          opensearchClientMock.createSuccessTransportRequestPromise({
+            '.kibana_7': {},
+            '.kibana_8': {},
+          })
+        );
+        client.get.mockRejectedValue(new Error('boom'));
+
+        const result = await Index.findPriorSavedObjectsIndex(migClient(), '.kibana', '.kibana_8');
+        expect(result).toBe('.kibana_7');
+      });
+    });
   });
 
   describe('reader', () => {
