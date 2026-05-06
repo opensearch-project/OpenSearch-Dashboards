@@ -1,5 +1,31 @@
 <img src="https://raw.githubusercontent.com/opensearch-project/project-website/refs/heads/main/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg" height="64px"/>
 
+## SQL Support in Explore Logs
+
+### Changes
+
+- **SQL language toggle**: Switching to SQL auto-generates a base query (`SELECT * FROM <index> LIMIT 1000`) and executes it.
+- **SQL filter buttons**: Filter for/out value buttons generate proper SQL `WHERE` clauses via `sql_filter_utils.ts`.
+- **SQL histogram**: Uses a PPL sidecar query (`/api/enhancements/search/ppl`) with `span()` for time bucketing, since the SQL engine lacks a pushdown-capable histogram function.
+
+### Limitation: SQL Histogram Uses PPL Internally
+
+The OpenSearch SQL engine does not support `span()` or any function that pushes down to a native `date_histogram` aggregation. The tokens `DATE_HISTOGRAM` / `HISTOGRAM` exist in the SQL lexer but are only wired in the legacy engine, not the current v3 Calcite engine.
+
+Approaches that don't work:
+- `DATE_FORMAT(time, '%Y-%m-%d') GROUP BY ...` — no aggregation pushdown, times out on large indices
+- `FLOOR(UNIX_TIMESTAMP(time) / interval)` — same issue
+
+Current workaround: the histogram query is issued as PPL via direct HTTP POST, bypassing the SQL interceptor. To remove PPL fully, the SQL plugin needs `span()` added to its grammar (the backend `AggregateAnalyzer` already handles it).
+
+### Files Modified
+
+- `src/plugins/explore/public/application/utils/state_management/actions/query_actions.ts` — PPL sidecar fetch + dispatch for SQL histogram
+- `src/plugins/query_enhancements/public/search/filters/sql_filter_utils.ts` — SQL filter generation
+- `src/plugins/query_enhancements/public/language_toggle.tsx` — SQL/PPL language switch behavior
+
+---
+
 - [Welcome!](#welcome)
 - [Project Resources](#project-resources)
 - [Code of Conduct](#code-of-conduct)

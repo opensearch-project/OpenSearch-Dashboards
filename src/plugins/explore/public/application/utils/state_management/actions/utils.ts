@@ -126,6 +126,39 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
   }
 };
 
+export const buildSQLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
+  const { aggs, finalInterval, timeFieldName, fromDate, toDate } = histogramConfig;
+
+  if (!aggs || !timeFieldName || !finalInterval) {
+    return query;
+  }
+
+  const fromMatch = query.match(/FROM\s+([^\s]+)/i);
+  if (!fromMatch) return query;
+  const tableName = fromMatch[1];
+
+  // Convert interval to DATE_FORMAT pattern (span() is PPL-only, not supported in SQL)
+  const fmt = intervalToDateFormat(finalInterval);
+  const tf = `\`${timeFieldName}\``;
+  return `SELECT COUNT(*) as cnt, DATE_FORMAT(${tf}, '${fmt}') as span FROM ${tableName} WHERE ${tf} >= '${fromDate}' AND ${tf} <= '${toDate}' GROUP BY span ORDER BY span`;
+};
+
+const intervalToDateFormat = (interval: string): string => {
+  const match = interval.match(/^(\d+)([smhdwMy])$/);
+  if (!match) return 'yyyy-MM-dd';
+  const unit = match[2];
+  switch (unit) {
+    case 'y': return 'yyyy';
+    case 'M': return 'yyyy-MM';
+    case 'w': return 'yyyy-ww';
+    case 'd': return 'yyyy-MM-dd';
+    case 'h': return 'yyyy-MM-dd HH';
+    case 'm': return 'yyyy-MM-dd HH:mm';
+    case 's': return 'yyyy-MM-dd HH:mm:ss';
+    default: return 'yyyy-MM-dd';
+  }
+};
+
 export const processRawResultsForHistogram = (
   queryString: string,
   rawResults: ISearchResult,

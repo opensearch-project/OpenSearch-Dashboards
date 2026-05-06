@@ -4,18 +4,21 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import {
+  selectActiveTabId,
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
 } from '../../../../application/utils/state_management/selectors';
 import { EditorMode } from '../../../../application/utils/state_management/types';
+import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { useEditorFocus } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
+import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { getServices } from '../../../../services/services';
 import './language_toggle.scss';
 
@@ -28,7 +31,9 @@ export const LanguageToggle = () => {
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const language = useSelector(selectQueryLanguage);
+  const activeTabId = useSelector(selectActiveTabId);
   const focusOnEditor = useEditorFocus();
+  const dispatch = useDispatch();
 
   const switchEditorMode = useLanguageSwitch();
 
@@ -44,24 +49,67 @@ export const LanguageToggle = () => {
     [closePopover, focusOnEditor, switchEditorMode]
   );
 
+  const onLanguageClick = useCallback(
+    (newLanguage: string) => {
+      closePopover();
+      const services = getServices();
+      const queryString = services.data.query.queryString;
+      const currentQuery = queryString.getQuery();
+      const languageSvc = queryString.getLanguageService();
+      const langConfig = languageSvc.getLanguage(newLanguage);
+      const dataset = currentQuery.dataset;
+
+      // Get the default query string for the new language
+      // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
+      const newQueryString = newLanguage === 'PPL' ? '' : (langConfig?.getQueryString?.(currentQuery) ?? '');
+
+      queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
+      languageSvc.setUserQueryLanguage(newLanguage);
+      dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
+      setTimeout(focusOnEditor);
+      // Auto-execute query after language switch
+      setTimeout(() => dispatch(onEditorRunActionCreator(services, newQueryString)));
+    },
+    [closePopover, focusOnEditor, dispatch]
+  );
+
+  const languageService = getServices().data.query.queryString.getLanguageService();
+
   const languageTitle = useMemo(() => {
-    const languageService = getServices().data.query.queryString.getLanguageService();
     return languageService.getLanguage(language)?.title ?? language;
-  }, [language]);
+  }, [language, languageService]);
+
+  // Get supported languages for the active tab
+  const supportedLanguages = useMemo(() => {
+    const services = getServices();
+    const activeTab = services.tabRegistry?.getTab(activeTabId);
+    if (activeTab?.supportedLanguages?.length) {
+      return activeTab.supportedLanguages;
+    }
+    // Fallback to PPL and SQL when tab is not resolved
+    return ['PPL', 'SQL'];
+  }, [activeTabId]);
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
 
   const items = useMemo(() => {
-    const output = [
-      <EuiContextMenuItem
-        key={languageTitle}
-        onClick={() => onItemClick(EditorMode.Query)}
-        disabled={!isPromptMode}
-        data-test-subj={`queryPanelFooterLanguageToggle-${languageTitle}`}
-      >
-        {languageTitle}
-      </EuiContextMenuItem>,
-    ];
+    const output: React.ReactElement[] = [];
+
+    // Add all supported languages for the active tab
+    for (const langId of supportedLanguages) {
+      const langConfig = languageService.getLanguage(langId);
+      const title = langConfig?.title ?? langId;
+      output.push(
+        <EuiContextMenuItem
+          key={langId}
+          onClick={() => langId === language ? onItemClick(EditorMode.Query) : onLanguageClick(langId)}
+          disabled={!isPromptMode && langId === language}
+          data-test-subj={`queryPanelFooterLanguageToggle-${title}`}
+        >
+          {title}
+        </EuiContextMenuItem>
+      );
+    }
 
     if (promptModeIsAvailable) {
       output.push(
@@ -77,7 +125,7 @@ export const LanguageToggle = () => {
     }
 
     return output;
-  }, [isPromptMode, onItemClick, promptModeIsAvailable, languageTitle]);
+  }, [isPromptMode, onItemClick, onLanguageClick, promptModeIsAvailable, languageTitle, supportedLanguages, language, languageService]);
 
   return (
     // This div is needed to allow for the gradient styling
@@ -98,7 +146,7 @@ export const LanguageToggle = () => {
         anchorPosition="downCenter"
         panelPaddingSize="none"
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        {isPopoverOpen && <EuiContextMenuPanel size="s" items={items} />}
       </EuiPopover>
     </div>
   );
