@@ -1,3 +1,5 @@
+$bar-gauge-radius: 2px;
+
 .main-bar-gauge-container {
   display: flex;
   box-sizing: border-box;
@@ -63,6 +65,7 @@
 .bar-gauge-background {
   flex: 1;
   position: relative;
+  border-radius: $bar-gauge-radius;
 
   .horizontal & {
     height: 100%;
@@ -77,6 +80,8 @@
 
 // filled bar
 .bar-gauge-fill {
+  border-radius: $bar-gauge-radius;
+
   .horizontal & {
     height: 100%;
     transition: width 0.3s ease;
@@ -90,13 +95,19 @@
 
 // stack segments
 .bar-gauge-stack {
-  overflow: hidden;
-
   .horizontal & {
     display: flex;
     flex-direction: row;
     height: 100%;
     transition: width 0.3s ease;
+
+    > :first-child {
+      border-radius: $bar-gauge-radius 0 0 $bar-gauge-radius;
+    }
+
+    > :last-child {
+      border-radius: 0 $bar-gauge-radius $bar-gauge-radius 0;
+    }
   }
 
   .vertical & {
@@ -104,6 +115,14 @@
     flex-direction: column-reverse;
     width: 100%;
     transition: height 0.3s ease;
+
+    > :last-child {
+      border-radius: $bar-gauge-radius $bar-gauge-radius 0 0;
+    }
+
+    > :first-child {
+      border-radius: 0 0 $bar-gauge-radius $bar-gauge-radius;
+    }
   }
 }
 
@@ -115,5 +134,6 @@
   .vertical & {
     font-size: 14px;
     text-align: center;
+    margin-bottom: 4px;
   }
 }

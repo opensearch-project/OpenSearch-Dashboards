@@ -79,13 +79,15 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
             calculateType: props.styleOptions.valueCalculation,
           })(props.transformedData);
 
-          const gaugeData = aggregated.map((row) => ({
-            category: String(row[categoryField]),
-            value:
-              row[valueField] !== undefined && row[valueField] !== null
-                ? Number(row[valueField])
-                : null,
-          }));
+          const gaugeData = aggregated.map((row) => {
+            return {
+              category: String(row[categoryField] ?? '-') || '-',
+              value:
+                row[valueField] !== undefined && row[valueField] !== null
+                  ? Number(row[valueField])
+                  : null,
+            };
+          });
 
           return (
             <BarGaugeRender

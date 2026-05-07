@@ -193,8 +193,8 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     const barThickness = Math.max(computedThickness, minThickness);
 
     const maxValueLen = items.reduce((max, item) => Math.max(max, item.displayValue.length), 1);
-    const fontSize = isHorizontal ? 12 : barThickness / (maxValueLen * 0.5);
-    return Math.min(15, fontSize);
+    const fontSize = isHorizontal ? barThickness / 3 : barThickness / (maxValueLen * 0.5);
+    return Math.min(24, fontSize);
   }, [containerDimensions, data.length, isHorizontal, items]);
 
   return (

@@ -103,6 +103,7 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
     bottom: `${percentage}%`,
     left: '50%',
     transform: 'translateX(-50%)',
+    marginBottom: '4px',
   };
 
   const bar = (
