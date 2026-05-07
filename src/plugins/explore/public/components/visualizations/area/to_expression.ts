@@ -44,7 +44,6 @@ export const createSimpleAreaChart = (
   const result = pipe(
     transform(sortByTime(timeField), convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${valueFieldNames.join(', ')} Over Time`,
       legend: { show: false },
     }),
     buildAxisConfigs,
@@ -99,9 +98,6 @@ export const createMultiAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      }`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -163,9 +159,6 @@ export const createFacetedMultiAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      } (Faceted by ${axisColumnMappings[AxisRole.FACET].name})`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -213,7 +206,6 @@ export const createCategoryAreaChart = (
       convertTo2DArray(allColumns)
     ),
     createBaseConfig({
-      title: `${valueFieldNames.join(', ')} by ${axisColumnMappings[AxisRole.X].name}`,
       legend: { show: false },
     }),
     buildAxisConfigs,
@@ -260,9 +252,6 @@ export const createStackedAreaChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} by ${
-        axisColumnMappings[AxisRole.X].name
-      } and ${axisColumnMappings[AxisRole.COLOR].name}`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,

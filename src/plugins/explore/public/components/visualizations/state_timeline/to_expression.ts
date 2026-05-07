@@ -84,7 +84,6 @@ export const createNumericalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name} by ${yCol.name} and ${xCol.name}`,
       addTrigger: false,
       legend: { show: styleOptions.addLegend },
     }),
@@ -137,7 +136,6 @@ export const createCategoricalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name} by ${yCol.name} and ${xCol.name}`,
       addTrigger: false,
       legend: { show: styleOptions.addLegend },
     }),
@@ -185,7 +183,6 @@ export const createSingleCategoricalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name}  by ${xCol.name}`,
       addTrigger: false,
       legend: { show: styleOptions.addLegend },
     }),
@@ -243,7 +240,6 @@ export const createSingleNumericalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name}  by ${xCol.name}`,
       addTrigger: false,
       legend: { show: styleOptions.addLegend },
     }),
