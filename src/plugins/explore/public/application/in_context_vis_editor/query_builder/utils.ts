@@ -161,8 +161,6 @@ export const queryExecution = async ({
 }: {
   services: ExploreServices;
   queryString: string;
-  // query: Query;
-  // queryEditorState: QueryEditorState;
   updateEditorStateFn: (updates: Partial<QueryEditorState>) => void;
   updateResultFn: (result: ISearchResult) => void;
   activeQueryAbortControllers: Map<string, AbortController>;
@@ -176,7 +174,6 @@ export const queryExecution = async ({
 
   try {
     updateEditorStateFn({
-      // currentRunningQuery: cacheKey,
       queryStatus: {
         status: QueryExecutionStatus.LOADING,
         startTime: queryStartTime,
@@ -265,7 +262,6 @@ export const queryExecution = async ({
 
     updateResultFn(rawResultsWithMeta);
     updateEditorStateFn({
-      // currentRunningQuery: cacheKey,
       queryStatus: {
         status:
           rawResults.hits?.hits?.length > 0
@@ -283,7 +279,6 @@ export const queryExecution = async ({
     // Handle abort errors - reset query status to initial state
     if (error instanceof Error && error.name === 'AbortError') {
       updateEditorStateFn({
-        // currentRunningQuery: cacheKey,
         queryStatus: {
           status: QueryExecutionStatus.UNINITIALIZED,
           startTime: undefined,
