@@ -267,7 +267,16 @@ export class ExploreEmbeddable
     this.filtersSearchSource = searchSource.create();
     this.filtersSearchSource.setParent(timeRangeSearchSource);
     searchSource.setParent(this.filtersSearchSource);
-    const query = this.savedExplore.searchSource.getField('query');
+
+    // Use input.query only if it was explicitly set (not inherited from parent container)
+    // Check if query exists in explicitInput to distinguish from inherited dashboard query
+    let query = this.savedExplore.searchSource.getField('query');
+    if (this.parent && query) {
+      const panelState = this.parent.getInput().panels?.[this.id];
+      if (panelState?.explicitInput?.query?.query) {
+        query = { ...query, query: panelState.explicitInput.query.query };
+      }
+    }
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const activeTab = uiState.activeTab;
     if (query) {
