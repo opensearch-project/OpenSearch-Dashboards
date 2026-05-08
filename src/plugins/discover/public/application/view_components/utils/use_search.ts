@@ -563,8 +563,10 @@ export const useSearch = (services: DiscoverViewServices) => {
       const isDataQueryDefault = dataQuery.query === defaultQuery.query;
       const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      // Use eixisting query, if eixisting query match default, use query from saved search
-      const query = isDataQueryDefault ? savedSearchQuery ?? dataQuery : dataQuery;
+      // Use existing query; if it matches default, prefer savedSearchQuery, then the freshly
+      // computed defaultQuery (which reflects the post-init default dataset and language clamp),
+      // falling back to dataQuery for back-compat.
+      const query = isDataQueryDefault ? savedSearchQuery ?? defaultQuery ?? dataQuery : dataQuery;
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {
