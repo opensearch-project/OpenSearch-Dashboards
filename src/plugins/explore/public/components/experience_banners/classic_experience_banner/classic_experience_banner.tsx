@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiCallOut, EuiLink, EuiSmallButton } from '@elastic/eui';
 import './classic_experience_banner.scss';
 import { NEW_DISCOVER_INFO_URL, SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY } from '../constants';

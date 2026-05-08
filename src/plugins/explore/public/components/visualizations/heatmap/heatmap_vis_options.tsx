@@ -25,8 +25,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {
@@ -54,8 +52,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           currentMapping={axisColumnMappings}
           updateVisualization={updateVisualization}
           chartType="heatmap"
-          onSwitchAxes={(v) => updateStyleOption('switchAxes', v)}
-          switchAxes={styleOptions.switchAxes}
         />
       </EuiFlexItem>
       {hasMappingSelected && (
@@ -84,7 +80,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
               onStandardAxesChange={(standardAxes) =>
                 updateStyleOption('standardAxes', standardAxes)
               }
-              switchAxes={styleOptions.switchAxes}
             />
           </EuiFlexItem>
 

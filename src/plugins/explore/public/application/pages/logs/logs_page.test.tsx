@@ -5,10 +5,9 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
@@ -162,10 +161,12 @@ describe('LogsPage', () => {
         query: queryReducer,
         queryEditor: queryEditorReducer,
       },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       preloadedState,
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -199,6 +200,7 @@ describe('LogsPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <LogsPage />
       </TestHarness>
@@ -214,6 +216,7 @@ describe('LogsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <LogsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
@@ -226,6 +229,7 @@ describe('LogsPage', () => {
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <LogsPage />
       </TestHarness>
@@ -239,6 +243,7 @@ describe('LogsPage', () => {
     it('registers all keyboard shortcuts correctly', () => {
       const store = createTestStore();
       render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <TestHarness store={store}>
           <LogsPage />
         </TestHarness>
@@ -279,6 +284,7 @@ describe('LogsPage', () => {
       const dispatchSpy = jest.spyOn(store, 'dispatch');
 
       render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         <TestHarness store={store}>
           <LogsPage />
         </TestHarness>

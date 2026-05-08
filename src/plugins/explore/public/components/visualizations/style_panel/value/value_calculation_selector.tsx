@@ -4,7 +4,7 @@
  */
 
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import { CalculationMethod } from '../../utils/calculation';
 

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { requiredProps, takeMountedSnapshot } from '../../../test';
 import { KuiListingTable } from './listing_table';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { DurationFormat } from 'src/plugins/data/common';
 
 import {

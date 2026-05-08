@@ -19,7 +19,6 @@ export const enum QUERY_LANGUAGE {
   DQL = 'DQL',
 }
 export enum DATA_SOURCE_TYPES {
-  // @ts-expect-error TS2553 TODO(ts-error): fixme
   DEFAULT_CLUSTER_TYPE = DEFAULT_DATA_SOURCE_TYPE,
   SPARK = 'spark',
   S3Glue = 's3glue',
@@ -62,7 +61,7 @@ export const ACC_INDEX_TYPE_DOCUMENTATION_URL =
 export const ACC_CHECKPOINT_DOCUMENTATION_URL =
   'https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#create-index-options';
 
-export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices have a naming format of pattern: \`prefix_<index name>_suffix\`. They share a common prefix structure, which is \`flint_<data source name>_<database name>_<table name>_\`. Additionally, they may have a suffix that varies based on the index type. 
+export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices have a naming format of pattern: \`prefix_<index name>_suffix\`. They share a common prefix structure, which is \`flint_<data source name>_<database name>_<table name>_\`. Additionally, they may have a suffix that varies based on the index type.
 ##### Skipping Index
 - For 'Skipping' indices, a fixed index name 'skipping' is used, and this name cannot be modified by the user. The suffix added to this type is \`_index\`.
   - An example of a 'Skipping' index name would be: \`flint_mydatasource_mydb_mytable_skipping_index\`.
@@ -73,7 +72,7 @@ export const ACCELERATION_INDEX_NAME_INFO = `All OpenSearch acceleration indices
 - 'Materialized View' indices also enable users to define their index name, but they do not have a suffix.
   - An example of a 'Materialized View' index name might look like: \`flint_mydatasource_mydb_mytable_myindexname\`.
 ##### Note:
-- All user given index names must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \, |, ?, #, >, or < are not allowed.  
+- All user given index names must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \, |, ?, #, >, or < are not allowed.
   `;
 
 export const SKIPPING_INDEX_ACCELERATION_METHODS = [

@@ -82,7 +82,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   }, [selectedSpan]);
 
   // Filter logs for the selected span from datasetLogs
-  const spanLogs = useMemo(() => {
+  useMemo(() => {
     if (!selectedSpan?.spanId || Object.keys(datasetLogs).length === 0) return [];
 
     // Combine all logs from all datasets and filter by span ID

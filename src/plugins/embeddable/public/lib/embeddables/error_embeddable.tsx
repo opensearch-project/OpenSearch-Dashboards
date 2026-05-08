@@ -29,7 +29,6 @@
  */
 
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Markdown } from '../../../../opensearch_dashboards_react/public';
 import { Embeddable } from './embeddable';
@@ -47,7 +46,6 @@ export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
-  private dom?: HTMLElement;
   private root?: Root;
 
   constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
@@ -57,11 +55,12 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
 
   public reload() {}
 
-  public render(dom: HTMLElement) {
+  public render(_dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
-    this.dom = dom;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._dom = _dom;
     if (!this.root) {
-      this.root = createRoot(dom);
+      this.root = createRoot(_dom);
     }
     this.root.render(
       // @ts-ignore

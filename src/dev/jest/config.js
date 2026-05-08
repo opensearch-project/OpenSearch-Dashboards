@@ -64,16 +64,17 @@ const rootGroups = [
     '<rootDir>/packages',
   ],
   [
-    // CI Group 3 (roughly 400 files)
-    '<rootDir>/src/plugins/[a-d]', // plugins a-d
+    // CI Group 3 (roughly 440 files)
+    '<rootDir>/src/plugins/[a-c]', // plugins a-c
+    '<rootDir>/src/plugins/[q-u]', // lighter utility plugins q-u (saved_objects*, share, telemetry*, ui_actions, etc.)
   ],
   [
-    // CI Group 4 (roughly 410 files)
+    // CI Group 4 (roughly 280 files)
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
     '<rootDir>/src/dev',
-    '<rootDir>/src/plugins/[e-u]', // plugins e-u
+    '<rootDir>/src/plugins/[e-k]', // plugins e-k (explore, embeddable, expressions, home, etc.)
     '<rootDir>/src/legacy/server',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/legacy/utils',
@@ -81,6 +82,14 @@ const rootGroups = [
     '<rootDir>/src/setup_node_env',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
+  ],
+  [
+    // CI Group 5 (roughly 755 files)
+    // [d] plugins are the heaviest (data, dashboard, discover, data_source, data_source_management)
+    // [l-p] plugins (legacy_export, management*, navigation, newsfeed, opensearch_*, opensearch_ui_shared)
+    // [q-u] moved to group 3 to keep Windows wall-clock time under 30 minutes
+    '<rootDir>/src/plugins/[d]', // plugins d
+    '<rootDir>/src/plugins/[l-p]', // plugins l-p
   ],
 ];
 
@@ -188,7 +197,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-color|axios|@smithy|@aws-crypto|@aws-sdk|uuid))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|uuid|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [

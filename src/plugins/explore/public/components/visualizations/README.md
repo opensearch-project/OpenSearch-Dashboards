@@ -1,19 +1,18 @@
 # OpenSearch Dashboards Visualizations
 
-This directory contains the visualization components for the OpenSearch Dashboards Explore plugin. It provides a flexible, rule-based system for rendering different types of visualizations based on data structure.
+This directory contains the visualization components for the OpenSearch Dashboards Explore plugin. It provides a flexible, registry-based system for rendering different types of visualizations based on axis-role mappings and data column types.
 
 ## Structure
 
-| Component                    | Description                                                        |
-| ---------------------------- | ------------------------------------------------------------------ |
-| **Visualization Registry**   | Manages the registration and retrieval of visualization rules      |
-| **Rule Repository**          | Contains predefined rules for matching data to visualization types |
-| **Visualization Container**  | Renders the selected visualization with its own styling options    |
-| **Type-specific Components** | Implementation for each supported chart type                       |
+| Component                  | Description                                                                  |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| **Visualization Registry** | Manages registration and retrieval of `VisualizationType` configurations     |
+| **Visualization Builder**  | Orchestrates chart selection, axis mapping, style management, and rendering  |
+| **Type-specific Configs**  | Each chart type defines its rules, axis mappings, defaults, and render logic |
+| **Style Panel**            | Shared and chart-specific style controls (axes, legend, thresholds, etc.)    |
+| **ECharts Render**         | Common ECharts rendering component used by most chart types                  |
 
 ## Supported Visualization Types
-
-The system currently supports the following visualization types:
 
 <table>
   <tr>
@@ -26,27 +25,59 @@ The system currently supports the following visualization types:
     <td><strong>Scatter Plots</strong></td>
     <td><strong>Metric Visualizations</strong></td>
   </tr>
+  <tr>
+    <td><strong>Area Charts</strong></td>
+    <td><strong>Tables</strong></td>
+    <td><strong>Gauges</strong></td>
+  </tr>
+  <tr>
+    <td><strong>Bar Gauges</strong></td>
+    <td><strong>Histograms</strong></td>
+    <td><strong>State Timelines</strong></td>
+  </tr>
 </table>
 
-## Rule-Based Visualization Selection
+## Architecture
 
-### How Rules Work
+### VisualizationType
 
-Each visualization rule defines:
+Each chart type is defined as a `VisualizationType<T>` object containing:
 
-1. A unique identifier
-2. A matching function that determines if the rule applies to the given set of data
-3. A list of chart types with priorities
-4. A function to convert the data to a vega expression for rendering
+- `name` / `type` / `icon` — metadata
+- `getRules()` — returns an array of `VisRule<T>` objects
+- `ui.style.defaults` — default style options
+- `ui.style.render` — React component for the style panel
 
-### Rule to Chart Type Mapping
+### VisRule and Axis Mappings
 
-**Key Feature:** Each rule can map to multiple chart types with different priorities
+Each `VisRule` defines:
 
-This allows for:
+1. A **priority** (higher = preferred when multiple rules match)
+2. One or more **mappings** — each mapping is a `Record<AxisRole, { type: VisFieldType }>` that declares which axis roles map to which field types
+3. A **render** function that produces the chart's React output
 
-- Providing alternative visualization options for the same data structure
-- Defining a default (highest priority) visualization while allowing users to switch to alternatives
+```typescript
+interface VisRule<T extends ChartType> {
+  priority: number;
+  mappings: AxisTypeMapping[];
+  render: (props: VisRenderProps<T>) => React.ReactNode;
+}
+```
+
+Axis roles include: `x`, `y`, `color`, `facet`, `size`, `y2`, `value`, `time`.
+
+Field types include: `numerical`, `categorical`, `date`.
+
+A single rule can have multiple mappings (e.g., allowing either X=Date/Y=Numerical or X=Numerical/Y=Date). The registry matches rules by comparing the required field type counts in each mapping against the available columns.
+
+### Rule Matching
+
+The `VisualizationRegistry` provides two levels of matching:
+
+- **Exact match**: the mapping's required field counts equal the input column counts exactly
+- **Compatible match**: the mapping's required field counts are less than or equal to the input counts (superset)
+
+The `findBestMatch` method returns the highest-priority rule with an exact column-count match, optionally scoped to a specific chart type.
 
 For a complete reference of all currently defined rules, see the [Visualization Rules Reference](./RULES.md).
 
@@ -54,179 +85,74 @@ For a complete reference of all currently defined rules, see the [Visualization 
 
 ### Basic Usage
 
-The visualization container automatically selects and renders the appropriate visualization based on the data:
+The `VisualizationBuilder` handles chart selection and rendering automatically:
 
 ```tsx
 <VisualizationContainer />
 ```
 
-### Accessing Available Chart Types
+### Accessing the Registry
 
 ```typescript
-const visualizationData = getVisualizationType(rows, fieldSchema);
-const availableChartTypes = visualizationData?.availableChartTypes;
+// Via React hook (preferred)
+const registry = useVisualizationRegistry();
 
-// availableChartTypes contains all chart types that can be used with the current data
-// sorted by priority
+// Via plugin services
+const registry = services.visualizationRegistry.getRegistry();
 ```
 
-### Registering New Visualization Rules
+### Registering a New Visualization Type
 
-To add a new visualization rule:
-
-1. Define a new rule object that implements the `VisualizationRule` interface:
+1. Define a config factory that returns a `VisualizationType`:
 
 ```typescript
-const myCustomRule: VisualizationRule = {
-  id: 'my-custom-rule',
-  name: 'My Custom Rule',
-  description: 'Description of when this rule applies',
-
-  // Define when this rule should match
-  matches: (numerical, categorical, date) => numerical.length === 2 && categorical.length === 1,
-
-  // Define chart types with priorities (higher number = higher priority)
-  chartTypes: [
-    { type: 'scatter', priority: 100, name: 'Scatter Plot' },
-    { type: 'bar', priority: 80, name: 'Bar Chart' },
+export const createMyChartConfig = (): VisualizationType<'my_chart'> => ({
+  name: 'My Chart',
+  type: 'my_chart',
+  icon: 'visMyChart',
+  getRules: () => [
+    {
+      priority: 100,
+      mappings: [
+        {
+          [AxisRole.X]: { type: VisFieldType.Categorical },
+          [AxisRole.Y]: { type: VisFieldType.Numerical },
+        },
+      ],
+      render(props) {
+        const spec = createMyChartSpec(
+          props.transformedData,
+          props.styleOptions,
+          props.axisColumnMappings
+        );
+        return <EchartsRender spec={spec} />;
+      },
+    },
   ],
-
-  // Define how to convert data to an expression
-  toExpression: (
-    transformedData,
-    numericalColumns,
-    categoricalColumns,
-    dateColumns,
-    styleOptions,
-    chartType = 'scatter'
-  ) => {
-    switch (chartType) {
-      case 'scatter':
-        return createCustomScatterChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          styleOptions
-        );
-      case 'bar':
-        return createCustomBarChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          styleOptions
-        );
-      default:
-        return createCustomScatterChart(
-          transformedData,
-          numericalColumns,
-          categoricalColumns,
-          styleOptions
-        );
-    }
+  ui: {
+    style: {
+      defaults: defaultMyChartStyles,
+      render: (props) => React.createElement(MyChartVisOptions, props),
+    },
   },
-};
+});
 ```
 
-2. Register the rule with the visualization registry:
+2. Register it via the `VisualizationRegistryService` setup contract:
 
 ```typescript
-// Register a single rule
-visualizationRegistry.registerRule(myCustomRule);
-
-// Or register multiple rules
-visualizationRegistry.registerRules([myCustomRule, anotherRule]);
+visualizationRegistry.register(createMyChartConfig());
 ```
 
-### Adding a New Chart Type
+3. Add the new chart type to the `ChartType` union and `ChartStylesMapping` interface in `utils/use_visualization_types.ts`.
 
-To add a new chart type:
-
-1. Create a new directory for your chart type:
+### Adding a New Chart Type Directory
 
 ```
 visualizations/
-└── my_chart_type/
-    ├── my_chart_vis_config.ts     # Chart configuration
-    ├── my_chart_vis_options.tsx   # UI options component
-    ├── to_expression.ts           # Expression generation
-    └── ... other files
-```
-
-2. Define the chart configuration in `my_chart_vis_config.ts`:
-
-```typescript
-export interface MyChartStyleControls {
-  // Define style options specific to your chart
-  showLegend: boolean;
-  colors: string[];
-  // ... other options
-}
-
-export const createMyChartConfig = () => {
-  return {
-    name: 'My Chart',
-    type: 'my_chart_type',
-    ui: {
-      style: {
-        defaults: {
-          showLegend: true,
-          colors: ['#1EA7FD', '#FF5733'],
-          // ... default values for other options
-        },
-        render: (props: StyleControlsProps<MyChartStyleControls>) => (
-          <MyChartVisOptions {...props} />
-        ),
-      },
-    },
-  };
-};
-```
-
-3. Create the expression generator in `to_expression.ts`:
-
-```typescript
-export const createMyChartExpression = (
-  transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
-  styleOptions: MyChartStyleControls
-) => {
-  // Generate the expression for your chart
-  // ...
-
-  return {
-    type: 'expression',
-    chain: [
-      // Your expression chain
-    ],
-  };
-};
-```
-
-4. Update the `ChartType` type and `ChartStyleControlMap` interface in `utils/use_visualization_types.ts`:
-
-```typescript
-export type ChartType = 'line' | 'pie' | /* ... */ | 'my_chart_type';
-
-export interface ChartStyleControlMap {
-  line: LineChartStyleControls;
-  pie: PieChartStyleControls;
-  // ... other chart types
-  my_chart_type: MyChartStyleControls;
-}
-```
-
-5. Update the `getVisualizationConfig` method in `visualization_registry.ts`:
-
-```typescript
-private getVisualizationConfig(type: string) {
-  switch (type) {
-    // ... existing cases
-    case 'my_chart_type':
-      return createMyChartConfig();
-    default:
-      return;
-  }
-}
+└── my_chart/
+    ├── my_chart_vis_config.tsx      # VisualizationType factory + style types + defaults
+    ├── my_chart_vis_options.tsx      # Style panel component
+    ├── to_expression.ts             # ECharts spec generation
+    └── ... other files (utils, tests, exclusive options)
 ```

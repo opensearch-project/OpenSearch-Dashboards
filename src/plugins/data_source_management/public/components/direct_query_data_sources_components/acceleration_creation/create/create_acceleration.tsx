@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,

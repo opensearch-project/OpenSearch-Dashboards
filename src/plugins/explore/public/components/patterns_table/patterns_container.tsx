@@ -66,6 +66,7 @@ const PatternsContainerContent = ({
       dispatch(setQueryStringWithHistory(query));
       setEditorText(query);
       dispatch(setActiveTab(EXPLORE_LOGS_TAB_ID));
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(executeQueries({ services }));
     },
     [dispatch, setEditorText, services]

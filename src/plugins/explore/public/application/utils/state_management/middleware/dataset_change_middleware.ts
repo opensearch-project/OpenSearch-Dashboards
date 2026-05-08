@@ -12,18 +12,18 @@ import { ExploreServices } from '../../../../types';
 import {
   clearResults,
   setPromptModeIsAvailable,
-  setActiveTab,
   clearLastExecutedData,
   setSummaryAgentIsAvailable,
   setPatternsField,
   setUsingRegexPatterns,
+  setActiveTab,
 } from '../slices';
 import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
-import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
+import { EXPLORE_NO_TAB_ID } from '../../../../../common';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -53,7 +53,7 @@ export const createDatasetChangeMiddleware = (
 
       currentDataset = dataset;
 
-      store.dispatch(setActiveTab(''));
+      store.dispatch(setActiveTab(EXPLORE_NO_TAB_ID));
       store.dispatch(clearResults());
       store.dispatch(clearQueryStatusMap());
       store.dispatch(clearLastExecutedData());

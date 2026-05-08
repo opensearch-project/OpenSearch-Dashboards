@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
 import { convertTimelineToMessageRows } from './chat_messages';
 
 // Mock the child components
 jest.mock('./message_row', () => ({
-  MessageRow: ({ message }: any) => <div data-test-subj="message-row">{message.content}</div>,
+  MessageRow: ({ message, timeline }: any) => (
+    <div data-test-subj="message-row" data-has-timeline={!!timeline}>
+      {message.content}
+    </div>
+  ),
 }));
 
 jest.mock('./tool_call_row', () => ({
@@ -74,6 +77,58 @@ describe('ChatMessages', () => {
       );
 
       expect(container.querySelector('.chatMessages--fullscreen')).toBeTruthy();
+    });
+  });
+
+  describe('conversation history in empty state', () => {
+    it('should render starter suggestions without conversation history when services are not provided', () => {
+      const onShowHistory = jest.fn();
+      const { getByText, queryByText } = render(
+        <ChatMessages {...defaultProps} onShowHistory={onShowHistory} />
+      );
+
+      // Verify all starter suggestions are still present
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+      expect(getByText('/investigate an issue')).toBeTruthy();
+      expect(getByText('Explain a concept')).toBeTruthy();
+      // RecentSessions should not render without required props
+      expect(queryByText('RECENT')).toBeNull();
+    });
+
+    it('should render RecentSessions component when all required props are provided', async () => {
+      const onShowHistory = jest.fn();
+      const onSelectConversation = jest.fn();
+      const mockConversationHistoryService = {
+        getConversations: jest.fn().mockResolvedValue({
+          conversations: [
+            {
+              id: '1',
+              threadId: 'thread-1',
+              name: 'Test conversation',
+              messages: [],
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ],
+          hasMore: false,
+          total: 1,
+        }),
+      };
+
+      const { findByText } = render(
+        <ChatMessages
+          {...defaultProps}
+          onShowHistory={onShowHistory}
+          conversationHistoryService={mockConversationHistoryService as any}
+          onSelectConversation={onSelectConversation}
+        />
+      );
+
+      // Verify starter suggestions are present
+      expect(await findByText('Ask questions about your data')).toBeTruthy();
+      // RecentSessions should render with required props
+      expect(await findByText('RECENT')).toBeTruthy();
+      expect(await findByText('Test conversation')).toBeTruthy();
     });
   });
 
@@ -145,6 +200,104 @@ describe('ChatMessages', () => {
       expect(getByText('Assistant message')).toBeTruthy();
     });
 
+    it('should render assistant messages with array content', () => {
+      const timeline: Message[] = [
+        ({
+          id: '1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'First part' },
+            { type: 'text', text: 'Second part' },
+          ],
+        } as unknown) as AssistantMessage, // Force type casting for the corner case.
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      const messageRows = getAllByTestId('message-row');
+      expect(messageRows).toHaveLength(2);
+      expect(messageRows[0].textContent).toBe('First part');
+      expect(messageRows[1].textContent).toBe('Second part');
+    });
+
+    it('should filter out empty text content from array assistant messages', () => {
+      const timeline: Message[] = [
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
+        {
+          id: '1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'Valid content' },
+            { type: 'text', text: '' },
+            { type: 'text', text: '   ' },
+            { type: 'text', text: 'Another valid' },
+          ],
+        } as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      const messageRows = getAllByTestId('message-row');
+      expect(messageRows).toHaveLength(2);
+      expect(messageRows[0].textContent).toBe('Valid content');
+      expect(messageRows[1].textContent).toBe('Another valid');
+    });
+
+    it('should not render assistant message with empty string content', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: '   ' },
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Only user message should be rendered
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
+    it('should not render assistant message with null/undefined content', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Hello' },
+        ({ id: '2', role: 'assistant', content: undefined } as unknown) as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Only user message should be rendered
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
+    it('should handle assistant message with empty array content', () => {
+      const timeline: Message[] = [
+        { id: '1', role: 'user', content: 'Hello' },
+        ({ id: '2', role: 'assistant', content: [] } as unknown) as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      // Only user message should be rendered
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
+    it('should filter out array content with null/undefined text', () => {
+      const timeline: Message[] = [
+        // @ts-expect-error TS2352 TODO(ts-error): fixme
+        {
+          id: '1',
+          role: 'assistant',
+          content: [
+            { type: 'text', text: 'Valid' },
+            { type: 'text', text: null } as any,
+            { type: 'text', text: undefined } as any,
+          ],
+        } as AssistantMessage,
+      ];
+
+      const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+      expect(getAllByTestId('message-row')).toHaveLength(1);
+    });
+
     it('should render system messages as errors', () => {
       const timeline: Message[] = [{ id: '1', role: 'system', content: 'Error message' }];
 
@@ -164,22 +317,34 @@ describe('ChatMessages', () => {
       expect(queryByTestId('message-row')).toBeNull();
     });
 
-    it('should render loading message for empty streaming assistant message', () => {
-      const timeline: Message[] = [{ id: '1', role: 'assistant', content: '' }];
+    it('should render loading message when streaming without startResponse', () => {
+      const timeline: Message[] = [{ id: '1', role: 'user', content: 'Hello' }];
 
       const { getByText } = render(
-        <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+        <ChatMessages
+          {...defaultProps}
+          timeline={timeline}
+          isStreaming={true}
+          startResponse={false}
+        />
       );
 
       expect(getByText('Thinking...')).toBeTruthy();
     });
 
-    it('should render loading message for messages with loading- prefix', () => {
-      const timeline: Message[] = [{ id: 'loading-123', role: 'assistant', content: '' }];
+    it('should not render loading message when startResponse is true', () => {
+      const timeline: Message[] = [{ id: '1', role: 'user', content: 'Hello' }];
 
-      const { getByText } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+      const { queryByText } = render(
+        <ChatMessages
+          {...defaultProps}
+          timeline={timeline}
+          isStreaming={true}
+          startResponse={true}
+        />
+      );
 
-      expect(getByText('Thinking...')).toBeTruthy();
+      expect(queryByText('Thinking...')).toBeNull();
     });
   });
 
@@ -607,5 +772,133 @@ describe('convertTimelineToMessageRows', () => {
       status: 'error',
       result: 'Error occurred',
     });
+  });
+});
+
+describe('share button visibility', () => {
+  const defaultProps = {
+    layoutMode: ChatLayoutMode.SIDECAR,
+    timeline: [] as Message[],
+    isStreaming: false,
+    threadId: 'thread-1',
+  };
+
+  it('should pass timeline to the last assistant message in a turn (share enabled)', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'Answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) => el.textContent === 'Answer');
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('true');
+  });
+
+  it('should not pass timeline to intermediate assistant messages in a turn', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'Let me check...' } as AssistantMessage,
+      { id: '3', role: 'assistant', content: 'Final answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const intermediateRow = messageRows.find((el) => el.textContent === 'Let me check...');
+    const finalRow = messageRows.find((el) => el.textContent === 'Final answer');
+    expect(intermediateRow?.getAttribute('data-has-timeline')).toBe('false');
+    expect(finalRow?.getAttribute('data-has-timeline')).toBe('true');
+  });
+
+  it('should not pass timeline when streaming (share disabled)', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'Streaming response...' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(
+      <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+    );
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) => el.textContent === 'Streaming response...');
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('false');
+  });
+
+  it('should not pass timeline to any assistant message when streaming', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'First question' } as UserMessage,
+      { id: '2', role: 'assistant', content: 'First answer' } as AssistantMessage,
+      { id: '3', role: 'user', content: 'Second question' } as UserMessage,
+      { id: '4', role: 'assistant', content: 'Still streaming...' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(
+      <ChatMessages {...defaultProps} timeline={timeline} isStreaming={true} />
+    );
+
+    const messageRows = getAllByTestId('message-row');
+    const firstAnswer = messageRows.find((el) => el.textContent === 'First answer');
+    const streamingAnswer = messageRows.find((el) => el.textContent === 'Still streaming...');
+    // All share buttons disabled while any response is streaming
+    expect(firstAnswer?.getAttribute('data-has-timeline')).toBe('false');
+    expect(streamingAnswer?.getAttribute('data-has-timeline')).toBe('false');
+  });
+});
+
+describe('share button with running tool calls', () => {
+  const defaultProps = {
+    layoutMode: ChatLayoutMode.SIDECAR,
+    timeline: [] as Message[],
+    isStreaming: false,
+    threadId: 'thread-1',
+  };
+
+  it('should not pass timeline when tool calls are still running', () => {
+    // Simulate a turn where the assistant has text content but a tool call has no result yet
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      {
+        id: '2',
+        role: 'assistant',
+        content: 'Let me look into that...',
+        toolCalls: [
+          { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
+        ],
+      } as AssistantMessage,
+      // No ToolMessage for tc1 — tool is still running
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const assistantRow = messageRows.find((el) =>
+      el.textContent?.includes('Let me look into that')
+    );
+    expect(assistantRow?.getAttribute('data-has-timeline')).toBe('false');
+  });
+
+  it('should pass timeline when all tool calls have completed', () => {
+    const timeline: Message[] = [
+      { id: '1', role: 'user', content: 'Question' } as UserMessage,
+      {
+        id: '2',
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
+        ],
+      } as AssistantMessage,
+      { id: '3', role: 'tool', content: 'Results', toolCallId: 'tc1' } as ToolMessage,
+      { id: '4', role: 'assistant', content: 'Here is the answer' } as AssistantMessage,
+    ];
+
+    const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
+
+    const messageRows = getAllByTestId('message-row');
+    const finalRow = messageRows.find((el) => el.textContent === 'Here is the answer');
+    expect(finalRow?.getAttribute('data-has-timeline')).toBe('true');
   });
 });

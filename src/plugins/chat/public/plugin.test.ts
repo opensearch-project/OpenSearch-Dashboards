@@ -7,10 +7,12 @@ import { ChatPlugin } from './plugin';
 import { ChatService } from './services/chat_service';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { BehaviorSubject, of } from 'rxjs';
+import { ChatMountService } from './services/chat_mount_service';
 
 // Mock dependencies
 jest.mock('./services/chat_service');
 jest.mock('../../opensearch_dashboards_react/public');
+jest.mock('./services/chat_mount_service');
 
 describe('ChatPlugin', () => {
   let plugin: ChatPlugin;
@@ -19,6 +21,7 @@ describe('ChatPlugin', () => {
   let mockCoreStart: any;
   let mockDeps: any;
   let mockCurrentAppId$: BehaviorSubject<string | undefined>;
+  let mockChromeVisible$: BehaviorSubject<boolean>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,6 +42,7 @@ describe('ChatPlugin', () => {
 
     // Mock core start - start with non-explore app
     mockCurrentAppId$ = new BehaviorSubject<string | undefined>('dashboard');
+    mockChromeVisible$ = new BehaviorSubject<boolean>(true);
     mockCoreStart = {
       application: {
         currentAppId$: mockCurrentAppId$,
@@ -55,14 +59,28 @@ describe('ChatPlugin', () => {
         globalSearch: {
           registerSearchCommand: jest.fn(),
         },
+        getIsVisible$: jest.fn(() => mockChromeVisible$),
       },
       overlays: {
         sidecar: {
           getSidecarConfig$: jest.fn().mockReturnValue(of({ paddingSize: 400 })),
+          show: jest.fn(),
+          hide: jest.fn(),
         },
       },
       uiSettings: {},
-      chat: {},
+      chat: {
+        onWindowOpen: jest.fn().mockReturnValue(jest.fn()),
+        onWindowClose: jest.fn().mockReturnValue(jest.fn()),
+        setWindowState: jest.fn(),
+        getWindowState$: jest.fn().mockReturnValue(
+          of({
+            isWindowOpen: false,
+            windowMode: 'sidecar',
+            paddingSize: 400,
+          })
+        ),
+      },
       workspaces: {},
     };
 
@@ -233,16 +251,10 @@ describe('ChatPlugin', () => {
 
       mountFunction(mockElement);
 
-      // Trigger visibility by setting explore app
-      mockCurrentAppId$.next('explore-test');
-
       expect(toMountPoint).toHaveBeenCalledWith(
         expect.objectContaining({
           props: expect.objectContaining({
             core: mockCoreStart,
-            chatService: expect.any(ChatService),
-            contextProvider: mockDeps.contextProvider,
-            charts: mockDeps.charts,
           }),
         })
       );
@@ -292,7 +304,6 @@ describe('ChatPlugin', () => {
 
   describe('localStorage persistence', () => {
     let mockLocalStorage: { [key: string]: string };
-    let mockChatService: any;
     let originalLocalStorage: Storage;
 
     beforeEach(() => {
@@ -318,11 +329,16 @@ describe('ChatPlugin', () => {
         configurable: true,
       });
 
-      // Create a mock ChatService instance
-      mockChatService = {
-        setWindowState: jest.fn(),
-        onWindowStateChange: jest.fn().mockReturnValue(jest.fn()),
-      };
+      // Mock core.chat methods
+      mockCoreStart.chat.setWindowState = jest.fn();
+      mockCoreStart.chat.openWindow = jest.fn().mockResolvedValue(undefined);
+      mockCoreStart.chat.getWindowState$ = jest.fn().mockReturnValue(
+        of({
+          isWindowOpen: false,
+          windowMode: 'sidecar',
+          paddingSize: 400,
+        })
+      );
     });
 
     afterEach(() => {
@@ -342,14 +358,9 @@ describe('ChatPlugin', () => {
         paddingSize: 500,
       });
 
-      // Mock ChatService to return our controlled instance
-      (ChatService as jest.MockedClass<typeof ChatService>).mockImplementation(
-        () => mockChatService
-      );
-
       plugin.start(mockCoreStart, mockDeps);
 
-      expect(mockChatService.setWindowState).toHaveBeenCalledWith({
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({
         isWindowOpen: true,
         windowMode: 'fullscreen',
         paddingSize: 500,
@@ -357,21 +368,17 @@ describe('ChatPlugin', () => {
     });
 
     it('should persist window state changes to localStorage', () => {
-      let stateChangeCallback: any;
-      mockChatService.onWindowStateChange = jest.fn((callback) => {
-        stateChangeCallback = callback;
-        return jest.fn();
+      const windowStateSubject = new BehaviorSubject({
+        isWindowOpen: false,
+        windowMode: 'sidecar' as const,
+        paddingSize: 400,
       });
-
-      // Mock ChatService to return our controlled instance
-      (ChatService as jest.MockedClass<typeof ChatService>).mockImplementation(
-        () => mockChatService
-      );
+      mockCoreStart.chat.getWindowState$ = jest.fn().mockReturnValue(windowStateSubject);
 
       plugin.start(mockCoreStart, mockDeps);
 
       // Simulate window state change
-      stateChangeCallback({ isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 });
+      windowStateSubject.next({ isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 });
 
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
         'chat.windowState',
@@ -390,17 +397,61 @@ describe('ChatPlugin', () => {
         windowMode: 'invalid-mode',
       });
 
-      // Mock ChatService to return our controlled instance
-      (ChatService as jest.MockedClass<typeof ChatService>).mockImplementation(
-        () => mockChatService
-      );
-
       plugin.start(mockCoreStart, mockDeps);
 
       // Should not call setWindowState with invalid data from localStorage
       // but will be called with paddingSize from sidecar config subscription
-      expect(mockChatService.setWindowState).toHaveBeenCalledTimes(1);
-      expect(mockChatService.setWindowState).toHaveBeenCalledWith({ paddingSize: 400 });
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledTimes(1);
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ paddingSize: 400 });
+    });
+  });
+
+  describe('chat mount service integration', () => {
+    let mockChatMountServiceInstance: any;
+
+    beforeEach(() => {
+      mockChatMountServiceInstance = {
+        start: jest.fn(),
+        stop: jest.fn(),
+      };
+      (ChatMountService as jest.Mock).mockImplementation(() => mockChatMountServiceInstance);
+    });
+
+    it('should initialize and start chat mount service with correct dependencies', () => {
+      plugin.setup(mockCoreSetup);
+      plugin.start(mockCoreStart, mockDeps);
+
+      expect(ChatMountService).toHaveBeenCalledTimes(1);
+      expect(mockChatMountServiceInstance.start).toHaveBeenCalledWith({
+        core: mockCoreStart,
+        chatService: expect.any(ChatService),
+        contextProvider: mockDeps.contextProvider,
+        charts: mockDeps.charts,
+        suggestedActionsService: expect.any(Object),
+        confirmationService: expect.any(Object),
+      });
+    });
+
+    it('should stop chat mount service when plugin stops', () => {
+      plugin.setup(mockCoreSetup);
+      plugin.start(mockCoreStart, mockDeps);
+
+      expect(mockChatMountServiceInstance.stop).not.toHaveBeenCalled();
+
+      plugin.stop();
+
+      expect(mockChatMountServiceInstance.stop).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not initialize chat mount service when chat is disabled', () => {
+      mockInitializerContext.config.get = jest.fn().mockReturnValue({ enabled: false });
+      const testPlugin = new ChatPlugin(mockInitializerContext);
+
+      testPlugin.setup(mockCoreSetup);
+      testPlugin.start(mockCoreStart, mockDeps);
+
+      expect(ChatMountService).not.toHaveBeenCalled();
+      expect(mockChatMountServiceInstance.start).not.toHaveBeenCalled();
     });
   });
 });

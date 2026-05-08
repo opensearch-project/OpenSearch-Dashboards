@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -44,6 +43,7 @@ const setup = async ({ props, services }) => {
   };
 
   const renderResult = render(
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <OpenSearchDashboardsContextProvider services={finalServices}>
         <TutorialDirectory {...makeProps()} {...props} />

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC } from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { FC } from 'react';
+import { createRoot } from 'react-dom/client';
 import { RenderFn } from '../../../../services/section_type/section_type';
 
 export const renderFn = (Component: FC): RenderFn => (element: HTMLElement) => {

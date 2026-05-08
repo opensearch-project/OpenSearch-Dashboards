@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { saveAs } from 'file-saver';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';

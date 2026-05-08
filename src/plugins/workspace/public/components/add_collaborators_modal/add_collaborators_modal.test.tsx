@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddCollaboratorsModal } from './add_collaborators_modal';
 import { DuplicateCollaboratorError } from './duplicate_collaborator_error';
@@ -97,8 +96,8 @@ describe('AddCollaboratorsModal', () => {
     const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
     fireEvent.click(addCollaboratorsButton);
     await waitFor(() => {
-      expect(screen.getByText('This ID is already added to the list.')).toBeInTheDocument();
-      expect(screen.getByText('A collaborator with this ID already exists.')).toBeInTheDocument();
+      expect(screen.getByText('This identity is already added to the list.')).toBeInTheDocument();
+      expect(screen.getByText('This identity already exists.')).toBeInTheDocument();
     });
   });
 

@@ -3,18 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssociatedObjectsDetailsFlyout } from './associated_objects_details_flyout';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
-import {
-  // @ts-expect-error TS6133 TODO(ts-error): fixme
-  getRenderAccelerationDetailsFlyout,
-  getRenderCreateAccelerationFlyout,
-} from '../../../plugin';
-// @ts-expect-error TS6133 TODO(ts-error): fixme
-import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
+import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
 import { useLoadTableColumnsToCache } from '../../../../framework/catalog_cache/cache_loader';
 

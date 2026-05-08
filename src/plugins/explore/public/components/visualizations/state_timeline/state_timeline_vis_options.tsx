@@ -25,8 +25,6 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {

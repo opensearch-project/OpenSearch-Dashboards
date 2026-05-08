@@ -29,7 +29,7 @@
  */
 
 import { get, find } from 'lodash';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';

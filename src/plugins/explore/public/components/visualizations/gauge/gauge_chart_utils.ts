@@ -56,7 +56,7 @@ export const createGaugeSeries = ({
       return;
     }
 
-    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     const numericalValues: number[] = [];
 
@@ -124,6 +124,7 @@ export const createGaugeSeries = ({
       z: 5,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       progress: {
         show: true,
         width: fontSizeFactor + 2,
@@ -175,6 +176,7 @@ export const createGaugeSeries = ({
       z: 10,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       itemStyle: {
         color: valueArcColor,
       },
@@ -223,6 +225,7 @@ export const createGaugeSeries = ({
           value: calculatedValue,
         },
       ],
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       renderItem(params, api) {
         const width = api.getWidth();
         const height = api.getHeight();
@@ -240,11 +243,11 @@ export const createGaugeSeries = ({
               style: {
                 x: 0,
                 y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: displayValue,
+                text: displayValue as string,
                 textAlign: 'center',
                 fontSize: valueFontSize,
                 fontWeight: 'bold',
-                fill: textColor,
+                fill: styles?.useThresholdColor ? textColor : getColors().text,
               },
             },
             ...(styles.showTitle

@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ExploreServices } from '../../../types';
 import { RootState } from '../state_management/store';
 import { executeQueries } from '../state_management/actions/query_actions';
 import { clearResults, clearQueryStatusMap, setIsInitialized } from '../state_management/slices';
-import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
-import { selectActiveTabId } from '../state_management/selectors';
 import { useCurrentExploreId } from './use_current_explore_id';
 import { useDatasetContext } from '../../context';
+import { selectActiveTabId } from '../state_management/selectors';
+import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 
 /**
  * Hook to handle initial query execution on page load
@@ -23,8 +23,11 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   const { isInitialized } = useSelector((state: RootState) => state.meta);
   const queryState = useSelector((state: RootState) => state.query);
   const activeTabId = useSelector(selectActiveTabId);
+  const activeTabIdRef = useRef(activeTabId);
   const exploreId = useCurrentExploreId();
   const { dataset: datasetFromContext, isLoading: datasetLoading } = useDatasetContext();
+
+  activeTabIdRef.current = activeTabId;
 
   const shouldSearchOnPageLoad = useMemo(() => {
     if (queryState.dataset && services?.data?.query?.queryString) {
@@ -58,10 +61,11 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
         dispatch(clearResults());
         dispatch(clearQueryStatusMap());
 
-        await dispatch(executeQueries({ services }));
-        if (!activeTabId) {
-          dispatch(detectAndSetOptimalTab({ services }));
+        if (!activeTabIdRef.current) {
+          await dispatch(detectAndSetOptimalTab({ services }));
         }
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
+        await dispatch(executeQueries({ services }));
         dispatch(setIsInitialized(true));
       }
     };
@@ -70,7 +74,6 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   }, [
     isInitialized,
     queryState,
-    activeTabId,
     shouldSearchOnPageLoad,
     dispatch,
     services,

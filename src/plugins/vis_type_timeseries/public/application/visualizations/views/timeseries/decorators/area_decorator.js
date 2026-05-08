@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ScaleType, AreaSeries } from '@elastic/charts';
 import { getAreaStyles } from '../utils/series_styles';
 import { ChartsEntities } from '../model/charts';

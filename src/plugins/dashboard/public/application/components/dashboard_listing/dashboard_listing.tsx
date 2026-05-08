@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';

@@ -42,6 +42,7 @@ import dedent from 'dedent';
 import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
+// @ts-expect-error TS1192 TODO(ts-upgrade): fixme
 import getopts from 'getopts';
 
 const log = new ToolingLog({
@@ -212,7 +213,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     log.info(`${folder} API: updated documentation ✔`);
   }
 
-  // If the api signature changed or any errors or warnings occured, exit with an error
+  // If the api signature changed or any errors or warnings occurred, exit with an error
   // NOTE: Because of https://github.com/Microsoft/web-build-tools/issues/1258
   //  api-extractor will not return `succeeded: false` when the API changes.
   return !apiReportChanged && succeeded;
@@ -226,6 +227,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
     default: {
       project: undefined,
     },
+    // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
     unknown(name) {
       extraFlags.push(name);
       return false;

@@ -5,7 +5,7 @@
 
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from '@cfaester/enzyme-adapter-react-18';
-import React, { act } from 'react';
+import { act } from 'react';
 import { SetupIntegrationForm, SetupBottomBar, LoadingPage } from './setup_integration';
 import { HttpStart } from 'opensearch-dashboards/public';
 import { TEST_INTEGRATION_CONFIG } from '../../../mocks';

@@ -25,11 +25,12 @@
       "src/plugins/data/public/ui/query_string_input/_query_bar.scss",
       "src/plugins/data/public/ui/query_editor/_query_editor.scss",
       "src/plugins/data/public/ui/dataset_selector/_dataset_selector.scss",
-      "src/plugins/explore/public/components/data_table/table_cell/table_source_cell.scss"
+      "src/plugins/explore/public/components/data_table/table_cell/table_source_cell.scss",
+      "src/plugins/explore/public/application/pages/metrics/promql_builder/promql_builder.scss"
     ]
   },
   "/\\.explore/": {
     "explanation": "\"explore\" prefix is preserved for Explore plugin",
-    "approved": ["src/plugins/explore/", "examples/expressions_example/public/index.scss"]
+    "approved": ["src/plugins/explore/", "src/plugins/agent_traces/", "examples/expressions_example/public/index.scss"]
   }
 }

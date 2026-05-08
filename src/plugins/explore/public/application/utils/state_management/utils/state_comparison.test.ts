@@ -49,6 +49,7 @@ describe('State Comparison Utilities', () => {
 
   describe('normalizeUIState', () => {
     it('should remove undefined properties from UI state', () => {
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       const uiState: UIState = {
         activeTabId: 'table',
         showHistogram: true,

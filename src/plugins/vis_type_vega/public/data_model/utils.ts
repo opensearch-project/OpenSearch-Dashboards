@@ -84,6 +84,18 @@ export class Utils {
         return true;
       } else if (Utils.isObject(value) && Utils.checkForFunctionProperty(value)) {
         return true;
+      } else if (Array.isArray(value)) {
+        // Check each element in the array for function properties
+        for (const item of value) {
+          if (typeof item === 'function') {
+            return true;
+          } else if (Utils.isObject(item) && item !== null) {
+            // Properly handle objects inside arrays by recursively checking them
+            if (Utils.checkForFunctionProperty(item)) {
+              return true;
+            }
+          }
+        }
       }
     }
     return false;

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiHeaderLinks } from '@elastic/eui';
 import { DataSourceMenu } from './data_source_menu';
 import { DataSourceMenuProps } from './types';

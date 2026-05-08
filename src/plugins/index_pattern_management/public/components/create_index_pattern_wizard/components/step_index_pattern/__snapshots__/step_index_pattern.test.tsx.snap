@@ -5,6 +5,7 @@ Object {
   "component": <Header
     characterList="\\\\, /, ?, \\", <, >, |"
     data-test-subj="createIndexPatternStep1Header"
+    displayName=""
     errors={
       Array [
         "A name cannot contain spaces or the characters: \\\\, /, ?, \\", <, >, |",
@@ -15,6 +16,7 @@ Object {
     isInputInvalid={true}
     isNextStepDisabled={true}
     onChangeIncludingSystemIndices={[Function]}
+    onDisplayNameChanged={[Function]}
     onQueryChanged={[Function]}
     query="?"
   />,

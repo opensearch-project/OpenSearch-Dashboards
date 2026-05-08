@@ -451,6 +451,40 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
       }
     >
       <EuiSpacer size="xs" />
+      {toolCall.arguments && (
+        <>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              {i18n.translate('chat.toolCall.parametersLabel', {
+                defaultMessage: 'Parameters:',
+              })}
+            </strong>
+          </EuiText>
+          <EuiPanel hasBorder paddingSize="s" style={{ wordBreak: 'break-all', marginBottom: 8 }}>
+            {isValidJSON(toolCall.arguments) ? (
+              <EuiCodeBlock
+                language="json"
+                paddingSize="none"
+                fontSize="s"
+                transparentBackground
+                overflowHeight={150}
+                isCopyable
+              >
+                {JSON.stringify(JSON.parse(toolCall.arguments), null, 2)}
+              </EuiCodeBlock>
+            ) : (
+              <EuiText size="s">{toolCall.arguments}</EuiText>
+            )}
+          </EuiPanel>
+        </>
+      )}
+      <EuiText size="xs" color="subdued">
+        <strong>
+          {i18n.translate('chat.toolCall.resultLabel', {
+            defaultMessage: 'Result:',
+          })}
+        </strong>
+      </EuiText>
       <EuiPanel hasBorder paddingSize="s" style={{ wordBreak: 'break-all' }}>
         {isError &&
           i18n.translate('chat.toolCall.errorMessage', {

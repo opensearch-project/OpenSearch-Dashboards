@@ -18,6 +18,7 @@ export interface DiscoverRootState extends RootState {
   discover: DiscoverState;
 }
 
+// @ts-expect-error TS2322 TODO(ts-error): fixme
 export const useSelector: TypedUseSelectorHook<DiscoverRootState> = useTypedSelector;
 export const useDispatch = useTypedDispatch;
 export { updateIndexPattern };

@@ -14,7 +14,8 @@ export function getFromSavedObject(
     return;
   }
 
-  const fields = JSON.parse(savedObject.attributes.fields!);
+  const rawFields = savedObject.attributes.fields!;
+  const fields = Array.isArray(rawFields) ? rawFields : JSON.parse(rawFields);
   return {
     id: savedObject.id,
     fields,

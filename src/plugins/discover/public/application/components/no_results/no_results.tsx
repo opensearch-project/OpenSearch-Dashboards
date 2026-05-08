@@ -29,7 +29,7 @@
  */
 
 import './no_results.scss';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import {
@@ -178,10 +178,14 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
-      const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
-      setSavedQueries(
-        savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
-      );
+      try {
+        const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
+        setSavedQueries(
+          savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
+        );
+      } catch (error) {
+        setSavedQueries([]);
+      }
     };
 
     fetchSavedQueries();
@@ -262,9 +266,12 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
               content: (
                 <Fragment>
                   <EuiSpacer />
-                  {savedQueries.map((sq) =>
-                    buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
-                  )}
+                  {savedQueries.map((sq) => {
+                    const queryValue = sq.attributes.query.query;
+                    const queryStr =
+                      typeof queryValue === 'string' ? queryValue : JSON.stringify(queryValue);
+                    return buildSampleQueryBlock(sq.id, queryStr);
+                  })}
                 </Fragment>
               ),
             },

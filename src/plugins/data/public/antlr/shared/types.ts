@@ -43,6 +43,8 @@ export interface TokenPosition {
 export interface KeywordSuggestion {
   value: string;
   symbolicName?: string;
+  followsOpeningParen?: boolean;
+  inRuntimeFunctionContext?: boolean;
   id: number;
 }
 
@@ -104,6 +106,7 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
   suggestSourcesOrTables?: SourceOrTableSuggestion;
   suggestRenameAs?: boolean;
   suggestFieldsInAggregateFunction?: boolean;
+  preferColumnSuggestionsOnly?: boolean;
   isInBackQuote?: boolean;
   isInQuote?: boolean;
   suggestSingleQuotes?: boolean;

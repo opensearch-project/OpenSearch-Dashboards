@@ -31,7 +31,7 @@
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl } from '@osd/i18n/react';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect } from 'react';
+import { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';

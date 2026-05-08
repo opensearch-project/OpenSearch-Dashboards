@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import { AggRow } from './agg_row';
 import { MetricSelect } from './metric_select';
 import { AggSelect } from './agg_select';

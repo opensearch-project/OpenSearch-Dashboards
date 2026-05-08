@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { EuiSmallButton, EuiSmallButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CONTROL_TYPES } from '../../editor_utils';

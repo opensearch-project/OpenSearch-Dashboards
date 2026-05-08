@@ -11,6 +11,7 @@ import { Env } from '@osd/config';
 import _ from 'lodash';
 import { schema, Type } from '@osd/config-schema';
 import { IDynamicConfigStoreClient } from 'opensearch-dashboards/server';
+// @ts-expect-error TS2345 TODO Fix me
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 
 describe('InternalDynamicConfigStoreClient', () => {

@@ -10,6 +10,7 @@ import {
   PreloadedState,
   AnyAction,
   Reducer,
+  Middleware,
 } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import {
@@ -20,6 +21,11 @@ import {
   legacyReducer,
   queryEditorReducer,
   metaReducer,
+  setResults,
+  clearResults,
+  clearResultsByKey,
+  resultsCache,
+  clearResultsCache,
 } from './slices';
 import { loadReduxState } from './utils/redux_persistence';
 import { normalizeStateForComparison } from './utils/state_comparison';
@@ -33,6 +39,35 @@ import { ExploreServices } from '../../../types';
 
 const resetState = createAction<RootState>('app/resetState');
 const hydrateState = createAction<RootState>('app/hydrateState');
+
+// Cache middleware: keeps the module-level resultsCache in sync with Redux results actions.
+//
+// ORDERING INVARIANT — cache writes must happen BEFORE next(action):
+//   next(action) runs the reducer, which updates Redux state and notifies React subscribers.
+//   If a component's useSelector fires during that notification and calls resultsCache.get(),
+//   the cache must already contain the new data. Writing to the cache after next(action)
+//   would cause the first re-render to read stale results.
+//
+// DO NOT move the cache writes below next(action).
+// DO NOT move the cache clears below next(action).
+const createResultsCacheMiddleware = (): Middleware => (_store) => (next) => (action: any) => {
+  // Write full results to cache before the reducer extracts and stores only metadata.
+  if (setResults.match(action)) {
+    resultsCache.set(action.payload.cacheKey, action.payload.results);
+  } else if (clearResultsByKey.match(action)) {
+    resultsCache.delete(action.payload);
+  } else if (
+    clearResults.match(action) ||
+    action.type === 'app/resetState' ||
+    action.type === 'app/hydrateState'
+  ) {
+    clearResultsCache();
+  }
+
+  // next(action) triggers the reducer and React re-renders.
+  // Cache must be up to date before this line.
+  return next(action);
+};
 
 const baseRootReducer = combineReducers({
   query: queryReducer,
@@ -65,15 +100,19 @@ export const configurePreloadedStore = (
   return configureStore({
     reducer: rootReducer,
     preloadedState,
-    middleware: (getDefaultMiddleware) =>
-      services
+    middleware: (getDefaultMiddleware) => {
+      return services
         ? getDefaultMiddleware()
+            // createResultsCacheMiddleware MUST be first so the cache is populated before any
+            // subsequent middleware or reducer sees the action. Do not reorder.
+            .concat(createResultsCacheMiddleware())
             .concat(createPersistenceMiddleware(services))
             .concat(createQuerySyncMiddleware(services))
             .concat(createTimefilterSyncMiddleware(services))
             .concat(createDatasetChangeMiddleware(services))
             .concat(createOverallStatusMiddleware())
-        : getDefaultMiddleware(),
+        : getDefaultMiddleware().concat(createResultsCacheMiddleware());
+    },
   });
 };
 

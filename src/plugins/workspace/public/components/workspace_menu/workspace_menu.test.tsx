@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { WorkspaceMenu } from './workspace_menu';
@@ -43,6 +42,7 @@ describe('<WorkspaceMenu />', () => {
 
   const WorkspaceMenuCreatorComponent = () => {
     return (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceMenu coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />

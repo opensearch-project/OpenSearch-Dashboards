@@ -24,3 +24,8 @@ export interface AppPluginStartDependencies {
   contextProvider: ContextProviderStart;
   charts: ChartsPluginStart;
 }
+
+export enum ChatLayoutMode {
+  SIDECAR = 'sidecar',
+  FULLSCREEN = 'fullscreen',
+}

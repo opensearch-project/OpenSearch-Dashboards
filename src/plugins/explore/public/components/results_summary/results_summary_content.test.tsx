@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+
 import { ResultsSummaryContent } from './results_summary_content';
 
 describe('ResultsSummaryContent', () => {

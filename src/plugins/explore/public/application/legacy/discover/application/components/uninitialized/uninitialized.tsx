@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
 import { EuiSmallButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
@@ -40,7 +39,7 @@ interface Props {
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   return (
     <I18nProvider>
-      <EuiPage>
+      <EuiPage style={{ height: '100%' }}>
         <EuiPageBody component="main">
           <EuiPageContent horizontalPosition="center">
             <EuiEmptyPrompt

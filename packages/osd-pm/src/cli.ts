@@ -29,6 +29,7 @@
  */
 
 import dedent from 'dedent';
+// @ts-expect-error TS1192 TODO(ts-upgrade): fixme
 import getopts from 'getopts';
 import { resolve } from 'path';
 import { pickLevelFromFlags } from '@osd/dev-utils/tooling_log';

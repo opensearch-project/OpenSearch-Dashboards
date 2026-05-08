@@ -4,7 +4,7 @@
  */
 
 import './discover_chart_container.scss';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { useDiscoverContext } from '../context';

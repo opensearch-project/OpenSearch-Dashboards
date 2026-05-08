@@ -30,11 +30,6 @@ const mockServices = {
   appName: 'test-app',
 } as IDataPluginServices;
 
-const mockPosition = {
-  lineNumber: 1,
-  column: 1,
-} as monaco.Position;
-
 describe('prompt code_completion', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -95,6 +90,7 @@ describe('prompt code_completion', () => {
       const found = suggestions.find((s) => {
         return (
           (!expected.text || s.text === expected.text) &&
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           (!expected.detail || s.detail === expected.detail) &&
           (!expected.type || s.type === expected.type)
         );
@@ -115,7 +111,7 @@ describe('prompt code_completion', () => {
     });
 
     test('should prioritize non-underscore fields', async () => {
-      const suggestions = await getPromptSuggestions('find');
+      await getPromptSuggestions('find');
 
       expect(utils.formatAvailableFieldsToSuggestions).toHaveBeenCalledWith(
         expect.arrayContaining([

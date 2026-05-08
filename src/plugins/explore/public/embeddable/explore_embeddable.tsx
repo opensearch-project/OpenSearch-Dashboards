@@ -9,7 +9,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
-import { RequestAdapter, Adapters } from '../../../inspector/public';
+import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
 import {
   opensearchFilters,
   Filter,
@@ -21,6 +21,11 @@ import {
   IFieldType,
 } from '../../../data/public';
 import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
+import {
+  DashboardContainer,
+  IVariableInterpolationService,
+  createNoOpVariableInterpolationService,
+} from '../../../dashboard/public';
 import { ExploreInput, ExploreOutput } from './types';
 import {
   getRequestInspectorStats,
@@ -35,8 +40,7 @@ import { SavedExplore } from '../saved_explore';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
-import { VisColumn } from '../components/visualizations/types';
-import { toExpression } from '../components/visualizations/utils/to_expression';
+import { AxisColumnMappings, VisColumn } from '../components/visualizations/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
@@ -49,12 +53,14 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import {
   adaptLegacyData,
   convertStringsToMappings,
+  isValidMapping,
 } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
 
+// TODO cleanup unused props
 export interface SearchProps {
   description?: string;
   sort?: SortOrder[];
@@ -64,17 +70,12 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   services: ExploreServices;
-  spec?: any;
-  expression?: string;
+  chartRender?: () => any;
   sharedItemTitle?: string;
-  searchContext?: {
-    query: Query | undefined;
-    filters: Filter[] | undefined;
-    timeRange: TimeRange | undefined;
-  };
   chartType?: ChartType;
   activeTab?: string;
   styleOptions?: StyleOptions;
+  axisColumnMappings?: AxisColumnMappings;
   displayTimeColumn: boolean;
   title: string;
   columns?: string[];
@@ -126,6 +127,12 @@ export class ExploreEmbeddable
   private node?: HTMLElement;
   private root?: Root;
 
+  // Variable interpolation support
+  private interpolationService: IVariableInterpolationService = createNoOpVariableInterpolationService();
+  private variableSubscription?: Subscription;
+  public originalQuery?: string;
+  private lastInterpolatedQuery?: string;
+
   constructor(
     {
       savedExplore,
@@ -156,9 +163,15 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    // manage data adapters for CSV export
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
+      data: new DataAdapter(),
     };
+
+    // Initialize variable support BEFORE search props so the interpolation
+    // service is available for the initial query setup.
+    this.initializeVariableSubscription(parent);
     this.initializeSearchProps();
 
     this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -174,6 +187,63 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+  }
+
+  /**
+   * Initialize variable interpolation service and subscription
+   * Variables are managed by the parent DashboardContainer
+   */
+  private initializeVariableSubscription(parent?: Container) {
+    // Default to no-op interpolation service
+    this.interpolationService = createNoOpVariableInterpolationService();
+
+    if (parent && 'variableInterpolationService' in parent) {
+      const dashboardContainer = (parent as unknown) as DashboardContainer;
+      this.interpolationService = dashboardContainer.variableInterpolationService;
+
+      if ('variableService' in dashboardContainer) {
+        this.variableSubscription = dashboardContainer.variableService
+          .getVariables$()
+          .subscribe((variables) => {
+            const hasLoading = variables.some((v) => 'loading' in v && v?.loading);
+            if (hasLoading) return;
+
+            this.handleVariablesChange();
+          });
+      }
+    }
+  }
+
+  /**
+   * Handle variable changes - interpolate query and refetch
+   */
+  private handleVariablesChange() {
+    if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
+      return;
+    }
+
+    const { searchSource } = this.savedExplore;
+    const currentQuery = searchSource.getField('query');
+    const interpolatedQuery = this.interpolationService.interpolate(
+      this.originalQuery,
+      currentQuery?.language
+    );
+
+    if (interpolatedQuery === this.lastInterpolatedQuery) {
+      return;
+    }
+    this.lastInterpolatedQuery = interpolatedQuery;
+
+    if (currentQuery) {
+      searchSource.setField('query', {
+        ...currentQuery,
+        query: interpolatedQuery,
+      });
+    }
+
+    if (this.searchProps) {
+      this.updateHandler(this.searchProps, true);
+    }
   }
 
   private initializeSearchProps() {
@@ -208,6 +278,18 @@ export class ExploreEmbeddable
         query.query = prepareQueryForLanguage(query).query;
       }
     }
+
+    // If the query contains variable placeholders, apply initial interpolation
+    // using whatever current values are available (from saved state).
+    const queryHasVariables =
+      query?.query && this.interpolationService.hasVariables(String(query.query));
+    if (queryHasVariables && query) {
+      // Store the original (pre-interpolation) query for later use
+      this.originalQuery = String(query.query);
+      query.query = this.interpolationService.interpolate(this.originalQuery, query.language);
+      this.lastInterpolatedQuery = String(query.query);
+    }
+
     searchSource.setFields({
       index: indexPattern,
       query,
@@ -287,6 +369,7 @@ export class ExploreEmbeddable
         embeddable: this,
         filters: [
           {
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             range: {
               '*': {
                 mode: 'absolute',
@@ -390,7 +473,7 @@ export class ExploreEmbeddable
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
-    const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
+    const vis = visualizationRegistry.getVisualization(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
@@ -410,12 +493,30 @@ export class ExploreEmbeddable
             rows: visualizationData.transformedData ?? [],
           };
         } else {
-          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          const savedAxesMapping = visualization.axesMapping ?? {};
+          let effectiveAxesMapping = savedAxesMapping;
+
+          // Check if the saved axes mapping is still compatible with the current data columns.
+          if (!isValidMapping(savedAxesMapping, allColumns)) {
+            const reusedMapping = visualizationRegistry.reuseAxesMapping(
+              selectedChartType,
+              savedAxesMapping,
+              allColumns
+            );
+
+            if (reusedMapping) {
+              effectiveAxesMapping = reusedMapping;
+            }
+          }
+
+          const axesMapping = convertStringsToMappings(effectiveAxesMapping, allColumns);
+          this.searchProps.axisColumnMappings = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
-            visualization.axesMapping,
+            selectedChartType,
+            effectiveAxesMapping,
             allColumns
           );
-          if (!matchedRule || !matchedRule.toSpec) {
+          if (!matchedRule) {
             throw new Error(
               `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
             );
@@ -425,13 +526,12 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
 
           let styles = adaptLegacyData({
             type: selectedChartType,
             styles: styleOptions,
-            axesMapping: visualization.axesMapping,
+            axesMapping: effectiveAxesMapping,
           })?.styles;
 
           if (vis) {
@@ -439,19 +539,15 @@ export class ExploreEmbeddable
           }
           this.searchProps.styleOptions = styles;
 
-          const spec = matchedRule.toSpec(
-            visualizationData.transformedData,
-            numericalColumns,
-            categoricalColumns,
-            dateColumns,
-            styles || styleOptions,
-            selectedChartType,
-            axesMapping,
-            searchContext.timeRange
-          );
-          this.searchProps.spec = spec;
-          const exp = toExpression(searchContext, spec);
-          this.searchProps.expression = exp;
+          const chartRender = () =>
+            matchedRule.render({
+              transformedData: visualizationData.transformedData,
+              styleOptions: styles || styleOptions,
+              onSelectTimeRange: this.searchProps?.onSelectTimeRange,
+              axisColumnMappings: axesMapping,
+              timeRange: searchContext.timeRange,
+            });
+          this.searchProps.chartRender = chartRender;
         }
       }
     }
@@ -461,6 +557,41 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
+
+    // set tabular for DataViewComponent to display via adapters.data.getTabular()
+    if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
+      const allColumns = [
+        ...(visualizationData.numericalColumns ?? []),
+        ...(visualizationData.categoricalColumns ?? []),
+        ...(visualizationData.dateColumns ?? []),
+      ];
+      const indexPattern = searchSource.getField('index');
+
+      this.inspectorAdaptors.data.setTabularLoader(
+        () => ({
+          columns: allColumns.map((col) => ({
+            name: col.name,
+            field: col.column,
+          })),
+
+          // format data rows and transform into shape {raw, formatted}
+          rows: visualizationData.transformedData.map((row) => {
+            const formattedRow: Record<string, FormattedData> = {};
+            for (const col of allColumns) {
+              const value = row[col.column];
+              const field = indexPattern?.fields.getByName(col.name);
+              const formatted =
+                field && indexPattern?.getFormatterForField
+                  ? indexPattern.getFormatterForField(field).convert(value)
+                  : String(value ?? '');
+              formattedRow[col.column] = new FormattedData(value, formatted);
+            }
+            return formattedRow;
+          }),
+        }),
+        { returnsFormattedValues: true }
+      );
+    }
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
@@ -477,6 +608,11 @@ export class ExploreEmbeddable
 
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
+    }
+
+    // Cleanup variable subscription
+    if (this.variableSubscription) {
+      this.variableSubscription.unsubscribe();
     }
 
     if (this.abortController) {

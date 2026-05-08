@@ -24,8 +24,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {

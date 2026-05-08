@@ -16,7 +16,8 @@ import { CalculationMethod } from '../calculation';
  *
  * @param options - Aggregation configuration options
  * @param options.groupBy - Field name for categories or time field (e.g., 'product', 'region', 'timestamp')
- * @param options.field - Field name for values (e.g., 'sales', 'count')
+ * @param options.field - Field name(s) for values. Can be a single string or an array of strings
+ *   (e.g., 'sales' or ['sales', 'count']). When an array is provided, each field is aggregated independently.
  * @param options.aggregationType - Type of aggregation to apply (SUM, MEAN, MAX, MIN, COUNT, NONE)
  * @param options.timeUnit - Optional time interval unit. When provided, treats groupBy as date field
  *
@@ -71,13 +72,14 @@ import { CalculationMethod } from '../calculation';
  */
 export const aggregate = (options: {
   groupBy: string;
-  field: string;
+  field: string | string[];
   aggregationType?: AggregationType;
   timeUnit?: TimeUnit;
   // TODO: align AggregationType and CalculationMethod
   calculateType?: CalculationMethod;
 }) => (data: Array<Record<string, any>>) => {
-  const { groupBy, field, aggregationType, timeUnit, calculateType } = options;
+  const { groupBy, aggregationType, timeUnit, calculateType } = options;
+  const fields = Array.isArray(options.field) ? options.field : [options.field];
 
   // Determine if this is time-based grouping
   const isTimeBased = timeUnit !== undefined;
@@ -117,33 +119,47 @@ export const aggregate = (options: {
       groupValue = groupKey;
     }
 
-    const value = Number(row[field]);
-    if (!isNaN(value)) {
-      if (!acc[groupKey]) {
-        acc[groupKey] = { groupValue, values: [] };
+    // Collect values for each field
+    if (!acc[groupKey]) {
+      acc[groupKey] = {
+        groupValue,
+        valuesByField: Object.fromEntries(fields.map((f) => [f, []])),
+      };
+    }
+    for (const f of fields) {
+      const value = Number(row[f]);
+      if (!isNaN(value)) {
+        acc[groupKey].valuesByField[f].push(value);
       }
-      acc[groupKey].values.push(value);
     }
 
     return acc;
-  }, {} as Record<string | number, { groupValue: string | Date; values: number[] }>);
+  }, {} as Record<string | number, { groupValue: string | Date; valuesByField: Record<string, number[]> }>);
 
   // Apply aggregation and convert to array of objects
-  let result = Object.values(grouped).map(({ groupValue, values }) => {
-    // values is guaranteed to have at least one element since groups
-    // are only created when valid values exist
-    const aggregatedValue = aggregateValues(aggregationType, values, calculateType);
+  let result = Object.entries(grouped)
+    .filter(([_, { valuesByField }]) =>
+      // Keep groups that have at least one valid value across any field
+      fields.some((f) => valuesByField[f].length > 0)
+    )
+    .map(([_, { groupValue, valuesByField }]) => {
+      const entry: Record<string, any> = { [groupBy]: groupValue };
 
-    const isValidNumber =
-      aggregatedValue !== undefined &&
-      typeof aggregatedValue === 'number' &&
-      !isNaN(aggregatedValue);
+      for (const f of fields) {
+        if (valuesByField[f].length > 0) {
+          const aggregatedValue = aggregateValues(aggregationType, valuesByField[f], calculateType);
+          const isValidNumber =
+            aggregatedValue !== undefined &&
+            typeof aggregatedValue === 'number' &&
+            !isNaN(aggregatedValue);
+          entry[f] = isValidNumber ? aggregatedValue : null;
+        } else {
+          entry[f] = null;
+        }
+      }
 
-    return {
-      [groupBy]: groupValue,
-      [field]: isValidNumber ? aggregatedValue : null,
-    };
-  });
+      return entry;
+    });
 
   // Sort by time if time-based
   if (isTimeBased) {

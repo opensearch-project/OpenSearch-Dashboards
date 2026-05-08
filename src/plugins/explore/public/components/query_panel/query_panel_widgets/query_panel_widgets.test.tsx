@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryPanelWidgets } from './query_panel_widgets';
 import { useDatasetContext } from '../../../application/context';
@@ -54,6 +53,10 @@ jest.mock('./query_panel_actions', () => ({
 
 jest.mock('./ask_ai_button', () => ({
   AskAIButton: () => <div data-test-subj="ask-ai-button">Ask AI Button</div>,
+}));
+
+jest.mock('../../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => 'logs'),
 }));
 
 jest.mock('../../../application/context', () => ({

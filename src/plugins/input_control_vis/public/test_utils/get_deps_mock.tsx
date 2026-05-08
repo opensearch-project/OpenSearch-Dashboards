@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { InputControlVisDependencies } from '../plugin';
 import { getSearchSourceMock } from './get_search_service_mock';
 

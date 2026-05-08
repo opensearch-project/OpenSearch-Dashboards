@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 import { findTestSubject } from 'test_utils/helpers';

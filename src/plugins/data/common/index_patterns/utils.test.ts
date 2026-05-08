@@ -55,6 +55,7 @@ describe('test getIndexPatternTitle', () => {
     references: [],
   };
   const indexPatternMockTitle = 'indexPatternMockTitle';
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   const referencesMock: SavedObjectReference[] = [{ type: 'data-source', id: 'dataSourceId' }];
 
   let getDataSourceMock: jest.Mock<any, any>;

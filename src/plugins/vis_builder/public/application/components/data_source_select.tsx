@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { SearchableDropdown, SearchableDropdownOption } from './searchable_dropdown';
@@ -19,7 +18,7 @@ function indexPatternEquality(A?: SearchableDropdownOption, B?: SearchableDropdo
 function toSearchableDropdownOption(indexPattern: IndexPattern): SearchableDropdownOption {
   return {
     id: indexPattern.id || '',
-    label: indexPattern.title,
+    label: indexPattern.getDisplayName(),
     searchableLabel: indexPattern.title,
     prepend: <EuiIcon type="indexPatternApp" />,
   };

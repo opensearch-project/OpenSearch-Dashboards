@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { render, mount } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
 

@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { DatasetMetadataFields } from './dataset_metadata_fields';
 
 const renderWithIntl = (component: React.ReactElement) => {
+  // @ts-expect-error TS2769 TODO(ts-error): fixme
   return render(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 

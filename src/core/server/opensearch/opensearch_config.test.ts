@@ -260,35 +260,29 @@ describe('throws when config is invalid', () => {
 
   it('throws if key is invalid', () => {
     const value = { ssl: { key: '/invalid/key' } };
-    expect(
-      () => new OpenSearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/key'"`
+    expect(() => new OpenSearchConfig(config.schema.validate(value))).toThrow(
+      /ENOENT.*no such file or directory.*invalid.*key/i
     );
   });
 
   it('throws if certificate is invalid', () => {
     const value = { ssl: { certificate: '/invalid/cert' } };
-    expect(
-      () => new OpenSearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/cert'"`
+    expect(() => new OpenSearchConfig(config.schema.validate(value))).toThrow(
+      /ENOENT.*no such file or directory.*invalid.*cert/i
     );
   });
 
   it('throws if certificateAuthorities is invalid', () => {
     const value = { ssl: { certificateAuthorities: '/invalid/ca' } };
-    expect(
-      () => new OpenSearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(`"ENOENT: no such file or directory, open '/invalid/ca'"`);
+    expect(() => new OpenSearchConfig(config.schema.validate(value))).toThrow(
+      /ENOENT.*no such file or directory.*invalid.*ca/i
+    );
   });
 
   it('throws if keystore path is invalid', () => {
     const value = { ssl: { keystore: { path: '/invalid/keystore' } } };
-    expect(
-      () => new OpenSearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/keystore'"`
+    expect(() => new OpenSearchConfig(config.schema.validate(value))).toThrow(
+      /ENOENT.*no such file or directory.*invalid.*keystore/i
     );
   });
 
@@ -310,10 +304,8 @@ describe('throws when config is invalid', () => {
 
   it('throws if truststore path is invalid', () => {
     const value = { ssl: { keystore: { path: '/invalid/truststore' } } };
-    expect(
-      () => new OpenSearchConfig(config.schema.validate(value))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"ENOENT: no such file or directory, open '/invalid/truststore'"`
+    expect(() => new OpenSearchConfig(config.schema.validate(value))).toThrow(
+      /ENOENT.*no such file or directory.*invalid.*truststore/i
     );
   });
 

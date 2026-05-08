@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiFieldText,
@@ -14,7 +14,6 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { UnitsCollection, getUnitById } from './collection';
-import { StyleAccordion } from '../style_accordion';
 import './style.scss';
 
 export interface UnitPanelProps {

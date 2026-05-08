@@ -4,7 +4,7 @@
  */
 
 import { Fragment, useEffect, useState, useCallback, useRef } from 'react';
-import React from 'react';
+
 import {
   EuiText,
   EuiModal,

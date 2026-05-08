@@ -83,6 +83,7 @@ export class IndexPatternsService implements Plugin<void, IndexPatternsServiceSt
 
         return new IndexPatternsCommonService({
           uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
           apiClient: new IndexPatternsApiServer(),
           fieldFormats: formats,

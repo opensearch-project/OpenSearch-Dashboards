@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { act } from 'react';
 import { render } from '@testing-library/react';
 import { ChatWindow } from './chat_window';
 import { coreMock } from '../../../../core/public/mocks';
@@ -13,30 +13,48 @@ import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
+import { ChatEventHandler } from '../services/chat_event_handler';
 
 // Create mock observable before using it in mocks
 const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
 
 // Mock dependencies
-jest.mock('../../../context_provider/public', () => ({
-  AssistantActionService: {
-    getInstance: jest.fn(() => ({
-      getState$: jest.fn(() => mockObservable),
-      getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
-      getActionRenderer: jest.fn(),
-    })),
-  },
-}));
+jest.mock('../../../context_provider/public', () => {
+  const assistantActionsInstance = {
+    getState$: jest.fn(() => mockObservable),
+    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
+    getActionRenderer: jest.fn(),
+  };
+  return {
+    AssistantActionService: {
+      getInstance: jest.fn(() => assistantActionsInstance),
+    },
+  };
+});
 
 jest.mock('../services/chat_event_handler', () => ({
-  ChatEventHandler: jest.fn().mockImplementation(() => ({
-    handleEvent: jest.fn(),
+  ChatEventHandler: jest.fn().mockImplementation((config) => ({
+    handleEvent: jest.fn().mockImplementation(async (event) => {
+      if (event.type === 'MESSAGES_SNAPSHOT' && event.messages) {
+        config.callbacks.onTimelineUpdate(event.messages);
+      }
+    }),
     clearState: jest.fn(),
   })),
 }));
 
 jest.mock('../actions/graph_timeseries_data_action', () => ({
   useGraphTimeseriesDataAction: jest.fn(),
+}));
+
+// Mock scrollIntoView
+Element.prototype.scrollIntoView = jest.fn();
+
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
 }));
 
 describe('ChatWindow - Conversation Name', () => {
@@ -64,11 +82,17 @@ describe('ChatWindow - Conversation Name', () => {
         userMessage: { id: '1', content: 'test', role: 'user' },
       }),
       newThread: jest.fn(),
-      getCurrentMessages: jest.fn().mockReturnValue([]),
-      updateCurrentMessages: jest.fn(),
+      saveConversation: jest.fn(),
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
+      conversationHistoryService: {
+        getMemoryProvider: jest.fn().mockReturnValue({
+          includeFullHistory: true,
+        }),
+      },
+      loadConversation: jest.fn(),
+      abort: jest.fn(),
     } as any;
     mockSuggestedActionsService = {} as any;
     mockConfirmationService = {
@@ -96,11 +120,46 @@ describe('ChatWindow - Conversation Name', () => {
     );
   };
 
-  describe('conversation name extraction', () => {
-    it('should not display conversation name when timeline is empty', () => {
-      mockChatService.getCurrentMessages.mockReturnValue([]);
+  // Helper function to simulate sending a message which populates the timeline
+  const sendMessageAndUpdateTimeline = async (messages: any[], rendered: any) => {
+    // Cast the mocked ChatEventHandler to jest.Mock to access mock properties
+    const MockedChatEventHandler = ChatEventHandler as jest.MockedClass<typeof ChatEventHandler>;
 
+    const mockHandleEvent = jest.fn().mockImplementation(async (event: any) => {
+      if (event.type === 'MESSAGES_SNAPSHOT' && event.messages) {
+        // Get the config that was passed to ChatEventHandler
+        const mockInstance =
+          MockedChatEventHandler.mock.results[MockedChatEventHandler.mock.results.length - 1]
+            ?.value;
+        if (mockInstance) {
+          // Directly call handleEvent implementation from our mock
+          const config =
+            MockedChatEventHandler.mock.calls[MockedChatEventHandler.mock.calls.length - 1][0];
+          if (config?.callbacks?.onTimelineUpdate) {
+            config.callbacks.onTimelineUpdate(event.messages);
+          }
+        }
+      }
+    });
+
+    // Simulate the event handler receiving a MESSAGES_SNAPSHOT event
+    await act(async () => {
+      await mockHandleEvent({
+        type: 'MESSAGES_SNAPSHOT',
+        messages,
+        timestamp: Date.now(),
+      });
+      // Wait for React state updates
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+  };
+
+  describe('conversation name extraction', () => {
+    it('should not display conversation name when timeline is empty', async () => {
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Wait for initialization
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // ChatHeader should not have the title text when there's no message
       const header = container.querySelector('.chatHeader');
@@ -111,21 +170,21 @@ describe('ChatWindow - Conversation Name', () => {
       expect(titleElement).not.toBeInTheDocument();
     });
 
-    it('should extract conversation name from first user message with string content', () => {
+    it('should extract conversation name from first user message with string content', async () => {
       const messages = [
         { id: '1', role: 'user' as const, content: 'How can I find the largest index?' },
         { id: '2', role: 'assistant' as const, content: 'You can use...' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('How can I find the largest index?');
     });
 
-    it('should extract conversation name from first user message with array content', () => {
+    it('should extract conversation name from first user message with array content', async () => {
       const messages = [
         {
           id: '1',
@@ -137,16 +196,16 @@ describe('ChatWindow - Conversation Name', () => {
         },
         { id: '2', role: 'assistant' as const, content: 'The weather is...' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('What is the weather today?');
     });
 
-    it('should find first user message with text when earlier messages have no text', () => {
+    it('should find first user message with text when earlier messages have no text', async () => {
       const messages = [
         {
           id: '1',
@@ -159,17 +218,16 @@ describe('ChatWindow - Conversation Name', () => {
         { id: '3', role: 'user' as const, content: 'Can you describe this image?' },
         { id: '4', role: 'assistant' as const, content: 'Sure...' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      // Should use the first user message with text content
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('Can you describe this image?');
     });
 
-    it('should return empty string when no user message has text content', () => {
+    it('should return empty string when no user message has text content', async () => {
       const messages = [
         {
           id: '1',
@@ -180,58 +238,57 @@ describe('ChatWindow - Conversation Name', () => {
         },
         { id: '2', role: 'assistant' as const, content: 'I see an image...' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      // Title should not be rendered when conversationName is empty
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).not.toBeInTheDocument();
     });
 
-    it('should skip assistant messages and find first user message', () => {
+    it('should skip assistant messages and find first user message', async () => {
       const messages = [
         { id: '1', role: 'assistant' as const, content: 'Hello! How can I help?' },
         { id: '2', role: 'user' as const, content: 'Tell me about TypeScript' },
         { id: '3', role: 'assistant' as const, content: 'TypeScript is...' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('Tell me about TypeScript');
     });
 
-    it('should skip whitespace-only messages and find first message with text', () => {
+    it('should skip whitespace-only messages and find first message with text', async () => {
       const messages = [
         { id: '1', role: 'user' as const, content: '   ' },
         { id: '2', role: 'assistant' as const, content: 'I need more information' },
         { id: '3', role: 'user' as const, content: 'How do I debug my code?' },
         { id: '4', role: 'assistant' as const, content: 'You can use...' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('How do I debug my code?');
     });
 
-    it('should handle long conversation name with CSS truncation', () => {
+    it('should handle long conversation name with CSS truncation', async () => {
       const longMessage =
         'This is a very long message that should be truncated by CSS ellipsis when it exceeds the available width in the header';
       const messages = [
         { id: '1', role: 'user' as const, content: longMessage },
         { id: '2', role: 'assistant' as const, content: 'Response' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messages);
 
-      const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      const rendered = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(messages, rendered);
 
-      const titleElement = container.querySelector('.chatHeader__title');
+      const titleElement = rendered.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       // Full text should be present (CSS handles truncation)
       expect(titleElement?.textContent).toBe(longMessage);
@@ -240,38 +297,29 @@ describe('ChatWindow - Conversation Name', () => {
       expect(titleElement).toHaveClass('chatHeader__title');
     });
 
-    it('should update conversation name when new messages are added', () => {
-      // Start with empty timeline
-      mockChatService.getCurrentMessages.mockReturnValue([]);
-
-      const { container, rerender } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Initially no title
-      let titleElement = container.querySelector('.chatHeader__title');
-      expect(titleElement).not.toBeInTheDocument();
-
-      // Simulate adding a message
-      const messagesWithUser = [
-        { id: '1', role: 'user' as const, content: 'New conversation started' },
+    it('should update conversation name when loading different conversations', async () => {
+      // Load first conversation
+      const firstMessages = [
+        { id: '1', role: 'user' as const, content: 'Initial message' },
+        { id: '2', role: 'assistant' as const, content: 'Initial response' },
       ];
-      mockChatService.getCurrentMessages.mockReturnValue(messagesWithUser);
 
-      rerender(
-        <OpenSearchDashboardsContextProvider
-          services={{ core: mockCore, contextProvider: mockContextProvider }}
-        >
-          <ChatProvider
-            chatService={mockChatService}
-            suggestedActionsService={mockSuggestedActionsService}
-            confirmationService={mockConfirmationService}
-          >
-            <ChatWindow onClose={jest.fn()} />
-          </ChatProvider>
-        </OpenSearchDashboardsContextProvider>
-      );
+      const rendered1 = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(firstMessages, rendered1);
 
-      // Now title should be present
-      titleElement = container.querySelector('.chatHeader__title');
+      let titleElement = rendered1.container.querySelector('.chatHeader__title');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement?.textContent).toBe('Initial message');
+
+      // Load second conversation in a new window instance
+      const secondMessages = [
+        { id: '3', role: 'user' as const, content: 'New conversation started' },
+      ];
+
+      const rendered2 = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+      await sendMessageAndUpdateTimeline(secondMessages, rendered2);
+
+      titleElement = rendered2.container.querySelector('.chatHeader__title');
       expect(titleElement).toBeInTheDocument();
       expect(titleElement?.textContent).toBe('New conversation started');
     });

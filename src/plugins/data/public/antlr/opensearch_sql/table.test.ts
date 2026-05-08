@@ -19,6 +19,7 @@ const mockTokenStream = (tokens: Array<Partial<Token>>): TokenStream => {
   } as TokenStream;
 };
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 const tokenDictionary: TokenDictionary = {
   SPACE: 1,
   FROM: 2,

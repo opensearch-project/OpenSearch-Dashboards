@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
 import { IAggConfig } from 'src/plugins/data/public';
 // @ts-expect-error TS6133 TODO(ts-error): fixme

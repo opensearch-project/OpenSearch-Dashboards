@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { OpenSavedQueryFlyout } from './open_saved_query_flyout';
 import { createSavedQueryService } from '../../../public/query/saved_query/saved_query_service';

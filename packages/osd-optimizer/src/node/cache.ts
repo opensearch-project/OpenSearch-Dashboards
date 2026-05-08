@@ -40,9 +40,8 @@ const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
-const dbName = (db: LMDB.Database) =>
-  // @ts-expect-error db.name is not a documented/typed property
-  db.name;
+// @ts-expect-error TS2339 TODO: FIX ME
+const dbName = (db: LMDB.Database) => db.name;
 
 export class Cache {
   private readonly codes: LMDB.RootDatabase<string, string>;

@@ -26,6 +26,7 @@ const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> =>
     title: 'Default Index Pattern',
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
     timeFieldName: '@timestamp',
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSource: {
       id: 'mock-data-source-id',
       title: 'Default Data Source',
@@ -33,6 +34,7 @@ const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> =>
     },
   };
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return {
     init: jest.fn(),
     registerType: jest.fn(),

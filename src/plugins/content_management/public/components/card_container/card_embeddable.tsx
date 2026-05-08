@@ -22,7 +22,6 @@ export type CardEmbeddableInput = EmbeddableInput & {
 
 export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
   public readonly type = CARD_EMBEDDABLE;
-  private node: HTMLElement | null = null;
   private root: Root | null = null;
 
   constructor(initialInput: CardEmbeddableInput, parent?: IContainer) {
@@ -33,7 +32,8 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
     if (this.root) {
       this.root.unmount();
     }
-    this.node = node;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this.__node = node;
     this.root = createRoot(node);
 
     // @ts-expect-error TS2322 TODO(ts-error): fixme

@@ -241,12 +241,10 @@ it('prepares assets for distribution', async () => {
   await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
-  // FIXME: the test didn't have .gz file created for chunks, however, chunks are properly compressed
-  // with .gz and .br when running actual build
-  // expectFileMatchesSnapshotWithCompression(
-  //   'plugins/foo/target/public/foo.chunk.674.js',
-  //   'foo async bundle'
-  // );
+  expectFileMatchesSnapshotWithCompression(
+    'plugins/foo/target/public/foo.chunk.0.js',
+    'foo async bundle'
+  );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
 

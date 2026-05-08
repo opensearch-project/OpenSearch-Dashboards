@@ -49,7 +49,7 @@ function render(props: ErrorToastProps = {}) {
     <ErrorToast
       openModal={openModal}
       error={props.error || new Error('error message')}
-      title={props.title || 'An error occured'}
+      title={props.title || 'An error occurred'}
       toastMessage={props.toastMessage || 'This is the toast message'}
       i18nContext={() => ({ children }) => <React.Fragment>{children}</React.Fragment>}
     />

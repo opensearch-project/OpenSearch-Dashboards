@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';

@@ -59,6 +59,8 @@ export const convertResult = ({
     },
   };
 
+  const highlightData = data?.meta?.highlights;
+
   if (data && data.fields && data.fields.length > 0) {
     for (let index = 0; index < data.size; index++) {
       const hit: { [key: string]: any } = {};
@@ -72,7 +74,7 @@ export const convertResult = ({
           const flattenedFieldName = `${field.name}.${nestedField}`;
 
           // Go through search source fields to find the field type of the nested field
-          fields?.index?.fields.forEach((searchSourceField) => {
+          fields?.index?.fields?.forEach((searchSourceField) => {
             if (
               searchSourceField.displayName === flattenedFieldName &&
               searchSourceField.type === 'date'
@@ -122,6 +124,7 @@ export const convertResult = ({
       hits.push({
         _index: data.name,
         _source: hit,
+        ...(highlightData?.[index] && { highlight: highlightData[index] }),
       });
     }
   }
@@ -139,6 +142,11 @@ export const convertResult = ({
       total: instantHits.length,
     };
     (searchResponse as any).instantFieldSchema = instantData.schema;
+  }
+
+  // Pass through truncation metadata for Prometheus queries
+  if (data.meta?.truncation) {
+    (searchResponse as any).truncation = data.meta.truncation;
   }
 
   if (data.hasOwnProperty('aggs')) {
@@ -365,6 +373,7 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     id: id ?? DATA_FRAME_TYPES.DEFAULT,
     title: dataFrame.name,
     timeFieldName: getTimeField(dataFrame, dataFrame.meta?.queryConfig)?.name,
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSourceRef: {
       id: dataFrame.meta?.queryConfig?.dataSourceId,
       name: dataFrame.meta?.queryConfig?.dataSourceName,

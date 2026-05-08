@@ -1,0 +1,2 @@
+feat:
+- Add optional display name field for index patterns to improve UX ([#10645](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/10645))

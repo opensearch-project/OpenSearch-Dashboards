@@ -5,7 +5,7 @@
 
 import { EuiCompressedFieldText, EuiCompressedFormRow, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { MAX_WORKSPACE_NAME_LENGTH } from '../../../../common/constants';
 
@@ -27,6 +27,7 @@ export const WorkspaceNameField = ({
   showDescription = true,
 }: WorkspaceNameFieldProps) => {
   const handleChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (e) => {
       onChange(e.currentTarget.value);
     },

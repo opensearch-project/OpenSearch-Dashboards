@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_sources';
 import { NotificationsStart } from '../../../../../../core/public';

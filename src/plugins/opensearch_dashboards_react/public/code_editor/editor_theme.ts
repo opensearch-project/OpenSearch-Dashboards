@@ -155,6 +155,8 @@ export function createTheme(
 
       { token: 'string', foreground: standardizeColor(euiTheme.euiCodeBlockStringColor) },
 
+      { token: 'key', foreground: standardizeColor(euiTheme.euiCodeBlockNumberColor) },
+
       { token: 'keyword', foreground: standardizeColor(euiTheme.euiCodeBlockKeywordColor) },
 
       {

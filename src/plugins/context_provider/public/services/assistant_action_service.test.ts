@@ -306,6 +306,44 @@ describe('AssistantActionService', () => {
 
       await expect(service.executeAction('test-action', {})).rejects.toThrow('Handler error');
     });
+
+    it('should allow execution of disabled actions to return stop instructions', async () => {
+      // Disabled actions CAN execute - they return instructions to stop tool execution
+      const mockHandler = jest.fn().mockResolvedValue({
+        success: false,
+        error: 'STOP: Tool not available - context has changed',
+        message:
+          'Do not attempt to use any more tools. Please respond directly to the user explaining the situation.',
+        stop_tool_execution: true,
+        context_lost: true,
+      });
+      const action: AssistantAction = {
+        name: 'disabled-action',
+        description: 'Disabled action',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+        available: 'disabled',
+        handler: mockHandler,
+      };
+
+      service.registerAction(action);
+
+      // Should execute and return the stop instruction
+      const result = await service.executeAction('disabled-action', { test: 'arg' });
+
+      expect(mockHandler).toHaveBeenCalledWith({ test: 'arg' });
+      expect(result).toEqual({
+        success: false,
+        error: 'STOP: Tool not available - context has changed',
+        message:
+          'Do not attempt to use any more tools. Please respond directly to the user explaining the situation.',
+        stop_tool_execution: true,
+        context_lost: true,
+      });
+    });
   });
 
   describe('updateToolCallState', () => {

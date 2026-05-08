@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { YesNo } from '../../yes_no';

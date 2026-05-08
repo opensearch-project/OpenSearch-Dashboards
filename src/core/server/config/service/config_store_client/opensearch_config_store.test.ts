@@ -79,7 +79,6 @@ describe('OpenSearchConfigStoreClient', () => {
       const mockHits = isListConfig
         ? configDocuments
         : configDocuments.filter((configDocument) => {
-            // @ts-expect-error
             const namespaces: string[] = request!.body!.query!.bool!.should![0].terms.config_name;
             return namespaces.includes(configDocument.config_name);
           });
@@ -409,6 +408,7 @@ describe('OpenSearchConfigStoreClient', () => {
         const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
         const actualMap = await configStoreClient.listConfigs();
 
+        // @ts-expect-error TODO FIX ME
         assertMapsAreEqual(actualMap, expectedMap);
       }
     );

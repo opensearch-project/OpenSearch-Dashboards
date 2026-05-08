@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { UrlTemplateFlyout } from './url_template_flyout';

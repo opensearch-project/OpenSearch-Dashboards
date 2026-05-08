@@ -4,7 +4,7 @@
  */
 
 import './workspace_initial.scss';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   EuiLink,

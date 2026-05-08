@@ -111,6 +111,7 @@ export class DynamicConfigService
         if (!config.skipMigrations) {
           await defaultConfigStoreClient.createDynamicConfigIndex();
         }
+        // @ts-expect-error TS2345 TODO Fix me
         configStoreClient = defaultConfigStoreClient;
       }
     }

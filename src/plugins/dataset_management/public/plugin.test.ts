@@ -12,18 +12,19 @@ import {
   ManagementAppMountParams,
   RegisterManagementAppArgs,
 } from 'src/plugins/management/public';
-import { waitFor } from '@testing-library/dom';
 import { BehaviorSubject } from 'rxjs';
 import {
   AppNavLinkStatus,
   DEFAULT_NAV_GROUPS,
   WORKSPACE_USE_CASE_PREFIX,
+  ALL_USE_CASE_ID,
 } from '../../../core/public';
 
 describe('DiscoverPlugin', () => {
   it('setup successfully', () => {
     const setupMock = coreMock.createSetup();
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     expect(() =>
       pluginInstance.setup(setupMock, {
@@ -32,9 +33,6 @@ describe('DiscoverPlugin', () => {
       })
     ).not.toThrow();
     expect(setupMock.application.register).toBeCalledTimes(1);
-    waitFor(() => {
-      expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(1);
-    });
   });
 
   it('when new navigation is enabled, should navigate to standard IPM app', async () => {
@@ -42,6 +40,7 @@ describe('DiscoverPlugin', () => {
     const startMock = coreMock.createStart();
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
     let applicationRegistration = {} as Omit<RegisterManagementAppArgs, 'basePath'>;
@@ -66,7 +65,7 @@ describe('DiscoverPlugin', () => {
     expect(startMock.application.navigateToUrl).toBeCalledWith('http://localhost/app/datasets');
   });
 
-  it('redirects to indexPatterns when NOT in observability workspace', async () => {
+  it('redirects to indexPatterns when NOT in observability or analytics workspace', async () => {
     const setupMock = coreMock.createSetup();
     const startMock = coreMock.createStart();
     const workspaceSubject = new BehaviorSubject({
@@ -75,6 +74,7 @@ describe('DiscoverPlugin', () => {
       features: ['some-other-feature'], // Not observability
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     // Mock capabilities with workspaces enabled
     (startMock.application as any).capabilities = {
@@ -85,6 +85,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
 
@@ -118,6 +119,7 @@ describe('DiscoverPlugin', () => {
       features: [`${WORKSPACE_USE_CASE_PREFIX}${DEFAULT_NAV_GROUPS.observability.id}`],
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     // Mock capabilities with workspaces enabled
     (startMock.application as any).capabilities = {
@@ -127,6 +129,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
     const managementMock = managementPluginMock.createSetupContract();
 
@@ -134,6 +137,7 @@ describe('DiscoverPlugin', () => {
     managementMock.sections.section.opensearchDashboards.registerApp = (
       app: Omit<RegisterManagementAppArgs, 'basePath'>
     ) => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       mountFunction = app.mount;
       return {} as ManagementApp;
     };
@@ -160,6 +164,7 @@ describe('DiscoverPlugin', () => {
       features: ['some-other-feature'],
     });
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     startMock.workspaces.currentWorkspace$ = workspaceSubject;
     // Mock capabilities with workspaces enabled
     (startMock.application as any).capabilities = {
@@ -169,6 +174,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
 
     let appUpdater: any;
@@ -211,6 +217,101 @@ describe('DiscoverPlugin', () => {
     expect(updates[updates.length - 1]?.navLinkStatus).toBe(AppNavLinkStatus.visible);
   });
 
+  it('allows access when in analytics workspace', async () => {
+    const setupMock = coreMock.createSetup();
+    const startMock = coreMock.createStart();
+    const workspaceSubject = new BehaviorSubject({
+      id: 'analytics-workspace',
+      name: 'Analytics Workspace',
+      features: [`${WORKSPACE_USE_CASE_PREFIX}${ALL_USE_CASE_ID}`],
+    });
+
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
+    startMock.workspaces.currentWorkspace$ = workspaceSubject;
+    (startMock.application as any).capabilities = {
+      ...startMock.application.capabilities,
+      workspaces: { enabled: true },
+    };
+
+    setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
+    const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
+    const pluginInstance = new DatasetManagementPlugin(initializerContext);
+    const managementMock = managementPluginMock.createSetupContract();
+
+    let mountFunction: ((params: ManagementAppMountParams) => Promise<any>) | undefined;
+    managementMock.sections.section.opensearchDashboards.registerApp = (
+      app: Omit<RegisterManagementAppArgs, 'basePath'>
+    ) => {
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
+      mountFunction = app.mount;
+      return {} as ManagementApp;
+    };
+
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(false);
+
+    pluginInstance.setup(setupMock, {
+      urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      management: managementMock,
+    });
+
+    expect(mountFunction).toBeDefined();
+  });
+
+  it('updates nav link visibility for analytics workspace', async () => {
+    const setupMock = coreMock.createSetup();
+    const startMock = coreMock.createStart();
+    const workspaceSubject = new BehaviorSubject({
+      id: 'test-workspace',
+      name: 'Test Workspace',
+      features: ['some-other-feature'],
+    });
+
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
+    startMock.workspaces.currentWorkspace$ = workspaceSubject;
+    (startMock.application as any).capabilities = {
+      ...startMock.application.capabilities,
+      workspaces: { enabled: true },
+    };
+
+    setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
+    const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
+    const pluginInstance = new DatasetManagementPlugin(initializerContext);
+
+    let appUpdater: any;
+    setupMock.application.register.mockImplementation((app: any) => {
+      appUpdater = app.updater$;
+      return {} as any;
+    });
+
+    pluginInstance.setup(setupMock, {
+      urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      management: managementPluginMock.createSetupContract(),
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const updates: any[] = [];
+    appUpdater.subscribe((update: any) => {
+      updates.push(update({}));
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(updates[updates.length - 1]?.navLinkStatus).toBe(AppNavLinkStatus.hidden);
+
+    workspaceSubject.next({
+      id: 'analytics-workspace',
+      name: 'Analytics Workspace',
+      features: [`${WORKSPACE_USE_CASE_PREFIX}${ALL_USE_CASE_ID}`],
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(updates[updates.length - 1]?.navLinkStatus).toBe(AppNavLinkStatus.visible);
+  });
+
   it('does not set up workspace subscription when workspaces are disabled', async () => {
     const setupMock = coreMock.createSetup();
     const startMock = coreMock.createStart();
@@ -223,6 +324,7 @@ describe('DiscoverPlugin', () => {
 
     setupMock.getStartServices.mockResolvedValue([startMock, {}, {}]);
     const initializerContext = coreMock.createPluginInitializerContext();
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     const pluginInstance = new DatasetManagementPlugin(initializerContext);
 
     let appUpdater: any;

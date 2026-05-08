@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import React from 'react';
+
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useInitialQueryExecution } from './use_initial_query_execution';
@@ -209,15 +209,23 @@ describe('useInitialQueryExecution', () => {
       expect(result.current.isInitialized).toBe(false); // Still false until Redux state updates
     });
 
-    it('should only initialize once', () => {
-      const { rerender } = renderHookWithProvider(mockServices);
+    it('should only initialize once', async () => {
+      let hookResult: any;
+
+      await act(async () => {
+        hookResult = renderHookWithProvider(mockServices);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // First render
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledTimes(1);
 
       // Re-render should not trigger again
-      rerender();
+      await act(async () => {
+        hookResult.rerender();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledTimes(1);
     });

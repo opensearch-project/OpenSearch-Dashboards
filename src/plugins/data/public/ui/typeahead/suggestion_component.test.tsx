@@ -29,7 +29,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import React from 'react';
+
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 

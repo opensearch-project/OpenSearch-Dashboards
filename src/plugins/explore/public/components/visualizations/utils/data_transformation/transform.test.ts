@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { transform } from './transform';
+import { transform, facetTransform } from './transform';
 
 describe('transform', () => {
   it('applies single transformation function', () => {
@@ -39,5 +39,47 @@ describe('transform', () => {
 
     // @ts-ignore
     expect(result.otherProp).toBe('value');
+  });
+});
+
+describe('facetTransform', () => {
+  const doubleA = (data: any[]) => data.map((item) => ({ ...item, a: item.a * 2 }));
+
+  it('handle one facet group and apply transforms to this group', () => {
+    const state = {
+      data: [
+        { cat: 'x', a: 1 },
+        { cat: 'x', a: 2 },
+      ],
+    } as any;
+
+    const result = facetTransform('cat', doubleA)(state);
+
+    expect(result.transformedData).toEqual([
+      [
+        { cat: 'x', a: 2 },
+        { cat: 'x', a: 4 },
+      ],
+    ]);
+  });
+
+  it('group data by facet column and apply transforms to each group', () => {
+    const state = {
+      data: [
+        { cat: 'x', a: 1 },
+        { cat: 'y', a: 3 },
+        { cat: 'x', a: 2 },
+      ],
+    } as any;
+
+    const result = facetTransform('cat', doubleA)(state);
+
+    expect(result.transformedData).toEqual([
+      [
+        { cat: 'x', a: 2 },
+        { cat: 'x', a: 4 },
+      ],
+      [{ cat: 'y', a: 6 }],
+    ]);
   });
 });

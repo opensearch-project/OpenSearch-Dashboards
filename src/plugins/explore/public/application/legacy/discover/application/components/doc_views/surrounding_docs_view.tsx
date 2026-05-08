@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Fragment, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Fragment, useEffect, useRef, useCallback, useMemo } from 'react';
 import { EuiPageContent, EuiPage } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dashboards_react/public';

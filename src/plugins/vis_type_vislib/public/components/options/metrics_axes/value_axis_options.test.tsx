@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
 import { ValueAxis } from '../../../types';

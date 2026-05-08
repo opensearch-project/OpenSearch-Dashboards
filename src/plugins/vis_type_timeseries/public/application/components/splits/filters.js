@@ -32,7 +32,6 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import { FilterItems } from './filter_items';
 import PropTypes from 'prop-types';
-import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 

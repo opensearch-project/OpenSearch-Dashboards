@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { AskAIVisualizeEmbeddableAction } from './ask_ai_embeddable_action';
 import { VisualizeEmbeddable } from '../embeddable/visualize_embeddable';

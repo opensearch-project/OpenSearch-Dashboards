@@ -234,7 +234,7 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     provider: IContextProvider<THandler, TContextName>
   ): this => {
     if (this.contextProviders.has(contextName)) {
-      throw new Error(`Context provider for ${contextName} has already been registered.`);
+      throw new Error(`Context provider for ${String(contextName)} has already been registered.`);
     }
     if (source !== this.coreId && !this.pluginDependencies.has(source)) {
       throw new Error(`Cannot register context for unknown plugin: ${source.toString()}`);

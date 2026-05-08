@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'opensearch-dashboards/public';

@@ -7,6 +7,9 @@
   ],
   "exclude": [],
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "bundler",
+    "rootDir": ".",
     "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-pm",
     "types": [
       "jest",

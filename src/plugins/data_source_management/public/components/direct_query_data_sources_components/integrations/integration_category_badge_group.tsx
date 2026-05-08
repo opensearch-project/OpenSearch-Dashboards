@@ -4,7 +4,6 @@
  */
 
 import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
-import React from 'react';
 
 export const badges = (labels: string[]) => {
   if (labels.length <= 3) {

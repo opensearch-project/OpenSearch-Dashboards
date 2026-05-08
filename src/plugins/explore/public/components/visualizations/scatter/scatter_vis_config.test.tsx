@@ -19,7 +19,7 @@ describe('createScatterConfig', () => {
     const config = createScatterConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'scatter');
+    expect(config).toHaveProperty('name', 'Scatter');
     expect(config).toHaveProperty('type', 'scatter');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');

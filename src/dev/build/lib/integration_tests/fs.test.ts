@@ -33,7 +33,18 @@ import { chmodSync, statSync } from 'fs';
 
 import del from 'del';
 
-import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
+import {
+  mkdirp,
+  write,
+  read,
+  getChildPaths,
+  copyAll,
+  getFileHash,
+  untar,
+  gunzip,
+  compressTar,
+  hasPigz,
+} from '../fs';
 import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 
 const TMP = resolve(__dirname, '../__tmp__');
@@ -374,5 +385,74 @@ describe('gunzip()', () => {
     const destination = resolve(TMP, 'z/y/x/v/u/t/foo.txt');
     await gunzip(FOO_GZIP_PATH, destination);
     expect(await read(resolve(destination))).toBe('foo\n');
+  });
+});
+
+describe('compressTar() pigz roundtrip', () => {
+  const srcDir = resolve(TMP, 'compress_src');
+
+  const setupSource = async () => {
+    await mkdirp(srcDir);
+    // include one small and one larger file so pigz parallel blocks exercise multi-thread
+    await write(resolve(srcDir, 'small.txt'), 'hello world\n');
+    await write(resolve(srcDir, 'big.txt'), 'x'.repeat(200 * 1024));
+    await mkdirp(resolve(srcDir, 'sub'));
+    await write(resolve(srcDir, 'sub/nested.txt'), 'nested\n');
+  };
+
+  it('produces standard gzip that is byte-identical after extraction under both paths', async () => {
+    // Skip loudly when pigz isn't on PATH — otherwise this test silently degenerates
+    // into Node-vs-Node which doesn't actually validate the pigz code path.
+    if (!hasPigz()) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[pigz roundtrip] pigz not on PATH; skipping. Install pigz to exercise the parallel-gzip path.'
+      );
+      return;
+    }
+    await del([TMP]);
+    await setupSource();
+
+    const pigzDest = resolve(TMP, 'out-pigz.tar.gz');
+    const nodeDest = resolve(TMP, 'out-node.tar.gz');
+
+    // Pigz path.
+    delete process.env.OSD_BUILD_NO_PIGZ;
+    const pigzCount = await compressTar({
+      source: srcDir,
+      destination: pigzDest,
+      archiverOptions: { gzip: true, gzipOptions: { level: 6 } },
+      createRootDirectory: true,
+    });
+
+    // Force Node gzip path.
+    process.env.OSD_BUILD_NO_PIGZ = '1';
+    try {
+      const nodeCount = await compressTar({
+        source: srcDir,
+        destination: nodeDest,
+        archiverOptions: { gzip: true, gzipOptions: { level: 6 } },
+        createRootDirectory: true,
+      });
+      expect(pigzCount).toBe(3);
+      expect(nodeCount).toBe(3);
+    } finally {
+      delete process.env.OSD_BUILD_NO_PIGZ;
+    }
+
+    // Both archives must be valid gzip + tar, and extract to byte-identical trees.
+    const pigzOut = resolve(TMP, 'extract-pigz');
+    const nodeOut = resolve(TMP, 'extract-node');
+    await mkdirp(pigzOut);
+    await mkdirp(nodeOut);
+    await untar(pigzDest, pigzOut);
+    await untar(nodeDest, nodeOut);
+
+    const pigzHash = await getFileHash(resolve(pigzOut, 'compress_src/big.txt'), 'sha256');
+    const nodeHash = await getFileHash(resolve(nodeOut, 'compress_src/big.txt'), 'sha256');
+    expect(pigzHash).toBe(nodeHash);
+    expect(await read(resolve(pigzOut, 'compress_src/small.txt'))).toBe('hello world\n');
+    expect(await read(resolve(nodeOut, 'compress_src/small.txt'))).toBe('hello world\n');
+    expect(await read(resolve(pigzOut, 'compress_src/sub/nested.txt'))).toBe('nested\n');
   });
 });

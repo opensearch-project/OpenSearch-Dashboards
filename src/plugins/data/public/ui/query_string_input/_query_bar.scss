@@ -84,6 +84,10 @@
     flex-grow: 0 !important;
     flex-basis: auto !important;
 
+    > div {
+      width: auto;
+    }
+
     &.osdQueryBar__datePickerWrapper-isHidden {
       width: 0;
       overflow: hidden;

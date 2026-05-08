@@ -2,8 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useCallback } from 'react';
-
+import { useState, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCompressedFieldText, EuiSmallButton } from '@elastic/eui';

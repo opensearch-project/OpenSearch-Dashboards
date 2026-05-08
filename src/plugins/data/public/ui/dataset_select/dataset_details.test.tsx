@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';
@@ -61,6 +60,7 @@ describe('Dataset Details Components', () => {
     description: 'Test index pattern description',
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
     timeFieldName: '@timestamp',
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSource: {
       id: 'opensearch-datasource',
       title: 'OpenSearch DataSource',

@@ -78,6 +78,7 @@ describe('PromQLToolHandlers', () => {
         { __name__: 'metric1', job: 'prometheus' },
       ]);
 
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const result = await handlers.executeTool('search_prometheus_metadata', { query: 'test' });
 
       expect(result).toHaveProperty('metrics');
@@ -225,7 +226,7 @@ describe('PromQLToolHandlers', () => {
       ]);
     });
 
-    it('should support regex query to match multiple patterns', async () => {
+    it('should match multiple patterns when space-separated terms are provided', async () => {
       const metrics = [
         'http_requests_total',
         'node_cpu_seconds',
@@ -240,8 +241,10 @@ describe('PromQLToolHandlers', () => {
         { __name__: 'process_cpu_seconds', job: 'prometheus' },
       ]);
 
-      // Match both cpu and memory metrics
-      const result = await handlers.searchPrometheusMetadata({ query: 'cpu|memory' });
+      // Multi-word queries split on whitespace and OR together — the space
+      // interface is the supported way to match multiple patterns; raw regex
+      // metacharacters like `|` in the input are escaped to avoid ReDoS.
+      const result = await handlers.searchPrometheusMetadata({ query: 'cpu memory' });
 
       expect(result.metrics).toHaveLength(3);
       expect(result.metrics.map((m) => m.name)).toEqual([
@@ -249,6 +252,19 @@ describe('PromQLToolHandlers', () => {
         'node_memory_bytes',
         'process_cpu_seconds',
       ]);
+    });
+
+    it('should escape regex metacharacters in single-word queries', async () => {
+      const metrics = ['http_requests_total', 'node_cpu_seconds', 'node_memory_bytes'];
+      mockPrometheusClient.getMetrics.mockResolvedValue(metrics);
+      mockPrometheusClient.getMetricMetadata.mockResolvedValue({});
+      mockPrometheusClient.getSeries.mockResolvedValue([]);
+
+      // The `|` here is escaped, so it is matched literally against metric
+      // names rather than being interpreted as regex alternation.
+      const result = await handlers.searchPrometheusMetadata({ query: 'cpu|memory' });
+
+      expect(result.metrics).toHaveLength(0);
     });
 
     it('should fall back to substring matching for invalid regex', async () => {

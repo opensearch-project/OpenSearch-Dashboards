@@ -4,7 +4,6 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import React from 'react';
 
 export interface ImportFileContentBodyProps {
   enabledFileTypes: string[];

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import './new_experience_banner.scss';
 import {

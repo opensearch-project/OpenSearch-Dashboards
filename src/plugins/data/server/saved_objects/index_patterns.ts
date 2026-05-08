@@ -60,6 +60,7 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       title: { type: 'text' },
+      displayName: { type: 'text' },
       type: { type: 'keyword' },
     },
   },

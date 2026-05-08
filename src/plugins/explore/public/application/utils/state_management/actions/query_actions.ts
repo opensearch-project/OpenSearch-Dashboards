@@ -260,12 +260,12 @@ export const executeQueries = createAsyncThunk<
   const dataTableCacheKey = defaultCacheKey;
   const breakdownField = state.queryEditor.breakdownField;
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
+  const queryString = defaultPrepareQueryString(query);
 
   // Check what needs execution for core queries
   // If results exist but query status is UNINITIALIZED (after cancel), we need to re-execute
   const dataTableQueryStatus = state.queryEditor.queryStatusMap[dataTableCacheKey];
   const histogramQueryStatus = state.queryEditor.queryStatusMap[histogramCacheKey];
-
   // Early exit if query should be skipped
   if (shouldSkipQueryExecution(query)) {
     return;
@@ -278,7 +278,6 @@ export const executeQueries = createAsyncThunk<
     query.language !== 'PROMQL' &&
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
-
   const promises = [];
   // Execute query without aggregations
   if (needsDataTableQuery) {
@@ -287,7 +286,7 @@ export const executeQueries = createAsyncThunk<
         executeDataTableQuery({
           services,
           cacheKey: dataTableCacheKey,
-          queryString: defaultPrepareQueryString(query),
+          queryString,
         })
       )
     );
@@ -300,7 +299,7 @@ export const executeQueries = createAsyncThunk<
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,
-        queryString: defaultPrepareQueryString(query),
+        queryString,
         interval,
       })
     );
@@ -318,7 +317,7 @@ export const executeQueries = createAsyncThunk<
     const dataTableResults = latestState.results[dataTableCacheKey];
 
     // Only execute RED metrics queries if we have table results with data
-    if (dataTableResults && dataTableResults.hits?.hits?.length > 0) {
+    if (dataTableResults && dataTableResults.hasResults) {
       const dataset = query.dataset
         ? await services.data.dataViews.get(
             query.dataset.id,
@@ -516,7 +515,13 @@ const executeQueryBase = async (
     });
     const inspectorRequest = services.inspectorAdapters.requests.start(title, { description });
 
-    await services.data.dataViews.ensureDefaultDataView();
+    // Only ensure default data view exists if no dataset is selected
+    // When a dataset is already selected (normal case), this check is redundant
+    // as DatasetSelect component already handles default selection during initialization
+    if (!query.dataset) {
+      await services.data.dataViews.ensureDefaultDataView();
+    }
+
     const dataView = query.dataset
       ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
       : await services.data.dataViews.getDefault();
@@ -532,13 +537,15 @@ const executeQueryBase = async (
       histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
     }
 
+    let effectiveQuery = queryString;
+    if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
+      effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
+    }
+
     const preparedQueryObject = {
       ...query,
       dataset,
-      query:
-        query.language === 'PPL' && isHistogramQuery && histogramConfig
-          ? buildPPLHistogramQuery(queryString, histogramConfig)
-          : queryString,
+      query: effectiveQuery,
     };
 
     let searchSource;
@@ -694,7 +701,7 @@ const executeQueryBase = async (
 /**
  * Helper function to create SearchSource with common configuration
  */
-const createSearchSourceWithQuery = async (
+export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,
@@ -738,6 +745,7 @@ const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());

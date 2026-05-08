@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
 import { useObservable } from 'react-use';
@@ -47,16 +47,7 @@ export interface OnSaveProps {
 
 export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern | Dataset }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const {
-    core,
-    dashboard,
-    savedObjects,
-    toastNotifications,
-    uiSettings,
-    scopedHistory,
-    data,
-    keyboardShortcut,
-  } = services;
+  const { core, dashboard, savedObjects, toastNotifications, data, keyboardShortcut } = services;
   const visualizationBuilder = getVisualizationBuilder();
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
@@ -108,7 +99,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       flavorId ?? 'logs',
-      tabDefinition!,
+      tabDefinition,
       {
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,

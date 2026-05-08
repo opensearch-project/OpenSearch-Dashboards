@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import { includes } from 'lodash';
 import { injectI18n } from '@osd/i18n/react';
 import { EuiCompressedComboBox } from '@elastic/eui';

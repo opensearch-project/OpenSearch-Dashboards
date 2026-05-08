@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';

@@ -23,7 +23,7 @@ import {
   EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { Fragment, useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import {
   UpdatedWorkspaceObject,
   getWorkspacesWithRecentMessage,

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import * as VB from '../../../../../components/visualizations/visualization_builder';
@@ -73,14 +72,14 @@ describe('<ResizableVisControlAndTabs />', () => {
     expect(screen.queryByTestId('style-panel')).not.toBeInTheDocument();
   });
 
-  test('it should display StylePanel if the current active tab is visualization', () => {
+  test('it should display only ExploreTabs regardless of active tab', () => {
     mockUseSelector.mockReturnValue('explore_visualization_tab');
     render(<ResizableVisControlAndTabs />);
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
-    expect(screen.getByTestId('style-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('style-panel')).not.toBeInTheDocument();
   });
 
-  test('it should NOT display StylePanel if the current active tab is visualization but no data', () => {
+  test('it should NOT display StylePanel since component is simplified', () => {
     mockUseSelector.mockReturnValue('explore_visualization_tab');
     jest.spyOn(ReactUse, 'useObservable').mockReturnValue(undefined);
     render(<ResizableVisControlAndTabs />);

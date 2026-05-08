@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { PublicAppInfo, UseCaseId } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
@@ -197,6 +196,7 @@ describe('WorkspaceCreator', () => {
       // @ts-ignore
       delete window.location;
     }
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = {} as Location;
     Object.defineProperty(window.location, 'href', {
       get: () => 'http://localhost/w/workspace/app/workspace_create',
@@ -205,6 +205,7 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
+    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
     window.location = location as Location;
   });
 

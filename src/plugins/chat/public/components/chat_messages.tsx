@@ -5,7 +5,7 @@
 
 import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 import { MessageRow } from './message_row';
 import { TimelineToolCall, ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
@@ -13,6 +13,12 @@ import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../com
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
+import { AssistantActionService } from '../../../context_provider/public';
+import { RecentSessions } from './recent_sessions';
+import {
+  ConversationHistoryService,
+  SavedConversation,
+} from '../services/conversation_history_service';
 
 /**
  * Determine tool status based on tool call and result
@@ -30,7 +36,8 @@ interface SuggestionItem {
   icon: string;
   iconColor?: string;
   text: string;
-  prompt: string;
+  prompt?: string;
+  action?: () => void;
 }
 
 const STARTER_SUGGESTIONS: SuggestionItem[] = [
@@ -62,6 +69,11 @@ interface ChatMessagesProps {
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
+  startResponse?: boolean;
+  threadId?: string;
+  onShowHistory?: () => void;
+  conversationHistoryService?: ConversationHistoryService;
+  onSelectConversation?: (conversation: SavedConversation) => void;
 }
 
 /**
@@ -71,6 +83,7 @@ interface ChatMessagesProps {
  * - Non-tool messages (user, assistant, system) are included as-is
  * - Completed tool calls from consecutive assistant messages are grouped together
  * - Running tool calls are displayed individually
+ * - Tool calls with custom renderers are displayed individually (not grouped)
  * - Tool result messages are filtered out (they're referenced by tool calls)
  *
  * @param timeline - Array of messages from the conversation
@@ -113,6 +126,18 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       );
       return !toolResult; // No result means still running
     });
+  };
+
+  // Helper: Check if tool has custom renderer
+  const hasCustomRenderer = (toolName: string): boolean => {
+    const service = AssistantActionService.getInstance();
+    return service.shouldUseCustomRenderer(toolName);
+  };
+
+  // Helper: Check if any tool call has custom renderer
+  const hasCustomRendererTool = (toolCalls?: ToolCall[]): boolean => {
+    if (!toolCalls?.length) return false;
+    return toolCalls.some((tc) => hasCustomRenderer(tc.function.name));
   };
 
   // Helper: Find next message that closes a tool call batch
@@ -164,6 +189,12 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       continue;
     }
 
+    // If any tool has custom renderer, show individually (don't group)
+    if (hasCustomRendererTool(toolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
     // Find where this batch of tool calls ends
     const batchEndIndex = findBatchEndIndex(i + 1);
 
@@ -188,7 +219,13 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       continue;
     }
 
-    // All tools completed - group them together
+    // If any continuation tool has custom renderer, show all individually (don't group)
+    if (hasCustomRendererTool(continuationToolCalls)) {
+      addIndividualToolCalls(toolCalls);
+      continue;
+    }
+
+    // All tools completed and none have custom renderers - group them together
     addToolCallGroup([...toolCalls, ...continuationToolCalls]);
 
     // Skip to the message before batch end
@@ -198,7 +235,7 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
   return result;
 };
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({
+const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
   isStreaming,
@@ -206,6 +243,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
+  startResponse,
+  threadId,
+  onShowHistory,
+  conversationHistoryService,
+  onSelectConversation,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -216,7 +258,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   // No need for separate context display here
 
   const scrollToBottom = useCallback(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && !userHasScrolledUp.current) {
       isAutoScrolling.current = true;
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       // Reset flag after animation completes
@@ -277,7 +319,17 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     }
   }, [timeline, isNearBottom, scrollToBottom]);
 
-  // Attach scroll listener
+  // Handle user wheel events to detect manual scroll intent
+  // This fires when user actively scrolls, even during auto-scroll animation
+  const handleWheelScroll = useCallback((e: WheelEvent) => {
+    // Scrolling up (negative deltaY) - user wants to stop auto-scroll
+    if (e.deltaY < 0) {
+      userHasScrolledUp.current = true;
+      isAutoScrolling.current = false; // Cancel any ongoing auto-scroll
+    }
+  }, []);
+
+  // Attach scroll and wheel listeners
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) {
@@ -285,11 +337,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     }
 
     container.addEventListener('scroll', handleScroll, { passive: true });
+    container.addEventListener('wheel', handleWheelScroll as EventListener, { passive: true });
 
     return () => {
       container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener('wheel', handleWheelScroll as EventListener);
     };
-  }, [handleScroll]);
+  }, [handleScroll, handleWheelScroll]);
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
@@ -310,6 +364,43 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     const lastUserMessageIndex = messageRows.findLastIndex((message) => message.role === 'user');
     return lastAssistantMessageIndex > lastUserMessageIndex;
   }, [messageRows, isStreaming, lastAssistantMessageIndex]);
+
+  /**
+   * Determine if an assistant message at the given index is shareable.
+   * A message is shareable when:
+   * 1. The response is not currently streaming
+   * 2. No tool calls in the current turn are still running (awaiting results)
+   * 3. It is the last assistant message with content before the next user message (or end of timeline)
+   */
+  const isMessageShareable = useCallback(
+    (index: number): boolean => {
+      if (isStreaming) return false;
+
+      // Walk backward: check if any tool calls in this turn are still running
+      for (let j = index; j >= 0; j--) {
+        const prev = messageRows[j];
+        if (prev.role === 'user') break;
+        if (prev.role === 'toolCall' && prev.toolCall.status === 'running') return false;
+        if (prev.role === 'toolCallGroup') {
+          if (prev.toolCalls.some((tc) => tc.status === 'running')) return false;
+        }
+      }
+
+      // Walk forward: check for a later assistant message with content or running tools
+      for (let j = index + 1; j < messageRows.length; j++) {
+        const next = messageRows[j];
+        if (next.role === 'user') return true;
+        if (next.role === 'assistant' && (next as AssistantMessage).content) return false;
+        if (next.role === 'toolCall' && next.toolCall.status === 'running') return false;
+        if (next.role === 'toolCallGroup') {
+          if (next.toolCalls.some((tc) => tc.status === 'running')) return false;
+        }
+      }
+
+      return true; // Last message in timeline with no running tools
+    },
+    [messageRows, isStreaming]
+  );
 
   return (
     <>
@@ -339,7 +430,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                   paddingSize="m"
                   hasBorder
                   className="chatMessages__suggestionCard"
-                  onClick={() => onFillInput?.(suggestion.prompt)}
+                  onClick={() => {
+                    if (suggestion.action) {
+                      suggestion.action();
+                    } else if (suggestion.prompt) {
+                      onFillInput?.(suggestion.prompt);
+                    }
+                  }}
                 >
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -354,6 +451,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                 </EuiPanel>
               ))}
             </div>
+            {conversationHistoryService && onSelectConversation && onShowHistory && (
+              <RecentSessions
+                conversationHistoryService={conversationHistoryService}
+                onSelectConversation={onSelectConversation}
+                onViewAll={onShowHistory}
+              />
+            )}
           </div>
         )}
 
@@ -365,30 +469,51 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
-            const isLoadingMessage = message.id.startsWith('loading-');
-            const isEmptyAndStreaming =
-              !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
+
+            const isShareable = isMessageShareable(index);
+
+            const renderAssistantContent = () => {
+              if (!assistantMsg.content) {
+                return null;
+              }
+
+              if (Array.isArray(assistantMsg.content)) {
+                return assistantMsg.content
+                  .filter((content) => content.text?.trim())
+                  .map((content, contentIndex) => (
+                    <MessageRow
+                      key={`${assistantMsg.id}-${contentIndex}`}
+                      message={{
+                        role: 'assistant',
+                        content: content.text,
+                        id: `${assistantMsg.id}-${contentIndex}`,
+                      }}
+                      timeline={isShareable ? timeline : undefined}
+                      threadId={isShareable ? threadId : undefined}
+                      shareTargetMessage={isShareable ? assistantMsg : undefined}
+                    />
+                  ));
+              }
+
+              if (assistantMsg.content.trim()) {
+                return (
+                  <MessageRow
+                    message={assistantMsg}
+                    timeline={isShareable ? timeline : undefined}
+                    threadId={isShareable ? threadId : undefined}
+                  />
+                );
+              }
+
+              return null;
+            };
 
             return (
               <div key={message.id}>
-                {/* Show loading indicator for loading messages or empty streaming messages */}
-                {(isLoadingMessage || isEmptyAndStreaming) && (
-                  <div className="messageRow">
-                    <div className="messageRow__icon">
-                      <EuiIcon type="console" size="m" color="success" />
-                    </div>
-                    <div className="messageRow__content">
-                      <div className="chatMessages__thinkingText">Thinking...</div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Assistant message content */}
-                {!isLoadingMessage && assistantMsg.content && assistantMsg.content.trim() && (
-                  <MessageRow message={assistantMsg} />
-                )}
+                {renderAssistantContent()}
 
-                {!isLoadingMessage && suggestionsEnabled && lastAssistantMessageIndex === index && (
+                {suggestionsEnabled && lastAssistantMessageIndex === index && (
                   <ChatSuggestions messages={timeline} currentMessage={message} />
                 )}
               </div>
@@ -423,12 +548,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           return null;
         })}
 
-        {/* Loading indicator - waiting for agent response */}
-        {isStreaming && timeline.length === 0 && (
+        {isStreaming && !startResponse && (
           <div className="chatMessages__loadingIndicator">
             <div className="messageRow">
               <div className="messageRow__icon">
-                <EuiIcon type="discuss" size="m" color="success" />
+                <EuiIcon type="console" size="m" color="success" />
               </div>
               <div className="messageRow__content">
                 <div className="chatMessages__thinkingText">Thinking...</div>
@@ -436,9 +560,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             </div>
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
     </>
   );
 };
+
+export const ChatMessages = React.memo(ChatMessagesComponent);

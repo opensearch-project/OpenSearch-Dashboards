@@ -6,7 +6,7 @@
 import './collapsible_nav_group_enabled.scss';
 import { EuiFlyout, EuiPanel, EuiHideFor, EuiFlyoutProps, EuiShowFor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useMemo } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import classNames from 'classnames';
@@ -29,6 +29,8 @@ import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
 import { HeaderSearchBar, HeaderSearchBarIcon } from './header_search_bar';
+import { ExpandedSideNav } from './expanded_side_nav';
+import { CollapsedSideNav } from './collapsed_side_nav';
 
 export interface CollapsibleNavGroupEnabledProps {
   appId$: InternalApplicationStart['currentAppId$'];
@@ -45,11 +47,16 @@ export interface CollapsibleNavGroupEnabledProps {
   logos: Logos;
   navGroupsMap$: Rx.Observable<Record<string, NavGroupItemInMap>>;
   navControlsLeftBottom$: Rx.Observable<readonly ChromeNavControl[]>;
+  navControlsIconSideNavFooter$: Rx.Observable<readonly ChromeNavControl[]>;
   currentNavGroup$: Rx.Observable<NavGroupItemInMap | undefined>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   globalSearchCommands$: Rx.Observable<GlobalSearchCommand[]>;
+  enableIconSideNav?: boolean;
+  isLocked?: boolean;
+  onIsLockedUpdate?: (isLocked: boolean) => void;
+  openNav?: () => void;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -58,7 +65,12 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
 
 enum NavWidth {
   Expanded = 270,
-  Collapsed = 48, // The Collapsed width is supposed to be aligned with the hamburger icon on the top left navigation.
+  // Width used by the classic EuiFlyout-push nav (flag OFF or non-observability workspaces).
+  // The Collapsed width is aligned with the hamburger icon on the top left navigation.
+  Collapsed = 48,
+  // Width used by the icon side nav in the observability workspace — wider so
+  // the larger (size="l") icons + bigger hit targets feel comfortable.
+  IconSideNavCollapsed = 64,
 }
 
 export function CollapsibleNavGroupEnabled({
@@ -73,6 +85,10 @@ export function CollapsibleNavGroupEnabled({
   setCurrentNavGroup,
   capabilities,
   collapsibleNavHeaderRender,
+  enableIconSideNav,
+  isLocked,
+  onIsLockedUpdate,
+  openNav,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -83,6 +99,40 @@ export function CollapsibleNavGroupEnabled({
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
   const currentWorkspace = useObservable(observables.currentWorkspace$);
   const globalSearchCommands = useObservable(observables.globalSearchCommands$);
+
+  // Set CSS variable so app-wrapper and header can offset for the fixed sidebar.
+  // Only active when enableIconSideNav is ON (two-div pattern).
+  // When OFF, the original EuiFlyout handles layout push natively.
+  //
+  // The content margin snaps instantly (no CSS transition) to avoid expensive
+  // per-frame relayout on heavy pages like Discover/Traces. The fixed-position
+  // sidebar visually masks the content jump as it slides open/closed.
+  useLayoutEffect(() => {
+    // The margin is only applied on desktop where the fixed icon-side-nav rail
+    // is visible. On mobile the nav is either hidden (collapsed) or an overlay
+    // (EuiFlyout type="overlay" handles its own positioning), so the wrapping
+    // page content should not be pushed over.
+    const isDesktop = () => window.matchMedia('(min-width: 992px)').matches;
+
+    const applyMargin = () => {
+      if (!enableIconSideNav || !isDesktop()) {
+        document.documentElement.style.removeProperty('--osd-sidebar-width');
+        return;
+      }
+      const width = isNavOpen ? `${NavWidth.Expanded}px` : `${NavWidth.IconSideNavCollapsed}px`;
+      document.documentElement.style.setProperty('--osd-sidebar-width', width);
+    };
+
+    applyMargin();
+    // Re-apply when the viewport crosses the desktop/mobile breakpoint.
+    const mql = window.matchMedia('(min-width: 992px)');
+    mql.addEventListener('change', applyMargin);
+
+    return () => {
+      mql.removeEventListener('change', applyMargin);
+      document.documentElement.style.removeProperty('--osd-sidebar-width');
+    };
+  }, [enableIconSideNav, isNavOpen]);
 
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
@@ -151,7 +201,6 @@ export function CollapsibleNavGroupEnabled({
     if (!isNavOpen) {
       return NavWidth.Collapsed;
     }
-
     return NavWidth.Expanded;
   }, [isNavOpen]);
 
@@ -178,8 +227,9 @@ export function CollapsibleNavGroupEnabled({
     }
   };
 
-  const rendeLeftNav = (props?: Partial<EuiFlyoutProps>) => (
-    // @ts-expect-error EuiFlyout ref type mismatch with React 18 - safe to ignore as we don't use ref
+  // ── Original nav rendering (EuiFlyout push — used when enableIconSideNav is OFF) ──
+
+  const renderLeftNav = (props?: Partial<EuiFlyoutProps>) => (
     <EuiFlyout
       data-test-subj="collapsibleNav"
       id={id}
@@ -283,12 +333,197 @@ export function CollapsibleNavGroupEnabled({
     </EuiFlyout>
   );
 
+  // ── Icon side nav rendering (two-div pattern — used when enableIconSideNav is ON) ──
+
+  const dataState = isNavOpen ? 'expanded' : 'collapsed';
+
+  const renderIconSideNavContent = () => (
+    <div className="osd-sidebar-inner">
+      <EuiPanel
+        hasBorder={false}
+        borderRadius="none"
+        paddingSize="s"
+        hasShadow={false}
+        color="transparent"
+        className="osd-sidebar-top-panel"
+      >
+        <CollapsibleNavTop
+          homeLink={homeLink}
+          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+          navigateToApp={navigateToApp}
+          logos={logos}
+          currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
+          shouldShrinkNavigation={!isNavOpen}
+          onClickShrink={closeNav}
+          onClickExpand={openNav}
+          isLocked={isLocked}
+          onIsLockedUpdate={onIsLockedUpdate}
+          enableIconSideNav={enableIconSideNav}
+          searchElement={
+            globalSearchCommands ? (
+              <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
+            ) : undefined
+          }
+        />
+      </EuiPanel>
+      {/* Render both expanded and collapsed navs; CSS handles visibility + transitions */}
+      <div
+        className={classNames('eui-yScroll flex-1-container obs-nav-scroll-container', {
+          'obs-nav-hidden': !isNavOpen,
+        })}
+      >
+        <ExpandedSideNav
+          navLinks={navLinksForRender}
+          appId={appId}
+          navigateToApp={navigateToApp}
+          basePath={basePath}
+        />
+      </div>
+      <div className={classNames('obsCollapsedNav-wrapper', { 'obs-nav-hidden': isNavOpen })}>
+        <CollapsedSideNav
+          navLinks={navLinksForRender}
+          appId={appId}
+          navigateToApp={navigateToApp}
+          basePath={basePath}
+        />
+      </div>
+      {isNavOpen ? (
+        <div
+          className={classNames({
+            'bottom-container': true,
+            'eui-xScroll': true,
+            'bottom-container-expanded': true,
+          })}
+        >
+          <HeaderNavControls
+            navControls$={observables.navControlsLeftBottom$}
+            className="nav-controls-padding"
+          />
+        </div>
+      ) : (
+        // Collapsed-state footer — only shows controls opted into the icon-side-nav
+        // footer slot (e.g., Dev Tools). Keeps the rail slim while preserving a
+        // utility entry-point.
+        <div className={classNames('bottom-container', 'bottom-container-collapsed')}>
+          <HeaderNavControls
+            navControls$={observables.navControlsIconSideNavFooter$}
+            className="nav-controls-padding"
+          />
+        </div>
+      )}
+    </div>
+  );
+
+  const renderDesktopIconSideNav = () => (
+    <>
+      <div className="osd-sidebar-gap" data-state={dataState} />
+      <nav
+        className="osd-sidebar"
+        data-state={dataState}
+        data-test-subj="collapsibleNav"
+        id={id}
+        aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+          defaultMessage: 'Primary',
+        })}
+      >
+        {renderIconSideNavContent()}
+      </nav>
+    </>
+  );
+
+  // Mobile: overlay flyout for icon side nav mode
+  const renderMobileIconSideNav = () => (
+    <EuiFlyout
+      data-test-subj="collapsibleNav"
+      id={id}
+      side="left"
+      aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+        defaultMessage: 'Primary',
+      })}
+      type="overlay"
+      onClose={closeNav}
+      outsideClickCloses={true}
+      className="context-nav-wrapper"
+      size={NavWidth.Expanded}
+      closeButtonPosition="outside"
+      hideCloseButton
+      paddingSize="none"
+      ownFocus={true}
+    >
+      <div className="eui-fullHeight left-navigation-wrapper">
+        <EuiPanel
+          hasBorder={false}
+          borderRadius="none"
+          paddingSize="s"
+          hasShadow={false}
+          color="transparent"
+          style={{ flexGrow: 0 }}
+        >
+          <CollapsibleNavTop
+            homeLink={homeLink}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+            navigateToApp={navigateToApp}
+            logos={logos}
+            currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
+            shouldShrinkNavigation={false}
+            onClickShrink={closeNav}
+          />
+        </EuiPanel>
+        <EuiPanel hasBorder={false} paddingSize="s" hasShadow={false} className="searchBar-wrapper">
+          {globalSearchCommands && <HeaderSearchBar globalSearchCommands={globalSearchCommands} />}
+        </EuiPanel>
+        <EuiPanel
+          hasBorder={false}
+          borderRadius="none"
+          paddingSize="m"
+          hasShadow={false}
+          className="eui-yScroll flex-1-container"
+          color="transparent"
+          style={{ paddingTop: 0 }}
+        >
+          <ExpandedSideNav
+            navLinks={navLinksForRender}
+            appId={appId}
+            navigateToApp={navigateToApp}
+            basePath={basePath}
+          />
+        </EuiPanel>
+        <div
+          className={classNames({
+            'bottom-container': true,
+            'eui-xScroll': true,
+            'bottom-container-expanded': true,
+          })}
+        >
+          <HeaderNavControls
+            navControls$={observables.navControlsLeftBottom$}
+            className="nav-controls-padding"
+          />
+        </div>
+      </div>
+    </EuiFlyout>
+  );
+
+  // ── Render ──
+
+  if (enableIconSideNav) {
+    return (
+      <>
+        <EuiHideFor sizes={['xs', 's', 'm']}>{renderDesktopIconSideNav()}</EuiHideFor>
+        {isNavOpen ? (
+          <EuiShowFor sizes={['xs', 's', 'm']}>{renderMobileIconSideNav()}</EuiShowFor>
+        ) : null}
+      </>
+    );
+  }
+
+  // Default: original EuiFlyout-based nav
   return (
     <>
-      <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
+      <EuiHideFor sizes={['xs', 's', 'm']}>{renderLeftNav()}</EuiHideFor>
       {isNavOpen ? (
         <EuiShowFor sizes={['xs', 's', 'm']}>
-          {rendeLeftNav({
+          {renderLeftNav({
             type: 'overlay',
             size: undefined,
             outsideClickCloses: true,

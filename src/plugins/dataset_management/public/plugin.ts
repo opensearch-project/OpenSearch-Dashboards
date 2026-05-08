@@ -23,6 +23,7 @@ import {
   DEFAULT_NAV_GROUPS,
   isNavGroupInFeatureConfigs,
   AppUpdater,
+  ALL_USE_CASE_ID,
 } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
@@ -112,8 +113,15 @@ export class DatasetManagementPlugin
           (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
           false;
 
+        const isAnalyticsWorkspace =
+          (features && isNavGroupInFeatureConfigs(ALL_USE_CASE_ID, features)) ?? false;
+
         // If not in observability workspace, don't allow access
-        if (!isObservabilityWorkspace && coreStart.application.capabilities.workspaces.enabled) {
+        if (
+          !isObservabilityWorkspace &&
+          !isAnalyticsWorkspace &&
+          coreStart.application.capabilities.workspaces.enabled
+        ) {
           // Redirect to index patterns instead
           const indexPatternsUrl = coreStart.application.getUrlForApp('indexPatterns');
           coreStart.application.navigateToUrl(indexPatternsUrl);
@@ -185,11 +193,15 @@ export class DatasetManagementPlugin
                 isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
               false;
 
+            const isAnalyticsWorkspace =
+              (features && isNavGroupInFeatureConfigs(ALL_USE_CASE_ID, features)) ?? false;
+
             // Update nav link visibility based on workspace
             this.appUpdater$.next(() => ({
-              navLinkStatus: isObservabilityWorkspace
-                ? AppNavLinkStatus.visible
-                : AppNavLinkStatus.hidden,
+              navLinkStatus:
+                isObservabilityWorkspace || isAnalyticsWorkspace
+                  ? AppNavLinkStatus.visible
+                  : AppNavLinkStatus.hidden,
             }));
           }
         );

@@ -87,6 +87,7 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
+import { Dataset } from '../../datasets';
 import {
   DATA_FRAME_TYPES,
   FetchStatusResponse,
@@ -157,6 +158,14 @@ export interface SearchSourceDependencies extends FetchHandlers {
     set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
+  /**
+   * Optional hook to prime the index-pattern cache for a dataset that has no backing
+   * saved object (e.g. INDEXES, S3, Prometheus). Invoked by `createSearchSource` when
+   * it encounters a non-INDEX_PATTERN dataset whose id is not already cached. Wired
+   * up in `data/public` plugin start via `datasetService.cacheDataset`; left
+   * undefined on the server or in tests that don't care about hydration.
+   */
+  hydrateDataset?: (dataset: Dataset) => Promise<void>;
 }
 
 /** @public **/

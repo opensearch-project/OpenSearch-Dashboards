@@ -45,7 +45,10 @@ export const facetTransform = (facetColumn: string, ...fns: TransformFn[]) => (
 
   const facetNumbers = Object.keys(grouped).length;
 
-  if (facetNumbers <= 1) return transform(...fns)(state);
+  if (facetNumbers <= 1) {
+    const result = transform(...fns)(state);
+    return { ...result, transformedData: [result.transformedData] };
+  }
 
   const res = Object.entries(grouped).map(([_, facetData]) => {
     const facetState = { ...state, data: facetData };

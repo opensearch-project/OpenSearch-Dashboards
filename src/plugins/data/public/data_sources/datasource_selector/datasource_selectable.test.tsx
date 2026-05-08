@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, act, screen, fireEvent } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
 import { DataSourceGroup, DataSourceOption } from './types';

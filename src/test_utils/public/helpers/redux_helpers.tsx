@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { Provider } from 'react-redux';
 
 export const WithStore = (store: any) => (WrappedComponent: ComponentType) => (props: any) => (

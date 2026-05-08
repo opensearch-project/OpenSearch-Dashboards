@@ -13,7 +13,6 @@ export type CustomContentEmbeddableInput = EmbeddableInput & { render: () => Rea
 
 export class CustomContentEmbeddable extends Embeddable<CustomContentEmbeddableInput> {
   public readonly type = CUSTOM_CONTENT_EMBEDDABLE;
-  private node: HTMLElement | null = null;
   private root: Root | null = null;
 
   constructor(initialInput: CustomContentEmbeddableInput, parent?: IContainer) {
@@ -24,7 +23,8 @@ export class CustomContentEmbeddable extends Embeddable<CustomContentEmbeddableI
     if (this.root) {
       this.root.unmount();
     }
-    this.node = node;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this.__node = node;
     this.root = createRoot(node);
     this.root.render(this.input.render());
   }

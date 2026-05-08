@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { AppCategory, ChromeNavLink, CoreStart } from 'opensearch-dashboards/public';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { NavigationPublicPluginStart } from '../../../../../../src/plugins/navigation/public';
 
 export interface FeatureCardsProps {

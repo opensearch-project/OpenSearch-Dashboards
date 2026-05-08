@@ -37,7 +37,7 @@ import { inspect } from 'util';
 // import webpack, { Stats } from 'webpack';
 import { rspack, Compiler, Stats } from '@rspack/core';
 import * as Rx from 'rxjs';
-import { mergeMap, map, mapTo, takeUntil, tap, finalize } from 'rxjs/operators';
+import { mergeMap, map, mapTo, takeUntil, finalize } from 'rxjs/operators';
 
 import {
   CompilerMsgs,
@@ -50,7 +50,7 @@ import {
   BundleRefs,
 } from '../common';
 import { getWebpackConfig, sassCompiler } from './webpack.config';
-import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
+import { isFailureStats, failedStatsToErrorMessage, isContextModule } from './webpack_helpers';
 import {
   isExternalModule,
   isNormalModule,
@@ -176,7 +176,7 @@ const observeCompiler = (
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module)) {
+        if (isExternalModule(module) || isContextModule(module) || isIgnoredModule(module)) {
           continue;
         }
 

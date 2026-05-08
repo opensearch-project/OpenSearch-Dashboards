@@ -82,6 +82,7 @@ export const SpanListTable: React.FC<SpanTableProps> = (props) => {
 
   const columns = useMemo(() => getSpanListTableColumns(), []);
   const renderCellValue = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ rowIndex, columnId, disableInteractions, setCellProps }) => (
       <SpanCell
         rowIndex={rowIndex}
@@ -106,6 +107,7 @@ export const SpanListTable: React.FC<SpanTableProps> = (props) => {
 
   return RenderCustomDataGrid({
     columns,
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     renderCellValue,
     rowCount: total,
     sorting: { columns: tableParams.sortingColumns, onSort },

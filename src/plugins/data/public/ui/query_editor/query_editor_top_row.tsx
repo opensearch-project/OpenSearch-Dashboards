@@ -75,7 +75,13 @@ export interface QueryEditorTopRowProps {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
+export default function QueryEditorTopRow({
+  showQueryEditor = true,
+  showDatePicker = true,
+  showAutoRefreshOnly = false,
+  ...restProps
+}: QueryEditorTopRowProps) {
+  const props = { showQueryEditor, showDatePicker, showAutoRefreshOnly, ...restProps };
   const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
@@ -400,7 +406,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       });
 
     const wrapperClasses = classNames('osdQueryEditor__datePickerWrapper', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdQueryEditor__datePickerWrapper-isHidden': isQueryEditorFocused,
     });
 
@@ -472,9 +477,3 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     </>
   );
 }
-
-QueryEditorTopRow.defaultProps = {
-  showQueryEditor: true,
-  showDatePicker: true,
-  showAutoRefreshOnly: false,
-};

@@ -39,7 +39,7 @@ import {
   EuiModalFooter,
   EuiSmallButtonEmpty,
 } from '@elastic/eui';
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 export interface ContactCardInitializerProps {
   onCreate: (name: { lastName?: string; firstName: string }) => void;

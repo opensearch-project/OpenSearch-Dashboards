@@ -20,7 +20,7 @@
 }
 
 .exploreChart__TimechartHeader {
-  padding-top: $euiSizeXS;
+  padding-bottom: calc($euiSizeXS / 2);
 
   &__logCount {
     margin-right: auto !important;

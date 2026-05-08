@@ -4,7 +4,7 @@
  */
 
 import { EuiComboBox } from '@elastic/eui';
-import React from 'react';
+
 import { i18n } from '@osd/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { gatherOptions } from './patterns_settings_popover_content';
@@ -34,6 +34,7 @@ export const PatternsSettingsPopoverButton = () => {
     dispatch(setPatternsField(newValue));
     Promise.resolve().then(() => {
       if (services) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services }));
       }
     });

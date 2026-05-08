@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { render, shallow } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 import sinon from 'sinon';

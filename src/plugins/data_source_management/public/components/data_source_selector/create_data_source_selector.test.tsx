@@ -5,7 +5,7 @@
 import { createDataSourceSelector } from './create_data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
-import React from 'react';
+
 import { getByText, render } from '@testing-library/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import {

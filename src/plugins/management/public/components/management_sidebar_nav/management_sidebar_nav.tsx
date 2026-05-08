@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactNode, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 

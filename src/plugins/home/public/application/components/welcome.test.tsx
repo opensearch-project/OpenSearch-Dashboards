@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';

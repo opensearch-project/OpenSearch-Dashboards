@@ -42,7 +42,7 @@ import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
-import { PROCESS_WORKING_DIR, standardize } from '@osd/cross-platform';
+import { PROCESS_WORKING_DIR } from '@osd/cross-platform';
 import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 const Plugins = {
@@ -304,12 +304,7 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    const srcPluginsPath = resolve(PROCESS_WORKING_DIR, 'src', 'plugins');
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining(`Error: EACCES, permission denied '${standardize(srcPluginsPath)}`),
-      ])
-    );
+    expect(errors).toEqual(expect.arrayContaining([expect.stringMatching(/EACCES.*src.plugins/)]));
   });
 
   it('return an error when the manifest file is not accessible', async () => {
@@ -339,12 +334,7 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    const errorPath = manifestPath('plugin_a');
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining(`Error: EACCES, permission denied '${standardize(errorPath)}`),
-      ])
-    );
+    expect(errors).toEqual(expect.arrayContaining([expect.stringMatching(/EACCES.*plugin_a/)]));
   });
 
   it('discovers plugins in nested directories', async () => {

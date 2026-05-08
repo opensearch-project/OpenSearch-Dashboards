@@ -30,7 +30,6 @@
 
 import './empty_index_pattern_prompt.scss';
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -85,6 +84,7 @@ export const EmptyIndexPatternPrompt = ({
               />
             </p>
             {canSave && (
+              // @ts-expect-error TS2769 TODO(ts-error): fixme
               <CreateButton options={creationOptions}>
                 <FormattedMessage
                   id="indexPatternManagement.indexPatternTable.createBtn"

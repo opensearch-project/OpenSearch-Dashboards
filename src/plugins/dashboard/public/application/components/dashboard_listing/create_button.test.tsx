@@ -13,8 +13,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 // @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import React from 'react';
-
 import { CreateButton } from './create_button';
 import { DashboardProvider } from '../../../types';
 

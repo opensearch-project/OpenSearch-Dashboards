@@ -175,7 +175,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         resourceName: 'up',
@@ -200,7 +200,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS,
         resourceName: undefined,
@@ -223,7 +223,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS,
         resourceName: undefined,
@@ -248,7 +248,7 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const result = await prometheusManager.getResources(mockContext, mockRequest, {
+      await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.RULES,
         resourceName: undefined,
@@ -389,6 +389,32 @@ describe('PrometheusManager', () => {
       });
     });
 
+    it('should handle POST request for label_values with match[] filter', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['value1', 'value2'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'label_values', name: 'job' },
+          content: { 'match[]': '{__name__="up"}' },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/label/job/values`,
+        querystring: 'match%5B%5D=%7B__name__%3D%22up%22%7D',
+        method: 'GET',
+      });
+    });
+
     it('should handle POST request for metric metadata with metric name and time range', async () => {
       const mockResponse = {
         body: {
@@ -452,6 +478,7 @@ describe('PrometheusManager', () => {
           timeout: 30,
           options: {
             queryType: 'instant',
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             start: '2021-12-01T00:00:00Z',
             end: '2021-12-01T01:00:00Z',
             step: '15s',
@@ -480,6 +507,7 @@ describe('PrometheusManager', () => {
           timeout: 30,
           options: {
             queryType: 'instant',
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             start: '2021-12-01T00:00:00Z',
             end: '2021-12-01T01:00:00Z',
             step: '15s',

@@ -165,3 +165,8 @@ export const TelemetryServiceConstructor = jest.fn().mockImplementation(() => Mo
 jest.doMock('./telemetry', () => ({
   TelemetryCoreService: TelemetryServiceConstructor,
 }));
+
+export const MockSetupSessionExpiredInterceptor = jest.fn();
+jest.doMock('./http/session_expired_interceptor', () => ({
+  setupSessionExpiredInterceptor: MockSetupSessionExpiredInterceptor,
+}));

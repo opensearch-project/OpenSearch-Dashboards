@@ -113,6 +113,46 @@ describe('Utils - Histogram Breakdown Support', () => {
     });
   });
 
+  describe('queryEndsWithHead', () => {
+    it('should detect head at end of query', () => {
+      expect(utils.queryEndsWithHead('source=logs | head 200')).toBe(true);
+    });
+
+    it('should detect head with from clause', () => {
+      expect(utils.queryEndsWithHead('source=logs | head 200 from 10')).toBe(true);
+    });
+
+    it('should detect head without explicit count', () => {
+      expect(utils.queryEndsWithHead('source=logs | head')).toBe(true);
+    });
+
+    it('should detect head followed by where clause', () => {
+      expect(utils.queryEndsWithHead('source=logs | head 200 | where status = 200')).toBe(true);
+    });
+
+    it('should return false when no head is present', () => {
+      expect(utils.queryEndsWithHead('source=logs | WHERE status = 200')).toBe(false);
+    });
+
+    it('should return false when head is only inside subquery', () => {
+      expect(utils.queryEndsWithHead('source=logs | where id in [source=other | head 10]')).toBe(
+        false
+      );
+    });
+
+    it('should detect main query head even with subquery head', () => {
+      expect(
+        utils.queryEndsWithHead('source=logs | where id in [source=other | head 10] | head 200')
+      ).toBe(true);
+    });
+
+    it('should return false when head is in the middle of the query', () => {
+      expect(utils.queryEndsWithHead('source=logs | head 200 | stats count() by status')).toBe(
+        false
+      );
+    });
+  });
+
   describe('buildPPLHistogramQuery', () => {
     it('should return original query when aggs is missing', () => {
       const query = 'source=logs';
@@ -143,6 +183,16 @@ describe('Utils - Histogram Breakdown Support', () => {
 
       const result = utils.buildPPLHistogramQuery(query, histogramConfig);
       expect(result).toBe('source=logs | stats count() by span(@timestamp, 1h)');
+    });
+
+    it('should preserve head clause in histogram query', () => {
+      const query = 'source=logs | head 200';
+      const histogramConfig = createBaseHistogramConfig({
+        aggs: { 2: { date_histogram: {} } },
+      });
+
+      const result = utils.buildPPLHistogramQuery(query, histogramConfig);
+      expect(result).toBe('source=logs | head 200 | stats count() by span(@timestamp, 1h)');
     });
   });
 

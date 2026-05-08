@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
 import { examplesDetailConfig } from './examples_detail';

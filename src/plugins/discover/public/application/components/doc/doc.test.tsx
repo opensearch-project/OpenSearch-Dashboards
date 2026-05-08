@@ -29,7 +29,7 @@
  */
 
 import { throwError, of } from 'rxjs';
-import React from 'react';
+
 import { act } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';

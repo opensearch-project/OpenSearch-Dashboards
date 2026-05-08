@@ -74,6 +74,7 @@ describe('Console Proxy Route', () => {
             getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//, /^\/bar\//] } })
           );
 
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
           opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
             // @ts-expect-error TS2345 TODO(ts-error): fixme
@@ -95,6 +96,7 @@ describe('Console Proxy Route', () => {
             getProxyRouteHandlerDeps({ proxy: { pathFilters: [/^\/foo\//] } })
           );
 
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           const mockResponse = opensearchServiceMock.createSuccessTransportRequestPromise('foo');
           opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mockResolvedValueOnce(
             // @ts-expect-error TS2345 TODO(ts-error): fixme

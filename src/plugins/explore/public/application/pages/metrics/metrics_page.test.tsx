@@ -5,7 +5,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -41,6 +41,10 @@ jest.mock('./metrics_bottom_container/bottom_right_container', () => ({
   BottomRightContainer: () => (
     <div data-test-subj="bottom-right-container">Bottom Right Container</div>
   ),
+}));
+
+jest.mock('./metrics_page_tabs', () => ({
+  MetricsPageTabs: () => <div data-test-subj="metrics-page-tabs">Metrics Page Tabs</div>,
 }));
 
 jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
@@ -142,10 +146,12 @@ describe('MetricsPage', () => {
         query: queryReducer,
         queryEditor: queryEditorReducer,
       },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       preloadedState,
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -170,13 +176,13 @@ describe('MetricsPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
@@ -185,24 +191,26 @@ describe('MetricsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
     );
 
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
   });
 
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 });

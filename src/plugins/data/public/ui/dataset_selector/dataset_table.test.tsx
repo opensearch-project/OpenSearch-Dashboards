@@ -65,6 +65,7 @@ describe('DataSetTable', () => {
   };
 
   const renderWithIntl = (component: React.ReactNode) =>
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     render(<IntlProvider locale="en">{component}</IntlProvider>);
 
   beforeEach(() => {

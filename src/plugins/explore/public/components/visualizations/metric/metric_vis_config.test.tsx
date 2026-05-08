@@ -18,7 +18,7 @@ describe('createMetrictmapeConfig', () => {
     const config = createMetricConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'metric');
+    expect(config).toHaveProperty('name', 'Metric');
     expect(config).toHaveProperty('type', 'metric');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');

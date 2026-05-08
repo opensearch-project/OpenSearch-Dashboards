@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { HttpStart } from 'opensearch-dashboards/public';
 
 import { WorkspaceCollaboratorPermissionType, WorkspaceCollaborator } from '../../types';
 import {
@@ -30,14 +31,14 @@ import { DuplicateCollaboratorError } from './duplicate_collaborator_error';
 const DUPLICATE_COLLABORATOR_ERROR_MESSAGE = i18n.translate(
   'workspace.addCollaboratorsModal.errors.duplicateCollaborator',
   {
-    defaultMessage: 'A collaborator with this ID already exists.',
+    defaultMessage: 'This identity already exists.',
   }
 );
 
 const DUPLICATE_COLLABORATOR_WITH_LIST_ERROR_MESSAGE = i18n.translate(
   'workspace.addCollaboratorsModal.errors.duplicateCollaboratorWithList',
   {
-    defaultMessage: 'This ID is already added to the list.',
+    defaultMessage: 'This identity is already added to the list.',
   }
 );
 
@@ -56,6 +57,8 @@ export interface AddCollaboratorsModalProps {
   permissionType: WorkspaceCollaboratorPermissionType;
   onClose: () => void;
   onAddCollaborators: (collaborators: WorkspaceCollaborator[]) => Promise<void>;
+  identitySource?: { source: string; type: string };
+  http?: HttpStart;
 }
 
 export const AddCollaboratorsModal = ({
@@ -69,6 +72,8 @@ export const AddCollaboratorsModal = ({
   addAnotherButtonLabel,
   onClose,
   onAddCollaborators,
+  identitySource,
+  http,
 }: AddCollaboratorsModalProps) => {
   const [collaborators, setCollaborators] = useState<WorkspaceCollaboratorInner[]>([
     { id: 0, accessLevel: 'readOnly', collaboratorId: '' },
@@ -82,6 +87,13 @@ export const AddCollaboratorsModal = ({
     return collaborator;
   });
   const [isAdding, setIsAdding] = useState(false);
+
+  const handleCollaboratorsChange = (newCollaborators: WorkspaceCollaboratorInner[]) => {
+    setCollaborators(newCollaborators);
+    if (Object.keys(errors).length > 0) {
+      setErrors({});
+    }
+  };
 
   const handleAddCollaborators = async () => {
     const singleStarIds = validInnerCollaborators.flatMap(({ id, collaboratorId }) =>
@@ -192,12 +204,14 @@ export const AddCollaboratorsModal = ({
         )}
         <WorkspaceCollaboratorsPanel
           collaborators={collaborators}
-          onChange={setCollaborators}
+          onChange={handleCollaboratorsChange}
           label={inputLabel}
           description={inputDescription}
           collaboratorIdInputPlaceholder={inputPlaceholder}
           addAnotherButtonLabel={addAnotherButtonLabel}
           errors={errors}
+          identitySource={identitySource}
+          http={http}
         />
       </EuiModalBody>
 

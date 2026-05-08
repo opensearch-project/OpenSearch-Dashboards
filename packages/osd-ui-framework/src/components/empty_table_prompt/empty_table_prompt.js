@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import classnames from 'classnames';
 
 import { KuiEmptyTablePromptMessage } from './empty_table_prompt_message';

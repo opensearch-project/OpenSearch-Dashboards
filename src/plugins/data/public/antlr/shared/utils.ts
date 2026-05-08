@@ -184,12 +184,11 @@ const updateFieldValuesAsync = async (
 
     const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
 
-    const dataView = await getDataViews().get(indexPattern.id!);
-    const dataset = await getDataViews().convertToDataset(dataView);
+    const dataset = await getDataViews().convertToDataset(indexPattern);
 
     const searchSource = await services.data.search.searchSource.create();
     searchSource.setFields({
-      index: dataView,
+      index: indexPattern,
       query: {
         query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
         language: 'PPL',

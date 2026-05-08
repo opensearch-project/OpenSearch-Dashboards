@@ -98,4 +98,8 @@ IF DEFINED OSD_USE_NODE_JS_FILE_PATH (
   "%NODE%" %*
 )
 
-ENDLOCAL
+:: Capture exit code before ENDLOCAL resets ERRORLEVEL, then restore it on exit.
+:: The `ENDLOCAL & EXIT /B` trick expands %OSD_EXIT_CODE% before ENDLOCAL runs,
+:: preserving the Node.js process exit code through the SETLOCAL scope boundary.
+SET OSD_EXIT_CODE=%ERRORLEVEL%
+ENDLOCAL & EXIT /B %OSD_EXIT_CODE%

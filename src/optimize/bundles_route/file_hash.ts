@@ -63,6 +63,7 @@ export async function getFileHash(cache: FileHashCache, path: string, stat: Fs.S
     )
   )
     .pipe(takeUntil(Rx.fromEvent(read, 'end')))
+    // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
     .forEach((chunk) => hash.update(chunk))
     .then(() => hash.digest('hex'))
     .catch((error) => {

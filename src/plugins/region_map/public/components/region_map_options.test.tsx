@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import * as React from 'react';
 import { RegionMapOptions } from './region_map_options';
 // @ts-expect-error TS7016 TODO(ts-error): fixme
 import renderer, { act } from 'react-test-renderer';

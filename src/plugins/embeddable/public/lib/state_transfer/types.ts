@@ -31,6 +31,11 @@
 import { Optional } from '@osd/utility-types';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
+export interface ContainerInfo {
+  containerName: string;
+  containerId: string;
+}
+
 /**
  * A state package that contains information an editor will need to create or edit an embeddable then redirect back.
  * @public
@@ -39,6 +44,7 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   embeddableId?: string;
   valueInput?: EmbeddableInput;
+  containerInfo?: ContainerInfo;
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {

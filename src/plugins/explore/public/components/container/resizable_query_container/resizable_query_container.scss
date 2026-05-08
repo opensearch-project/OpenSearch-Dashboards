@@ -1,0 +1,92 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreResizableQueryContainer {
+  flex: 1;
+  min-height: 0;
+  gap: $ouiSizeXS;
+
+  // In prompt (AI) mode, hide the resize handle and lower its z-index
+  // so it cannot overlap the generated-query bar.
+  &--promptMode {
+    .exploreResizableQueryContainer__resizeHandle {
+      visibility: hidden;
+      z-index: 0;
+      height: 0;
+      margin: 0;
+    }
+  }
+
+  &__queryPanel {
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    >.euiResizablePanel__content {
+      overflow: visible !important;
+      position: relative;
+    }
+  }
+
+  &__queryPanelInner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+
+    .exploreQueryPanel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .exploreQueryPanel__editorsWrapper {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .exploreQueryPanelEditor {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+
+      .react-monaco-editor-container {
+        flex: 1;
+        min-height: 0;
+      }
+    }
+  }
+
+  &__resizeHandle {
+    z-index: 1;
+    margin-top: 0;
+    margin-bottom: 0;
+
+    &::before,
+    &::after {
+      width: $ouiSize * 2;
+    }
+  }
+
+  &__contentPanel {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    >.euiResizablePanel__content {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}

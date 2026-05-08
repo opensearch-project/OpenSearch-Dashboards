@@ -1,0 +1,52 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.agentTracesTable__kindCell {
+  display: flex;
+  align-items: center;
+  gap: $ouiSizeXS;
+}
+
+.agentTracesTable__spinnerWrapper {
+  display: inline-flex;
+  width: $ouiSizeL;
+  height: $ouiSizeL;
+  align-items: center;
+  justify-content: center;
+}
+
+.agentTracesTable__expandSpacer {
+  width: $ouiSizeL;
+}
+
+.agentTracesTable__container {
+  display: flex;
+  flex-direction: column;
+  padding: $ouiSizeXS $ouiSizeM 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.agentTracesTable__infoBar {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.agentTracesTable__scrollContainer {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  mask-image: none;
+}
+
+.agentTracesTable__clickableRow {
+  cursor: pointer;
+}
+
+// Category badges: pastel background with colored text
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.agentTraces__categoryBadge {
+  font-weight: 600;
+}
